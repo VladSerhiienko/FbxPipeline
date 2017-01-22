@@ -250,3 +250,6 @@ paket-files/
 # JetBrains Rider
 .idea/
 *.sln.iml
+/ThirdParty/draco_build_v140x64
+/ThirdParty/draco_build_v140x86
+/FbxPipeline/*.sublime-workspace

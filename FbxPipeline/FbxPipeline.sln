@@ -5,13 +5,18 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "[ThirdParty]", "[ThirdParty]", "{CBABF91B-6506-4189-8982-17E17FAFCEDB}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "[flatbuffers]", "[flatbuffers]", "{EE1D8BE7-45A4-43A6-9EA2-925891897D87}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "flatbuffers (google)", "flatbuffers (google)", "{EE1D8BE7-45A4-43A6-9EA2-925891897D87}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "flatc", "flatc\flatc.vcxproj", "{4DA55265-4570-410D-8448-67700F0208C1}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "flatbuffers", "flatbuffers\flatbuffers.vcxproj", "{F55E3BE0-18FB-4CE7-8BBF-EE631CC2FE7F}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FbxPipeline", "FbxPipeline\FbxPipeline.vcxproj", "{5E40B698-DDC4-46F4-A72D-51E116D6DE89}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "draco (google)", "draco (google)", "{888C05CA-1AE3-4F5C-807A-86885250D086}"
+	ProjectSection(SolutionItems) = preProject
+		..\ThirdParty\CMakeDraco.sh = ..\ThirdParty\CMakeDraco.sh
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -53,5 +58,6 @@ Global
 		{EE1D8BE7-45A4-43A6-9EA2-925891897D87} = {CBABF91B-6506-4189-8982-17E17FAFCEDB}
 		{4DA55265-4570-410D-8448-67700F0208C1} = {EE1D8BE7-45A4-43A6-9EA2-925891897D87}
 		{F55E3BE0-18FB-4CE7-8BBF-EE631CC2FE7F} = {EE1D8BE7-45A4-43A6-9EA2-925891897D87}
+		{888C05CA-1AE3-4F5C-807A-86885250D086} = {CBABF91B-6506-4189-8982-17E17FAFCEDB}
 	EndGlobalSection
 EndGlobal

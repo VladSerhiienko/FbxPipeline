@@ -1,3 +1,6 @@
 [submodule "ThirdParty/flatbuffers"]
 	path = ThirdParty/flatbuffers
 	url = git@github.com:google/flatbuffers.git
+[submodule "ThirdParty/draco"]
+	path = ThirdParty/draco
+	url = git@github.com:google/draco.git
