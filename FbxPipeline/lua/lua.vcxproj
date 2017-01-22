@@ -19,32 +19,32 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{5E40B698-DDC4-46F4-A72D-51E116D6DE89}</ProjectGuid>
-    <RootNamespace>FbxPipeline</RootNamespace>
+    <ProjectGuid>{BC0150F4-8AA1-43BE-A42A-66E4E7EDB745}</ProjectGuid>
+    <RootNamespace>lua</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -69,19 +69,19 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(SolutionDir)bin\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)lib\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(SolutionDir)bin\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)lib\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)bin\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)lib\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)bin\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)lib\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -89,32 +89,16 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(FBX_SDK)include\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\draco;$(SolutionDir)..\ThirdParty\lua;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\ThirdParty\lua\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <Link>
-      <AdditionalLibraryDirectories>$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\;$(SolutionDir)..\ThirdParty\draco_build_v140$(PlatformTarget)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>draco.lib;libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
-    </Link>
-    <PostBuildEvent>
-      <Command>xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.dll" "$(OutDir)" /s /d
-xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.pdb" "$(OutDir)" /s /d</Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(FBX_SDK)include\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\draco;$(SolutionDir)..\ThirdParty\lua;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\ThirdParty\lua\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <Link>
-      <AdditionalLibraryDirectories>$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\;$(SolutionDir)..\ThirdParty\draco_build_v140$(PlatformTarget)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>draco.lib;libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
-    </Link>
-    <PostBuildEvent>
-      <Command>xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.dll" "$(OutDir)" /s /d
-xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.pdb" "$(OutDir)" /s /d</Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -123,18 +107,12 @@ xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.pdb" "$(OutDir)
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(FBX_SDK)include\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\draco;$(SolutionDir)..\ThirdParty\lua;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\ThirdParty\lua\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\;$(SolutionDir)..\ThirdParty\draco_build_v140$(PlatformTarget)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>draco.lib;libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <PostBuildEvent>
-      <Command>xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.dll" "$(OutDir)" /s /d
-xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.pdb" "$(OutDir)" /s /d</Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -143,32 +121,49 @@ xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.pdb" "$(OutDir)
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(FBX_SDK)include\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\draco;$(SolutionDir)..\ThirdParty\lua;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\ThirdParty\lua\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\;$(SolutionDir)..\ThirdParty\draco_build_v140$(PlatformTarget)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>draco.lib;libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <PostBuildEvent>
-      <Command>xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.dll" "$(OutDir)" /s /d
-xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.pdb" "$(OutDir)" /s /d</Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\flatbuffers\flatbuffers.vcxproj">
-      <Project>{f55e3be0-18fb-4ce7-8bbf-ee631cc2fe7f}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\lua\lua.vcxproj">
-      <Project>{bc0150f4-8aa1-43be-a42a-66e4e7edb745}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\schemes\scene.fbs" />
+    <ClCompile Include="..\..\ThirdParty\lua\lapi.c" />
+    <ClCompile Include="..\..\ThirdParty\lua\lauxlib.c" />
+    <ClCompile Include="..\..\ThirdParty\lua\lbaselib.c" />
+    <ClCompile Include="..\..\ThirdParty\lua\lbitlib.c" />
+    <ClCompile Include="..\..\ThirdParty\lua\lcode.c" />
+    <ClCompile Include="..\..\ThirdParty\lua\lcorolib.c" />
+    <ClCompile Include="..\..\ThirdParty\lua\lctype.c" />
+    <ClCompile Include="..\..\ThirdParty\lua\ldblib.c" />
+    <ClCompile Include="..\..\ThirdParty\lua\ldebug.c" />
+    <ClCompile Include="..\..\ThirdParty\lua\ldo.c" />
+    <ClCompile Include="..\..\ThirdParty\lua\ldump.c" />
+    <ClCompile Include="..\..\ThirdParty\lua\lfunc.c" />
+    <ClCompile Include="..\..\ThirdParty\lua\lgc.c" />
+    <ClCompile Include="..\..\ThirdParty\lua\linit.c" />
+    <ClCompile Include="..\..\ThirdParty\lua\liolib.c" />
+    <ClCompile Include="..\..\ThirdParty\lua\llex.c" />
+    <ClCompile Include="..\..\ThirdParty\lua\lmathlib.c" />
+    <ClCompile Include="..\..\ThirdParty\lua\lmem.c" />
+    <ClCompile Include="..\..\ThirdParty\lua\loadlib.c" />
+    <ClCompile Include="..\..\ThirdParty\lua\lobject.c" />
+    <ClCompile Include="..\..\ThirdParty\lua\lopcodes.c" />
+    <ClCompile Include="..\..\ThirdParty\lua\loslib.c" />
+    <ClCompile Include="..\..\ThirdParty\lua\lparser.c" />
+    <ClCompile Include="..\..\ThirdParty\lua\lstate.c" />
+    <ClCompile Include="..\..\ThirdParty\lua\lstring.c" />
+    <ClCompile Include="..\..\ThirdParty\lua\lstrlib.c" />
+    <ClCompile Include="..\..\ThirdParty\lua\ltable.c" />
+    <ClCompile Include="..\..\ThirdParty\lua\ltablib.c" />
+    <ClCompile Include="..\..\ThirdParty\lua\ltests.c" />
+    <ClCompile Include="..\..\ThirdParty\lua\ltm.c" />
+    <ClCompile Include="..\..\ThirdParty\lua\lua.c" />
+    <ClCompile Include="..\..\ThirdParty\lua\lundump.c" />
+    <ClCompile Include="..\..\ThirdParty\lua\lutf8lib.c" />
+    <ClCompile Include="..\..\ThirdParty\lua\lvm.c" />
+    <ClCompile Include="..\..\ThirdParty\lua\lzio.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

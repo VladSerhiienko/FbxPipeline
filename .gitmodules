@@ -4,3 +4,6 @@
 [submodule "ThirdParty/draco"]
 	path = ThirdParty/draco
 	url = git@github.com:google/draco.git
+[submodule "ThirdParty/lua"]
+	path = ThirdParty/lua
+	url = git@github.com:lua/lua.git

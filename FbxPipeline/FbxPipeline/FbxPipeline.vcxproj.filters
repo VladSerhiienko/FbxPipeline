@@ -11,4 +11,9 @@
       <Filter>Sources</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\schemes\scene.fbs">
+      <Filter>Sources</Filter>
+    </None>
+  </ItemGroup>
 </Project>
