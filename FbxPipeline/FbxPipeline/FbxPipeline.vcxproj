@@ -97,7 +97,8 @@
     </Link>
     <PostBuildEvent>
       <Command>xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.dll" "$(OutDir)" /s /d
-xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.pdb" "$(OutDir)" /s /d</Command>
+xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.pdb" "$(OutDir)" /s /d
+xcopy "$(SolutionDir)..\ThirdParty\draco_build_$(PlatformToolset)$(PlatformTarget)\$(Configuration)\draco.pdb" "$(OutDir)" /s /d</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -113,7 +114,8 @@ xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.pdb" "$(OutDir)
     </Link>
     <PostBuildEvent>
       <Command>xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.dll" "$(OutDir)" /s /d
-xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.pdb" "$(OutDir)" /s /d</Command>
+xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.pdb" "$(OutDir)" /s /d
+xcopy "$(SolutionDir)..\ThirdParty\draco_build_$(PlatformToolset)$(PlatformTarget)\$(Configuration)\draco.pdb" "$(OutDir)" /s /d</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -133,7 +135,8 @@ xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.pdb" "$(OutDir)
     </Link>
     <PostBuildEvent>
       <Command>xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.dll" "$(OutDir)" /s /d
-xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.pdb" "$(OutDir)" /s /d</Command>
+xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.pdb" "$(OutDir)" /s /d
+xcopy "$(SolutionDir)..\ThirdParty\draco_build_$(PlatformToolset)$(PlatformTarget)\$(Configuration)\draco.pdb" "$(OutDir)" /s /d</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -153,7 +156,8 @@ xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.pdb" "$(OutDir)
     </Link>
     <PostBuildEvent>
       <Command>xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.dll" "$(OutDir)" /s /d
-xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.pdb" "$(OutDir)" /s /d</Command>
+xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.pdb" "$(OutDir)" /s /d
+xcopy "$(SolutionDir)..\ThirdParty\draco_build_$(PlatformToolset)$(PlatformTarget)\$(Configuration)\draco.pdb" "$(OutDir)" /s /d</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
