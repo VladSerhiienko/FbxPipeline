@@ -13,9 +13,12 @@
 [submodule "ThirdParty/spdlog"]
 	path = ThirdParty/spdlog
 	url = git@github.com:gabime/spdlog.git
-[submodule "ThirdParty/snappy"]
-	path = ThirdParty/snappy
-	url = git@github.com:google/snappy.git
 [submodule "ThirdParty/selene"]
 	path = ThirdParty/selene
 	url = git@github.com:jeremyong/Selene.git
+[submodule "ThirdParty/lz4"]
+	path = ThirdParty/lz4
+	url = git@github.com:lz4/lz4.git
+[submodule "ThirdParty/cityhash"]
+	path = ThirdParty/cityhash
+	url = git@github.com:google/cityhash.git

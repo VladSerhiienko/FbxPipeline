@@ -5,15 +5,41 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+    <Filter Include="Schemes">
+      <UniqueIdentifier>{3fcaa3c0-9f7d-4fa2-aff4-c3ce9d0ba409}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
+    <ClCompile Include="transform.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="animation.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="mesh.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="fbxppch.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="fbxpstate.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\schemes\scene.fbs">
-      <Filter>Sources</Filter>
+      <Filter>Schemes</Filter>
     </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="fbxppch.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="fbxpstate.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

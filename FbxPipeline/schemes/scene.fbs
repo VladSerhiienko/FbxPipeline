@@ -6,30 +6,37 @@ namespace fbxp.fb;
 //
 
 struct vec2 {
-	x:float;
-	y:float;
+	x	:float;
+	y	:float;
 }
 struct vec3 {
-	x:float;
-	y:float;
-	z:float;
+	x	:float;
+	y	:float;
+	z	:float;
 }
 struct vec4 {
-	x:float;
-	y:float;
-	z:float;
-	w:float;
+	x	:float;
+	y	:float;
+	z	:float;
+	w	:float;
 }
-struct StaticVertexFb {
-	position	:vec3;
-	normal		:vec3;
-	tangent		:vec4;
-	texCoords	:vec2;
+enum EFVF : uint {
+	XYZ
 }
-struct SubMeshFb {
-	material_id:uint;
-	first:uint;
-	count:uint;
+struct SubmeshFb {
+	base_vertex		:uint;
+	vertex_count	:uint;
+	base_index		:uint;
+	index_count		:uint;
+	base_subset		:ushort;
+	subset_count	:ushort;
+	vertex_stride	:ushort;
+	vertex_format	:EFVF;
+}
+struct SubsetFb {
+	base_index		:uint;
+	index_count		:uint;
+	material_id		:ushort;
 }
 enum EVertexTypeFb : uint {
 	Static,
@@ -74,7 +81,8 @@ struct TransformFb (force_align:16) {
 table MeshFb {
 	vertices	:[ubyte];
 	indices		:[ubyte];
-	submeshes	:[SubMeshFb];
+	submeshes	:[SubmeshFb];
+	subsets		:[SubsetFb];
 	vertex_type	:EVertexTypeFb;
 	index_type	:EIndexTypeFb;
 }
@@ -102,7 +110,7 @@ table MaterialFb {
 	props	:[MaterialPropFb];
 }
 table NodeFb {
-	id:uint;
+	id				:uint;
 	child_ids		:[uint];
 	material_ids	:[uint];
 	mesh_id			:uint;
@@ -116,6 +124,6 @@ table SceneFb {
 	materials	:[MaterialFb];
 }
 
-root_type SceneFb;
+root_type		SceneFb;
 file_extension	"fbxp";
 file_identifier "FBXP";
