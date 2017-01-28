@@ -28,6 +28,12 @@
     <ClCompile Include="fbxpstate.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
+    <ClCompile Include="node.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="material.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\schemes\scene.fbs">

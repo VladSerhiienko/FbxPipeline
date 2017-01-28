@@ -17,6 +17,7 @@ fbxp::State& fbxp::GetState( ) {
 fbxp::State::State( ) : console( spdlog::stdout_color_mt( "fbxp" ) ), options( GetExecutable( ) ) {
     options.add_options( "input" )( "f,file", "File", cxxopts::value< std::string >( ) );
     options.add_options( "input" )( "d,dir", "Directory", cxxopts::value< std::string >( ) );
+    options.add_options( "input" )( "k,convert", "Convert", cxxopts::value< bool >( ) );
 }
 
 fbxp::State::~State( ) {
@@ -24,10 +25,8 @@ fbxp::State::~State( ) {
 }
 
 bool fbxp::State::Initialize( ) {
-    if ( !manager || !scene ) {
-        return InitializeSdkObjects( manager, scene );
-    }
-
+    if ( !manager || !scene )
+        InitializeSdkObjects( manager, scene );
     return manager && scene;
 }
 
@@ -40,9 +39,8 @@ void fbxp::State::Release( ) {
 
 bool fbxp::State::Load( const char* f ) {
     SplitFilename( f, folderPath, fileName );
-    console->info( "File name {}", fileName );
-    console->info( "Folder name {}", folderPath );
-
+    console->info( "File name  : \"{}\"", fileName );
+    console->info( "Folder name: \"{}\"", folderPath );
     return LoadScene( manager, scene, f );
 }
 
@@ -53,8 +51,8 @@ bool fbxp::State::Finish( ) {
     //
 
     std::vector< flatbuffers::Offset< fb::NameFb > > nameOffsets; {
-        nameOffsets.reserve( nameLookup.size( ) );
-        for ( auto& namePair : nameLookup ) {
+        nameOffsets.reserve( names.size( ) );
+        for ( auto& namePair : names ) {
             const auto valueOffset = builder.CreateString( namePair.second );
 
             fb::NameFbBuilder nameBuilder( builder );
@@ -73,12 +71,48 @@ bool fbxp::State::Finish( ) {
     const auto transformsOffset = builder.CreateVectorOfStructs( transforms );
 
     //
+    // Finalize nodes
+    //
+
+    std::vector< flatbuffers::Offset< fb::NodeFb > > nodeOffsets; {
+        nodeOffsets.reserve( nodes.size( ) );
+        for ( auto& node : nodes ) {
+            const auto childIdsOffset = builder.CreateVector( node.childIds );
+
+            fb::NodeFbBuilder nodeBuilder( builder );
+            nodeBuilder.add_id( node.id );
+            nodeBuilder.add_name_id( node.nameId );
+            nodeBuilder.add_child_ids( childIdsOffset );
+            nodeOffsets.push_back( nodeBuilder.Finish( ) );
+        }
+    }
+
+    const auto nodesOffset = builder.CreateVector( nodeOffsets );
+
+    //
+    // Finalize materials
+    // 
+
+    std::vector< flatbuffers::Offset< fb::MaterialFb > > materialOffsets; {
+        materialOffsets.reserve( materials.size( ) );
+        for (auto& material : materials) {
+        }
+    }
+    //
+    // Finalize textures
+    //
+
+    const auto texturesOffset = builder.CreateVectorOfStructs( textures );
+
+    //
     // Finalize scene
     //
 
     fbxp::fb::SceneFbBuilder sceneBuilder( builder );
     sceneBuilder.add_transforms( transformsOffset );
     sceneBuilder.add_names( namesOffset );
+    sceneBuilder.add_nodes( nodesOffset );
+    sceneBuilder.add_textures( texturesOffset );
 
     builder.Finish( sceneBuilder.Finish( ) );
 
@@ -102,7 +136,7 @@ bool fbxp::State::Finish( ) {
 
 uint64_t fbxp::State::PushName( std::string const& name ) {
     const uint64_t hash = CityHash64( name.data( ), name.size( ) );
-    nameLookup.insert( std::make_pair( hash, name ) );
+    names.insert( std::make_pair( hash, name ) );
     return hash;
 }
 
@@ -258,6 +292,61 @@ bool LoadScene( FbxManager* pManager, FbxDocument* pScene, const char* pFilename
     // Destroy the importer.
     lImporter->Destroy( );
 
+    return lStatus;
+}
+
+bool SaveScene( FbxManager* pManager, FbxDocument* pScene, const char* pFilename, int pFileFormat, bool pEmbedMedia ) {
+    int  lMajor, lMinor, lRevision;
+    bool lStatus = true;
+
+    // Create an exporter.
+    FbxExporter* lExporter = FbxExporter::Create( pManager, "" );
+
+    if ( pFileFormat < 0 || pFileFormat >= pManager->GetIOPluginRegistry( )->GetWriterFormatCount( ) ) {
+        // Write in fall back format in less no ASCII format found
+        pFileFormat = pManager->GetIOPluginRegistry( )->GetNativeWriterFormat( );
+
+        // Try to export in ASCII if possible
+        int lFormatIndex, lFormatCount = pManager->GetIOPluginRegistry( )->GetWriterFormatCount( );
+
+        for ( lFormatIndex = 0; lFormatIndex < lFormatCount; lFormatIndex++ ) {
+            if ( pManager->GetIOPluginRegistry( )->WriterIsFBX( lFormatIndex ) ) {
+                FbxString   lDesc  = pManager->GetIOPluginRegistry( )->GetWriterFormatDescription( lFormatIndex );
+                const char* lASCII = "ascii";
+                if ( lDesc.Find( lASCII ) >= 0 ) {
+                    pFileFormat = lFormatIndex;
+                    break;
+                }
+            }
+        }
+    }
+
+    // Set the export states. By default, the export states are always set to
+    // true except for the option eEXPORT_TEXTURE_AS_EMBEDDED. The code below
+    // shows how to change these states.
+    IOS_REF.SetBoolProp( EXP_FBX_MATERIAL, true );
+    IOS_REF.SetBoolProp( EXP_FBX_TEXTURE, true );
+    IOS_REF.SetBoolProp( EXP_FBX_EMBEDDED, pEmbedMedia );
+    IOS_REF.SetBoolProp( EXP_FBX_SHAPE, true );
+    IOS_REF.SetBoolProp( EXP_FBX_GOBO, true );
+    IOS_REF.SetBoolProp( EXP_FBX_ANIMATION, true );
+    IOS_REF.SetBoolProp( EXP_FBX_GLOBAL_SETTINGS, true );
+
+    // Initialize the exporter by providing a filename.
+    if ( lExporter->Initialize( pFilename, pFileFormat, pManager->GetIOSettings( ) ) == false ) {
+        FBXSDK_printf( "Call to FbxExporter::Initialize() failed.\n" );
+        FBXSDK_printf( "Error returned: %s\n\n", lExporter->GetStatus( ).GetErrorString( ) );
+        return false;
+    }
+
+    FbxManager::GetFileFormatVersion( lMajor, lMinor, lRevision );
+    FBXSDK_printf( "FBX file format version %d.%d.%d\n\n", lMajor, lMinor, lRevision );
+
+    // Export the scene.
+    lStatus = lExporter->Export( pScene );
+
+    // Destroy the exporter.
+    lExporter->Destroy( );
     return lStatus;
 }
 

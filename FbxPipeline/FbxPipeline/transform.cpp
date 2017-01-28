@@ -6,7 +6,7 @@ inline fbxp::fb::vec3 cast( FbxDouble3 const& d ) {
         static_cast< float >( d.mData[ 0 ] ), static_cast< float >( d.mData[ 1 ] ), static_cast< float >( d.mData[ 2 ] )};
 }
 
-void ExportTransform( FbxNode* node ) {
+void ExportTransform( FbxNode* node, fbxp::Node & n ) {
     fbxp::fb::TransformFb transform( cast( node->LclTranslation.Get( ) ),
                                      cast( node->RotationOffset.Get( ) ),
                                      cast( node->RotationPivot.Get( ) ),

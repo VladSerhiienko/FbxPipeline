@@ -1,44 +1,76 @@
 #include <fbxppch.h>
 #include <fbxpstate.h>
-#include <scene_generated.h>
 
 void ExportScene( FbxScene* pScene );
-void ExportNodes( FbxNode* pNode );
-void ExportNode( FbxNode* pNode );
-void ExportTransform( FbxNode* node );
+void ConvertScene( FbxManager* lSdkManager, FbxScene* lScene, FbxString lFilePath );
 
 int main( int argc, char** argv ) {
+    auto& s = fbxp::GetState( );
+
     std::string file;
+    bool convert = false;
+
     try {
-        fbxp::GetState( ).options.parse( argc, argv );
-        file = fbxp::GetState( ).options[ "f" ].as< std::string >( );
+        s.options.parse( argc, argv );
+        file    = s.options[ "f" ].as< std::string >( );
+        convert = s.options[ "k" ].as< bool >( );
     } catch ( const cxxopts::OptionException& e ) {
-        fbxp::GetState( ).console->critical( "error parsing options: {0}", e.what( ) );
+        s.console->critical( "error parsing options: {0}", e.what( ) );
         std::exit( 1 );
     }
 
-    if ( fbxp::GetState( ).Initialize( ) ) {
-        if ( fbxp::GetState( ).Load( file.c_str( ) ) ) {
-            ExportScene( fbxp::GetState( ).scene );
-            fbxp::GetState( ).Finish( );
+    if ( s.Initialize( ) ) {
+        if ( s.Load( file.c_str( ) ) ) {
+            if ( convert )
+                ConvertScene( s.manager, s.scene, file.c_str( ) );
+            else {
+                ExportScene( s.scene );
+                s.Finish( );
+            }
         }
     }
 
     return 0;
 }
 
-void ExportNode( FbxNode* node ) {
-    const auto nameId = fbxp::GetState( ).PushName( node->GetName( ) );
-    ExportTransform( node );
-}
+void ConvertScene( FbxManager* lSdkManager, FbxScene* lScene, FbxString lFilePath ) {
+    auto& s = fbxp::GetState( );
 
-void ExportNodes( FbxNode* node ) {
-    ExportNode( node );
-    for ( auto i = 0; i < node->GetChildCount( ); ++i ) {
-        ExportNodes( node->GetChild( i ) );
+    const char* lFileTypes[] = {
+        "_fbx7ascii.fbx", "FBX ascii (*.fbx)", "_fbx6ascii.fbx", "FBX 6.0 ascii (*.fbx)", "_obj.obj", "Alias OBJ (*.obj)",
+        //"_dae.dae",           "Collada DAE (*.dae)",
+        //"_fbx7binary.fbx",     "FBX binary (*.fbx)",
+        //"_fbx6binary.fbx", "FBX 6.0 binary (*.fbx)",
+        //"_dxf.dxf",           "AutoCAD DXF (*.dxf)"
+    };
+
+    const size_t lFileTypeCount = sizeof( lFileTypes ) / sizeof( lFileTypes[ 0 ] ) / 2;
+
+    for ( size_t i = 0; i < lFileTypeCount; ++i ) {
+        // Retrieve the writer ID according to the description of file format.
+        int lFormat = lSdkManager->GetIOPluginRegistry( )->FindWriterIDByDescription( lFileTypes[ i * 2 + 1 ] );
+
+        // Construct the output file name.
+        FbxString lNewFileName = lFilePath + lFileTypes[ i * 2 ];
+
+        // Create an exporter.
+        FbxExporter* lExporter = FbxExporter::Create( lSdkManager, "" );
+
+        //
+        lSdkManager->GetIOSettings( )->SetBoolProp( EXP_FBX_EMBEDDED, true );
+        //
+
+        // Initialize the exporter.
+        int lResult = lExporter->Initialize( lNewFileName, lFormat, lSdkManager->GetIOSettings( ) );
+        if ( lResult ) {
+            // Export the scene.
+            lResult = lExporter->Export( lScene );
+            if ( lResult ) {
+                s.console->info( "Exported {} {}.\n", lNewFileName.Buffer( ), lFileTypes[ i * 2 + 1 ] );
+            }
+        }
+
+        // Destroy the exporter.
+        lExporter->Destroy( );
     }
-}
-
-void ExportScene( FbxScene* scene ) {
-    ExportNodes( scene->GetRootNode( ) );
 }

@@ -92,6 +92,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir);$(FBX_SDK)include\;$(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\snappy\;$(SolutionDir)..\ThirdParty\;$(SolutionDir)..\ThirdParty\lua;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;$(SolutionDir)..\ThirdParty\draco;$(SolutionDir)..\ThirdParty\draco\io\;$(SolutionDir)..\ThirdParty\draco\compression\;$(SolutionDir)..\ThirdParty\draco\mesh\;$(SolutionDir)..\ThirdParty\draco\core\;$(SolutionDir)..\ThirdParty\lz4\lib\;$(SolutionDir)..\ThirdParty\cityhash\src\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>fbxppch.h</PrecompiledHeaderFile>
+      <PreprocessorDefinitions>KFBX_DLLINFO;FBXSDK_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\;$(SolutionDir)..\ThirdParty\draco_build_v140$(PlatformTarget)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -115,6 +116,7 @@ xcopy "$(SolutionDir)..\ThirdParty\draco_build_$(PlatformToolset)$(PlatformTarge
       <AdditionalIncludeDirectories>$(ProjectDir);$(FBX_SDK)include\;$(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\snappy\;$(SolutionDir)..\ThirdParty\;$(SolutionDir)..\ThirdParty\lua;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;$(SolutionDir)..\ThirdParty\draco;$(SolutionDir)..\ThirdParty\draco\io\;$(SolutionDir)..\ThirdParty\draco\compression\;$(SolutionDir)..\ThirdParty\draco\mesh\;$(SolutionDir)..\ThirdParty\draco\core\;$(SolutionDir)..\ThirdParty\lz4\lib\;$(SolutionDir)..\ThirdParty\cityhash\src\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>fbxppch.h</PrecompiledHeaderFile>
+      <PreprocessorDefinitions>KFBX_DLLINFO;FBXSDK_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\;$(SolutionDir)..\ThirdParty\draco_build_v140$(PlatformTarget)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -140,6 +142,7 @@ xcopy "$(SolutionDir)..\ThirdParty\draco_build_$(PlatformToolset)$(PlatformTarge
       <AdditionalIncludeDirectories>$(ProjectDir);$(FBX_SDK)include\;$(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\snappy\;$(SolutionDir)..\ThirdParty\;$(SolutionDir)..\ThirdParty\lua;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;$(SolutionDir)..\ThirdParty\draco;$(SolutionDir)..\ThirdParty\draco\io\;$(SolutionDir)..\ThirdParty\draco\compression\;$(SolutionDir)..\ThirdParty\draco\mesh\;$(SolutionDir)..\ThirdParty\draco\core\;$(SolutionDir)..\ThirdParty\lz4\lib\;$(SolutionDir)..\ThirdParty\cityhash\src\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>fbxppch.h</PrecompiledHeaderFile>
+      <PreprocessorDefinitions>KFBX_DLLINFO;FBXSDK_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -167,6 +170,7 @@ xcopy "$(SolutionDir)..\ThirdParty\draco_build_$(PlatformToolset)$(PlatformTarge
       <AdditionalIncludeDirectories>$(ProjectDir);$(FBX_SDK)include\;$(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\snappy\;$(SolutionDir)..\ThirdParty\;$(SolutionDir)..\ThirdParty\lua;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;$(SolutionDir)..\ThirdParty\draco;$(SolutionDir)..\ThirdParty\draco\io\;$(SolutionDir)..\ThirdParty\draco\compression\;$(SolutionDir)..\ThirdParty\draco\mesh\;$(SolutionDir)..\ThirdParty\draco\core\;$(SolutionDir)..\ThirdParty\lz4\lib\;$(SolutionDir)..\ThirdParty\cityhash\src\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>fbxppch.h</PrecompiledHeaderFile>
+      <PreprocessorDefinitions>KFBX_DLLINFO;FBXSDK_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -194,7 +198,9 @@ xcopy "$(SolutionDir)..\ThirdParty\draco_build_$(PlatformToolset)$(PlatformTarge
     </ClCompile>
     <ClCompile Include="fbxpstate.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="material.cpp" />
     <ClCompile Include="mesh.cpp" />
+    <ClCompile Include="node.cpp" />
     <ClCompile Include="transform.cpp" />
   </ItemGroup>
   <ItemGroup>
