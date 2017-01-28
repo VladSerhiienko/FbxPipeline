@@ -12,8 +12,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\schemes\scene.fbs">
+    <CustomBuild Include="..\schemes\scene.fbs">
       <Filter>Sources</Filter>
-    </None>
+    </CustomBuild>
   </ItemGroup>
 </Project>

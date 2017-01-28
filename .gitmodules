@@ -7,3 +7,15 @@
 [submodule "ThirdParty/lua"]
 	path = ThirdParty/lua
 	url = git@github.com:lua/lua.git
+[submodule "ThirdParty/cxxopts"]
+	path = ThirdParty/cxxopts
+	url = git@github.com:jarro2783/cxxopts.git
+[submodule "ThirdParty/spdlog"]
+	path = ThirdParty/spdlog
+	url = git@github.com:gabime/spdlog.git
+[submodule "ThirdParty/snappy"]
+	path = ThirdParty/snappy
+	url = git@github.com:google/snappy.git
+[submodule "ThirdParty/selene"]
+	path = ThirdParty/selene
+	url = git@github.com:jeremyong/Selene.git

@@ -1,0 +1,43 @@
+BasedOnStyle: "Google"
+ColumnLimit: 128
+# ------------------------------
+Language: Cpp
+Standard: Cpp11
+
+UseTab: Never
+IndentWidth: 4
+AccessModifierOffset: -4
+NamespaceIndentation: All
+
+AlwaysBreakTemplateDeclarations: true
+BreakConstructorInitializersBeforeComma: true
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+ConstructorInitializerIndentWidth: 4
+
+AllowShortBlocksOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AllowAllParametersOfDeclarationOnNextLine: true
+
+PointerAlignment: Middle
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: true
+
+# SpaceBeforeParens: Always 
+SpaceBeforeAssignmentOperators: true
+SpaceInEmptyParentheses: true
+SpaceAfterCStyleCast: true
+SpacesInParentheses: true
+SpacesInAngles: true
+SpacesInSquareBrackets: true
+
+BinPackArguments: false
+BinPackParameters: false
+
+AlignAfterOpenBracket: Align
+
+AlignTrailingComments: true
+SpacesBeforeTrailingComments: 1
+
+# BreakBeforeBraces: Allman
