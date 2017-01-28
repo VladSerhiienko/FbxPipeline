@@ -1,0 +1,116 @@
+
+namespace FbxPipeline.Fb;
+
+//
+// Structs
+//
+
+struct vec2 {
+	x:float;
+	y:float;
+}
+struct vec3 {
+	x:float;
+	y:float;
+	z:float;
+}
+struct vec4 {
+	x:float;
+	y:float;
+	z:float;
+	w:float;
+}
+struct StaticVertexFb {
+	position:vec3;
+	normal:vec3;
+	tangent:vec4;
+	texCoords:vec2;
+}
+struct SubMeshFb {
+	material_id:uint;
+	first:uint;
+	count:uint;
+}
+enum EVertexTypeFb : uint {
+	Static,
+	StaticCompressed,
+	Count,
+}
+enum EIndexTypeFb : uint {
+	UInt16,
+	UInt16Compressed,
+	UInt32,
+	UInt32Compressed,
+	Count,
+}
+enum MaterialPropertyFb : uint {
+	DiffuseColor,
+	AmbientColor,
+}
+
+//
+// Tables
+//
+
+table NameFb {
+	h:ulong (key);
+	v:string;
+}
+
+struct TransformFb (force_align:16) {
+	translation:vec3;
+	rotation_offset:vec3;
+	rotation_pivot:vec3;
+	pre_rotation:vec3;
+	post_rotation:vec3;
+	rotation:vec3;
+	scaling_offset:vec3;
+	scaling_pivot:vec3;
+	scaling:vec3;
+	geometric_translation:vec3;
+	geometric_rotation:vec3;
+	geometric_scaling:vec3;
+}
+table MeshFb {
+	vertices:[ubyte];
+	indices:[ubyte];
+	vertex_type:EVertexTypeFb;
+	index_type:EIndexTypeFb;
+	submeshes:[SubMeshFb];
+}
+struct MaterialScalarPropFb {
+	name_id:ulong;
+	value:double;
+}
+struct MaterialColorPropFb {
+	name_id:ulong;
+	value:vec4;
+}
+struct MaterialImagePropFb {
+	name_id:ulong;
+	value:ulong;
+}
+table MaterialFb {
+	name_id:ulong;
+	scalars:[MaterialScalarPropFb];
+	colors:[MaterialColorPropFb];
+	images:[MaterialImagePropFb];
+}
+table NodeFb {
+	id:uint;
+	child_ids:[uint];
+	material_ids:[uint];
+	mesh_id:uint;
+	name_id:ulong;
+}
+table SceneFb {
+	transforms:[TransformFb];
+	nodes:[NodeFb];
+	meshes:[MeshFb];
+	names:[NameFb];
+	materials:[MaterialFb];
+}
+
+root_type SceneFb;
+file_extension "fbxp";
+file_identifier "FBXP";

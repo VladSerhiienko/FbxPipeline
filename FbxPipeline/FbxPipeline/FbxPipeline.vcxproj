@@ -89,7 +89,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(FBX_SDK)include\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\draco;$(SolutionDir)..\ThirdParty\lua;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(FBX_SDK)include\;$(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\draco;$(SolutionDir)..\ThirdParty\lua;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\;$(SolutionDir)..\ThirdParty\draco_build_v140$(PlatformTarget)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -100,13 +100,16 @@
 xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.pdb" "$(OutDir)" /s /d
 xcopy "$(SolutionDir)..\ThirdParty\draco_build_$(PlatformToolset)$(PlatformTarget)\$(Configuration)\draco.pdb" "$(OutDir)" /s /d</Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>$(SolutionDir)bin\flatc\$(PlatformToolset)$(Platform)$(Configuration)\flatc -o $(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration) -c $(SolutionDir)schemes\scene.fbs</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(FBX_SDK)include\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\draco;$(SolutionDir)..\ThirdParty\lua;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(FBX_SDK)include\;$(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\draco;$(SolutionDir)..\ThirdParty\lua;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\;$(SolutionDir)..\ThirdParty\draco_build_v140$(PlatformTarget)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -117,6 +120,9 @@ xcopy "$(SolutionDir)..\ThirdParty\draco_build_$(PlatformToolset)$(PlatformTarge
 xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.pdb" "$(OutDir)" /s /d
 xcopy "$(SolutionDir)..\ThirdParty\draco_build_$(PlatformToolset)$(PlatformTarget)\$(Configuration)\draco.pdb" "$(OutDir)" /s /d</Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>$(SolutionDir)bin\flatc\$(PlatformToolset)$(Platform)$(Configuration)\flatc -o $(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration) -c $(SolutionDir)schemes\scene.fbs</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -125,7 +131,7 @@ xcopy "$(SolutionDir)..\ThirdParty\draco_build_$(PlatformToolset)$(PlatformTarge
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(FBX_SDK)include\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\draco;$(SolutionDir)..\ThirdParty\lua;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(FBX_SDK)include\;$(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\draco;$(SolutionDir)..\ThirdParty\lua;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -138,6 +144,9 @@ xcopy "$(SolutionDir)..\ThirdParty\draco_build_$(PlatformToolset)$(PlatformTarge
 xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.pdb" "$(OutDir)" /s /d
 xcopy "$(SolutionDir)..\ThirdParty\draco_build_$(PlatformToolset)$(PlatformTarget)\$(Configuration)\draco.pdb" "$(OutDir)" /s /d</Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>$(SolutionDir)bin\flatc\$(PlatformToolset)$(Platform)$(Configuration)\flatc -o $(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration) -c $(SolutionDir)schemes\scene.fbs</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -146,7 +155,7 @@ xcopy "$(SolutionDir)..\ThirdParty\draco_build_$(PlatformToolset)$(PlatformTarge
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(FBX_SDK)include\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\draco;$(SolutionDir)..\ThirdParty\lua;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(FBX_SDK)include\;$(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\draco;$(SolutionDir)..\ThirdParty\lua;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -159,6 +168,9 @@ xcopy "$(SolutionDir)..\ThirdParty\draco_build_$(PlatformToolset)$(PlatformTarge
 xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.pdb" "$(OutDir)" /s /d
 xcopy "$(SolutionDir)..\ThirdParty\draco_build_$(PlatformToolset)$(PlatformTarget)\$(Configuration)\draco.pdb" "$(OutDir)" /s /d</Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>$(SolutionDir)bin\flatc\$(PlatformToolset)$(Platform)$(Configuration)\flatc -o $(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration) -c $(SolutionDir)schemes\scene.fbs</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
