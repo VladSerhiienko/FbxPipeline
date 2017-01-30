@@ -6,6 +6,8 @@ void SplitFilename( const std::string& filePath, std::string& parentFolderName, 
 
 template < typename TFbxMaterial >
 void ExportMaterial( FbxSurfaceMaterial* material, fbxp::Material& m ) {
+    (void) material;
+    (void) m;
 }
 
 template <>
@@ -98,16 +100,16 @@ void ExportTexture( std::string const& pn, fbxp::Material& m, FbxProperty& pp, F
         std::string folder, file;
         SplitFilename( url, folder, file );
 
-        s.textures.push_back( fbxp::fb::TextureFb( (uint32_t) s.textures.size( ),
-                                                   s.PushName( t->GetName( ) ),
-                                                   s.PushName( file ),
-                                                   (fbxp::fb::EBlendMode) t->GetBlendMode( ),
-                                                   (fbxp::fb::EWrapMode) t->GetWrapModeU( ),
-                                                   (fbxp::fb::EWrapMode) t->GetWrapModeV( ),
-                                                   (float) t->GetTranslationU( ),
-                                                   (float) t->GetTranslationV( ),
-                                                   (float) t->GetScaleU( ),
-                                                   (float) t->GetScaleV( ) ) );
+        s.textures.emplace_back( (uint32_t) s.textures.size( ),
+                                 s.PushName( t->GetName( ) ),
+                                 s.PushName( file ),
+                                 (fbxp::fb::EBlendMode) t->GetBlendMode( ),
+                                 (fbxp::fb::EWrapMode) t->GetWrapModeU( ),
+                                 (fbxp::fb::EWrapMode) t->GetWrapModeV( ),
+                                 (float) t->GetTranslationU( ),
+                                 (float) t->GetTranslationV( ),
+                                 (float) t->GetScaleU( ),
+                                 (float) t->GetScaleV( ) );
 
         m.props.emplace_back( s.PushName( pp.GetName( ).Buffer( ) ),
                               fbxp::fb::EMaterialPropTypeFb_Texture,
