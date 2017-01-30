@@ -16,12 +16,12 @@ void ExportNodeAttributes( FbxNode* node, fbxp::Node& n ) {
 }
 
 uint32_t ExportNode( FbxNode* node ) {
-    auto& s = fbxp::GetState( );
+    auto& s = fbxp::Get( );
 
-    const auto nodeId = s.nodes.size( );
+    const uint32_t nodeId = static_cast< uint32_t >( s.nodes.size( ) );
     s.nodes.emplace_back( );
 
-    auto& n  = s.nodes.back( );
+    auto& n = s.nodes.back( );
     n.id = nodeId;
     n.nameId = s.PushName( node->GetName( ) );
 
@@ -38,7 +38,7 @@ uint32_t ExportNode( FbxNode* node ) {
 }
 
 void ExportScene( FbxScene* scene ) {
-    auto& s = fbxp::GetState( );
+    auto& s = fbxp::Get( );
     s.nodes.reserve( scene->GetNodeCount( ) );
     ExportMaterials( scene );
     ExportNode( scene->GetRootNode( ) );

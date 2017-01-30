@@ -13,25 +13,25 @@
     <ClCompile Include="main.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
-    <ClCompile Include="transform.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="animation.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="mesh.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
     <ClCompile Include="fbxppch.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
     <ClCompile Include="fbxpstate.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
-    <ClCompile Include="node.cpp">
+    <ClCompile Include="fbxpmaterial.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
-    <ClCompile Include="material.cpp">
+    <ClCompile Include="fbxpmesh.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="fbxpnode.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="fbxptransform.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="fbxpanimation.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
   </ItemGroup>

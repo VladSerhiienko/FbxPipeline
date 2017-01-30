@@ -37,6 +37,18 @@ enum EBlendMode : uint {
     Modulate2,
     Over
 }
+struct TextureFb {
+    id : uint;
+    name_id : ulong;
+    source_id : ulong;
+    blend_mode : EBlendMode;
+    wrap_mode_u : EWrapMode;
+    wrap_mode_v : EWrapMode;
+    offset_u : float;
+    offset_v : float;
+    scale_u : float;
+    scale_v : float;
+}
 enum EVertexFormat : uint {
     Static
 }
@@ -49,18 +61,6 @@ struct SubmeshFb {
     subset_count : ushort;
     vertex_format : EVertexFormat;
     vertex_stride : ushort;
-}
-struct TextureFb {
-    id : uint;
-    name_id : ulong;
-    source_id : ulong;
-    blend_mode : EBlendMode;
-    wrap_mode_u : EWrapMode;
-    wrap_mode_v : EWrapMode;
-    offset_u : float;
-    offset_v : float;
-    scale_u : float;
-    scale_v : float;
 }
 struct SubsetFb {
     base_index : uint;
@@ -115,24 +115,16 @@ table MeshFb {
 	vertex_type	:EVertexTypeFb;
 	index_type	:EIndexTypeFb;
 }
-
-table MaterialScalarPropFb {
-	value :float;
+enum EMaterialPropTypeFb : uint {
+	Scalar,
+	Color,
+	Texture,
+	Video,
 }
-table MaterialColorPropFb {
-	value :vec4;
-}
-table MaterialImagePropFb {
-	value :uint;
-}
-union MaterialPropValueFb {
-	MaterialScalarPropFb,
-	MaterialColorPropFb,
-	MaterialImagePropFb,
-}
-table MaterialPropFb {
+struct MaterialPropFb {
 	name_id	:ulong;
-	value	:MaterialPropValueFb;
+	type	:EMaterialPropTypeFb;
+	value	:vec3;
 }
 table MaterialFb {
 	id		:uint;

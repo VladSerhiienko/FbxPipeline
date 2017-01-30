@@ -5,7 +5,7 @@ void ExportScene( FbxScene* pScene );
 void ConvertScene( FbxManager* lSdkManager, FbxScene* lScene, FbxString lFilePath );
 
 int main( int argc, char** argv ) {
-    auto& s = fbxp::GetState( );
+    auto& s = fbxp::Get( );
 
     std::string file;
     bool convert = false;
@@ -34,7 +34,7 @@ int main( int argc, char** argv ) {
 }
 
 void ConvertScene( FbxManager* lSdkManager, FbxScene* lScene, FbxString lFilePath ) {
-    auto& s = fbxp::GetState( );
+    auto& s = fbxp::Get( );
 
     const char* lFileTypes[] = {
         "_fbx7ascii.fbx", "FBX ascii (*.fbx)", "_fbx6ascii.fbx", "FBX 6.0 ascii (*.fbx)", "_obj.obj", "Alias OBJ (*.obj)",

@@ -189,7 +189,7 @@ xcopy "$(SolutionDir)..\ThirdParty\draco_build_$(PlatformToolset)$(PlatformTarge
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="animation.cpp" />
+    <ClCompile Include="fbxpanimation.cpp" />
     <ClCompile Include="fbxppch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -198,10 +198,10 @@ xcopy "$(SolutionDir)..\ThirdParty\draco_build_$(PlatformToolset)$(PlatformTarge
     </ClCompile>
     <ClCompile Include="fbxpstate.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="material.cpp" />
-    <ClCompile Include="mesh.cpp" />
-    <ClCompile Include="node.cpp" />
-    <ClCompile Include="transform.cpp" />
+    <ClCompile Include="fbxpmaterial.cpp" />
+    <ClCompile Include="fbxpmesh.cpp" />
+    <ClCompile Include="fbxpnode.cpp" />
+    <ClCompile Include="fbxptransform.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\cityhash\cityhash.vcxproj">

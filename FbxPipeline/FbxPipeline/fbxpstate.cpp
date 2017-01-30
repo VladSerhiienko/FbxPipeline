@@ -10,7 +10,7 @@ void DestroySdkObjects( FbxManager* pManager );
 bool LoadScene( FbxManager* pManager, FbxDocument* pScene, const char* pFilename );
 
 fbxp::State  s;
-fbxp::State& fbxp::GetState( ) {
+fbxp::State& fbxp::Get( ) {
     return s;
 }
 
@@ -78,11 +78,13 @@ bool fbxp::State::Finish( ) {
         nodeOffsets.reserve( nodes.size( ) );
         for ( auto& node : nodes ) {
             const auto childIdsOffset = builder.CreateVector( node.childIds );
+            const auto materialIdsOffset = builder.CreateVector( node.materialIds );
 
             fb::NodeFbBuilder nodeBuilder( builder );
             nodeBuilder.add_id( node.id );
             nodeBuilder.add_name_id( node.nameId );
             nodeBuilder.add_child_ids( childIdsOffset );
+            nodeBuilder.add_material_ids( materialIdsOffset );
             nodeOffsets.push_back( nodeBuilder.Finish( ) );
         }
     }
@@ -96,8 +98,22 @@ bool fbxp::State::Finish( ) {
     std::vector< flatbuffers::Offset< fb::MaterialFb > > materialOffsets; {
         materialOffsets.reserve( materials.size( ) );
         for (auto& material : materials) {
+            auto propsOffset = builder.CreateVectorOfStructs( material.props );
+
+            fb::MaterialFbBuilder materialBuilder( builder );
+            materialBuilder.add_id(material.id);
+            materialBuilder.add_name_id(material.nameId);
+            materialBuilder.add_props( propsOffset );
+            materialOffsets.push_back(materialBuilder.Finish());
         }
     }
+
+    //
+    // Finalize Materials
+    //
+
+    const auto materialsOffset = builder.CreateVector( materialOffsets );
+
     //
     // Finalize textures
     //
@@ -113,6 +129,7 @@ bool fbxp::State::Finish( ) {
     sceneBuilder.add_names( namesOffset );
     sceneBuilder.add_nodes( nodesOffset );
     sceneBuilder.add_textures( texturesOffset );
+    sceneBuilder.add_materials( materialsOffset );
 
     builder.Finish( sceneBuilder.Finish( ) );
 
@@ -127,11 +144,12 @@ bool fbxp::State::Finish( ) {
     if ( outputFileStream.good( ) ) {
         outputFileStream.write( (const char*) builder.GetBufferPointer( ), builder.GetSize( ) );
         outputFileStream.close( );
-    } else {
-        console->error( "Failed to write to output to {}", outputPath );
+        return true;
     }
 
-    return true;
+    console->error( "Failed to write to output to {}", outputPath );
+    assert( false );
+    return false;
 }
 
 uint64_t fbxp::State::PushName( std::string const& name ) {

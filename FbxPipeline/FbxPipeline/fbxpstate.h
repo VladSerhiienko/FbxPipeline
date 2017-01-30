@@ -4,32 +4,18 @@
 #include <scene_generated.h>
 
 namespace fbxp {
+
     struct Node {
         uint32_t                id;
         uint64_t                nameId;
         std::vector< uint32_t > childIds;
+        std::vector< uint32_t > materialIds;
     };
 
     struct Material {
-        uint32_t id;
-        uint64_t nameId;
-
-        struct Prop {
-            uint64_t nameId;
-
-            enum {
-                eScalar,
-                eColor,
-                eTexture,
-            } type;
-
-            union {
-                float    scalar;
-                float    color[ 3 ];
-                uint64_t textureId;
-            };
-        };
-        std::vector< Prop > props;
+        uint32_t                          id;
+        uint64_t                          nameId;
+        std::vector< fb::MaterialPropFb > props;
     };
 
     struct State {
@@ -40,10 +26,11 @@ namespace fbxp {
         cxxopts::Options                  options;
         std::string                       fileName;
         std::string                       folderPath;
-        std::map< uint64_t, std::string > names;
-        std::vector< fb::TransformFb >    transforms;
         std::vector< Node >               nodes;
         std::vector< Material >           materials;
+        std::map< uint64_t, uint32_t >    materialDict;
+        std::map< uint64_t, std::string > names;
+        std::vector< fb::TransformFb >    transforms;
         std::vector< fb::TextureFb >      textures;
 
         State( );
@@ -55,6 +42,6 @@ namespace fbxp {
         bool Finish( );
         uint64_t PushName( std::string const& name );
 
-        friend State& GetState( );
+        friend State& Get( );
     };
 }

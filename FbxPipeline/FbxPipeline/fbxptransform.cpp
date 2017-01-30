@@ -20,5 +20,5 @@ void ExportTransform( FbxNode* node, fbxp::Node & n ) {
                                      cast( node->GeometricRotation.Get( ) ),
                                      cast( node->GeometricScaling.Get( ) ) );
 
-    fbxp::GetState( ).transforms.push_back( transform );
+    fbxp::Get( ).transforms.push_back( transform );
 }
