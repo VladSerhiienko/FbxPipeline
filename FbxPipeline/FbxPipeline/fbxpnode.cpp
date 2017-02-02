@@ -39,7 +39,15 @@ uint32_t ExportNode( FbxNode* node ) {
 
 void ExportScene( FbxScene* scene ) {
     auto& s = fbxp::Get( );
-    s.nodes.reserve( scene->GetNodeCount( ) );
+
+    // Pre-allocate nodes and attributes.
+    s.nodes.reserve( (size_t) scene->GetNodeCount( ) );
+    s.meshes.reserve( (size_t) scene->GetNodeCount( ) );
+
+    // We want shared materials, so export all the scene material first
+    // and reference them from the node scope by their indices.
     ExportMaterials( scene );
+
+    // Export nodes recursively.
     ExportNode( scene->GetRootNode( ) );
 }

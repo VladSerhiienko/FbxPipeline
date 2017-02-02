@@ -83,6 +83,7 @@ bool fbxp::State::Finish( ) {
             fb::NodeFbBuilder nodeBuilder( builder );
             nodeBuilder.add_id( node.id );
             nodeBuilder.add_name_id( node.nameId );
+            nodeBuilder.add_mesh_id( node.meshId );
             nodeBuilder.add_child_ids( childIdsOffset );
             nodeBuilder.add_material_ids( materialIdsOffset );
             nodeOffsets.push_back( nodeBuilder.Finish( ) );

@@ -5,9 +5,20 @@
 
 namespace fbxp {
 
+    struct Mesh {
+        fbxp::fb::vec3                     min;
+        fbxp::fb::vec3                     max;
+        std::vector< uint32_t >            polygons;
+        std::vector< fbxp::fb::vec3 >      controlPoints;
+        std::vector< fbxp::fb::SubmeshFb > submeshes;
+        std::vector< fbxp::fb::SubsetFb >  subsets;
+        std::vector< uint32_t >            subsetIndices;
+    };
+
     struct Node {
         uint32_t                id;
         uint64_t                nameId;
+        uint32_t                meshId;
         std::vector< uint32_t > childIds;
         std::vector< uint32_t > materialIds;
     };
@@ -28,10 +39,12 @@ namespace fbxp {
         std::string                       folderPath;
         std::vector< Node >               nodes;
         std::vector< Material >           materials;
+        std::map< uint64_t, uint32_t >    textureDict;
         std::map< uint64_t, uint32_t >    materialDict;
         std::map< uint64_t, std::string > names;
         std::vector< fb::TransformFb >    transforms;
         std::vector< fb::TextureFb >      textures;
+        std::vector< Mesh >               meshes;
 
         State( );
         ~State( );

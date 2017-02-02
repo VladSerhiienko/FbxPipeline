@@ -79,10 +79,6 @@ enum EIndexTypeFb : uint {
 	UInt32Compressed,
 	Count,
 }
-enum MaterialPropertyFb : uint {
-	DiffuseColor,
-	AmbientColor,
-}
 
 //
 // Tables
@@ -108,12 +104,13 @@ struct TransformFb (force_align:16) {
 	geometric_scaling		:vec3;
 }
 table MeshFb {
-	vertices	:[ubyte];
-	indices		:[ubyte];
-	submeshes	:[SubmeshFb];
-	subsets		:[SubsetFb];
-	vertex_type	:EVertexTypeFb;
-	index_type	:EIndexTypeFb;
+	polygons			:[uint];
+	ctrl_points			:[vec3];
+	vertices			:[ubyte];
+	indices				:[ubyte];
+	submeshes			:[SubmeshFb];
+	subsets				:[SubsetFb];
+	index_type			:EIndexTypeFb;
 }
 enum EMaterialPropTypeFb : uint {
 	Scalar,
@@ -142,9 +139,9 @@ table SceneFb {
 	transforms	:[TransformFb];
 	nodes		:[NodeFb];
 	meshes		:[MeshFb];
-	names		:[NameFb];
 	materials	:[MaterialFb];
 	textures	:[TextureFb];
+	names		:[NameFb];
 }
 
 root_type		SceneFb;
