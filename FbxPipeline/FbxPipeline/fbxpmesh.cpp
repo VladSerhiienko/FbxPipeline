@@ -56,7 +56,7 @@ bool GetSubsets( FbxMesh* mesh, fbxp::Mesh& m, std::vector< uint32_t >& indices,
     }
 
     if ( items.empty( ) ) {
-        s.console->error( "Mesh {} has not correctly mapped materials.", mesh->GetNode( )->GetName( ) );
+        s.console->error( "Mesh {} has no correctly mapped materials (fallback to first one).", mesh->GetNode( )->GetName( ) );
         DebugBreak( );
         return false;
     }
@@ -92,7 +92,7 @@ bool GetSubsets( FbxMesh* mesh, fbxp::Mesh& m, std::vector< uint32_t >& indices,
             if ((kk - k) > 1) {
                 // s.console->info( "Break in {} - {} vs {}", j, k, kk );
                 // Process a case where there is a break in polygon indices.
-                s.console->info( "Adding subset: material {}, index {}, count {} ({} - {})", mii, k, j - ki, ki, j - 1 );
+                s.console->info( "Adding subset: material {}, index {}, count {} ({} - {}).", mii, k, j - ki, ki, j - 1 );
                 subsets.emplace_back( mii, ki, j - ki );
                 ki = j;
                 k  = kk;
@@ -101,7 +101,7 @@ bool GetSubsets( FbxMesh* mesh, fbxp::Mesh& m, std::vector< uint32_t >& indices,
             k = kk;
         }
 
-        s.console->info( "Adding subset: material {}, index {}, count {} ({} - {})", mii, k, j - ki, ki, j - 1 );
+        s.console->info( "Adding subset: material {}, index {}, count {} ({} - {}).", mii, k, j - ki, ki, j - 1 );
         subsets.emplace_back( mii, k, j - ki );
     };
 
@@ -109,7 +109,7 @@ bool GetSubsets( FbxMesh* mesh, fbxp::Mesh& m, std::vector< uint32_t >& indices,
     uint32_t mii = std::get< 0 >( items.front( ) );
 
     uint32_t i  = 0;
-    const uint32_t ic = items.size( );
+    const uint32_t ic = (uint32_t) items.size( );
     for ( ; i < ic; ++i ) {
         uint32_t mi = std::get< 0 >( items[ i ] );
         if ( mi != mii ) {
@@ -126,6 +126,7 @@ bool GetSubsets( FbxMesh* mesh, fbxp::Mesh& m, std::vector< uint32_t >& indices,
     s.console->info( "Material {} has {} assigned polygons ({} - {}).", mii, i - ii, ii, i - 1 );
     std::sort( items.data( ) + ii, items.data( ) + i, sortByPolygonIndex );
     extractSubmeshesFromRange( mii, ii, i );
+    return true;
 }
 
 template < typename TVertexFn >
@@ -182,19 +183,25 @@ void GetVertices( FbxMesh* mesh, fbxp::Mesh& m, TVertexFn vertexCallback ) {
 void ExportMesh( FbxNode* node, fbxp::Node& n ) {
     auto& s = fbxp::Get( );
     if ( auto mesh = node->GetMesh( ) ) {
-        s.console->info( "Node {} has mesh '{}' (can be empty).", node->GetName( ), mesh->GetName( ) );
+        s.console->info( "Node {} has mesh '{}' (can be empty, ).", node->GetName( ), mesh->GetName( ) );
         if ( !mesh->IsTriangleMesh( ) ) {
             s.console->warn( "Mesh {} is not triangular, processing...", node->GetName( ) );
             FbxGeometryConverter converter( mesh->GetNode( )->GetFbxManager( ) );
-            mesh = (FbxMesh*) converter.Triangulate( mesh, false );
-            s.console->warn( "Mesh {} was triangulated.", node->GetName( ) );
+            mesh = (FbxMesh*) converter.Triangulate( mesh, false, s.legacyTriangulationSdk );
+
+            if (nullptr == mesh) {
+                s.console->error( "Mesh {} triangulation failed (mesh will be skipped).", node->GetName( ) );
+                return;
+            }
+
+            s.console->warn( "Mesh {} was triangulated (success).", node->GetName( ) );
         }
 
         if ( const auto deformerCount = mesh->GetDeformerCount( ) ) {
             s.console->warn( "Mesh {} has {} deformers (ignored).", node->GetName( ), deformerCount );
         }
 
-        const uint32_t meshId = s.meshes.size( );
+        const uint32_t meshId = (uint32_t) s.meshes.size( );
         n.meshId = meshId;
         s.meshes.emplace_back( );
         fbxp::Mesh& m = s.meshes.back( );

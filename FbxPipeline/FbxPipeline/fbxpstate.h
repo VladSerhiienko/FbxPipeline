@@ -18,7 +18,7 @@ namespace fbxp {
     struct Node {
         uint32_t                id;
         uint64_t                nameId;
-        uint32_t                meshId;
+        uint32_t                meshId = (uint32_t) -1;
         std::vector< uint32_t > childIds;
         std::vector< uint32_t > materialIds;
     };
@@ -30,6 +30,7 @@ namespace fbxp {
     };
 
     struct State {
+        bool                              legacyTriangulationSdk = false;
         fbxsdk::FbxManager*               manager = nullptr;
         fbxsdk::FbxScene*                 scene   = nullptr;
         std::shared_ptr< spdlog::logger > console;

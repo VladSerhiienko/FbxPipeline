@@ -63,9 +63,9 @@ struct SubmeshFb {
     vertex_stride : ushort;
 }
 struct SubsetFb {
+    material_id : uint;
     base_index : uint;
     index_count : uint;
-    material_id : ushort;
 }
 enum EVertexTypeFb : uint {
 	Static,
@@ -110,6 +110,7 @@ table MeshFb {
 	indices				:[ubyte];
 	submeshes			:[SubmeshFb];
 	subsets				:[SubsetFb];
+	subset_indices		:[uint];
 	index_type			:EIndexTypeFb;
 }
 enum EMaterialPropTypeFb : uint {

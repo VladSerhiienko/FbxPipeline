@@ -110,6 +110,29 @@ bool fbxp::State::Finish( ) {
     }
 
     //
+    // Finalize meshes
+    //
+
+    std::vector< flatbuffers::Offset< fb::MeshFb > > meshOffsets; {
+        materialOffsets.reserve( meshes.size( ) );
+        for ( auto& mesh : meshes ) {
+            auto cpOffset = builder.CreateVectorOfStructs( mesh.controlPoints );
+            auto ppOffset = builder.CreateVector( mesh.polygons );
+            auto siOffset = builder.CreateVector( mesh.subsetIndices );
+            auto ssOffset = builder.CreateVectorOfStructs( mesh.subsets );
+
+            fb::MeshFbBuilder meshBuilder( builder );
+            meshBuilder.add_ctrl_points( cpOffset );
+            meshBuilder.add_polygons( ppOffset );
+            meshBuilder.add_subset_indices( siOffset );
+            meshBuilder.add_subsets( ssOffset );
+            meshOffsets.push_back( meshBuilder.Finish( ) );
+        }
+    }
+
+    const auto meshesOffset = builder.CreateVector( meshOffsets );
+
+    //
     // Finalize Materials
     //
 
@@ -129,6 +152,7 @@ bool fbxp::State::Finish( ) {
     sceneBuilder.add_transforms( transformsOffset );
     sceneBuilder.add_names( namesOffset );
     sceneBuilder.add_nodes( nodesOffset );
+    sceneBuilder.add_meshes( meshesOffset );
     sceneBuilder.add_textures( texturesOffset );
     sceneBuilder.add_materials( materialsOffset );
 
@@ -149,7 +173,7 @@ bool fbxp::State::Finish( ) {
     }
 
     console->error( "Failed to write to output to {}", outputPath );
-    assert( false );
+    DebugBreak( );
     return false;
 }
 
@@ -195,6 +219,7 @@ bool InitializeSdkObjects( FbxManager*& pManager, FbxScene*& pScene ) {
     if ( !pScene ) {
         s.console->error( "Unable to create FBX scene." );
         DestroySdkObjects( pManager );
+        DebugBreak( );
         return false;
     }
 
@@ -236,6 +261,7 @@ bool LoadScene( FbxManager* pManager, FbxDocument* pScene, const char* pFilename
             s.console->info( "FBX file format version for file '{}' is {}.{}.{}.", pFilename, lFileMajor, lFileMinor, lFileRevision );
         }
 
+        DebugBreak( );
         return false;
     }
 
