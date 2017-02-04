@@ -89,7 +89,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(FBX_SDK)include\;$(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\snappy\;$(SolutionDir)..\ThirdParty\;$(SolutionDir)..\ThirdParty\lua;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;$(SolutionDir)..\ThirdParty\draco;$(SolutionDir)..\ThirdParty\draco\io\;$(SolutionDir)..\ThirdParty\draco\compression\;$(SolutionDir)..\ThirdParty\draco\mesh\;$(SolutionDir)..\ThirdParty\draco\core\;$(SolutionDir)..\ThirdParty\lz4\lib\;$(SolutionDir)..\ThirdParty\cityhash\src\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(FBX_SDK)include\;$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\snappy\;$(SolutionDir)..\ThirdParty\;$(SolutionDir)..\ThirdParty\mathfu\include;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\lua;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;$(SolutionDir)..\ThirdParty\draco;$(SolutionDir)..\ThirdParty\draco\io\;$(SolutionDir)..\ThirdParty\draco\compression\;$(SolutionDir)..\ThirdParty\draco\mesh\;$(SolutionDir)..\ThirdParty\draco\core\;$(SolutionDir)..\ThirdParty\lz4\lib\;$(SolutionDir)..\ThirdParty\cityhash\src\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>fbxppch.h</PrecompiledHeaderFile>
       <PreprocessorDefinitions>KFBX_DLLINFO;FBXSDK_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -99,9 +99,11 @@
       <AdditionalDependencies>draco.lib;libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.dll" "$(OutDir)" /s /d
+      <Command>echo FBXP Copying dlls and pdbs
+xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.dll" "$(OutDir)" /s /d
 xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.pdb" "$(OutDir)" /s /d
-xcopy "$(SolutionDir)..\ThirdParty\draco_build_$(PlatformToolset)$(PlatformTarget)\$(Configuration)\draco.pdb" "$(OutDir)" /s /d</Command>
+xcopy "$(SolutionDir)..\ThirdParty\draco_build_$(PlatformToolset)$(PlatformTarget)\$(Configuration)\draco.pdb" "$(OutDir)" /s /d
+exit 0</Command>
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>
@@ -113,7 +115,7 @@ xcopy "$(SolutionDir)..\ThirdParty\draco_build_$(PlatformToolset)$(PlatformTarge
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(FBX_SDK)include\;$(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\snappy\;$(SolutionDir)..\ThirdParty\;$(SolutionDir)..\ThirdParty\lua;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;$(SolutionDir)..\ThirdParty\draco;$(SolutionDir)..\ThirdParty\draco\io\;$(SolutionDir)..\ThirdParty\draco\compression\;$(SolutionDir)..\ThirdParty\draco\mesh\;$(SolutionDir)..\ThirdParty\draco\core\;$(SolutionDir)..\ThirdParty\lz4\lib\;$(SolutionDir)..\ThirdParty\cityhash\src\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(FBX_SDK)include\;$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\snappy\;$(SolutionDir)..\ThirdParty\;$(SolutionDir)..\ThirdParty\mathfu\include;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\lua;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;$(SolutionDir)..\ThirdParty\draco;$(SolutionDir)..\ThirdParty\draco\io\;$(SolutionDir)..\ThirdParty\draco\compression\;$(SolutionDir)..\ThirdParty\draco\mesh\;$(SolutionDir)..\ThirdParty\draco\core\;$(SolutionDir)..\ThirdParty\lz4\lib\;$(SolutionDir)..\ThirdParty\cityhash\src\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>fbxppch.h</PrecompiledHeaderFile>
       <PreprocessorDefinitions>KFBX_DLLINFO;FBXSDK_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -123,9 +125,11 @@ xcopy "$(SolutionDir)..\ThirdParty\draco_build_$(PlatformToolset)$(PlatformTarge
       <AdditionalDependencies>draco.lib;libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.dll" "$(OutDir)" /s /d
+      <Command>echo FBXP Copying dlls and pdbs
+xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.dll" "$(OutDir)" /s /d
 xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.pdb" "$(OutDir)" /s /d
-xcopy "$(SolutionDir)..\ThirdParty\draco_build_$(PlatformToolset)$(PlatformTarget)\$(Configuration)\draco.pdb" "$(OutDir)" /s /d</Command>
+xcopy "$(SolutionDir)..\ThirdParty\draco_build_$(PlatformToolset)$(PlatformTarget)\$(Configuration)\draco.pdb" "$(OutDir)" /s /d
+exit 0</Command>
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>
@@ -139,7 +143,7 @@ xcopy "$(SolutionDir)..\ThirdParty\draco_build_$(PlatformToolset)$(PlatformTarge
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(FBX_SDK)include\;$(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\snappy\;$(SolutionDir)..\ThirdParty\;$(SolutionDir)..\ThirdParty\lua;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;$(SolutionDir)..\ThirdParty\draco;$(SolutionDir)..\ThirdParty\draco\io\;$(SolutionDir)..\ThirdParty\draco\compression\;$(SolutionDir)..\ThirdParty\draco\mesh\;$(SolutionDir)..\ThirdParty\draco\core\;$(SolutionDir)..\ThirdParty\lz4\lib\;$(SolutionDir)..\ThirdParty\cityhash\src\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(FBX_SDK)include\;$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\snappy\;$(SolutionDir)..\ThirdParty\;$(SolutionDir)..\ThirdParty\mathfu\include;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\lua;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;$(SolutionDir)..\ThirdParty\draco;$(SolutionDir)..\ThirdParty\draco\io\;$(SolutionDir)..\ThirdParty\draco\compression\;$(SolutionDir)..\ThirdParty\draco\mesh\;$(SolutionDir)..\ThirdParty\draco\core\;$(SolutionDir)..\ThirdParty\lz4\lib\;$(SolutionDir)..\ThirdParty\cityhash\src\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>fbxppch.h</PrecompiledHeaderFile>
       <PreprocessorDefinitions>KFBX_DLLINFO;FBXSDK_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -151,9 +155,11 @@ xcopy "$(SolutionDir)..\ThirdParty\draco_build_$(PlatformToolset)$(PlatformTarge
       <AdditionalDependencies>draco.lib;libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.dll" "$(OutDir)" /s /d
+      <Command>echo FBXP Copying dlls and pdbs
+xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.dll" "$(OutDir)" /s /d
 xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.pdb" "$(OutDir)" /s /d
-xcopy "$(SolutionDir)..\ThirdParty\draco_build_$(PlatformToolset)$(PlatformTarget)\$(Configuration)\draco.pdb" "$(OutDir)" /s /d</Command>
+xcopy "$(SolutionDir)..\ThirdParty\draco_build_$(PlatformToolset)$(PlatformTarget)\$(Configuration)\draco.pdb" "$(OutDir)" /s /d
+exit 0</Command>
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>
@@ -167,7 +173,7 @@ xcopy "$(SolutionDir)..\ThirdParty\draco_build_$(PlatformToolset)$(PlatformTarge
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(FBX_SDK)include\;$(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\snappy\;$(SolutionDir)..\ThirdParty\;$(SolutionDir)..\ThirdParty\lua;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;$(SolutionDir)..\ThirdParty\draco;$(SolutionDir)..\ThirdParty\draco\io\;$(SolutionDir)..\ThirdParty\draco\compression\;$(SolutionDir)..\ThirdParty\draco\mesh\;$(SolutionDir)..\ThirdParty\draco\core\;$(SolutionDir)..\ThirdParty\lz4\lib\;$(SolutionDir)..\ThirdParty\cityhash\src\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(FBX_SDK)include\;$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\snappy\;$(SolutionDir)..\ThirdParty\;$(SolutionDir)..\ThirdParty\mathfu\include;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\lua;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;$(SolutionDir)..\ThirdParty\draco;$(SolutionDir)..\ThirdParty\draco\io\;$(SolutionDir)..\ThirdParty\draco\compression\;$(SolutionDir)..\ThirdParty\draco\mesh\;$(SolutionDir)..\ThirdParty\draco\core\;$(SolutionDir)..\ThirdParty\lz4\lib\;$(SolutionDir)..\ThirdParty\cityhash\src\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>fbxppch.h</PrecompiledHeaderFile>
       <PreprocessorDefinitions>KFBX_DLLINFO;FBXSDK_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -179,9 +185,11 @@ xcopy "$(SolutionDir)..\ThirdParty\draco_build_$(PlatformToolset)$(PlatformTarge
       <AdditionalDependencies>draco.lib;libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.dll" "$(OutDir)" /s /d
+      <Command>echo FBXP Copying dlls and pdbs
+xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.dll" "$(OutDir)" /s /d
 xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.pdb" "$(OutDir)" /s /d
-xcopy "$(SolutionDir)..\ThirdParty\draco_build_$(PlatformToolset)$(PlatformTarget)\$(Configuration)\draco.pdb" "$(OutDir)" /s /d</Command>
+xcopy "$(SolutionDir)..\ThirdParty\draco_build_$(PlatformToolset)$(PlatformTarget)\$(Configuration)\draco.pdb" "$(OutDir)" /s /d
+exit 0</Command>
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>
@@ -220,14 +228,18 @@ xcopy "$(SolutionDir)..\ThirdParty\draco_build_$(PlatformToolset)$(PlatformTarge
   <ItemGroup>
     <CustomBuild Include="..\schemes\scene.fbs">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)bin\flatc\$(PlatformToolset)$(Platform)$(Configuration)\flatc -o $(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration) -c $(SolutionDir)schemes\scene.fbs</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)bin\flatc\$(PlatformToolset)$(Platform)$(Configuration)\flatc -o $(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration) -c $(SolutionDir)schemes\scene.fbs</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)bin\flatc\$(PlatformToolset)$(Platform)$(Configuration)\flatc -o $(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration) -c $(SolutionDir)schemes\scene.fbs</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)bin\flatc\$(PlatformToolset)$(Platform)$(Configuration)\flatc -o $(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration) -c $(SolutionDir)schemes\scene.fbs</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\scene_generated.h;%(Outputs)</Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\scene_generated.h;%(Outputs)</Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\scene_generated.h;%(Outputs)</Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\scene_generated.h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)bin\flatc\$(PlatformToolset)$(Platform)$(Configuration)\flatc -o $(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration) -c $(SolutionDir)schemes\scene.fbs
+$(SolutionDir)bin\flatc\$(PlatformToolset)$(Platform)$(Configuration)\flatc -o $(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration) -s $(SolutionDir)schemes\scene.fbs</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)bin\flatc\$(PlatformToolset)$(Platform)$(Configuration)\flatc -o $(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration) -c $(SolutionDir)schemes\scene.fbs
+$(SolutionDir)bin\flatc\$(PlatformToolset)$(Platform)$(Configuration)\flatc -o $(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration) -s $(SolutionDir)schemes\scene.fbs</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)bin\flatc\$(PlatformToolset)$(Platform)$(Configuration)\flatc -o $(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration) -c $(SolutionDir)schemes\scene.fbs
+$(SolutionDir)bin\flatc\$(PlatformToolset)$(Platform)$(Configuration)\flatc -o $(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration) -s $(SolutionDir)schemes\scene.fbs</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)bin\flatc\$(PlatformToolset)$(Platform)$(Configuration)\flatc -o $(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration) -c $(SolutionDir)schemes\scene.fbs
+$(SolutionDir)bin\flatc\$(PlatformToolset)$(Platform)$(Configuration)\flatc -o $(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration) -s $(SolutionDir)schemes\scene.fbs</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\scene_generated.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\scene_generated.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\scene_generated.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\scene_generated.h;%(Outputs)</Outputs>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

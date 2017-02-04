@@ -89,7 +89,8 @@ table NameFb {
 	v : string;
 }
 
-struct TransformFb (force_align:16) {
+// (force_align:16)
+struct TransformFb {
 	translation				:vec3;
 	rotation_offset			:vec3;
 	rotation_pivot			:vec3;

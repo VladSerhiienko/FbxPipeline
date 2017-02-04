@@ -1,6 +1,70 @@
 #include <fbxppch.h>
 #include <fbxpstate.h>
 
+/**
+ * Helper function to calculate tangents when the tangent element layer is missing.
+ * Can be used in multiple threads.
+ * http://gamedev.stackexchange.com/a/68617/39505
+ **/
+template < typename TVertex >
+void CalculateTangents( TVertex* vertices, size_t vertexCount ) {
+    std::vector< mathfu::vec3 > tan;
+    tan.resize( vertexCount * 2 );
+
+    auto tan1 = tan.data( );
+    auto tan2 = tan1 + vertexCount;
+
+    for ( size_t i = 0; i < vertexCount; i += 3 ) {
+        TVertex& v0 = vertices[ i + 0 ];
+        TVertex& v1 = vertices[ i + 1 ];
+        TVertex& v2 = vertices[ i + 2 ];
+
+        float x1 = v1.position[ 0 ] - v0.position[ 0 ];
+        float x2 = v2.position[ 0 ] - v0.position[ 0 ];
+        float y1 = v1.position[ 1 ] - v0.position[ 1 ];
+        float y2 = v2.position[ 1 ] - v0.position[ 1 ];
+        float z1 = v1.position[ 2 ] - v0.position[ 2 ];
+        float z2 = v2.position[ 2 ] - v0.position[ 2 ];
+
+        float s1 = v1.texCoords[ 0 ] - v0.texCoords[ 0 ];
+        float s2 = v2.texCoords[ 0 ] - v0.texCoords[ 0 ];
+        float t1 = v1.texCoords[ 1 ] - v0.texCoords[ 1 ];
+        float t2 = v2.texCoords[ 1 ] - v0.texCoords[ 1 ];
+
+        float        r = 1.0F / ( s1 * t2 - s2 * t1 );
+        mathfu::vec3 sdir( ( t2 * x1 - t1 * x2 ) * r, ( t2 * y1 - t1 * y2 ) * r, ( t2 * z1 - t1 * z2 ) * r );
+        mathfu::vec3 tdir( ( s1 * x2 - s2 * x1 ) * r, ( s1 * y2 - s2 * y1 ) * r, ( s1 * z2 - s2 * z1 ) * r );
+
+        tan1[ i + 0 ] += sdir;
+        tan1[ i + 1 ] += sdir;
+        tan1[ i + 2 ] += sdir;
+
+        tan2[ i + 0 ] += tdir;
+        tan2[ i + 1 ] += tdir;
+        tan2[ i + 2 ] += tdir;
+    }
+
+    for ( size_t i = 0; i < vertexCount; i += 1 ) {
+        TVertex& v = vertices[ i ];
+        auto     n = mathfu::vec3( v.normal[ 0 ], v.normal[ 1 ], v.normal[ 2 ] );
+        auto     t = tan1[ i ];
+
+        mathfu::vec3 tt = mathfu::normalize( t - n * mathfu::dot( n, t ) );
+        v.tangent[ 0 ]  = tt.x( );
+        v.tangent[ 1 ]  = tt.y( );
+        v.tangent[ 2 ]  = tt.z( );
+        v.tangent[ 3 ]  = ( mathfu::dot( mathfu::cross( n, t ), tan2[ i ] ) < 0 ) ? -1.0f : 1.0f;
+    }
+}
+
+/**
+ * Produces mesh subsets and subset indices.
+ * A subset is a structure for mapping material index to a polygon range to allow a single mesh to
+ * be rendered using multiple materials.
+ * The usage could be: 1) render polygon range [ 0, 12] with 1st material.
+ *                     2) render polygon range [12, 64] with 2nd material.
+ *                     * range is [base index; index count]
+ **/
 using SubsetItem = std::tuple< uint32_t, uint32_t, uint32_t >;
 bool GetSubsets( FbxMesh* mesh, fbxp::Mesh& m, std::vector< uint32_t >& indices, std::vector< fbxp::fb::SubsetFb >& subsets ) {
     auto& s = fbxp::Get( );
@@ -22,7 +86,7 @@ bool GetSubsets( FbxMesh* mesh, fbxp::Mesh& m, std::vector< uint32_t >& indices,
 
     std::vector< std::tuple< uint32_t, uint32_t > > items;
     items.reserve( mesh->GetPolygonCount( ) );
-    indices.reserve( mesh->GetPolygonCount( ) * 3 );
+    //indices.reserve( mesh->GetPolygonCount( ) * 3 );
     subsets.reserve( mesh->GetNode( )->GetMaterialCount( ) );
 
     // Go though all the material elements and map them.
@@ -78,22 +142,24 @@ bool GetSubsets( FbxMesh* mesh, fbxp::Mesh& m, std::vector< uint32_t >& indices,
     // Sort items by material index.
     std::sort( items.begin( ), items.end( ), sortByMaterialIndex );
 
-    auto extractSubmeshesFromRange = [&]( const uint32_t mii, const uint32_t ii, const uint32_t i ) {
+    auto extractSubsetsFromRange = [&]( const uint32_t mii, const uint32_t ii, const uint32_t i ) {
         uint32_t ki = ii;
         uint32_t k  = std::get< 1 >( items[ ii ] );
 
         uint32_t j = ii;
         for ( ; j < i; ++j ) {
-            indices.push_back( j * 3 + 0 );
-            indices.push_back( j * 3 + 0 );
-            indices.push_back( j * 3 + 2 );
+            //indices.push_back( j * 3 + 0 );
+            //indices.push_back( j * 3 + 0 );
+            //indices.push_back( j * 3 + 2 );
 
             const uint32_t kk  = std::get< 1 >( items[ j ] );
             if ((kk - k) > 1) {
                 // s.console->info( "Break in {} - {} vs {}", j, k, kk );
                 // Process a case where there is a break in polygon indices.
-                s.console->info( "Adding subset: material {}, index {}, count {} ({} - {}).", mii, k, j - ki, ki, j - 1 );
-                subsets.emplace_back( mii, ki, j - ki );
+                s.console->info( "Adding subset: material {}, polygon {}, count {} ({} - {}).", mii, k, j - ki, ki, j - 1 );
+
+                // subsets.emplace_back( mii, ki, j - ki );
+                subsets.emplace_back( mii, ki * 3, ( j - ki ) * 3 );
                 ki = j;
                 k  = kk;
             }
@@ -101,8 +167,9 @@ bool GetSubsets( FbxMesh* mesh, fbxp::Mesh& m, std::vector< uint32_t >& indices,
             k = kk;
         }
 
-        s.console->info( "Adding subset: material {}, index {}, count {} ({} - {}).", mii, k, j - ki, ki, j - 1 );
-        subsets.emplace_back( mii, k, j - ki );
+        s.console->info( "Adding subset: material {}, polygon {}, count {} ({} - {}).", mii, k, j - ki, ki, j - 1 );
+        // subsets.emplace_back( mii, ki, j - ki );
+        subsets.emplace_back( mii, ki * 3, ( j - ki ) * 3 );
     };
 
     uint32_t ii = 0;
@@ -111,13 +178,13 @@ bool GetSubsets( FbxMesh* mesh, fbxp::Mesh& m, std::vector< uint32_t >& indices,
     uint32_t i  = 0;
     const uint32_t ic = (uint32_t) items.size( );
     for ( ; i < ic; ++i ) {
-        uint32_t mi = std::get< 0 >( items[ i ] );
+        const uint32_t mi = std::get< 0 >( items[ i ] );
         if ( mi != mii ) {
             s.console->info( "Material {} has {} assigned polygons ({} - {}).", mii, i - ii, ii, i - 1 );
 
             // Sort items by polygon index.
             std::sort( items.data( ) + ii, items.data( ) + i, sortByPolygonIndex );
-            extractSubmeshesFromRange( mii, ii, i );
+            extractSubsetsFromRange( mii, ii, i );
             ii  = i;
             mii = mi;
         }
@@ -125,12 +192,90 @@ bool GetSubsets( FbxMesh* mesh, fbxp::Mesh& m, std::vector< uint32_t >& indices,
 
     s.console->info( "Material {} has {} assigned polygons ({} - {}).", mii, i - ii, ii, i - 1 );
     std::sort( items.data( ) + ii, items.data( ) + i, sortByPolygonIndex );
-    extractSubmeshesFromRange( mii, ii, i );
+    extractSubsetsFromRange( mii, ii, i );
     return true;
 }
 
-template < typename TVertexFn >
-void GetVertices( FbxMesh* mesh, fbxp::Mesh& m, TVertexFn vertexCallback ) {
+//
+// Helper function to get values from geometry element layers
+// with their reference and mapping modes.
+//
+
+template < typename TElementLayer, typename TElementValue >
+TElementValue GetElementValue( const TElementLayer* elementLayer, uint32_t i ) {
+    assert( elementLayer );
+    switch ( const auto referenceMode = elementLayer->GetReferenceMode( ) ) {
+        case FbxLayerElement::EReferenceMode::eDirect:
+            return elementLayer->GetDirectArray( ).GetAt( i );
+        case FbxLayerElement::EReferenceMode::eIndex:
+        case FbxLayerElement::EReferenceMode::eIndexToDirect: {
+            const int j = elementLayer->GetIndexArray( ).GetAt( i );
+            return elementLayer->GetDirectArray( ).GetAt( j );
+        }
+
+        default:
+            fbxp::Get( ).console->error(
+                "Reference mode {} of layer {} "
+                "is not supported.",
+                referenceMode,
+                elementLayer->GetName( ) );
+
+            DebugBreak( );
+            return TElementValue( );
+    }
+}
+
+template < typename TElementLayer, typename TElementValue >
+TElementValue GetElementValue( const TElementLayer* elementLayer,
+                               uint32_t             controlPointIndex,
+                               uint32_t             vertexIndex,
+                               uint32_t             polygonIndex ) {
+    if ( nullptr == elementLayer )
+        return TElementValue( );
+
+    switch ( const auto mappingMode = elementLayer->GetMappingMode( ) ) {
+        case FbxLayerElement::EMappingMode::eByControlPoint:
+            return GetElementValue< TElementLayer, TElementValue >( elementLayer, controlPointIndex );
+        case FbxLayerElement::EMappingMode::eByPolygon:
+            return GetElementValue< TElementLayer, TElementValue >( elementLayer, polygonIndex );
+        case FbxLayerElement::EMappingMode::eByPolygonVertex:
+            return GetElementValue< TElementLayer, TElementValue >( elementLayer, vertexIndex );
+
+        default:
+            fbxp::Get( ).console->error(
+                "Mapping mode {} of layer {} "
+                "is not supported.",
+                mappingMode,
+                elementLayer->GetName( ) );
+
+            DebugBreak( );
+            return TElementValue( );
+    }
+}
+
+/**
+ * Helper structure to assign vertex property values
+ * since flatbuffers generator took care about mutable data.
+ * Between const_cast's and reinterpret_cast I chose the last one.
+ **/
+struct StaticVertex {
+    float position[ 3 ];
+    float normal[ 3 ];
+    float tangent[ 4 ];
+    float texCoords[ 2 ];
+};
+
+/**
+ * Flatbuffers takes care about correct platform-independent alignment.
+ **/
+static_assert( sizeof( StaticVertex ) == sizeof( fbxp::fb::StaticVertexFb ), "Must match" );
+
+/**
+ * Initialize vertices with very basic properties like 'position', 'normal', 'tangent', 'texCoords'.
+ * Calculate mesh bounding box (local space).
+ **/
+template < typename TVertex >
+void InitializeVertices( FbxMesh* mesh, fbxp::Mesh& m, TVertex* vertices, size_t vertexCount ) {
     auto& s = fbxp::Get( );
 
     auto& controlPoints = m.controlPoints;
@@ -167,16 +312,63 @@ void GetVertices( FbxMesh* mesh, fbxp::Mesh& m, TVertexFn vertexCallback ) {
 
     s.console->info( "Mesh {} has {} polygons.", mesh->GetNode( )->GetName( ), pc );
 
+    const auto uve = mesh->GetElementUV( );
+    const auto ne  = mesh->GetElementNormal( );
+    const auto te  = mesh->GetElementTangent( );
+
     polygons.reserve( pc * 3 );
+
+    uint32_t vi = 0;
     for ( uint32_t pi = 0; pi < pc; ++pi ) {
         // Must be triangular.
         assert( 3 == mesh->GetPolygonSize( pi ) );
 
         // Having this array we can easily control polygon winding order.
+        // Since mesh is triangular we can make it static [3] at compile-time.
         for ( const uint32_t pvi : {0, 1, 2} ) {
             const uint32_t ci = (uint32_t) mesh->GetPolygonVertex( (int) pi, (int) pvi );
             polygons.push_back( ci );
+
+            //const auto vii = vi + pvi;
+            const auto cp  = mesh->GetControlPointAt( ci );
+            const auto uv  = GetElementValue< FbxGeometryElementUV, FbxVector2 >( uve, ci, vi, pi );
+            const auto n   = GetElementValue< FbxGeometryElementNormal, FbxVector4 >( ne, ci, vi, pi );
+            const auto t   = GetElementValue< FbxGeometryElementTangent, FbxVector4 >( te, ci, vi, pi );
+
+            auto& vvii          = vertices[ vi ];
+            vvii.position[ 0 ]  = (float) cp[ 0 ];
+            vvii.position[ 1 ]  = (float) cp[ 1 ];
+            vvii.position[ 2 ]  = (float) cp[ 2 ];
+            vvii.normal[ 0 ]    = (float) n[ 0 ];
+            vvii.normal[ 1 ]    = (float) n[ 1 ];
+            vvii.normal[ 2 ]    = (float) n[ 2 ];
+            vvii.tangent[ 0 ]   = (float) t[ 0 ];
+            vvii.tangent[ 1 ]   = (float) t[ 1 ];
+            vvii.tangent[ 2 ]   = (float) t[ 2 ];
+            vvii.tangent[ 3 ]   = (float) t[ 3 ];
+            vvii.texCoords[ 0 ] = (float) uv[ 0 ];
+            vvii.texCoords[ 1 ] = (float) uv[ 1 ];
+
+            ++vi;
         }
+    }
+
+    if ( nullptr == uve ) {
+        s.console->error( "Mesh {} does not have texcoords geometry layer.",
+                          mesh->GetNode( )->GetName( ) );
+    }
+
+    if ( nullptr == ne ) {
+        s.console->error( "Mesh {} does not have normal geometry layer.",
+                          mesh->GetNode( )->GetName( ) );
+    }
+
+    if ( nullptr == te ) {
+        s.console->warn( "Mesh {} does not have tangent geometry layer (will be calculated here).",
+                         mesh->GetNode( )->GetName( ) );
+
+        // Calculate tangents ourselves.
+        CalculateTangents( vertices, vertexCount );
     }
 }
 
@@ -201,12 +393,25 @@ void ExportMesh( FbxNode* node, fbxp::Node& n ) {
             s.console->warn( "Mesh {} has {} deformers (ignored).", node->GetName( ), deformerCount );
         }
 
-        const uint32_t meshId = (uint32_t) s.meshes.size( );
-        n.meshId = meshId;
+        n.meshId = (uint32_t) s.meshes.size( );
         s.meshes.emplace_back( );
         fbxp::Mesh& m = s.meshes.back( );
 
-        GetVertices( mesh, m, [] {} );
+        const uint32_t vertexCount  = mesh->GetPolygonCount( ) * 3;
+        const uint16_t vertexStride = (uint16_t) sizeof( StaticVertex );
+        m.vertices.resize( vertexCount * vertexStride );
+
+        InitializeVertices( mesh, m, reinterpret_cast< StaticVertex* >( m.vertices.data( ) ), vertexCount );
         GetSubsets( mesh, m, m.subsetIndices, m.subsets );
+
+        m.submeshes.emplace_back( 0,                              // base vertex
+                                  vertexCount,                    // vertex count
+                                  0,                              // base index
+                                  0,                              // index count
+                                  0,                              // base subset
+                                  (uint32_t) m.subsets.size( ),   // subset count
+                                  fbxp::fb::EVertexFormat_Static, // vertex format
+                                  vertexStride                    // vertex stride
+                                  );
     }
 }

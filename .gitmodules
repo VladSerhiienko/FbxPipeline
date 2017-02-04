@@ -22,3 +22,6 @@
 [submodule "ThirdParty/cityhash"]
 	path = ThirdParty/cityhash
 	url = git@github.com:google/cityhash.git
+[submodule "ThirdParty/mathfu"]
+	path = ThirdParty/mathfu
+	url = git@github.com:google/mathfu.git

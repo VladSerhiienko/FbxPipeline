@@ -13,6 +13,8 @@ namespace fbxp {
         std::vector< fbxp::fb::SubmeshFb > submeshes;
         std::vector< fbxp::fb::SubsetFb >  subsets;
         std::vector< uint32_t >            subsetIndices;
+        std::vector< uint8_t >             vertices;
+        std::vector< uint8_t >             indices;
     };
 
     struct Node {
