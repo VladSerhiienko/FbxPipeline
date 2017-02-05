@@ -33,6 +33,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cityhash (google)", "cityha
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cityhash", "cityhash\cityhash.vcxproj", "{A8F7D89E-F8F3-4E09-A108-3A9AA3FA96A2}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CppDump", "CppDump\CppDump.vcxproj", "{D2485FB5-DA43-4EEB-959E-FB19EB234406}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -89,6 +91,14 @@ Global
 		{A8F7D89E-F8F3-4E09-A108-3A9AA3FA96A2}.Release|x64.Build.0 = Release|x64
 		{A8F7D89E-F8F3-4E09-A108-3A9AA3FA96A2}.Release|x86.ActiveCfg = Release|Win32
 		{A8F7D89E-F8F3-4E09-A108-3A9AA3FA96A2}.Release|x86.Build.0 = Release|Win32
+		{D2485FB5-DA43-4EEB-959E-FB19EB234406}.Debug|x64.ActiveCfg = Debug|x64
+		{D2485FB5-DA43-4EEB-959E-FB19EB234406}.Debug|x64.Build.0 = Debug|x64
+		{D2485FB5-DA43-4EEB-959E-FB19EB234406}.Debug|x86.ActiveCfg = Debug|Win32
+		{D2485FB5-DA43-4EEB-959E-FB19EB234406}.Debug|x86.Build.0 = Debug|Win32
+		{D2485FB5-DA43-4EEB-959E-FB19EB234406}.Release|x64.ActiveCfg = Release|x64
+		{D2485FB5-DA43-4EEB-959E-FB19EB234406}.Release|x64.Build.0 = Release|x64
+		{D2485FB5-DA43-4EEB-959E-FB19EB234406}.Release|x86.ActiveCfg = Release|Win32
+		{D2485FB5-DA43-4EEB-959E-FB19EB234406}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

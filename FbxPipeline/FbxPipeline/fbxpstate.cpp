@@ -2,6 +2,7 @@
 #include <fbxpstate.h>
 #include <city.h>
 #include <fstream>
+#include <flatbuffers/util.h>
 
 std::string GetExecutable( );
 void SplitFilename( const std::string& filePath, std::string& parentFolderName, std::string& fileName );
@@ -15,8 +16,8 @@ fbxp::State& fbxp::Get( ) {
 }
 
 fbxp::State::State( ) : console( spdlog::stdout_color_mt( "fbxp" ) ), options( GetExecutable( ) ) {
-    options.add_options( "input" )( "f,file", "File", cxxopts::value< std::string >( ) );
-    options.add_options( "input" )( "d,dir", "Directory", cxxopts::value< std::string >( ) );
+    options.add_options( "input" )( "i,input", "Input", cxxopts::value< std::string >( ) );
+    options.add_options( "input" )( "o,output", "Output", cxxopts::value< std::string >( ) );
     options.add_options( "input" )( "k,convert", "Convert", cxxopts::value< bool >( ) );
 }
 
@@ -160,23 +161,30 @@ bool fbxp::State::Finish( ) {
     sceneBuilder.add_textures( texturesOffset );
     sceneBuilder.add_materials( materialsOffset );
 
-    builder.Finish( sceneBuilder.Finish( ) );
+    fbxp::fb::FinishSceneFbBuffer( builder, sceneBuilder.Finish( ) );
 
     //
     // Write the file
     //
 
-    const std::string outputPath = folderPath + fileName + "." + fb::SceneFbExtension( );
+    flatbuffers::Verifier v( builder.GetBufferPointer( ), builder.GetSize( ) );
+    assert( fbxp::fb::VerifySceneFbBuffer( v ) );
 
-    std::ofstream outputFileStream;
-    outputFileStream.open( outputPath );
-    if ( outputFileStream.good( ) ) {
-        outputFileStream.write( (const char*) builder.GetBufferPointer( ), builder.GetSize( ) );
-        outputFileStream.close( );
+    std::string output = options[ "o" ].as< std::string >( );
+    if ( output.empty( ) ) {
+        output = folderPath + fileName + "." + fb::SceneFbExtension( );
+    } else {
+        std::string outputFolder, outputFileName;
+        SplitFilename( output, outputFolder, outputFileName );
+        CreateDirectoryA( outputFolder.c_str( ), 0 );
+        (void) outputFileName;
+    }
+
+    if ( flatbuffers::SaveFile(output.c_str( ), (const char*) builder.GetBufferPointer( ), (size_t) builder.GetSize( ), true ) ) {
         return true;
     }
 
-    console->error( "Failed to write to output to {}", outputPath );
+    console->error( "Failed to write to output to {}", output );
     DebugBreak( );
     return false;
 }
