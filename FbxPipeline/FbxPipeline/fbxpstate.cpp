@@ -120,16 +120,16 @@ bool fbxp::State::Finish( ) {
             auto ppOffset = builder.CreateVector( mesh.polygons );
             auto vsOffset = builder.CreateVector( mesh.vertices );
             auto ssOffset = builder.CreateVectorOfStructs( mesh.subsets );
-            //auto iiOffset = builder.CreateVector( mesh.indices );
-            //auto siOffset = builder.CreateVector( mesh.subsetIndices );
+            auto iiOffset = builder.CreateVector( mesh.indices );
+            auto siOffset = builder.CreateVector( mesh.subsetIndices );
 
             fb::MeshFbBuilder meshBuilder( builder );
             meshBuilder.add_ctrl_points( cpOffset );
             meshBuilder.add_polygons( ppOffset );
             meshBuilder.add_vertices( vsOffset );
             meshBuilder.add_subsets( ssOffset );
-            //meshBuilder.add_indices( iiOffset );
-            //meshBuilder.add_subset_indices( siOffset );
+            meshBuilder.add_indices( iiOffset );
+            meshBuilder.add_subset_indices( siOffset );
             meshOffsets.push_back( meshBuilder.Finish( ) );
         }
     }
