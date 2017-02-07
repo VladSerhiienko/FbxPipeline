@@ -12,15 +12,17 @@ namespace fbxp {
         std::vector< fbxp::fb::vec3 >      controlPoints;
         std::vector< fbxp::fb::SubmeshFb > submeshes;
         std::vector< fbxp::fb::SubsetFb >  subsets;
+        std::vector< fbxp::fb::SubsetFb >  subsetsPolies;
         std::vector< uint32_t >            subsetIndices;
         std::vector< uint8_t >             vertices;
         std::vector< uint8_t >             indices;
     };
 
     struct Node {
-        uint32_t                id;
-        uint64_t                nameId;
-        uint32_t                meshId = (uint32_t) -1;
+        fbxp::fb::ECullingType  cullingType = fbxp::fb::ECullingType_CullingOff;
+        uint32_t                id          = (uint32_t) -1;
+        uint64_t                nameId      = (uint64_t) 0;
+        uint32_t                meshId      = (uint32_t) -1;
         std::vector< uint32_t > childIds;
         std::vector< uint32_t > materialIds;
     };
@@ -31,10 +33,12 @@ namespace fbxp {
         std::vector< fb::MaterialPropFb > props;
     };
 
+    using TupleUintUint = std::tuple< uint32_t, uint32_t >;
+
     struct State {
         bool                              legacyTriangulationSdk = false;
-        fbxsdk::FbxManager*               manager = nullptr;
-        fbxsdk::FbxScene*                 scene   = nullptr;
+        fbxsdk::FbxManager*               manager                = nullptr;
+        fbxsdk::FbxScene*                 scene                  = nullptr;
         std::shared_ptr< spdlog::logger > console;
         flatbuffers::FlatBufferBuilder    builder;
         cxxopts::Options                  options;
@@ -48,6 +52,7 @@ namespace fbxp {
         std::vector< fb::TransformFb >    transforms;
         std::vector< fb::TextureFb >      textures;
         std::vector< Mesh >               meshes;
+        std::vector< TupleUintUint >      tempItems;
 
         State( );
         ~State( );

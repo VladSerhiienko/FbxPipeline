@@ -82,7 +82,7 @@ void ExportVideo( std::string const& pn, fbxp::Material& m, FbxProperty& pp, Fbx
                               fbxp::fb::EMaterialPropTypeFb_Video,
                               fbxp::fb::vec3( static_cast< float >( s.textures.back( ).id( ) ), 0, 0 ) );
 
-        s.console->info("Found video \"{}\" (\"{}\") ({})", v->GetName(), file, pp.GetName().Buffer());
+        s.console->info("Found video \"{}\" (\"{}\") (\"{}\")", v->GetName(), file, pp.GetName().Buffer());
 
     }
 }
@@ -115,7 +115,7 @@ void ExportTexture( std::string const& pn, fbxp::Material& m, FbxProperty& pp, F
                               fbxp::fb::EMaterialPropTypeFb_Texture,
                               fbxp::fb::vec3( static_cast< float >( s.textures.back( ).id( ) ), 0, 0 ) );
 
-        s.console->info( "Found texture \"{}\" (\"{}\") ({})", t->GetName( ), file, pp.GetName( ).Buffer( ) );
+        s.console->info( "Found texture \"{}\" (\"{}\") (\"{}\")", t->GetName( ), file, pp.GetName( ).Buffer( ) );
     }
 }
 

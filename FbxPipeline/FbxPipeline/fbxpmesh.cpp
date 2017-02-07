@@ -66,10 +66,15 @@ void CalculateTangents( TVertex* vertices, size_t vertexCount ) {
  *                     * range is [base index; index count]
  **/
 using SubsetItem = std::tuple< uint32_t, uint32_t, uint32_t >;
-bool GetSubsets( FbxMesh* mesh, fbxp::Mesh& m, std::vector< uint32_t >& indices, std::vector< fbxp::fb::SubsetFb >& subsets ) {
+bool GetSubsets( FbxMesh*                            mesh,
+                 fbxp::Mesh&                         m,
+                 std::vector< uint32_t >&            indices,
+                 std::vector< fbxp::fb::SubsetFb >&  subsets,
+                 std::vector< fbxp::fb::SubsetFb >&  subsetPolies,
+                 std::vector< fbxp::TupleUintUint >& items ) {
     auto& s = fbxp::Get( );
 
-    s.console->info("Mesh {} has {} material(s) assigned.", mesh->GetNode( )->GetName( ), mesh->GetNode( )->GetMaterialCount( ) );
+    s.console->info("Mesh \"{}\" has {} material(s) assigned.", mesh->GetNode( )->GetName( ), mesh->GetNode( )->GetMaterialCount( ) );
 
     // No submeshes for a node that has only 1 or no materials.
     if (mesh->GetNode()->GetMaterialCount() < 2) {
@@ -81,24 +86,25 @@ bool GetSubsets( FbxMesh* mesh, fbxp::Mesh& m, std::vector< uint32_t >& indices,
     //
 
     for ( auto k = 0; k < mesh->GetNode( )->GetMaterialCount( ); ++k ) {
-        s.console->info( "#{} - {}.", k, mesh->GetNode( )->GetMaterial( k )->GetName( ) );
+        s.console->info( "\t#{} - \"{}\".", k, mesh->GetNode( )->GetMaterial( k )->GetName( ) );
     }
 
-    std::vector< std::tuple< uint32_t, uint32_t > > items;
+    items.clear( );
     items.reserve( mesh->GetPolygonCount( ) );
-    //indices.reserve( mesh->GetPolygonCount( ) * 3 );
+    indices.reserve( mesh->GetPolygonCount( ) * 3 );
     subsets.reserve( mesh->GetNode( )->GetMaterialCount( ) );
+    subsetPolies.reserve( mesh->GetNode( )->GetMaterialCount( ) );
 
     // Go though all the material elements and map them.
     if ( const uint32_t mc = (uint32_t) mesh->GetElementMaterialCount( ) ) {
-        s.console->info( "Mesh {} has {} material elements.", mesh->GetNode( )->GetName( ), mc );
+        s.console->info( "Mesh \"{}\" has {} material elements.", mesh->GetNode( )->GetName( ), mc );
 
         for ( uint32_t m = 0; m < mc; ++m ) {
             if ( const auto materialElement = mesh->GetElementMaterial( m ) ) {
                 // The only mapping mode for materials that makes sense is polygon mapping.
                 const auto materialMappingMode = materialElement->GetMappingMode( );
                 if ( materialMappingMode != FbxLayerElement::eByPolygon ) {
-                    s.console->error( "Material element {} has {} mapping mode (not supported).", m, materialMappingMode );
+                    s.console->error( "Material element #{} has {} mapping mode (not supported).", m, materialMappingMode );
                     DebugBreak( );
                     continue;
                 }
@@ -120,7 +126,7 @@ bool GetSubsets( FbxMesh* mesh, fbxp::Mesh& m, std::vector< uint32_t >& indices,
     }
 
     if ( items.empty( ) ) {
-        s.console->error( "Mesh {} has no correctly mapped materials (fallback to first one).", mesh->GetNode( )->GetName( ) );
+        s.console->error( "Mesh \"{}\" has no correctly mapped materials (fallback to first one).", mesh->GetNode( )->GetName( ) );
         DebugBreak( );
         return false;
     }
@@ -156,10 +162,12 @@ bool GetSubsets( FbxMesh* mesh, fbxp::Mesh& m, std::vector< uint32_t >& indices,
             if ((kk - k) > 1) {
                 // s.console->info( "Break in {} - {} vs {}", j, k, kk );
                 // Process a case where there is a break in polygon indices.
-                s.console->info( "Adding subset: material {}, polygon {}, count {} ({} - {}).", mii, k, j - ki, ki, j - 1 );
+                s.console->info( "\tAdding subset: material #{}, polygon #{}, count {} ({} - {}).", mii, k, j - ki, ki, j - 1 );
 
+                subsetPolies.emplace_back( mii, k, j - ki );
+                // subsetPolies.emplace_back( mii, ki, j - ki );
                 // subsets.emplace_back( mii, ki, j - ki );
-                subsets.emplace_back( mii, ki * 3, ( j - ki ) * 3 );
+                // subsets.emplace_back( mii, ki * 3, ( j - ki ) * 3 );
                 ki = j;
                 k  = kk;
             }
@@ -167,9 +175,11 @@ bool GetSubsets( FbxMesh* mesh, fbxp::Mesh& m, std::vector< uint32_t >& indices,
             k = kk;
         }
 
-        s.console->info( "Adding subset: material {}, polygon {}, count {} ({} - {}).", mii, k, j - ki, ki, j - 1 );
+        s.console->info( "\tAdding subset: material #{}, polygon #{}, count {} ({} - {}).", mii, k, j - ki, ki, j - 1 );
+        subsetPolies.emplace_back( mii, k, j - ki );
+        // subsetPolies.emplace_back( mii, ki, j - ki );
         // subsets.emplace_back( mii, ki, j - ki );
-        subsets.emplace_back( mii, ki * 3, ( j - ki ) * 3 );
+        // subsets.emplace_back( mii, ki * 3, ( j - ki ) * 3 );
     };
 
     uint32_t ii = 0;
@@ -180,7 +190,7 @@ bool GetSubsets( FbxMesh* mesh, fbxp::Mesh& m, std::vector< uint32_t >& indices,
     for ( ; i < ic; ++i ) {
         const uint32_t mi = std::get< 0 >( items[ i ] );
         if ( mi != mii ) {
-            s.console->info( "Material {} has {} assigned polygons ({} - {}).", mii, i - ii, ii, i - 1 );
+            s.console->info( "Material #{} has {} assigned polygons ({} - {}).", mii, i - ii, ii, i - 1 );
 
             // Sort items by polygon index.
             std::sort( items.data( ) + ii, items.data( ) + i, sortByPolygonIndex );
@@ -190,9 +200,58 @@ bool GetSubsets( FbxMesh* mesh, fbxp::Mesh& m, std::vector< uint32_t >& indices,
         }
     }
 
-    s.console->info( "Material {} has {} assigned polygons ({} - {}).", mii, i - ii, ii, i - 1 );
+    s.console->info( "Material #{} has {} assigned polygons ({} - {}).", mii, i - ii, ii, i - 1 );
     std::sort( items.data( ) + ii, items.data( ) + i, sortByPolygonIndex );
     extractSubsetsFromRange( mii, ii, i );
+
+    uint32_t subsetStartIndex = 0;
+    uint32_t materialIndex    = (uint32_t) -1;
+
+    if ( !subsetPolies.empty( ) ) {
+        s.console->info( "Mesh index subsets from {} polygon ranges:", subsetPolies.size( ) );
+    }
+
+    for ( auto& sp : subsetPolies ) {
+        if ( materialIndex != sp.material_id( ) ) {
+            const auto indexCount = (uint32_t) indices.size( );
+
+            if ( materialIndex != (uint32_t) -1 ) {
+                const auto subsetLength = indexCount - subsetStartIndex;
+                subsets.emplace_back( materialIndex, subsetStartIndex, subsetLength );
+
+                s.console->info( "\tMesh subset #{} for material #{} index range: [{}; {}].",
+                                 subsets.size( ) - 1,
+                                 materialIndex,
+                                 subsetStartIndex,
+                                 subsetLength );
+            }
+
+            materialIndex    = sp.material_id( );
+            subsetStartIndex = indexCount;
+        }
+
+        for ( uint32_t pp = 0; pp < sp.index_count( ); ++pp ) {
+            const uint32_t pii = ( sp.base_index( ) + pp );
+            indices.push_back( pii * 3 + 0 );
+            indices.push_back( pii * 3 + 1 );
+            indices.push_back( pii * 3 + 2 );
+        }
+    }
+
+    if ( !subsetPolies.empty( ) ) {
+        const auto indexCount   = (uint32_t) indices.size( );
+        const auto subsetLength = indexCount - subsetStartIndex;
+        subsets.emplace_back( materialIndex, subsetStartIndex, subsetLength );
+
+        s.console->info( "\tMesh subset #{} for material #{} index range: [{}; {}].",
+                         subsets.size( ) - 1,
+                         materialIndex,
+                         subsetStartIndex,
+                         subsetLength );
+    }
+
+    assert( indices.size( ) == ( size_t )( mesh->GetPolygonCount( ) * 3 ) );
+    assert( subsets.size( ) <= ( size_t )( mesh->GetNode( )->GetMaterialCount( ) ) );
     return true;
 }
 
@@ -215,7 +274,7 @@ TElementValue GetElementValue( const TElementLayer* elementLayer, uint32_t i ) {
 
         default:
             fbxp::Get( ).console->error(
-                "Reference mode {} of layer {} "
+                "Reference mode {} of layer \"{}\" "
                 "is not supported.",
                 referenceMode,
                 elementLayer->GetName( ) );
@@ -243,7 +302,7 @@ TElementValue GetElementValue( const TElementLayer* elementLayer,
 
         default:
             fbxp::Get( ).console->error(
-                "Mapping mode {} of layer {} "
+                "Mapping mode {} of layer \"{}\" "
                 "is not supported.",
                 mappingMode,
                 elementLayer->GetName( ) );
@@ -282,7 +341,7 @@ void InitializeVertices( FbxMesh* mesh, fbxp::Mesh& m, TVertex* vertices, size_t
     const uint32_t cc = (uint32_t) mesh->GetControlPointsCount( );
     controlPoints.reserve( cc );
 
-    s.console->info( "Mesh {} has {} control points.", mesh->GetNode( )->GetName( ), cc );
+    s.console->info( "Mesh \"{}\" has {} control points.", mesh->GetNode( )->GetName( ), cc );
 
     float bboxMin[ 3 ];
     float bboxMax[ 3 ];
@@ -310,7 +369,7 @@ void InitializeVertices( FbxMesh* mesh, fbxp::Mesh& m, TVertex* vertices, size_t
     auto& polygons = m.polygons;
     const uint32_t pc = (uint32_t) mesh->GetPolygonCount( );
 
-    s.console->info( "Mesh {} has {} polygons.", mesh->GetNode( )->GetName( ), pc );
+    s.console->info( "Mesh \"{}\" has {} polygons.", mesh->GetNode( )->GetName( ), pc );
 
     const auto uve = mesh->GetElementUV( );
     const auto ne  = mesh->GetElementNormal( );
@@ -354,17 +413,17 @@ void InitializeVertices( FbxMesh* mesh, fbxp::Mesh& m, TVertex* vertices, size_t
     }
 
     if ( nullptr == uve ) {
-        s.console->error( "Mesh {} does not have texcoords geometry layer.",
+        s.console->error( "Mesh \"{}\" does not have texcoords geometry layer.",
                           mesh->GetNode( )->GetName( ) );
     }
 
     if ( nullptr == ne ) {
-        s.console->error( "Mesh {} does not have normal geometry layer.",
+        s.console->error( "Mesh \"{}\" does not have normal geometry layer.",
                           mesh->GetNode( )->GetName( ) );
     }
 
     if ( nullptr == te ) {
-        s.console->warn( "Mesh {} does not have tangent geometry layer (will be calculated here).",
+        s.console->warn( "Mesh \"{}\" does not have tangent geometry layer.",
                          mesh->GetNode( )->GetName( ) );
 
         // Calculate tangents ourselves.
@@ -375,22 +434,22 @@ void InitializeVertices( FbxMesh* mesh, fbxp::Mesh& m, TVertex* vertices, size_t
 void ExportMesh( FbxNode* node, fbxp::Node& n ) {
     auto& s = fbxp::Get( );
     if ( auto mesh = node->GetMesh( ) ) {
-        s.console->info( "Node {} has mesh '{}' (can be empty, ).", node->GetName( ), mesh->GetName( ) );
+        s.console->info( "Node \"{}\" has mesh.", node->GetName( ) );
         if ( !mesh->IsTriangleMesh( ) ) {
-            s.console->warn( "Mesh {} is not triangular, processing...", node->GetName( ) );
+            s.console->warn( "Mesh \"{}\" is not triangular, processing...", node->GetName( ) );
             FbxGeometryConverter converter( mesh->GetNode( )->GetFbxManager( ) );
             mesh = (FbxMesh*) converter.Triangulate( mesh, false, s.legacyTriangulationSdk );
 
-            if (nullptr == mesh) {
-                s.console->error( "Mesh {} triangulation failed (mesh will be skipped).", node->GetName( ) );
+            if ( nullptr == mesh ) {
+                s.console->error( "Mesh \"{}\" triangulation failed (mesh will be skipped).", node->GetName( ) );
                 return;
             }
 
-            s.console->warn( "Mesh {} was triangulated (success).", node->GetName( ) );
+            s.console->warn( "Mesh \"{}\" was triangulated (success).", node->GetName( ) );
         }
 
         if ( const auto deformerCount = mesh->GetDeformerCount( ) ) {
-            s.console->warn( "Mesh {} has {} deformers (ignored).", node->GetName( ), deformerCount );
+            s.console->warn( "Mesh \"{}\" has {} deformers (ignored).", node->GetName( ), deformerCount );
         }
 
         n.meshId = (uint32_t) s.meshes.size( );
@@ -402,7 +461,7 @@ void ExportMesh( FbxNode* node, fbxp::Node& n ) {
         m.vertices.resize( vertexCount * vertexStride );
 
         InitializeVertices( mesh, m, reinterpret_cast< StaticVertex* >( m.vertices.data( ) ), vertexCount );
-        GetSubsets( mesh, m, m.subsetIndices, m.subsets );
+        GetSubsets( mesh, m, m.subsetIndices, m.subsets, m.subsetsPolies, s.tempItems );
 
         m.submeshes.emplace_back( 0,                              // base vertex
                                   vertexCount,                    // vertex count

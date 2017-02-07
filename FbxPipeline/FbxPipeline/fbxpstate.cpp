@@ -84,6 +84,7 @@ bool fbxp::State::Finish( ) {
             fb::NodeFbBuilder nodeBuilder( builder );
             nodeBuilder.add_id( node.id );
             nodeBuilder.add_name_id( node.nameId );
+            nodeBuilder.add_culling_type( node.cullingType );
             nodeBuilder.add_mesh_id( node.meshId );
             nodeBuilder.add_child_ids( childIdsOffset );
             nodeBuilder.add_material_ids( materialIdsOffset );
@@ -123,6 +124,7 @@ bool fbxp::State::Finish( ) {
             auto ssOffset = builder.CreateVectorOfStructs( mesh.subsets );
             auto iiOffset = builder.CreateVector( mesh.indices );
             auto siOffset = builder.CreateVector( mesh.subsetIndices );
+            auto spOffset = builder.CreateVectorOfStructs( mesh.subsetsPolies );
 
             fb::MeshFbBuilder meshBuilder( builder );
             meshBuilder.add_ctrl_points( cpOffset );
@@ -130,6 +132,7 @@ bool fbxp::State::Finish( ) {
             meshBuilder.add_vertices( vsOffset );
             meshBuilder.add_subsets( ssOffset );
             meshBuilder.add_indices( iiOffset );
+            meshBuilder.add_subset_polies( spOffset );
             meshBuilder.add_subset_indices( siOffset );
             meshOffsets.push_back( meshBuilder.Finish( ) );
         }
@@ -176,8 +179,8 @@ bool fbxp::State::Finish( ) {
     } else {
         std::string outputFolder, outputFileName;
         SplitFilename( output, outputFolder, outputFileName );
-        CreateDirectoryA( outputFolder.c_str( ), 0 );
         (void) outputFileName;
+        CreateDirectoryA( outputFolder.c_str( ), 0 );
     }
 
     if ( flatbuffers::SaveFile(output.c_str( ), (const char*) builder.GetBufferPointer( ), (size_t) builder.GetSize( ), true ) ) {

@@ -37,6 +37,29 @@ struct NodeFb;
 
 struct SceneFb;
 
+enum ECullingType {
+  ECullingType_CullingOff = 0,
+  ECullingType_CullingOnCCW = 1,
+  ECullingType_CullingOnCW = 2,
+  ECullingType_MIN = ECullingType_CullingOff,
+  ECullingType_MAX = ECullingType_CullingOnCW
+};
+
+inline const char **EnumNamesECullingType() {
+  static const char *names[] = {
+    "CullingOff",
+    "CullingOnCCW",
+    "CullingOnCW",
+    nullptr
+  };
+  return names;
+}
+
+inline const char *EnumNameECullingType(ECullingType e) {
+  const size_t index = static_cast<int>(e);
+  return EnumNamesECullingType()[index];
+}
+
 enum EWrapMode {
   EWrapMode_Repeat = 0,
   EWrapMode_Clamp = 1,
@@ -649,8 +672,9 @@ struct MeshFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     VT_INDICES = 10,
     VT_SUBMESHES = 12,
     VT_SUBSETS = 14,
-    VT_SUBSET_INDICES = 16,
-    VT_INDEX_TYPE = 18
+    VT_SUBSET_POLIES = 16,
+    VT_SUBSET_INDICES = 18,
+    VT_INDEX_TYPE = 20
   };
   const flatbuffers::Vector<uint32_t> *polygons() const {
     return GetPointer<const flatbuffers::Vector<uint32_t> *>(VT_POLYGONS);
@@ -669,6 +693,9 @@ struct MeshFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   }
   const flatbuffers::Vector<const SubsetFb *> *subsets() const {
     return GetPointer<const flatbuffers::Vector<const SubsetFb *> *>(VT_SUBSETS);
+  }
+  const flatbuffers::Vector<const SubsetFb *> *subset_polies() const {
+    return GetPointer<const flatbuffers::Vector<const SubsetFb *> *>(VT_SUBSET_POLIES);
   }
   const flatbuffers::Vector<uint32_t> *subset_indices() const {
     return GetPointer<const flatbuffers::Vector<uint32_t> *>(VT_SUBSET_INDICES);
@@ -690,6 +717,8 @@ struct MeshFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            verifier.Verify(submeshes()) &&
            VerifyField<flatbuffers::uoffset_t>(verifier, VT_SUBSETS) &&
            verifier.Verify(subsets()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_SUBSET_POLIES) &&
+           verifier.Verify(subset_polies()) &&
            VerifyField<flatbuffers::uoffset_t>(verifier, VT_SUBSET_INDICES) &&
            verifier.Verify(subset_indices()) &&
            VerifyField<uint32_t>(verifier, VT_INDEX_TYPE) &&
@@ -718,6 +747,9 @@ struct MeshFbBuilder {
   void add_subsets(flatbuffers::Offset<flatbuffers::Vector<const SubsetFb *>> subsets) {
     fbb_.AddOffset(MeshFb::VT_SUBSETS, subsets);
   }
+  void add_subset_polies(flatbuffers::Offset<flatbuffers::Vector<const SubsetFb *>> subset_polies) {
+    fbb_.AddOffset(MeshFb::VT_SUBSET_POLIES, subset_polies);
+  }
   void add_subset_indices(flatbuffers::Offset<flatbuffers::Vector<uint32_t>> subset_indices) {
     fbb_.AddOffset(MeshFb::VT_SUBSET_INDICES, subset_indices);
   }
@@ -730,7 +762,7 @@ struct MeshFbBuilder {
   }
   MeshFbBuilder &operator=(const MeshFbBuilder &);
   flatbuffers::Offset<MeshFb> Finish() {
-    const auto end = fbb_.EndTable(start_, 8);
+    const auto end = fbb_.EndTable(start_, 9);
     auto o = flatbuffers::Offset<MeshFb>(end);
     return o;
   }
@@ -744,11 +776,13 @@ inline flatbuffers::Offset<MeshFb> CreateMeshFb(
     flatbuffers::Offset<flatbuffers::Vector<uint8_t>> indices = 0,
     flatbuffers::Offset<flatbuffers::Vector<const SubmeshFb *>> submeshes = 0,
     flatbuffers::Offset<flatbuffers::Vector<const SubsetFb *>> subsets = 0,
+    flatbuffers::Offset<flatbuffers::Vector<const SubsetFb *>> subset_polies = 0,
     flatbuffers::Offset<flatbuffers::Vector<uint32_t>> subset_indices = 0,
     EIndexTypeFb index_type = EIndexTypeFb_UInt16) {
   MeshFbBuilder builder_(_fbb);
   builder_.add_index_type(index_type);
   builder_.add_subset_indices(subset_indices);
+  builder_.add_subset_polies(subset_polies);
   builder_.add_subsets(subsets);
   builder_.add_submeshes(submeshes);
   builder_.add_indices(indices);
@@ -766,6 +800,7 @@ inline flatbuffers::Offset<MeshFb> CreateMeshFbDirect(
     const std::vector<uint8_t> *indices = nullptr,
     const std::vector<const SubmeshFb *> *submeshes = nullptr,
     const std::vector<const SubsetFb *> *subsets = nullptr,
+    const std::vector<const SubsetFb *> *subset_polies = nullptr,
     const std::vector<uint32_t> *subset_indices = nullptr,
     EIndexTypeFb index_type = EIndexTypeFb_UInt16) {
   return CreateMeshFb(
@@ -776,6 +811,7 @@ inline flatbuffers::Offset<MeshFb> CreateMeshFbDirect(
       indices ? _fbb.CreateVector<uint8_t>(*indices) : 0,
       submeshes ? _fbb.CreateVector<const SubmeshFb *>(*submeshes) : 0,
       subsets ? _fbb.CreateVector<const SubsetFb *>(*subsets) : 0,
+      subset_polies ? _fbb.CreateVector<const SubsetFb *>(*subset_polies) : 0,
       subset_indices ? _fbb.CreateVector<uint32_t>(*subset_indices) : 0,
       index_type);
 }
@@ -859,7 +895,8 @@ struct NodeFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     VT_CHILD_IDS = 6,
     VT_MATERIAL_IDS = 8,
     VT_MESH_ID = 10,
-    VT_NAME_ID = 12
+    VT_NAME_ID = 12,
+    VT_CULLING_TYPE = 14
   };
   uint32_t id() const {
     return GetField<uint32_t>(VT_ID, 0);
@@ -876,6 +913,9 @@ struct NodeFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   uint64_t name_id() const {
     return GetField<uint64_t>(VT_NAME_ID, 0);
   }
+  ECullingType culling_type() const {
+    return static_cast<ECullingType>(GetField<uint32_t>(VT_CULLING_TYPE, 0));
+  }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<uint32_t>(verifier, VT_ID) &&
@@ -885,6 +925,7 @@ struct NodeFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            verifier.Verify(material_ids()) &&
            VerifyField<uint32_t>(verifier, VT_MESH_ID) &&
            VerifyField<uint64_t>(verifier, VT_NAME_ID) &&
+           VerifyField<uint32_t>(verifier, VT_CULLING_TYPE) &&
            verifier.EndTable();
   }
 };
@@ -907,13 +948,16 @@ struct NodeFbBuilder {
   void add_name_id(uint64_t name_id) {
     fbb_.AddElement<uint64_t>(NodeFb::VT_NAME_ID, name_id, 0);
   }
+  void add_culling_type(ECullingType culling_type) {
+    fbb_.AddElement<uint32_t>(NodeFb::VT_CULLING_TYPE, static_cast<uint32_t>(culling_type), 0);
+  }
   NodeFbBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
   }
   NodeFbBuilder &operator=(const NodeFbBuilder &);
   flatbuffers::Offset<NodeFb> Finish() {
-    const auto end = fbb_.EndTable(start_, 5);
+    const auto end = fbb_.EndTable(start_, 6);
     auto o = flatbuffers::Offset<NodeFb>(end);
     return o;
   }
@@ -925,9 +969,11 @@ inline flatbuffers::Offset<NodeFb> CreateNodeFb(
     flatbuffers::Offset<flatbuffers::Vector<uint32_t>> child_ids = 0,
     flatbuffers::Offset<flatbuffers::Vector<uint32_t>> material_ids = 0,
     uint32_t mesh_id = 0,
-    uint64_t name_id = 0) {
+    uint64_t name_id = 0,
+    ECullingType culling_type = ECullingType_CullingOff) {
   NodeFbBuilder builder_(_fbb);
   builder_.add_name_id(name_id);
+  builder_.add_culling_type(culling_type);
   builder_.add_mesh_id(mesh_id);
   builder_.add_material_ids(material_ids);
   builder_.add_child_ids(child_ids);
@@ -941,14 +987,16 @@ inline flatbuffers::Offset<NodeFb> CreateNodeFbDirect(
     const std::vector<uint32_t> *child_ids = nullptr,
     const std::vector<uint32_t> *material_ids = nullptr,
     uint32_t mesh_id = 0,
-    uint64_t name_id = 0) {
+    uint64_t name_id = 0,
+    ECullingType culling_type = ECullingType_CullingOff) {
   return CreateNodeFb(
       _fbb,
       id,
       child_ids ? _fbb.CreateVector<uint32_t>(*child_ids) : 0,
       material_ids ? _fbb.CreateVector<uint32_t>(*material_ids) : 0,
       mesh_id,
-      name_id);
+      name_id,
+      culling_type);
 }
 
 struct SceneFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {

@@ -9,6 +9,11 @@ void ExportTransform( FbxNode* node, fbxp::Node& n );
 void ExportAnimation( FbxNode* node, fbxp::Node& n );
 
 void ExportNodeAttributes( FbxNode* node, fbxp::Node& n ) {
+    auto& s = fbxp::Get( );
+
+    n.cullingType = (fbxp::fb::ECullingType) node->mCullingType;
+    s.console->info( "Node \"{}\" has {} culling type.", node->GetName(), n.cullingType );
+
     ExportTransform( node, n );
     ExportAnimation( node, n );
     ExportMesh( node, n );
