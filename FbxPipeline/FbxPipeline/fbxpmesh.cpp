@@ -65,7 +65,6 @@ void CalculateTangents( TVertex* vertices, size_t vertexCount ) {
  *                     2) render polygon range [12, 64] with 2nd material.
  *                     * range is [base index; index count]
  **/
-using SubsetItem = std::tuple< uint32_t, uint32_t, uint32_t >;
 bool GetSubsets( FbxMesh*                            mesh,
                  fbxp::Mesh&                         m,
                  std::vector< uint32_t >&            indices,
