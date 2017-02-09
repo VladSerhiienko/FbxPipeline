@@ -25,3 +25,9 @@
 [submodule "ThirdParty/mathfu"]
 	path = ThirdParty/mathfu
 	url = git@github.com:google/mathfu.git
+[submodule "ThirdParty/bx"]
+	path = ThirdParty/bx
+	url = git://github.com/bkaradzic/bx.git
+[submodule "ThirdParty/bgfx"]
+	path = ThirdParty/bgfx
+	url = git://github.com/bkaradzic/bgfx.git

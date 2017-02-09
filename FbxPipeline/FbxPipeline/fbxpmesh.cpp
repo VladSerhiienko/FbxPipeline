@@ -64,6 +64,11 @@ void CalculateTangents( TVertex* vertices, size_t vertexCount ) {
  * The usage could be: 1) render polygon range [ 0, 12] with 1st material.
  *                     2) render polygon range [12, 64] with 2nd material.
  *                     * range is [base index; index count]
+ *
+ * @param indices The indices of the mesh that will be used to draw the mesh with multiple materials.
+ * @param subsets The ranges of the vertex indices for each material of the node.
+ * @param subsetPolies A mapping of material indices to polygon ranges (useful for knowing the basic structure).
+ * @return True on success.
  **/
 bool GetSubsets( FbxMesh*                            mesh,
                  fbxp::Mesh&                         m,
