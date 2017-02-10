@@ -89,10 +89,14 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\bx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\compat\msvc\;$(SolutionDir)..\ThirdParty\mathfu\include\;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\sdl2\include\;$(SolutionDir)..\ThirdParty\bx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\compat\msvc\;$(SolutionDir)..\ThirdParty\mathfu\include\;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>fbxvpch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)..\ThirdParty\bgfx\.build\win$(PlatformArchitecture)_vs2015\bin\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <SubSystem>Windows</SubSystem>
+      <AdditionalDependencies>opengl32.lib;winmm.lib;imm32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent />
   </ItemDefinitionGroup>
@@ -101,10 +105,15 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\bx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\compat\msvc\;$(SolutionDir)..\ThirdParty\mathfu\include\;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\sdl2\include\;$(SolutionDir)..\ThirdParty\bx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\compat\msvc\;$(SolutionDir)..\ThirdParty\mathfu\include\;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>fbxvpch.h</PrecompiledHeaderFile>
+      <PreprocessorDefinitions>NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)..\ThirdParty\bgfx\.build\win$(PlatformArchitecture)_vs2015\bin\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <SubSystem>Windows</SubSystem>
+      <AdditionalDependencies>opengl32.lib;winmm.lib;imm32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent />
   </ItemDefinitionGroup>
@@ -115,12 +124,16 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\bx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\compat\msvc\;$(SolutionDir)..\ThirdParty\mathfu\include\;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\sdl2\include\;$(SolutionDir)..\ThirdParty\bx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\compat\msvc\;$(SolutionDir)..\ThirdParty\mathfu\include\;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>fbxvpch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SolutionDir)..\ThirdParty\bgfx\.build\win$(PlatformArchitecture)_vs2015\bin\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <SubSystem>Windows</SubSystem>
+      <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent />
   </ItemDefinitionGroup>
@@ -131,17 +144,37 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\bx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\compat\msvc\;$(SolutionDir)..\ThirdParty\mathfu\include\;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\sdl2\include\;$(SolutionDir)..\ThirdParty\bx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\compat\msvc\;$(SolutionDir)..\ThirdParty\mathfu\include\;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>fbxvpch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SolutionDir)..\ThirdParty\bgfx\.build\win$(PlatformArchitecture)_vs2015\bin\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <SubSystem>Windows</SubSystem>
+      <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="App.cpp" />
+    <ClCompile Include="AppBase.cpp" />
+    <ClCompile Include="AppMainSdl.cpp" />
+    <ClCompile Include="AppSurface.cpp" />
+    <ClCompile Include="AppSurfaceBaseSdl.cpp" />
+    <ClCompile Include="fbxvpch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">fbxvpch.h</PrecompiledHeaderFile>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">fbxvpch.h</PrecompiledHeaderFile>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">fbxvpch.h</PrecompiledHeaderFile>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">fbxvpch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <ClCompile Include="InputSdl.cpp" />
+    <ClCompile Include="StopwatchSdl.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\bgfx\bgfx.vcxproj">
@@ -153,6 +186,19 @@
     <ProjectReference Include="..\flatbuffers\flatbuffers.vcxproj">
       <Project>{f55e3be0-18fb-4ce7-8bbf-ee631cc2fe7f}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\sdl2\sdl2.vcxproj">
+      <Project>{d319c0fc-c7ea-4643-b962-21f50f77fad2}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="alloca.h" />
+    <ClInclude Include="App.h" />
+    <ClInclude Include="AppBase.h" />
+    <ClInclude Include="AppSurface.h" />
+    <ClInclude Include="AppSurfaceBase.h" />
+    <ClInclude Include="fbxvpch.h" />
+    <ClInclude Include="Input.h" />
+    <ClInclude Include="Stopwatch.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -5,10 +5,63 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+    <Filter Include="Missing">
+      <UniqueIdentifier>{62e7221c-6e9f-401c-afe6-df2d6ce8a97e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Precompiled">
+      <UniqueIdentifier>{6361af17-eb17-40d0-b2d4-24ed4f128237}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="App.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
+    <ClCompile Include="AppSurface.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="AppBase.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="AppMainSdl.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="AppSurfaceBaseSdl.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="InputSdl.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="StopwatchSdl.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="fbxvpch.cpp">
+      <Filter>Precompiled</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="App.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="AppSurface.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="AppBase.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="AppSurfaceBase.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="Input.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="Stopwatch.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="fbxvpch.h">
+      <Filter>Precompiled</Filter>
+    </ClInclude>
+    <ClInclude Include="alloca.h">
+      <Filter>Missing</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

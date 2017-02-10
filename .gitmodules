@@ -31,3 +31,6 @@
 [submodule "ThirdParty/bgfx"]
 	path = ThirdParty/bgfx
 	url = git://github.com/bkaradzic/bgfx.git
+[submodule "ThirdParty/sdl2"]
+	path = ThirdParty/sdl2
+	url = git@github.com:davidsiaw/SDL2.git

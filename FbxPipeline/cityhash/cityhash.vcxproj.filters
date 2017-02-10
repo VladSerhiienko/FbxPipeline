@@ -5,6 +5,9 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+    <Filter Include="Missing">
+      <UniqueIdentifier>{468d6aa7-edd2-415f-95b1-bcb6ba9bd24e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\ThirdParty\cityhash\src\city.cc">
@@ -13,7 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="config.h">
-      <Filter>Sources</Filter>
+      <Filter>Missing</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
