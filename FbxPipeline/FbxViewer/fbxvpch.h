@@ -9,6 +9,7 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <new>
 #include <type_traits>
 #include <vector>
 
@@ -19,6 +20,7 @@
 
 #include <SDL.h>
 #include <SDL_syswm.h>
+#include <SDL_opengl.h>
 #include <bgfx/platform.h>
 #include <bgfx/bgfx.h>
 
@@ -44,3 +46,11 @@
 //
 
 #include <ArrayUtils.h>
+
+//
+//
+//
+
+#ifndef MALLOC_ALIGNMENT
+#define MALLOC_ALIGNMENT 16
+#endif

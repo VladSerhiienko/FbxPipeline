@@ -11,23 +11,14 @@
     <Filter Include="Precompiled">
       <UniqueIdentifier>{6361af17-eb17-40d0-b2d4-24ed4f128237}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{15fa34da-b9da-4905-bd46-4c8731bd5d4f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\App">
+      <UniqueIdentifier>{c8a73387-d37b-4bb7-a492-2260fc572b76}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="App.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="AppSurface.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="AppBase.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="AppMainSdl.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="AppSurfaceBaseSdl.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
     <ClCompile Include="InputSdl.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
@@ -37,20 +28,26 @@
     <ClCompile Include="fbxvpch.cpp">
       <Filter>Precompiled</Filter>
     </ClCompile>
+    <ClCompile Include="NuklearSdlBgfx.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="App.cpp">
+      <Filter>Sources\App</Filter>
+    </ClCompile>
+    <ClCompile Include="AppBase.cpp">
+      <Filter>Sources\App</Filter>
+    </ClCompile>
+    <ClCompile Include="AppMainSdl.cpp">
+      <Filter>Sources\App</Filter>
+    </ClCompile>
+    <ClCompile Include="AppSurfaceBgfx.cpp">
+      <Filter>Sources\App</Filter>
+    </ClCompile>
+    <ClCompile Include="AppSurfaceBaseSdl.cpp">
+      <Filter>Sources\App</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="App.h">
-      <Filter>Sources</Filter>
-    </ClInclude>
-    <ClInclude Include="AppSurface.h">
-      <Filter>Sources</Filter>
-    </ClInclude>
-    <ClInclude Include="AppBase.h">
-      <Filter>Sources</Filter>
-    </ClInclude>
-    <ClInclude Include="AppSurfaceBase.h">
-      <Filter>Sources</Filter>
-    </ClInclude>
     <ClInclude Include="Input.h">
       <Filter>Sources</Filter>
     </ClInclude>
@@ -63,5 +60,31 @@
     <ClInclude Include="alloca.h">
       <Filter>Missing</Filter>
     </ClInclude>
+    <ClInclude Include="App.h">
+      <Filter>Sources\App</Filter>
+    </ClInclude>
+    <ClInclude Include="AppBase.h">
+      <Filter>Sources\App</Filter>
+    </ClInclude>
+    <ClInclude Include="AppSurface.h">
+      <Filter>Sources\App</Filter>
+    </ClInclude>
+    <ClInclude Include="AppSurfaceBase.h">
+      <Filter>Sources\App</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="vs_nuklear_texture.sc">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="fs_nuklear_texture.sc">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="varying.def.sc">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="CompileShaders.js">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

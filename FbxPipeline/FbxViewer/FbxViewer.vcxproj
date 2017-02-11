@@ -89,9 +89,10 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\sdl2\include\;$(SolutionDir)..\ThirdParty\bx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\compat\msvc\;$(SolutionDir)..\ThirdParty\mathfu\include\;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\nuklear\;$(SolutionDir)..\ThirdParty\sdl2\include\;$(SolutionDir)..\ThirdParty\bx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\compat\msvc\;$(SolutionDir)..\ThirdParty\mathfu\include\;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>fbxvpch.h</PrecompiledHeaderFile>
+      <PreprocessorDefinitions>NOMINMAX;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)..\ThirdParty\bgfx\.build\win$(PlatformArchitecture)_vs2015\bin\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -99,16 +100,19 @@
       <AdditionalDependencies>opengl32.lib;winmm.lib;imm32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent />
+    <CustomBuildStep>
+      <Command>node CompileShaders.js $(ProjectDir) &gt;&gt; CompileShaders.log.txt</Command>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\sdl2\include\;$(SolutionDir)..\ThirdParty\bx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\compat\msvc\;$(SolutionDir)..\ThirdParty\mathfu\include\;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\nuklear\;$(SolutionDir)..\ThirdParty\sdl2\include\;$(SolutionDir)..\ThirdParty\bx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\compat\msvc\;$(SolutionDir)..\ThirdParty\mathfu\include\;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>fbxvpch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NOMINMAX;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)..\ThirdParty\bgfx\.build\win$(PlatformArchitecture)_vs2015\bin\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -116,6 +120,9 @@
       <AdditionalDependencies>opengl32.lib;winmm.lib;imm32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent />
+    <CustomBuildStep>
+      <Command>node CompileShaders.js $(ProjectDir) &gt;&gt; CompileShaders.log.txt</Command>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -124,9 +131,10 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\sdl2\include\;$(SolutionDir)..\ThirdParty\bx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\compat\msvc\;$(SolutionDir)..\ThirdParty\mathfu\include\;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\nuklear\;$(SolutionDir)..\ThirdParty\sdl2\include\;$(SolutionDir)..\ThirdParty\bx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\compat\msvc\;$(SolutionDir)..\ThirdParty\mathfu\include\;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>fbxvpch.h</PrecompiledHeaderFile>
+      <PreprocessorDefinitions>NOMINMAX;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -136,6 +144,9 @@
       <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent />
+    <CustomBuildStep>
+      <Command>node CompileShaders.js $(ProjectDir) &gt;&gt; CompileShaders.log.txt</Command>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -144,9 +155,10 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\sdl2\include\;$(SolutionDir)..\ThirdParty\bx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\compat\msvc\;$(SolutionDir)..\ThirdParty\mathfu\include\;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\nuklear\;$(SolutionDir)..\ThirdParty\sdl2\include\;$(SolutionDir)..\ThirdParty\bx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\compat\msvc\;$(SolutionDir)..\ThirdParty\mathfu\include\;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>fbxvpch.h</PrecompiledHeaderFile>
+      <PreprocessorDefinitions>NOMINMAX;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -156,12 +168,15 @@
       <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent />
+    <CustomBuildStep>
+      <Command>node CompileShaders.js $(ProjectDir) &gt;&gt; CompileShaders.log.txt</Command>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp" />
     <ClCompile Include="AppBase.cpp" />
     <ClCompile Include="AppMainSdl.cpp" />
-    <ClCompile Include="AppSurface.cpp" />
+    <ClCompile Include="AppSurfaceBgfx.cpp" />
     <ClCompile Include="AppSurfaceBaseSdl.cpp" />
     <ClCompile Include="fbxvpch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -174,6 +189,7 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">fbxvpch.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="InputSdl.cpp" />
+    <ClCompile Include="NuklearSdlBgfx.cpp" />
     <ClCompile Include="StopwatchSdl.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -199,6 +215,22 @@
     <ClInclude Include="fbxvpch.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Stopwatch.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="fs_nuklear_texture.sc">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)..\ThirdParty\bgfx\.build\win$(PlatformArchitecture)_vs2015\bin\shaderc$(Configuration).exe -f $(SolutionDir)FbxViewer\fs_nuklear_texture.sc -o $(SolutionDir)assets\fs_nuklear_texture.bin.h --bin2c fs_nuklear_texture -i $(SolutionDir)..\ThirdParty\bgfx\src\ --verbose --type fragment --platform android</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)..\ThirdParty\bgfx\.build\win$(PlatformArchitecture)_vs2015\bin\shaderc$(Configuration).exe -f $(SolutionDir)FbxViewer\fs_nuklear_texture.sc -o $(SolutionDir)assets\fs_nuklear_texture.bin.h --bin2c fs_nuklear_texture -i $(SolutionDir)..\ThirdParty\bgfx\src\ --verbose --type fragment --platform android</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)..\ThirdParty\bgfx\.build\win$(PlatformArchitecture)_vs2015\bin\shaderc$(Configuration).exe -f $(SolutionDir)FbxViewer\fs_nuklear_texture.sc -o $(SolutionDir)assets\fs_nuklear_texture.bin.h --bin2c fs_nuklear_texture -i $(SolutionDir)..\ThirdParty\bgfx\src\ --verbose --type fragment --platform android</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)..\ThirdParty\bgfx\.build\win$(PlatformArchitecture)_vs2015\bin\shaderc$(Configuration).exe -f $(SolutionDir)FbxViewer\fs_nuklear_texture.sc -o $(SolutionDir)assets\fs_nuklear_texture.bin.h --bin2c fs_nuklear_texture -i $(SolutionDir)..\ThirdParty\bgfx\src\ --verbose --type fragment --platform android</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)assets\fs_nuklear_texture.bin;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)assets\fs_nuklear_texture.bin;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)assets\fs_nuklear_texture.bin;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)assets\fs_nuklear_texture.bin;%(Outputs)</Outputs>
+    </CustomBuild>
+    <None Include="CompileShaders.js" />
+    <None Include="varying.def.sc" />
+    <None Include="vs_nuklear_texture.sc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

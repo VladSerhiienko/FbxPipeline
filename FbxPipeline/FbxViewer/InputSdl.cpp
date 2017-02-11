@@ -5,7 +5,7 @@ void BuildSdlKeyMapping(uint32_t * pOutKeyMapping)
 {
     using namespace fbxv;
     //TIMED_SCOPE(timer, "InputKeyMapping");
-
+     
     pOutKeyMapping[kDigitalInput_KeyEscape]       = SDL_SCANCODE_ESCAPE;
     pOutKeyMapping[kDigitalInput_Key1]            = SDL_SCANCODE_1;
     pOutKeyMapping[kDigitalInput_Key2]            = SDL_SCANCODE_2;
