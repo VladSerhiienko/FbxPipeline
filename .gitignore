@@ -256,3 +256,5 @@ paket-files/
 /FbxPipeline/lib
 /FbxPipeline/generated
 /FbxPipeline/obj
+/FbxPipeline/shaders/nuklear_texture/include
+/FbxPipeline/shaders/nuklear_texture/runtime

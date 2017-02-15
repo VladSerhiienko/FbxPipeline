@@ -1,5 +1,15 @@
 #include <fbxvpch.h>
 #include <AppSurface.h>
+#include <nuklear.h>
+
+NK_API struct nk_context* nk_sdl_init( SDL_Window* win );
+NK_API void nk_sdl_font_stash_begin( struct nk_font_atlas** atlas );
+NK_API void nk_sdl_font_stash_end( void );
+NK_API int nk_sdl_handle_event( SDL_Event* evt );
+NK_API void nk_sdl_render( enum nk_anti_aliasing, int max_vertex_buffer, int max_element_buffer );
+NK_API void nk_sdl_shutdown( void );
+NK_API void nk_sdl_device_destroy( void );
+NK_API void nk_sdl_device_create( void );
 
 namespace fbxv {
     void* Malloc( size_t bytes );
@@ -135,6 +145,21 @@ namespace bgfx {
     }
 }
 
+namespace fbxv {
+    struct AppSurface::Context {
+        uint32_t    mWidth          = 0;
+        uint32_t    mHeight         = 0;
+        nk_context* mNuklearContext = nullptr;
+    };
+}
+
+fbxv::AppSurface::AppSurface( ) : mContext( new Context( ) ) {
+}
+
+fbxv::AppSurface::~AppSurface()
+{
+}
+
 void fbxv::AppSurface::OnFrameMove( ) {
     AppSurfaceBase::OnFrameMove( );
 
@@ -144,14 +169,15 @@ void fbxv::AppSurface::OnFrameMove( ) {
 
     auto width  = GetWidth( );
     auto height = GetHeight( );
-    if ( width != mWidth || height != mHeight ) {
-        mWidth  = width;
-        mHeight = height;
-        bgfx::reset( mWidth, mHeight, BGFX_RESET_VSYNC );
+    if ( width != mContext->mWidth || height != mContext->mHeight ) {
+        mContext-> mWidth  = width;
+        mContext-> mHeight = height;
+        bgfx::reset( mContext->mWidth, mContext->mHeight, BGFX_RESET_VSYNC );
     }
 
     // Set view 0 default viewport.
     bgfx::setViewRect( 0, 0, 0, uint16_t( GetWidth( ) ), uint16_t( GetHeight( ) ) );
+    bgfx::setState( BGFX_STATE_DEFAULT );
 
     // This dummy draw call is here to make sure that view 0 is cleared
     // if no other draw calls are submitted to view 0.
@@ -159,7 +185,7 @@ void fbxv::AppSurface::OnFrameMove( ) {
 
     // Use debug font to print information about this example.
     bgfx::dbgTextClear( );
-    bgfx::dbgTextPrintf( 0, 1, 0x4f, "bgfx/examples/00-helloworld" );
+    bgfx::dbgTextPrintf( 0, 1, 0x4f, "Fbx Viewer" );
     bgfx::dbgTextPrintf( 0, 2, 0x6f, "Description: Initialization and debug text." );
 
     const bgfx::Stats* stats = bgfx::getStats( );
@@ -171,9 +197,38 @@ void fbxv::AppSurface::OnFrameMove( ) {
                          stats->height,
                          stats->textWidth,
                          stats->textHeight );
+
+    if ( nk_begin( mContext->mNuklearContext,
+                   "FBXV: Nuklear demo.",
+                   nk_rect( 50, 50, 200, 200 ),
+                   NK_WINDOW_BORDER |
+                   NK_WINDOW_MOVABLE |
+                   NK_WINDOW_SCALABLE |
+                   NK_WINDOW_CLOSABLE |
+                   NK_WINDOW_MINIMIZABLE |
+                   NK_WINDOW_TITLE ) ) {
+        enum { EASY, HARD };
+        static int op       = EASY;
+        static int property = 20;
+
+        nk_layout_row_static( mContext->mNuklearContext, 30, 80, 1 );
+        if ( nk_button_label( mContext->mNuklearContext, "button" ) )
+            fprintf( stdout, "button pressed\n" );
+        nk_layout_row_dynamic( mContext->mNuklearContext, 30, 2 );
+
+        if ( nk_option_label( mContext->mNuklearContext, "easy", op == EASY ) )
+            op = EASY;
+        if ( nk_option_label( mContext->mNuklearContext, "hard", op == HARD ) )
+            op = HARD;
+        nk_layout_row_dynamic( mContext->mNuklearContext, 25, 1 );
+        nk_property_int( mContext->mNuklearContext, "Compression:", 0, &property, 100, 10, 1 );
+        nk_end( mContext->mNuklearContext );
+    }
 }
 
 void fbxv::AppSurface::OnFrameDone( ) {
+    nk_sdl_render( NK_ANTI_ALIASING_ON, 0, 0 );
+
     // Advance to next frame. Rendering thread will be kicked to
     // process submitted rendering primitives.
     bgfx::frame( );
@@ -189,17 +244,23 @@ bool fbxv::AppSurface::Initialize( ) {
             return false;
         }
 
-        const auto bgfxRendererType = bgfx::RendererType::OpenGLES;
+        const auto bgfxRendererType = bgfx::RendererType::OpenGL;
 
         if ( !bgfx::init( bgfxRendererType, 0, 0, new bgfx::Callback( ), new bx::Allocator( ) ) ) {
             return false;
         }
+        assert( bgfxRendererType == bgfx::getRendererType( ) );
 
-        mWidth  = GetWidth( );
-        mHeight = GetHeight( );
+        SDL_Log( "Renderer type: %u", bgfx::getRendererType( ) );
+        SDL_Log( "Renderer name: %s", bgfx::getRendererName( bgfxRendererType ) );
+
+        mContext->mNuklearContext = nk_sdl_init( (SDL_Window*) GetWindowHandle( ) );
+
+        mContext->mWidth  = GetWidth( );
+        mContext->mHeight = GetHeight( );
 
         // Enable debug text and set view 0 clear state.
-        bgfx::reset( mWidth, mHeight, BGFX_RESET_VSYNC );
+        bgfx::reset( mContext->mWidth, mContext->mHeight, BGFX_RESET_VSYNC );
         bgfx::setDebug( BGFX_DEBUG_TEXT );
         bgfx::setViewClear( 0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x303030ff, 1.0f, 0 );
 
@@ -210,6 +271,7 @@ bool fbxv::AppSurface::Initialize( ) {
 }
 
 void fbxv::AppSurface::Finalize( ) {
+    nk_sdl_device_destroy( );
     bgfx::shutdown( );
     AppSurfaceBase::Finalize( );
 }

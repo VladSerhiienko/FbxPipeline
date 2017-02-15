@@ -4,8 +4,14 @@
 
 namespace fbxv {
     class AppSurface : public fbxv::AppSurfaceBase {
-        uint32_t mWidth = 0, mHeight = 0;
+        struct Context;
+        friend Context;
+        std::unique_ptr< Context > mContext;
+
     public:
+        AppSurface( );
+        virtual ~AppSurface( );
+
         virtual void OnFrameMove( ) override;
         virtual void OnFrameDone( ) override;
         virtual bool Initialize( ) override;

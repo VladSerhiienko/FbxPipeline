@@ -9,94 +9,78 @@ function removeExtension(filename) {
     else return filename.substr(0, lastDotPosition);
 }
 
-var shaderc = process.argv[2];
-var shaderDir = process.argv[3];
-var outputDir = process.argv[4];
-var includeDir = process.argv[5];
-var varyingDef = process.argv[6];
+function removeFile(filename) {
+    var lastDotPosition = filename.lastIndexOf("/");
+    if (lastDotPosition === -1) lastDotPosition = filename.lastIndexOf("\\");
+    if (lastDotPosition === -1) return filename;
+    else return filename.substr(0, lastDotPosition);
+}
 
-//console.log('Current folder:', currentDir);
+var shaderc = removeFile(process.argv[1]);
+var shaderDir = shaderc + '/shaders';
+if (process.argv.length >= 3)
+    shaderDir = process.argv[2];
+
+var rutimeDir = shaderDir + '/runtime/';
+var rutimeIncludeDir = shaderDir + '/include/';
+
+if (!fs.existsSync(rutimeDir)){
+    fs.mkdirSync(rutimeDir);
+}
+
+if (!fs.existsSync(rutimeIncludeDir)){
+    fs.mkdirSync(rutimeIncludeDir);
+}
+
+var platformProfiles = ['windows', 'android', 'osx', 'ios'];
+var commandTemplate = 'shaderc -f {{shaderFilePath}} -o {{binFilePath}} {{bin2c}} ' +
+                      '-i ../shaders/shared -i ../../ThirdParty/bgfx/src --verbose ' +
+                      '--type {{shaderType}} --platform {{platformProfile}}';
+
 fs.readdir(shaderDir, (err, files) => {
     files.forEach(fileName => {
-        if (path.extname(fileName) == ".sc") {
-
-            const fileBaseName = removeExtension(fileName);
-            const filePath = shaderDir + path.basename(fileName);
-            const filePathBin = outputDir + fileBaseName + '.bin';
-            const filePathBin2c = outputDir + fileBaseName + '.bin.h';
-
-            console.log(' <- ', fileName);
-            console.log(' -> ', filePath);
-            console.log(' -> ', fileBaseName);
-            console.log(' -> ', filePathBin2c);
-
+         if (path.extname(fileName) == ".sc") {
             var shaderType = null;
-
-            if (fileName.substring(0, 3) == "fs_") {
+            var shaderFilePref = fileName.substring(0, 3);
+            if (shaderFilePref == "fs_") {
                 shaderType = "fragment";
-
-            } else if (fileName.substring(0, 3) == "vs_") {
+            } else if (shaderFilePref == "vs_") {
                 shaderType = "vertex";
             }
 
             if (shaderType != null) {
-                var shadercCmdBin
-                    = shaderc + 
-                    //'/../../ThirdParty/bgfx/.build/win64_vs2015/bin/shadercRelease' +
-                    ' -f ' +
-                    filePath +
-                    ' -o ' +
-                    filePathBin +
-                    ' -i ' +
-                    includeDir +
-                    //process.cwd() +
-                    //'/../../ThirdParty/bgfx/src' +
-                    ' --type ' +
-                    shaderType +
-                    ' --platform windows' +
-                    ' --verbose ' +
-                    ' --varyingdef ' + varyingDef;
+                var shaderFilePath = shaderDir + '/' + fileName;
 
-                var shadercCmdBin2c
-                    = shaderc + 
-                    //'/../../ThirdParty/bgfx/.build/win64_vs2015/bin/shadercRelease' +
-                    ' -f ' +
-                    filePath +
-                    ' -o ' +
-                    filePathBin2c +
-                    ' --bin2c ' +
-                    fileBaseName +
-                    ' -i ' +
-                    includeDir +
-                    //process.cwd() +
-                    //'/../../ThirdParty/bgfx/src' +
-                    ' --type ' +
-                    shaderType + 
-                    ' --platform windows' +
-                    ' --verbose' +
-                    ' --varyingdef ' + varyingDef;
+                var binCmdTemplate = commandTemplate.replace('{{shaderFilePath}}', shaderFilePath);
+                binCmdTemplate = binCmdTemplate.replace('{{bin2c}}', '');
+                binCmdTemplate = binCmdTemplate.replace('{{shaderType}}', shaderType);
 
-                console.log(shadercCmdBin);
-                console.log(shadercCmdBin2c);
+                var incCmdTemplate = commandTemplate.replace('{{shaderFilePath}}', shaderFilePath);
+                incCmdTemplate = incCmdTemplate.replace('{{bin2c}}', '--bin2c');
+                incCmdTemplate = incCmdTemplate.replace('{{shaderType}}', shaderType);
 
-                var scBin = exec(shadercCmdBin, function(err, stdout, stderr) {
-                    //console.log(' bin (err) -> ', err);
-                    //console.log(' bin (stderr) -> ', stderr);
-                    //console.log(' bin (stdout) -> ', stdout);
+                console.log('Bin (T): ', binCmdTemplate);
+                console.log('Inc (T): ', incCmdTemplate);
+
+                platformProfiles.forEach((value, index, array) => {
+                    var binFilePath = rutimeDir + removeExtension(fileName) + '_' + value + '.bin';
+                    var incFilePath = rutimeIncludeDir + removeExtension(fileName) + '_' + value + ".bin.h";
+
+                    var binCmd = binCmdTemplate.replace('{{binFilePath}}', binFilePath).replace('{{platformProfile}}', value);
+                    var incCmd = incCmdTemplate.replace('{{binFilePath}}', incFilePath).replace('{{platformProfile}}', value);
+
+                    console.log('Bin: ', binCmd);
+                    console.log('Inc: ', incCmd);
+
+                    var binOutput = exec(binCmd);
+                    binOutput.stdout.pipe(process.stdout);
+                    binOutput.stderr.pipe(process.stderr);
+
+                    var incOutput = exec(incCmd);
+                    incOutput.stdout.pipe(process.stdout);
+                    incOutput.stderr.pipe(process.stderr);
                 });
-
-                scBin.stdout.pipe(process.stdout);
-                scBin.stderr.pipe(process.stderr);
-
-                var scBin2c = exec(shadercCmdBin2c, function(err, stdout, stderr) {
-                    //console.log(' bin2c (err) -> ', err);
-                    //console.log(' bin2c (stderr) -> ', stderr);
-                    //console.log(' bin2c (stdout) -> ', stdout);
-                });
-
-                scBin2c.stdout.pipe(process.stdout);
-                scBin2c.stderr.pipe(process.stderr);
             }
         }
     });
-})
+});

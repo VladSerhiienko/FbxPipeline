@@ -17,6 +17,9 @@
     <Filter Include="Sources\App">
       <UniqueIdentifier>{c8a73387-d37b-4bb7-a492-2260fc572b76}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\nuklear_texture">
+      <UniqueIdentifier>{558bcdad-27b2-48ad-b8d5-f433a07e2481}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="InputSdl.cpp">
@@ -74,17 +77,14 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="vs_nuklear_texture.sc">
-      <Filter>Shaders</Filter>
+    <None Include="..\shaders\nuklear_texture\vs_nuklear_texture.sc">
+      <Filter>Shaders\nuklear_texture</Filter>
     </None>
-    <None Include="fs_nuklear_texture.sc">
-      <Filter>Shaders</Filter>
+    <None Include="..\shaders\nuklear_texture\fs_nuklear_texture.sc">
+      <Filter>Shaders\nuklear_texture</Filter>
     </None>
-    <None Include="varying.def.sc">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="CompileShaders.js">
-      <Filter>Shaders</Filter>
+    <None Include="..\shaders\nuklear_texture\vd_nuklear_texture.sc">
+      <Filter>Shaders\nuklear_texture</Filter>
     </None>
   </ItemGroup>
 </Project>
