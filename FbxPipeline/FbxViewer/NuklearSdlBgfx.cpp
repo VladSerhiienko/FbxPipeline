@@ -25,7 +25,7 @@ namespace fbxv {
 void *nk_plugin_alloc_fbxvimpl( nk_handle, void *old, nk_size size ) {
     if ( old )
         fbxv::Free( old );
-    return fbxv::Memalign( 16, size );
+    return fbxv::Malloc( size );
 }
 void nk_plugin_free_fbxvimpl( nk_handle, void *old ) {
     fbxv::Free( old );
@@ -214,7 +214,7 @@ NK_API void nk_sdl_render( enum nk_anti_aliasing aa, int max_vertex_buffer, int 
         const uint16_t scissorW = uint16_t( bx::fmin( cmd->clip_rect.w, 65535.0f ) - scissorX );
         const uint16_t scissorH = uint16_t( bx::fmin( cmd->clip_rect.h, 65535.0f ) - scissorY );
 
-        bgfx::setScissor( scissorX, scissorY, scissorW, scissorH );
+        bgfx::setScissor( scissorX * scale.x, scissorY * scale.y, scissorW * scale.x, scissorH * scale.y );
         bgfx::setState( BGFX_STATE_RGB_WRITE | BGFX_STATE_ALPHA_WRITE | BGFX_STATE_BLEND_EQUATION_ADD |
                         BGFX_STATE_BLEND_FUNC( BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA ) );
 
