@@ -20,19 +20,19 @@
     <Filter Include="Shaders\nuklear_texture">
       <UniqueIdentifier>{558bcdad-27b2-48ad-b8d5-f433a07e2481}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sources\UI">
+      <UniqueIdentifier>{69d6f5da-d78a-47dc-9751-04c41fc4e365}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Input">
+      <UniqueIdentifier>{9f91e80f-6cb7-48e4-8af0-3fd7c29198dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Time">
+      <UniqueIdentifier>{f7a2a985-5732-4cc8-94d8-7cbfc656b648}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="InputSdl.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="StopwatchSdl.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
     <ClCompile Include="fbxvpch.cpp">
       <Filter>Precompiled</Filter>
-    </ClCompile>
-    <ClCompile Include="NuklearSdlBgfx.cpp">
-      <Filter>Sources</Filter>
     </ClCompile>
     <ClCompile Include="App.cpp">
       <Filter>Sources\App</Filter>
@@ -49,14 +49,17 @@
     <ClCompile Include="AppSurfaceBaseSdl.cpp">
       <Filter>Sources\App</Filter>
     </ClCompile>
+    <ClCompile Include="NuklearSdlBgfx.cpp">
+      <Filter>Sources\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="InputSdl.cpp">
+      <Filter>Sources\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="StopwatchSdl.cpp">
+      <Filter>Sources\Time</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Input.h">
-      <Filter>Sources</Filter>
-    </ClInclude>
-    <ClInclude Include="Stopwatch.h">
-      <Filter>Sources</Filter>
-    </ClInclude>
     <ClInclude Include="fbxvpch.h">
       <Filter>Precompiled</Filter>
     </ClInclude>
@@ -76,7 +79,13 @@
       <Filter>Sources\App</Filter>
     </ClInclude>
     <ClInclude Include="NuklearSdl.h">
-      <Filter>Sources</Filter>
+      <Filter>Sources\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Input.h">
+      <Filter>Sources\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Stopwatch.h">
+      <Filter>Sources\Time</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
