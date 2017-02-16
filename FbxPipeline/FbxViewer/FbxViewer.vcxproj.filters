@@ -75,6 +75,9 @@
     <ClInclude Include="AppSurfaceBase.h">
       <Filter>Sources\App</Filter>
     </ClInclude>
+    <ClInclude Include="NuklearSdl.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\shaders\nuklear_texture\vs_nuklear_texture.sc">
@@ -83,7 +86,7 @@
     <None Include="..\shaders\nuklear_texture\fs_nuklear_texture.sc">
       <Filter>Shaders\nuklear_texture</Filter>
     </None>
-    <None Include="..\shaders\nuklear_texture\vd_nuklear_texture.sc">
+    <None Include="..\shaders\nuklear_texture\varying.def.sc">
       <Filter>Shaders\nuklear_texture</Filter>
     </None>
   </ItemGroup>

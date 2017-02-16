@@ -96,7 +96,7 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)..\ThirdParty\bgfx\.build\win$(PlatformArchitecture)_vs2015\bin\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <AdditionalDependencies>opengl32.lib;winmm.lib;imm32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent />
@@ -116,7 +116,7 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)..\ThirdParty\bgfx\.build\win$(PlatformArchitecture)_vs2015\bin\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <AdditionalDependencies>opengl32.lib;winmm.lib;imm32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent />
@@ -140,7 +140,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SolutionDir)..\ThirdParty\bgfx\.build\win$(PlatformArchitecture)_vs2015\bin\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent />
@@ -164,7 +164,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SolutionDir)..\ThirdParty\bgfx\.build\win$(PlatformArchitecture)_vs2015\bin\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent />
@@ -210,6 +210,7 @@
     <ClInclude Include="alloca.h" />
     <ClInclude Include="App.h" />
     <ClInclude Include="AppBase.h" />
+    <ClInclude Include="NuklearSdl.h" />
     <ClInclude Include="AppSurface.h" />
     <ClInclude Include="AppSurfaceBase.h" />
     <ClInclude Include="fbxvpch.h" />
@@ -218,7 +219,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\shaders\nuklear_texture\fs_nuklear_texture.sc" />
-    <None Include="..\shaders\nuklear_texture\vd_nuklear_texture.sc" />
+    <None Include="..\shaders\nuklear_texture\varying.def.sc" />
     <None Include="..\shaders\nuklear_texture\vs_nuklear_texture.sc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

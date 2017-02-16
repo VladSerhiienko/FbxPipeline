@@ -29,6 +29,7 @@
 #include <bx/handlealloc.h>
 #include <bx/readerwriter.h>
 #include <bx/crtimpl.h>
+#include <bx/fpumath.h>
 
 #include <flatbuffers/flatbuffers.h>
 #include <flatbuffers/util.h>

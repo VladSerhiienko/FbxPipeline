@@ -8,4 +8,5 @@ void main()
 {
 	vec4 color = texture2D(s_texColor, v_texcoord0);
 	gl_FragColor = color * v_color0;
+	//gl_FragColor = vec4_splat(1.0);
 }

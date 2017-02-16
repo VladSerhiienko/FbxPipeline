@@ -184,8 +184,8 @@ void fbxv::AppSurface::OnFrameMove( ) {
     bgfx::touch( 0 );
 
     // Use debug font to print information about this example.
-    //bgfx::dbgTextClear( );
-    bgfx::dbgTextPrintf( 0, 1, 0x4f, "Fbx Viewer" );
+    bgfx::dbgTextClear( );
+    //bgfx::dbgTextPrintf( 0, 1, 0x4f, "Fbx Viewer" );
 
     if (nk_begin( mContext->mNuklearContext,
                    "FBXV: Nuklear demo.",
@@ -205,12 +205,12 @@ void fbxv::AppSurface::OnFrameMove( ) {
             fprintf( stdout, "button pressed\n" );
         nk_layout_row_dynamic( mContext->mNuklearContext, 30, 2 );
 
-        /*if ( nk_option_label( mContext->mNuklearContext, "easy", op == EASY ) )
+        if ( nk_option_label( mContext->mNuklearContext, "easy", op == EASY ) )
             op = EASY;
         if ( nk_option_label( mContext->mNuklearContext, "hard", op == HARD ) )
             op = HARD;
         nk_layout_row_dynamic( mContext->mNuklearContext, 25, 1 );
-        nk_property_int( mContext->mNuklearContext, "Compression:", 0, &property, 100, 10, 1 );*/
+        nk_property_int( mContext->mNuklearContext, "Compression:", 0, &property, 100, 10, 1 );
         nk_end( mContext->mNuklearContext );
     }
 }
@@ -250,7 +250,7 @@ bool fbxv::AppSurface::Initialize( ) {
 
         // Enable debug text and set view 0 clear state.
         bgfx::reset( mContext->mWidth, mContext->mHeight, BGFX_RESET_VSYNC );
-        //bgfx::setDebug( BGFX_DEBUG_TEXT | BGFX_DEBUG_STATS );
+        bgfx::setDebug(BGFX_DEBUG_TEXT); // | BGFX_DEBUG_STATS );
         bgfx::setViewClear( 0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x303030ff, 1.0f, 0 );
 
         return true;
