@@ -575,17 +575,21 @@ void App::Update( float deltaSecs, Input const& inputState ) {
     content->uniforms.m_cameraFar[ 0 ] = content->camera.cfar;
 
     bgfx::dbgTextClear( );
-    bgfx::dbgTextPrintf( 0, 1, 0x4f, "fbxv/ubisoft demo" );
+    bgfx::dbgTextPrintf( 0, 1, 0x4f, "fbxv/demo" );
     bgfx::dbgTextPrintf( 0, 2, 0x2f, "Frame: % 7.3f[ms]", deltaSecs * 1000.0f );
 
-    float    proj[ 16 ];
-    float    view[ 16 ];
+    float proj[ 16 ];
+    float view[ 16 ];
 
     // Env mtx.
     float mtxEnvView[ 16 ];
     content->camera.envViewMtx( content->uniforms.m_mtx );
     bx::mtxIdentity( view );
     bx::mtxOrtho( proj, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 100.0f );
+
+    //
+    // Skybox pass
+    //
 
     bgfx::setViewClear( 0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 1.0f, 0, 0 );
     bgfx::setViewRect( 0, 0, 0, uint16_t( width ), uint16_t( height ) );
