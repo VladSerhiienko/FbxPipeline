@@ -71,12 +71,18 @@ struct Camera {
         m_orbit[ 1 ] -= consume[ 1 ];
 
         const float toPos[ 3 ] = {
-            m_pos.curr[ 0 ] - m_target.curr[ 0 ], m_pos.curr[ 1 ] - m_target.curr[ 1 ], m_pos.curr[ 2 ] - m_target.curr[ 2 ],
+            m_pos.curr[ 0 ] - m_target.curr[ 0 ],
+            m_pos.curr[ 1 ] - m_target.curr[ 1 ],
+            m_pos.curr[ 2 ] - m_target.curr[ 2 ],
         };
-        const float toPosLen       = bx::vec3Length( toPos );
-        const float invToPosLen    = 1.0f / ( toPosLen + FLT_MIN );
+
+        const float toPosLen    = bx::vec3Length( toPos );
+        const float invToPosLen = 1.0f / ( toPosLen + FLT_MIN );
+
         const float toPosNorm[ 3 ] = {
-            toPos[ 0 ] * invToPosLen, toPos[ 1 ] * invToPosLen, toPos[ 2 ] * invToPosLen,
+            toPos[ 0 ] * invToPosLen,
+            toPos[ 1 ] * invToPosLen,
+            toPos[ 2 ] * invToPosLen,
         };
 
         float ll[ 2 ];
@@ -572,7 +578,6 @@ void App::Update( float deltaSecs, Input const& inputState ) {
     bgfx::dbgTextPrintf( 0, 1, 0x4f, "fbxv/ubisoft demo" );
     bgfx::dbgTextPrintf( 0, 2, 0x2f, "Frame: % 7.3f[ms]", deltaSecs * 1000.0f );
 
-    uint32_t envId = 1; // UI
     float    proj[ 16 ];
     float    view[ 16 ];
 
@@ -585,8 +590,8 @@ void App::Update( float deltaSecs, Input const& inputState ) {
     bgfx::setViewClear( 0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 1.0f, 0, 0 );
     bgfx::setViewRect( 0, 0, 0, uint16_t( width ), uint16_t( height ) );
     bgfx::setViewTransform( 0, view, proj );
-    bgfx::setTexture( 0, content->s_texCube, content->radianceTextureHandles[ envId ] );
-    bgfx::setTexture( 1, content->s_texCubeIrr, content->irradianceTextureHandles[ envId ] );
+    bgfx::setTexture( 0, content->s_texCube, content->radianceTextureHandles[ content->envId ] );
+    bgfx::setTexture( 1, content->s_texCubeIrr, content->irradianceTextureHandles[ content->envId ] );
     bgfx::setState( BGFX_STATE_RGB_WRITE | BGFX_STATE_ALPHA_WRITE );
     screenSpaceQuad( (float) width, (float) height, 0, bgfx::getCaps( )->originBottomLeft );
     content->uniforms.submit( );
@@ -610,8 +615,8 @@ void App::Update( float deltaSecs, Input const& inputState ) {
             float mtx[ 16 ];
             memcpy( mtx, &scene->worldMatrices[ nodeId ], sizeof( mtx ) );
 
-            bgfx::setTexture( 0, content->s_texCube, content->radianceTextureHandles[ envId ] );
-            bgfx::setTexture( 1, content->s_texCubeIrr, content->irradianceTextureHandles[ envId ] );
+            bgfx::setTexture( 0, content->s_texCube, content->radianceTextureHandles[ content->envId ] );
+            bgfx::setTexture( 1, content->s_texCubeIrr, content->irradianceTextureHandles[ content->envId ] );
             content->uniforms.submit( );
 
             auto state = BGFX_STATE_RGB_WRITE |
