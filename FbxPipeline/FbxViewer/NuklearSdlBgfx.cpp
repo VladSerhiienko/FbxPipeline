@@ -6,14 +6,21 @@
 #include <NuklearSdl.h>
 
 namespace fbxv {
-    void *Malloc( size_t bytes );
+   /* void *Malloc( size_t bytes );
     void *Memalign( size_t alignment, size_t bytes );
-    void Free( void *p );
+    void Free( void *p );*/
 
     namespace bgfxUtils {
         void releaseRef( void *data, void *userData ) {
-            fbxv::Free( data );
+            free( data );
+            //fbxv::Free( data );
             (void) userData;
+        }
+
+        const bgfx::Memory *makeReleasableCopy( const void *data, size_t dataSize ) {
+            auto dataCopy = malloc( dataSize );
+            memcpy( dataCopy, data, dataSize );
+            return bgfx::makeRef( dataCopy, (uint32_t) dataSize, &releaseRef, nullptr );
         }
 
         const bgfx::Memory *makeReleasableRef( const void *data, size_t dataSize ) {
@@ -24,11 +31,11 @@ namespace fbxv {
 
 void *nk_plugin_alloc_fbxvimpl( nk_handle, void *old, nk_size size ) {
     if ( old )
-        fbxv::Free( old );
-    return fbxv::Malloc( size );
+        free( old );
+    return malloc( size );
 }
 void nk_plugin_free_fbxvimpl( nk_handle, void *old ) {
-    fbxv::Free( old );
+    free( old );
 }
 
 struct nk_sdl_device {
@@ -142,7 +149,7 @@ NK_INTERN void nk_sdl_device_upload_atlas( const void *image, int width, int hei
     struct nk_sdl_device *dev = &sdl.ogl;
 
     auto imageDataSize = width * height * 4;
-    auto imageCopyData = fbxv::Malloc( imageDataSize );
+    auto imageCopyData = malloc( imageDataSize );
     memcpy( imageCopyData, image, imageDataSize );
     auto imageCopyRef = fbxv::bgfxUtils::makeReleasableRef( imageCopyData, imageDataSize );
 
@@ -163,12 +170,10 @@ NK_API void nk_sdl_device_destroy( void ) {
     nk_buffer_free(&dev->cmds);
 }
 
-NK_API void nk_sdl_render( enum nk_anti_aliasing aa, int max_vertex_buffer, int max_element_buffer ) {
+NK_API void nk_sdl_render( enum nk_anti_aliasing aa, uint32_t id ) {
     struct nk_sdl_device *dev = &sdl.ogl;
 
     (void) aa;
-    (void) max_vertex_buffer;
-    (void) max_element_buffer;
 
     int width, height;
     int displayWidth, displayHeight;
@@ -178,8 +183,6 @@ NK_API void nk_sdl_render( enum nk_anti_aliasing aa, int max_vertex_buffer, int 
     float ortho[ 16 ];
     bx::mtxOrtho( ortho, 0.0f, (float) displayWidth, (float) displayHeight, 0.0f, 0.0f, 1.0f );
 
-    bgfx::setViewRect( 0, 0, 0, displayWidth, displayHeight );
-    bgfx::setViewTransform( 0, nullptr, ortho );
 
     struct nk_vec2 scale;
     scale.x = (float) displayWidth / (float) width;
@@ -209,12 +212,15 @@ NK_API void nk_sdl_render( enum nk_anti_aliasing aa, int max_vertex_buffer, int 
         if ( !cmd->elem_count )
             continue;
 
+        bgfx::setViewRect( id, 0, 0, displayWidth, displayHeight );
+        bgfx::setViewTransform( id, nullptr, ortho );
+
         const uint16_t scissorX = uint16_t( bx::fmax( cmd->clip_rect.x, 0.0f ) );
         const uint16_t scissorY = uint16_t( bx::fmax( cmd->clip_rect.y, 0.0f ) );
-        const uint16_t scissorW = uint16_t( bx::fmin( cmd->clip_rect.w, 65535.0f ) - scissorX );
-        const uint16_t scissorH = uint16_t( bx::fmin( cmd->clip_rect.h, 65535.0f ) - scissorY );
-
+        const uint16_t scissorW = uint16_t( bx::fmin( cmd->clip_rect.w, 65535.0f ) );
+        const uint16_t scissorH = uint16_t( bx::fmin( cmd->clip_rect.h, 65535.0f ) );
         bgfx::setScissor( scissorX * scale.x, scissorY * scale.y, scissorW * scale.x, scissorH * scale.y );
+
         bgfx::setState( BGFX_STATE_RGB_WRITE | BGFX_STATE_ALPHA_WRITE | BGFX_STATE_BLEND_EQUATION_ADD |
                         BGFX_STATE_BLEND_FUNC( BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA ) );
 
@@ -226,8 +232,9 @@ NK_API void nk_sdl_render( enum nk_anti_aliasing aa, int max_vertex_buffer, int 
         bgfx::setVertexBuffer( dev->vertexBufferHandle, 0, vertexCount );
         bgfx::setIndexBuffer( dev->elementBufferHandle, offset, cmd->elem_count );
 
-        drawcallCount += bgfx::submit( 0, dev->textureProgramHandle );
+        drawcallCount += bgfx::submit( id, dev->textureProgramHandle );
         offset += cmd->elem_count;
+        //++id;
     }
 
     nk_clear( &sdl.ctx );
@@ -248,13 +255,13 @@ static void nk_sdl_clipbard_copy( nk_handle usr, const char *text, int len ) {
     (void) usr;
     if ( !len )
         return;
-    str = (char *) fbxv::Malloc( (size_t) len + 1 );
+    str = (char *) malloc( (size_t) len + 1 );
     if ( !str )
         return;
     memcpy( str, text, (size_t) len );
     str[ len ] = '\0';
     SDL_SetClipboardText( str );
-    fbxv::Free( str );
+    free( str );
 }
 
 NK_API struct nk_context *nk_sdl_init( SDL_Window *win ) {

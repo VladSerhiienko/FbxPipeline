@@ -2,7 +2,10 @@
 
 namespace fbxv {
     class App : public fbxv::AppBase {
-        float TotalSecs;
+        friend struct AppContent;
+
+        std::unique_ptr< AppContent > content;
+        float                         totalSecs;
 
     public:
         App( );

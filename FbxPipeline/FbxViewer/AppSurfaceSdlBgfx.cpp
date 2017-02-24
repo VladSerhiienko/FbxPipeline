@@ -145,15 +145,7 @@ namespace bgfx {
     }
 }
 
-namespace fbxv {
-    struct AppSurface::Context {
-        uint32_t    mWidth          = 0;
-        uint32_t    mHeight         = 0;
-        nk_context* mNuklearContext = nullptr;
-    };
-}
-
-fbxv::AppSurface::AppSurface( ) : mContext( new Context( ) ) {
+fbxv::AppSurface::AppSurface( ) {
 }
 
 fbxv::AppSurface::~AppSurface()
@@ -162,62 +154,9 @@ fbxv::AppSurface::~AppSurface()
 
 void fbxv::AppSurface::OnFrameMove( ) {
     AppSurfaceBase::OnFrameMove( );
-
-    //
-    // Handle resizing.
-    //
-
-    auto width  = GetWidth( );
-    auto height = GetHeight( );
-    if ( width != mContext->mWidth || height != mContext->mHeight ) {
-        mContext-> mWidth  = width;
-        mContext-> mHeight = height;
-        bgfx::reset( mContext->mWidth, mContext->mHeight, BGFX_RESET_VSYNC );
-    }
-
-    // Set view 0 default viewport.
-    bgfx::setViewRect( 0, 0, 0, uint16_t( GetWidth( ) ), uint16_t( GetHeight( ) ) );
-    bgfx::setState( BGFX_STATE_DEFAULT );
-
-    // This dummy draw call is here to make sure that view 0 is cleared
-    // if no other draw calls are submitted to view 0.
-    bgfx::touch( 0 );
-
-    // Use debug font to print information about this example.
-    bgfx::dbgTextClear( );
-    //bgfx::dbgTextPrintf( 0, 1, 0x4f, "Fbx Viewer" );
-
-    if (nk_begin( mContext->mNuklearContext,
-                   "FBXV: Nuklear demo.",
-                   nk_rect( 50, 50, 200, 200 ),
-                   NK_WINDOW_BORDER |
-                   NK_WINDOW_MOVABLE |
-                   NK_WINDOW_SCALABLE |
-                   NK_WINDOW_CLOSABLE |
-                   NK_WINDOW_MINIMIZABLE |
-                   NK_WINDOW_TITLE ) ) {
-        enum { EASY, HARD };
-        static int op       = EASY;
-        static int property = 20;
-
-        nk_layout_row_static( mContext->mNuklearContext, 30, 80, 1 );
-        if ( nk_button_label( mContext->mNuklearContext, "button" ) )
-            fprintf( stdout, "button pressed\n" );
-        nk_layout_row_dynamic( mContext->mNuklearContext, 30, 2 );
-
-        if ( nk_option_label( mContext->mNuklearContext, "easy", op == EASY ) )
-            op = EASY;
-        if ( nk_option_label( mContext->mNuklearContext, "hard", op == HARD ) )
-            op = HARD;
-        nk_layout_row_dynamic( mContext->mNuklearContext, 25, 1 );
-        nk_property_int( mContext->mNuklearContext, "Compression:", 0, &property, 100, 10, 1 );
-        nk_end( mContext->mNuklearContext );
-    }
 }
 
 void fbxv::AppSurface::OnFrameDone( ) {
-    nk_sdl_render( NK_ANTI_ALIASING_ON, 0, 0 );
-
     // Advance to next frame. Rendering thread will be kicked to
     // process submitted rendering primitives.
     bgfx::frame( );
@@ -235,22 +174,18 @@ bool fbxv::AppSurface::Initialize( ) {
 
         const auto bgfxRendererType = bgfx::RendererType::OpenGL;
 
-        if ( !bgfx::init( bgfxRendererType, 0, 0, new bgfx::Callback( ), new bx::Allocator( ) ) ) {
+        if ( !bgfx::init( bgfxRendererType, 0, 0 ) ) { // , new bgfx::Callback(), new bx::Allocator()) ) {
             return false;
         }
-        assert( bgfxRendererType == bgfx::getRendererType( ) );
 
+        assert( bgfxRendererType == bgfx::getRendererType( ) );
         SDL_Log( "Renderer type: %u", bgfx::getRendererType( ) );
         SDL_Log( "Renderer name: %s", bgfx::getRendererName( bgfxRendererType ) );
 
-        mContext->mNuklearContext = nk_sdl_init( (SDL_Window*) GetWindowHandle( ) );
-
-        mContext->mWidth  = GetWidth( );
-        mContext->mHeight = GetHeight( );
 
         // Enable debug text and set view 0 clear state.
-        bgfx::reset( mContext->mWidth, mContext->mHeight, BGFX_RESET_VSYNC );
-        bgfx::setDebug(BGFX_DEBUG_TEXT); // | BGFX_DEBUG_STATS );
+        bgfx::reset( GetWidth( ), GetHeight( ), BGFX_RESET_VSYNC );
+        bgfx::setDebug(BGFX_DEBUG_TEXT);
         bgfx::setViewClear( 0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x303030ff, 1.0f, 0 );
 
         return true;

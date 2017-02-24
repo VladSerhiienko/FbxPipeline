@@ -296,6 +296,8 @@ TElementValue GetElementValue( const TElementLayer* elementLayer,
     if ( nullptr == elementLayer )
         return TElementValue( );
 
+    static bool sWarnedUnsupportedMappingMode = false;
+
     switch ( const auto mappingMode = elementLayer->GetMappingMode( ) ) {
         case FbxLayerElement::EMappingMode::eByControlPoint:
             return GetElementValue< TElementLayer, TElementValue >( elementLayer, controlPointIndex );
@@ -305,13 +307,17 @@ TElementValue GetElementValue( const TElementLayer* elementLayer,
             return GetElementValue< TElementLayer, TElementValue >( elementLayer, vertexIndex );
 
         default:
-            fbxp::Get( ).console->error(
-                "Mapping mode {} of layer \"{}\" "
-                "is not supported.",
-                mappingMode,
-                elementLayer->GetName( ) );
+            if ( false == sWarnedUnsupportedMappingMode ) {
+                sWarnedUnsupportedMappingMode = true;
+                DebugBreak( );
 
-            DebugBreak( );
+                fbxp::Get( ).console->error(
+                    "Mapping mode {} of layer \"{}\" "
+                    "is not supported.",
+                    mappingMode,
+                    elementLayer->GetName( ) );
+            }
+
             return TElementValue( );
     }
 }

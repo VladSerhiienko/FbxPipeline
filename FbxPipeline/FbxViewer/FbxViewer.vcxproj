@@ -141,7 +141,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SolutionDir)..\ThirdParty\bgfx\.build\win$(PlatformArchitecture)_vs2015\bin\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;winmm.lib;imm32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent />
     <CustomBuildStep>
@@ -165,7 +165,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SolutionDir)..\ThirdParty\bgfx\.build\win$(PlatformArchitecture)_vs2015\bin\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;winmm.lib;imm32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent />
     <CustomBuildStep>
@@ -176,8 +176,8 @@
     <ClCompile Include="App.cpp" />
     <ClCompile Include="AppBase.cpp" />
     <ClCompile Include="AppMainSdl.cpp" />
-    <ClCompile Include="AppSurfaceBgfx.cpp" />
-    <ClCompile Include="AppSurfaceBaseSdl.cpp" />
+    <ClCompile Include="AppSurfaceSdlBgfx.cpp" />
+    <ClCompile Include="AppSurfaceSdlBase.cpp" />
     <ClCompile Include="fbxvpch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">fbxvpch.h</PrecompiledHeaderFile>
@@ -215,12 +215,23 @@
     <ClInclude Include="AppSurfaceBase.h" />
     <ClInclude Include="fbxvpch.h" />
     <ClInclude Include="Input.h" />
+    <ClInclude Include="Scene.h" />
     <ClInclude Include="Stopwatch.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\shaders\mesh_ibl\fs_ibl_mesh.sc" />
+    <None Include="..\shaders\mesh_ibl\uniforms.sh" />
+    <None Include="..\shaders\mesh_ibl\varying.def.sc" />
+    <None Include="..\shaders\mesh_ibl\vs_ibl_mesh.sc" />
     <None Include="..\shaders\nuklear_texture\fs_nuklear_texture.sc" />
     <None Include="..\shaders\nuklear_texture\varying.def.sc" />
     <None Include="..\shaders\nuklear_texture\vs_nuklear_texture.sc" />
+    <None Include="..\shaders\shared\common.sh" />
+    <None Include="..\shaders\shared\shaderlib.sh" />
+    <None Include="..\shaders\skybox\fs_ibl_skybox.sc" />
+    <None Include="..\shaders\skybox\uniforms.sh" />
+    <None Include="..\shaders\skybox\varying.def.sc" />
+    <None Include="..\shaders\skybox\vs_ibl_skybox.sc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

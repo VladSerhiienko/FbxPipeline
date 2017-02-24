@@ -258,3 +258,5 @@ paket-files/
 /FbxPipeline/obj
 /FbxPipeline/shaders/nuklear_texture/include
 /FbxPipeline/shaders/nuklear_texture/runtime
+/FbxPipeline/assets/shaders/runtime
+/FbxPipeline/assets/shaders/include

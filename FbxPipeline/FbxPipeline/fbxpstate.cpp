@@ -121,6 +121,7 @@ bool fbxp::State::Finish( ) {
             auto cpOffset = builder.CreateVectorOfStructs( mesh.controlPoints );
             auto ppOffset = builder.CreateVector( mesh.polygons );
             auto vsOffset = builder.CreateVector( mesh.vertices );
+            auto smOffset = builder.CreateVectorOfStructs( mesh.submeshes );
             auto ssOffset = builder.CreateVectorOfStructs( mesh.subsets );
             auto iiOffset = builder.CreateVector( mesh.indices );
             auto siOffset = builder.CreateVector( mesh.subsetIndices );
@@ -130,6 +131,7 @@ bool fbxp::State::Finish( ) {
             meshBuilder.add_ctrl_points( cpOffset );
             meshBuilder.add_polygons( ppOffset );
             meshBuilder.add_vertices( vsOffset );
+            meshBuilder.add_submeshes( smOffset );
             meshBuilder.add_subsets( ssOffset );
             meshBuilder.add_indices( iiOffset );
             meshBuilder.add_subset_polies( spOffset );

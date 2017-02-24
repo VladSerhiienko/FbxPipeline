@@ -29,6 +29,15 @@
     <Filter Include="Sources\Time">
       <UniqueIdentifier>{f7a2a985-5732-4cc8-94d8-7cbfc656b648}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sources\Scene">
+      <UniqueIdentifier>{aca4255e-09e5-4f58-8d05-65f0daa60285}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\mesh_ibl">
+      <UniqueIdentifier>{103628f3-d66b-4a0a-9dc0-aa02b6808d4e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\skybox">
+      <UniqueIdentifier>{71552e80-5c16-4a1e-95f2-95397c62e82c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="fbxvpch.cpp">
@@ -43,12 +52,6 @@
     <ClCompile Include="AppMainSdl.cpp">
       <Filter>Sources\App</Filter>
     </ClCompile>
-    <ClCompile Include="AppSurfaceBgfx.cpp">
-      <Filter>Sources\App</Filter>
-    </ClCompile>
-    <ClCompile Include="AppSurfaceBaseSdl.cpp">
-      <Filter>Sources\App</Filter>
-    </ClCompile>
     <ClCompile Include="NuklearSdlBgfx.cpp">
       <Filter>Sources\UI</Filter>
     </ClCompile>
@@ -57,6 +60,12 @@
     </ClCompile>
     <ClCompile Include="StopwatchSdl.cpp">
       <Filter>Sources\Time</Filter>
+    </ClCompile>
+    <ClCompile Include="AppSurfaceSdlBgfx.cpp">
+      <Filter>Sources\App</Filter>
+    </ClCompile>
+    <ClCompile Include="AppSurfaceSdlBase.cpp">
+      <Filter>Sources\App</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -87,6 +96,9 @@
     <ClInclude Include="Stopwatch.h">
       <Filter>Sources\Time</Filter>
     </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>Sources\Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\shaders\nuklear_texture\vs_nuklear_texture.sc">
@@ -97,6 +109,36 @@
     </None>
     <None Include="..\shaders\nuklear_texture\varying.def.sc">
       <Filter>Shaders\nuklear_texture</Filter>
+    </None>
+    <None Include="..\shaders\mesh_ibl\fs_ibl_mesh.sc">
+      <Filter>Shaders\mesh_ibl</Filter>
+    </None>
+    <None Include="..\shaders\mesh_ibl\varying.def.sc">
+      <Filter>Shaders\mesh_ibl</Filter>
+    </None>
+    <None Include="..\shaders\mesh_ibl\vs_ibl_mesh.sc">
+      <Filter>Shaders\mesh_ibl</Filter>
+    </None>
+    <None Include="..\shaders\shared\common.sh">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\shaders\shared\shaderlib.sh">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\shaders\skybox\fs_ibl_skybox.sc">
+      <Filter>Shaders\skybox</Filter>
+    </None>
+    <None Include="..\shaders\skybox\uniforms.sh">
+      <Filter>Shaders\skybox</Filter>
+    </None>
+    <None Include="..\shaders\skybox\varying.def.sc">
+      <Filter>Shaders\skybox</Filter>
+    </None>
+    <None Include="..\shaders\skybox\vs_ibl_skybox.sc">
+      <Filter>Shaders\skybox</Filter>
+    </None>
+    <None Include="..\shaders\mesh_ibl\uniforms.sh">
+      <Filter>Shaders\mesh_ibl</Filter>
     </None>
   </ItemGroup>
 </Project>
