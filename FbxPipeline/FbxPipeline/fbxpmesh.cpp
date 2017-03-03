@@ -168,8 +168,8 @@ bool GetSubsets( FbxMesh*                            mesh,
                 // Process a case where there is a break in polygon indices.
                 s.console->info( "\tAdding subset: material #{}, polygon #{}, count {} ({} - {}).", mii, k, j - ki, ki, j - 1 );
 
-                subsetPolies.emplace_back( mii, k, j - ki );
-                // subsetPolies.emplace_back( mii, ki, j - ki );
+                // subsetPolies.emplace_back( mii, k, j - ki );
+                subsetPolies.emplace_back( mii, ki, j - ki );
                 // subsets.emplace_back( mii, ki, j - ki );
                 // subsets.emplace_back( mii, ki * 3, ( j - ki ) * 3 );
                 ki = j;
@@ -180,8 +180,8 @@ bool GetSubsets( FbxMesh*                            mesh,
         }
 
         s.console->info( "\tAdding subset: material #{}, polygon #{}, count {} ({} - {}).", mii, k, j - ki, ki, j - 1 );
-        subsetPolies.emplace_back( mii, k, j - ki );
-        // subsetPolies.emplace_back( mii, ki, j - ki );
+        // subsetPolies.emplace_back( mii, k, j - ki );
+        subsetPolies.emplace_back( mii, ki, j - ki );
         // subsets.emplace_back( mii, ki, j - ki );
         // subsets.emplace_back( mii, ki * 3, ( j - ki ) * 3 );
     };

@@ -388,7 +388,17 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         content->nk = nk_sdl_init( (SDL_Window*) GetSurface( )->GetWindowHandle( ) );
 
         content->scenes[ 0 ] = LoadSceneFromFile( "../../../assets/MercedesBenzA45AMG.fbxp" );
-        content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/mech-m-6k.fbxp" );
+        //content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/MercedesBenzSLR.fbxp" );
+        //content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/P90.fbxp" );
+        //content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/IronMan.fbxp" );
+        //content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/Cathedral.fbxp" );
+        //content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/Leica1933.fbxp" );
+        //content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/UnrealOrb.fbxp" );
+        content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/Mech6k.fbxp" );
+        // content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/Artorias.fbxp" );
+        // content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/9mm.fbxp" );
+        // content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/Knife.fbxp" );
+        // content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/mech-m-6k.fbxp" );
 
         content->uniforms.init( );
 
@@ -578,6 +588,7 @@ void App::Update( float deltaSecs, Input const& inputState ) {
     bgfx::dbgTextPrintf( 0, 1, 0x4f, "fbxv/demo" );
     bgfx::dbgTextPrintf( 0, 2, 0x2f, "Frame: % 7.3f[ms]", deltaSecs * 1000.0f );
 
+    float world[ 16 ];
     float proj[ 16 ];
     float view[ 16 ];
 
@@ -610,18 +621,16 @@ void App::Update( float deltaSecs, Input const& inputState ) {
 
     auto scene = content->scenes[ content->sceneId ];
 
+    uint32_t drawcalls            = 0;
+    uint32_t drawcallsWithIndices = 0;
+
     scene->ForEachNode( [&]( uint32_t nodeId ) {
         assert( nodeId != uint32_t( -1 ) );
         auto& node = scene->nodes[ nodeId ];
         if ( node.meshId != uint32_t( -1 ) ) {
             auto& mesh = scene->meshes[ node.meshId ];
-
-            float mtx[ 16 ];
-            memcpy( mtx, &scene->worldMatrices[ nodeId ], sizeof( mtx ) );
-
-            bgfx::setTexture( 0, content->s_texCube, content->radianceTextureHandles[ content->envId ] );
-            bgfx::setTexture( 1, content->s_texCubeIrr, content->irradianceTextureHandles[ content->envId ] );
-            content->uniforms.submit( );
+            memcpy( world, &scene->worldMatrices[ nodeId ], sizeof( world ) );
+            static_assert( sizeof( world ) == sizeof( mathfu::mat4 ), "Cannot memcpy." );
 
             auto state = BGFX_STATE_RGB_WRITE |
                          BGFX_STATE_ALPHA_WRITE |
@@ -629,17 +638,45 @@ void App::Update( float deltaSecs, Input const& inputState ) {
                          BGFX_STATE_DEPTH_TEST_LESS |
                          BGFX_STATE_MSAA;
 
-            bgfx::setViewRect( 1, 0, 0, uint16_t( width ), uint16_t( height ) );
+            if ( false == mesh.subsets.empty( ) )
+                for ( auto& subset : mesh.subsets ) {
+                    ++drawcallsWithIndices;
 
-            bgfx::setViewTransform( 1, view, proj );
-            bgfx::setTransform( mtx );
-            bgfx::setState( state );
-            bgfx::setVertexBuffer( mesh.vertexBufferHandle );
-            bgfx::submit( 1, content->programMesh, 0, false );
+                    bgfx::setViewRect( 1, 0, 0, uint16_t( width ), uint16_t( height ) );
+                    bgfx::setViewTransform( 1, view, proj );
+                    bgfx::setTransform( world );
+                    bgfx::setState( state );
+                    bgfx::setTexture( 0, content->s_texCube, content->radianceTextureHandles[ content->envId ] );
+                    bgfx::setTexture( 1, content->s_texCubeIrr, content->irradianceTextureHandles[ content->envId ] );
+
+                    content->uniforms.m_rgbDiff[ 0 ] = scene->materials[ node.materialIds[ subset.materialId ] ].albedo.x( );
+                    content->uniforms.m_rgbDiff[ 1 ] = scene->materials[ node.materialIds[ subset.materialId ] ].albedo.y( );
+                    content->uniforms.m_rgbDiff[ 2 ] = scene->materials[ node.materialIds[ subset.materialId ] ].albedo.z( );
+                    content->uniforms.submit( );
+
+                    bgfx::setVertexBuffer( mesh.vertexBufferHandle );
+                    bgfx::setIndexBuffer( mesh.indexBufferHandle, subset.baseIndex, subset.indexCount );
+                    bgfx::submit( 1, content->programMesh, 0, false );
+                }
+            else {
+                ++drawcalls;
+
+                bgfx::setViewRect( 2, 0, 0, uint16_t( width ), uint16_t( height ) );
+                bgfx::setViewTransform( 2, view, proj );
+                bgfx::setTransform( world );
+                bgfx::setState( state );
+                bgfx::setTexture( 0, content->s_texCube, content->radianceTextureHandles[ content->envId ] );
+                bgfx::setTexture( 1, content->s_texCubeIrr, content->irradianceTextureHandles[ content->envId ] );
+                content->uniforms.submit( );
+                bgfx::setVertexBuffer( mesh.vertexBufferHandle );
+                bgfx::submit( 2, content->programMesh, 0, false );
+            }
         }
     } );
 
-    nk_sdl_render( NK_ANTI_ALIASING_ON, 2 );
+    bgfx::dbgTextPrintf( 0, 3, 0x5f, "Draw Calls: %u, %u", drawcalls, drawcallsWithIndices );
+
+    nk_sdl_render( NK_ANTI_ALIASING_ON, 3 );
 }
 
 bool App::IsRunning( ) {
