@@ -37,6 +37,3 @@
 [submodule "ThirdParty/vcache_optimizer"]
 	path = ThirdParty/vcache_optimizer
 	url = git@github.com:dv1/vcache_optimizer.git
-[submodule "ThirdParty/lzma.js"]
-	path = ThirdParty/lzma.js
-	url = git@github.com:kripken/lzma.js.git
