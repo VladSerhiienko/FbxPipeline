@@ -40,6 +40,3 @@
 [submodule "ThirdParty/lzma.js"]
 	path = ThirdParty/lzma.js
 	url = git@github.com:kripken/lzma.js.git
-[submodule "ThirdParty/lz4"]
-	path = ThirdParty/lz4
-	url = git@github.com:lz4/lz4.git
