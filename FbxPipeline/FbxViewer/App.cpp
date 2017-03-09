@@ -387,14 +387,15 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
 
         content->nk = nk_sdl_init( (SDL_Window*) GetSurface( )->GetWindowHandle( ) );
 
-        content->scenes[ 0 ] = LoadSceneFromFile( "../../../assets/MercedesBenzA45AMG.fbxp" );
-        //content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/MercedesBenzSLR.fbxp" );
-        //content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/P90.fbxp" );
-        //content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/IronMan.fbxp" );
-        //content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/Cathedral.fbxp" );
-        //content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/Leica1933.fbxp" );
-        //content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/UnrealOrb.fbxp" );
-        content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/Mech6k.fbxp" );
+        content->scenes[ 0 ] = LoadSceneFromFile( "../../../assets/Mech6k_v2.fbxp" );
+        content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/P90_v2.fbxp" );
+        // content->scenes[ 0 ] = LoadSceneFromFile( "../../../assets/MercedesBenzA45AMG.fbxp" );
+        // content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/MercedesBenzSLR.fbxp" );
+        // content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/P90.fbxp" );
+        // content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/IronMan.fbxp" );
+        // content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/Cathedral.fbxp" );
+        // content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/Leica1933.fbxp" );
+        // content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/UnrealOrb.fbxp" );
         // content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/Artorias.fbxp" );
         // content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/9mm.fbxp" );
         // content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/Knife.fbxp" );
@@ -503,10 +504,9 @@ void App::Update( float deltaSecs, Input const& inputState ) {
     bool hovered = false;
     bool reset   = false;
 
-    if ( nk_begin( content->nk,
-                   "FBXV: Blur Demo.",
-                   nk_rect( 10, 60, 400, 600 ),
-                   NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE ) ) {
+    const nk_flags windowFlags = NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE;
+
+    if ( nk_begin( content->nk, "FBXV: Demo.", nk_rect( 10, 60, 400, 600 ), windowFlags ) ) {
         nk_layout_row_dynamic( content->nk, 20, 1 );
         nk_labelf_wrap( content->nk, "Orbit - left button" );
         nk_labelf_wrap( content->nk, "Zoom - right button" );

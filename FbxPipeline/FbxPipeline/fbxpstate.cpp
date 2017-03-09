@@ -104,10 +104,10 @@ bool fbxp::State::Finish( ) {
             auto propsOffset = builder.CreateVectorOfStructs( material.props );
 
             fb::MaterialFbBuilder materialBuilder( builder );
-            materialBuilder.add_id(material.id);
-            materialBuilder.add_name_id(material.nameId);
+            materialBuilder.add_id( material.id );
+            materialBuilder.add_name_id( material.nameId );
             materialBuilder.add_props( propsOffset );
-            materialOffsets.push_back(materialBuilder.Finish());
+            materialOffsets.push_back( materialBuilder.Finish( ) );
         }
     }
 
@@ -118,24 +118,21 @@ bool fbxp::State::Finish( ) {
     std::vector< flatbuffers::Offset< fb::MeshFb > > meshOffsets; {
         materialOffsets.reserve( meshes.size( ) );
         for ( auto& mesh : meshes ) {
-            auto cpOffset = builder.CreateVectorOfStructs( mesh.controlPoints );
-            auto ppOffset = builder.CreateVector( mesh.polygons );
             auto vsOffset = builder.CreateVector( mesh.vertices );
             auto smOffset = builder.CreateVectorOfStructs( mesh.submeshes );
             auto ssOffset = builder.CreateVectorOfStructs( mesh.subsets );
-            auto iiOffset = builder.CreateVector( mesh.indices );
+            // auto iiOffset = builder.CreateVector( mesh.indices );
             auto siOffset = builder.CreateVector( mesh.subsetIndices );
-            auto spOffset = builder.CreateVectorOfStructs( mesh.subsetsPolies );
+            // auto spOffset = builder.CreateVectorOfStructs( mesh.subsetsPolies );
 
             fb::MeshFbBuilder meshBuilder( builder );
-            meshBuilder.add_ctrl_points( cpOffset );
-            meshBuilder.add_polygons( ppOffset );
             meshBuilder.add_vertices( vsOffset );
             meshBuilder.add_submeshes( smOffset );
             meshBuilder.add_subsets( ssOffset );
-            meshBuilder.add_indices( iiOffset );
-            meshBuilder.add_subset_polies( spOffset );
+            // meshBuilder.add_indices( iiOffset );
+            // meshBuilder.add_subset_polies( spOffset );
             meshBuilder.add_subset_indices( siOffset );
+            meshBuilder.add_subset_index_type( mesh.subsetIndexType );
             meshOffsets.push_back( meshBuilder.Finish( ) );
         }
     }

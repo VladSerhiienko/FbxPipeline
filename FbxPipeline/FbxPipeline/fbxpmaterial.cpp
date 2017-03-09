@@ -120,7 +120,7 @@ void ExportTexture( std::string const& pn, fbxp::Material& m, FbxProperty& pp, F
 }
 
 void ExportTextures( std::string const& pn, fbxp::Material& m, FbxProperty& pp ) {
-    if ( int ltc = pp.GetSrcObjectCount< FbxLayeredTexture >( ) ) {
+    if ( const int ltc = pp.GetSrcObjectCount< FbxLayeredTexture >( ) ) {
         for ( int j = 0; j < ltc; j++ )
             if ( FbxLayeredTexture* lt = pp.GetSrcObject< FbxLayeredTexture >( j ) ) {
                 int lc = lt->GetSrcObjectCount< FbxTexture >( );
@@ -129,12 +129,12 @@ void ExportTextures( std::string const& pn, fbxp::Material& m, FbxProperty& pp )
                 }
             }
     }
-    if ( int tc = pp.GetSrcObjectCount< FbxTexture >( ) ) {
+    if ( const int tc = pp.GetSrcObjectCount< FbxTexture >( ) ) {
         for ( int j = 0; j < tc; j++ ) {
             ExportTexture( pn, m, pp, pp.GetSrcObject< FbxTexture >( j ) );
         }
     }
-    if ( int vc = pp.GetSrcObjectCount< FbxVideo >( ) ) {
+    if ( const int vc = pp.GetSrcObjectCount< FbxVideo >( ) ) {
         for ( int j = 0; j < vc; j++ ) {
             ExportVideo( pn, m, pp, pp.GetSrcObject< FbxVideo >( j ) );
         }
@@ -170,7 +170,6 @@ void ExportMaterials( FbxScene* scene ) {
                              S::sAmbientFactor,
                              S::sBump,
                              S::sBumpFactor,
-                             S::sMultiLayer,
                              S::sDiffuse,
                              S::sDiffuseFactor,
                              S::sDisplacementColor,

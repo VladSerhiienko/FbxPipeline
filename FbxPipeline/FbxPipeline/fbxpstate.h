@@ -6,16 +6,18 @@
 namespace fbxp {
 
     struct Mesh {
+        bool                               hasTexcoords = false;
         fbxp::fb::vec3                     min;
         fbxp::fb::vec3                     max;
-        std::vector< uint32_t >            polygons;
-        std::vector< fbxp::fb::vec3 >      controlPoints;
+        //std::vector< uint32_t >            polygons;
+        //std::vector< fbxp::fb::vec3 >      controlPoints;
         std::vector< fbxp::fb::SubmeshFb > submeshes;
         std::vector< fbxp::fb::SubsetFb >  subsets;
         std::vector< fbxp::fb::SubsetFb >  subsetsPolies;
-        std::vector< uint32_t >            subsetIndices;
+        std::vector< uint8_t >             subsetIndices;
         std::vector< uint8_t >             vertices;
         std::vector< uint8_t >             indices;
+        fbxp::fb::EIndexTypeFb             subsetIndexType;
     };
 
     struct Node {
@@ -52,7 +54,6 @@ namespace fbxp {
         std::vector< fb::TransformFb >    transforms;
         std::vector< fb::TextureFb >      textures;
         std::vector< Mesh >               meshes;
-        std::vector< TupleUintUint >      tempItems;
 
         State( );
         ~State( );

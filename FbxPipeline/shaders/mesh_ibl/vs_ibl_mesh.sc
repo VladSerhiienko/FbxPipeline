@@ -19,6 +19,6 @@ void main()
 	v_view = u_camPos - mul(u_model[0], vec4(a_position, 1.0)).xyz;
 
 	// Normal in world space
-	vec3 normal = a_normal;
+	vec3 normal = a_normal * 2.0 - vec3_splat( 1.0 );
 	v_normal = mul(u_model[0], vec4(normal, 0.0) ).xyz;
 }

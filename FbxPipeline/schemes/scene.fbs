@@ -1,6 +1,9 @@
 
 namespace fbxp.fb;
 
+enum EVersion : uint {
+    Value = 2
+}
 enum ECullingType : uint
 {
 	CullingOff,
@@ -19,12 +22,8 @@ enum EBlendMode : uint {
     Over
 }
 enum EVertexFormat : uint {
-    Static
-}
-enum EVertexTypeFb : uint {
-	Static,
-	StaticCompressed,
-	Count,
+    Static,
+	Packed,
 }
 enum EIndexTypeFb : uint {
 	UInt16,
@@ -61,9 +60,15 @@ struct StaticVertexFb {
     tangent : vec4;
     texCoords : vec2;
 }
+struct PackedVertexFb {
+    position : vec3;
+    normal : uint;
+    tangent : uint;
+    texCoords : uint;
+}
 struct TextureFb {
     id : uint;
-    name_id : ulong;
+    name_id : ulong( key );
     source_id : ulong;
     blend_mode : EBlendMode;
     wrap_mode_u : EWrapMode;
@@ -108,24 +113,20 @@ struct TransformFb {
     geometric_scaling : vec3;
 }
 table MeshFb {
-    polygons : [uint];
-    ctrl_points : [vec3];
     vertices : [ubyte];
-    indices : [ubyte];
     submeshes : [SubmeshFb];
     subsets : [SubsetFb];
-    subset_polies : [SubsetFb];
-    subset_indices : [uint];
-    index_type : EIndexTypeFb;
+    subset_indices : [ubyte];
+    subset_index_type : EIndexTypeFb;
 }
 struct MaterialPropFb {
-    name_id : ulong;
+    name_id : ulong( key );
     type : EMaterialPropTypeFb;
     value : vec3;
 }
 table MaterialFb {
     id : uint;
-    name_id : ulong;
+    name_id : ulong( key );
     props : [MaterialPropFb];
 }
 table NodeFb {

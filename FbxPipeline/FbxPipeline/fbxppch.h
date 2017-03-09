@@ -14,7 +14,6 @@
 #include <flatbuffers/flatbuffers.h>
 #include <spdlog/spdlog.h>
 #include <cxxopts.hpp>
-#include <lz4.h>
 
 //
 // ThirdParty

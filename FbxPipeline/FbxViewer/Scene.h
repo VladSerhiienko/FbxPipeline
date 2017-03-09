@@ -16,12 +16,7 @@ namespace fbxv {
 
 namespace fbxv {
 
-    struct SceneVertex {
-        mathfu::vec3 position;
-        mathfu::vec3 normal;
-        mathfu::vec4 tangent;
-        mathfu::vec2 texCoords;
-
+    struct StaticVertex {
         static bgfx::VertexDecl vertexDecl;
         static void InitializeOnce( ) {
             static bool sInitialized = false;
@@ -37,7 +32,30 @@ namespace fbxv {
         }
     };
 
-    bgfx::VertexDecl SceneVertex::vertexDecl;
+    struct PackedVertex {
+        static bgfx::VertexDecl vertexDecl;
+        static void InitializeOnce( ) {
+            static bool sInitialized = false;
+            if ( !sInitialized ) {
+                sInitialized = true;
+                /*vertexDecl.begin( )
+                    .add( bgfx::Attrib::Position, 3, bgfx::AttribType::Float, false, false )
+                    .add( bgfx::Attrib::Normal, 3, bgfx::AttribType::Uint10, true, true )
+                    .add( bgfx::Attrib::Tangent, 4, bgfx::AttribType::Uint10, true, true )
+                    .add( bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Half, false, false )
+                    .end( );*/
+                vertexDecl.begin( )
+                    .add( bgfx::Attrib::Position, 3, bgfx::AttribType::Float, false, false )
+                    .add( bgfx::Attrib::Normal, 3, bgfx::AttribType::Uint8, true, false )
+                    .add( bgfx::Attrib::Tangent, 4, bgfx::AttribType::Uint8, true, false )
+                    .add( bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Half, false, false )
+                    .end( );
+            }
+        }
+    };
+
+    bgfx::VertexDecl StaticVertex::vertexDecl;
+    bgfx::VertexDecl PackedVertex::vertexDecl;
 
     struct SceneMaterial {
         mathfu::vec4 albedo;
@@ -325,7 +343,7 @@ namespace fbxv {
                 }
 
                 if ( auto meshesFb = sceneFb->meshes( ) ) {
-                    SceneVertex::InitializeOnce( );
+                    PackedVertex::InitializeOnce( );
                     scene->meshes.reserve( meshesFb->size( ) );
 
                     for ( auto meshFb : *meshesFb ) {
@@ -338,18 +356,13 @@ namespace fbxv {
 
                         mesh.vertexBufferHandle = bgfx::createVertexBuffer(
                             bgfxUtils::makeReleasableCopy( meshFb->vertices( )->Data( ), meshFb->vertices( )->size( ) ),
-                            SceneVertex::vertexDecl );
+                            PackedVertex::vertexDecl );
 
-                        //auto vertexIt    = (const fbxp::fb::StaticVertexFb *) meshFb->vertices( )->Data( );
-                        //auto vertexEndIt = vertexIt + meshFb->vertices( )->size( ) / sizeof( fbxp::fb::StaticVertexFb );
-                        //std::vector< fbxp::fb::StaticVertexFb > v( vertexIt, vertexEndIt );
-
-                        if ( meshFb->subsets( ) && meshFb->subsets( )->size( ) && meshFb->subset_indices( ) &&
-                             meshFb->subset_indices( )->size( ) ) {
+                        if ( meshFb->subsets( ) && meshFb->subsets( )->size( ) && meshFb->subset_indices( ) ) {
                             mesh.indexBufferHandle = bgfx::createIndexBuffer(
                                 bgfxUtils::makeReleasableCopy( meshFb->subset_indices( )->Data( ),
-                                                               meshFb->subset_indices( )->size( ) * sizeof( uint32_t ) ),
-                                BGFX_BUFFER_INDEX32 );
+                                                               meshFb->subset_indices( )->size( ) ),
+                                meshFb->subset_index_type( ) == fbxp::fb::EIndexTypeFb_UInt32 ? BGFX_BUFFER_INDEX32 : 0 );
                         }
 
                         mesh.subsets.reserve( meshFb->subsets( )->size( ) );

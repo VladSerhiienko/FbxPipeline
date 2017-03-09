@@ -16,9 +16,6 @@
 [submodule "ThirdParty/selene"]
 	path = ThirdParty/selene
 	url = git@github.com:jeremyong/Selene.git
-[submodule "ThirdParty/lz4"]
-	path = ThirdParty/lz4
-	url = git@github.com:lz4/lz4.git
 [submodule "ThirdParty/cityhash"]
 	path = ThirdParty/cityhash
 	url = git@github.com:google/cityhash.git
@@ -37,3 +34,9 @@
 [submodule "ThirdParty/nuklear"]
 	path = ThirdParty/nuklear
 	url = git@github.com:vurtun/nuklear.git
+[submodule "ThirdParty/vcache_optimizer"]
+	path = ThirdParty/vcache_optimizer
+	url = git@github.com:dv1/vcache_optimizer.git
+[submodule "ThirdParty/lzma.js"]
+	path = ThirdParty/lzma.js
+	url = git@github.com:kripken/lzma.js.git
