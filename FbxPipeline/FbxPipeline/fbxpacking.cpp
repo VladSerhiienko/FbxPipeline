@@ -22,6 +22,17 @@ inline TMathFu Map( const TMathFu input,
     return ( input - input_start ) * output_range / input_range + output_start;
 }
 
+template < typename TMathFu >
+inline void AssertInRange( const TMathFu v, float vmin = 0.0f, float vmax = 1.0f, float tolerance = 0.0001f ) {
+    float values[ sizeof( TMathFu ) / sizeof( float ) ];
+    static_assert( sizeof( values ) == sizeof( v ), "Cannot copy." );
+    memcpy( values, &v, sizeof( values ) );
+
+    for ( auto value : values ) {
+        assert( value >= ( vmin - tolerance ) && value <= ( vmax + tolerance ) );
+    }
+}
+
 struct PackedVertex {
     uint32_t position;
     uint32_t normal;
@@ -68,7 +79,7 @@ uint32_t PackPosition_10_10_10_2( const mathfu::vec3 position,
                                   const mathfu::vec3 positionMax ) {
     const mathfu::vec3 positionSize  = positionMax - positionMin;
     const mathfu::vec3 positionScale = ( position - positionMin ) / positionSize;
-    assert( mathfu::InRange( positionScale, mathfu::vec3( 0.0f ), mathfu::vec3( 1.0f ) ) );
+    AssertInRange( positionScale );
 
     UIntPack_10_10_10_2 packed;
     packed.q.x = Unorm< 10 >( positionScale.x( ) ).Bits( );
@@ -84,7 +95,7 @@ uint32_t PackTexcoord_16_16_fixed( const mathfu::vec2 texcoord,
                                    const mathfu::vec2 texcoordMax ) {
     const mathfu::vec2 texcoordSize  = texcoordMax - texcoordMin;
     const mathfu::vec2 texcoordScale = ( texcoord - texcoordMin ) / texcoordSize;
-    assert( mathfu::InRange( texcoordScale, mathfu::vec2( 0.0f ), mathfu::vec2( 1.0f ) ) );
+    AssertInRange( texcoordScale );
 
     UIntPack_16_16 packed;
     packed.q.x = Unorm< 16 >( texcoordScale.x( ) ).Bits( );
@@ -96,7 +107,7 @@ uint32_t PackTexcoord_16_16_fixed( const mathfu::vec2 texcoord,
 uint32_t PackTexcoord_16_16_half( const mathfu::vec2 texcoord,
                                   const mathfu::vec2 texcoordMin,
                                   const mathfu::vec2 texcoordMax ) {
-    const bool sOverflowCheck = true;
+    const bool sOverflowCheck = FBXP_DEBUG;
 
     UIntPack_16_16 packed;
     packed.q.x = Half< sOverflowCheck >( texcoord.x( ) ).Bits( );
@@ -106,8 +117,10 @@ uint32_t PackTexcoord_16_16_half( const mathfu::vec2 texcoord,
 }
 
 uint32_t PackNormal_10_10_10_2( const mathfu::vec3 normal ) {
-    assert( normal.Length( ) <= 1.0f );
+    AssertInRange( normal.Length( ) );
+
     const mathfu::vec3 n = normal * 0.5f + 0.5f;
+    AssertInRange( n );
 
     UIntPack_10_10_10_2 packed;
     packed.q.x = Unorm< 10 >( n.x( ) ).Bits( );
@@ -119,16 +132,18 @@ uint32_t PackNormal_10_10_10_2( const mathfu::vec3 normal ) {
 }
 
 uint32_t PackTangent_10_10_10_2( const mathfu::vec4 tangent ) {
+    AssertInRange( tangent.w( ), -1.f, +1.f );
     UIntPack_10_10_10_2 packed;
-    packed.u = PackNormal_10_10_10_2( mathfu::vec4::ToType< mathfu::vec3 >( tangent ).Normalized( ) );
+    packed.u = PackNormal_10_10_10_2( mathfu::vec3( tangent.x( ), tangent.y( ), tangent.z( ) ).Normalized( ) );
     packed.q.w = Unorm< 2 >( tangent.w( ) * 0.5f + 0.5f ).Bits( );
     return packed.u;
 }
 
 uint32_t PackNormal_8_8_8_8( const mathfu::vec3 normal ) {
-    assert( normal.Length( ) <= 1.0f );
+    AssertInRange( normal.Length( ) );
 
     const mathfu::vec3 n = normal * 0.5f + 0.5f;
+    AssertInRange( n );
 
     UIntPack_8_8_8_8 packedPosition;
     packedPosition.q.x = Unorm< 8 >( n.x( ) ).Bits( );
@@ -140,8 +155,9 @@ uint32_t PackNormal_8_8_8_8( const mathfu::vec3 normal ) {
 }
 
 uint32_t PackTangent_8_8_8_8( const mathfu::vec4 tangent ) {
+    AssertInRange( tangent.w( ), -1.f, +1.f );
     UIntPack_8_8_8_8 packed;
-    packed.u   = PackNormal_8_8_8_8( mathfu::vec4::ToType< mathfu::vec3 >( tangent ).Normalized( ) );
+    packed.u = PackNormal_8_8_8_8( mathfu::vec3( tangent.x( ), tangent.y( ), tangent.z( ) ).Normalized( ) );
     packed.q.w = Unorm< 8 >( tangent.w( ) * 0.5f + 0.5f ).Bits( );
     return packed.u;
 }
