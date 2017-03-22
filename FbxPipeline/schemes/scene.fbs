@@ -58,13 +58,13 @@ struct StaticVertexFb {
     position : vec3;
     normal : vec3;
     tangent : vec4;
-    texCoords : vec2;
+    uv : vec2;
 }
 struct PackedVertexFb {
-    position : vec3;
+    position : uint;
     normal : uint;
     tangent : uint;
-    texCoords : uint;
+    uv : uint;
 }
 struct TextureFb {
     id : uint;
@@ -79,6 +79,12 @@ struct TextureFb {
     scale_v : float;
 }
 struct SubmeshFb {
+	bbox_min : vec3;
+	bbox_max : vec3;
+	position_offset : vec3;
+	position_scale : vec3;
+	uv_offset : vec2;
+	uv_scale : vec2;
     base_vertex : uint;
     vertex_count : uint;
     base_index : uint;

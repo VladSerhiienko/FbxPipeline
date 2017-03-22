@@ -7,10 +7,14 @@ namespace fbxp {
 
     struct Mesh {
         bool                               hasTexcoords = false;
-        fbxp::fb::vec3                     min;
-        fbxp::fb::vec3                     max;
-        //std::vector< uint32_t >            polygons;
-        //std::vector< fbxp::fb::vec3 >      controlPoints;
+        fbxp::fb::vec3                     positionMin;
+        fbxp::fb::vec3                     positionMax;
+        fbxp::fb::vec3                     positionOffset;
+        fbxp::fb::vec3                     positionScale;
+        fbxp::fb::vec2                     texcoordMin;
+        fbxp::fb::vec2                     texcoordMax;
+        fbxp::fb::vec2                     texcoordOffset;
+        fbxp::fb::vec2                     texcoordScale;
         std::vector< fbxp::fb::SubmeshFb > submeshes;
         std::vector< fbxp::fb::SubsetFb >  subsets;
         std::vector< fbxp::fb::SubsetFb >  subsetsPolies;

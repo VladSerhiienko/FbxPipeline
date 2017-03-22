@@ -37,6 +37,12 @@
     <ClCompile Include="fbxpmem.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
+    <ClCompile Include="fbxpacking.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="fbxpmeshopt.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\schemes\scene.fbs">
@@ -48,6 +54,9 @@
       <Filter>Sources</Filter>
     </ClInclude>
     <ClInclude Include="fbxpstate.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="fbxpnorm.h">
       <Filter>Sources</Filter>
     </ClInclude>
   </ItemGroup>

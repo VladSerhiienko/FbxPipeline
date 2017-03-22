@@ -15,6 +15,13 @@ fbxp.fb = fbxp.fb || {};
 /**
  * @enum
  */
+fbxp.fb.EVersion = {
+  Value: 2
+};
+
+/**
+ * @enum
+ */
 fbxp.fb.ECullingType = {
   CullingOff: 0,
   CullingOnCCW: 1,
@@ -44,16 +51,8 @@ fbxp.fb.EBlendMode = {
  * @enum
  */
 fbxp.fb.EVertexFormat = {
-  Static: 0
-};
-
-/**
- * @enum
- */
-fbxp.fb.EVertexTypeFb = {
   Static: 0,
-  StaticCompressed: 1,
-  Count: 2
+  Packed: 1
 };
 
 /**
@@ -351,6 +350,83 @@ fbxp.fb.StaticVertexFb.createStaticVertexFb = function(builder, position_x, posi
   builder.writeFloat32(normal_z);
   builder.writeFloat32(normal_y);
   builder.writeFloat32(normal_x);
+  builder.prep(4, 12);
+  builder.writeFloat32(position_z);
+  builder.writeFloat32(position_y);
+  builder.writeFloat32(position_x);
+  return builder.offset();
+};
+
+/**
+ * @constructor
+ */
+fbxp.fb.PackedVertexFb = function() {
+  /**
+   * @type {flatbuffers.ByteBuffer}
+   */
+  this.bb = null;
+
+  /**
+   * @type {number}
+   */
+  this.bb_pos = 0;
+};
+
+/**
+ * @param {number} i
+ * @param {flatbuffers.ByteBuffer} bb
+ * @returns {fbxp.fb.PackedVertexFb}
+ */
+fbxp.fb.PackedVertexFb.prototype.__init = function(i, bb) {
+  this.bb_pos = i;
+  this.bb = bb;
+  return this;
+};
+
+/**
+ * @param {fbxp.fb.vec3=} obj
+ * @returns {fbxp.fb.vec3}
+ */
+fbxp.fb.PackedVertexFb.prototype.position = function(obj) {
+  return (obj || new fbxp.fb.vec3).__init(this.bb_pos, this.bb);
+};
+
+/**
+ * @returns {number}
+ */
+fbxp.fb.PackedVertexFb.prototype.normal = function() {
+  return this.bb.readUint32(this.bb_pos + 12);
+};
+
+/**
+ * @returns {number}
+ */
+fbxp.fb.PackedVertexFb.prototype.tangent = function() {
+  return this.bb.readUint32(this.bb_pos + 16);
+};
+
+/**
+ * @returns {number}
+ */
+fbxp.fb.PackedVertexFb.prototype.texCoords = function() {
+  return this.bb.readUint32(this.bb_pos + 20);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {number} position_x
+ * @param {number} position_y
+ * @param {number} position_z
+ * @param {number} normal
+ * @param {number} tangent
+ * @param {number} texCoords
+ * @returns {flatbuffers.Offset}
+ */
+fbxp.fb.PackedVertexFb.createPackedVertexFb = function(builder, position_x, position_y, position_z, normal, tangent, texCoords) {
+  builder.prep(4, 24);
+  builder.writeInt32(texCoords);
+  builder.writeInt32(tangent);
+  builder.writeInt32(normal);
   builder.prep(4, 12);
   builder.writeFloat32(position_z);
   builder.writeFloat32(position_y);
@@ -993,51 +1069,8 @@ fbxp.fb.MeshFb.getRootAsMeshFb = function(bb, obj) {
  * @param {number} index
  * @returns {number}
  */
-fbxp.fb.MeshFb.prototype.polygons = function(index) {
-  var offset = this.bb.__offset(this.bb_pos, 4);
-  return offset ? this.bb.readUint32(this.bb.__vector(this.bb_pos + offset) + index * 4) : 0;
-};
-
-/**
- * @returns {number}
- */
-fbxp.fb.MeshFb.prototype.polygonsLength = function() {
-  var offset = this.bb.__offset(this.bb_pos, 4);
-  return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
-};
-
-/**
- * @returns {Uint32Array}
- */
-fbxp.fb.MeshFb.prototype.polygonsArray = function() {
-  var offset = this.bb.__offset(this.bb_pos, 4);
-  return offset ? new Uint32Array(this.bb.bytes().buffer, this.bb.bytes().byteOffset + this.bb.__vector(this.bb_pos + offset), this.bb.__vector_len(this.bb_pos + offset)) : null;
-};
-
-/**
- * @param {number} index
- * @param {fbxp.fb.vec3=} obj
- * @returns {fbxp.fb.vec3}
- */
-fbxp.fb.MeshFb.prototype.ctrlPoints = function(index, obj) {
-  var offset = this.bb.__offset(this.bb_pos, 6);
-  return offset ? (obj || new fbxp.fb.vec3).__init(this.bb.__vector(this.bb_pos + offset) + index * 12, this.bb) : null;
-};
-
-/**
- * @returns {number}
- */
-fbxp.fb.MeshFb.prototype.ctrlPointsLength = function() {
-  var offset = this.bb.__offset(this.bb_pos, 6);
-  return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
-};
-
-/**
- * @param {number} index
- * @returns {number}
- */
 fbxp.fb.MeshFb.prototype.vertices = function(index) {
-  var offset = this.bb.__offset(this.bb_pos, 8);
+  var offset = this.bb.__offset(this.bb_pos, 4);
   return offset ? this.bb.readUint8(this.bb.__vector(this.bb_pos + offset) + index) : 0;
 };
 
@@ -1045,7 +1078,7 @@ fbxp.fb.MeshFb.prototype.vertices = function(index) {
  * @returns {number}
  */
 fbxp.fb.MeshFb.prototype.verticesLength = function() {
-  var offset = this.bb.__offset(this.bb_pos, 8);
+  var offset = this.bb.__offset(this.bb_pos, 4);
   return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
 };
 
@@ -1053,32 +1086,7 @@ fbxp.fb.MeshFb.prototype.verticesLength = function() {
  * @returns {Uint8Array}
  */
 fbxp.fb.MeshFb.prototype.verticesArray = function() {
-  var offset = this.bb.__offset(this.bb_pos, 8);
-  return offset ? new Uint8Array(this.bb.bytes().buffer, this.bb.bytes().byteOffset + this.bb.__vector(this.bb_pos + offset), this.bb.__vector_len(this.bb_pos + offset)) : null;
-};
-
-/**
- * @param {number} index
- * @returns {number}
- */
-fbxp.fb.MeshFb.prototype.indices = function(index) {
-  var offset = this.bb.__offset(this.bb_pos, 10);
-  return offset ? this.bb.readUint8(this.bb.__vector(this.bb_pos + offset) + index) : 0;
-};
-
-/**
- * @returns {number}
- */
-fbxp.fb.MeshFb.prototype.indicesLength = function() {
-  var offset = this.bb.__offset(this.bb_pos, 10);
-  return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
-};
-
-/**
- * @returns {Uint8Array}
- */
-fbxp.fb.MeshFb.prototype.indicesArray = function() {
-  var offset = this.bb.__offset(this.bb_pos, 10);
+  var offset = this.bb.__offset(this.bb_pos, 4);
   return offset ? new Uint8Array(this.bb.bytes().buffer, this.bb.bytes().byteOffset + this.bb.__vector(this.bb_pos + offset), this.bb.__vector_len(this.bb_pos + offset)) : null;
 };
 
@@ -1088,7 +1096,7 @@ fbxp.fb.MeshFb.prototype.indicesArray = function() {
  * @returns {fbxp.fb.SubmeshFb}
  */
 fbxp.fb.MeshFb.prototype.submeshes = function(index, obj) {
-  var offset = this.bb.__offset(this.bb_pos, 12);
+  var offset = this.bb.__offset(this.bb_pos, 6);
   return offset ? (obj || new fbxp.fb.SubmeshFb).__init(this.bb.__vector(this.bb_pos + offset) + index * 28, this.bb) : null;
 };
 
@@ -1096,7 +1104,7 @@ fbxp.fb.MeshFb.prototype.submeshes = function(index, obj) {
  * @returns {number}
  */
 fbxp.fb.MeshFb.prototype.submeshesLength = function() {
-  var offset = this.bb.__offset(this.bb_pos, 12);
+  var offset = this.bb.__offset(this.bb_pos, 6);
   return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
 };
 
@@ -1106,7 +1114,7 @@ fbxp.fb.MeshFb.prototype.submeshesLength = function() {
  * @returns {fbxp.fb.SubsetFb}
  */
 fbxp.fb.MeshFb.prototype.subsets = function(index, obj) {
-  var offset = this.bb.__offset(this.bb_pos, 14);
+  var offset = this.bb.__offset(this.bb_pos, 8);
   return offset ? (obj || new fbxp.fb.SubsetFb).__init(this.bb.__vector(this.bb_pos + offset) + index * 12, this.bb) : null;
 };
 
@@ -1114,25 +1122,7 @@ fbxp.fb.MeshFb.prototype.subsets = function(index, obj) {
  * @returns {number}
  */
 fbxp.fb.MeshFb.prototype.subsetsLength = function() {
-  var offset = this.bb.__offset(this.bb_pos, 14);
-  return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
-};
-
-/**
- * @param {number} index
- * @param {fbxp.fb.SubsetFb=} obj
- * @returns {fbxp.fb.SubsetFb}
- */
-fbxp.fb.MeshFb.prototype.subsetPolies = function(index, obj) {
-  var offset = this.bb.__offset(this.bb_pos, 16);
-  return offset ? (obj || new fbxp.fb.SubsetFb).__init(this.bb.__vector(this.bb_pos + offset) + index * 12, this.bb) : null;
-};
-
-/**
- * @returns {number}
- */
-fbxp.fb.MeshFb.prototype.subsetPoliesLength = function() {
-  var offset = this.bb.__offset(this.bb_pos, 16);
+  var offset = this.bb.__offset(this.bb_pos, 8);
   return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
 };
 
@@ -1141,31 +1131,31 @@ fbxp.fb.MeshFb.prototype.subsetPoliesLength = function() {
  * @returns {number}
  */
 fbxp.fb.MeshFb.prototype.subsetIndices = function(index) {
-  var offset = this.bb.__offset(this.bb_pos, 18);
-  return offset ? this.bb.readUint32(this.bb.__vector(this.bb_pos + offset) + index * 4) : 0;
+  var offset = this.bb.__offset(this.bb_pos, 10);
+  return offset ? this.bb.readUint8(this.bb.__vector(this.bb_pos + offset) + index) : 0;
 };
 
 /**
  * @returns {number}
  */
 fbxp.fb.MeshFb.prototype.subsetIndicesLength = function() {
-  var offset = this.bb.__offset(this.bb_pos, 18);
+  var offset = this.bb.__offset(this.bb_pos, 10);
   return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
 };
 
 /**
- * @returns {Uint32Array}
+ * @returns {Uint8Array}
  */
 fbxp.fb.MeshFb.prototype.subsetIndicesArray = function() {
-  var offset = this.bb.__offset(this.bb_pos, 18);
-  return offset ? new Uint32Array(this.bb.bytes().buffer, this.bb.bytes().byteOffset + this.bb.__vector(this.bb_pos + offset), this.bb.__vector_len(this.bb_pos + offset)) : null;
+  var offset = this.bb.__offset(this.bb_pos, 10);
+  return offset ? new Uint8Array(this.bb.bytes().buffer, this.bb.bytes().byteOffset + this.bb.__vector(this.bb_pos + offset), this.bb.__vector_len(this.bb_pos + offset)) : null;
 };
 
 /**
  * @returns {fbxp.fb.EIndexTypeFb}
  */
-fbxp.fb.MeshFb.prototype.indexType = function() {
-  var offset = this.bb.__offset(this.bb_pos, 20);
+fbxp.fb.MeshFb.prototype.subsetIndexType = function() {
+  var offset = this.bb.__offset(this.bb_pos, 12);
   return offset ? /** @type {fbxp.fb.EIndexTypeFb} */ (this.bb.readUint32(this.bb_pos + offset)) : fbxp.fb.EIndexTypeFb.UInt16;
 };
 
@@ -1173,52 +1163,7 @@ fbxp.fb.MeshFb.prototype.indexType = function() {
  * @param {flatbuffers.Builder} builder
  */
 fbxp.fb.MeshFb.startMeshFb = function(builder) {
-  builder.startObject(9);
-};
-
-/**
- * @param {flatbuffers.Builder} builder
- * @param {flatbuffers.Offset} polygonsOffset
- */
-fbxp.fb.MeshFb.addPolygons = function(builder, polygonsOffset) {
-  builder.addFieldOffset(0, polygonsOffset, 0);
-};
-
-/**
- * @param {flatbuffers.Builder} builder
- * @param {Array.<number>} data
- * @returns {flatbuffers.Offset}
- */
-fbxp.fb.MeshFb.createPolygonsVector = function(builder, data) {
-  builder.startVector(4, data.length, 4);
-  for (var i = data.length - 1; i >= 0; i--) {
-    builder.addInt32(data[i]);
-  }
-  return builder.endVector();
-};
-
-/**
- * @param {flatbuffers.Builder} builder
- * @param {number} numElems
- */
-fbxp.fb.MeshFb.startPolygonsVector = function(builder, numElems) {
-  builder.startVector(4, numElems, 4);
-};
-
-/**
- * @param {flatbuffers.Builder} builder
- * @param {flatbuffers.Offset} ctrlPointsOffset
- */
-fbxp.fb.MeshFb.addCtrlPoints = function(builder, ctrlPointsOffset) {
-  builder.addFieldOffset(1, ctrlPointsOffset, 0);
-};
-
-/**
- * @param {flatbuffers.Builder} builder
- * @param {number} numElems
- */
-fbxp.fb.MeshFb.startCtrlPointsVector = function(builder, numElems) {
-  builder.startVector(12, numElems, 4);
+  builder.startObject(5);
 };
 
 /**
@@ -1226,7 +1171,7 @@ fbxp.fb.MeshFb.startCtrlPointsVector = function(builder, numElems) {
  * @param {flatbuffers.Offset} verticesOffset
  */
 fbxp.fb.MeshFb.addVertices = function(builder, verticesOffset) {
-  builder.addFieldOffset(2, verticesOffset, 0);
+  builder.addFieldOffset(0, verticesOffset, 0);
 };
 
 /**
@@ -1252,39 +1197,10 @@ fbxp.fb.MeshFb.startVerticesVector = function(builder, numElems) {
 
 /**
  * @param {flatbuffers.Builder} builder
- * @param {flatbuffers.Offset} indicesOffset
- */
-fbxp.fb.MeshFb.addIndices = function(builder, indicesOffset) {
-  builder.addFieldOffset(3, indicesOffset, 0);
-};
-
-/**
- * @param {flatbuffers.Builder} builder
- * @param {Array.<number>} data
- * @returns {flatbuffers.Offset}
- */
-fbxp.fb.MeshFb.createIndicesVector = function(builder, data) {
-  builder.startVector(1, data.length, 1);
-  for (var i = data.length - 1; i >= 0; i--) {
-    builder.addInt8(data[i]);
-  }
-  return builder.endVector();
-};
-
-/**
- * @param {flatbuffers.Builder} builder
- * @param {number} numElems
- */
-fbxp.fb.MeshFb.startIndicesVector = function(builder, numElems) {
-  builder.startVector(1, numElems, 1);
-};
-
-/**
- * @param {flatbuffers.Builder} builder
  * @param {flatbuffers.Offset} submeshesOffset
  */
 fbxp.fb.MeshFb.addSubmeshes = function(builder, submeshesOffset) {
-  builder.addFieldOffset(4, submeshesOffset, 0);
+  builder.addFieldOffset(1, submeshesOffset, 0);
 };
 
 /**
@@ -1300,7 +1216,7 @@ fbxp.fb.MeshFb.startSubmeshesVector = function(builder, numElems) {
  * @param {flatbuffers.Offset} subsetsOffset
  */
 fbxp.fb.MeshFb.addSubsets = function(builder, subsetsOffset) {
-  builder.addFieldOffset(5, subsetsOffset, 0);
+  builder.addFieldOffset(2, subsetsOffset, 0);
 };
 
 /**
@@ -1313,26 +1229,10 @@ fbxp.fb.MeshFb.startSubsetsVector = function(builder, numElems) {
 
 /**
  * @param {flatbuffers.Builder} builder
- * @param {flatbuffers.Offset} subsetPoliesOffset
- */
-fbxp.fb.MeshFb.addSubsetPolies = function(builder, subsetPoliesOffset) {
-  builder.addFieldOffset(6, subsetPoliesOffset, 0);
-};
-
-/**
- * @param {flatbuffers.Builder} builder
- * @param {number} numElems
- */
-fbxp.fb.MeshFb.startSubsetPoliesVector = function(builder, numElems) {
-  builder.startVector(12, numElems, 4);
-};
-
-/**
- * @param {flatbuffers.Builder} builder
  * @param {flatbuffers.Offset} subsetIndicesOffset
  */
 fbxp.fb.MeshFb.addSubsetIndices = function(builder, subsetIndicesOffset) {
-  builder.addFieldOffset(7, subsetIndicesOffset, 0);
+  builder.addFieldOffset(3, subsetIndicesOffset, 0);
 };
 
 /**
@@ -1341,9 +1241,9 @@ fbxp.fb.MeshFb.addSubsetIndices = function(builder, subsetIndicesOffset) {
  * @returns {flatbuffers.Offset}
  */
 fbxp.fb.MeshFb.createSubsetIndicesVector = function(builder, data) {
-  builder.startVector(4, data.length, 4);
+  builder.startVector(1, data.length, 1);
   for (var i = data.length - 1; i >= 0; i--) {
-    builder.addInt32(data[i]);
+    builder.addInt8(data[i]);
   }
   return builder.endVector();
 };
@@ -1353,15 +1253,15 @@ fbxp.fb.MeshFb.createSubsetIndicesVector = function(builder, data) {
  * @param {number} numElems
  */
 fbxp.fb.MeshFb.startSubsetIndicesVector = function(builder, numElems) {
-  builder.startVector(4, numElems, 4);
+  builder.startVector(1, numElems, 1);
 };
 
 /**
  * @param {flatbuffers.Builder} builder
- * @param {fbxp.fb.EIndexTypeFb} indexType
+ * @param {fbxp.fb.EIndexTypeFb} subsetIndexType
  */
-fbxp.fb.MeshFb.addIndexType = function(builder, indexType) {
-  builder.addFieldInt32(8, indexType, fbxp.fb.EIndexTypeFb.UInt16);
+fbxp.fb.MeshFb.addSubsetIndexType = function(builder, subsetIndexType) {
+  builder.addFieldInt32(4, subsetIndexType, fbxp.fb.EIndexTypeFb.UInt16);
 };
 
 /**

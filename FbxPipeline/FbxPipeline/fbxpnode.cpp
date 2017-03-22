@@ -2,7 +2,7 @@
 #include <fbxpstate.h>
 #include <queue>
 
-void ExportMesh( FbxNode* node, fbxp::Node& n );
+void ExportMesh( FbxNode* node, fbxp::Node& n, bool pack );
 void ExportMaterials( FbxScene* scene );
 void ExportMaterials( FbxNode* node, fbxp::Node& n );
 void ExportTransform( FbxNode* node, fbxp::Node& n );
@@ -16,7 +16,7 @@ void ExportNodeAttributes( FbxNode* node, fbxp::Node& n ) {
 
     ExportTransform( node, n );
     ExportAnimation( node, n );
-    ExportMesh( node, n );
+    ExportMesh( node, n, true );
     ExportMaterials( node, n );
 }
 

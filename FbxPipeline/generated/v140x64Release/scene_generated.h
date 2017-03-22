@@ -17,6 +17,8 @@ struct vec4;
 
 struct StaticVertexFb;
 
+struct PackedVertexFb;
+
 struct TextureFb;
 
 struct SubmeshFb;
@@ -36,6 +38,25 @@ struct MaterialFb;
 struct NodeFb;
 
 struct SceneFb;
+
+enum EVersion {
+  EVersion_Value = 2,
+  EVersion_MIN = EVersion_Value,
+  EVersion_MAX = EVersion_Value
+};
+
+inline const char **EnumNamesEVersion() {
+  static const char *names[] = {
+    "Value",
+    nullptr
+  };
+  return names;
+}
+
+inline const char *EnumNameEVersion(EVersion e) {
+  const size_t index = static_cast<int>(e) - static_cast<int>(EVersion_Value);
+  return EnumNamesEVersion()[index];
+}
 
 enum ECullingType {
   ECullingType_CullingOff = 0,
@@ -110,13 +131,15 @@ inline const char *EnumNameEBlendMode(EBlendMode e) {
 
 enum EVertexFormat {
   EVertexFormat_Static = 0,
+  EVertexFormat_Packed = 1,
   EVertexFormat_MIN = EVertexFormat_Static,
-  EVertexFormat_MAX = EVertexFormat_Static
+  EVertexFormat_MAX = EVertexFormat_Packed
 };
 
 inline const char **EnumNamesEVertexFormat() {
   static const char *names[] = {
     "Static",
+    "Packed",
     nullptr
   };
   return names;
@@ -125,29 +148,6 @@ inline const char **EnumNamesEVertexFormat() {
 inline const char *EnumNameEVertexFormat(EVertexFormat e) {
   const size_t index = static_cast<int>(e);
   return EnumNamesEVertexFormat()[index];
-}
-
-enum EVertexTypeFb {
-  EVertexTypeFb_Static = 0,
-  EVertexTypeFb_StaticCompressed = 1,
-  EVertexTypeFb_Count = 2,
-  EVertexTypeFb_MIN = EVertexTypeFb_Static,
-  EVertexTypeFb_MAX = EVertexTypeFb_Count
-};
-
-inline const char **EnumNamesEVertexTypeFb() {
-  static const char *names[] = {
-    "Static",
-    "StaticCompressed",
-    "Count",
-    nullptr
-  };
-  return names;
-}
-
-inline const char *EnumNameEVertexTypeFb(EVertexTypeFb e) {
-  const size_t index = static_cast<int>(e);
-  return EnumNamesEVertexTypeFb()[index];
 }
 
 enum EIndexTypeFb {
@@ -326,6 +326,41 @@ MANUALLY_ALIGNED_STRUCT(4) StaticVertexFb FLATBUFFERS_FINAL_CLASS {
   }
 };
 STRUCT_END(StaticVertexFb, 48);
+
+MANUALLY_ALIGNED_STRUCT(4) PackedVertexFb FLATBUFFERS_FINAL_CLASS {
+ private:
+  vec3 position_;
+  uint32_t normal_;
+  uint32_t tangent_;
+  uint32_t texCoords_;
+
+ public:
+  PackedVertexFb() {
+    memset(this, 0, sizeof(PackedVertexFb));
+  }
+  PackedVertexFb(const PackedVertexFb &_o) {
+    memcpy(this, &_o, sizeof(PackedVertexFb));
+  }
+  PackedVertexFb(const vec3 &_position, uint32_t _normal, uint32_t _tangent, uint32_t _texCoords)
+      : position_(_position),
+        normal_(flatbuffers::EndianScalar(_normal)),
+        tangent_(flatbuffers::EndianScalar(_tangent)),
+        texCoords_(flatbuffers::EndianScalar(_texCoords)) {
+  }
+  const vec3 &position() const {
+    return position_;
+  }
+  uint32_t normal() const {
+    return flatbuffers::EndianScalar(normal_);
+  }
+  uint32_t tangent() const {
+    return flatbuffers::EndianScalar(tangent_);
+  }
+  uint32_t texCoords() const {
+    return flatbuffers::EndianScalar(texCoords_);
+  }
+};
+STRUCT_END(PackedVertexFb, 24);
 
 MANUALLY_ALIGNED_STRUCT(8) TextureFb FLATBUFFERS_FINAL_CLASS {
  private:
@@ -666,27 +701,14 @@ inline flatbuffers::Offset<NameFb> CreateNameFbDirect(
 
 struct MeshFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   enum {
-    VT_POLYGONS = 4,
-    VT_CTRL_POINTS = 6,
-    VT_VERTICES = 8,
-    VT_INDICES = 10,
-    VT_SUBMESHES = 12,
-    VT_SUBSETS = 14,
-    VT_SUBSET_POLIES = 16,
-    VT_SUBSET_INDICES = 18,
-    VT_INDEX_TYPE = 20
+    VT_VERTICES = 4,
+    VT_SUBMESHES = 6,
+    VT_SUBSETS = 8,
+    VT_SUBSET_INDICES = 10,
+    VT_SUBSET_INDEX_TYPE = 12
   };
-  const flatbuffers::Vector<uint32_t> *polygons() const {
-    return GetPointer<const flatbuffers::Vector<uint32_t> *>(VT_POLYGONS);
-  }
-  const flatbuffers::Vector<const vec3 *> *ctrl_points() const {
-    return GetPointer<const flatbuffers::Vector<const vec3 *> *>(VT_CTRL_POINTS);
-  }
   const flatbuffers::Vector<uint8_t> *vertices() const {
     return GetPointer<const flatbuffers::Vector<uint8_t> *>(VT_VERTICES);
-  }
-  const flatbuffers::Vector<uint8_t> *indices() const {
-    return GetPointer<const flatbuffers::Vector<uint8_t> *>(VT_INDICES);
   }
   const flatbuffers::Vector<const SubmeshFb *> *submeshes() const {
     return GetPointer<const flatbuffers::Vector<const SubmeshFb *> *>(VT_SUBMESHES);
@@ -694,34 +716,23 @@ struct MeshFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flatbuffers::Vector<const SubsetFb *> *subsets() const {
     return GetPointer<const flatbuffers::Vector<const SubsetFb *> *>(VT_SUBSETS);
   }
-  const flatbuffers::Vector<const SubsetFb *> *subset_polies() const {
-    return GetPointer<const flatbuffers::Vector<const SubsetFb *> *>(VT_SUBSET_POLIES);
+  const flatbuffers::Vector<uint8_t> *subset_indices() const {
+    return GetPointer<const flatbuffers::Vector<uint8_t> *>(VT_SUBSET_INDICES);
   }
-  const flatbuffers::Vector<uint32_t> *subset_indices() const {
-    return GetPointer<const flatbuffers::Vector<uint32_t> *>(VT_SUBSET_INDICES);
-  }
-  EIndexTypeFb index_type() const {
-    return static_cast<EIndexTypeFb>(GetField<uint32_t>(VT_INDEX_TYPE, 0));
+  EIndexTypeFb subset_index_type() const {
+    return static_cast<EIndexTypeFb>(GetField<uint32_t>(VT_SUBSET_INDEX_TYPE, 0));
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, VT_POLYGONS) &&
-           verifier.Verify(polygons()) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, VT_CTRL_POINTS) &&
-           verifier.Verify(ctrl_points()) &&
            VerifyField<flatbuffers::uoffset_t>(verifier, VT_VERTICES) &&
            verifier.Verify(vertices()) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, VT_INDICES) &&
-           verifier.Verify(indices()) &&
            VerifyField<flatbuffers::uoffset_t>(verifier, VT_SUBMESHES) &&
            verifier.Verify(submeshes()) &&
            VerifyField<flatbuffers::uoffset_t>(verifier, VT_SUBSETS) &&
            verifier.Verify(subsets()) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, VT_SUBSET_POLIES) &&
-           verifier.Verify(subset_polies()) &&
            VerifyField<flatbuffers::uoffset_t>(verifier, VT_SUBSET_INDICES) &&
            verifier.Verify(subset_indices()) &&
-           VerifyField<uint32_t>(verifier, VT_INDEX_TYPE) &&
+           VerifyField<uint32_t>(verifier, VT_SUBSET_INDEX_TYPE) &&
            verifier.EndTable();
   }
 };
@@ -729,17 +740,8 @@ struct MeshFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
 struct MeshFbBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
-  void add_polygons(flatbuffers::Offset<flatbuffers::Vector<uint32_t>> polygons) {
-    fbb_.AddOffset(MeshFb::VT_POLYGONS, polygons);
-  }
-  void add_ctrl_points(flatbuffers::Offset<flatbuffers::Vector<const vec3 *>> ctrl_points) {
-    fbb_.AddOffset(MeshFb::VT_CTRL_POINTS, ctrl_points);
-  }
   void add_vertices(flatbuffers::Offset<flatbuffers::Vector<uint8_t>> vertices) {
     fbb_.AddOffset(MeshFb::VT_VERTICES, vertices);
-  }
-  void add_indices(flatbuffers::Offset<flatbuffers::Vector<uint8_t>> indices) {
-    fbb_.AddOffset(MeshFb::VT_INDICES, indices);
   }
   void add_submeshes(flatbuffers::Offset<flatbuffers::Vector<const SubmeshFb *>> submeshes) {
     fbb_.AddOffset(MeshFb::VT_SUBMESHES, submeshes);
@@ -747,14 +749,11 @@ struct MeshFbBuilder {
   void add_subsets(flatbuffers::Offset<flatbuffers::Vector<const SubsetFb *>> subsets) {
     fbb_.AddOffset(MeshFb::VT_SUBSETS, subsets);
   }
-  void add_subset_polies(flatbuffers::Offset<flatbuffers::Vector<const SubsetFb *>> subset_polies) {
-    fbb_.AddOffset(MeshFb::VT_SUBSET_POLIES, subset_polies);
-  }
-  void add_subset_indices(flatbuffers::Offset<flatbuffers::Vector<uint32_t>> subset_indices) {
+  void add_subset_indices(flatbuffers::Offset<flatbuffers::Vector<uint8_t>> subset_indices) {
     fbb_.AddOffset(MeshFb::VT_SUBSET_INDICES, subset_indices);
   }
-  void add_index_type(EIndexTypeFb index_type) {
-    fbb_.AddElement<uint32_t>(MeshFb::VT_INDEX_TYPE, static_cast<uint32_t>(index_type), 0);
+  void add_subset_index_type(EIndexTypeFb subset_index_type) {
+    fbb_.AddElement<uint32_t>(MeshFb::VT_SUBSET_INDEX_TYPE, static_cast<uint32_t>(subset_index_type), 0);
   }
   MeshFbBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
@@ -762,7 +761,7 @@ struct MeshFbBuilder {
   }
   MeshFbBuilder &operator=(const MeshFbBuilder &);
   flatbuffers::Offset<MeshFb> Finish() {
-    const auto end = fbb_.EndTable(start_, 9);
+    const auto end = fbb_.EndTable(start_, 5);
     auto o = flatbuffers::Offset<MeshFb>(end);
     return o;
   }
@@ -770,50 +769,34 @@ struct MeshFbBuilder {
 
 inline flatbuffers::Offset<MeshFb> CreateMeshFb(
     flatbuffers::FlatBufferBuilder &_fbb,
-    flatbuffers::Offset<flatbuffers::Vector<uint32_t>> polygons = 0,
-    flatbuffers::Offset<flatbuffers::Vector<const vec3 *>> ctrl_points = 0,
     flatbuffers::Offset<flatbuffers::Vector<uint8_t>> vertices = 0,
-    flatbuffers::Offset<flatbuffers::Vector<uint8_t>> indices = 0,
     flatbuffers::Offset<flatbuffers::Vector<const SubmeshFb *>> submeshes = 0,
     flatbuffers::Offset<flatbuffers::Vector<const SubsetFb *>> subsets = 0,
-    flatbuffers::Offset<flatbuffers::Vector<const SubsetFb *>> subset_polies = 0,
-    flatbuffers::Offset<flatbuffers::Vector<uint32_t>> subset_indices = 0,
-    EIndexTypeFb index_type = EIndexTypeFb_UInt16) {
+    flatbuffers::Offset<flatbuffers::Vector<uint8_t>> subset_indices = 0,
+    EIndexTypeFb subset_index_type = EIndexTypeFb_UInt16) {
   MeshFbBuilder builder_(_fbb);
-  builder_.add_index_type(index_type);
+  builder_.add_subset_index_type(subset_index_type);
   builder_.add_subset_indices(subset_indices);
-  builder_.add_subset_polies(subset_polies);
   builder_.add_subsets(subsets);
   builder_.add_submeshes(submeshes);
-  builder_.add_indices(indices);
   builder_.add_vertices(vertices);
-  builder_.add_ctrl_points(ctrl_points);
-  builder_.add_polygons(polygons);
   return builder_.Finish();
 }
 
 inline flatbuffers::Offset<MeshFb> CreateMeshFbDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
-    const std::vector<uint32_t> *polygons = nullptr,
-    const std::vector<const vec3 *> *ctrl_points = nullptr,
     const std::vector<uint8_t> *vertices = nullptr,
-    const std::vector<uint8_t> *indices = nullptr,
     const std::vector<const SubmeshFb *> *submeshes = nullptr,
     const std::vector<const SubsetFb *> *subsets = nullptr,
-    const std::vector<const SubsetFb *> *subset_polies = nullptr,
-    const std::vector<uint32_t> *subset_indices = nullptr,
-    EIndexTypeFb index_type = EIndexTypeFb_UInt16) {
+    const std::vector<uint8_t> *subset_indices = nullptr,
+    EIndexTypeFb subset_index_type = EIndexTypeFb_UInt16) {
   return CreateMeshFb(
       _fbb,
-      polygons ? _fbb.CreateVector<uint32_t>(*polygons) : 0,
-      ctrl_points ? _fbb.CreateVector<const vec3 *>(*ctrl_points) : 0,
       vertices ? _fbb.CreateVector<uint8_t>(*vertices) : 0,
-      indices ? _fbb.CreateVector<uint8_t>(*indices) : 0,
       submeshes ? _fbb.CreateVector<const SubmeshFb *>(*submeshes) : 0,
       subsets ? _fbb.CreateVector<const SubsetFb *>(*subsets) : 0,
-      subset_polies ? _fbb.CreateVector<const SubsetFb *>(*subset_polies) : 0,
-      subset_indices ? _fbb.CreateVector<uint32_t>(*subset_indices) : 0,
-      index_type);
+      subset_indices ? _fbb.CreateVector<uint8_t>(*subset_indices) : 0,
+      subset_index_type);
 }
 
 struct MaterialFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
@@ -827,6 +810,19 @@ struct MaterialFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   }
   uint64_t name_id() const {
     return GetField<uint64_t>(VT_NAME_ID, 0);
+  }
+  bool KeyCompareLessThan(const MaterialFb *o) const {
+    return name_id() < o->name_id();
+  }
+  int KeyCompareWithValue(uint64_t val) const {
+    const auto key = name_id();
+    if (key < val) {
+      return -1;
+    } else if (key > val) {
+      return 1;
+    } else {
+      return 0;
+    }
   }
   const flatbuffers::Vector<const MaterialPropFb *> *props() const {
     return GetPointer<const flatbuffers::Vector<const MaterialPropFb *> *>(VT_PROPS);
