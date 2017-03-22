@@ -6,17 +6,19 @@
 #include <vcache_optimizer.hpp>
 #pragma warning( pop )
 
+#include <meshoptimizer.hpp>
+
 using namespace fbxp;
 using namespace fb;
 
 template < typename TIndex >
-struct Triangle {
+struct VcacheTriangle {
     TIndex indices[ 3 ];
 
-    inline Triangle( ) {
+    inline VcacheTriangle( ) {
     }
 
-    inline Triangle( TIndex const i1, TIndex const i2, TIndex const i3 ) {
+    inline VcacheTriangle( TIndex const i1, TIndex const i2, TIndex const i3 ) {
         indices[ 0 ] = i1;
         indices[ 1 ] = i2;
         indices[ 2 ] = i3;
@@ -28,132 +30,226 @@ struct Triangle {
     }
 };
 
-template < typename TIndex >
-struct PackedMesh {
-    fbxp::Mesh* m = nullptr;
-    PackedMesh( fbxp::Mesh* m ) : m( m ) {
-    }
-};
+using Vertex = fbxp::fb::StaticVertexFb;
 
-using PackedMesh16 = PackedMesh< uint16_t >;
-using PackedMesh32 = PackedMesh< uint32_t >;
+template < typename TIndex >
+struct VcacheMesh {
+    fbxp::Mesh* m = nullptr;
+};
 
 namespace vcache_optimizer {
     template < typename TIndex >
-    struct mesh_traits< PackedMesh< TIndex > > {
+    struct mesh_traits< VcacheMesh< TIndex > > {
         typedef uint32_t                 submesh_id_t;
         typedef TIndex                   vertex_index_t;
         typedef TIndex                   triangle_index_t;
-        typedef Triangle< TIndex >       triangle_t;
-        typedef fbxp::fb::PackedVertexFb vertex_t;
+        typedef Vertex                   vertex_t;
+        typedef VcacheTriangle< TIndex > triangle_t;
     };
 }
 
 #pragma region Optimization
 
-Triangle< uint16_t > create_new_triangle( PackedMesh< uint16_t >& m, uint16_t const i1, uint16_t const i2, uint16_t const i3 ) {
-    return Triangle< uint16_t >( i1, i2, i3 );
+VcacheTriangle< uint16_t > create_new_triangle( VcacheMesh< uint16_t >& m, uint16_t const i1, uint16_t const i2, uint16_t const i3 ) {
+    return VcacheTriangle< uint16_t >( i1, i2, i3 );
 }
 
-std::size_t get_num_triangles( PackedMesh< uint16_t > const& m, uint32_t const& sm ) {
+std::size_t get_num_triangles( VcacheMesh< uint16_t > const& m, uint32_t const& sm ) {
     return m.m->subsets[ sm ].index_count( ) / 3;
 }
 
-std::size_t get_num_vertices( PackedMesh< uint16_t > const& m, uint32_t const& sm ) {
-    return m.m->vertices.size( ) / sizeof( fbxp::fb::PackedVertexFb );
-    // return m.m->subsets[ sm ].index_count( );
+std::size_t get_num_vertices( VcacheMesh< uint16_t > const& m, uint32_t const& sm ) {
+    return m.m->vertices.size( ) / sizeof( Vertex );
 }
 
-Triangle< uint16_t > get_triangle( PackedMesh< uint16_t > const& m, uint32_t const& sm, uint16_t& index ) {
+VcacheTriangle< uint16_t > get_triangle( VcacheMesh< uint16_t > const& m, uint32_t const& sm, uint16_t& index ) {
     uint16_t* subsetIndices = reinterpret_cast< uint16_t* >( m.m->subsetIndices.data( ) );
     const uint32_t i1 = subsetIndices[ m.m->subsets[ sm ].base_index( ) + index * 3 + 0 ];
     const uint32_t i2 = subsetIndices[ m.m->subsets[ sm ].base_index( ) + index * 3 + 1 ];
     const uint32_t i3 = subsetIndices[ m.m->subsets[ sm ].base_index( ) + index * 3 + 2 ];
-    return Triangle< uint16_t >( i1, i2, i3 );
+    return VcacheTriangle< uint16_t >( i1, i2, i3 );
 }
 
-fbxp::fb::PackedVertexFb get_vertex( PackedMesh< uint16_t > const& m, uint32_t const& sm, uint16_t& index ) {
+Vertex get_vertex( VcacheMesh< uint16_t > const& m, uint32_t const& sm, uint16_t& index ) {
     // uint16_t* subsetIndices = reinterpret_cast< uint16_t* >( m.m->subsetIndices.data( ) );
     // const uint16_t i = subsetIndices[ index ];
     // const uint16_t i = subsetIndices[ m.m->subsets[ sm ].base_index( ) + index ];
-    // return *(fbxp::fb::PackedVertexFb*) ( m.m->vertices.data( ) + i * sizeof( fbxp::fb::PackedVertexFb ) );
-    return *(fbxp::fb::PackedVertexFb*) ( m.m->vertices.data( ) + index * sizeof( fbxp::fb::PackedVertexFb ) );
+    // return *(Vertex*) ( m.m->vertices.data( ) + i * sizeof( Vertex ) );
+    return *(Vertex*) ( m.m->vertices.data( ) + index * sizeof( Vertex ) );
 }
 
-void set_triangle( PackedMesh< uint16_t >& m, uint32_t const& sm, uint16_t& index, Triangle< uint16_t > const& new_triangle ) {
+void set_triangle( VcacheMesh< uint16_t >& m, uint32_t const& sm, uint16_t& index, VcacheTriangle< uint16_t > const& new_triangle ) {
     uint16_t* subsetIndices = reinterpret_cast< uint16_t* >( m.m->subsetIndices.data( ) );
     subsetIndices[ m.m->subsets[ sm ].base_index( ) + index * 3 + 0 ] = new_triangle[ 0 ];
     subsetIndices[ m.m->subsets[ sm ].base_index( ) + index * 3 + 1 ] = new_triangle[ 1 ];
     subsetIndices[ m.m->subsets[ sm ].base_index( ) + index * 3 + 2 ] = new_triangle[ 2 ];
 }
 
-void set_vertex( PackedMesh< uint16_t >& m, uint32_t const& sm, uint16_t& index, fbxp::fb::PackedVertexFb const& new_vertex ) {
+void set_vertex( VcacheMesh< uint16_t >& m, uint32_t const& sm, uint16_t& index, Vertex const& new_vertex ) {
     // uint16_t* subsetIndices = reinterpret_cast< uint16_t* >( m.m->subsetIndices.data( ) );
     // const uint16_t i = subsetIndices[ index ];
     // const uint16_t i = subsetIndices[ m.m->subsets[ sm ].base_index( ) + index ];
-    // *(fbxp::fb::PackedVertexFb*) ( m.m->vertices.data( ) + i * sizeof( fbxp::fb::PackedVertexFb ) ) = new_vertex;
-    *(fbxp::fb::PackedVertexFb*) ( m.m->vertices.data( ) + index * sizeof( fbxp::fb::PackedVertexFb ) ) = new_vertex;
+    // *(Vertex*) ( m.m->vertices.data( ) + i * sizeof( Vertex ) ) = new_vertex;
+    *(Vertex*) ( m.m->vertices.data( ) + index * sizeof( Vertex ) ) = new_vertex;
 }
 
-Triangle< uint32_t > create_new_triangle( PackedMesh< uint32_t >& m, uint32_t const i1, uint32_t const i2, uint32_t const i3 ) {
-    return Triangle< uint32_t >( i1, i2, i3 );
+VcacheTriangle< uint32_t > create_new_triangle( VcacheMesh< uint32_t >& m, uint32_t const i1, uint32_t const i2, uint32_t const i3 ) {
+    return VcacheTriangle< uint32_t >( i1, i2, i3 );
 }
 
-std::size_t get_num_triangles( PackedMesh< uint32_t > const& m, uint32_t const& sm ) {
+std::size_t get_num_triangles( VcacheMesh< uint32_t > const& m, uint32_t const& sm ) {
     return m.m->subsets[ sm ].index_count( ) / 3;
 }
 
-std::size_t get_num_vertices( PackedMesh< uint32_t > const& m, uint32_t const& sm ) {
-    return m.m->vertices.size( ) / sizeof( fbxp::fb::PackedVertexFb );
+std::size_t get_num_vertices( VcacheMesh< uint32_t > const& m, uint32_t const& sm ) {
+    return m.m->vertices.size( ) / sizeof( Vertex );
     // return m.m->subsets[ sm ].index_count( );
 }
 
-Triangle< uint32_t > get_triangle( PackedMesh< uint32_t > const& m, uint32_t const& sm, uint32_t& index ) {
+VcacheTriangle< uint32_t > get_triangle( VcacheMesh< uint32_t > const& m, uint32_t const& sm, uint32_t& index ) {
     uint32_t* subsetIndices = reinterpret_cast< uint32_t* >( m.m->subsetIndices.data( ) );
     const uint32_t i1 = subsetIndices[ m.m->subsets[ sm ].base_index( ) + index * 3 + 0 ];
     const uint32_t i2 = subsetIndices[ m.m->subsets[ sm ].base_index( ) + index * 3 + 1 ];
     const uint32_t i3 = subsetIndices[ m.m->subsets[ sm ].base_index( ) + index * 3 + 2 ];
-    return Triangle< uint32_t >( i1, i2, i3 );
+    return VcacheTriangle< uint32_t >( i1, i2, i3 );
 }
 
-fbxp::fb::PackedVertexFb get_vertex( PackedMesh< uint32_t > const& m, uint32_t const& sm, uint32_t& index ) {
+Vertex get_vertex( VcacheMesh< uint32_t > const& m, uint32_t const& sm, uint32_t& index ) {
     // uint32_t* subsetIndices = reinterpret_cast< uint32_t* >( m.m->subsetIndices.data( ) );
     // const uint32_t i = subsetIndices[ index ];
     // const uint32_t i = subsetIndices[ m.m->subsets[ sm ].base_index( ) + index ];
-    // return *(fbxp::fb::PackedVertexFb*) ( m.m->vertices.data( ) + i * sizeof( fbxp::fb::PackedVertexFb ) );
-    return *(fbxp::fb::PackedVertexFb*) ( m.m->vertices.data( ) + index * sizeof( fbxp::fb::PackedVertexFb ) );
+    // return *(Vertex*) ( m.m->vertices.data( ) + i * sizeof( Vertex ) );
+    return *(Vertex*) ( m.m->vertices.data( ) + index * sizeof( Vertex ) );
 }
 
-void set_triangle( PackedMesh< uint32_t >& m, uint32_t const& sm, uint32_t& index, Triangle< uint32_t > const& new_triangle ) {
+void set_triangle( VcacheMesh< uint32_t >& m, uint32_t const& sm, uint32_t& index, VcacheTriangle< uint32_t > const& new_triangle ) {
     uint32_t* subsetIndices = reinterpret_cast< uint32_t* >( m.m->subsetIndices.data( ) );
     subsetIndices[ m.m->subsets[ sm ].base_index( ) + index * 3 + 0 ] = new_triangle[ 0 ];
     subsetIndices[ m.m->subsets[ sm ].base_index( ) + index * 3 + 1 ] = new_triangle[ 1 ];
     subsetIndices[ m.m->subsets[ sm ].base_index( ) + index * 3 + 2 ] = new_triangle[ 2 ];
 }
 
-void set_vertex( PackedMesh< uint32_t >& m, uint32_t const& sm, uint32_t& index, fbxp::fb::PackedVertexFb const& new_vertex ) {
+void set_vertex( VcacheMesh< uint32_t >& m, uint32_t const& sm, uint32_t& index, Vertex const& new_vertex ) {
     // uint32_t* subsetIndices = reinterpret_cast< uint32_t* >( m.m->subsetIndices.data( ) );
     // const uint32_t i = m.m->subsetIndices[ index ];
     // const uint32_t i = m.m->subsetIndices[ m.m->subsets[ sm ].base_index( ) + index ];
-    // *(fbxp::fb::PackedVertexFb*) ( m.m->vertices.data( ) + i * sizeof( fbxp::fb::PackedVertexFb ) ) = new_vertex;
-    *(fbxp::fb::PackedVertexFb*) ( m.m->vertices.data( ) + index * sizeof( fbxp::fb::PackedVertexFb ) ) = new_vertex;
+    // *(Vertex*) ( m.m->vertices.data( ) + i * sizeof( Vertex ) ) = new_vertex;
+    *(Vertex*) ( m.m->vertices.data( ) + index * sizeof( Vertex ) ) = new_vertex;
 }
 
 #pragma endregion
 
+const bool bUseVcacheOptimizer = false;
+
 template < typename TIndex >
-void Optimize( fbxp::Mesh& m ) {
-    PackedMesh< TIndex > mm{(fbxp::Mesh*) &m};
+void GenerateSubset( fbxp::Mesh& m, uint32_t& vertexCount, uint32_t vertexStride ) {
+    if ( false == m.subsets.empty( ) )
+        return;
+
+    std::vector< uint32_t > indexBuffer;
+    indexBuffer.resize( vertexCount );
+
+    const uint32_t vc = (uint32_t) generateIndexBuffer( indexBuffer.data( ), m.vertices.data( ), vertexCount, vertexStride );
+
+    std::vector< uint8_t > vertexBuffer;
+    vertexBuffer.resize( vc * vertexStride );
+    generateVertexBuffer( vertexBuffer.data( ), indexBuffer.data( ), m.vertices.data( ), vertexCount, vertexStride );
+
+    m.vertices.swap( vertexBuffer );
+    vertexCount = vc;
+
+    m.subsetIndices.resize( sizeof( TIndex ) * vertexCount );
+    auto indices = reinterpret_cast< TIndex* >( m.subsetIndices.data( ) );
+    for ( uint32_t i = 0; i < vc; ++i ) {
+        indices[ i ] = (TIndex) indexBuffer[ i ];
+    }
+
+    m.subsets.emplace_back( (uint32_t) 0, (uint32_t) 0, (uint32_t) vc );
+}
+
+template < typename TIndex >
+void OptimizeSubsetVcache( fbxp::Mesh& mesh, uint32_t subsetIndex ) {
+    VcacheMesh< TIndex > meshWrapper;
+    meshWrapper.m = &mesh;
+
+    vcache_optimizer::vcache_optimizer< VcacheMesh< TIndex > > optimizer;
+    optimizer( meshWrapper, subsetIndex, mesh.subsets.size( ) == 1 );
+}
+
+template < typename TIndex >
+void OptimizeSubset(fbxp::Mesh& m, const Vertex * vertices, uint32_t& vertexCount, uint32_t vertexStride, uint32_t ss ) {
+    const uint32_t kCacheSize = 16;
+
+    std::vector< uint8_t > indexBuffer;
+    indexBuffer.resize( m.subsets[ ss ].index_count( ) * sizeof( TIndex ) );
+
+#if 0
+
+    std::vector< uint32_t > clusters;
+    optimizePostTransform( reinterpret_cast< TIndex* >( indexBuffer.data( ) ),
+                           reinterpret_cast< TIndex* >( m.subsetIndices.data( ) ) + m.subsets[ ss ].base_index( ),
+                           m.subsets[ ss ].index_count( ),
+                           vertexCount,
+                           kCacheSize,
+                           &clusters );
+
+    memcpy( reinterpret_cast< TIndex* >( m.subsetIndices.data( ) ) + m.subsets[ ss ].base_index( ),
+            indexBuffer.data( ),
+            m.subsets[ ss ].index_count( ) * sizeof( TIndex ) );
+
+    optimizeOverdraw( reinterpret_cast< TIndex* >( indexBuffer.data( ) ),
+                      reinterpret_cast< TIndex* >( m.subsetIndices.data( ) ) + m.subsets[ ss ].base_index( ),
+                      m.subsets[ ss ].index_count( ),
+                      vertices,
+                      vertexStride,
+                      vertexCount,
+                      clusters,
+                      kCacheSize,
+                      1.05f );
+
+    memcpy( reinterpret_cast< TIndex* >( m.subsetIndices.data( ) ) + m.subsets[ ss ].base_index( ),
+            indexBuffer.data( ),
+            m.subsets[ ss ].index_count( ) * sizeof( TIndex ) );
+
+#else
+
+    optimizePostTransform( reinterpret_cast< TIndex* >( indexBuffer.data( ) ),
+                           reinterpret_cast< TIndex* >( m.subsetIndices.data( ) ) + m.subsets[ ss ].base_index( ),
+                           m.subsets[ ss ].index_count( ),
+                           vertexCount,
+                           kCacheSize );
+
+#endif
+}
+
+template < typename TIndex >
+void Optimize( fbxp::Mesh& m, const Vertex * vertices, uint32_t& vertexCount, uint32_t vertexStride ) {
+
+    auto& s = fbxp::Get( );
+
+    VcacheMesh< TIndex > mm;
+    mm.m = &m;
+
+    if ( m.subsets.empty( ) ) {
+        GenerateSubset< TIndex >( m, vertexCount, vertexStride );
+        // OptimizeSubset< TIndex >( m, vertices, vertexCount, vertexStride, 0 );
+    }
+
     for ( uint32_t ss = 0; ss < m.subsets.size( ); ++ss ) {
-        vcache_optimizer::vcache_optimizer< PackedMesh< TIndex > > optimizer;
-        optimizer( mm, ss, false );
+        // OptimizeSubset< TIndex >( m, vertices, vertexCount, vertexStride, ss );
+        OptimizeSubsetVcache< TIndex >( m, ss );
     }
 }
 
-void Optimize32( fbxp::Mesh& mesh ) {
-    Optimize< uint32_t >( mesh );
+// F:\Dev\Projects\ProjectFbxPipeline\ThirdParty\meshoptimizer\demo\bunny.obj
+// E:\Media\Models\Mercedes+Benz+A45+AMG.FBX
+// E:\Media\Models\m4a1-sopmod-overkill\source\M4A1 SOPMOD Overkill HIGH POLY.obj
+// E:\Media\Models\mech-m-6k\source\93d43cf18ad5406ba0176c9fae7d4927.fbx
+
+void Optimize32( fbxp::Mesh& mesh, const Vertex* vertices, uint32_t& vertexCount, uint32_t vertexStride ) {
+    Optimize< uint32_t >( mesh, vertices, vertexCount, vertexStride );
 }
 
-void Optimize16( fbxp::Mesh& mesh ) {
-    Optimize< uint16_t >( mesh );
+void Optimize16( fbxp::Mesh& mesh, const Vertex* vertices, uint32_t& vertexCount, uint32_t vertexStride ) {
+    Optimize< uint16_t >( mesh, vertices, vertexCount, vertexStride );
 }

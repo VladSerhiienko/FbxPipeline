@@ -1,3 +1,4 @@
+
 #include <fbxppch.h>
 #include <fbxpstate.h>
 #include <city.h>
@@ -16,9 +17,11 @@ fbxp::State& fbxp::Get( ) {
 }
 
 fbxp::State::State( ) : console( spdlog::stdout_color_mt( "fbxp" ) ), options( GetExecutable( ) ) {
-    options.add_options( "input" )( "i,input", "Input", cxxopts::value< std::string >( ) );
-    options.add_options( "input" )( "o,output", "Output", cxxopts::value< std::string >( ) );
+    options.add_options( "input" )( "i,input-file", "Input", cxxopts::value< std::string >( ) );
+    options.add_options( "input" )( "o,output-file", "Output", cxxopts::value< std::string >( ) );
     options.add_options( "input" )( "k,convert", "Convert", cxxopts::value< bool >( ) );
+    options.add_options( "input" )( "p,pack-meshes", "Pack meshes", cxxopts::value< bool >( ) );
+    options.add_options( "input" )( "s,split-meshes-per-material", "Split meshes per material", cxxopts::value< bool >( ) );
 }
 
 fbxp::State::~State( ) {

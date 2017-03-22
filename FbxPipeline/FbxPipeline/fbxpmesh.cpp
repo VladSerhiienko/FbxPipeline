@@ -11,30 +11,34 @@ template < typename TVertex >
 void CalculateTangents( TVertex* vertices, size_t vertexCount ) {
     std::vector< mathfu::vec3 > tan;
     tan.resize( vertexCount * 2 );
+    memset( tan.data( ), 0, sizeof( mathfu::vec3 ) * vertexCount * 2 );
 
     auto tan1 = tan.data( );
     auto tan2 = tan1 + vertexCount;
 
     for ( size_t i = 0; i < vertexCount; i += 3 ) {
-        TVertex& v0 = vertices[ i + 0 ];
-        TVertex& v1 = vertices[ i + 1 ];
-        TVertex& v2 = vertices[ i + 2 ];
+        const TVertex v0 = vertices[ i + 0 ];
+        const TVertex v1 = vertices[ i + 1 ];
+        const TVertex v2 = vertices[ i + 2 ];
 
-        float x1 = v1.position[ 0 ] - v0.position[ 0 ];
-        float x2 = v2.position[ 0 ] - v0.position[ 0 ];
-        float y1 = v1.position[ 1 ] - v0.position[ 1 ];
-        float y2 = v2.position[ 1 ] - v0.position[ 1 ];
-        float z1 = v1.position[ 2 ] - v0.position[ 2 ];
-        float z2 = v2.position[ 2 ] - v0.position[ 2 ];
+        const float x1 = v1.position[ 0 ] - v0.position[ 0 ];
+        const float x2 = v2.position[ 0 ] - v0.position[ 0 ];
+        const float y1 = v1.position[ 1 ] - v0.position[ 1 ];
+        const float y2 = v2.position[ 1 ] - v0.position[ 1 ];
+        const float z1 = v1.position[ 2 ] - v0.position[ 2 ];
+        const float z2 = v2.position[ 2 ] - v0.position[ 2 ];
 
-        float s1 = v1.texCoords[ 0 ] - v0.texCoords[ 0 ];
-        float s2 = v2.texCoords[ 0 ] - v0.texCoords[ 0 ];
-        float t1 = v1.texCoords[ 1 ] - v0.texCoords[ 1 ];
-        float t2 = v2.texCoords[ 1 ] - v0.texCoords[ 1 ];
+        const float s1 = v1.texCoords[ 0 ] - v0.texCoords[ 0 ];
+        const float s2 = v2.texCoords[ 0 ] - v0.texCoords[ 0 ];
+        const float t1 = v1.texCoords[ 1 ] - v0.texCoords[ 1 ];
+        const float t2 = v2.texCoords[ 1 ] - v0.texCoords[ 1 ];
 
-        float        r = 1.0F / ( s1 * t2 - s2 * t1 );
-        mathfu::vec3 sdir( ( t2 * x1 - t1 * x2 ) * r, ( t2 * y1 - t1 * y2 ) * r, ( t2 * z1 - t1 * z2 ) * r );
-        mathfu::vec3 tdir( ( s1 * x2 - s2 * x1 ) * r, ( s1 * y2 - s2 * y1 ) * r, ( s1 * z2 - s2 * z1 ) * r );
+        const float r = 1.0f / ( s1 * t2 - s2 * t1 );
+        const mathfu::vec3 sdir( ( t2 * x1 - t1 * x2 ) * r, ( t2 * y1 - t1 * y2 ) * r, ( t2 * z1 - t1 * z2 ) * r );
+        const mathfu::vec3 tdir( ( s1 * x2 - s2 * x1 ) * r, ( s1 * y2 - s2 * y1 ) * r, ( s1 * z2 - s2 * z1 ) * r );
+
+        // assert( !isnan( sdir.x( ) ) && !isnan( sdir.y( ) ) && !isnan( sdir.z( ) ) );
+        // assert( !isnan( tdir.x( ) ) && !isnan( tdir.y( ) ) && !isnan( tdir.z( ) ) );
 
         tan1[ i + 0 ] += sdir;
         tan1[ i + 1 ] += sdir;
@@ -47,10 +51,12 @@ void CalculateTangents( TVertex* vertices, size_t vertexCount ) {
 
     for ( size_t i = 0; i < vertexCount; i += 1 ) {
         TVertex& v = vertices[ i ];
-        auto     n = mathfu::vec3( v.normal[ 0 ], v.normal[ 1 ], v.normal[ 2 ] );
-        auto     t = tan1[ i ];
+        const auto n = mathfu::vec3( v.normal[ 0 ], v.normal[ 1 ], v.normal[ 2 ] );
+        const auto t = tan1[ i ];
 
         mathfu::vec3 tt = mathfu::normalize( t - n * mathfu::dot( n, t ) );
+        // assert( !isnan( tt.x( ) ) && !isnan( tt.y( ) ) && !isnan( tt.z( ) ) );
+
         v.tangent[ 0 ]  = tt.x( );
         v.tangent[ 1 ]  = tt.y( );
         v.tangent[ 2 ]  = tt.z( );
@@ -247,7 +253,7 @@ bool GetSubsets( FbxMesh*                           mesh,
     extractSubsetsFromRange( mii, ii, i );
 
     TIndex subsetStartIndex = 0;
-    uint32_t materialIndex    = (uint32_t) -1;
+    uint32_t materialIndex = (uint32_t) -1;
 
     if ( !subsetPolies.empty( ) ) {
         s.console->info( "Mesh index subsets from {} polygon ranges:", subsetPolies.size( ) );
@@ -482,6 +488,11 @@ void InitializeVertices( FbxMesh*      mesh,
             vvii.texCoords[ 0 ] = (float) uv[ 0 ];
             vvii.texCoords[ 1 ] = (float) uv[ 1 ];
 
+            assert( !isnan( (float) cp[ 0 ] ) && !isnan( (float) cp[ 1 ] ) && !isnan( (float) cp[ 2 ] ) );
+            assert( !isnan( (float) n[ 0 ] ) && !isnan( (float) n[ 1 ] ) && !isnan( (float) n[ 2 ] ) );
+            assert( !isnan( (float) t[ 0 ] ) && !isnan( (float) t[ 1 ] ) && !isnan( (float) t[ 2 ] ) && !isnan( (float) t[ 3 ] ) );
+            assert( !isnan( (float) uv[ 0 ] ) && !isnan( (float) uv[ 1 ] ) );
+
             positionMin.x( ) = std::min( positionMin.x( ), (float) cp[ 0 ] );
             positionMin.y( ) = std::min( positionMin.y( ), (float) cp[ 1 ] );
             positionMin.z( ) = std::min( positionMin.z( ), (float) cp[ 2 ] );
@@ -517,11 +528,11 @@ void InitializeVertices( FbxMesh*      mesh,
         CalculateFaceNormals( vertices, vertexCount );
     }
 
-    if ( nullptr == te ) {
+    if ( nullptr == te && nullptr != uve ) {
         s.console->warn( "Mesh \"{}\" does not have tangent geometry layer.",
                          mesh->GetNode( )->GetName( ) );
 
-        // Calculate tangents ourselves.
+        // Calculate tangents ourselves if UVs are available.
         CalculateTangents( vertices, vertexCount );
     }
 }
@@ -530,8 +541,8 @@ void InitializeVertices( FbxMesh*      mesh,
 // See implementation in fbxpmeshopt.cpp.
 //
 
-void Optimize32( fbxp::Mesh& mesh );
-void Optimize16( fbxp::Mesh& mesh );
+void Optimize32( fbxp::Mesh& mesh, fbxp::fb::StaticVertexFb const* vertices, uint32_t & vertexCount, uint32_t vertexStride );
+void Optimize16( fbxp::Mesh& mesh, fbxp::fb::StaticVertexFb const* vertices, uint32_t & vertexCount, uint32_t vertexStride );
 
 //
 // See implementation in fbxpmeshpacking.cpp.
@@ -546,7 +557,7 @@ void Pack( const fbxp::fb::StaticVertexFb* vertices,
            const mathfu::vec2              texcoordsMax );
 
 template < typename TIndex, bool bOptimizeSubsetIndices = true >
-void ExportMesh( FbxNode* node, FbxMesh* mesh, fbxp::Node& n, fbxp::Mesh& m, const uint32_t vertexCount, bool pack ) {
+void ExportMesh( FbxNode* node, FbxMesh* mesh, fbxp::Node& n, fbxp::Mesh& m, uint32_t vertexCount, bool pack ) {
     auto& s = fbxp::Get( );
 
     const uint16_t vertexStride           = (uint16_t) sizeof( fbxp::fb::StaticVertexFb );
@@ -554,8 +565,7 @@ void ExportMesh( FbxNode* node, FbxMesh* mesh, fbxp::Node& n, fbxp::Mesh& m, con
     const uint16_t packedVertexStride     = (uint16_t) sizeof( fbxp::fb::PackedVertexFb );
     const uint32_t packedVertexBufferSize = vertexCount * packedVertexStride;
 
-    std::vector< StaticVertex > tempBuffer;
-    tempBuffer.resize( vertexCount );
+    m.vertices.resize( vertexBufferSize );
 
     std::vector< TIndex > tempSubsetIndices;
     std::vector< std::tuple< TIndex, TIndex > > tempItems;
@@ -565,22 +575,37 @@ void ExportMesh( FbxNode* node, FbxMesh* mesh, fbxp::Node& n, fbxp::Mesh& m, con
     mathfu::vec2 texcoordMin;
     mathfu::vec2 texcoordMax;
 
-    InitializeVertices( mesh, m, tempBuffer.data( ), vertexCount, positionMin, positionMax, texcoordMin, texcoordMax );
+    InitializeVertices( mesh,
+                        m,
+                        reinterpret_cast< StaticVertex* >( m.vertices.data( ) ),
+                        vertexCount,
+                        positionMin,
+                        positionMax,
+                        texcoordMin,
+                        texcoordMax );
+
     GetSubsets( mesh, m, tempSubsetIndices, m.subsets, m.subsetsPolies, tempItems );
 
-    const size_t subsetIndexBufferSize = sizeof( TIndex ) * tempSubsetIndices.size( );
-    m.subsetIndices.resize( subsetIndexBufferSize );
-    std::memcpy( m.subsetIndices.data( ), tempSubsetIndices.data( ), subsetIndexBufferSize );
+    if ( const size_t subsetIndexBufferSize = sizeof( TIndex ) * tempSubsetIndices.size( ) ) {
+        m.subsetIndices.resize( subsetIndexBufferSize );
+        std::memcpy( m.subsetIndices.data( ), tempSubsetIndices.data( ), subsetIndexBufferSize );
+    }
 
     if ( std::is_same< TIndex, uint16_t >::value ) {
         m.subsetIndexType = fbxp::fb::EIndexTypeFb_UInt16;
+        Optimize16( m, reinterpret_cast< const fbxp::fb::StaticVertexFb* >( m.vertices.data( ) ), vertexCount, vertexStride );
     } else if ( std::is_same< TIndex, uint32_t >::value ) {
         m.subsetIndexType = fbxp::fb::EIndexTypeFb_UInt32;
+        Optimize32( m, reinterpret_cast< const fbxp::fb::StaticVertexFb* >( m.vertices.data( ) ), vertexCount, vertexStride );
     } else {
         assert( false );
     }
 
     if ( pack ) {
+        std::vector< fbxp::fb::StaticVertexFb > tempBuffer;
+        tempBuffer.resize( vertexCount );
+        memcpy( tempBuffer.data( ), m.vertices.data( ), m.vertices.size( ) );
+
         m.vertices.resize( packedVertexBufferSize );
         Pack( reinterpret_cast< fbxp::fb::StaticVertexFb* >( tempBuffer.data( ) ),
               reinterpret_cast< fbxp::fb::PackedVertexFb* >( m.vertices.data( ) ),
@@ -589,19 +614,6 @@ void ExportMesh( FbxNode* node, FbxMesh* mesh, fbxp::Node& n, fbxp::Mesh& m, con
               positionMax,
               texcoordMin,
               texcoordMax );
-    } else {
-        m.vertices.resize( vertexBufferSize );
-        memcpy( m.vertices.data( ), tempBuffer.data( ), vertexBufferSize );
-    }
-
-    if ( bOptimizeSubsetIndices && false == m.subsets.empty( ) ) {
-        if ( std::is_same< TIndex, uint16_t >::value ) {
-            Optimize16( m );
-        } else if ( std::is_same< TIndex, uint32_t >::value ) {
-            Optimize32( m );
-        } else {
-            assert( false );
-        }
     }
 
     fbxp::fb::vec3 bboxMin( positionMin.x( ), positionMin.y( ), positionMin.z( ) );

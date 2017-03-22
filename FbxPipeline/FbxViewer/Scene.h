@@ -46,8 +46,8 @@ namespace fbxv {
                     .end( );*/
                 vertexDecl.begin( )
                     .add( bgfx::Attrib::Position, 3, bgfx::AttribType::Float, false, false )
-                    .add( bgfx::Attrib::Normal, 3, bgfx::AttribType::Uint8, true, false )
-                    .add( bgfx::Attrib::Tangent, 4, bgfx::AttribType::Uint8, true, false )
+                    .add( bgfx::Attrib::Normal, 4, bgfx::AttribType::Uint10, true, false )
+                    .add( bgfx::Attrib::Tangent, 4, bgfx::AttribType::Uint10, true, false )
                     .add( bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Half, false, false )
                     .end( );
             }

@@ -8,10 +8,17 @@
 namespace fbxp {
 
     template < int BitCount >
-    struct ChooseUint {};
+    struct ChooseUint {
+        typedef uint64_t type;
+    };
 
     template <>
     struct ChooseUint< 2 > {
+        typedef uint8_t type;
+    };
+
+    template <>
+    struct ChooseUint< 4 > {
         typedef uint8_t type;
     };
 
@@ -26,8 +33,18 @@ namespace fbxp {
     };
 
     template <>
+    struct ChooseUint< 11 > {
+        typedef uint16_t type;
+    };
+
+    template <>
     struct ChooseUint< 16 > {
         typedef uint16_t type;
+    };
+
+    template <>
+    struct ChooseUint< 24 > {
+        typedef uint32_t type;
     };
 
     template <>
@@ -50,6 +67,7 @@ namespace fbxp {
                 return val;
             }
         }
+
         inline float round( float f ) {
             return floor( f + 0.5f );
         }
@@ -224,24 +242,22 @@ namespace fbxp {
             f.f   = v;
             h.q.s = f.q.s;
 
-            // Check for zero, denormal or too small value.
-            // Too small exponent? (0+127-15)
             if ( bOverflowCheck && f.q.e <= 112 ) {
-                // DebugBreak( );
+                // Check for zero, denormal or too small value.
+                // Too small exponent? (0+127-15)
                 // Set to 0.
                 h.q.e = 0;
                 h.q.m = 0;
-            }
-            // Check for INF or NaN, or too high value
-            // Too large exponent? (31+127-15)
-            else if ( bOverflowCheck && f.q.e >= 143 ) {
                 // DebugBreak( );
+            } else if ( bOverflowCheck && f.q.e >= 143 ) {
+                // Check for INF or NaN, or too high value
+                // Too large exponent? (31+127-15)
                 // Set to 65504.0 (max value)
                 h.q.e = 30;
                 h.q.m = 1023;
-            }
-            // Handle normal number.
-            else {
+                // DebugBreak( );
+            } else {
+                // Handle normal number.
                 h.q.e = int32_t( f.q.e ) - 127 + 15;
                 h.q.m = uint16_t( f.q.m >> 13 );
             }
@@ -271,11 +287,11 @@ namespace fbxp {
                     f.q.e = 127 - ( 15 - 1 ) - MantissaShift;
                     f.q.m = Mantissa << ( MantissaShift + 23 - 10 );
                 }
-            } else if ( h.q.e == 31 /* 2^5 - 1 */ ) {
-                // DebugBreak( );
+            } else if ( h.q.e == 31 ) {
                 // Infinity or NaN. Set to 65504.0
                 f.q.e = 142;
                 f.q.m = 8380416;
+                // DebugBreak( );
             } else {
                 // Normal number.
                 // Stored exponents are biased by half their range.

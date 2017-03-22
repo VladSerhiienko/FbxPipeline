@@ -16,7 +16,7 @@ void ExportNodeAttributes( FbxNode* node, fbxp::Node& n ) {
 
     ExportTransform( node, n );
     ExportAnimation( node, n );
-    ExportMesh( node, n, true );
+    ExportMesh( node, n, s.options[ "p" ].as< bool >( ) );
     ExportMaterials( node, n );
 }
 
@@ -42,8 +42,59 @@ uint32_t ExportNode( FbxNode* node ) {
     return nodeId;
 }
 
+/**
+ * Preprocess scene with Fbx tools:
+ * FbxGeometryConverter - remove bad polygons
+ *                      - triangulate
+ *                      - split meshes per material
+ **/
+void PreprocessMeshes( FbxScene* scene ) {
+    auto& s = fbxp::Get( );
+
+    FbxGeometryConverter geometryConverter( s.manager );
+
+    s.console->info( "Triangulating..." );
+    if ( false == geometryConverter.Triangulate( s.scene, true ) ) {
+        s.console->warn( "Triangulation failed for some nodes." );
+        s.console->warn( "Nodes that failed triangulation will be detected in mesh exporting stage." );
+    } else {
+        s.console->info( "Triangulation succeeded for all nodes." );
+    }
+
+    FbxArray< FbxNode* > affectedNodes;
+    s.console->info( "Removing bad polygons..." );
+    geometryConverter.RemoveBadPolygonsFromMeshes( s.scene, &affectedNodes );
+    if ( 0 != affectedNodes.Size( ) ) {
+        s.console->warn( "Removed bad polygons from {} nodes:", affectedNodes.Size( ) );
+        for ( int32_t i = 0; i < affectedNodes.Size( ); ++i ) {
+            assert( nullptr != affectedNodes[ i ] );
+            s.console->warn( "\t > {}", affectedNodes[ i ]->GetName( ) );
+        }
+    } else {
+        s.console->info( "No bad polygons in the scene." );
+    }
+
+    if ( s.options[ "s" ].as< bool >( ) ) {
+        s.console->info( "Splitting per material..." );
+        if ( false == geometryConverter.SplitMeshesPerMaterial( s.scene, true ) ) {
+            s.console->warn( "Splitting per material failed for some nodes." );
+            s.console->warn( "Nodes that were not splitted will have subsets." );
+        } else {
+            s.console->info( "Splitting per material succeeded for all nodes." );
+        }
+    }
+}
+
+void PreprocessAnimation( FbxScene* scene ) {
+    auto& s = fbxp::Get( );
+
+}
+
 void ExportScene( FbxScene* scene ) {
     auto& s = fbxp::Get( );
+
+    PreprocessMeshes( scene );
+    PreprocessAnimation( scene );
 
     // Pre-allocate nodes and attributes.
     s.nodes.reserve( (size_t) scene->GetNodeCount( ) );

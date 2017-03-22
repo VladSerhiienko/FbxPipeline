@@ -24,13 +24,13 @@ inline TMathFu Map( const TMathFu input,
 
 template < typename TMathFu >
 inline void AssertInRange( const TMathFu v, float vmin = 0.0f, float vmax = 1.0f, float tolerance = 0.0001f ) {
-    float values[ sizeof( TMathFu ) / sizeof( float ) ];
+    /*float values[ sizeof( TMathFu ) / sizeof( float ) ];
     static_assert( sizeof( values ) == sizeof( v ), "Cannot copy." );
     memcpy( values, &v, sizeof( values ) );
 
     for ( auto value : values ) {
         assert( value >= ( vmin - tolerance ) && value <= ( vmax + tolerance ) );
-    }
+    }*/
 }
 
 struct PackedVertex {
