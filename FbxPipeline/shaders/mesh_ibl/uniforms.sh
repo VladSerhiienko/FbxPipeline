@@ -1,9 +1,5 @@
-/*
- * Copyright 2016 Dario Manesku. All rights reserved.
- * License: https://github.com/bkaradzic/bgfx#license-bsd-2-clause
- */
 
-uniform vec4 u_params[12];
+uniform vec4 u_params[15];
 #define u_mtx0          u_params[0]
 #define u_mtx1          u_params[1]
 #define u_mtx2          u_params[2]
@@ -26,3 +22,7 @@ uniform vec4 u_params[12];
 #define u_unused10      u_params[10].w
 #define u_lightCol      u_params[11].xyz
 #define u_unused11      u_params[11].w
+#define u_positionOffset    u_params[12].xyz
+#define u_positionScale     u_params[13].xyz
+#define u_texcoordOffset    u_params[14].xy
+#define u_texcoordScale     u_params[14].zw

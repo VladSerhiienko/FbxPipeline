@@ -30,6 +30,17 @@ float specPwr(float _gloss)
 
 void main()
 {
+	// Assign log depth.
+	// http://outerra.blogspot.com/2013/07/logarithmic-depth-buffer-optimizations.html
+	float Fcoef = 2.0 / log2(u_camFar + 1.0);
+	float Fcoef_half = 0.5 * Fcoef;
+	gl_FragDepth = log2(v_logz) * Fcoef_half;
+
+	// Debug normals.
+    // gl_FragColor.xyz = v_normal.xyz;
+	// gl_FragColor.w = 1.0;
+	// return;
+
     // Light.
     vec3 ld     = normalize(u_lightDir);
     vec3 clight = u_lightCol;
@@ -81,10 +92,4 @@ void main()
     color = color * exp2(u_exposure);
     gl_FragColor.xyz = toFilmic(color);
     gl_FragColor.w = 1.0;
-
-	// Assign log depth
-	// http://outerra.blogspot.com/2013/07/logarithmic-depth-buffer-optimizations.html
-	float Fcoef = 2.0 / log2(u_camFar + 1.0);
-	float Fcoef_half = 0.5 * Fcoef;
-	gl_FragDepth = log2(v_logz) * Fcoef_half;
 }

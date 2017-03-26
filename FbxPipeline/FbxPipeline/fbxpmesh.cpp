@@ -150,6 +150,11 @@ bool GetSubsets( FbxMesh*                           mesh,
             if ( const auto materialElement = mesh->GetElementMaterial( m ) ) {
                 // The only mapping mode for materials that makes sense is polygon mapping.
                 const auto materialMappingMode = materialElement->GetMappingMode( );
+
+                // Handle the case with splitted meshes.
+                if (materialMappingMode == FbxLayerElement::eAllSame)
+                    continue;
+
                 if ( materialMappingMode != FbxLayerElement::eByPolygon ) {
                     s.console->error( "Material element #{} has {} mapping mode (not supported).", m, materialMappingMode );
                     DebugBreak( );
@@ -174,7 +179,8 @@ bool GetSubsets( FbxMesh*                           mesh,
 
     if ( items.empty( ) ) {
         s.console->error( "Mesh \"{}\" has no correctly mapped materials (fallback to first one).", mesh->GetNode( )->GetName( ) );
-        DebugBreak( );
+        // Splitted meshes per material case, do not issues a debug break.
+        // DebugBreak( );
         return false;
     }
 
@@ -556,8 +562,8 @@ void Pack( const fbxp::fb::StaticVertexFb* vertices,
            const mathfu::vec2              texcoordsMin,
            const mathfu::vec2              texcoordsMax );
 
-template < typename TIndex, bool bOptimizeSubsetIndices = true >
-void ExportMesh( FbxNode* node, FbxMesh* mesh, fbxp::Node& n, fbxp::Mesh& m, uint32_t vertexCount, bool pack ) {
+template < typename TIndex >
+void ExportMesh( FbxNode* node, FbxMesh* mesh, fbxp::Node& n, fbxp::Mesh& m, uint32_t vertexCount, bool pack, bool optimize ) {
     auto& s = fbxp::Get( );
 
     const uint16_t vertexStride           = (uint16_t) sizeof( fbxp::fb::StaticVertexFb );
@@ -593,12 +599,21 @@ void ExportMesh( FbxNode* node, FbxMesh* mesh, fbxp::Node& n, fbxp::Mesh& m, uin
 
     if ( std::is_same< TIndex, uint16_t >::value ) {
         m.subsetIndexType = fbxp::fb::EIndexTypeFb_UInt16;
-        Optimize16( m, reinterpret_cast< const fbxp::fb::StaticVertexFb* >( m.vertices.data( ) ), vertexCount, vertexStride );
     } else if ( std::is_same< TIndex, uint32_t >::value ) {
         m.subsetIndexType = fbxp::fb::EIndexTypeFb_UInt32;
-        Optimize32( m, reinterpret_cast< const fbxp::fb::StaticVertexFb* >( m.vertices.data( ) ), vertexCount, vertexStride );
     } else {
         assert( false );
+    }
+
+    if ( optimize ) {
+        auto initializedVertices = reinterpret_cast< const fbxp::fb::StaticVertexFb* >( m.vertices.data( ) );
+
+        if ( std::is_same< TIndex, uint16_t >::value ) {
+            Optimize16( m, initializedVertices, vertexCount, vertexStride );
+        } else if ( std::is_same< TIndex, uint32_t >::value ) {
+            m.subsetIndexType = fbxp::fb::EIndexTypeFb_UInt32;
+            Optimize32( m, initializedVertices, vertexCount, vertexStride );
+        }
     }
 
     if ( pack ) {
@@ -661,7 +676,7 @@ void ExportMesh( FbxNode* node, FbxMesh* mesh, fbxp::Node& n, fbxp::Mesh& m, uin
     }
 }
 
-void ExportMesh( FbxNode* node, fbxp::Node& n, bool pack ) {
+void ExportMesh( FbxNode* node, fbxp::Node& n, bool pack, bool optimize ) {
     auto& s = fbxp::Get( );
     if ( auto mesh = node->GetMesh( ) ) {
         s.console->info( "Node \"{}\" has mesh.", node->GetName( ) );
@@ -689,8 +704,8 @@ void ExportMesh( FbxNode* node, fbxp::Node& n, bool pack ) {
         const uint32_t vertexCount = mesh->GetPolygonCount( ) * 3;
 
         if ( vertexCount < 0xffff )
-            ExportMesh< uint16_t >( node, mesh, n, m, vertexCount, pack );
+            ExportMesh< uint16_t >( node, mesh, n, m, vertexCount, pack, optimize );
         else
-            ExportMesh< uint32_t >( node, mesh, n, m, vertexCount, pack );
+            ExportMesh< uint32_t >( node, mesh, n, m, vertexCount, pack, optimize );
     }
 }

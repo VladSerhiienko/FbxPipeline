@@ -228,7 +228,7 @@ struct Mouse {
 };
 
 struct Uniforms {
-    enum { NumVec4 = 16 };
+    enum { NumVec4 = 15 };
 
     void init( ) {
         u_params = bgfx::createUniform( "u_params", bgfx::UniformType::Vec4, NumVec4 );
@@ -259,7 +259,9 @@ struct Uniforms {
             /* 9*/ struct { float m_rgbSpec[ 4 ]; };
             /*10*/ struct { float m_lightDir[ 3 ], m_unused10[ 1 ]; };
             /*11*/ struct { float m_lightCol[ 3 ], m_unused11[ 1 ]; };
-            /*12*/ struct { float m_clipPlanes[ 2 ], m_unused12[ 2 ]; };
+            /*12*/ struct { float m_positionOffset[ 3 ], m_unused13[ 1 ]; };
+            /*13*/ struct { float m_positionScale[ 3 ], m_unused14[ 1 ]; };
+            /*14*/ struct { float m_texcoordOffset[ 2 ], m_texcoordScale[ 2 ]; };
         };
 
         float m_params[ NumVec4 * 4 ];
@@ -387,8 +389,11 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
 
         content->nk = nk_sdl_init( (SDL_Window*) GetSurface( )->GetWindowHandle( ) );
 
-        content->scenes[ 0 ] = LoadSceneFromFile( "../../../assets/Mech6k_v2.fbxp" );
-        content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/P90_v2.fbxp" );
+        content->scenes[ 0 ] = LoadSceneFromFile( "../../../assets/iron-man.fbxp" );
+        content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/kalestra-the-sorceress.fbxp" );
+        // content->scenes[ 0 ] = LoadSceneFromFile( "../../../assets/Mech6kv3ps.fbxp" );
+        // content->scenes[ 0 ] = LoadSceneFromFile( "../../../assets/Mech6k_v2.fbxp" );
+        // content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/P90_v2.fbxp" );
         // content->scenes[ 0 ] = LoadSceneFromFile( "../../../assets/MercedesBenzA45AMG.fbxp" );
         // content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/MercedesBenzSLR.fbxp" );
         // content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/P90.fbxp" );
@@ -638,7 +643,20 @@ void App::Update( float deltaSecs, Input const& inputState ) {
                          BGFX_STATE_DEPTH_TEST_LESS |
                          BGFX_STATE_MSAA;
 
-            if ( false == mesh.subsets.empty( ) )
+            content->uniforms.m_positionOffset[ 0 ] = mesh.positionOffset.x( );
+            content->uniforms.m_positionOffset[ 1 ] = mesh.positionOffset.y( );
+            content->uniforms.m_positionOffset[ 2 ] = mesh.positionOffset.z( );
+            content->uniforms.m_positionScale[ 0 ]  = mesh.positionScale.x( );
+            content->uniforms.m_positionScale[ 1 ]  = mesh.positionScale.y( );
+            content->uniforms.m_positionScale[ 2 ]  = mesh.positionScale.z( );
+            content->uniforms.m_texcoordOffset[ 0 ] = mesh.texcoordOffset.x( );
+            content->uniforms.m_texcoordOffset[ 1 ] = mesh.texcoordOffset.y( );
+            content->uniforms.m_texcoordScale[ 0 ]  = mesh.texcoordScale.x( );
+            content->uniforms.m_texcoordScale[ 1 ]  = mesh.texcoordScale.y( );
+            // E:\Media\Models\iron-man-marvel\source\TONY\IRON.obj
+
+            if ( false == mesh.subsets.empty( ) ){
+
                 for ( auto& subset : mesh.subsets ) {
                     ++drawcallsWithIndices;
 
@@ -652,12 +670,14 @@ void App::Update( float deltaSecs, Input const& inputState ) {
                     content->uniforms.m_rgbDiff[ 0 ] = scene->materials[ node.materialIds[ subset.materialId ] ].albedo.x( );
                     content->uniforms.m_rgbDiff[ 1 ] = scene->materials[ node.materialIds[ subset.materialId ] ].albedo.y( );
                     content->uniforms.m_rgbDiff[ 2 ] = scene->materials[ node.materialIds[ subset.materialId ] ].albedo.z( );
+
                     content->uniforms.submit( );
 
                     bgfx::setVertexBuffer( mesh.vertexBufferHandle );
                     bgfx::setIndexBuffer( mesh.indexBufferHandle, subset.baseIndex, subset.indexCount );
                     bgfx::submit( 1, content->programMesh, 0, false );
                 }
+            }
             else {
                 ++drawcalls;
 

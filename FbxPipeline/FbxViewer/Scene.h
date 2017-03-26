@@ -44,11 +44,13 @@ namespace fbxv {
                     .add( bgfx::Attrib::Tangent, 4, bgfx::AttribType::Uint10, true, true )
                     .add( bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Half, false, false )
                     .end( );*/
-                vertexDecl.begin( )
-                    .add( bgfx::Attrib::Position, 3, bgfx::AttribType::Float, false, false )
+                vertexDecl
+                    .begin( )
+                    //.add( bgfx::Attrib::Position, 3, bgfx::AttribType::Float, false, false )
+                    .add( bgfx::Attrib::Position, 4, bgfx::AttribType::Uint10, true, false )
                     .add( bgfx::Attrib::Normal, 4, bgfx::AttribType::Uint10, true, false )
                     .add( bgfx::Attrib::Tangent, 4, bgfx::AttribType::Uint10, true, false )
-                    .add( bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Half, false, false )
+                    .add( bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Int16, true, false )
                     .end( );
             }
         }
@@ -71,6 +73,10 @@ namespace fbxv {
         bgfx::VertexBufferHandle       vertexBufferHandle;
         bgfx::IndexBufferHandle        indexBufferHandle;
         std::vector< SceneMeshSubset > subsets;
+        mathfu::vec3                   positionOffset;
+        mathfu::vec3                   positionScale;
+        mathfu::vec2                   texcoordOffset;
+        mathfu::vec2                   texcoordScale;
     };
 
     /**
@@ -363,6 +369,21 @@ namespace fbxv {
                                 bgfxUtils::makeReleasableCopy( meshFb->subset_indices( )->Data( ),
                                                                meshFb->subset_indices( )->size( ) ),
                                 meshFb->subset_index_type( ) == fbxp::fb::EIndexTypeFb_UInt32 ? BGFX_BUFFER_INDEX32 : 0 );
+                        }
+
+                        if ( auto submeshesFb = meshFb->submeshes( ) ) {
+                            auto submeshFb = (const fbxp::fb::SubmeshFb *) submeshesFb->Data( );
+
+                            mesh.positionOffset.x( ) = submeshFb->position_offset( ).x( );
+                            mesh.positionOffset.y( ) = submeshFb->position_offset( ).y( );
+                            mesh.positionOffset.z( ) = submeshFb->position_offset( ).z( );
+                            mesh.positionScale.x( )  = submeshFb->position_scale( ).x( );
+                            mesh.positionScale.y( )  = submeshFb->position_scale( ).y( );
+                            mesh.positionScale.z( )  = submeshFb->position_scale( ).z( );
+                            mesh.texcoordOffset.x( ) = submeshFb->uv_offset( ).x( );
+                            mesh.texcoordOffset.y( ) = submeshFb->uv_offset( ).y( );
+                            mesh.texcoordScale.x( )  = submeshFb->uv_scale( ).x( );
+                            mesh.texcoordScale.y( )  = submeshFb->uv_scale( ).y( );
                         }
 
                         mesh.subsets.reserve( meshFb->subsets( )->size( ) );

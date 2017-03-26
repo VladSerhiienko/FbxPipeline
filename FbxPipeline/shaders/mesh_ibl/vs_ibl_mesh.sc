@@ -7,7 +7,7 @@ $output v_view, v_normal, v_logz
 void main()
 {
 	// Calculate position
-	gl_Position = mul(u_modelViewProj, vec4(a_position, 1.0) );
+	gl_Position = mul(u_modelViewProj, vec4(a_position * u_positionScale + u_positionOffset, 1.0) );
 
 	// Calculate log depth
 	// http://outerra.blogspot.com/2013/07/logarithmic-depth-buffer-optimizations.html
@@ -20,5 +20,6 @@ void main()
 
 	// Normal in world space
 	vec3 normal = a_normal * 2.0 - vec3_splat( 1.0 );
+	//vec3 normal = a_normal.bgr * 2.0 - vec3_splat( 1.0 );
 	v_normal = mul(u_model[0], vec4(normal, 0.0) ).xyz;
 }

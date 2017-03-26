@@ -297,7 +297,7 @@ MANUALLY_ALIGNED_STRUCT(4) StaticVertexFb FLATBUFFERS_FINAL_CLASS {
   vec3 position_;
   vec3 normal_;
   vec4 tangent_;
-  vec2 texCoords_;
+  vec2 uv_;
 
  public:
   StaticVertexFb() {
@@ -306,11 +306,11 @@ MANUALLY_ALIGNED_STRUCT(4) StaticVertexFb FLATBUFFERS_FINAL_CLASS {
   StaticVertexFb(const StaticVertexFb &_o) {
     memcpy(this, &_o, sizeof(StaticVertexFb));
   }
-  StaticVertexFb(const vec3 &_position, const vec3 &_normal, const vec4 &_tangent, const vec2 &_texCoords)
+  StaticVertexFb(const vec3 &_position, const vec3 &_normal, const vec4 &_tangent, const vec2 &_uv)
       : position_(_position),
         normal_(_normal),
         tangent_(_tangent),
-        texCoords_(_texCoords) {
+        uv_(_uv) {
   }
   const vec3 &position() const {
     return position_;
@@ -321,18 +321,18 @@ MANUALLY_ALIGNED_STRUCT(4) StaticVertexFb FLATBUFFERS_FINAL_CLASS {
   const vec4 &tangent() const {
     return tangent_;
   }
-  const vec2 &texCoords() const {
-    return texCoords_;
+  const vec2 &uv() const {
+    return uv_;
   }
 };
 STRUCT_END(StaticVertexFb, 48);
 
 MANUALLY_ALIGNED_STRUCT(4) PackedVertexFb FLATBUFFERS_FINAL_CLASS {
  private:
-  vec3 position_;
+  uint32_t position_;
   uint32_t normal_;
   uint32_t tangent_;
-  uint32_t texCoords_;
+  uint32_t uv_;
 
  public:
   PackedVertexFb() {
@@ -341,14 +341,14 @@ MANUALLY_ALIGNED_STRUCT(4) PackedVertexFb FLATBUFFERS_FINAL_CLASS {
   PackedVertexFb(const PackedVertexFb &_o) {
     memcpy(this, &_o, sizeof(PackedVertexFb));
   }
-  PackedVertexFb(const vec3 &_position, uint32_t _normal, uint32_t _tangent, uint32_t _texCoords)
-      : position_(_position),
+  PackedVertexFb(uint32_t _position, uint32_t _normal, uint32_t _tangent, uint32_t _uv)
+      : position_(flatbuffers::EndianScalar(_position)),
         normal_(flatbuffers::EndianScalar(_normal)),
         tangent_(flatbuffers::EndianScalar(_tangent)),
-        texCoords_(flatbuffers::EndianScalar(_texCoords)) {
+        uv_(flatbuffers::EndianScalar(_uv)) {
   }
-  const vec3 &position() const {
-    return position_;
+  uint32_t position() const {
+    return flatbuffers::EndianScalar(position_);
   }
   uint32_t normal() const {
     return flatbuffers::EndianScalar(normal_);
@@ -356,11 +356,11 @@ MANUALLY_ALIGNED_STRUCT(4) PackedVertexFb FLATBUFFERS_FINAL_CLASS {
   uint32_t tangent() const {
     return flatbuffers::EndianScalar(tangent_);
   }
-  uint32_t texCoords() const {
-    return flatbuffers::EndianScalar(texCoords_);
+  uint32_t uv() const {
+    return flatbuffers::EndianScalar(uv_);
   }
 };
-STRUCT_END(PackedVertexFb, 24);
+STRUCT_END(PackedVertexFb, 16);
 
 MANUALLY_ALIGNED_STRUCT(8) TextureFb FLATBUFFERS_FINAL_CLASS {
  private:
@@ -434,6 +434,12 @@ STRUCT_END(TextureFb, 56);
 
 MANUALLY_ALIGNED_STRUCT(4) SubmeshFb FLATBUFFERS_FINAL_CLASS {
  private:
+  vec3 bbox_min_;
+  vec3 bbox_max_;
+  vec3 position_offset_;
+  vec3 position_scale_;
+  vec2 uv_offset_;
+  vec2 uv_scale_;
   uint32_t base_vertex_;
   uint32_t vertex_count_;
   uint32_t base_index_;
@@ -451,8 +457,14 @@ MANUALLY_ALIGNED_STRUCT(4) SubmeshFb FLATBUFFERS_FINAL_CLASS {
   SubmeshFb(const SubmeshFb &_o) {
     memcpy(this, &_o, sizeof(SubmeshFb));
   }
-  SubmeshFb(uint32_t _base_vertex, uint32_t _vertex_count, uint32_t _base_index, uint32_t _index_count, uint16_t _base_subset, uint16_t _subset_count, EVertexFormat _vertex_format, uint16_t _vertex_stride)
-      : base_vertex_(flatbuffers::EndianScalar(_base_vertex)),
+  SubmeshFb(const vec3 &_bbox_min, const vec3 &_bbox_max, const vec3 &_position_offset, const vec3 &_position_scale, const vec2 &_uv_offset, const vec2 &_uv_scale, uint32_t _base_vertex, uint32_t _vertex_count, uint32_t _base_index, uint32_t _index_count, uint16_t _base_subset, uint16_t _subset_count, EVertexFormat _vertex_format, uint16_t _vertex_stride)
+      : bbox_min_(_bbox_min),
+        bbox_max_(_bbox_max),
+        position_offset_(_position_offset),
+        position_scale_(_position_scale),
+        uv_offset_(_uv_offset),
+        uv_scale_(_uv_scale),
+        base_vertex_(flatbuffers::EndianScalar(_base_vertex)),
         vertex_count_(flatbuffers::EndianScalar(_vertex_count)),
         base_index_(flatbuffers::EndianScalar(_base_index)),
         index_count_(flatbuffers::EndianScalar(_index_count)),
@@ -462,6 +474,24 @@ MANUALLY_ALIGNED_STRUCT(4) SubmeshFb FLATBUFFERS_FINAL_CLASS {
         vertex_stride_(flatbuffers::EndianScalar(_vertex_stride)),
         padding0__(0) {
     (void)padding0__;
+  }
+  const vec3 &bbox_min() const {
+    return bbox_min_;
+  }
+  const vec3 &bbox_max() const {
+    return bbox_max_;
+  }
+  const vec3 &position_offset() const {
+    return position_offset_;
+  }
+  const vec3 &position_scale() const {
+    return position_scale_;
+  }
+  const vec2 &uv_offset() const {
+    return uv_offset_;
+  }
+  const vec2 &uv_scale() const {
+    return uv_scale_;
   }
   uint32_t base_vertex() const {
     return flatbuffers::EndianScalar(base_vertex_);
@@ -488,7 +518,7 @@ MANUALLY_ALIGNED_STRUCT(4) SubmeshFb FLATBUFFERS_FINAL_CLASS {
     return flatbuffers::EndianScalar(vertex_stride_);
   }
 };
-STRUCT_END(SubmeshFb, 28);
+STRUCT_END(SubmeshFb, 92);
 
 MANUALLY_ALIGNED_STRUCT(4) SubsetFb FLATBUFFERS_FINAL_CLASS {
  private:

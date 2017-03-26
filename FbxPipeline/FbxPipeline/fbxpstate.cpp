@@ -22,6 +22,7 @@ fbxp::State::State( ) : console( spdlog::stdout_color_mt( "fbxp" ) ), options( G
     options.add_options( "input" )( "k,convert", "Convert", cxxopts::value< bool >( ) );
     options.add_options( "input" )( "p,pack-meshes", "Pack meshes", cxxopts::value< bool >( ) );
     options.add_options( "input" )( "s,split-meshes-per-material", "Split meshes per material", cxxopts::value< bool >( ) );
+    options.add_options( "input" )( "t,optimize-meshes", "Optimize meshes", cxxopts::value< bool >( ) );
 }
 
 fbxp::State::~State( ) {
@@ -124,16 +125,12 @@ bool fbxp::State::Finish( ) {
             auto vsOffset = builder.CreateVector( mesh.vertices );
             auto smOffset = builder.CreateVectorOfStructs( mesh.submeshes );
             auto ssOffset = builder.CreateVectorOfStructs( mesh.subsets );
-            // auto iiOffset = builder.CreateVector( mesh.indices );
             auto siOffset = builder.CreateVector( mesh.subsetIndices );
-            // auto spOffset = builder.CreateVectorOfStructs( mesh.subsetsPolies );
 
             fb::MeshFbBuilder meshBuilder( builder );
             meshBuilder.add_vertices( vsOffset );
             meshBuilder.add_submeshes( smOffset );
             meshBuilder.add_subsets( ssOffset );
-            // meshBuilder.add_indices( iiOffset );
-            // meshBuilder.add_subset_polies( spOffset );
             meshBuilder.add_subset_indices( siOffset );
             meshBuilder.add_subset_index_type( mesh.subsetIndexType );
             meshOffsets.push_back( meshBuilder.Finish( ) );

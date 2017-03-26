@@ -2,7 +2,7 @@
 #include <fbxpstate.h>
 #include <queue>
 
-void ExportMesh( FbxNode* node, fbxp::Node& n, bool pack );
+void ExportMesh( FbxNode* node, fbxp::Node& n, bool pack, bool optimize );
 void ExportMaterials( FbxScene* scene );
 void ExportMaterials( FbxNode* node, fbxp::Node& n );
 void ExportTransform( FbxNode* node, fbxp::Node& n );
@@ -16,7 +16,7 @@ void ExportNodeAttributes( FbxNode* node, fbxp::Node& n ) {
 
     ExportTransform( node, n );
     ExportAnimation( node, n );
-    ExportMesh( node, n, s.options[ "p" ].as< bool >( ) );
+    ExportMesh( node, n, s.options[ "p" ].as< bool >( ), s.options[ "t" ].as< bool >( ) );
     ExportMaterials( node, n );
 }
 
@@ -44,9 +44,9 @@ uint32_t ExportNode( FbxNode* node ) {
 
 /**
  * Preprocess scene with Fbx tools:
- * FbxGeometryConverter - remove bad polygons
- *                      - triangulate
- *                      - split meshes per material
+ * FbxGeometryConverter > Remove bad polygons
+ *                      > Triangulate
+ *                      > Split meshes per material
  **/
 void PreprocessMeshes( FbxScene* scene ) {
     auto& s = fbxp::Get( );
