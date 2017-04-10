@@ -89,20 +89,21 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(FBX_SDK)include\;$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\snappy\;$(SolutionDir)..\ThirdParty\;$(SolutionDir)..\ThirdParty\mathfu\include;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\lua;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;$(SolutionDir)..\ThirdParty\draco;$(SolutionDir)..\ThirdParty\draco\io\;$(SolutionDir)..\ThirdParty\draco\compression\;$(SolutionDir)..\ThirdParty\draco\mesh\;$(SolutionDir)..\ThirdParty\draco\core\;$(SolutionDir)..\ThirdParty\lz4\lib\;$(SolutionDir)..\ThirdParty\cityhash\src\;$(SolutionDir)..\ThirdParty\forsythtriangleorderoptimizer\;$(SolutionDir)..\ThirdParty\vcache_optimizer\vcache_optimizer\;$(SolutionDir)..\ThirdParty\meshoptimizer\src\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(FBX_SDK)include\;$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\snappy\;$(SolutionDir)..\ThirdParty\;$(SolutionDir)..\ThirdParty\mathfu\include;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\lua;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;$(SolutionDir)..\ThirdParty\draco;$(SolutionDir)..\ThirdParty\draco\io\;$(SolutionDir)..\ThirdParty\draco\compression\;$(SolutionDir)..\ThirdParty\draco\mesh\;$(SolutionDir)..\ThirdParty\draco\core\;$(SolutionDir)..\ThirdParty\lz4\lib\;$(SolutionDir)..\ThirdParty\cityhash\src\;$(SolutionDir)..\ThirdParty\forsythtriangleorderoptimizer\;$(SolutionDir)..\ThirdParty\vcache_optimizer\vcache_optimizer\;$(SolutionDir)..\ThirdParty\meshoptimizer\src\;$(PVR_GRAPHICS_ROOT)PowerVR_Tools\PVRTexTool\Library\Include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>fbxppch.h</PrecompiledHeaderFile>
       <PreprocessorDefinitions>KFBX_DLLINFO;FBXSDK_SHARED;FBXP_DEBUG=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\;$(SolutionDir)..\ThirdParty\draco_build_v140$(PlatformTarget)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>draco.lib;libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\;$(SolutionDir)..\ThirdParty\draco_build_v140$(PlatformTarget)\$(Configuration)\;$(PVR_GRAPHICS_ROOT)PowerVR_Tools\PVRTexTool\Library\Windows_x86_$(PlatformArchitecture)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>draco.lib;libfbxsdk.lib;PVRTexLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>echo FBXP Copying dlls and pdbs
 xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.dll" "$(OutDir)" /s /d
 xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.pdb" "$(OutDir)" /s /d
 xcopy "$(SolutionDir)..\ThirdParty\draco_build_$(PlatformToolset)$(PlatformTarget)\$(Configuration)\draco.pdb" "$(OutDir)" /s /d
+xcopy "$(PVR_GRAPHICS_ROOT)PowerVR_Tools\PVRTexTool\Library\Windows_x86_$(PlatformArchitecture)\*.dll" "$(OutDir)" /s /d
 exit 0</Command>
     </PostBuildEvent>
     <PreBuildEvent>
@@ -115,20 +116,21 @@ exit 0</Command>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(FBX_SDK)include\;$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\snappy\;$(SolutionDir)..\ThirdParty\;$(SolutionDir)..\ThirdParty\mathfu\include;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\lua;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;$(SolutionDir)..\ThirdParty\draco;$(SolutionDir)..\ThirdParty\draco\io\;$(SolutionDir)..\ThirdParty\draco\compression\;$(SolutionDir)..\ThirdParty\draco\mesh\;$(SolutionDir)..\ThirdParty\draco\core\;$(SolutionDir)..\ThirdParty\lz4\lib\;$(SolutionDir)..\ThirdParty\cityhash\src\;$(SolutionDir)..\ThirdParty\forsythtriangleorderoptimizer\;$(SolutionDir)..\ThirdParty\vcache_optimizer\vcache_optimizer\;$(SolutionDir)..\ThirdParty\meshoptimizer\src\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(FBX_SDK)include\;$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\snappy\;$(SolutionDir)..\ThirdParty\;$(SolutionDir)..\ThirdParty\mathfu\include;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\lua;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;$(SolutionDir)..\ThirdParty\draco;$(SolutionDir)..\ThirdParty\draco\io\;$(SolutionDir)..\ThirdParty\draco\compression\;$(SolutionDir)..\ThirdParty\draco\mesh\;$(SolutionDir)..\ThirdParty\draco\core\;$(SolutionDir)..\ThirdParty\lz4\lib\;$(SolutionDir)..\ThirdParty\cityhash\src\;$(SolutionDir)..\ThirdParty\forsythtriangleorderoptimizer\;$(SolutionDir)..\ThirdParty\vcache_optimizer\vcache_optimizer\;$(SolutionDir)..\ThirdParty\meshoptimizer\src\;$(PVR_GRAPHICS_ROOT)PowerVR_Tools\PVRTexTool\Library\Include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>fbxppch.h</PrecompiledHeaderFile>
       <PreprocessorDefinitions>KFBX_DLLINFO;FBXSDK_SHARED;FBXP_DEBUG=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\;$(SolutionDir)..\ThirdParty\draco_build_v140$(PlatformTarget)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>draco.lib;libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\;$(SolutionDir)..\ThirdParty\draco_build_v140$(PlatformTarget)\$(Configuration)\;$(PVR_GRAPHICS_ROOT)PowerVR_Tools\PVRTexTool\Library\Windows_x86_$(PlatformArchitecture)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>draco.lib;libfbxsdk.lib;PVRTexLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>echo FBXP Copying dlls and pdbs
 xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.dll" "$(OutDir)" /s /d
 xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.pdb" "$(OutDir)" /s /d
 xcopy "$(SolutionDir)..\ThirdParty\draco_build_$(PlatformToolset)$(PlatformTarget)\$(Configuration)\draco.pdb" "$(OutDir)" /s /d
+xcopy "$(PVR_GRAPHICS_ROOT)PowerVR_Tools\PVRTexTool\Library\Windows_x86_$(PlatformArchitecture)\*.dll" "$(OutDir)" /s /d
 exit 0</Command>
     </PostBuildEvent>
     <PreBuildEvent>
@@ -143,7 +145,7 @@ exit 0</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(FBX_SDK)include\;$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\snappy\;$(SolutionDir)..\ThirdParty\;$(SolutionDir)..\ThirdParty\mathfu\include;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\lua;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;$(SolutionDir)..\ThirdParty\draco;$(SolutionDir)..\ThirdParty\draco\io\;$(SolutionDir)..\ThirdParty\draco\compression\;$(SolutionDir)..\ThirdParty\draco\mesh\;$(SolutionDir)..\ThirdParty\draco\core\;$(SolutionDir)..\ThirdParty\lz4\lib\;$(SolutionDir)..\ThirdParty\cityhash\src\;$(SolutionDir)..\ThirdParty\forsythtriangleorderoptimizer\;$(SolutionDir)..\ThirdParty\vcache_optimizer\vcache_optimizer\;$(SolutionDir)..\ThirdParty\meshoptimizer\src\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(FBX_SDK)include\;$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\snappy\;$(SolutionDir)..\ThirdParty\;$(SolutionDir)..\ThirdParty\mathfu\include;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\lua;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;$(SolutionDir)..\ThirdParty\draco;$(SolutionDir)..\ThirdParty\draco\io\;$(SolutionDir)..\ThirdParty\draco\compression\;$(SolutionDir)..\ThirdParty\draco\mesh\;$(SolutionDir)..\ThirdParty\draco\core\;$(SolutionDir)..\ThirdParty\lz4\lib\;$(SolutionDir)..\ThirdParty\cityhash\src\;$(SolutionDir)..\ThirdParty\forsythtriangleorderoptimizer\;$(SolutionDir)..\ThirdParty\vcache_optimizer\vcache_optimizer\;$(SolutionDir)..\ThirdParty\meshoptimizer\src\;$(PVR_GRAPHICS_ROOT)PowerVR_Tools\PVRTexTool\Library\Include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>fbxppch.h</PrecompiledHeaderFile>
       <PreprocessorDefinitions>KFBX_DLLINFO;FBXSDK_SHARED;FBXP_DEBUG=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -151,14 +153,15 @@ exit 0</Command>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\;$(SolutionDir)..\ThirdParty\draco_build_v140$(PlatformTarget)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>draco.lib;libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\;$(SolutionDir)..\ThirdParty\draco_build_v140$(PlatformTarget)\$(Configuration)\;$(PVR_GRAPHICS_ROOT)PowerVR_Tools\PVRTexTool\Library\Windows_x86_$(PlatformArchitecture)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>draco.lib;libfbxsdk.lib;PVRTexLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>echo FBXP Copying dlls and pdbs
 xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.dll" "$(OutDir)" /s /d
 xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.pdb" "$(OutDir)" /s /d
 xcopy "$(SolutionDir)..\ThirdParty\draco_build_$(PlatformToolset)$(PlatformTarget)\$(Configuration)\draco.pdb" "$(OutDir)" /s /d
+xcopy "$(PVR_GRAPHICS_ROOT)PowerVR_Tools\PVRTexTool\Library\Windows_x86_$(PlatformArchitecture)\*.dll" "$(OutDir)" /s /d
 exit 0</Command>
     </PostBuildEvent>
     <PreBuildEvent>
@@ -173,7 +176,7 @@ exit 0</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(FBX_SDK)include\;$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\snappy\;$(SolutionDir)..\ThirdParty\;$(SolutionDir)..\ThirdParty\mathfu\include;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\lua;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;$(SolutionDir)..\ThirdParty\draco;$(SolutionDir)..\ThirdParty\draco\io\;$(SolutionDir)..\ThirdParty\draco\compression\;$(SolutionDir)..\ThirdParty\draco\mesh\;$(SolutionDir)..\ThirdParty\draco\core\;$(SolutionDir)..\ThirdParty\lz4\lib\;$(SolutionDir)..\ThirdParty\cityhash\src\;$(SolutionDir)..\ThirdParty\forsythtriangleorderoptimizer\;$(SolutionDir)..\ThirdParty\vcache_optimizer\vcache_optimizer\;$(SolutionDir)..\ThirdParty\meshoptimizer\src\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(FBX_SDK)include\;$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\snappy\;$(SolutionDir)..\ThirdParty\;$(SolutionDir)..\ThirdParty\mathfu\include;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\lua;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;$(SolutionDir)..\ThirdParty\draco;$(SolutionDir)..\ThirdParty\draco\io\;$(SolutionDir)..\ThirdParty\draco\compression\;$(SolutionDir)..\ThirdParty\draco\mesh\;$(SolutionDir)..\ThirdParty\draco\core\;$(SolutionDir)..\ThirdParty\lz4\lib\;$(SolutionDir)..\ThirdParty\cityhash\src\;$(SolutionDir)..\ThirdParty\forsythtriangleorderoptimizer\;$(SolutionDir)..\ThirdParty\vcache_optimizer\vcache_optimizer\;$(SolutionDir)..\ThirdParty\meshoptimizer\src\;$(PVR_GRAPHICS_ROOT)PowerVR_Tools\PVRTexTool\Library\Include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>fbxppch.h</PrecompiledHeaderFile>
       <PreprocessorDefinitions>KFBX_DLLINFO;FBXSDK_SHARED;FBXP_DEBUG=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -181,14 +184,15 @@ exit 0</Command>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\;$(SolutionDir)..\ThirdParty\draco_build_v140$(PlatformTarget)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>draco.lib;libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\;$(SolutionDir)..\ThirdParty\draco_build_v140$(PlatformTarget)\$(Configuration)\;$(PVR_GRAPHICS_ROOT)PowerVR_Tools\PVRTexTool\Library\Windows_x86_$(PlatformArchitecture)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>draco.lib;libfbxsdk.lib;PVRTexLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>echo FBXP Copying dlls and pdbs
 xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.dll" "$(OutDir)" /s /d
 xcopy "$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\*.pdb" "$(OutDir)" /s /d
 xcopy "$(SolutionDir)..\ThirdParty\draco_build_$(PlatformToolset)$(PlatformTarget)\$(Configuration)\draco.pdb" "$(OutDir)" /s /d
+xcopy "$(PVR_GRAPHICS_ROOT)PowerVR_Tools\PVRTexTool\Library\Windows_x86_$(PlatformArchitecture)\*.dll" "$(OutDir)" /s /d
 exit 0</Command>
     </PostBuildEvent>
     <PreBuildEvent>
@@ -199,6 +203,7 @@ exit 0</Command>
   <ItemGroup>
     <ClCompile Include="fbxpacking.cpp" />
     <ClCompile Include="fbxpanimation.cpp" />
+    <ClCompile Include="fbxpfileutils.cpp" />
     <ClCompile Include="fbxpmem.cpp" />
     <ClCompile Include="fbxpmeshopt.cpp" />
     <ClCompile Include="fbxppch.cpp">

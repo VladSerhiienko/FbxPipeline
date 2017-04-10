@@ -43,6 +43,9 @@
     <ClCompile Include="fbxpmeshopt.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
+    <ClCompile Include="fbxpfileutils.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\schemes\scene.fbs">

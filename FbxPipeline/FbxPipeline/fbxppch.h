@@ -38,3 +38,9 @@ namespace mathfu {
 //
 
 #include <fbxsdk.h>
+
+//
+// PVRTexTool Library
+//
+
+#include <PVRTexture.h>

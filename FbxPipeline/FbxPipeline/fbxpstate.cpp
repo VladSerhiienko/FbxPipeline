@@ -10,6 +10,7 @@ void SplitFilename( const std::string& filePath, std::string& parentFolderName, 
 bool InitializeSdkObjects( FbxManager*& pManager, FbxScene*& pScene );
 void DestroySdkObjects( FbxManager* pManager );
 bool LoadScene( FbxManager* pManager, FbxDocument* pScene, const char* pFilename );
+void InitializeSeachLocations( );
 
 fbxp::State  s;
 fbxp::State& fbxp::Get( ) {
@@ -20,9 +21,12 @@ fbxp::State::State( ) : console( spdlog::stdout_color_mt( "fbxp" ) ), options( G
     options.add_options( "input" )( "i,input-file", "Input", cxxopts::value< std::string >( ) );
     options.add_options( "input" )( "o,output-file", "Output", cxxopts::value< std::string >( ) );
     options.add_options( "input" )( "k,convert", "Convert", cxxopts::value< bool >( ) );
+    options.add_options( "input" )( "c,compress", "Compress", cxxopts::value< bool >( ) );
     options.add_options( "input" )( "p,pack-meshes", "Pack meshes", cxxopts::value< bool >( ) );
     options.add_options( "input" )( "s,split-meshes-per-material", "Split meshes per material", cxxopts::value< bool >( ) );
     options.add_options( "input" )( "t,optimize-meshes", "Optimize meshes", cxxopts::value< bool >( ) );
+    options.add_options( "input" )( "e,search-location", "Add search location", cxxopts::value< std::vector< std::string > >( ) );
+    options.add_options( "input" )( "m,embed-file", "Embed file", cxxopts::value< std::vector< std::string > >( ) );
 }
 
 fbxp::State::~State( ) {
@@ -30,8 +34,11 @@ fbxp::State::~State( ) {
 }
 
 bool fbxp::State::Initialize( ) {
-    if ( !manager || !scene )
+    if (!manager || !scene) {
         InitializeSdkObjects( manager, scene );
+        InitializeSeachLocations( );
+    }
+
     return manager && scene;
 }
 
@@ -42,12 +49,15 @@ void fbxp::State::Release( ) {
     }
 }
 
-bool fbxp::State::Load( const char* f ) {
-    SplitFilename( f, folderPath, fileName );
-    console->info( "File name  : \"{}\"", fileName );
-    console->info( "Folder name: \"{}\"", folderPath );
-    return LoadScene( manager, scene, f );
+bool fbxp::State::Load( ) {
+    const std::string inputFile = options[ "i" ].as< std::string >( );
+    // SplitFilename( inputFile.c_str( ), folderPath, fileName );
+    // console->info( "File name  : \"{}\"", fileName );
+    // console->info( "Folder name: \"{}\"", folderPath );
+    return LoadScene( manager, scene, inputFile.c_str( ) );
 }
+
+std::vector< uint8_t > ReadFile( const char* filepath );
 
 bool fbxp::State::Finish( ) {
 
@@ -137,6 +147,26 @@ bool fbxp::State::Finish( ) {
         }
     }
 
+    //
+    // Finalize files
+    //
+
+    std::vector< flatbuffers::Offset< fb::FileFb > > fileOffsets; {
+        fileOffsets.reserve( embedQueue.size( ) );
+
+        std::vector< uint8_t > fileBuffer;
+
+        for ( auto& fileForEmbedding : embedQueue ) {
+            fileBuffer = ReadFile( fileForEmbedding.c_str( ) );
+            if ( !fileBuffer.empty( ) ) {
+                auto bytesOffset = builder.CreateVectorOfStructs( fileBuffer );
+
+                fileOffsets.push_back( fb::CreateFileFbDirect( builder, fileOffsets.size( ), 0, &fileBuffer ) );
+            }
+
+        }
+    }
+
     const auto meshesOffset = builder.CreateVector( meshOffsets );
 
     //
@@ -152,6 +182,12 @@ bool fbxp::State::Finish( ) {
     const auto texturesOffset = builder.CreateVectorOfStructs( textures );
 
     //
+    // Finalize files
+    //
+
+    const auto filesOffset = builder.CreateVector( fileOffsets );
+
+    //
     // Finalize scene
     //
 
@@ -162,6 +198,7 @@ bool fbxp::State::Finish( ) {
     sceneBuilder.add_meshes( meshesOffset );
     sceneBuilder.add_textures( texturesOffset );
     sceneBuilder.add_materials( materialsOffset );
+    sceneBuilder.add_files( filesOffset );
 
     fbxp::fb::FinishSceneFbBuffer( builder, sceneBuilder.Finish( ) );
 

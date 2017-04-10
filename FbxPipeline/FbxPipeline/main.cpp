@@ -7,14 +7,10 @@ void ConvertScene( FbxManager* lSdkManager, FbxScene* lScene, FbxString lFilePat
 int main( int argc, char** argv ) {
     auto& s = fbxp::Get( );
 
-    std::string input;
-    std::string output;
     bool convert = false;
 
     try {
         s.options.parse( argc, argv );
-        input   = s.options[ "i" ].as< std::string >( );
-        output  = s.options[ "o" ].as< std::string >( );
         convert = s.options[ "k" ].as< bool >( );
     } catch ( const cxxopts::OptionException& e ) {
         s.console->critical( "error parsing options: {0}", e.what( ) );
@@ -22,9 +18,9 @@ int main( int argc, char** argv ) {
     }
 
     if ( s.Initialize( ) ) {
-        if ( s.Load( input.c_str( ) ) ) {
+        if ( s.Load( ) ) {
             if ( convert )
-                ConvertScene( s.manager, s.scene, input.c_str( ) );
+                ConvertScene( s.manager, s.scene, s.options[ "i" ].as< std::string >( ).c_str( ) );
             else {
                 ExportScene( s.scene );
                 s.Finish( );

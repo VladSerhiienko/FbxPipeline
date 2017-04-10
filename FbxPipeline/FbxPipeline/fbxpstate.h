@@ -58,14 +58,16 @@ namespace fbxp {
         std::vector< fb::TransformFb >    transforms;
         std::vector< fb::TextureFb >      textures;
         std::vector< Mesh >               meshes;
+        std::vector< std::string >        searchLocations;
+        std::set< std::string >        embedQueue;
 
         State( );
         ~State( );
 
-        bool Initialize( );
-        void Release( );
-        bool Load( const char* fileName );
-        bool Finish( );
+        bool     Initialize( );
+        void     Release( );
+        bool     Load( );
+        bool     Finish( );
         uint64_t PushName( std::string const& name );
 
         friend State& Get( );

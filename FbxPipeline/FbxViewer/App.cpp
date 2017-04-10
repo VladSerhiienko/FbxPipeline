@@ -637,11 +637,8 @@ void App::Update( float deltaSecs, Input const& inputState ) {
             memcpy( world, &scene->worldMatrices[ nodeId ], sizeof( world ) );
             static_assert( sizeof( world ) == sizeof( mathfu::mat4 ), "Cannot memcpy." );
 
-            auto state = BGFX_STATE_RGB_WRITE |
-                         BGFX_STATE_ALPHA_WRITE |
-                         BGFX_STATE_DEPTH_WRITE |
-                         BGFX_STATE_DEPTH_TEST_LESS |
-                         BGFX_STATE_MSAA;
+            auto state = BGFX_STATE_RGB_WRITE | BGFX_STATE_ALPHA_WRITE | BGFX_STATE_DEPTH_WRITE | BGFX_STATE_DEPTH_TEST_LESS |
+                         BGFX_STATE_MSAA | BGFX_STATE_CULL_CCW;
 
             content->uniforms.m_positionOffset[ 0 ] = mesh.positionOffset.x( );
             content->uniforms.m_positionOffset[ 1 ] = mesh.positionOffset.y( );
@@ -653,10 +650,8 @@ void App::Update( float deltaSecs, Input const& inputState ) {
             content->uniforms.m_texcoordOffset[ 1 ] = mesh.texcoordOffset.y( );
             content->uniforms.m_texcoordScale[ 0 ]  = mesh.texcoordScale.x( );
             content->uniforms.m_texcoordScale[ 1 ]  = mesh.texcoordScale.y( );
-            // E:\Media\Models\iron-man-marvel\source\TONY\IRON.obj
 
-            if ( false == mesh.subsets.empty( ) ){
-
+            if ( false == mesh.subsets.empty( ) ) {
                 for ( auto& subset : mesh.subsets ) {
                     ++drawcallsWithIndices;
 
@@ -687,7 +682,9 @@ void App::Update( float deltaSecs, Input const& inputState ) {
                 bgfx::setState( state );
                 bgfx::setTexture( 0, content->s_texCube, content->radianceTextureHandles[ content->envId ] );
                 bgfx::setTexture( 1, content->s_texCubeIrr, content->irradianceTextureHandles[ content->envId ] );
+
                 content->uniforms.submit( );
+
                 bgfx::setVertexBuffer( mesh.vertexBufferHandle );
                 bgfx::submit( 2, content->programMesh, 0, false );
             }

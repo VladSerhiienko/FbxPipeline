@@ -2,7 +2,7 @@
 namespace fbxp.fb;
 
 enum EVersion : uint {
-    Value = 2
+    Value = 3
 }
 enum ECullingType : uint
 {
@@ -69,7 +69,7 @@ struct PackedVertexFb {
 struct TextureFb {
     id : uint;
     name_id : ulong( key );
-    source_id : ulong;
+    file_id : uint;
     blend_mode : EBlendMode;
     wrap_mode_u : EWrapMode;
     wrap_mode_v : EWrapMode;
@@ -137,11 +137,16 @@ table MaterialFb {
 }
 table NodeFb {
     id : uint;
+    mesh_id : uint;
+    name_id : ulong( key );
+	culling_type : ECullingType;
     child_ids : [uint];
     material_ids : [uint];
-    mesh_id : uint;
-    name_id : ulong;
-	culling_type : ECullingType;
+}
+table FileFb {
+	id : uint;
+    name_id : ulong( key );
+	buffer : [ubyte];
 }
 table SceneFb {
     transforms : [TransformFb];
@@ -149,6 +154,7 @@ table SceneFb {
     meshes : [MeshFb];
     materials : [MaterialFb];
     textures : [TextureFb];
+    files : [FileFb];
     names : [NameFb];
 }
 

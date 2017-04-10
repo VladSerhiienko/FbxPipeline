@@ -2,6 +2,8 @@
 #include <fbxpstate.h>
 #include <scene_generated.h>
 
+std::string FindFile( const char* filepath );
+std::string GetFileName( const char* filePath );
 void SplitFilename( const std::string& filePath, std::string& parentFolderName, std::string& fileName );
 
 template < typename TFbxMaterial >
@@ -63,13 +65,12 @@ void ExportVideo( std::string const& pn, fbxp::Material& m, FbxProperty& pp, Fbx
     if ( url.empty( ) ) {
         url = v->GetUrl( );
     }
-    if (!url.empty()) {
-        std::string folder, file;
-        SplitFilename(url, folder, file);
+    if ( !url.empty( ) ) {
+        s.embedQueue.insert( FindFile( url.c_str( ) ) );
 
         s.textures.emplace_back( (uint32_t) s.textures.size( ),
                                  s.PushName( v->GetName( ) ),
-                                 s.PushName( file ),
+                                 s.PushName( GetFileName( url.c_str( ) ) ),
                                  fbxp::fb::EBlendMode::EBlendMode_Over,
                                  fbxp::fb::EWrapMode::EWrapMode_Clamp,
                                  fbxp::fb::EWrapMode::EWrapMode_Clamp,
@@ -82,8 +83,10 @@ void ExportVideo( std::string const& pn, fbxp::Material& m, FbxProperty& pp, Fbx
                               fbxp::fb::EMaterialPropTypeFb_Video,
                               fbxp::fb::vec3( static_cast< float >( s.textures.back( ).id( ) ), 0, 0 ) );
 
-        s.console->info("Found video \"{}\" (\"{}\") (\"{}\")", v->GetName(), file, pp.GetName().Buffer());
-
+        s.console->info( "Found video \"{}\" (\"{}\") (\"{}\")",
+                         v->GetName( ),
+                         GetFileName( url.c_str( ) ).c_str( ),
+                         pp.GetName( ).Buffer( ) );
     }
 }
 
@@ -97,12 +100,11 @@ void ExportTexture( std::string const& pn, fbxp::Material& m, FbxProperty& pp, F
     }
 
     if ( !url.empty( ) ) {
-        std::string folder, file;
-        SplitFilename( url, folder, file );
+        s.embedQueue.insert( FindFile( url.c_str( ) ) );
 
         s.textures.emplace_back( (uint32_t) s.textures.size( ),
                                  s.PushName( t->GetName( ) ),
-                                 s.PushName( file ),
+                                 s.PushName( GetFileName( url.c_str( ) ) ),
                                  (fbxp::fb::EBlendMode) t->GetBlendMode( ),
                                  (fbxp::fb::EWrapMode) t->GetWrapModeU( ),
                                  (fbxp::fb::EWrapMode) t->GetWrapModeV( ),
@@ -115,7 +117,10 @@ void ExportTexture( std::string const& pn, fbxp::Material& m, FbxProperty& pp, F
                               fbxp::fb::EMaterialPropTypeFb_Texture,
                               fbxp::fb::vec3( static_cast< float >( s.textures.back( ).id( ) ), 0, 0 ) );
 
-        s.console->info( "Found texture \"{}\" (\"{}\") (\"{}\")", t->GetName( ), file, pp.GetName( ).Buffer( ) );
+        s.console->info( "Found texture \"{}\" (\"{}\") (\"{}\")",
+                         t->GetName( ),
+                         GetFileName( url.c_str( ) ).c_str( ),
+                         pp.GetName( ).Buffer( ) );
     }
 }
 
