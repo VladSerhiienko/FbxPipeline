@@ -156,14 +156,12 @@ bool fbxp::State::Finish( ) {
 
         std::vector< uint8_t > fileBuffer;
 
-        for ( auto& fileForEmbedding : embedQueue ) {
-            fileBuffer = ReadFile( fileForEmbedding.c_str( ) );
+        for ( auto& embedded : embedQueue ) {
+            fileBuffer = ReadFile( embedded.c_str( ) );
             if ( !fileBuffer.empty( ) ) {
                 auto bytesOffset = builder.CreateVectorOfStructs( fileBuffer );
-
                 fileOffsets.push_back( fb::CreateFileFbDirect( builder, fileOffsets.size( ), 0, &fileBuffer ) );
             }
-
         }
     }
 

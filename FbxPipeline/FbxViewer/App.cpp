@@ -7,6 +7,8 @@
 
 #include <Scene.h>
 
+#include <EmbeddedShaderCompiler.h>
+
 using namespace fbxv;
 
 struct Camera {
@@ -388,6 +390,40 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         totalSecs = 0.0f;
 
         content->nk = nk_sdl_init( (SDL_Window*) GetSurface( )->GetWindowHandle( ) );
+
+        apemode::EmbeddedShaderPreprocessor preproc;
+        preproc.PushDefinition( "AM_OPTION_1=1" );
+        preproc.PushDefinition( "AM_OPTION_2=0" );
+        preproc.PushFile("func_1.glsl", "float func_1() { return 1.0; }");
+        preproc.PushFile("func_2.glsl", "float func_2() { return 2.0; }");
+        preproc.PushFile("func_3.glsl", "float func_3() { return 3.0; }");
+
+        std::string shaderCode;
+
+        preproc.Preprocess( nullptr,
+                            &shaderCode,
+                            "#if AM_OPTION_1\n"
+                            "#include <func_1.glsl>\n"
+                            "#endif\n"
+                            "#if AM_OPTION_2\n"
+                            "#include <func_2.glsl>\n"
+                            "#endif\n"
+                            "#include <func_3.glsl>\n"
+                            "\n"
+                            "void main () {\n"
+                            "float a = 1.0;\n"
+                            "#if AM_OPTION_1\n"
+                            "a += func_1();\n"
+                            "#endif\n"
+                            "#if AM_OPTION_2\n"
+                            "a += func_2();\n"
+                            "#endif\n"
+                            "a += func_3();\n"
+                            "gl_FragColor = vec4(a, a, a, 1.0);\n"
+                            "}\n"
+                            "",
+                            apemode::EmbeddedShaderPreprocessor::OpenGLES20,
+                            apemode::EmbeddedShaderPreprocessor::Fragment );
 
         content->scenes[ 0 ] = LoadSceneFromFile( "../../../assets/iron-man.fbxp" );
         content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/kalestra-the-sorceress.fbxp" );

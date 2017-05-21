@@ -89,7 +89,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)generated\;$(SolutionDir)assets\fonts\include\;$(SolutionDir)assets\shaders\include\;$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\nuklear\;$(SolutionDir)..\ThirdParty\sdl2\include\;$(SolutionDir)..\ThirdParty\bx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\compat\msvc\;$(SolutionDir)..\ThirdParty\mathfu\include\;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)generated\;$(SolutionDir)assets\fonts\include\;$(SolutionDir)assets\shaders\include\;$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\nuklear\;$(SolutionDir)..\ThirdParty\sdl2\include\;$(SolutionDir)..\ThirdParty\bx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\compat\msvc\;$(SolutionDir)..\ThirdParty\mathfu\include\;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;$(SolutionDir)EmbeddedShaderCompiler\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>fbxvpch.h</PrecompiledHeaderFile>
       <PreprocessorDefinitions>NOMINMAX;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -109,7 +109,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)generated\;$(SolutionDir)assets\fonts\include\;$(SolutionDir)assets\shaders\include\;$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\nuklear\;$(SolutionDir)..\ThirdParty\sdl2\include\;$(SolutionDir)..\ThirdParty\bx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\compat\msvc\;$(SolutionDir)..\ThirdParty\mathfu\include\;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)generated\;$(SolutionDir)assets\fonts\include\;$(SolutionDir)assets\shaders\include\;$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\nuklear\;$(SolutionDir)..\ThirdParty\sdl2\include\;$(SolutionDir)..\ThirdParty\bx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\compat\msvc\;$(SolutionDir)..\ThirdParty\mathfu\include\;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;$(SolutionDir)EmbeddedShaderCompiler\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>fbxvpch.h</PrecompiledHeaderFile>
       <PreprocessorDefinitions>NOMINMAX;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -131,7 +131,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)generated\;$(SolutionDir)assets\fonts\include\;$(SolutionDir)assets\shaders\include\;$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\nuklear\;$(SolutionDir)..\ThirdParty\sdl2\include\;$(SolutionDir)..\ThirdParty\bx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\compat\msvc\;$(SolutionDir)..\ThirdParty\mathfu\include\;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)generated\;$(SolutionDir)assets\fonts\include\;$(SolutionDir)assets\shaders\include\;$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\nuklear\;$(SolutionDir)..\ThirdParty\sdl2\include\;$(SolutionDir)..\ThirdParty\bx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\compat\msvc\;$(SolutionDir)..\ThirdParty\mathfu\include\;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;$(SolutionDir)EmbeddedShaderCompiler\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>fbxvpch.h</PrecompiledHeaderFile>
       <PreprocessorDefinitions>NOMINMAX;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -155,7 +155,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)generated\;$(SolutionDir)assets\fonts\include\;$(SolutionDir)assets\shaders\include\;$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\nuklear\;$(SolutionDir)..\ThirdParty\sdl2\include\;$(SolutionDir)..\ThirdParty\bx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\compat\msvc\;$(SolutionDir)..\ThirdParty\mathfu\include\;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)generated\;$(SolutionDir)assets\fonts\include\;$(SolutionDir)assets\shaders\include\;$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\nuklear\;$(SolutionDir)..\ThirdParty\sdl2\include\;$(SolutionDir)..\ThirdParty\bx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\;$(SolutionDir)..\ThirdParty\bgfx\include\compat\msvc\;$(SolutionDir)..\ThirdParty\mathfu\include\;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;$(SolutionDir)EmbeddedShaderCompiler\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>fbxvpch.h</PrecompiledHeaderFile>
       <PreprocessorDefinitions>NOMINMAX;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -198,6 +198,9 @@
     </ProjectReference>
     <ProjectReference Include="..\bx\bx.vcxproj">
       <Project>{882e3542-a1da-4341-96f7-9c92f1ce7ce4}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\EmbeddedShaderCompiler\EmbeddedShaderCompiler.vcxproj">
+      <Project>{832afa17-4776-4a0f-942f-64db2f005d55}</Project>
     </ProjectReference>
     <ProjectReference Include="..\flatbuffers\flatbuffers.vcxproj">
       <Project>{f55e3be0-18fb-4ce7-8bbf-ee631cc2fe7f}</Project>
