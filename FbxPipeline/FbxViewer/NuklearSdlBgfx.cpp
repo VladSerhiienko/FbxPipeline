@@ -77,12 +77,12 @@ NK_API void nk_sdl_device_create( void ) {
     struct nk_sdl_device *dev = &sdl.ogl;
     nk_buffer_init_default( &dev->cmds );
 
-#include <fs_nuklear_texture_android.bin.h>
-#include <vs_nuklear_texture_android.bin.h>
+//#include <fs_nuklear_texture_android.bin.h>
+//#include <vs_nuklear_texture_android.bin.h>
 #include <droidsans.ttf.h>
 
-    dev->vertexShaderHandle = bgfx::createShader( bgfx::makeRef( (uint8_t *) vs_nuklear_texture_android_bin_h, sizeof( vs_nuklear_texture_android_bin_h ) ) );
-    dev->fragmentShaderHandle = bgfx::createShader( bgfx::makeRef( (uint8_t *) fs_nuklear_texture_android_bin_h, sizeof( fs_nuklear_texture_android_bin_h ) ) );
+    //dev->vertexShaderHandle = bgfx::createShader( bgfx::makeRef( (uint8_t *) vs_nuklear_texture_android_bin_h, sizeof( vs_nuklear_texture_android_bin_h ) ) );
+    //dev->fragmentShaderHandle = bgfx::createShader( bgfx::makeRef( (uint8_t *) fs_nuklear_texture_android_bin_h, sizeof( fs_nuklear_texture_android_bin_h ) ) );
     dev->textureProgramHandle = bgfx::createProgram( dev->vertexShaderHandle, dev->fragmentShaderHandle, false );
 
     dev->allocator.alloc     = &nk_plugin_alloc_fbxvimpl;

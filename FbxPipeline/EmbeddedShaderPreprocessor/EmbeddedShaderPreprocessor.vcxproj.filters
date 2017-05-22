@@ -352,12 +352,12 @@
     <ClCompile Include="..\fcpp\cpp6.c">
       <Filter>Sources\[fcpp]</Filter>
     </ClCompile>
-    <ClCompile Include="EmbeddedShaderCompiler.cpp">
+    <ClCompile Include="EmbeddedShaderPreprocessor.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="EmbeddedShaderCompiler.h">
+    <ClInclude Include="EmbeddedShaderPreprocessor.h">
       <Filter>Sources</Filter>
     </ClInclude>
   </ItemGroup>

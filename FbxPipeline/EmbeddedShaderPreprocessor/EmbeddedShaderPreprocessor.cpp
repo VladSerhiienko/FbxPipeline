@@ -1,11 +1,11 @@
 #include "EmbeddedShaderPreprocessor.h"
 
+#include <assert.h>
+#include <algorithm>
 #include <map>
 #include <set>
-#include <vector>
-#include <algorithm>
-#include <assert.h>
 #include <sstream>
+#include <vector>
 
 #include <Windows.h>
 
@@ -16,22 +16,40 @@ extern "C" {
 #include <glsl_optimizer.h>
 
 struct apemode::EmbeddedShaderPreprocessor::Impl {
-    std::map< std::string, std::pair< std::string, uint32_t > > files;
-    std::set< std::string >                                     definitions;
-    std::vector< fppTag >                                       tags;
-    uint32_t                                                    pos;
-    std::stringstream                                           err;
-    std::stringstream                                           out;
-    std::set< std::string >                                     dependencies;
-    std::string                                                 log;
+    std::set< std::string >           definitions;
+    std::vector< std::string > const* shaderTable;
+    std::vector< uint32_t >           pos;
+    std::vector< fppTag >             tags;
+    std::stringstream                 err;
+    std::stringstream                 out;
+    std::vector< uint32_t >*          dependencies;
+    std::string                       log;
+    uint32_t                          inputIndex;
+    glslopt_ctx*                      glsl[ 3 ] = {nullptr};
 
-    static void fppDepends( char* _fileName, void* _userData ) {
-        Impl* self = (Impl*) _userData;
-        self->dependencies.insert( _fileName );
+    ~Impl( ) {
+        for ( auto& ctx : glsl )
+            if ( ctx )
+                glslopt_cleanup( ctx );
     }
 
-    static char* Fgets( char* _buffer, int _size, std::string const& input, uint32_t& p ) {
-        if (p >= input.size()) {
+    uint32_t GetShaderIndex( std::string const& shaderName ) {
+        if ( nullptr != shaderTable )
+            for ( uint32_t i = 0; i < shaderTable->size( ); i += 2 )
+                if ( shaderTable->at( i ) == shaderName )
+                    return i;
+
+        return -1;
+    }
+
+    static void FppDepends( char* _fileName, void* _userData ) {
+        if ( Impl* impl = (Impl*) _userData )
+            if ( nullptr != impl->dependencies )
+                impl->dependencies->push_back( impl->GetShaderIndex( _fileName ) );
+    }
+
+    static char* FGets( char* _buffer, int _size, std::string const& input, uint32_t& p ) {
+        if ( p >= input.size( ) ) {
             _buffer[ 0 ] = '\0';
             return nullptr;
         }
@@ -50,43 +68,50 @@ struct apemode::EmbeddedShaderPreprocessor::Impl {
         return _buffer;
     }
 
-    static char* fppFgets( char* _buffer, int _size, void* _file, void* _userData ) {
-        Impl* self = (Impl*) _userData;
+    static char* FppFGets( char* _buffer, int _size, void* _file, void* _userData ) {
+        Impl* impl = (Impl*) _userData;
 
-        auto fileIt = self->files.find( (char*) _file );
-        if ( fileIt != self->files.end( ) ) {
-            return Fgets( _buffer, _size, fileIt->second.first, fileIt->second.second );
-        }
-
-        return nullptr;
-    }
-
-    static char* fppInput( char* _buffer, int _size, void* _userData ) {
-        return fppFgets( _buffer, _size, "this", _userData );
-    }
-
-    static void fppOutput( int _ch, void* _userData ) {
-        Impl* self = (Impl*) _userData;
-        self->out << (char) _ch;
-    }
-
-    static void* fppFopen( char* _fileName, void* _userData ) {
-        Impl* self = (Impl*) _userData;
-
-        auto fileIt = self->files.find( _fileName );
-        if ( fileIt != self->files.end( ) )
-            return (void*) fileIt->first.c_str( );
+        uint32_t shaderIndex = (uint32_t) _file;
+        if ( shaderIndex != -1 )
+            return FGets( _buffer, _size, impl->shaderTable->at( shaderIndex ), impl->pos[ shaderIndex >> 1 ] );
 
         return nullptr;
     }
 
-    static void fppError( void* _userData, char* _format, va_list _vargs ) {
+    static char* FppInput( char* _buffer, int _size, void* _userData ) {
+        Impl* impl = (Impl*) _userData;
+        return FppFGets( _buffer, _size, (void*) impl->inputIndex, _userData );
+    }
+
+    static void FppOutput( int _ch, void* _userData ) {
+        Impl* impl = (Impl*) _userData;
+        impl->out << (char) _ch;
+    }
+
+    static void* FppFOpen( char* _fileName, void* _userData ) {
+        Impl* impl = (Impl*) _userData;
+
+        auto shaderIndex = impl->GetShaderIndex( _fileName );
+        if ( shaderIndex != -1 )
+            return (void*) ( shaderIndex + 1 );
+
+        return nullptr;
+    }
+
+    static void FppError( void* _userData, char* _format, va_list _vargs ) {
         char err[ 1024 ] = {0};
         vsprintf_s( err, _format, _vargs );
 
-        Impl* self = (Impl*) _userData;
-        self->err << err;
-        self->err << "\n\n";
+        Impl* impl = (Impl*) _userData;
+        impl->err << err;
+        impl->err << "\n\n";
+    }
+
+    glslopt_ctx* GetGlslOpt( glslopt_target shaderTarget ) {
+        if ( auto ctx = glsl[ shaderTarget ] )
+            return ctx;
+
+        return ( glsl[ shaderTarget ] = glslopt_initialize( shaderTarget ) );
     }
 };
 
@@ -99,59 +124,64 @@ apemode::EmbeddedShaderPreprocessor::~EmbeddedShaderPreprocessor( ) {
         delete impl;
 }
 
-void apemode::EmbeddedShaderPreprocessor::PushFile( std::string const& file, std::string const& content ) {
-    impl->files[ file ] = std::make_pair( content, uint32_t( 0 ) );
-}
+bool apemode::EmbeddedShaderPreprocessor::Preprocess( std::string*                      preprocessedContent,
+                                                      std::string*                      optimizedContent,
+                                                      std::string*                      log,
+                                                      std::vector< uint32_t >*          dependencies,
+                                                      std::vector< std::string > const& shaderTable,
+                                                      std::vector< std::string > const& definitions,
+                                                      std::string const&                shaderName,
+                                                      ShaderTarget                      shaderTarget,
+                                                      ShaderType                        shaderType ) {
+    impl->shaderTable  = &shaderTable;
+    impl->dependencies = dependencies;
+    impl->pos.resize( shaderTable.size( ) >> 1, 0 );
 
-void apemode::EmbeddedShaderPreprocessor::PushDefinition( std::string const& definition) {
-    impl->definitions.insert( definition );
-}
+    impl->inputIndex    = impl->GetShaderIndex( shaderName ) + 1;
+    auto& shaderContent = shaderTable[ impl->inputIndex ];
 
-bool apemode::EmbeddedShaderPreprocessor::Preprocess( std::string*       preprocessedContent,
-                                                      std::string*       optimizedContent,
-                                                      std::string const& initialContent,
-                                                      Target             shaderTarget,
-                                                      Type               shaderType ) {
-    impl->files[ "this" ] = std::make_pair( initialContent, uint32_t( 0 ) );
-    impl->tags.reserve( 11 + impl->definitions.size( ) );
+    impl->tags.reserve( 12 + impl->definitions.size( ) );
 
     impl->tags.emplace_back( fppTag{FPPTAG_USERDATA, (void*) impl} );
-    impl->tags.emplace_back( fppTag{FPPTAG_INPUT, (void*) &Impl::fppInput} );
-    impl->tags.emplace_back( fppTag{FPPTAG_ERROR, (void*) &Impl::fppError} );
-    impl->tags.emplace_back( fppTag{FPPTAG_FOPEN, (void*) &Impl::fppFopen} );
-    impl->tags.emplace_back( fppTag{FPPTAG_FGETS, (void*) &Impl::fppFgets} );
-    impl->tags.emplace_back( fppTag{FPPTAG_OUTPUT, (void*) &Impl::fppOutput} );
-    impl->tags.emplace_back( fppTag{FPPTAG_DEPENDS, (void*) &Impl::fppDepends} );
+    impl->tags.emplace_back( fppTag{FPPTAG_INPUT, (void*) &Impl::FppInput} );
+    impl->tags.emplace_back( fppTag{FPPTAG_ERROR, (void*) &Impl::FppError} );
+    impl->tags.emplace_back( fppTag{FPPTAG_FOPEN, (void*) &Impl::FppFOpen} );
+    impl->tags.emplace_back( fppTag{FPPTAG_FGETS, (void*) &Impl::FppFGets} );
+    impl->tags.emplace_back( fppTag{FPPTAG_OUTPUT, (void*) &Impl::FppOutput} );
+    impl->tags.emplace_back( fppTag{FPPTAG_DEPENDS, (void*) &Impl::FppDepends} );
     impl->tags.emplace_back( fppTag{FPPTAG_LINE, (void*) 0} );
     impl->tags.emplace_back( fppTag{FPPTAG_IGNOREVERSION, (void*) 0} );
     impl->tags.emplace_back( fppTag{FPPTAG_KEEPCOMMENTS, (void*) 0} );
-    impl->tags.emplace_back( fppTag{FPPTAG_INPUT_NAME, (void*) impl->files.find( "this" )->first.c_str( )} );
+    impl->tags.emplace_back( fppTag{FPPTAG_INPUT_NAME, (void*) shaderContent.c_str( )} );
 
-    for ( auto& definition : impl->definitions )
+    for ( auto& definition : definitions )
         impl->tags.emplace_back( fppTag{FPPTAG_DEFINE, (void*) definition.c_str( )} );
 
     impl->tags.emplace_back( fppTag{FPPTAG_END, (void*) 0} );
 
-    impl->pos = 0;
     impl->err.str( "" );
     impl->err.clear( );
+
     impl->out.str( "" );
     impl->out.clear( );
-    impl->dependencies.clear( );
 
     auto fppResult = fppPreProcess( impl->tags.data( ) );
-    if ( fppResult != 0 )
+    if ( fppResult != 0 ) {
+        if ( log )
+            // TODO: Consider error codes of the fpp.
+            *log = "Failed to preprocess code.";
         return false;
+    }
 
-    OutputDebugStringA( impl->out.str( ).c_str( ) );
-    OutputDebugStringA( "\n\n" );
+    // OutputDebugStringA( impl->out.str( ).c_str( ) );
+    // OutputDebugStringA( "\n----------------------------------------------------\n" );
 
     if ( preprocessedContent ) {
         *preprocessedContent = impl->out.str( );
     }
 
     if ( optimizedContent ) {
-        if ( glslopt_ctx* ctx = glslopt_initialize( glslopt_target( shaderTarget ) ) ) {
+        if ( glslopt_ctx* ctx = impl->GetGlslOpt( (glslopt_target) shaderTarget ) ) {
             glslopt_shader* shader =
                 glslopt_optimize( ctx,
                                   glslopt_shader_type( shaderType ),
@@ -159,20 +189,16 @@ bool apemode::EmbeddedShaderPreprocessor::Preprocess( std::string*       preproc
                                   0 );
 
             if ( !glslopt_get_status( shader ) ) {
-                impl->log = glslopt_get_log( shader );
-                glslopt_cleanup( ctx );
+                if ( log )
+                    *log = glslopt_get_log( shader );
                 return false;
             }
 
             *optimizedContent = glslopt_get_output( shader );
 
-            OutputDebugStringA( optimizedContent->c_str( ) );
-            OutputDebugStringA( "\n\n" );
-
-            glslopt_cleanup( ctx );
-            return true;
-        } else
-            return false;
+            // OutputDebugStringA( optimizedContent->c_str( ) );
+            // OutputDebugStringA( "\n----------------------------------------------------\n" );
+        }
     }
 
     return true;

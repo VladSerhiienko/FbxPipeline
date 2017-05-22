@@ -7,7 +7,7 @@
 
 #include <Scene.h>
 
-#include <EmbeddedShaderCompiler.h>
+#include <EmbeddedShaderPreprocessor.h>
 
 using namespace fbxv;
 
@@ -392,36 +392,45 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         content->nk = nk_sdl_init( (SDL_Window*) GetSurface( )->GetWindowHandle( ) );
 
         apemode::EmbeddedShaderPreprocessor preproc;
-        preproc.PushDefinition( "AM_OPTION_1=1" );
-        preproc.PushDefinition( "AM_OPTION_2=0" );
-        preproc.PushFile("func_1.glsl", "float func_1() { return 1.0; }");
-        preproc.PushFile("func_2.glsl", "float func_2() { return 2.0; }");
-        preproc.PushFile("func_3.glsl", "float func_3() { return 3.0; }");
+        std::vector< std::string > definitions = {"AM_OPTION_1=1", "AM_OPTION_2=0"};
+        std::vector< std::string > shaderTable = {"func_1.glsl",
+                                                  "float func_1() { return 1.0; }",
+                                                  "func_2.glsl",
+                                                  "float func_2() { return 2.0; }",
+                                                  "func_3.glsl",
+                                                  "float func_3() { return 3.0; }",
+                                                  "test.glsl",
+                                                  "#if AM_OPTION_1\n"
+                                                  "#include <func_1.glsl>\n"
+                                                  "#endif\n"
+                                                  "#if AM_OPTION_2\n"
+                                                  "#include <func_2.glsl>\n"
+                                                  "#endif\n"
+                                                  "#include <func_3.glsl>\n"
+                                                  "\n"
+                                                  "void main () {\n"
+                                                  "float a = 1.0;\n"
+                                                  "#if AM_OPTION_1\n"
+                                                  "a += func_1();\n"
+                                                  "#endif\n"
+                                                  "#if AM_OPTION_2\n"
+                                                  "a += func_2();\n"
+                                                  "#endif\n"
+                                                  "a += func_3();\n"
+                                                  "gl_FragColor = vec4(a, a, a, 1.0);\n"
+                                                  "}\n"
+                                                  ""};
 
-        std::string shaderCode;
+        std::string shaderCode, log;
+        std::vector< uint32_t > dependencies;
 
         preproc.Preprocess( nullptr,
                             &shaderCode,
-                            "#if AM_OPTION_1\n"
-                            "#include <func_1.glsl>\n"
-                            "#endif\n"
-                            "#if AM_OPTION_2\n"
-                            "#include <func_2.glsl>\n"
-                            "#endif\n"
-                            "#include <func_3.glsl>\n"
-                            "\n"
-                            "void main () {\n"
-                            "float a = 1.0;\n"
-                            "#if AM_OPTION_1\n"
-                            "a += func_1();\n"
-                            "#endif\n"
-                            "#if AM_OPTION_2\n"
-                            "a += func_2();\n"
-                            "#endif\n"
-                            "a += func_3();\n"
-                            "gl_FragColor = vec4(a, a, a, 1.0);\n"
-                            "}\n"
-                            "",
+                            &log,
+                            &dependencies,
+                            shaderTable,
+                            definitions,
+                            "test.glsl",
                             apemode::EmbeddedShaderPreprocessor::OpenGLES20,
                             apemode::EmbeddedShaderPreprocessor::Fragment );
 
@@ -456,21 +465,21 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         content->s_texCubeIrr = bgfx::createUniform( "s_texCubeIrr", bgfx::UniformType::Int1 );
         content->u_blurParams = bgfx::createUniform( "u_blurParams", bgfx::UniformType::Vec4 );
 
-#include <vs_ibl_mesh_android.bin.h>
-#include <fs_ibl_mesh_android.bin.h>
-
-        content->programMesh = bgfx::createProgram(
-            bgfx::createShader( bgfx::makeRef( (uint8_t*) vs_ibl_mesh_android_bin_h, sizeof( vs_ibl_mesh_android_bin_h ) ) ),
-            bgfx::createShader( bgfx::makeRef( (uint8_t*) fs_ibl_mesh_android_bin_h, sizeof( fs_ibl_mesh_android_bin_h ) ) ),
-            true );
-
-#include <vs_ibl_skybox_android.bin.h>
-#include <fs_ibl_skybox_android.bin.h>
-
-        content->programSky = bgfx::createProgram(
-            bgfx::createShader( bgfx::makeRef( (uint8_t*) vs_ibl_skybox_android_bin_h, sizeof( vs_ibl_skybox_android_bin_h ) ) ),
-            bgfx::createShader( bgfx::makeRef( (uint8_t*) fs_ibl_skybox_android_bin_h, sizeof( fs_ibl_skybox_android_bin_h ) ) ),
-            true );
+//#include <vs_ibl_mesh_android.bin.h>
+//#include <fs_ibl_mesh_android.bin.h>
+//
+//        content->programMesh = bgfx::createProgram(
+//            bgfx::createShader( bgfx::makeRef( (uint8_t*) vs_ibl_mesh_android_bin_h, sizeof( vs_ibl_mesh_android_bin_h ) ) ),
+//            bgfx::createShader( bgfx::makeRef( (uint8_t*) fs_ibl_mesh_android_bin_h, sizeof( fs_ibl_mesh_android_bin_h ) ) ),
+//            true );
+//
+//#include <vs_ibl_skybox_android.bin.h>
+//#include <fs_ibl_skybox_android.bin.h>
+//
+//        content->programSky = bgfx::createProgram(
+//            bgfx::createShader( bgfx::makeRef( (uint8_t*) vs_ibl_skybox_android_bin_h, sizeof( vs_ibl_skybox_android_bin_h ) ) ),
+//            bgfx::createShader( bgfx::makeRef( (uint8_t*) fs_ibl_skybox_android_bin_h, sizeof( fs_ibl_skybox_android_bin_h ) ) ),
+//            true );
 
         std::string fileBuffer;
 

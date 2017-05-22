@@ -1,25 +1,22 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 namespace apemode {
+
     struct EmbeddedShaderPreprocessor {
-        enum Target {
+        enum ShaderTarget {
             OpenGL,
             OpenGLES20,
             OpenGLES30,
             Metal,
         };
 
-        enum Type {
+        enum ShaderType {
             Vertex,
             Fragment,
             Compute
-        };
-
-        enum Status {
-            Preprocessed = 1,
-            Optimized    = 2,
         };
 
         struct Impl;
@@ -29,15 +26,14 @@ namespace apemode {
         EmbeddedShaderPreprocessor( );
         ~EmbeddedShaderPreprocessor( );
 
-        /**
-         * Adds include file 
-         */
-        void PushFile( std::string const& file, std::string const& content );
-        void PushDefinition( std::string const& define );
-        bool Preprocess( std::string*       preprocessedContent,
-                         std::string*       optimizedContent,
-                         std::string const& initialContent,
-                         Target             shaderTarget,
-                         Type               shaderType );
+        bool Preprocess( std::string*                      preprocessedContent,
+                         std::string*                      optimizedContent,
+                         std::string*                      log,
+                         std::vector< uint32_t >*          dependencies,
+                         std::vector< std::string > const& shaderTable,
+                         std::vector< std::string > const& definitions,
+                         std::string const&                shaderName,
+                         ShaderTarget                      shaderTarget,
+                         ShaderType                        shaderType );
     };
 } // namespace apemode

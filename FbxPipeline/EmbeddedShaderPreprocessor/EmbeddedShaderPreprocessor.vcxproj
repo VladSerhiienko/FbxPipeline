@@ -247,10 +247,10 @@
     <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\mesa\program\symbol_table.c" />
     <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\util\hash_table.c" />
     <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\util\ralloc.c" />
-    <ClCompile Include="EmbeddedShaderCompiler.cpp" />
+    <ClCompile Include="EmbeddedShaderPreprocessor.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="EmbeddedShaderCompiler.h" />
+    <ClInclude Include="EmbeddedShaderPreprocessor.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
