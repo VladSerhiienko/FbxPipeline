@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Missing">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Precompiled">
+      <UniqueIdentifier>{d7d32970-3797-4576-a3d3-028437997455}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{6a14e287-60c2-4ea5-bc8c-3aba90e86669}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Sources\App">
+      <UniqueIdentifier>{35af0699-4d69-4698-b564-6f1c52d80e20}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Input">
+      <UniqueIdentifier>{9feb9abf-b746-41c1-b66c-b9f1522b1435}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Scene">
+      <UniqueIdentifier>{b542e451-3646-4a6b-b2db-732e3f1c7543}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\UI">
+      <UniqueIdentifier>{096025fa-a784-4a30-9b05-3cee23ed472f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Time">
+      <UniqueIdentifier>{ee4bc7a9-2b7f-40f1-825b-768ed0ace613}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="alloca.h">
+      <Filter>Missing</Filter>
+    </ClInclude>
+    <ClInclude Include="fbxvpch.h">
+      <Filter>Precompiled</Filter>
+    </ClInclude>
+    <ClInclude Include="App.h">
+      <Filter>Sources\App</Filter>
+    </ClInclude>
+    <ClInclude Include="AppBase.h">
+      <Filter>Sources\App</Filter>
+    </ClInclude>
+    <ClInclude Include="AppSurface.h">
+      <Filter>Sources\App</Filter>
+    </ClInclude>
+    <ClInclude Include="AppSurfaceBase.h">
+      <Filter>Sources\App</Filter>
+    </ClInclude>
+    <ClInclude Include="Input.h">
+      <Filter>Sources\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Stopwatch.h">
+      <Filter>Sources\Time</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>Sources\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="NuklearSdl.h">
+      <Filter>Sources\UI</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="fbxvpch.cpp">
+      <Filter>Precompiled</Filter>
+    </ClCompile>
+    <ClCompile Include="App.cpp">
+      <Filter>Sources\App</Filter>
+    </ClCompile>
+    <ClCompile Include="AppBase.cpp">
+      <Filter>Sources\App</Filter>
+    </ClCompile>
+    <ClCompile Include="AppMainSdl.cpp">
+      <Filter>Sources\App</Filter>
+    </ClCompile>
+    <ClCompile Include="AppSurfaceSdlBase.cpp">
+      <Filter>Sources\App</Filter>
+    </ClCompile>
+    <ClCompile Include="InputSdl.cpp">
+      <Filter>Sources\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="StopwatchSdl.cpp">
+      <Filter>Sources\Time</Filter>
+    </ClCompile>
+    <ClCompile Include="AppSurfaceSdlGL.cpp">
+      <Filter>Sources\App</Filter>
+    </ClCompile>
+    <ClCompile Include="NuklearSdlGL.cpp">
+      <Filter>Sources\UI</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

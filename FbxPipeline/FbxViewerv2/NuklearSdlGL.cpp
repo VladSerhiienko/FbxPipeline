@@ -1,63 +1,35 @@
 
-#include <fbxvpch.h>
-#include <string.h>
-
 #define NK_IMPLEMENTATION
 #include <NuklearSdl.h>
 
-namespace fbxv {
-   /* void *Malloc( size_t bytes );
-    void *Memalign( size_t alignment, size_t bytes );
-    void Free( void *p );*/
+#include <GL/glew.h>
+#include <assert.h>
+#include <string.h>
 
-    namespace bgfxUtils {
-        void releaseRef( void *data, void *userData ) {
-            free( data );
-            //fbxv::Free( data );
-            (void) userData;
-        }
+NK_API struct nk_context *nk_sdl_init( SDL_Window *win );
+NK_API void               nk_sdl_font_stash_begin( struct nk_font_atlas **atlas );
+NK_API void               nk_sdl_font_stash_end( void );
+NK_API int                nk_sdl_handle_event( SDL_Event *evt );
+NK_API void               nk_sdl_render( enum nk_anti_aliasing, int max_vertex_buffer, int max_element_buffer );
+NK_API void               nk_sdl_shutdown( void );
+NK_API void               nk_sdl_device_destroy( void );
+NK_API void               nk_sdl_device_create( void );
 
-        const bgfx::Memory *makeReleasableCopy( const void *data, size_t dataSize ) {
-            auto dataCopy = malloc( dataSize );
-            memcpy( dataCopy, data, dataSize );
-            return bgfx::makeRef( dataCopy, (uint32_t) dataSize, &releaseRef, nullptr );
-        }
-
-        const bgfx::Memory *makeReleasableRef( const void *data, size_t dataSize ) {
-            return bgfx::makeRef( data, (uint32_t) dataSize, &releaseRef, nullptr );
-        }
-    }
-}
-
-void *nk_plugin_alloc_fbxvimpl( nk_handle, void *old, nk_size size ) {
-    if ( old )
-        free( old );
-    return malloc( size );
-}
-void nk_plugin_free_fbxvimpl( nk_handle, void *old ) {
-    free( old );
-}
 
 struct nk_sdl_device {
-    nk_buffer                       cmds;
-    nk_draw_null_texture            null;
-    nk_allocator                    allocator;
-    uint32_t                        maxVertexBufferSize;
-    uint32_t                        maxIndexBufferSize;
-    nk_draw_vertex_layout_element   vertexLayout[ 4 ];
-    nk_font *                       defaultFont;
-    nk_buffer                       vertexBuffer;
-    nk_buffer                       elementBuffer;
-    nk_convert_config               convertConfig;
-    bgfx::VertexDecl                vertexDecl;
-    bgfx::VertexDeclHandle          vertexDeclHandle;
-    bgfx::DynamicVertexBufferHandle vertexBufferHandle;
-    bgfx::DynamicIndexBufferHandle  elementBufferHandle;
-    bgfx::ShaderHandle              vertexShaderHandle;
-    bgfx::ShaderHandle              fragmentShaderHandle;
-    bgfx::ProgramHandle             textureProgramHandle;
-    bgfx::TextureHandle             fontAtlasHandle;
-    bgfx::UniformHandle             textureUniformHandle;
+    struct nk_buffer            cmds;
+    struct nk_draw_null_texture null;
+    GLuint                      vbo, vao, ebo;
+    GLuint                      prog;
+    GLuint                      vert_shdr;
+    GLuint                      frag_shdr;
+    GLint                       attrib_pos;
+    GLint                       attrib_uv;
+    GLint                       attrib_col;
+    GLint                       uniform_tex;
+    GLint                       uniform_proj;
+    GLuint                      font_tex;
+    nk_font *                   default_font;
 };
 
 struct nk_sdl_vertex {
@@ -73,174 +45,223 @@ static struct nk_sdl {
     struct nk_font_atlas atlas;
 } sdl;
 
+#ifdef __APPLE__
+#define NK_SHADER_VERSION "#version 150\n"
+#else
+#define NK_SHADER_VERSION "#version 300 es\n"
+#endif
 NK_API void nk_sdl_device_create( void ) {
+    GLint                status;
+    static const GLchar *vertex_shader = NK_SHADER_VERSION
+        "uniform mat4 ProjMtx;\n"
+        "in vec2 Position;\n"
+        "in vec2 TexCoord;\n"
+        "in vec4 Color;\n"
+        "out vec2 Frag_UV;\n"
+        "out vec4 Frag_Color;\n"
+        "void main() {\n"
+        "   Frag_UV = TexCoord;\n"
+        "   Frag_Color = Color;\n"
+        "   gl_Position = ProjMtx * vec4(Position.xy, 0, 1);\n"
+        "}\n";
+    static const GLchar *fragment_shader = NK_SHADER_VERSION
+        "precision mediump float;\n"
+        "uniform sampler2D Texture;\n"
+        "in vec2 Frag_UV;\n"
+        "in vec4 Frag_Color;\n"
+        "out vec4 Out_Color;\n"
+        "void main(){\n"
+        "   Out_Color = Frag_Color * texture(Texture, Frag_UV.st);\n"
+        "}\n";
+
     struct nk_sdl_device *dev = &sdl.ogl;
     nk_buffer_init_default( &dev->cmds );
+    dev->prog      = glCreateProgram( );
+    dev->vert_shdr = glCreateShader( GL_VERTEX_SHADER );
+    dev->frag_shdr = glCreateShader( GL_FRAGMENT_SHADER );
+    glShaderSource( dev->vert_shdr, 1, &vertex_shader, 0 );
+    glShaderSource( dev->frag_shdr, 1, &fragment_shader, 0 );
+    glCompileShader( dev->vert_shdr );
+    glCompileShader( dev->frag_shdr );
+    glGetShaderiv( dev->vert_shdr, GL_COMPILE_STATUS, &status );
+    assert( status == GL_TRUE );
+    glGetShaderiv( dev->frag_shdr, GL_COMPILE_STATUS, &status );
+    assert( status == GL_TRUE );
+    glAttachShader( dev->prog, dev->vert_shdr );
+    glAttachShader( dev->prog, dev->frag_shdr );
+    glLinkProgram( dev->prog );
+    glGetProgramiv( dev->prog, GL_LINK_STATUS, &status );
+    assert( status == GL_TRUE );
 
-//#include <fs_nuklear_texture_android.bin.h>
-//#include <vs_nuklear_texture_android.bin.h>
+    dev->uniform_tex  = glGetUniformLocation( dev->prog, "Texture" );
+    dev->uniform_proj = glGetUniformLocation( dev->prog, "ProjMtx" );
+    dev->attrib_pos   = glGetAttribLocation( dev->prog, "Position" );
+    dev->attrib_uv    = glGetAttribLocation( dev->prog, "TexCoord" );
+    dev->attrib_col   = glGetAttribLocation( dev->prog, "Color" );
+
+    {
+        /* buffer setup */
+        GLsizei vs = sizeof( struct nk_sdl_vertex );
+        size_t  vp = offsetof( struct nk_sdl_vertex, position );
+        size_t  vt = offsetof( struct nk_sdl_vertex, uv );
+        size_t  vc = offsetof( struct nk_sdl_vertex, col );
+
+        glGenBuffers( 1, &dev->vbo );
+        glGenBuffers( 1, &dev->ebo );
+        glGenVertexArrays( 1, &dev->vao );
+
+        glBindVertexArray( dev->vao );
+        glBindBuffer( GL_ARRAY_BUFFER, dev->vbo );
+        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, dev->ebo );
+
+        glEnableVertexAttribArray( (GLuint) dev->attrib_pos );
+        glEnableVertexAttribArray( (GLuint) dev->attrib_uv );
+        glEnableVertexAttribArray( (GLuint) dev->attrib_col );
+
+        glVertexAttribPointer( (GLuint) dev->attrib_pos, 2, GL_FLOAT, GL_FALSE, vs, (void *) vp );
+        glVertexAttribPointer( (GLuint) dev->attrib_uv, 2, GL_FLOAT, GL_FALSE, vs, (void *) vt );
+        glVertexAttribPointer( (GLuint) dev->attrib_col, 4, GL_UNSIGNED_BYTE, GL_TRUE, vs, (void *) vc );
+    }
+
+    glBindTexture( GL_TEXTURE_2D, 0 );
+    glBindBuffer( GL_ARRAY_BUFFER, 0 );
+    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+    glBindVertexArray( 0 );
+
 #include <droidsans.ttf.h>
-
-    //dev->vertexShaderHandle = bgfx::createShader( bgfx::makeRef( (uint8_t *) vs_nuklear_texture_android_bin_h, sizeof( vs_nuklear_texture_android_bin_h ) ) );
-    //dev->fragmentShaderHandle = bgfx::createShader( bgfx::makeRef( (uint8_t *) fs_nuklear_texture_android_bin_h, sizeof( fs_nuklear_texture_android_bin_h ) ) );
-    dev->textureProgramHandle = bgfx::createProgram( dev->vertexShaderHandle, dev->fragmentShaderHandle, false );
-
-    dev->allocator.alloc     = &nk_plugin_alloc_fbxvimpl;
-    dev->allocator.free      = &nk_plugin_free_fbxvimpl;
-    dev->allocator.userdata  = nk_handle_ptr( &sdl );
-    dev->maxVertexBufferSize = 512 * 1024;
-    dev->maxIndexBufferSize  = 128 * 1024;
-
-    dev->vertexDecl.begin( )
-        .add( bgfx::Attrib::Position, 2, bgfx::AttribType::Float, false, false )
-        .add( bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float, false, false )
-        .add( bgfx::Attrib::Color0, 4, bgfx::AttribType::Uint8, true, false )
-        .end( );
-
-    dev->textureUniformHandle = bgfx::createUniform( "s_texColor", bgfx::UniformType::Int1 );
-
-    const size_t vs = sizeof( struct nk_sdl_vertex );
-    const size_t vp = offsetof( struct nk_sdl_vertex, position );
-    const size_t vt = offsetof( struct nk_sdl_vertex, uv );
-    const size_t vc = offsetof( struct nk_sdl_vertex, col );
-    assert( dev->vertexDecl.getOffset( bgfx::Attrib::Position ) == vp );
-    assert( dev->vertexDecl.getOffset( bgfx::Attrib::TexCoord0 ) == vt );
-    assert( dev->vertexDecl.getOffset( bgfx::Attrib::Color0 ) == vc );
-
-    static const nk_draw_vertex_layout_element vertexLayout[] = {
-        {NK_VERTEX_POSITION, NK_FORMAT_FLOAT, dev->vertexDecl.getOffset( bgfx::Attrib::Position )},
-        {NK_VERTEX_TEXCOORD, NK_FORMAT_FLOAT, dev->vertexDecl.getOffset( bgfx::Attrib::TexCoord0 )},
-        {NK_VERTEX_COLOR, NK_FORMAT_R8G8B8A8, dev->vertexDecl.getOffset( bgfx::Attrib::Color0 )},
-        {NK_VERTEX_LAYOUT_END}};
-
-    static_assert( sizeof( dev->vertexLayout ) == sizeof( vertexLayout ), "Size mismatch." );
-    memcpy( dev->vertexLayout, vertexLayout, sizeof( vertexLayout ) );
-
-    dev->vertexBufferHandle = bgfx::createDynamicVertexBuffer( dev->maxVertexBufferSize, dev->vertexDecl, BGFX_BUFFER_ALLOW_RESIZE );
-    dev->elementBufferHandle = bgfx::createDynamicIndexBuffer( dev->maxIndexBufferSize, BGFX_BUFFER_ALLOW_RESIZE );
 
     struct nk_font_atlas *atlas;
     nk_sdl_font_stash_begin( &atlas );
-    dev->defaultFont = nk_font_atlas_add_from_memory( atlas, (void *) s_droidSansTtf, sizeof( s_droidSansTtf ), 14, 0 );
+    dev->default_font = nk_font_atlas_add_from_memory( atlas, (void *) s_droidSansTtf, sizeof( s_droidSansTtf ), 14, 0 );
     nk_sdl_font_stash_end( );
 
     nk_set_style( &sdl.ctx, nk_theme::NK_THEME_DARK );
-    sdl.ctx.style.font = &dev->defaultFont->handle;
-    sdl.atlas.default_font = dev->defaultFont;
-    nk_style_set_font( &sdl.ctx, &dev->defaultFont->handle );
-
-    nk_buffer_init( &sdl.ogl.vertexBuffer, &dev->allocator, dev->maxVertexBufferSize );
-    nk_buffer_init( &sdl.ogl.elementBuffer, &dev->allocator, dev->maxIndexBufferSize );
-
-    dev->convertConfig                      = nk_convert_config{0};
-    dev->convertConfig.vertex_layout        = dev->vertexLayout;
-    dev->convertConfig.vertex_size          = sizeof( nk_sdl_vertex );
-    dev->convertConfig.vertex_alignment     = NK_ALIGNOF( nk_sdl_vertex );
-    dev->convertConfig.null                 = dev->null;
-    dev->convertConfig.circle_segment_count = 22;
-    dev->convertConfig.curve_segment_count  = 22;
-    dev->convertConfig.arc_segment_count    = 22;
-    dev->convertConfig.global_alpha         = 1.0f;
-    dev->convertConfig.shape_AA             = NK_ANTI_ALIASING_ON;
-    dev->convertConfig.line_AA              = NK_ANTI_ALIASING_ON;
+    sdl.ctx.style.font = &dev->default_font->handle;
+    sdl.atlas.default_font = dev->default_font;
+    nk_style_set_font( &sdl.ctx, &dev->default_font->handle );
 }
 
 NK_INTERN void nk_sdl_device_upload_atlas( const void *image, int width, int height ) {
     struct nk_sdl_device *dev = &sdl.ogl;
-
-    auto imageDataSize = width * height * 4;
-    auto imageCopyData = malloc( imageDataSize );
-    memcpy( imageCopyData, image, imageDataSize );
-    auto imageCopyRef = fbxv::bgfxUtils::makeReleasableRef( imageCopyData, imageDataSize );
-
-    dev->fontAtlasHandle = bgfx::createTexture2D( width, height, false, 1, bgfx::TextureFormat::RGBA8, 0, imageCopyRef );
+    glGenTextures( 1, &dev->font_tex );
+    glBindTexture( GL_TEXTURE_2D, dev->font_tex );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, (GLsizei) width, (GLsizei) height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image );
 }
 
 NK_API void nk_sdl_device_destroy( void ) {
     struct nk_sdl_device *dev = &sdl.ogl;
-
-    bgfx::destroyDynamicVertexBuffer( dev->vertexBufferHandle );
-    bgfx::destroyDynamicIndexBuffer( dev->elementBufferHandle );
-    bgfx::destroyTexture( dev->fontAtlasHandle );
-    bgfx::destroyUniform( dev->textureUniformHandle );
-    bgfx::destroyShader( dev->vertexShaderHandle );
-    bgfx::destroyShader( dev->fragmentShaderHandle );
-    bgfx::destroyProgram( dev->textureProgramHandle );
-
-    nk_buffer_free(&dev->cmds);
+    glDetachShader( dev->prog, dev->vert_shdr );
+    glDetachShader( dev->prog, dev->frag_shdr );
+    glDeleteShader( dev->vert_shdr );
+    glDeleteShader( dev->frag_shdr );
+    glDeleteProgram( dev->prog );
+    glDeleteTextures( 1, &dev->font_tex );
+    glDeleteBuffers( 1, &dev->vbo );
+    glDeleteBuffers( 1, &dev->ebo );
+    nk_buffer_free( &dev->cmds );
 }
 
-NK_API void nk_sdl_render( enum nk_anti_aliasing aa, uint32_t id ) {
+NK_API void nk_sdl_render( enum nk_anti_aliasing AA, int max_vertex_buffer, int max_element_buffer ) {
     struct nk_sdl_device *dev = &sdl.ogl;
-
-    (void) aa;
-
-    int width, height;
-    int displayWidth, displayHeight;
+    int                   width, height;
+    int                   display_width, display_height;
+    struct nk_vec2        scale;
+    GLfloat               ortho[ 4 ][ 4 ] = {
+        {2.0f, 0.0f, 0.0f, 0.0f}, {0.0f, -2.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -1.0f, 0.0f}, {-1.0f, 1.0f, 0.0f, 1.0f},
+    };
     SDL_GetWindowSize( sdl.win, &width, &height );
-    SDL_GL_GetDrawableSize( sdl.win, &displayWidth, &displayHeight );
+    SDL_GL_GetDrawableSize( sdl.win, &display_width, &display_height );
+    ortho[ 0 ][ 0 ] /= (GLfloat) width;
+    ortho[ 1 ][ 1 ] /= (GLfloat) height;
 
-    float ortho[ 16 ];
-    bx::mtxOrtho( ortho, 0.0f, (float) displayWidth, (float) displayHeight, 0.0f, 0.0f, 1.0f );
+    scale.x = (float) display_width / (float) width;
+    scale.y = (float) display_height / (float) height;
 
+    /* setup global state */
+    glViewport( 0, 0, display_width, display_height );
+    glEnable( GL_BLEND );
+    glBlendEquation( GL_FUNC_ADD );
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+    glDisable( GL_CULL_FACE );
+    glDisable( GL_DEPTH_TEST );
+    glEnable( GL_SCISSOR_TEST );
+    glActiveTexture( GL_TEXTURE0 );
 
-    struct nk_vec2 scale;
-    scale.x = (float) displayWidth / (float) width;
-    scale.y = (float) displayHeight / (float) height;
+    /* setup program */
+    glUseProgram( dev->prog );
+    glUniform1i( dev->uniform_tex, 0 );
+    glUniformMatrix4fv( dev->uniform_proj, 1, GL_FALSE, &ortho[ 0 ][ 0 ] );
+    {
+        /* convert from command queue into draw list and draw to screen */
+        const struct nk_draw_command *cmd;
+        void *                        vertices, *elements;
+        const nk_draw_index *         offset = NULL;
 
-    nk_buffer_init( &sdl.ogl.vertexBuffer, &dev->allocator, dev->maxVertexBufferSize );
-    nk_buffer_init( &sdl.ogl.elementBuffer, &dev->allocator, dev->maxIndexBufferSize );
-    nk_convert( &sdl.ctx, &dev->cmds, &sdl.ogl.vertexBuffer, &sdl.ogl.elementBuffer, &dev->convertConfig );
+        /* allocate vertex and element buffer */
+        glBindVertexArray( dev->vao );
+        glBindBuffer( GL_ARRAY_BUFFER, dev->vbo );
+        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, dev->ebo );
 
-    const auto vertexData      = sdl.ogl.vertexBuffer.memory.ptr;
-    const auto elementData     = sdl.ogl.elementBuffer.memory.ptr;
-    const auto vertexDataSize  = sdl.ogl.vertexBuffer.allocated;
-    const auto elementDataSize = sdl.ogl.elementBuffer.allocated;
-    const auto vertexMemory    = fbxv::bgfxUtils::makeReleasableRef( vertexData, vertexDataSize );
-    const auto elementMemory   = fbxv::bgfxUtils::makeReleasableRef( elementData, elementDataSize );
+        glBufferData( GL_ARRAY_BUFFER, max_vertex_buffer, NULL, GL_STREAM_DRAW );
+        glBufferData( GL_ELEMENT_ARRAY_BUFFER, max_element_buffer, NULL, GL_STREAM_DRAW );
 
-    bgfx::updateDynamicVertexBuffer( dev->vertexBufferHandle, 0, vertexMemory );
-    bgfx::updateDynamicIndexBuffer( dev->elementBufferHandle, 0, elementMemory );
+        /* load vertices/elements directly into vertex/element buffer */
+        vertices = glMapBuffer( GL_ARRAY_BUFFER, GL_WRITE_ONLY );
+        elements = glMapBuffer( GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY );
+        {
+            /* fill convert configuration */
+            struct nk_convert_config                          config;
+            static const struct nk_draw_vertex_layout_element vertex_layout[] = {
+                {NK_VERTEX_POSITION, NK_FORMAT_FLOAT, NK_OFFSETOF( struct nk_sdl_vertex, position )},
+                {NK_VERTEX_TEXCOORD, NK_FORMAT_FLOAT, NK_OFFSETOF( struct nk_sdl_vertex, uv )},
+                {NK_VERTEX_COLOR, NK_FORMAT_R8G8B8A8, NK_OFFSETOF( struct nk_sdl_vertex, col )},
+                {NK_VERTEX_LAYOUT_END}};
+            memset( &config, 0, sizeof( config ) );
+            config.vertex_layout        = vertex_layout;
+            config.vertex_size          = sizeof( struct nk_sdl_vertex );
+            config.vertex_alignment     = NK_ALIGNOF( struct nk_sdl_vertex );
+            config.null                 = dev->null;
+            config.circle_segment_count = 22;
+            config.curve_segment_count  = 22;
+            config.arc_segment_count    = 22;
+            config.global_alpha         = 1.0f;
+            config.shape_AA             = AA;
+            config.line_AA              = AA;
 
-    uint32_t offset        = 0;
-    uint32_t drawcallCount = 0;
-
-    const uint32_t vertexCount = (uint32_t) vertexDataSize / sdl.ogl.vertexDecl.getStride( );
-
-    const nk_draw_command *cmd = nullptr;
-    nk_draw_foreach( cmd, &sdl.ctx, &dev->cmds ) {
-        if ( !cmd->elem_count )
-            continue;
-
-        bgfx::setViewRect( id, 0, 0, displayWidth, displayHeight );
-        bgfx::setViewTransform( id, nullptr, ortho );
-
-        const uint16_t scissorX = uint16_t( bx::fmax( cmd->clip_rect.x, 0.0f ) );
-        const uint16_t scissorY = uint16_t( bx::fmax( cmd->clip_rect.y, 0.0f ) );
-        const uint16_t scissorW = uint16_t( bx::fmin( cmd->clip_rect.w, 65535.0f ) );
-        const uint16_t scissorH = uint16_t( bx::fmin( cmd->clip_rect.h, 65535.0f ) );
-        bgfx::setScissor( scissorX * scale.x, scissorY * scale.y, scissorW * scale.x, scissorH * scale.y );
-
-        bgfx::setState( BGFX_STATE_RGB_WRITE | BGFX_STATE_ALPHA_WRITE | BGFX_STATE_BLEND_EQUATION_ADD |
-                        BGFX_STATE_BLEND_FUNC( BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA ) );
-
-        if ( nullptr != cmd->texture.ptr ) {
-            auto &textureHandle = *(bgfx::TextureHandle *) cmd->texture.ptr;
-            bgfx::setTexture( 0, dev->textureUniformHandle, textureHandle );
+            /* setup buffers to load vertices and elements */
+            {
+                struct nk_buffer vbuf, ebuf;
+                nk_buffer_init_fixed( &vbuf, vertices, (nk_size) max_vertex_buffer );
+                nk_buffer_init_fixed( &ebuf, elements, (nk_size) max_element_buffer );
+                nk_convert( &sdl.ctx, &dev->cmds, &vbuf, &ebuf, &config );
+            }
         }
+        glUnmapBuffer( GL_ARRAY_BUFFER );
+        glUnmapBuffer( GL_ELEMENT_ARRAY_BUFFER );
 
-        bgfx::setVertexBuffer( dev->vertexBufferHandle, 0, vertexCount );
-        bgfx::setIndexBuffer( dev->elementBufferHandle, offset, cmd->elem_count );
-
-        drawcallCount += bgfx::submit( id, dev->textureProgramHandle );
-        offset += cmd->elem_count;
-        //++id;
+        /* iterate over and execute each draw command */
+        nk_draw_foreach( cmd, &sdl.ctx, &dev->cmds ) {
+            if ( !cmd->elem_count )
+                continue;
+            glBindTexture( GL_TEXTURE_2D, (GLuint) cmd->texture.id );
+            glScissor( ( GLint )( cmd->clip_rect.x * scale.x ),
+                       ( GLint )( ( height - ( GLint )( cmd->clip_rect.y + cmd->clip_rect.h ) ) * scale.y ),
+                       ( GLint )( cmd->clip_rect.w * scale.x ),
+                       ( GLint )( cmd->clip_rect.h * scale.y ) );
+            glDrawElements( GL_TRIANGLES, (GLsizei) cmd->elem_count, GL_UNSIGNED_SHORT, offset );
+            offset += cmd->elem_count;
+        }
+        nk_clear( &sdl.ctx );
     }
 
-    nk_clear( &sdl.ctx );
-
-    //bgfx::dbgTextPrintf( 0, 2, 0x6f, "[Nuklear] draw call count: %u", drawcallCount );
-    //bgfx::dbgTextPrintf( 0, 3, 0x8f, "[Nuklear] submitted elements: %u (%u triangles)", offset, offset / 3 );
+    glUseProgram( 0 );
+    glBindBuffer( GL_ARRAY_BUFFER, 0 );
+    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+    glBindVertexArray( 0 );
+    glDisable( GL_BLEND );
+    glDisable( GL_SCISSOR_TEST );
 }
 
 static void nk_sdl_clipbard_paste( nk_handle usr, struct nk_text_edit *edit ) {
@@ -267,12 +288,9 @@ static void nk_sdl_clipbard_copy( nk_handle usr, const char *text, int len ) {
 NK_API struct nk_context *nk_sdl_init( SDL_Window *win ) {
     sdl.win = win;
     nk_init_default( &sdl.ctx, 0 );
-    sdl.ctx.clip.copy           = nk_sdl_clipbard_copy;
-    sdl.ctx.clip.paste          = nk_sdl_clipbard_paste;
-    sdl.ctx.clip.userdata       = nk_handle_ptr( 0 );
-    sdl.ctx.pool.alloc.alloc    = &nk_plugin_alloc_fbxvimpl;
-    sdl.ctx.pool.alloc.free     = &nk_plugin_free_fbxvimpl;
-    sdl.ctx.pool.alloc.userdata = nk_handle_ptr( &sdl );
+    sdl.ctx.clip.copy     = nk_sdl_clipbard_copy;
+    sdl.ctx.clip.paste    = nk_sdl_clipbard_paste;
+    sdl.ctx.clip.userdata = nk_handle_ptr( 0 );
     nk_sdl_device_create( );
     return &sdl.ctx;
 }
@@ -288,7 +306,7 @@ NK_API void nk_sdl_font_stash_end( void ) {
     int         w, h;
     image = nk_font_atlas_bake( &sdl.atlas, &w, &h, NK_FONT_ATLAS_RGBA32 );
     nk_sdl_device_upload_atlas( image, w, h );
-    nk_font_atlas_end( &sdl.atlas, nk_handle_ptr( &sdl.ogl.fontAtlasHandle ), &sdl.ogl.null );
+    nk_font_atlas_end( &sdl.atlas, nk_handle_id( (int) sdl.ogl.font_tex ), &sdl.ogl.null );
     if ( sdl.atlas.default_font )
         nk_style_set_font( &sdl.ctx, &sdl.atlas.default_font->handle );
 }
@@ -355,14 +373,17 @@ NK_API int nk_sdl_handle_event( SDL_Event *evt ) {
         /* mouse button */
         int       down = evt->type == SDL_MOUSEBUTTONDOWN;
         const int x = evt->button.x, y = evt->button.y;
-        if ( evt->button.button == SDL_BUTTON_LEFT )
+        if ( evt->button.button == SDL_BUTTON_LEFT ) {
+            // if (evt->button.clicks > 1)
+            // nk_input_button(ctx, NK_BUTTON_DOUBLE, x, y, down);
             nk_input_button( ctx, NK_BUTTON_LEFT, x, y, down );
-        if ( evt->button.button == SDL_BUTTON_MIDDLE )
+        } else if ( evt->button.button == SDL_BUTTON_MIDDLE )
             nk_input_button( ctx, NK_BUTTON_MIDDLE, x, y, down );
-        if ( evt->button.button == SDL_BUTTON_RIGHT )
+        else if ( evt->button.button == SDL_BUTTON_RIGHT )
             nk_input_button( ctx, NK_BUTTON_RIGHT, x, y, down );
         return 1;
     } else if ( evt->type == SDL_MOUSEMOTION ) {
+        /* mouse motion */
         if ( ctx->input.mouse.grabbed ) {
             int x = (int) ctx->input.mouse.prev.x, y = (int) ctx->input.mouse.prev.y;
             nk_input_motion( ctx, x + evt->motion.xrel, y + evt->motion.yrel );
@@ -370,12 +391,14 @@ NK_API int nk_sdl_handle_event( SDL_Event *evt ) {
             nk_input_motion( ctx, evt->motion.x, evt->motion.y );
         return 1;
     } else if ( evt->type == SDL_TEXTINPUT ) {
+        /* text input */
         nk_glyph glyph;
         memcpy( glyph, evt->text.text, NK_UTF_SIZE );
         nk_input_glyph( ctx, glyph );
         return 1;
     } else if ( evt->type == SDL_MOUSEWHEEL ) {
-        nk_input_scroll( ctx, {(float) evt->wheel.x, (float) evt->wheel.y} );
+        /* mouse wheel */
+        nk_input_scroll( ctx, nk_vec2( (float) evt->wheel.x, (float) evt->wheel.y ) );
         return 1;
     }
     return 0;
@@ -389,6 +412,7 @@ void nk_sdl_shutdown( void ) {
     memset( &sdl, 0, sizeof( sdl ) );
 }
 
+NK_API
 void nk_set_style( struct nk_context *ctx, enum nk_theme theme ) {
     struct nk_color table[ NK_COLOR_COUNT ];
     if ( theme == NK_THEME_WHITE ) {

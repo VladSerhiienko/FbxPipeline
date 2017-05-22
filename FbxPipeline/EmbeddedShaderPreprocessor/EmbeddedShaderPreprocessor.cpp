@@ -16,7 +16,6 @@ extern "C" {
 #include <glsl_optimizer.h>
 
 struct apemode::EmbeddedShaderPreprocessor::Impl {
-    std::set< std::string >           definitions;
     std::vector< std::string > const* shaderTable;
     std::vector< uint32_t >           pos;
     std::vector< fppTag >             tags;
@@ -140,7 +139,7 @@ bool apemode::EmbeddedShaderPreprocessor::Preprocess( std::string*              
     impl->inputIndex    = impl->GetShaderIndex( shaderName ) + 1;
     auto& shaderContent = shaderTable[ impl->inputIndex ];
 
-    impl->tags.reserve( 12 + impl->definitions.size( ) );
+    impl->tags.reserve( 12 + definitions.size( ) );
 
     impl->tags.emplace_back( fppTag{FPPTAG_USERDATA, (void*) impl} );
     impl->tags.emplace_back( fppTag{FPPTAG_INPUT, (void*) &Impl::FppInput} );
@@ -165,11 +164,13 @@ bool apemode::EmbeddedShaderPreprocessor::Preprocess( std::string*              
     impl->out.str( "" );
     impl->out.clear( );
 
-    auto fppResult = fppPreProcess( impl->tags.data( ) );
+    const auto fppResult = fppPreProcess( impl->tags.data( ) );
+
+    if ( log )
+        // TODO: Consider error codes of the fpp.
+        *log += impl->err.str( );
+
     if ( fppResult != 0 ) {
-        if ( log )
-            // TODO: Consider error codes of the fpp.
-            *log = "Failed to preprocess code.";
         return false;
     }
 
@@ -188,9 +189,10 @@ bool apemode::EmbeddedShaderPreprocessor::Preprocess( std::string*              
                                   preprocessedContent ? preprocessedContent->c_str( ) : impl->out.str( ).c_str( ),
                                   0 );
 
-            if ( !glslopt_get_status( shader ) ) {
-                if ( log )
-                    *log = glslopt_get_log( shader );
+            if (false == glslopt_get_status( shader ) ) {
+                if (log)
+                    *log += "\n",
+                    *log += glslopt_get_log( shader );
                 return false;
             }
 
