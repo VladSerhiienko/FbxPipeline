@@ -1,0 +1,364 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Sources">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Sources\[fcpp]">
+      <UniqueIdentifier>{53c01fc2-f637-4cd3-a5a3-14fb086b5973}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\[glsl]">
+      <UniqueIdentifier>{31990f9b-30ff-4a69-838c-2dd8b3fb2423}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\[glsl]\[mesa]">
+      <UniqueIdentifier>{be8b85d1-4815-4799-8d16-7f02ee036df6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\[glsl]\[glcpp]">
+      <UniqueIdentifier>{a157335e-e15d-4cd0-bef8-9315fddf3e55}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\[glsl]\[util]">
+      <UniqueIdentifier>{da1c164f-0476-4cbc-b312-616fc915dcc8}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\strtod.c">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\standalone_scaffolding.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\s_expression.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_vectorize.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_tree_grafting.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_swizzle_swizzle.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_structure_splitting.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_redundant_jumps.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_rebalance_tree.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_noop_swizzle.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_minmax.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_if_simplification.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_function_inlining.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_flip_matrices.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_flatten_nested_if_blocks.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_dead_functions.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_dead_code_local.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_dead_code.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_dead_builtin_varyings.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_dead_builtin_variables.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_cse.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_copy_propagation_elements.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_copy_propagation.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_constant_variable.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_constant_propagation.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_constant_folding.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_array_splitting.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_algebraic.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\lower_vertex_id.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\lower_vector_insert.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\lower_vector.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\lower_vec_index_to_swizzle.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\lower_vec_index_to_cond_assign.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\lower_variable_index_to_cond_assign.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\lower_ubo_reference.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\lower_packing_builtins.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\lower_packed_varyings.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\lower_output_reads.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\lower_offset_array.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\lower_noise.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\lower_named_interface_blocks.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\lower_mat_op_to_vec.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\lower_jumps.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\lower_instructions.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\lower_if_to_cond_assign.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\lower_discard_flow.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\lower_discard.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\lower_clip_distance.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\loop_unroll.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\loop_controls.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\loop_analysis.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\linker.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\link_varyings.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\link_uniforms.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\link_uniform_initializers.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\link_uniform_blocks.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\link_uniform_block_active_visitor.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\link_interface_blocks.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\link_functions.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\link_atomics.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_variable_refcount.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_validate.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_unused_structs.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_stats.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_rvalue_visitor.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_print_visitor.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_print_metal_visitor.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_print_glsl_visitor.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_import_prototypes.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_hv_accept.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_hierarchical_visitor.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_function_detect_recursion.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_function_can_inline.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_function.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_expression_flattening.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_equals.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_constant_expression.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_clone.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_builder.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_basic_block.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\ir.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\hir_field_selection.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\glsl_types.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\glsl_symbol_table.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\glsl_parser_extras.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\glsl_parser.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\glsl_optimizer.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\glsl_lexer.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\builtin_variables.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\builtin_types.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\builtin_functions.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\ast_type.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\ast_to_hir.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\ast_function.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\ast_expr.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\ast_array_index.cpp">
+      <Filter>Sources\[glsl]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\glcpp\glcpp-lex.c">
+      <Filter>Sources\[glsl]\[glcpp]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\glcpp\glcpp-parse.c">
+      <Filter>Sources\[glsl]\[glcpp]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\glsl\glcpp\pp.c">
+      <Filter>Sources\[glsl]\[glcpp]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\mesa\main\imports.c">
+      <Filter>Sources\[glsl]\[mesa]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\mesa\program\symbol_table.c">
+      <Filter>Sources\[glsl]\[mesa]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\mesa\program\prog_hash_table.c">
+      <Filter>Sources\[glsl]\[mesa]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\util\hash_table.c">
+      <Filter>Sources\[glsl]\[util]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\bgfx\3rdparty\glsl-optimizer\src\util\ralloc.c">
+      <Filter>Sources\[glsl]\[util]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\fcpp\cpp1.c">
+      <Filter>Sources\[fcpp]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\fcpp\cpp2.c">
+      <Filter>Sources\[fcpp]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\fcpp\cpp3.c">
+      <Filter>Sources\[fcpp]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\fcpp\cpp4.c">
+      <Filter>Sources\[fcpp]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\fcpp\cpp5.c">
+      <Filter>Sources\[fcpp]</Filter>
+    </ClCompile>
+    <ClCompile Include="..\fcpp\cpp6.c">
+      <Filter>Sources\[fcpp]</Filter>
+    </ClCompile>
+    <ClCompile Include="EmbeddedShaderCompiler.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="EmbeddedShaderCompiler.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

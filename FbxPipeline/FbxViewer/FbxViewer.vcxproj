@@ -199,7 +199,7 @@
     <ProjectReference Include="..\bx\bx.vcxproj">
       <Project>{882e3542-a1da-4341-96f7-9c92f1ce7ce4}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\EmbeddedShaderCompiler\EmbeddedShaderCompiler.vcxproj">
+    <ProjectReference Include="..\EmbeddedShaderPreprocessor\EmbeddedShaderPreprocessor.vcxproj">
       <Project>{832afa17-4776-4a0f-942f-64db2f005d55}</Project>
     </ProjectReference>
     <ProjectReference Include="..\flatbuffers\flatbuffers.vcxproj">

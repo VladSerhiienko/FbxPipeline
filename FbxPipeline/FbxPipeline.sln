@@ -50,7 +50,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "meshoptimizer (zeux)", "mes
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "meshoptimizer", "meshoptimizer\meshoptimizer.vcxproj", "{372155A0-BD6C-4724-B85C-7127C42DD8E4}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EmbeddedShaderCompiler", "EmbeddedShaderCompiler\EmbeddedShaderCompiler.vcxproj", "{832AFA17-4776-4A0F-942F-64DB2F005D55}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EmbeddedShaderPreprocessor", "EmbeddedShaderPreprocessor\EmbeddedShaderPreprocessor.vcxproj", "{832AFA17-4776-4A0F-942F-64DB2F005D55}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
