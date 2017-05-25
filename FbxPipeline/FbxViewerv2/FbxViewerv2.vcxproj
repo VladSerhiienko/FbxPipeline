@@ -29,6 +29,36 @@
     <ClInclude Include="NuklearSdl.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Stopwatch.h" />
+    <ClInclude Include="vk\Buffer.Vulkan.h" />
+    <ClInclude Include="vk\BufferPools.Vulkan.h" />
+    <ClInclude Include="vk\CommandQueue.Vulkan.h" />
+    <ClInclude Include="vk\DepthStencil.Vulkan.h" />
+    <ClInclude Include="vk\DescriptorPool.Vulkan.h" />
+    <ClInclude Include="vk\ExecutionSync.Vulkan.h" />
+    <ClInclude Include="vk\Framebuffer.Vulkan.h" />
+    <ClInclude Include="vk\GraphicsDevice.PrivateContent.Vulkan.h" />
+    <ClInclude Include="vk\GraphicsDevice.Vulkan.h" />
+    <ClInclude Include="vk\GraphicsEcosystem.KnownExtensions.Vulkan.h" />
+    <ClInclude Include="vk\GraphicsEcosystem.KnownLayers.Vulkan.h" />
+    <ClInclude Include="vk\GraphicsEcosystem.PrivateContent.Vulkan.h" />
+    <ClInclude Include="vk\GraphicsEcosystem.PrivateCreateDeviceArgs.Vulkan.h" />
+    <ClInclude Include="vk\GraphicsEcosystems.Vulkan.h" />
+    <ClInclude Include="vk\NativeDispatchableHandles.Vulkan.h" />
+    <ClInclude Include="vk\PipelineState.Vulkan.h" />
+    <ClInclude Include="vk\RenderPass.Vulkan.h" />
+    <ClInclude Include="vk\RenderPassResources.Vulkan.h" />
+    <ClInclude Include="vk\RenderTarget.Vulkan.h" />
+    <ClInclude Include="vk\RenderTargets.Vulkan.h" />
+    <ClInclude Include="vk\Resource.Vulkan.h" />
+    <ClInclude Include="vk\ResourceAssembler.Vulkan.h" />
+    <ClInclude Include="vk\ResultHandle.Vulkan.h" />
+    <ClInclude Include="vk\RootSignature.Vulkan.h" />
+    <ClInclude Include="vk\Shader.Vulkan.h" />
+    <ClInclude Include="vk\Swapchain.Vulkan.h" />
+    <ClInclude Include="vk\SystemAllocationCallbacks.Vulkan.h" />
+    <ClInclude Include="vk\TDispatchableHandle.Vulkan.h" />
+    <ClInclude Include="vk\Texture.Vulkan.h" />
+    <ClInclude Include="vk\TInfoStruct.Vulkan.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp" />
@@ -40,6 +70,27 @@
     <ClCompile Include="InputSdl.cpp" />
     <ClCompile Include="NuklearSdlGL.cpp" />
     <ClCompile Include="StopwatchSdl.cpp" />
+    <ClCompile Include="vk\Buffer.Vulkan.cpp" />
+    <ClCompile Include="vk\BufferPools.Vulkan.cpp" />
+    <ClCompile Include="vk\CommandQueue.Vulkan.cpp" />
+    <ClCompile Include="vk\DepthStencil.Vulkan.cpp" />
+    <ClCompile Include="vk\DescriptorPool.Vulkan.cpp" />
+    <ClCompile Include="vk\ExecutionSync.Vulkan.cpp" />
+    <ClCompile Include="vk\Framebuffer.Vulkan.cpp" />
+    <ClCompile Include="vk\GraphicsDevice.Vulkan.cpp" />
+    <ClCompile Include="vk\GraphicsEcosystems.Vulkan.cpp" />
+    <ClCompile Include="vk\PipelineState.Vulkan.cpp" />
+    <ClCompile Include="vk\RenderPass.Vulkan.cpp" />
+    <ClCompile Include="vk\RenderPassResources.Vulkan.cpp" />
+    <ClCompile Include="vk\RenderTarget.Vulkan.cpp" />
+    <ClCompile Include="vk\RenderTargets.Vulkan.cpp" />
+    <ClCompile Include="vk\Resource.Vulkan.cpp" />
+    <ClCompile Include="vk\ResourceAssembler.Vulkan.cpp" />
+    <ClCompile Include="vk\RootSignature.Vulkan.cpp" />
+    <ClCompile Include="vk\Shader.Vulkan.cpp" />
+    <ClCompile Include="vk\Swapchain.Vulkan.cpp" />
+    <ClCompile Include="vk\SystemAllocationCallbacks.Vulkan.cpp" />
+    <ClCompile Include="vk\Texture.Vulkan.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EmbeddedShaderPreprocessor\EmbeddedShaderPreprocessor.vcxproj">
@@ -123,11 +174,11 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)generated\;$(SolutionDir)assets\fonts\include\;$(SolutionDir)assets\shaders\include\;$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\include\;$(SolutionDir)..\ThirdParty\nuklear\;$(SolutionDir)..\ThirdParty\sdl2\include\;$(SolutionDir)..\ThirdParty\mathfu\include\;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\glew-2.0.0\include\;$(SolutionDir)..\ThirdParty\glfw-3.2.1.bin.$(PlatformTarget)\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;$(SolutionDir)EmbeddedShaderPreprocessor\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VK_SDK_PATH)\Include\;$(ProjectDir);$(ProjectDir)vk\;$(SolutionDir)generated\;$(SolutionDir)assets\fonts\include\;$(SolutionDir)assets\shaders\include\;$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\include\;$(SolutionDir)..\ThirdParty\nuklear\;$(SolutionDir)..\ThirdParty\sdl2\include\;$(SolutionDir)..\ThirdParty\mathfu\include\;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\glew-2.0.0\include\;$(SolutionDir)..\ThirdParty\glfw-3.2.1.bin.$(PlatformTarget)\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;$(SolutionDir)EmbeddedShaderPreprocessor\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NOMINMAX;_CRT_SECURE_NO_WARNINGS;GLEW_STATIC;GL_GLEXT_PROTOTYPES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\ThirdParty\glfw-3.2.1.bin.$(PlatformTarget)\lib-vc2015\;$(SolutionDir)..\ThirdParty\glew-2.0.0\lib\Release\$(PlatformTarget)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\ThirdParty\glfw-3.2.1.bin.$(PlatformTarget)\lib-vc2015\;$(SolutionDir)..\ThirdParty\glew-2.0.0\lib\Release\$(PlatformTarget)\;$(VK_SDK_PATH)\Lib32\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3.lib;glew32s.lib;opengl32.lib;winmm.lib;imm32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
@@ -137,11 +188,11 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)generated\;$(SolutionDir)assets\fonts\include\;$(SolutionDir)assets\shaders\include\;$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\include\;$(SolutionDir)..\ThirdParty\nuklear\;$(SolutionDir)..\ThirdParty\sdl2\include\;$(SolutionDir)..\ThirdParty\mathfu\include\;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\glew-2.0.0\include\;$(SolutionDir)..\ThirdParty\glfw-3.2.1.bin.$(PlatformTarget)\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;$(SolutionDir)EmbeddedShaderPreprocessor\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VK_SDK_PATH)\Include\;$(ProjectDir);$(ProjectDir)vk\;$(SolutionDir)generated\;$(SolutionDir)assets\fonts\include\;$(SolutionDir)assets\shaders\include\;$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\include\;$(SolutionDir)..\ThirdParty\nuklear\;$(SolutionDir)..\ThirdParty\sdl2\include\;$(SolutionDir)..\ThirdParty\mathfu\include\;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\glew-2.0.0\include\;$(SolutionDir)..\ThirdParty\glfw-3.2.1.bin.$(PlatformTarget)\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;$(SolutionDir)EmbeddedShaderPreprocessor\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NOMINMAX;_CRT_SECURE_NO_WARNINGS;GLEW_STATIC;GL_GLEXT_PROTOTYPES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\ThirdParty\glfw-3.2.1.bin.$(PlatformTarget)\lib-vc2015\;$(SolutionDir)..\ThirdParty\glew-2.0.0\lib\Release\$(PlatformTarget)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\ThirdParty\glfw-3.2.1.bin.$(PlatformTarget)\lib-vc2015\;$(SolutionDir)..\ThirdParty\glew-2.0.0\lib\Release\$(PlatformTarget)\;$(VK_SDK_PATH)\Lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3.lib;glew32s.lib;opengl32.lib;winmm.lib;imm32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
@@ -153,13 +204,13 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)generated\;$(SolutionDir)assets\fonts\include\;$(SolutionDir)assets\shaders\include\;$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\include\;$(SolutionDir)..\ThirdParty\nuklear\;$(SolutionDir)..\ThirdParty\sdl2\include\;$(SolutionDir)..\ThirdParty\mathfu\include\;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\glew-2.0.0\include\;$(SolutionDir)..\ThirdParty\glfw-3.2.1.bin.$(PlatformTarget)\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;$(SolutionDir)EmbeddedShaderPreprocessor\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VK_SDK_PATH)\Include\;$(ProjectDir);$(ProjectDir)vk\;$(SolutionDir)generated\;$(SolutionDir)assets\fonts\include\;$(SolutionDir)assets\shaders\include\;$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\include\;$(SolutionDir)..\ThirdParty\nuklear\;$(SolutionDir)..\ThirdParty\sdl2\include\;$(SolutionDir)..\ThirdParty\mathfu\include\;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\glew-2.0.0\include\;$(SolutionDir)..\ThirdParty\glfw-3.2.1.bin.$(PlatformTarget)\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;$(SolutionDir)EmbeddedShaderPreprocessor\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NOMINMAX;_CRT_SECURE_NO_WARNINGS;GLEW_STATIC;GL_GLEXT_PROTOTYPES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\ThirdParty\glfw-3.2.1.bin.$(PlatformTarget)\lib-vc2015\;$(SolutionDir)..\ThirdParty\glew-2.0.0\lib\Release\$(PlatformTarget)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\ThirdParty\glfw-3.2.1.bin.$(PlatformTarget)\lib-vc2015\;$(SolutionDir)..\ThirdParty\glew-2.0.0\lib\Release\$(PlatformTarget)\;$(VK_SDK_PATH)\Lib32\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3.lib;glew32s.lib;opengl32.lib;winmm.lib;imm32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
@@ -171,13 +222,13 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)generated\;$(SolutionDir)assets\fonts\include\;$(SolutionDir)assets\shaders\include\;$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\include\;$(SolutionDir)..\ThirdParty\nuklear\;$(SolutionDir)..\ThirdParty\sdl2\include\;$(SolutionDir)..\ThirdParty\mathfu\include\;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\glew-2.0.0\include\;$(SolutionDir)..\ThirdParty\glfw-3.2.1.bin.$(PlatformTarget)\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;$(SolutionDir)EmbeddedShaderPreprocessor\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VK_SDK_PATH)\Include\;$(ProjectDir);$(ProjectDir)vk\;$(SolutionDir)generated\;$(SolutionDir)assets\fonts\include\;$(SolutionDir)assets\shaders\include\;$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\include\;$(SolutionDir)..\ThirdParty\nuklear\;$(SolutionDir)..\ThirdParty\sdl2\include\;$(SolutionDir)..\ThirdParty\mathfu\include\;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\glew-2.0.0\include\;$(SolutionDir)..\ThirdParty\glfw-3.2.1.bin.$(PlatformTarget)\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;$(SolutionDir)EmbeddedShaderPreprocessor\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NOMINMAX;_CRT_SECURE_NO_WARNINGS;GLEW_STATIC;GL_GLEXT_PROTOTYPES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\ThirdParty\glfw-3.2.1.bin.$(PlatformTarget)\lib-vc2015\;$(SolutionDir)..\ThirdParty\glew-2.0.0\lib\Release\$(PlatformTarget)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\ThirdParty\glfw-3.2.1.bin.$(PlatformTarget)\lib-vc2015\;$(SolutionDir)..\ThirdParty\glew-2.0.0\lib\Release\$(PlatformTarget)\;$(VK_SDK_PATH)\Lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3.lib;glew32s.lib;opengl32.lib;winmm.lib;imm32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>

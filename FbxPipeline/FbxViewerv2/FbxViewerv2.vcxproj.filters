@@ -30,6 +30,12 @@
     <Filter Include="Sources\Time">
       <UniqueIdentifier>{ee4bc7a9-2b7f-40f1-825b-768ed0ace613}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sources\Graphics">
+      <UniqueIdentifier>{9b9ca866-fb8f-4ba8-83f3-7422c26fe15a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Graphics\Vk">
+      <UniqueIdentifier>{925bf837-34ce-4197-97e0-cb94a2e788ad}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="alloca.h">
@@ -62,6 +68,96 @@
     <ClInclude Include="NuklearSdl.h">
       <Filter>Sources\UI</Filter>
     </ClInclude>
+    <ClInclude Include="vk\Buffer.Vulkan.h">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClInclude>
+    <ClInclude Include="vk\BufferPools.Vulkan.h">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClInclude>
+    <ClInclude Include="vk\CommandQueue.Vulkan.h">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClInclude>
+    <ClInclude Include="vk\DepthStencil.Vulkan.h">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClInclude>
+    <ClInclude Include="vk\DescriptorPool.Vulkan.h">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClInclude>
+    <ClInclude Include="vk\ExecutionSync.Vulkan.h">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClInclude>
+    <ClInclude Include="vk\Framebuffer.Vulkan.h">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClInclude>
+    <ClInclude Include="vk\GraphicsDevice.PrivateContent.Vulkan.h">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClInclude>
+    <ClInclude Include="vk\GraphicsDevice.Vulkan.h">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClInclude>
+    <ClInclude Include="vk\GraphicsEcosystem.KnownExtensions.Vulkan.h">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClInclude>
+    <ClInclude Include="vk\GraphicsEcosystem.KnownLayers.Vulkan.h">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClInclude>
+    <ClInclude Include="vk\GraphicsEcosystem.PrivateContent.Vulkan.h">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClInclude>
+    <ClInclude Include="vk\GraphicsEcosystem.PrivateCreateDeviceArgs.Vulkan.h">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClInclude>
+    <ClInclude Include="vk\GraphicsEcosystems.Vulkan.h">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClInclude>
+    <ClInclude Include="vk\NativeDispatchableHandles.Vulkan.h">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClInclude>
+    <ClInclude Include="vk\PipelineState.Vulkan.h">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClInclude>
+    <ClInclude Include="vk\RenderPass.Vulkan.h">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClInclude>
+    <ClInclude Include="vk\RenderPassResources.Vulkan.h">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClInclude>
+    <ClInclude Include="vk\RenderTarget.Vulkan.h">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClInclude>
+    <ClInclude Include="vk\RenderTargets.Vulkan.h">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClInclude>
+    <ClInclude Include="vk\Resource.Vulkan.h">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClInclude>
+    <ClInclude Include="vk\ResourceAssembler.Vulkan.h">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClInclude>
+    <ClInclude Include="vk\ResultHandle.Vulkan.h">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClInclude>
+    <ClInclude Include="vk\RootSignature.Vulkan.h">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClInclude>
+    <ClInclude Include="vk\Shader.Vulkan.h">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClInclude>
+    <ClInclude Include="vk\Swapchain.Vulkan.h">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClInclude>
+    <ClInclude Include="vk\SystemAllocationCallbacks.Vulkan.h">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClInclude>
+    <ClInclude Include="vk\TDispatchableHandle.Vulkan.h">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClInclude>
+    <ClInclude Include="vk\Texture.Vulkan.h">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClInclude>
+    <ClInclude Include="vk\TInfoStruct.Vulkan.h">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="fbxvpch.cpp">
@@ -90,6 +186,69 @@
     </ClCompile>
     <ClCompile Include="NuklearSdlGL.cpp">
       <Filter>Sources\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="vk\Buffer.Vulkan.cpp">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClCompile>
+    <ClCompile Include="vk\BufferPools.Vulkan.cpp">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClCompile>
+    <ClCompile Include="vk\CommandQueue.Vulkan.cpp">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClCompile>
+    <ClCompile Include="vk\DepthStencil.Vulkan.cpp">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClCompile>
+    <ClCompile Include="vk\DescriptorPool.Vulkan.cpp">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClCompile>
+    <ClCompile Include="vk\ExecutionSync.Vulkan.cpp">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClCompile>
+    <ClCompile Include="vk\Framebuffer.Vulkan.cpp">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClCompile>
+    <ClCompile Include="vk\GraphicsDevice.Vulkan.cpp">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClCompile>
+    <ClCompile Include="vk\GraphicsEcosystems.Vulkan.cpp">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClCompile>
+    <ClCompile Include="vk\PipelineState.Vulkan.cpp">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClCompile>
+    <ClCompile Include="vk\RenderPass.Vulkan.cpp">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClCompile>
+    <ClCompile Include="vk\RenderPassResources.Vulkan.cpp">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClCompile>
+    <ClCompile Include="vk\RenderTarget.Vulkan.cpp">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClCompile>
+    <ClCompile Include="vk\RenderTargets.Vulkan.cpp">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClCompile>
+    <ClCompile Include="vk\Resource.Vulkan.cpp">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClCompile>
+    <ClCompile Include="vk\ResourceAssembler.Vulkan.cpp">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClCompile>
+    <ClCompile Include="vk\RootSignature.Vulkan.cpp">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClCompile>
+    <ClCompile Include="vk\Shader.Vulkan.cpp">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClCompile>
+    <ClCompile Include="vk\Swapchain.Vulkan.cpp">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClCompile>
+    <ClCompile Include="vk\SystemAllocationCallbacks.Vulkan.cpp">
+      <Filter>Sources\Graphics\Vk</Filter>
+    </ClCompile>
+    <ClCompile Include="vk\Texture.Vulkan.cpp">
+      <Filter>Sources\Graphics\Vk</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
