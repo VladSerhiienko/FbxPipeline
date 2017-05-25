@@ -6,7 +6,7 @@
 #include <CityHash.h>
 #include <NativeDispatchableHandles.Vulkan.h>
 
-namespace Core
+namespace apemode
 {
     class ResourceView;
     class ColorResourceView;
@@ -16,14 +16,14 @@ namespace Core
     class RenderPassDescription;
     class RenderPassBuilder;
 
-    class _Graphics_ecosystem_dll_api RenderPass : public Aux::ScalableAllocPolicy,
-                                                   public Aux::NoCopyAssignPolicy
+    class _Graphics_ecosystem_dll_api RenderPass : public apemode::ScalableAllocPolicy,
+                                                   public apemode::NoCopyAssignPolicy
     {
     public:
         uint64_t                                Hash;
-        Core::TDispatchableHandle<VkRenderPass> Handle;
-        Core::RenderPassDescription const *     pDesc;
-        Core::GraphicsDevice const *            pGraphicsNode;
+        apemode::TDispatchableHandle<VkRenderPass> Handle;
+        apemode::RenderPassDescription const *     pDesc;
+        apemode::GraphicsDevice const *            pGraphicsNode;
 
     public:
         RenderPass();
@@ -32,12 +32,12 @@ namespace Core
         operator VkRenderPass() const;
     };
 
-    class _Graphics_ecosystem_dll_api RenderPassDescription : public Aux::ScalableAllocPolicy,
-                                                              public Aux::NoCopyAssignPolicy
+    class _Graphics_ecosystem_dll_api RenderPassDescription : public apemode::ScalableAllocPolicy,
+                                                              public apemode::NoCopyAssignPolicy
     {
     public:
-        struct _Graphics_ecosystem_dll_api SubpassDescription : public Aux::ScalableAllocPolicy,
-                                                                public Aux::NoCopyAssignPolicy
+        struct _Graphics_ecosystem_dll_api SubpassDescription : public apemode::ScalableAllocPolicy,
+                                                                public apemode::NoCopyAssignPolicy
         {
             using NativeSubpassDescription  = TInfoStruct<VkSubpassDescription>;
             using NativeAttachmentReference = TInfoStruct<VkAttachmentReference>;
@@ -68,7 +68,7 @@ namespace Core
 
     public:
         uint64_t                                      Hash;
-        Core::TInfoStruct<VkRenderPassCreateInfo>     Desc;
+        apemode::TInfoStruct<VkRenderPassCreateInfo>     Desc;
         std::vector<VkAttachmentDescription> Attachments;
         std::vector<VkSubpassDependency>     SubpassDependencies;
         std::vector<uint64_t>                SwapchainAttachmentHashes;
@@ -87,8 +87,8 @@ namespace Core
         MakeNewFromTemporary (RenderPassDescription const & TemporaryDesc);
     };
 
-    class _Graphics_ecosystem_dll_api RenderPassBuilder : public Aux::ScalableAllocPolicy,
-                                                          public Aux::NoCopyAssignPolicy
+    class _Graphics_ecosystem_dll_api RenderPassBuilder : public apemode::ScalableAllocPolicy,
+                                                          public apemode::NoCopyAssignPolicy
     {
     public:
         static const uint32_t sInvalidSwapchainId = 0xffffffff;
@@ -156,7 +156,7 @@ namespace Core
                                    VkAccessFlags        eDstSubpassAccess,
                                    bool                 bDependentByRegion);
 
-        Core::RenderPass const * RecreateRenderPass (Core::GraphicsDevice & GraphicsNode);
+        apemode::RenderPass const * RecreateRenderPass (apemode::GraphicsDevice & GraphicsNode);
 
         /**
          * Checks whether subpasses are complete.
@@ -170,8 +170,8 @@ namespace Core
 
     class _Graphics_ecosystem_dll_api RenderPassManager
     {
-        friend Core::GraphicsDevice;
-        friend Core::RenderPassBuilder;
+        friend apemode::GraphicsDevice;
+        friend apemode::RenderPassBuilder;
         struct RenderPassContent;
         struct PrivateContent;
 
@@ -181,7 +181,7 @@ namespace Core
         RenderPassManager ();
         ~RenderPassManager ();
 
-        void AddNewRenderPassObject (Core::RenderPass & RenderPass);
-        Core::RenderPass const * TryGetRenderPassObjectByHash (uint64_t Hash);
+        void AddNewRenderPassObject (apemode::RenderPass & RenderPass);
+        apemode::RenderPass const * TryGetRenderPassObjectByHash (uint64_t Hash);
     };
 }

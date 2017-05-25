@@ -16,18 +16,18 @@ uint64_t const Uint64Max = std::numeric_limits<uint64_t>::max();
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-static bool ExtractSwapchainBuffers (Core::GraphicsDevice &          InGraphicsNode,
+static bool ExtractSwapchainBuffers (apemode::GraphicsDevice &          InGraphicsNode,
                                      VkSwapchainKHR                  hSwapchain,
                                      std::vector<VkImage> & OutSwapchainBufferImgs)
 {
     _Game_engine_Assert (InGraphicsNode.IsValid () && hSwapchain, "Not initialized.");
 
     uint32_t OutSwapchainBufferCount = 0;
-    if (_Game_engine_Likely (Core::ResultHandle::Succeeded (vkGetSwapchainImagesKHR (
+    if (_Game_engine_Likely (apemode::ResultHandle::Succeeded (vkGetSwapchainImagesKHR (
             InGraphicsNode, hSwapchain, &OutSwapchainBufferCount, nullptr))))
     {
         OutSwapchainBufferImgs.resize (OutSwapchainBufferCount, VkImage (nullptr));
-        if (_Game_engine_Likely (Core::ResultHandle::Succeeded (
+        if (_Game_engine_Likely (apemode::ResultHandle::Succeeded (
                 vkGetSwapchainImagesKHR (InGraphicsNode,
                                          hSwapchain,
                                          &OutSwapchainBufferCount,
@@ -46,18 +46,18 @@ static bool ExtractSwapchainBuffers (Core::GraphicsDevice &          InGraphicsN
 /// Swapchain
 /// -------------------------------------------------------------------------------------------------------------------
 
-uint64_t const                      Core::Swapchain::kMaxTimeout            = Uint64Max;
-uint32_t const                      Core::Swapchain::kExtentMatchFullscreen = -1;
-uint32_t const                      Core::Swapchain::kExtentMatchWindow     = 0;
-Core::Swapchain::ModuleHandle const Core::Swapchain::kCurrentExecutable     = nullptr;
+uint64_t const                      apemode::Swapchain::kMaxTimeout            = Uint64Max;
+uint32_t const                      apemode::Swapchain::kExtentMatchFullscreen = -1;
+uint32_t const                      apemode::Swapchain::kExtentMatchWindow     = 0;
+apemode::Swapchain::ModuleHandle const apemode::Swapchain::kCurrentExecutable     = nullptr;
 
-Core::Swapchain::Swapchain () : pGraphicsNode (nullptr), pCmdQueue (nullptr)
+apemode::Swapchain::Swapchain () : pGraphicsNode (nullptr), pCmdQueue (nullptr)
 {
     static uint16_t sSwapchainNextId = 0;
     Id = sSwapchainNextId++;
 }
 
-Core::Swapchain::~Swapchain()
+apemode::Swapchain::~Swapchain()
 {
     _Aux_DebugTraceFunc;
 
@@ -69,7 +69,7 @@ Core::Swapchain::~Swapchain()
         for (auto & hBuffer : hBuffers)
             if (hBuffer)
             {
-                Core::TDispatchableHandle<VkImage> hImg;
+                apemode::TDispatchableHandle<VkImage> hImg;
                 hImg.Deleter.LogicalDeviceHandle = *pGraphicsNode;
                 hImg.Handle = hBuffer;
                 hImg.Destroy ();
@@ -78,7 +78,7 @@ Core::Swapchain::~Swapchain()
         /*for (auto & hPresentSemaphore : hPresentSemaphores)
             if (hPresentSemaphore)
             {
-                Core::TDispatchableHandle<VkSemaphore> hSemaphore;
+                apemode::TDispatchableHandle<VkSemaphore> hSemaphore;
                 hSemaphore.Deleter.LogicalDeviceHandle = *pGraphicsNode;
                 hSemaphore.Handle = hPresentSemaphore;
                 hSemaphore.Destroy ();
@@ -86,7 +86,7 @@ Core::Swapchain::~Swapchain()
     }
 }
 
-bool Core::Swapchain::RecreateResourceFor (GraphicsDevice & InGraphicsNode,
+bool apemode::Swapchain::RecreateResourceFor (GraphicsDevice & InGraphicsNode,
                                            CommandQueue &   InCmdQueue,
 #ifdef _WIN32
                                            ModuleHandle InInst,
@@ -229,7 +229,7 @@ bool Core::Swapchain::RecreateResourceFor (GraphicsDevice & InGraphicsNode,
     }
 
     const bool bSurfaceSupportsIdentity
-        = Aux::HasFlagEql (SurfaceCaps.supportedTransforms,
+        = apemode::HasFlagEql (SurfaceCaps.supportedTransforms,
                            VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR);
 
     eSurfaceTransform = bSurfaceSupportsIdentity ? VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR
@@ -265,8 +265,8 @@ bool Core::Swapchain::RecreateResourceFor (GraphicsDevice & InGraphicsNode,
     /*hPresentSemaphores.resize (hBuffers.size (), nullptr);
     for (auto & hPresentSemaphore : hPresentSemaphores)
     {
-        Core::TDispatchableHandle<VkSemaphore> hSemaphore;
-        if (!hSemaphore.Recreate (InGraphicsNode, Core::TInfoStruct<VkSemaphoreCreateInfo> ()))
+        apemode::TDispatchableHandle<VkSemaphore> hSemaphore;
+        if (!hSemaphore.Recreate (InGraphicsNode, apemode::TInfoStruct<VkSemaphoreCreateInfo> ()))
         {
             _Game_engine_Halt ("Failed to create preseting semaphore.");
             return false;
@@ -278,7 +278,7 @@ bool Core::Swapchain::RecreateResourceFor (GraphicsDevice & InGraphicsNode,
     return true;
 }
 
-bool Core::Swapchain::SupportsPresenting (Core::GraphicsDevice const & InGraphicsNode,
+bool apemode::Swapchain::SupportsPresenting (apemode::GraphicsDevice const & InGraphicsNode,
                                           CommandQueue const &         InCmdQueue) const
 {
     _Game_engine_Assert (hSurface.IsNotNull (), "Not initialized.");
@@ -303,29 +303,29 @@ bool Core::Swapchain::SupportsPresenting (Core::GraphicsDevice const & InGraphic
     return false;
 }
 
-uint32_t Core::Swapchain::GetBufferCount () const
+uint32_t apemode::Swapchain::GetBufferCount () const
 {
     return _Get_collection_length_u (hBuffers);
 }
 
-//VkSemaphore Core::Swapchain::GetPresentSemaphore ()
+//VkSemaphore apemode::Swapchain::GetPresentSemaphore ()
 //{
 //    return hPresentSemaphores[ PresentSemapforeIdx ];
 //}
 //
-//VkSemaphore Core::Swapchain::GetNextPresentSemaphore ()
+//VkSemaphore apemode::Swapchain::GetNextPresentSemaphore ()
 //{
 //    const uint32_t Count = _Get_collection_length_u (hPresentSemaphores);
 //    return hPresentSemaphores[ (PresentSemapforeIdx + 1) % Count ];
 //}
 //
-//void Core::Swapchain::AdvancePresentSemaphoreIdx ()
+//void apemode::Swapchain::AdvancePresentSemaphoreIdx ()
 //{
 //    const uint32_t Count = _Get_collection_length_u (hPresentSemaphores);
 //    PresentSemapforeIdx  = (PresentSemapforeIdx + 1) % Count;
 //}
 
-bool Core::Swapchain::OnFrameMove (Core::RenderPassResources & Resources,
+bool apemode::Swapchain::OnFrameMove (apemode::RenderPassResources & Resources,
                                    VkSemaphore                 hSemaphore,
                                    VkFence                     hFence,
                                    uint64_t                    Timeout)
@@ -354,8 +354,8 @@ bool Core::Swapchain::OnFrameMove (Core::RenderPassResources & Resources,
     return false;
 }
 
-bool Core::Swapchain::OnFramePresent (Core::CommandQueue &        CmdQueue,
-                                      Core::RenderPassResources & Resources,
+bool apemode::Swapchain::OnFramePresent (apemode::CommandQueue &        CmdQueue,
+                                      apemode::RenderPassResources & Resources,
                                       VkSemaphore *               pWaitSemaphores,
                                       uint32_t                    WaitSemaphoreCount)
 {

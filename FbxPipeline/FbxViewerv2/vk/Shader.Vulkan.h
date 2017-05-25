@@ -4,13 +4,13 @@
 #include <TInfoStruct.Vulkan.h>
 #include <NativeDispatchableHandles.Vulkan.h>
 
-namespace Core
+namespace apemode
 {
     class ShaderBytecode;
     class ShaderReflection;
 
-    class _Graphics_ecosystem_dll_api ShaderObject : public Aux::ScalableAllocPolicy,
-                                                     public Aux::NoCopyAssignPolicy
+    class _Graphics_ecosystem_dll_api ShaderObject : public apemode::ScalableAllocPolicy,
+                                                     public apemode::NoCopyAssignPolicy
     {
     public:
         std::string                              Id;
@@ -18,11 +18,11 @@ namespace Core
         uint64_t                                  BytecodeHash;
         VkShaderStageFlags                        StageFlags;
         ShaderReflection *                        pReflection;
-        Core::TDispatchableHandle<VkShaderModule> pShaderModule;
+        apemode::TDispatchableHandle<VkShaderModule> pShaderModule;
     };
 
-    class _Graphics_ecosystem_dll_api ShaderManager : public Aux::ScalableAllocPolicy,
-                                                      public Aux::NoCopyAssignPolicy
+    class _Graphics_ecosystem_dll_api ShaderManager : public apemode::ScalableAllocPolicy,
+                                                      public apemode::NoCopyAssignPolicy
     {
         struct PrivateContent;
         friend PrivateContent;
@@ -34,12 +34,12 @@ namespace Core
         ShaderManager();
         ~ShaderManager();
 
-        Core::TDispatchableHandle<VkShaderModule> &&
-        GetShaderModule (Core::GraphicsDevice & GraphicsNode,
+        apemode::TDispatchableHandle<VkShaderModule> &&
+        GetShaderModule (apemode::GraphicsDevice & GraphicsNode,
                          ShaderBytecode const & Bytecode);
 
         /** Not implemented. */
-        ShaderReflection const * Reflect (Core::GraphicsDevice & GraphicsNode,
+        ShaderReflection const * Reflect (apemode::GraphicsDevice & GraphicsNode,
                                           ShaderBytecode const & Bytecode);
     };
 }

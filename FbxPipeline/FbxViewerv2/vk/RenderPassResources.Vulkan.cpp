@@ -22,8 +22,8 @@ union ExposedAttachmentHash {
 /// RenderPassResources
 /// -------------------------------------------------------------------------------------------------------------------
 
-static bool ExtractSwapchainBuffers (Core::GraphicsDevice &          InGraphicsNode,
-                                     Core::Swapchain &               InSwapchain,
+static bool ExtractSwapchainBuffers (apemode::GraphicsDevice &          InGraphicsNode,
+                                     apemode::Swapchain &               InSwapchain,
                                      uint32_t                        InFrameCount,
                                      std::vector<VkImage> & OutSwapchainBufferImgs)
 {
@@ -31,7 +31,7 @@ static bool ExtractSwapchainBuffers (Core::GraphicsDevice &          InGraphicsN
                          "Not initialized.");
 
     uint32_t OutSwapchainBufferCount = 0;
-    if (_Game_engine_Likely (Core::ResultHandle::Succeeded (vkGetSwapchainImagesKHR (
+    if (_Game_engine_Likely (apemode::ResultHandle::Succeeded (vkGetSwapchainImagesKHR (
             InGraphicsNode, InSwapchain.hSwapchain, &OutSwapchainBufferCount, nullptr))))
     {
         _Game_engine_Assert (OutSwapchainBufferCount != InFrameCount,
@@ -40,7 +40,7 @@ static bool ExtractSwapchainBuffers (Core::GraphicsDevice &          InGraphicsN
                              InFrameCount);
 
         OutSwapchainBufferImgs.resize (OutSwapchainBufferCount, VkImage (nullptr));
-        if (_Game_engine_Likely (Core::ResultHandle::Succeeded (
+        if (_Game_engine_Likely (apemode::ResultHandle::Succeeded (
                 vkGetSwapchainImagesKHR (InGraphicsNode,
                                          InSwapchain.hSwapchain,
                                          &OutSwapchainBufferCount,
@@ -56,7 +56,7 @@ static bool ExtractSwapchainBuffers (Core::GraphicsDevice &          InGraphicsN
     return false;
 }
 
-void Core::RenderPassResources::SetWriteFrame (uint32_t InWriteFrame)
+void apemode::RenderPassResources::SetWriteFrame (uint32_t InWriteFrame)
 {
     _Game_engine_Assert (FrameCount != 1 && InWriteFrame < FrameCount,
                          "Index is out of range.");
@@ -73,9 +73,9 @@ void Core::RenderPassResources::SetWriteFrame (uint32_t InWriteFrame)
     }
 }
 
-bool Core::RenderPassResources::RecreateResourcesFor (Core::GraphicsDevice &   InGraphicsNode,
-                                                      Core::RenderPass const & InRenderPass,
-                                                      Core::Swapchain **       ppInSwapchains,
+bool apemode::RenderPassResources::RecreateResourcesFor (apemode::GraphicsDevice &   InGraphicsNode,
+                                                      apemode::RenderPass const & InRenderPass,
+                                                      apemode::Swapchain **       ppInSwapchains,
                                                       uint32_t                 InSwapchainCount,
                                                       uint32_t                 InFrameCount,
                                                       uint32_t                 InColorWidth,
@@ -232,38 +232,38 @@ bool Core::RenderPassResources::RecreateResourcesFor (Core::GraphicsDevice &   I
     return true;
 }
 
-void Core::RenderPassResources::AdvanceFrame ()
+void apemode::RenderPassResources::AdvanceFrame ()
 {
     ReadFrame  = WriteFrame;
     WriteFrame = (WriteFrame + 1) % FrameCount;
 }
 
-uint32_t Core::RenderPassResources::GetWriteFrame () const
+uint32_t apemode::RenderPassResources::GetWriteFrame () const
 {
     return WriteFrame;
 }
 
-uint32_t Core::RenderPassResources::GetFrameCount () const
+uint32_t apemode::RenderPassResources::GetFrameCount () const
 {
     return FrameCount;
 }
 
-uint32_t Core::RenderPassResources::GetReadFrame () const
+uint32_t apemode::RenderPassResources::GetReadFrame () const
 {
     return ReadFrame;
 }
 
-uint32_t Core::RenderPassResources::GetAttachmentCount () const
+uint32_t apemode::RenderPassResources::GetAttachmentCount () const
 {
     return _Get_collection_length_u (ClearValues);
 }
 
-Core::RenderPass const * Core::RenderPassResources::GetRenderPass () const
+apemode::RenderPass const * apemode::RenderPassResources::GetRenderPass () const
 {
     return pRenderPass;
 }
 
-Core::Framebuffer const * Core::RenderPassResources::GetWriteFramebuffer () const
+apemode::Framebuffer const * apemode::RenderPassResources::GetWriteFramebuffer () const
 {
     return ppFramebuffers[ GetWriteFrame () ];
 }
@@ -272,7 +272,7 @@ Core::Framebuffer const * Core::RenderPassResources::GetWriteFramebuffer () cons
 /// RenderPassResources BeginEndScope
 /// -------------------------------------------------------------------------------------------------------------------
 
-Core::RenderPassResources::BeginEndScope::BeginEndScope (CommandList &         CmdList,
+apemode::RenderPassResources::BeginEndScope::BeginEndScope (CommandList &         CmdList,
                                                          RenderPassResources & Resources)
     : AssocCmdList (CmdList), AssocResources (Resources)
 {
@@ -300,7 +300,7 @@ Core::RenderPassResources::BeginEndScope::BeginEndScope (CommandList &         C
     CmdList.pFramebuffer = Resources.GetWriteFramebuffer ();
 }
 
-Core::RenderPassResources::BeginEndScope::~BeginEndScope ()
+apemode::RenderPassResources::BeginEndScope::~BeginEndScope ()
 {
     AssocCmdList.pRenderPass  = nullptr;
     AssocCmdList.pFramebuffer = nullptr;

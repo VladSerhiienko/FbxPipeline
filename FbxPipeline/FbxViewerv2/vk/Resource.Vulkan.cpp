@@ -14,17 +14,17 @@
 /// ResourceReference
 /// -------------------------------------------------------------------------------------------------------------------
 
-Core::ResourceReference::LkPtr Core::ResourceReference::MakeNewLinked(GraphicsDevice & GraphicsNode)
+apemode::ResourceReference::LkPtr apemode::ResourceReference::MakeNewLinked(GraphicsDevice & GraphicsNode)
 {
     return std::make_shared<ResourceReference>(GraphicsNode);
 }
 
-Core::ResourceReference::ResourceReference(GraphicsDevice & GraphicsNode)
+apemode::ResourceReference::ResourceReference(GraphicsDevice & GraphicsNode)
     : GraphicsNode(GraphicsNode)
 {
 }
 
-uint32_t Core::ResourceReference::GetElementSizeInBytes(VkFormat Format)
+uint32_t apemode::ResourceReference::GetElementSizeInBytes(VkFormat Format)
 {
     switch (Format)
     {
@@ -185,7 +185,7 @@ uint32_t Core::ResourceReference::GetElementSizeInBytes(VkFormat Format)
     }
 }
 
-bool Core::ResourceReference::IsSRGBFormat(VkFormat Format)
+bool apemode::ResourceReference::IsSRGBFormat(VkFormat Format)
 {
     switch (Format)
     {
@@ -224,7 +224,7 @@ bool Core::ResourceReference::IsSRGBFormat(VkFormat Format)
     return false;
 }
 
-bool Core::ResourceReference::IsDepthStencilFormat (VkFormat Format)
+bool apemode::ResourceReference::IsDepthStencilFormat (VkFormat Format)
 {
     switch (Format)
     {
@@ -240,7 +240,7 @@ bool Core::ResourceReference::IsDepthStencilFormat (VkFormat Format)
     return false;
 }
 
-bool Core::ResourceReference::GetDepthStencilFormats(VkFormat DSVFormat, VkFormat & DepthFormat, VkFormat & StencilFormat)
+bool apemode::ResourceReference::GetDepthStencilFormats(VkFormat DSVFormat, VkFormat & DepthFormat, VkFormat & StencilFormat)
 {
     bool bOk = false;
 
@@ -281,7 +281,7 @@ bool Core::ResourceReference::GetDepthStencilFormats(VkFormat DSVFormat, VkForma
     return bOk;
 }
 
-bool Core::ResourceReference::GetMemoryTypeFromProperties(GraphicsDevice & InGraphicsNode,
+bool apemode::ResourceReference::GetMemoryTypeFromProperties(GraphicsDevice & InGraphicsNode,
                                                           uint32_t         InTypeBits,
                                                           VkFlags          InRequirementsMask,
                                                           uint32_t &       OutTypeIndex)
@@ -314,30 +314,30 @@ bool Core::ResourceReference::GetMemoryTypeFromProperties(GraphicsDevice & InGra
 /// ResourceView
 /// -------------------------------------------------------------------------------------------------------------------
 
-Core::ResourceView::ResourceView()
+apemode::ResourceView::ResourceView()
 {
     //MemoryStates.reserve(16);
 }
 
-Core::ResourceView::MemoryState Core::ResourceView::GetState(Core::CommandList & CmdList) const
+apemode::ResourceView::MemoryState apemode::ResourceView::GetState(apemode::CommandList & CmdList) const
 {
     const auto StateIt = MemoryStates.find (&CmdList);
     const bool bHasCmdListAssociation = StateIt != MemoryStates.end ();
     return bHasCmdListAssociation ? StateIt->second : MemoryState ();
 }
 
-void Core::ResourceView::SetState (Core::CommandList & CmdList, MemoryState const & State)
+void apemode::ResourceView::SetState (apemode::CommandList & CmdList, MemoryState const & State)
 {
     MemoryStates[&CmdList ] = State;
 }
 
-Core::ResourceView::ResourceViewType
-Core::ResourceView::GetBaseResourceViewType (ResourceViewType eViewType)
+apemode::ResourceView::ResourceViewType
+apemode::ResourceView::GetBaseResourceViewType (ResourceViewType eViewType)
 {
     return (eViewType & kResourceViewTypeBaseMask);
 }
 
-Core::ResourceView::MemoryState::MemoryState ()
+apemode::ResourceView::MemoryState::MemoryState ()
     : eType (kType_Undefined)
     , AccessMask (VK_ACCESS_FLAG_BITS_MAX_ENUM)
     , ImgLayout (VK_IMAGE_LAYOUT_MAX_ENUM)
@@ -351,7 +351,7 @@ Core::ResourceView::MemoryState::MemoryState ()
     ImgSubresRange.levelCount     = -1;
 }
 
-Core::ResourceView::MemoryState::MemoryState (VkPipelineStageFlags PipelineStageFlags,
+apemode::ResourceView::MemoryState::MemoryState (VkPipelineStageFlags PipelineStageFlags,
                                               VkAccessFlags        AccessMask,
                                               uint32_t             QueueFamily,
                                               uint32_t             BufferSize,
@@ -365,7 +365,7 @@ Core::ResourceView::MemoryState::MemoryState (VkPipelineStageFlags PipelineStage
 {
 }
 
-Core::ResourceView::MemoryState::MemoryState (VkPipelineStageFlags    PipelineStageFlags,
+apemode::ResourceView::MemoryState::MemoryState (VkPipelineStageFlags    PipelineStageFlags,
                                               VkAccessFlags           AccessMask,
                                               uint32_t                QueueFamily,
                                               VkImageLayout           ImgLayout,
@@ -379,12 +379,12 @@ Core::ResourceView::MemoryState::MemoryState (VkPipelineStageFlags    PipelineSt
 {
 }
 
-bool Core::ResourceView::MemoryState::IsValid () const
+bool apemode::ResourceView::MemoryState::IsValid () const
 {
     return eType != kType_Undefined;
 }
 
-bool Core::ResourceView::MemoryState::IsImgBarrier () const
+bool apemode::ResourceView::MemoryState::IsImgBarrier () const
 {
     return eType == kType_Image;
 }

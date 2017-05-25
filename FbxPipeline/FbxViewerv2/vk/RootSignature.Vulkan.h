@@ -4,7 +4,7 @@
 #include <TInfoStruct.Vulkan.h>
 #include <NativeDispatchableHandles.Vulkan.h>
 
-namespace Core
+namespace apemode
 {
     class RootParameter;
     class RootSignature;
@@ -24,7 +24,7 @@ namespace Core
         kShaderVisibility_All                   = VK_SHADER_STAGE_ALL,
     };
 
-    class _Graphics_ecosystem_dll_api RootParameter : public Aux::ScalableAllocPolicy
+    class _Graphics_ecosystem_dll_api RootParameter : public apemode::ScalableAllocPolicy
     {
         friend RootSignature;
         friend RootSignatureBuilder;
@@ -32,7 +32,7 @@ namespace Core
 
     public:
         uint32_t                                  DescSet;
-        Core::TInfoStruct<VkDescriptorSetLayoutBinding> Binding;
+        apemode::TInfoStruct<VkDescriptorSetLayoutBinding> Binding;
 
     public:
         RootParameter();
@@ -65,15 +65,15 @@ namespace Core
         operator VkDescriptorSetLayoutBinding() const;
     };
 
-    class _Graphics_ecosystem_dll_api RootSignature : public Aux::ScalableAllocPolicy,
-                                                      public Aux::NoCopyAssignPolicy
+    class _Graphics_ecosystem_dll_api RootSignature : public apemode::ScalableAllocPolicy,
+                                                      public apemode::NoCopyAssignPolicy
     {
     public:
         uint64_t                                                             Hash;
-        Core::TDispatchableHandle<VkDescriptorSetLayout>::NativeHandleVector DescSetLayouts;
-        Core::TDispatchableHandle<VkPipelineLayout>                          PipelineLayoutHandle;
-        Core::GraphicsDevice const *                                         pGraphicsNode;
-        Core::RootSignatureDescription const *                               pDesc;
+        apemode::TDispatchableHandle<VkDescriptorSetLayout>::NativeHandleVector DescSetLayouts;
+        apemode::TDispatchableHandle<VkPipelineLayout>                          PipelineLayoutHandle;
+        apemode::GraphicsDevice const *                                         pGraphicsNode;
+        apemode::RootSignatureDescription const *                               pDesc;
 
     public:
         RootSignature();
@@ -83,8 +83,8 @@ namespace Core
         operator VkPipelineLayout() const;
     };
 
-    class _Graphics_ecosystem_dll_api RootSignatureDescription : public Aux::ScalableAllocPolicy,
-                                                                 public Aux::NoCopyAssignPolicy
+    class _Graphics_ecosystem_dll_api RootSignatureDescription : public apemode::ScalableAllocPolicy,
+                                                                 public apemode::NoCopyAssignPolicy
     {
     public:
         uint64_t                                  Hash;
@@ -98,33 +98,33 @@ namespace Core
         void Reset();
         uint64_t UpdateHash();
         uint32_t GetParamCount()  const;
-        Core::RootParameter const & GetParameter(uint32_t ParameterIndex) const;
+        apemode::RootParameter const & GetParameter(uint32_t ParameterIndex) const;
 
     public:
-        static Core::RootSignatureDescription const *
-        MakeNewFromTemporary (Core::RootSignatureDescription const & TemporaryDesc);
+        static apemode::RootSignatureDescription const *
+        MakeNewFromTemporary (apemode::RootSignatureDescription const & TemporaryDesc);
     };
 
-    class _Graphics_ecosystem_dll_api RootSignatureBuilder : public Aux::ScalableAllocPolicy,
-                                                             public Aux::NoCopyAssignPolicy
+    class _Graphics_ecosystem_dll_api RootSignatureBuilder : public apemode::ScalableAllocPolicy,
+                                                             public apemode::NoCopyAssignPolicy
     {
-        Core::RootSignatureDescription TemporaryDesc;
+        apemode::RootSignatureDescription TemporaryDesc;
 
     public:
         RootSignatureBuilder ();
 
         void Reset (uint32_t BindingCount, uint32_t PushConstRangeCount);
-        Core::RootParameter & AddParameter ();
+        apemode::RootParameter & AddParameter ();
         VkPushConstantRange & AddPushConstRange ();
 
-        Core::RootSignature const * RecreateRootSignature (Core::GraphicsDevice & GraphicsNode);
+        apemode::RootSignature const * RecreateRootSignature (apemode::GraphicsDevice & GraphicsNode);
     };
 
-    class _Graphics_ecosystem_dll_api RootSignatureManager : public Aux::ScalableAllocPolicy,
-                                                             public Aux::NoCopyAssignPolicy
+    class _Graphics_ecosystem_dll_api RootSignatureManager : public apemode::ScalableAllocPolicy,
+                                                             public apemode::NoCopyAssignPolicy
     {
-        friend Core::GraphicsDevice;
-        friend Core::RootSignatureBuilder;
+        friend apemode::GraphicsDevice;
+        friend apemode::RootSignatureBuilder;
         struct RootSignatureContent;
         struct PrivateContent;
 
@@ -136,9 +136,9 @@ namespace Core
 
         VkDescriptorSetLayout GetDescSetLayout (uint64_t Hash);
         void SetDescSetLayout (uint64_t Hash, VkDescriptorSetLayout SetLayout);
-        void AddNewRootSignatureObject (Core::RootSignature & pRootSign);
-        Core::RootSignature const * TryGetRootSignatureObjectByHash (uint64_t Hash);
+        void AddNewRootSignatureObject (apemode::RootSignature & pRootSign);
+        apemode::RootSignature const * TryGetRootSignatureObjectByHash (uint64_t Hash);
     };
 }
 
-_Game_engine_Define_enum_flag_operators(Core::ShaderVisibility);
+_Game_engine_Define_enum_flag_operators(apemode::ShaderVisibility);

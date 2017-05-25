@@ -20,11 +20,11 @@ union ExposedSwapchainAttachment {
 /// RenderPassBuilder
 /// -------------------------------------------------------------------------------------------------------------------
 
-Core::RenderPassBuilder::RenderPassBuilder()
+apemode::RenderPassBuilder::RenderPassBuilder()
 {
 }
 
-void Core::RenderPassBuilder::Reset (uint32_t MaxAttachments,
+void apemode::RenderPassBuilder::Reset (uint32_t MaxAttachments,
                                      uint32_t MaxDependencies,
                                      uint32_t MaxSwaphchainAttachments)
 {
@@ -36,8 +36,8 @@ void Core::RenderPassBuilder::Reset (uint32_t MaxAttachments,
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-Core::RenderPassDescription::SubpassDescription &
-Core::RenderPassBuilder::GetOrCreateSubpass(uint32_t SubpassId)
+apemode::RenderPassDescription::SubpassDescription &
+apemode::RenderPassBuilder::GetOrCreateSubpass(uint32_t SubpassId)
 {
     auto const SubpassIt    = TemporaryDesc.SubpassDescriptions.find(SubpassId);
     auto const SubpassItEnd = TemporaryDesc.SubpassDescriptions.end();
@@ -55,7 +55,7 @@ Core::RenderPassBuilder::GetOrCreateSubpass(uint32_t SubpassId)
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-void Core::RenderPassBuilder::ResetSubpass (uint32_t SubpassId,
+void apemode::RenderPassBuilder::ResetSubpass (uint32_t SubpassId,
                                             uint32_t MaxColors,
                                             uint32_t MaxInputs,
                                             uint32_t MaxPreserves)
@@ -69,7 +69,7 @@ void Core::RenderPassBuilder::ResetSubpass (uint32_t SubpassId,
     Subpass.DepthStencilRef.layout = VK_IMAGE_LAYOUT_MAX_ENUM;
 }
 
-uint32_t Core::RenderPassBuilder::AddAttachment (VkFormat            ImgFmt,
+uint32_t apemode::RenderPassBuilder::AddAttachment (VkFormat            ImgFmt,
                                                  VkSampleCountFlags  SampleCount,
                                                  VkImageLayout       ImgInitialLayout,
                                                  VkImageLayout       ImgFinalLayout,
@@ -106,7 +106,7 @@ uint32_t Core::RenderPassBuilder::AddAttachment (VkFormat            ImgFmt,
     return OutId;
 }
 
-uint32_t Core::RenderPassBuilder::AddAttachment (VkFormat            ImgFmt,
+uint32_t apemode::RenderPassBuilder::AddAttachment (VkFormat            ImgFmt,
                                                  VkSampleCountFlags  ImgSampleCount,
                                                  VkImageLayout       ImgInitialLayout,
                                                  VkImageLayout       ImgFinalLayout,
@@ -132,13 +132,13 @@ uint32_t Core::RenderPassBuilder::AddAttachment (VkFormat            ImgFmt,
     return OutId;
 }
 
-void Core::RenderPassBuilder::AddColorToSubpass (uint32_t      SubpassId,
+void apemode::RenderPassBuilder::AddColorToSubpass (uint32_t      SubpassId,
                                                  uint32_t      AttachmentId,
                                                  VkImageLayout ImgSubpassLayout)
 {
     auto & Subpass    = GetOrCreateSubpass (SubpassId);
-    auto & ColorRef   = Aux::PushBackAndGet( Subpass.ColorRefs);
-    auto & ResolveRef = Aux::PushBackAndGet(Subpass.ResolveRefs);
+    auto & ColorRef   = apemode::PushBackAndGet( Subpass.ColorRefs);
+    auto & ResolveRef = apemode::PushBackAndGet(Subpass.ResolveRefs);
 
     ColorRef.attachment = AttachmentId;
     ColorRef.layout     = ImgSubpassLayout;
@@ -147,15 +147,15 @@ void Core::RenderPassBuilder::AddColorToSubpass (uint32_t      SubpassId,
     ResolveRef.layout     = VK_IMAGE_LAYOUT_UNDEFINED;
 }
 
-void Core::RenderPassBuilder::AddColorToSubpass (uint32_t      SubpassId,
+void apemode::RenderPassBuilder::AddColorToSubpass (uint32_t      SubpassId,
                                                  uint32_t      AttachmentId,
                                                  VkImageLayout ImgSubpassLayout,
                                                  uint32_t      ResolveAttachmentId,
                                                  VkImageLayout ResolveImgSubpassLayout)
 {
     auto & Subpass    = GetOrCreateSubpass (SubpassId);
-    auto & ColorRef   = Aux::PushBackAndGet(Subpass.ColorRefs);
-    auto & ResolveRef = Aux::PushBackAndGet(Subpass.ResolveRefs);
+    auto & ColorRef   = apemode::PushBackAndGet(Subpass.ColorRefs);
+    auto & ResolveRef = apemode::PushBackAndGet(Subpass.ResolveRefs);
 
     ColorRef.attachment = AttachmentId;
     ColorRef.layout     = ImgSubpassLayout;
@@ -164,18 +164,18 @@ void Core::RenderPassBuilder::AddColorToSubpass (uint32_t      SubpassId,
     ResolveRef.layout     = ResolveImgSubpassLayout;
 }
 
-void Core::RenderPassBuilder::AddInputToSubpass (uint32_t      SubpassId,
+void apemode::RenderPassBuilder::AddInputToSubpass (uint32_t      SubpassId,
                                                  uint32_t      AttachmentId,
                                                  VkImageLayout ImgSubpassLayout)
 {
     auto & Subpass  = GetOrCreateSubpass (SubpassId);
-    auto & InputRef = Aux::PushBackAndGet(Subpass.InputRefs);
+    auto & InputRef = apemode::PushBackAndGet(Subpass.InputRefs);
 
     InputRef.attachment = AttachmentId;
     InputRef.layout     = ImgSubpassLayout;
 }
 
-void Core::RenderPassBuilder::SetDepthToSubpass (uint32_t      SubpassId,
+void apemode::RenderPassBuilder::SetDepthToSubpass (uint32_t      SubpassId,
                                                  uint32_t      AttachmentId,
                                                  VkImageLayout ImgSubpassLayout)
 {
@@ -185,14 +185,14 @@ void Core::RenderPassBuilder::SetDepthToSubpass (uint32_t      SubpassId,
     Subpass.DepthStencilRef.layout     = ImgSubpassLayout;
 }
 
-void Core::RenderPassBuilder::PreserveInSubpass (uint32_t SubpassId, uint32_t AttachmentId)
+void apemode::RenderPassBuilder::PreserveInSubpass (uint32_t SubpassId, uint32_t AttachmentId)
 {
     auto & Subpass = GetOrCreateSubpass (SubpassId);
 
     Subpass.PreserveIndices.push_back (AttachmentId);
 }
 
-void Core::RenderPassBuilder::SetSubpassDependency(uint32_t             SrcSubpassId,
+void apemode::RenderPassBuilder::SetSubpassDependency(uint32_t             SrcSubpassId,
                                                    VkPipelineStageFlags SrcSubpassStage,
                                                    VkAccessFlags        SrcSubpassAccess,
                                                    uint32_t             DstSubpassId,
@@ -200,7 +200,7 @@ void Core::RenderPassBuilder::SetSubpassDependency(uint32_t             SrcSubpa
                                                    VkAccessFlags        DstSubpassAccess,
                                                    bool                 bDependentByRegion)
 {
-    auto & SubpassDependency = Aux::PushBackAndGet(TemporaryDesc.SubpassDependencies);
+    auto & SubpassDependency = apemode::PushBackAndGet(TemporaryDesc.SubpassDependencies);
 
     SubpassDependency               = TInfoStruct<VkSubpassDependency> ();
     SubpassDependency.srcSubpass    = SrcSubpassId;
@@ -214,10 +214,10 @@ void Core::RenderPassBuilder::SetSubpassDependency(uint32_t             SrcSubpa
         SubpassDependency.dependencyFlags |= VK_DEPENDENCY_BY_REGION_BIT;
 }
 
-Core::RenderPass const *
-Core::RenderPassBuilder::RecreateRenderPass(Core::GraphicsDevice & GraphicsNode)
+apemode::RenderPass const *
+apemode::RenderPassBuilder::RecreateRenderPass(apemode::GraphicsDevice & GraphicsNode)
 {
-    using SubpassIdPair = std::pair<uint32_t, Core::RenderPassDescription::SubpassDescription::LkPtr>;
+    using SubpassIdPair = std::pair<uint32_t, apemode::RenderPassDescription::SubpassDescription::LkPtr>;
 
     if (GraphicsNode.IsValid() && VerifySubpasses())
     {
@@ -253,11 +253,11 @@ Core::RenderPassBuilder::RecreateRenderPass(Core::GraphicsDevice & GraphicsNode)
 
         //TODO Fill render pass create info...
 
-        Aux::AliasStructs (TemporaryDesc.Attachments,
+        apemode::AliasStructs (TemporaryDesc.Attachments,
                            TemporaryDesc.Desc->pAttachments,
                            TemporaryDesc.Desc->attachmentCount);
 
-        Aux::AliasStructs(Subpasses,
+        apemode::AliasStructs(Subpasses,
                           TemporaryDesc.Desc->pSubpasses,
                           TemporaryDesc.Desc->subpassCount);
 
@@ -270,7 +270,7 @@ Core::RenderPassBuilder::RecreateRenderPass(Core::GraphicsDevice & GraphicsNode)
         TDispatchableHandle<VkRenderPass> NewHandle;
         if (NewHandle.Recreate(GraphicsNode, TemporaryDesc.Desc))
         {
-            auto pRenderPass = new Core::RenderPass();
+            auto pRenderPass = new apemode::RenderPass();
             pRenderPass->Handle.Swap(NewHandle);
             pRenderPass->Hash          = Hash;
             pRenderPass->pGraphicsNode = &GraphicsNode;
@@ -287,7 +287,7 @@ Core::RenderPassBuilder::RecreateRenderPass(Core::GraphicsDevice & GraphicsNode)
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-bool Core::RenderPassBuilder::VerifySubpasses() const
+bool apemode::RenderPassBuilder::VerifySubpasses() const
 {
     if (!TemporaryDesc.SubpassDescriptions.empty())
     {
@@ -310,27 +310,27 @@ bool Core::RenderPassBuilder::VerifySubpasses() const
 /// RenderPassDescription SubpassDescription
 /// -------------------------------------------------------------------------------------------------------------------
 
-Core::RenderPassDescription::SubpassDescription::SubpassDescription ( uint32_t Id ) : Id ( Id )
+apemode::RenderPassDescription::SubpassDescription::SubpassDescription ( uint32_t Id ) : Id ( Id )
 {
     DepthStencilRef.layout = VK_IMAGE_LAYOUT_MAX_ENUM;
 }
 
-bool Core::RenderPassDescription::SubpassDescription::HasDepthStencilRef () const
+bool apemode::RenderPassDescription::SubpassDescription::HasDepthStencilRef () const
 {
     return DepthStencilRef.layout == VK_IMAGE_LAYOUT_MAX_ENUM;
 }
 
-Core::RenderPassDescription::SubpassDescription::UqPtr
-Core::RenderPassDescription::SubpassDescription::MakeNewUnique (uint32_t SubpassId)
+apemode::RenderPassDescription::SubpassDescription::UqPtr
+apemode::RenderPassDescription::SubpassDescription::MakeNewUnique (uint32_t SubpassId)
 {
-    using Deleter = Core::RenderPassDescription::SubpassDescription::UqPtr::deleter_type;
+    using Deleter = apemode::RenderPassDescription::SubpassDescription::UqPtr::deleter_type;
     return std::make_unique<SubpassDescription> (SubpassId);
 }
 
-Core::RenderPassDescription::SubpassDescription::LkPtr
-Core::RenderPassDescription::SubpassDescription::MakeNewLinked(uint32_t SubpassId)
+apemode::RenderPassDescription::SubpassDescription::LkPtr
+apemode::RenderPassDescription::SubpassDescription::MakeNewLinked(uint32_t SubpassId)
 {
-    using Deleter = Core::RenderPassDescription::SubpassDescription::UqPtr::deleter_type;
+    using Deleter = apemode::RenderPassDescription::SubpassDescription::UqPtr::deleter_type;
     return std::make_shared<SubpassDescription> (SubpassId);
 }
 
@@ -338,10 +338,10 @@ Core::RenderPassDescription::SubpassDescription::MakeNewLinked(uint32_t SubpassI
 /// RenderPassManager PrivateContent
 /// -------------------------------------------------------------------------------------------------------------------
 
-struct Core::RenderPassManager::PrivateContent : public Aux::ScalableAllocPolicy,
-                                                 public Aux::NoCopyAssignPolicy
+struct apemode::RenderPassManager::PrivateContent : public apemode::ScalableAllocPolicy,
+                                                 public apemode::NoCopyAssignPolicy
 {
-    using HashType         = Aux::CityHash64Wrapper::ValueType;
+    using HashType         = apemode::CityHash64Wrapper::ValueType;
     using RenderPassLookup = std::map<HashType, std::unique_ptr<RenderPass> >;
 
     std::mutex        Lock;
@@ -352,12 +352,12 @@ struct Core::RenderPassManager::PrivateContent : public Aux::ScalableAllocPolicy
 /// RenderPassDescription
 /// -------------------------------------------------------------------------------------------------------------------
 
-Core::RenderPassDescription::RenderPassDescription () : Hash (0)
+apemode::RenderPassDescription::RenderPassDescription () : Hash (0)
 {
     Reset ();
 }
 
-void Core::RenderPassDescription::Reset ()
+void apemode::RenderPassDescription::Reset ()
 {
     Hash = 0;
     Desc.ZeroMemory ();
@@ -367,7 +367,7 @@ void Core::RenderPassDescription::Reset ()
     SwapchainAttachmentHashes.clear ();
 }
 
-uint64_t Core::RenderPassDescription::UpdateHash()
+uint64_t apemode::RenderPassDescription::UpdateHash()
 {
     VkRenderPassCreateInfo PartialDesc = Desc;
 
@@ -379,7 +379,7 @@ uint64_t Core::RenderPassDescription::UpdateHash()
     PartialDesc.pAttachments  = nullptr;
     PartialDesc.pDependencies = nullptr;
 
-    auto HashWrapper = Aux::CityHash64Wrapper ();
+    auto HashWrapper = apemode::CityHash64Wrapper ();
     HashWrapper.CombineWith (PartialDesc);
 
     if (_Game_engine_Likely (PartialDesc.attachmentCount != 0))
@@ -454,7 +454,7 @@ uint64_t Core::RenderPassDescription::UpdateHash()
     return HashWrapper;
 }
 
-bool Core::RenderPassDescription::GetSwapchainAttachmentInfo (uint32_t   AttachmentId,
+bool apemode::RenderPassDescription::GetSwapchainAttachmentInfo (uint32_t   AttachmentId,
                                                               uint32_t & OutSwapchainId) const
 {
     if (!SwapchainAttachmentHashes.empty ())
@@ -474,10 +474,10 @@ bool Core::RenderPassDescription::GetSwapchainAttachmentInfo (uint32_t   Attachm
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-Core::RenderPassDescription const *
-Core::RenderPassDescription::MakeNewFromTemporary(RenderPassDescription const & TemporaryDesc)
+apemode::RenderPassDescription const *
+apemode::RenderPassDescription::MakeNewFromTemporary(RenderPassDescription const & TemporaryDesc)
 {
-    if (auto pNewDesc = new Core::RenderPassDescription())
+    if (auto pNewDesc = new apemode::RenderPassDescription())
     {
         pNewDesc->Hash = TemporaryDesc.Hash;
 
@@ -493,7 +493,7 @@ Core::RenderPassDescription::MakeNewFromTemporary(RenderPassDescription const & 
                          TemporaryDesc.Attachments.end (),
                          std::back_inserter (pNewDesc->Attachments));
 
-            Aux::AliasStructs (pNewDesc->Attachments,
+            apemode::AliasStructs (pNewDesc->Attachments,
                                pNewDesc->Desc->pAttachments,
                                pNewDesc->Desc->attachmentCount);
         }
@@ -519,7 +519,7 @@ Core::RenderPassDescription::MakeNewFromTemporary(RenderPassDescription const & 
                          TemporaryDesc.SubpassDependencies.end (),
                          std::back_inserter (pNewDesc->SubpassDependencies));
 
-            Aux::AliasStructs (pNewDesc->SubpassDependencies,
+            apemode::AliasStructs (pNewDesc->SubpassDependencies,
                                pNewDesc->Desc->pDependencies,
                                pNewDesc->Desc->dependencyCount);
         }
@@ -543,7 +543,7 @@ Core::RenderPassDescription::MakeNewFromTemporary(RenderPassDescription const & 
 /// RenderPassManager
 /// -------------------------------------------------------------------------------------------------------------------
 
-void Core::RenderPassManager::AddNewRenderPassObject(Core::RenderPass & NewRenderPass)
+void apemode::RenderPassManager::AddNewRenderPassObject(apemode::RenderPass & NewRenderPass)
 {
     std::lock_guard<std::mutex> LockGuard (pContent->Lock);
 
@@ -556,18 +556,18 @@ void Core::RenderPassManager::AddNewRenderPassObject(Core::RenderPass & NewRende
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-Core::RenderPassManager::RenderPassManager()
+apemode::RenderPassManager::RenderPassManager()
     : pContent(new PrivateContent())
 {
 }
 
-Core::RenderPassManager::~RenderPassManager()
+apemode::RenderPassManager::~RenderPassManager()
 {
-    Aux::TSafeDeleteObj (pContent);
+    apemode::TSafeDeleteObj (pContent);
 }
 
-Core::RenderPass const *
-Core::RenderPassManager::TryGetRenderPassObjectByHash(uint64_t Hash)
+apemode::RenderPass const *
+apemode::RenderPassManager::TryGetRenderPassObjectByHash(uint64_t Hash)
 {
     std::lock_guard<std::mutex> LockGuard (pContent->Lock);
 
@@ -578,11 +578,11 @@ Core::RenderPassManager::TryGetRenderPassObjectByHash(uint64_t Hash)
     return nullptr;
 }
 
-Core::RenderPass::RenderPass () : pGraphicsNode (nullptr), pDesc (nullptr), Hash (0)
+apemode::RenderPass::RenderPass () : pGraphicsNode (nullptr), pDesc (nullptr), Hash (0)
 {
 }
 
-Core::RenderPass::operator VkRenderPass () const
+apemode::RenderPass::operator VkRenderPass () const
 {
     return Handle;
 }

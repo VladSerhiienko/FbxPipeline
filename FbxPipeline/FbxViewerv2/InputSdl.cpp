@@ -3,7 +3,7 @@
 
 void BuildSdlKeyMapping(uint32_t * pOutKeyMapping)
 {
-    using namespace fbxv;
+    using namespace apemode;
     //TIMED_SCOPE(timer, "InputKeyMapping");
      
     pOutKeyMapping[kDigitalInput_KeyEscape]       = SDL_SCANCODE_ESCAPE;
@@ -88,7 +88,7 @@ void BuildSdlKeyMapping(uint32_t * pOutKeyMapping)
     pOutKeyMapping[kDigitalInput_KeyDelete]       = SDL_SCANCODE_DELETE;
 }
 
-fbxv::Input::Input ()
+apemode::Input::Input ()
     : bFocused (false)
     , bSizeChanged (false)
     , bIsUsingTouch (false)
@@ -106,55 +106,55 @@ fbxv::Input::Input ()
         TouchId = sInvalidTouchValue;
 }
 
-fbxv::Input::~Input()
+apemode::Input::~Input()
 {
 }
 
-bool fbxv::Input::IsTouchEnabled() const
+bool apemode::Input::IsTouchEnabled() const
 {
     return bIsUsingTouch;
 }
 
-uint32_t fbxv::Input::GetFirstTouchId() const
+uint32_t apemode::Input::GetFirstTouchId() const
 {
     assert(TouchIdCount > 0 && "Invalid.");
     return TouchIds[0];
 }
 
-uint32_t fbxv::Input::GetLastTouchId() const
+uint32_t apemode::Input::GetLastTouchId() const
 {
     assert(TouchIdCount > 0 && "Out of range.");
     return TouchIds[TouchIdCount - 1];
 }
 
-bool fbxv::Input::IsTouchTracked(uint32_t TouchId) const
+bool apemode::Input::IsTouchTracked(uint32_t TouchId) const
 {
     const auto TouchIt    = TouchIds;
     const auto TouchItEnd = TouchIds + TouchIdCount;
     return std::find(TouchIt, TouchItEnd, TouchId) != TouchItEnd;
 }
 
-uint32_t fbxv::Input::GetTouchCount() const
+uint32_t apemode::Input::GetTouchCount() const
 {
     return TouchIdCount;
 }
 
-bool fbxv::Input::IsAnyPressed() const
+bool apemode::Input::IsAnyPressed() const
 {
     return bIsAnyPressed;
 }
 
-bool fbxv::Input::IsTrackingTouchesOrMousePressed() const
+bool apemode::Input::IsTrackingTouchesOrMousePressed() const
 {
     return bIsTrackingTouchesOrMousePressed;
 }
 
-bool fbxv::Input::IsPressed (DigitalInputUInt InDigitalInput) const
+bool apemode::Input::IsPressed (DigitalInputUInt InDigitalInput) const
 {
     return Buttons[ 0 ][ InDigitalInput ];
 }
 
-bool fbxv::Input::IsFirstPressed (DigitalInputUInt InDigitalInput) const
+bool apemode::Input::IsFirstPressed (DigitalInputUInt InDigitalInput) const
 {
     /*SDL_LogInfo (SDL_LOG_CATEGORY_APPLICATION,
                  "Octopus: is first pressed ? [0]=%u [1]=%u",
@@ -164,12 +164,12 @@ bool fbxv::Input::IsFirstPressed (DigitalInputUInt InDigitalInput) const
     return Buttons[ 0 ][ InDigitalInput ] && !Buttons[ 1 ][ InDigitalInput ];
 }
 
-bool fbxv::Input::IsReleased (DigitalInputUInt InDigitalInput) const
+bool apemode::Input::IsReleased (DigitalInputUInt InDigitalInput) const
 {
     return !Buttons[ 0 ][ InDigitalInput ];
 }
 
-bool fbxv::Input::IsFirstReleased (DigitalInputUInt InDigitalInput) const
+bool apemode::Input::IsFirstReleased (DigitalInputUInt InDigitalInput) const
 {
     /*SDL_LogInfo (SDL_LOG_CATEGORY_APPLICATION,
                  "Octopus: is first released ? [0]=%u [1]=%u",
@@ -179,30 +179,30 @@ bool fbxv::Input::IsFirstReleased (DigitalInputUInt InDigitalInput) const
     return !Buttons[ 0 ][ InDigitalInput ] && Buttons[ 1 ][ InDigitalInput ];
 }
 
-float fbxv::Input::GetDurationPressed(DigitalInputUInt InDigitalInput) const
+float apemode::Input::GetDurationPressed(DigitalInputUInt InDigitalInput) const
 {
     return HoldDuration[InDigitalInput];
 }
 
-float fbxv::Input::GetAnalogInput (AnalogInputUInt InAnalogInput) const
+float apemode::Input::GetAnalogInput (AnalogInputUInt InAnalogInput) const
 {
     return Analogs[ InAnalogInput ];
 }
 
-float fbxv::Input::GetTimeCorrectedAnalogInput (AnalogInputUInt InAnalogInput) const
+float apemode::Input::GetTimeCorrectedAnalogInput (AnalogInputUInt InAnalogInput) const
 {
     return AnalogsTimeCorrected[ InAnalogInput ];
 }
 
-fbxv::InputManager::InputManager ()
+apemode::InputManager::InputManager ()
 {
 }
 
-fbxv::InputManager::~InputManager ()
+apemode::InputManager::~InputManager ()
 {
 }
 
-bool fbxv::InputManager::Initialize ()
+bool apemode::InputManager::Initialize ()
 {
     BuildSdlKeyMapping (KeyMapping);
     return true;
@@ -235,7 +235,7 @@ static void LogTouches (uint32_t stateIndex, bool const * touchButtonsState)
                  touchButtonsState[ 15 ]);
 }
 
-void fbxv::InputManager::Update(Input & InOutState, float const DeltaTime)
+void apemode::InputManager::Update(Input & InOutState, float const DeltaTime)
 {
     /*SDL_LogInfo (SDL_LOG_CATEGORY_APPLICATION, "Octopus: < Input Update >");
     LogTouches (0, InOutState.Buttons[ 0 ] + kDigitalInput_Touch0);
@@ -263,17 +263,17 @@ void fbxv::InputManager::Update(Input & InOutState, float const DeltaTime)
             if (windowEvent.window.type == SDL_WINDOWEVENT_SIZE_CHANGED
                 || windowEvent.window.type == SDL_WINDOWEVENT_RESIZED)
             {
-                SDL_LogWarn (SDL_LOG_CATEGORY_APPLICATION, "fbxv: Window size changed.");
+                SDL_LogWarn (SDL_LOG_CATEGORY_APPLICATION, "apemode: Window size changed.");
                 InOutState.bSizeChanged = true;
             }
             else if (windowEvent.window.type == SDL_WINDOWEVENT_FOCUS_GAINED)
             {
-                SDL_LogWarn (SDL_LOG_CATEGORY_APPLICATION, "fbxv: Window gained focus.");
+                SDL_LogWarn (SDL_LOG_CATEGORY_APPLICATION, "apemode: Window gained focus.");
                 InOutState.bFocused = true;
             }
             else if (windowEvent.window.type == SDL_WINDOWEVENT_FOCUS_LOST)
             {
-                SDL_LogWarn (SDL_LOG_CATEGORY_APPLICATION, "fbxv: Window lost focus.");
+                SDL_LogWarn (SDL_LOG_CATEGORY_APPLICATION, "apemode: Window lost focus.");
                 InOutState.bFocused = false;
             }
         }
@@ -499,6 +499,6 @@ void fbxv::InputManager::Update(Input & InOutState, float const DeltaTime)
     SDL_FlushEvents (SDL_FIRSTEVENT, SDL_LASTEVENT);
 }
 
-void fbxv::InputManager::Release()
+void apemode::InputManager::Release()
 {
 }

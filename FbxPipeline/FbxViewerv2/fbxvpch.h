@@ -19,7 +19,6 @@
 
 #include <SDL.h>
 #include <SDL_syswm.h>
-#include <SDL_opengl.h>
 
 #include <stdio.h>
 

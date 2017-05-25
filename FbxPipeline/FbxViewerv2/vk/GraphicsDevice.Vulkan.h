@@ -2,7 +2,7 @@
 
 #include <ResultHandle.Vulkan.h>
 
-namespace Core
+namespace apemode
 {
     class Swapchain;
     class CommandQueue;
@@ -12,10 +12,10 @@ namespace Core
     class PipelineStateManager;
     class ShaderManager;
     class FramebufferManager;
-    class GraphicsHeterogeneousMultiadapterEcosystem;
+    class GraphicsEcosystem;
 
-    class _Graphics_ecosystem_dll_api GraphicsDevice : public Aux::ScalableAllocPolicy,
-                                                       public Aux::NoCopyAssignPolicy
+    class _Graphics_ecosystem_dll_api GraphicsDevice : public apemode::ScalableAllocPolicy,
+                                                       public apemode::NoCopyAssignPolicy
     {
     public:
         static std::unique_ptr<GraphicsDevice> MakeNewUnique ();
@@ -35,7 +35,7 @@ namespace Core
         bool     Await ();
         uint32_t GetQueueFamilyCount ();
         uint32_t GetQueueCountInQueueFamily (uint32_t QueueFamilyId);
-        GraphicsHeterogeneousMultiadapterEcosystem & GetGraphicsEcosystem ();
+        GraphicsEcosystem & GetGraphicsEcosystem ();
 
         ShaderManager &        GetDefaultShaderManager();
         RenderPassManager &    GetDefaultRenderPassManager();
@@ -50,13 +50,13 @@ namespace Core
         friend Swapchain;
         friend ResourceReference;
         friend PrivateContent;
-        friend GraphicsHeterogeneousMultiadapterEcosystem;
+        friend GraphicsEcosystem;
 
     private:
         operator PrivateContent &();
 
         PrivateContent *                             pContent;
-        GraphicsHeterogeneousMultiadapterEcosystem * pGraphicsEcosystem;
+        GraphicsEcosystem * pGraphicsEcosystem;
     };
 
 

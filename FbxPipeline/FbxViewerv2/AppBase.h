@@ -1,9 +1,9 @@
 #pragma once
 
-namespace fbxv {
+namespace apemode {
     class Input;
     class AppContent;
-    class AppSurfaceBase;
+    class IAppSurface;
 
     class AppBase {
         AppContent* pAppContent;
@@ -15,8 +15,8 @@ namespace fbxv {
         virtual ~AppBase( );
 
         virtual bool Initialize( int Args, char* ppArgs[] );
-        virtual AppSurfaceBase* CreateAppSurface( );
-        AppSurfaceBase*         GetSurface( );
+        virtual IAppSurface* CreateAppSurface( );
+        IAppSurface*         GetSurface( );
 
         virtual void OnFrameMove( );
         virtual void Update( float DeltaSecs, Input const& InputState );

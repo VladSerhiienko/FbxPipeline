@@ -22,10 +22,11 @@
     <ClInclude Include="alloca.h" />
     <ClInclude Include="App.h" />
     <ClInclude Include="AppBase.h" />
-    <ClInclude Include="AppSurface.h" />
-    <ClInclude Include="AppSurfaceBase.h" />
+    <ClInclude Include="AppSurfaceSdlGL.h" />
+    <ClInclude Include="AppSurfaceSdlVk.h" />
     <ClInclude Include="CityHash.h" />
     <ClInclude Include="fbxvpch.h" />
+    <ClInclude Include="IAppSurface.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="NuklearSdl.h" />
     <ClInclude Include="Scene.h" />
@@ -64,8 +65,8 @@
     <ClCompile Include="App.cpp" />
     <ClCompile Include="AppBase.cpp" />
     <ClCompile Include="AppMainSdl.cpp" />
-    <ClCompile Include="AppSurfaceSdlBase.cpp" />
     <ClCompile Include="AppSurfaceSdlGL.cpp" />
+    <ClCompile Include="AppSurfaceSdlVk.cpp" />
     <ClCompile Include="CityHash.cpp" />
     <ClCompile Include="fbxvpch.cpp" />
     <ClCompile Include="InputSdl.cpp" />

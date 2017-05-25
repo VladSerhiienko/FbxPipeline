@@ -8,17 +8,17 @@
 /// CommandList
 /// -------------------------------------------------------------------------------------------------------------------
 
-std::unique_ptr<Core::CommandList> Core::CommandList::MakeNewUnique ()
+std::unique_ptr<apemode::CommandList> apemode::CommandList::MakeNewUnique ()
 {
-    return std::unique_ptr<Core::CommandList> (new CommandList ());
+    return std::unique_ptr<apemode::CommandList> (new CommandList ());
 }
 
-std::shared_ptr<Core::CommandList> Core::CommandList::MakeNewLinked ()
+std::shared_ptr<apemode::CommandList> apemode::CommandList::MakeNewLinked ()
 {
-    return std::shared_ptr<Core::CommandList> (new CommandList ());
+    return std::shared_ptr<apemode::CommandList> (new CommandList ());
 }
 
-Core::CommandList::CommandList ()
+apemode::CommandList::CommandList ()
     : eType (kCommandListType_Invalid)
     , pRenderPass (nullptr)
     , pFramebuffer (nullptr)
@@ -32,7 +32,7 @@ Core::CommandList::CommandList ()
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-bool Core::CommandList::RecreateResourcesFor (GraphicsDevice & GraphicsNode,
+bool apemode::CommandList::RecreateResourcesFor (GraphicsDevice & GraphicsNode,
                                               uint32_t         QueueFamilyId,
                                               bool             bIsDirect,
                                               bool             bIsTransient)
@@ -79,7 +79,7 @@ bool Core::CommandList::RecreateResourcesFor (GraphicsDevice & GraphicsNode,
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-bool Core::CommandList::Reset (bool bReleaseResources)
+bool apemode::CommandList::Reset (bool bReleaseResources)
 {
     const VkCommandBufferResetFlags ResetFlags = bReleaseResources 
         ? VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT 
@@ -94,7 +94,7 @@ static uint64_t ComposeKey (VkPipelineStageFlags SrcFlags, VkPipelineStageFlags 
     return static_cast<uint64_t> (SrcFlags) << 32 | static_cast<uint64_t> (DstFlags);
 }
 
-void Core::CommandList::InsertBarrier (VkPipelineStageFlags    SrcFlags,
+void apemode::CommandList::InsertBarrier (VkPipelineStageFlags    SrcFlags,
                                        VkPipelineStageFlags    DstFlags,
                                        VkMemoryBarrier const & Barrier)
 {
@@ -104,7 +104,7 @@ void Core::CommandList::InsertBarrier (VkPipelineStageFlags    SrcFlags,
     StagedBarriers.insert (std::make_pair<> (CmdBarrier.StageHash, CmdBarrier));
 }
 
-void Core::CommandList::InsertBarrier (VkPipelineStageFlags         SrcFlags,
+void apemode::CommandList::InsertBarrier (VkPipelineStageFlags         SrcFlags,
                                        VkPipelineStageFlags         DstFlags,
                                        VkImageMemoryBarrier const & Barrier)
 {
@@ -114,7 +114,7 @@ void Core::CommandList::InsertBarrier (VkPipelineStageFlags         SrcFlags,
     StagedBarriers.insert (std::make_pair<> (CmdBarrier.StageHash, CmdBarrier));
 }
 
-void Core::CommandList::InsertBarrier (VkPipelineStageFlags          SrcFlags,
+void apemode::CommandList::InsertBarrier (VkPipelineStageFlags          SrcFlags,
                                        VkPipelineStageFlags          DstFlags,
                                        VkBufferMemoryBarrier const & Barrier)
 {
@@ -124,7 +124,7 @@ void Core::CommandList::InsertBarrier (VkPipelineStageFlags          SrcFlags,
     StagedBarriers.insert (std::make_pair<> (CmdBarrier.StageHash, CmdBarrier));
 }
 
-void Core::CommandList::FlushStagedBarriers()
+void apemode::CommandList::FlushStagedBarriers()
 {
     Barriers.reserve (BarrierCount);
     ImgBarriers.reserve (ImgBarrierCount);
@@ -189,12 +189,12 @@ void Core::CommandList::FlushStagedBarriers()
     StagedBarriers.clear ();
 }
 
-Core::CommandList::operator VkCommandBuffer () const
+apemode::CommandList::operator VkCommandBuffer () const
 {
     return hCmdList;
 }
 
-bool Core::CommandList::IsDirect () const
+bool apemode::CommandList::IsDirect () const
 {
     return eType == kCommandListType_Direct;
 }
@@ -203,13 +203,13 @@ bool Core::CommandList::IsDirect () const
 /// CommandQueue
 /// -------------------------------------------------------------------------------------------------------------------
 
-Core::CommandQueue::CommandQueue () : pGraphicsNode (nullptr), QueueFamilyId (0), QueueId (0)
+apemode::CommandQueue::CommandQueue () : pGraphicsNode (nullptr), QueueFamilyId (0), QueueId (0)
 {
 }
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-Core::CommandQueue::~CommandQueue ()
+apemode::CommandQueue::~CommandQueue ()
 {
     if (pGraphicsNode != nullptr)
     {
@@ -219,7 +219,7 @@ Core::CommandQueue::~CommandQueue ()
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-bool Core::CommandQueue::RecreateResourcesFor (GraphicsDevice & InGraphicsNode,
+bool apemode::CommandQueue::RecreateResourcesFor (GraphicsDevice & InGraphicsNode,
                                                uint32_t         InQueueFamilyId,
                                                uint32_t         InQueueId)
 {
@@ -242,7 +242,7 @@ bool Core::CommandQueue::RecreateResourcesFor (GraphicsDevice & InGraphicsNode,
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-bool Core::CommandQueue::Await ()
+bool apemode::CommandQueue::Await ()
 {
     _Game_engine_Assert(hCmdQueue.IsNotNull(), "Not initialized.");
 
@@ -252,7 +252,7 @@ bool Core::CommandQueue::Await ()
     return eQueueWaitIdleOk.Succeeded ();
 }
 
-bool Core::CommandQueue::Execute (CommandList & CmdList,
+bool apemode::CommandQueue::Execute (CommandList & CmdList,
                                   VkSemaphore * hWaitSemaphores,
                                   uint32_t      WaitSemaphoreCount,
                                   VkFence       hFence)
@@ -274,7 +274,7 @@ bool Core::CommandQueue::Execute (CommandList & CmdList,
     return false;
 }
 
-bool Core::CommandQueue::Execute (CommandList & CmdList, VkFence Fence)
+bool apemode::CommandQueue::Execute (CommandList & CmdList, VkFence Fence)
 {
     _Game_engine_Assert (hCmdQueue.IsNotNull (), "Not initialized.");
     if (_Game_engine_Likely (hCmdQueue.IsNotNull ()))
@@ -293,7 +293,7 @@ bool Core::CommandQueue::Execute (CommandList & CmdList, VkFence Fence)
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-Core::CommandQueue::operator VkQueue () const
+apemode::CommandQueue::operator VkQueue () const
 {
     _Game_engine_Assert (hCmdQueue.IsNotNull (), "Not initialized.");
     return hCmdQueue;
@@ -301,7 +301,7 @@ Core::CommandQueue::operator VkQueue () const
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-bool Core::CommandQueue::Execute (CommandList * CmdLists, uint32_t CmdListCount, VkFence Fence)
+bool apemode::CommandQueue::Execute (CommandList * CmdLists, uint32_t CmdListCount, VkFence Fence)
 {
     _Game_engine_Assert (hCmdQueue.IsNotNull (), "Not initialized.");
     if (_Game_engine_Likely (hCmdQueue.IsNotNull ()))
@@ -316,7 +316,7 @@ bool Core::CommandQueue::Execute (CommandList * CmdLists, uint32_t CmdListCount,
             [&](CommandList const & CmdList) { return static_cast<VkCommandBuffer> (CmdList); });
 
         TInfoStruct<VkSubmitInfo> SubmitDesc;
-        Aux::AliasStructs (CmdListHandles,
+        apemode::AliasStructs (CmdListHandles,
                            SubmitDesc->pCommandBuffers,
                            SubmitDesc->commandBufferCount);
 
@@ -332,13 +332,13 @@ bool Core::CommandQueue::Execute (CommandList * CmdLists, uint32_t CmdListCount,
 /// CommandQueueReserver Key
 /// -------------------------------------------------------------------------------------------------------------------
 
-Core::CommandQueueReserver::Key::Key() : GraphicsNodeHash(0), QueueHash(0)
+apemode::CommandQueueReserver::Key::Key() : GraphicsNodeHash(0), QueueHash(0)
 {
 }
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-Core::CommandQueueReserver::Key Core::CommandQueueReserver::Key::NewKeyFor(
+apemode::CommandQueueReserver::Key apemode::CommandQueueReserver::Key::NewKeyFor(
     GraphicsDevice const & GraphicsNode, uint32_t InQueueFamilyId, uint32_t InQueueId)
 {
     Key NewKey;
@@ -382,15 +382,15 @@ struct UInt64Hasher<4>
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-size_t Core::CommandQueueReserver::Key::Hasher::operator() (Key const & Key) const
+size_t apemode::CommandQueueReserver::Key::Hasher::operator() (Key const & Key) const
 {
-    const auto KeyHash = Aux::CityHash128to64 (Key.QueueHash, Key.GraphicsNodeHash);
+    const auto KeyHash = apemode::CityHash128to64 (Key.QueueHash, Key.GraphicsNodeHash);
     return UInt64Hasher<>::Hash (KeyHash);
 }
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-bool Core::CommandQueueReserver::Key::CmpOpEqual::operator() (Key const & Key0,
+bool apemode::CommandQueueReserver::Key::CmpOpEqual::operator() (Key const & Key0,
                                                               Key const & Key1) const
 {
     return Key0.QueueHash == Key1.QueueHash && Key0.GraphicsNodeHash == Key1.GraphicsNodeHash;
@@ -398,7 +398,7 @@ bool Core::CommandQueueReserver::Key::CmpOpEqual::operator() (Key const & Key0,
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-bool Core::CommandQueueReserver::Key::CmpOpLess::operator() (Key const & Key0,
+bool apemode::CommandQueueReserver::Key::CmpOpLess::operator() (Key const & Key0,
                                                              Key const & Key1) const
 {
     return Key0.QueueHash < Key1.QueueHash && Key0.GraphicsNodeHash < Key1.GraphicsNodeHash;
@@ -408,21 +408,21 @@ bool Core::CommandQueueReserver::Key::CmpOpLess::operator() (Key const & Key0,
 /// CommandQueueReserver Reservation
 /// -------------------------------------------------------------------------------------------------------------------
 
-Core::CommandQueueReserver::Reservation::Reservation ()
+apemode::CommandQueueReserver::Reservation::Reservation ()
     : pQueue (nullptr), QueueId (0), QueueFamilyId (0)
 {
 }
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-bool Core::CommandQueueReserver::Reservation::IsValid () const
+bool apemode::CommandQueueReserver::Reservation::IsValid () const
 {
     return pQueue != nullptr;
 }
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-void Core::CommandQueueReserver::Reservation::Release ()
+void apemode::CommandQueueReserver::Reservation::Release ()
 {
     pQueue = nullptr;
 }
@@ -431,13 +431,13 @@ void Core::CommandQueueReserver::Reservation::Release ()
 /// CommandQueueReserver
 /// -------------------------------------------------------------------------------------------------------------------
 
-Core::CommandQueueReserver::CommandQueueReserver ()
+apemode::CommandQueueReserver::CommandQueueReserver ()
 {
 }
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-Core::CommandQueueReserver & Core::CommandQueueReserver::Get ()
+apemode::CommandQueueReserver & apemode::CommandQueueReserver::Get ()
 {
     static CommandQueueReserver Reserver;
     return Reserver;
@@ -445,7 +445,7 @@ Core::CommandQueueReserver & Core::CommandQueueReserver::Get ()
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-bool Core::CommandQueueReserver::TryReserve (GraphicsDevice const & GraphicsNode,
+bool apemode::CommandQueueReserver::TryReserve (GraphicsDevice const & GraphicsNode,
                                              uint32_t               QueueFamilyId,
                                              uint32_t               QueueId)
 {
@@ -458,7 +458,7 @@ bool Core::CommandQueueReserver::TryReserve (GraphicsDevice const & GraphicsNode
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-void Core::CommandQueueReserver::Unreserve (GraphicsDevice const & GraphicsNode,
+void apemode::CommandQueueReserver::Unreserve (GraphicsDevice const & GraphicsNode,
                                             uint32_t               QueueFamilyId,
                                             uint32_t               QueueId)
 {
@@ -470,12 +470,12 @@ void Core::CommandQueueReserver::Unreserve (GraphicsDevice const & GraphicsNode,
 /// CommandList BeginEndScope
 /// -------------------------------------------------------------------------------------------------------------------
 
-Core::CommandList::BeginEndScope::BeginEndScope (CommandList & CmdList, bool bOneTimeSubmit)
+apemode::CommandList::BeginEndScope::BeginEndScope (CommandList & CmdList, bool bOneTimeSubmit)
     : BeginEndScope (CmdList, TInfoStruct<VkCommandBufferInheritanceInfo> (), bOneTimeSubmit)
 {
 }
 
-Core::CommandList::BeginEndScope::BeginEndScope (CommandList &                          CmdList,
+apemode::CommandList::BeginEndScope::BeginEndScope (CommandList &                          CmdList,
                                                  VkCommandBufferInheritanceInfo const & CmdInherit,
                                                  bool bOneTimeSubmit)
     : AssociatedCmdList (CmdList)
@@ -492,7 +492,7 @@ Core::CommandList::BeginEndScope::BeginEndScope (CommandList &                  
 }
 
 
-Core::CommandList::BeginEndScope::~BeginEndScope ()
+apemode::CommandList::BeginEndScope::~BeginEndScope ()
 {
     AssociatedCmdList.bIsInBeginEndScope = false;
     vkEndCommandBuffer (AssociatedCmdList);
@@ -502,21 +502,21 @@ Core::CommandList::BeginEndScope::~BeginEndScope ()
 /// CommandList StagedBarrier
 /// -------------------------------------------------------------------------------------------------------------------
 
-Core::CommandList::StagedBarrier::StagedBarrier (VkPipelineStageFlags    SrcStage,
+apemode::CommandList::StagedBarrier::StagedBarrier (VkPipelineStageFlags    SrcStage,
                                                  VkPipelineStageFlags    DstStage,
                                                  VkMemoryBarrier const & Barrier)
     : SrcStage (SrcStage), DstStage (DstStage), Barrier (Barrier)
 {
 }
 
-Core::CommandList::StagedBarrier::StagedBarrier (VkPipelineStageFlags         SrcStage,
+apemode::CommandList::StagedBarrier::StagedBarrier (VkPipelineStageFlags         SrcStage,
                                                  VkPipelineStageFlags         DstStage,
                                                  VkImageMemoryBarrier const & Barrier)
     : SrcStage (SrcStage), DstStage (DstStage), ImgBarrier (Barrier)
 {
 }
 
-Core::CommandList::StagedBarrier::StagedBarrier (VkPipelineStageFlags          SrcStage,
+apemode::CommandList::StagedBarrier::StagedBarrier (VkPipelineStageFlags          SrcStage,
                                                  VkPipelineStageFlags          DstStage,
                                                  VkBufferMemoryBarrier const & Barrier)
     : SrcStage (SrcStage), DstStage (DstStage), BufferBarrier (Barrier)

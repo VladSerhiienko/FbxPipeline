@@ -12,7 +12,7 @@
 /// PipelineStateDescription
 /// -------------------------------------------------------------------------------------------------------------------
 
-void Core::PipelineStateDescription::Reset()
+void apemode::PipelineStateDescription::Reset()
 {
     DynamicState.ZeroMemory();
     InputAssemblyState.ZeroMemory();
@@ -33,10 +33,10 @@ void Core::PipelineStateDescription::Reset()
     SampleMask = 0;
 
     for (auto & ShaderSpecialization : ShaderSpecializations)
-        Aux::ZeroMemory(ShaderSpecialization);
+        apemode::ZeroMemory(ShaderSpecialization);
 
     for (auto & ColorBlendAttachmentState : ColorBlendAttachmentStates)
-        Aux::ZeroMemory(ColorBlendAttachmentState);
+        apemode::ZeroMemory(ColorBlendAttachmentState);
 
     Compute.ZeroMemory();
     Graphics.ZeroMemory();
@@ -85,7 +85,7 @@ void Core::PipelineStateDescription::Reset()
     Graphics->pStages = reinterpret_cast<VkPipelineShaderStageCreateInfo *>(ShaderStages);
 }
 
-bool Core::PipelineStateDescription::IsDynamicStateEnabled(VkDynamicState eDynamicState) const
+bool apemode::PipelineStateDescription::IsDynamicStateEnabled(VkDynamicState eDynamicState) const
 {
     for (uint32_t Idx = 0; Idx < DynamicState->dynamicStateCount; Idx++)
         if (EnabledDynamicStates[Idx] == eDynamicState)
@@ -94,9 +94,9 @@ bool Core::PipelineStateDescription::IsDynamicStateEnabled(VkDynamicState eDynam
     return false;
 }
 
-uint64_t Core::PipelineStateDescription::UpdateHash()
+uint64_t apemode::PipelineStateDescription::UpdateHash()
 {
-    Aux::CityHash64Wrapper HashBuilder;
+    apemode::CityHash64Wrapper HashBuilder;
 
     if (bIsGraphics)
     {
@@ -239,7 +239,7 @@ uint64_t Core::PipelineStateDescription::UpdateHash()
 /// PipelineState
 /// -------------------------------------------------------------------------------------------------------------------
 
-Core::PipelineState::PipelineState ()
+apemode::PipelineState::PipelineState ()
     : pRenderPass (nullptr)
     , pRootSignature (nullptr)
     , pGraphicsNode (nullptr)
@@ -247,21 +247,21 @@ Core::PipelineState::PipelineState ()
 {
 }
 
-Core::PipelineState::~PipelineState ()
+apemode::PipelineState::~PipelineState ()
 {
 }
 
-void Core::PipelineState::BindTo (Core::CommandList & CmdList)
+void apemode::PipelineState::BindTo (apemode::CommandList & CmdList)
 {
     vkCmdBindPipeline (CmdList, eBindPoint, hPipeline);
 }
 
-Core::PipelineState::operator VkPipeline () const
+apemode::PipelineState::operator VkPipeline () const
 {
     return hPipeline;
 }
 
-Core::PipelineState::operator VkPipelineCache () const
+apemode::PipelineState::operator VkPipelineCache () const
 {
     return hPipelineCache;
 }
@@ -270,22 +270,22 @@ Core::PipelineState::operator VkPipelineCache () const
 /// PipelineStateBuilder
 /// -------------------------------------------------------------------------------------------------------------------
 
-Core::PipelineStateBuilder::PipelineStateBuilder()
+apemode::PipelineStateBuilder::PipelineStateBuilder()
     : InputEditor(*this)
 {
     Reset();
 }
 
-Core::PipelineStateBuilder::~PipelineStateBuilder()
+apemode::PipelineStateBuilder::~PipelineStateBuilder()
 {
 }
 
-void Core::PipelineStateBuilder::Reset()
+void apemode::PipelineStateBuilder::Reset()
 {
     TemporaryDesc.Reset();
 }
 
-void Core::PipelineStateBuilder::SetRenderPass (Core::RenderPass const & RenderPass,
+void apemode::PipelineStateBuilder::SetRenderPass (apemode::RenderPass const & RenderPass,
                                                 uint32_t                 SubpassId)
 {
     TemporaryDesc.pRenderPass          = &RenderPass;
@@ -294,22 +294,22 @@ void Core::PipelineStateBuilder::SetRenderPass (Core::RenderPass const & RenderP
     TemporaryDesc.Graphics->renderPass = RenderPass;
 }
 
-void Core::PipelineStateBuilder::SetRootSignature (Core::RootSignature const & RootSignature)
+void apemode::PipelineStateBuilder::SetRootSignature (apemode::RootSignature const & RootSignature)
 {
     TemporaryDesc.pRootSignature = &RootSignature;
 
     TemporaryDesc.Graphics->layout = RootSignature;
 }
 
-Core::PipelineStateBuilder::InputLayoutBuilder &
-Core::PipelineStateBuilder::EditInputLayout(uint32_t InputElementCount,
+apemode::PipelineStateBuilder::InputLayoutBuilder &
+apemode::PipelineStateBuilder::EditInputLayout(uint32_t InputElementCount,
                                             uint32_t TotalInputAttributeCount)
 {
     InputEditor.Reserve(InputElementCount, TotalInputAttributeCount);
     return InputEditor;
 }
 
-void Core::PipelineStateBuilder::ClearInputLayout (uint32_t InputElementCount,
+void apemode::PipelineStateBuilder::ClearInputLayout (uint32_t InputElementCount,
                                                    uint32_t TotalInputAttributeCount)
 {
     TemporaryDesc.InputBindings.clear ();
@@ -318,14 +318,14 @@ void Core::PipelineStateBuilder::ClearInputLayout (uint32_t InputElementCount,
     TemporaryDesc.InputAttributes.reserve (TotalInputAttributeCount);
 }
 
-void Core::PipelineStateBuilder::AddInputElement (
+void apemode::PipelineStateBuilder::AddInputElement (
     uint32_t                                  VertexStride,
     VkVertexInputRate                         InputRate,
     VkVertexInputAttributeDescription const * InputAttributes,
     uint32_t                                  InputAttributeCount)
 {
     const uint32_t BindingIdx = _Get_collection_length_u (TemporaryDesc.InputBindings);
-    auto & Binding = Aux::PushBackAndGet(TemporaryDesc.InputBindings);
+    auto & Binding = apemode::PushBackAndGet(TemporaryDesc.InputBindings);
 
     Binding           = TInfoStruct<VkVertexInputBindingDescription> ();
     Binding.stride    = VertexStride;
@@ -334,28 +334,28 @@ void Core::PipelineStateBuilder::AddInputElement (
 
     for (uint32_t AttrIdx = 0; AttrIdx < InputAttributeCount; ++AttrIdx)
     {
-        auto & InputAttribute   = Aux::PushBackAndGet(TemporaryDesc.InputAttributes);
+        auto & InputAttribute   = apemode::PushBackAndGet(TemporaryDesc.InputAttributes);
         InputAttribute.format   = InputAttributes[ AttrIdx ].format;
         InputAttribute.location = InputAttributes[ AttrIdx ].location;
         InputAttribute.offset   = InputAttributes[ AttrIdx ].offset;
         InputAttribute.binding  = BindingIdx;
     }
 
-    Aux::AliasStructs (TemporaryDesc.InputBindings,
+    apemode::AliasStructs (TemporaryDesc.InputBindings,
                        TemporaryDesc.VertexInputState->pVertexBindingDescriptions,
                        TemporaryDesc.VertexInputState->vertexBindingDescriptionCount);
 
-    Aux::AliasStructs (TemporaryDesc.InputAttributes,
+    apemode::AliasStructs (TemporaryDesc.InputAttributes,
                        TemporaryDesc.VertexInputState->pVertexAttributeDescriptions,
                        TemporaryDesc.VertexInputState->vertexAttributeDescriptionCount);
 }
 
-Core::PipelineStateDescription & Core::PipelineStateBuilder::GetDesc ()
+apemode::PipelineStateDescription & apemode::PipelineStateBuilder::GetDesc ()
 {
     return TemporaryDesc;
 }
 
-void Core::PipelineStateBuilder::SetBlendContants (float r, float g, float b, float a)
+void apemode::PipelineStateBuilder::SetBlendContants (float r, float g, float b, float a)
 {
     TemporaryDesc.ColorBlendState->blendConstants[ 0 ] = r;
     TemporaryDesc.ColorBlendState->blendConstants[ 1 ] = g;
@@ -365,23 +365,23 @@ void Core::PipelineStateBuilder::SetBlendContants (float r, float g, float b, fl
     DisableDynamicState (VK_DYNAMIC_STATE_BLEND_CONSTANTS);
 }
 
-void Core::PipelineStateBuilder::ResetBlendContants ()
+void apemode::PipelineStateBuilder::ResetBlendContants ()
 {
     EnableDynamicState (VK_DYNAMIC_STATE_BLEND_CONSTANTS);
 }
 
-void Core::PipelineStateBuilder::SetLineWidth (float LineWidth)
+void apemode::PipelineStateBuilder::SetLineWidth (float LineWidth)
 {
     TemporaryDesc.RasterizationState->lineWidth = LineWidth;
     DisableDynamicState (VK_DYNAMIC_STATE_LINE_WIDTH);
 }
 
-void Core::PipelineStateBuilder::ResetLineWidth ()
+void apemode::PipelineStateBuilder::ResetLineWidth ()
 {
     EnableDynamicState (VK_DYNAMIC_STATE_LINE_WIDTH);
 }
 
-void Core::PipelineStateBuilder::SetDepthBias (float DepthBiasConstantFactor,
+void apemode::PipelineStateBuilder::SetDepthBias (float DepthBiasConstantFactor,
                                                float DepthBiasClamp,
                                                float DepthBiasSlopeFactor)
 {
@@ -392,12 +392,12 @@ void Core::PipelineStateBuilder::SetDepthBias (float DepthBiasConstantFactor,
     DisableDynamicState(VK_DYNAMIC_STATE_DEPTH_BIAS);
 }
 
-void Core::PipelineStateBuilder::ResetDepthBias ()
+void apemode::PipelineStateBuilder::ResetDepthBias ()
 {
     EnableDynamicState (VK_DYNAMIC_STATE_DEPTH_BIAS);
 }
 
-void Core::PipelineStateBuilder::SetDepthBounds (float MinDepthBounds,
+void apemode::PipelineStateBuilder::SetDepthBounds (float MinDepthBounds,
                                                  float MaxDepthBounds,
                                                  bool  bEnableDepthBoundsTest)
 {
@@ -408,12 +408,12 @@ void Core::PipelineStateBuilder::SetDepthBounds (float MinDepthBounds,
     DisableDynamicState (VK_DYNAMIC_STATE_DEPTH_BOUNDS);
 }
 
-void Core::PipelineStateBuilder::ResetDepthBounds ()
+void apemode::PipelineStateBuilder::ResetDepthBounds ()
 {
     EnableDynamicState (VK_DYNAMIC_STATE_DEPTH_BOUNDS);
 }
 
-void Core::PipelineStateBuilder::SetStencilCompareMask (uint32_t FrontFaceStencilCompareMask,
+void apemode::PipelineStateBuilder::SetStencilCompareMask (uint32_t FrontFaceStencilCompareMask,
                                                         uint32_t BackFaceStencilCompareMask)
 {
     TemporaryDesc.DepthStencilState->front.compareMask = FrontFaceStencilCompareMask;
@@ -422,12 +422,12 @@ void Core::PipelineStateBuilder::SetStencilCompareMask (uint32_t FrontFaceStenci
     DisableDynamicState (VK_DYNAMIC_STATE_STENCIL_COMPARE_MASK);
 }
 
-void Core::PipelineStateBuilder::ResetStencilCompareMask ()
+void apemode::PipelineStateBuilder::ResetStencilCompareMask ()
 {
     EnableDynamicState (VK_DYNAMIC_STATE_STENCIL_COMPARE_MASK);
 }
 
-void Core::PipelineStateBuilder::SetStencilWriteMask (uint32_t FrontFaceStencilWriteMask,
+void apemode::PipelineStateBuilder::SetStencilWriteMask (uint32_t FrontFaceStencilWriteMask,
                                                       uint32_t BackFaceStencilWriteMask)
 {
     TemporaryDesc.DepthStencilState->front.writeMask = FrontFaceStencilWriteMask;
@@ -436,12 +436,12 @@ void Core::PipelineStateBuilder::SetStencilWriteMask (uint32_t FrontFaceStencilW
     DisableDynamicState (VK_DYNAMIC_STATE_STENCIL_WRITE_MASK);
 }
 
-void Core::PipelineStateBuilder::ResetStencilWriteMask()
+void apemode::PipelineStateBuilder::ResetStencilWriteMask()
 {
     EnableDynamicState (VK_DYNAMIC_STATE_STENCIL_WRITE_MASK);
 }
 
-void Core::PipelineStateBuilder::SetStencilReference (uint32_t FrontFaceStencilReference,
+void apemode::PipelineStateBuilder::SetStencilReference (uint32_t FrontFaceStencilReference,
                                                       uint32_t BackFaceStencilReference)
 {
     TemporaryDesc.DepthStencilState->front.reference = FrontFaceStencilReference;
@@ -450,12 +450,12 @@ void Core::PipelineStateBuilder::SetStencilReference (uint32_t FrontFaceStencilR
     DisableDynamicState (VK_DYNAMIC_STATE_STENCIL_REFERENCE);
 }
 
-void Core::PipelineStateBuilder::ResetStencilReference()
+void apemode::PipelineStateBuilder::ResetStencilReference()
 {
     EnableDynamicState (VK_DYNAMIC_STATE_STENCIL_REFERENCE);
 }
 
-void Core::PipelineStateBuilder::SetViewports(VkViewport const * pViewports, size_t ViewportCount)
+void apemode::PipelineStateBuilder::SetViewports(VkViewport const * pViewports, size_t ViewportCount)
 {
     TemporaryDesc.ViewportState->viewportCount = static_cast<uint32_t>(ViewportCount);
 
@@ -474,12 +474,12 @@ void Core::PipelineStateBuilder::SetViewports(VkViewport const * pViewports, siz
     }
 }
 
-void Core::PipelineStateBuilder::ResetViewports()
+void apemode::PipelineStateBuilder::ResetViewports()
 {
     SetViewports (nullptr, 0);
 }
 
-void Core::PipelineStateBuilder::SetScissorRects(VkRect2D const * pRects, size_t RectCount)
+void apemode::PipelineStateBuilder::SetScissorRects(VkRect2D const * pRects, size_t RectCount)
 {
     TemporaryDesc.ViewportState->scissorCount = static_cast<uint32_t>(RectCount);
 
@@ -497,12 +497,12 @@ void Core::PipelineStateBuilder::SetScissorRects(VkRect2D const * pRects, size_t
     }
 }
 
-void Core::PipelineStateBuilder::ResetScissorRects()
+void apemode::PipelineStateBuilder::ResetScissorRects()
 {
     SetScissorRects (nullptr, 0);
 }
 
-void Core::PipelineStateBuilder::EnableDynamicState(VkDynamicState eDynamicState)
+void apemode::PipelineStateBuilder::EnableDynamicState(VkDynamicState eDynamicState)
 {
     if (TemporaryDesc.IsDynamicStateEnabled (eDynamicState))
         return;
@@ -511,7 +511,7 @@ void Core::PipelineStateBuilder::EnableDynamicState(VkDynamicState eDynamicState
     TemporaryDesc.EnabledDynamicStates[ Counter ] = eDynamicState;
 }
 
-void Core::PipelineStateBuilder::DisableDynamicState (VkDynamicState eDynamicState)
+void apemode::PipelineStateBuilder::DisableDynamicState (VkDynamicState eDynamicState)
 {
     uint32_t       DynamicStateIdx   = 0;
     uint32_t const DynamicStateCount = TemporaryDesc.DynamicState->dynamicStateCount;
@@ -531,12 +531,12 @@ void Core::PipelineStateBuilder::DisableDynamicState (VkDynamicState eDynamicSta
         }
 }
 
-void Core::PipelineStateBuilder::SetShader (const char * pId,
+void apemode::PipelineStateBuilder::SetShader (const char * pId,
                                             const char * pMainFn,
                                             const void * pBytecode,
                                             size_t       BytecodeLength)
 {
-    Core::ShaderBytecode ShaderBytecode;
+    apemode::ShaderBytecode ShaderBytecode;
     ShaderBytecode.SetIdAndType (pId);
     ShaderBytecode.SetMainFn (pMainFn);
     ShaderBytecode.SetBytecode (pBytecode, BytecodeLength);
@@ -554,7 +554,7 @@ void Core::PipelineStateBuilder::SetShader (const char * pId,
 /// PipelineStateBuilder InputLayoutBuilder
 /// -------------------------------------------------------------------------------------------------------------------
 
-Core::PipelineStateBuilder::InputLayoutBuilder::InputLayoutBuilder (PipelineStateBuilder & Bilder)
+apemode::PipelineStateBuilder::InputLayoutBuilder::InputLayoutBuilder (PipelineStateBuilder & Bilder)
     : Bilder (Bilder)
     , pBinding (nullptr)
     , AttributeLocation (0)
@@ -563,22 +563,22 @@ Core::PipelineStateBuilder::InputLayoutBuilder::InputLayoutBuilder (PipelineStat
 {
 }
 
-Core::PipelineStateBuilder::InputLayoutBuilder &
-Core::PipelineStateBuilder::InputLayoutBuilder::Reserve (uint32_t InputElementCount,
+apemode::PipelineStateBuilder::InputLayoutBuilder &
+apemode::PipelineStateBuilder::InputLayoutBuilder::Reserve (uint32_t InputElementCount,
                                                          uint32_t TotalInputAttributeCount)
 {
     Bilder.ClearInputLayout (InputElementCount, TotalInputAttributeCount);
     return *this;
 }
 
-Core::PipelineStateBuilder::InputLayoutBuilder &
-Core::PipelineStateBuilder::InputLayoutBuilder::AddInputElement (uint32_t          Stride,
+apemode::PipelineStateBuilder::InputLayoutBuilder &
+apemode::PipelineStateBuilder::InputLayoutBuilder::AddInputElement (uint32_t          Stride,
                                                                  VkVertexInputRate InputRate,
                                                                  uint32_t          Count)
 {
     const auto BindingIdx = _Get_collection_length_u (Bilder.TemporaryDesc.InputBindings);
 
-    pBinding  = &Aux::PushBackAndGet(Bilder.TemporaryDesc.InputBindings);
+    pBinding  = &apemode::PushBackAndGet(Bilder.TemporaryDesc.InputBindings);
     *pBinding = TInfoStruct<VkVertexInputBindingDescription> ();
 
     pBinding->inputRate = InputRate;
@@ -592,10 +592,10 @@ Core::PipelineStateBuilder::InputLayoutBuilder::AddInputElement (uint32_t       
     return *this;
 }
 
-Core::PipelineStateBuilder::InputLayoutBuilder &
-Core::PipelineStateBuilder::InputLayoutBuilder::AddAttribute (VkFormat Fmt)
+apemode::PipelineStateBuilder::InputLayoutBuilder &
+apemode::PipelineStateBuilder::InputLayoutBuilder::AddAttribute (VkFormat Fmt)
 {
-    auto & Attribute   = Aux::PushBackAndGet(Bilder.TemporaryDesc.InputAttributes);
+    auto & Attribute   = apemode::PushBackAndGet(Bilder.TemporaryDesc.InputAttributes);
     Attribute.binding  = pBinding->binding;
     Attribute.location = AttributeLocation++;
     Attribute.offset   = AttributeOffset;
@@ -603,7 +603,7 @@ Core::PipelineStateBuilder::InputLayoutBuilder::AddAttribute (VkFormat Fmt)
     _Game_engine_Assert (AttributeLocation < AttributeCount,
                          "Too many attributes for the binding.");
 
-    const auto ElementByteWidth = Core::ResourceReference::GetElementSizeInBytes (Fmt);
+    const auto ElementByteWidth = apemode::ResourceReference::GetElementSizeInBytes (Fmt);
     _Game_engine_Assert (ElementByteWidth != 0, "Unsupported attribute type.");
 
     AttributeOffset += ElementByteWidth;
@@ -612,21 +612,21 @@ Core::PipelineStateBuilder::InputLayoutBuilder::AddAttribute (VkFormat Fmt)
     return *this;
 }
 
-void Core::PipelineStateBuilder::InputLayoutBuilder::ShrinkToFit ()
+void apemode::PipelineStateBuilder::InputLayoutBuilder::ShrinkToFit ()
 {
     Bilder.TemporaryDesc.InputBindings.shrink_to_fit ();
     Bilder.TemporaryDesc.InputAttributes.shrink_to_fit ();
 }
 
-void Core::PipelineStateBuilder::SetPrimitiveTopology (VkPrimitiveTopology Topology,
+void apemode::PipelineStateBuilder::SetPrimitiveTopology (VkPrimitiveTopology Topology,
                                                        bool                bEnableRestart)
 {
     TemporaryDesc.InputAssemblyState->topology               = Topology;
     TemporaryDesc.InputAssemblyState->primitiveRestartEnable = bEnableRestart;
 }
 
-Core::PipelineState const *
-Core::PipelineStateBuilder::RecreatePipelineState (Core::GraphicsDevice & GraphicsNode)
+apemode::PipelineState const *
+apemode::PipelineStateBuilder::RecreatePipelineState (apemode::GraphicsDevice & GraphicsNode)
 {
     if (_Game_engine_Likely (GraphicsNode.IsValid ()))
     {
@@ -644,12 +644,12 @@ Core::PipelineStateBuilder::RecreatePipelineState (Core::GraphicsDevice & Graphi
 /// PipelineStateManager PrivateContent
 /// -------------------------------------------------------------------------------------------------------------------
 
-struct Core::PipelineStateManager::PrivateContent : public Aux::ScalableAllocPolicy,
-                                                    public Aux::NoCopyAssignPolicy
+struct apemode::PipelineStateManager::PrivateContent : public apemode::ScalableAllocPolicy,
+                                                    public apemode::NoCopyAssignPolicy
 {
-    using PipelineStateHashMap = std::map<Aux::CityHash64Wrapper::ValueType,
+    using PipelineStateHashMap = std::map<apemode::CityHash64Wrapper::ValueType,
                                                    std::unique_ptr<PipelineState>,
-                                                   Aux::CityHash64Wrapper::CmpOpLess>;
+                                                   apemode::CityHash64Wrapper::CmpOpLess>;
 
     std::mutex            Lock;
     PipelineStateHashMap StoredPipelineStates;
@@ -659,17 +659,17 @@ struct Core::PipelineStateManager::PrivateContent : public Aux::ScalableAllocPol
 /// PipelineStateManager
 /// -------------------------------------------------------------------------------------------------------------------
 
-Core::PipelineStateManager::PipelineStateManager ()
+apemode::PipelineStateManager::PipelineStateManager ()
     : pContent (new PrivateContent ())
 {
 }
 
-Core::PipelineStateManager::~PipelineStateManager ()
+apemode::PipelineStateManager::~PipelineStateManager ()
 {
-    Aux::TSafeDeleteObj (pContent);
+    apemode::TSafeDeleteObj (pContent);
 }
 
-void Core::PipelineStateManager::AddNewPipelineStateObject (Core::PipelineState & PipelineState)
+void apemode::PipelineStateManager::AddNewPipelineStateObject (apemode::PipelineState & PipelineState)
 {
     std::lock_guard<std::mutex> LockGuard (pContent->Lock);
 
@@ -680,8 +680,8 @@ void Core::PipelineStateManager::AddNewPipelineStateObject (Core::PipelineState 
     pContent->StoredPipelineStates[ PipelineState.Hash ].reset (&PipelineState);
 }
 
-Core::PipelineState const *
-Core::PipelineStateManager::TryGetPipelineStateObjectByHash (uint64_t Hash)
+apemode::PipelineState const *
+apemode::PipelineStateManager::TryGetPipelineStateObjectByHash (uint64_t Hash)
 {
     std::lock_guard<std::mutex> LockGuard (pContent->Lock);
 
@@ -698,33 +698,33 @@ Core::PipelineStateManager::TryGetPipelineStateObjectByHash (uint64_t Hash)
 /// ShaderBytecode
 /// -------------------------------------------------------------------------------------------------------------------
 
-Core::ShaderType GetShaderType (const char * pId)
+apemode::ShaderType GetShaderType (const char * pId)
 {
     const auto Length = std::strlen (pId);
     auto       pType  = pId + Length - 4;
 
     if (!std::strcmp (pType, "vert"))
-        return Core::kShaderType_Vertex;
+        return apemode::kShaderType_Vertex;
     if (!std::strcmp (pType, "frag"))
-        return Core::kShaderType_Fragment;
+        return apemode::kShaderType_Fragment;
     if (!std::strcmp (pType, "geom"))
-        return Core::kShaderType_Geometry;
+        return apemode::kShaderType_Geometry;
     if (!std::strcmp (pType, "tesc"))
-        return Core::kShaderType_TesselationControl;
+        return apemode::kShaderType_TesselationControl;
     if (!std::strcmp (pType, "tese"))
-        return Core::kShaderType_TesselationEvaluation;
+        return apemode::kShaderType_TesselationEvaluation;
     if (!std::strcmp (pType, "comp"))
-        return Core::kShaderType_Compute;
+        return apemode::kShaderType_Compute;
 
-    return Core::kShaderType_Unknown;
+    return apemode::kShaderType_Unknown;
 }
 
-Core::ShaderBytecode::ShaderBytecode () : eType (kShaderType_Unknown), Hash (0)
+apemode::ShaderBytecode::ShaderBytecode () : eType (kShaderType_Unknown), Hash (0)
 {
 
 }
 
-Core::ShaderBytecode::ShaderBytecode (ShaderBytecode const & Other)
+apemode::ShaderBytecode::ShaderBytecode (ShaderBytecode const & Other)
     : Hash (Other.Hash)
     , Id (Other.Id)
     , eType (Other.eType)
@@ -733,7 +733,7 @@ Core::ShaderBytecode::ShaderBytecode (ShaderBytecode const & Other)
 {
 }
 
-Core::ShaderBytecode::ShaderBytecode (ShaderBytecode && Other)
+apemode::ShaderBytecode::ShaderBytecode (ShaderBytecode && Other)
     : Hash (Other.Hash)
     , Id (std::move (Other.Id))
     , eType (Other.eType)
@@ -742,7 +742,7 @@ Core::ShaderBytecode::ShaderBytecode (ShaderBytecode && Other)
 {
 }
 
-Core::ShaderBytecode & Core::ShaderBytecode::operator= (Core::ShaderBytecode const & Other)
+apemode::ShaderBytecode & apemode::ShaderBytecode::operator= (apemode::ShaderBytecode const & Other)
 {
     Hash     = Other.Hash;
     eType    = Other.eType;
@@ -753,7 +753,7 @@ Core::ShaderBytecode & Core::ShaderBytecode::operator= (Core::ShaderBytecode con
     return *this;
 }
 
-Core::ShaderBytecode & Core::ShaderBytecode::operator= (Core::ShaderBytecode && Other)
+apemode::ShaderBytecode & apemode::ShaderBytecode::operator= (apemode::ShaderBytecode && Other)
 {
     Hash     = Other.Hash;
     eType    = Other.eType;
@@ -764,21 +764,21 @@ Core::ShaderBytecode & Core::ShaderBytecode::operator= (Core::ShaderBytecode && 
     return *this;
 }
 
-void Core::ShaderBytecode::SetIdAndType (const char * pId)
+void apemode::ShaderBytecode::SetIdAndType (const char * pId)
 {
     Id    = pId;
     eType = GetShaderType (pId);
 }
 
-void Core::ShaderBytecode::SetMainFn (const char * pMainFn)
+void apemode::ShaderBytecode::SetMainFn (const char * pMainFn)
 {
     MainFn = pMainFn;
 }
 
-void Core::ShaderBytecode::SetBytecode (const void * pCode, size_t CodeSize)
+void apemode::ShaderBytecode::SetBytecode (const void * pCode, size_t CodeSize)
 {
     Bytecode.resize (CodeSize);
     std::memcpy (Bytecode.data (), pCode, CodeSize);
 
-    Hash = Aux::CityHash64 (reinterpret_cast<const char *> (pCode), CodeSize);
+    Hash = apemode::CityHash64 (reinterpret_cast<const char *> (pCode), CodeSize);
 }

@@ -53,12 +53,6 @@
     <ClInclude Include="AppBase.h">
       <Filter>Sources\App</Filter>
     </ClInclude>
-    <ClInclude Include="AppSurface.h">
-      <Filter>Sources\App</Filter>
-    </ClInclude>
-    <ClInclude Include="AppSurfaceBase.h">
-      <Filter>Sources\App</Filter>
-    </ClInclude>
     <ClInclude Include="Input.h">
       <Filter>Sources\Input</Filter>
     </ClInclude>
@@ -161,6 +155,15 @@
     <ClInclude Include="CityHash.h">
       <Filter>Sources\Aux</Filter>
     </ClInclude>
+    <ClInclude Include="AppSurfaceSdlVk.h">
+      <Filter>Sources\App</Filter>
+    </ClInclude>
+    <ClInclude Include="AppSurfaceSdlGL.h">
+      <Filter>Sources\App</Filter>
+    </ClInclude>
+    <ClInclude Include="IAppSurface.h">
+      <Filter>Sources\App</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="fbxvpch.cpp">
@@ -175,17 +178,11 @@
     <ClCompile Include="AppMainSdl.cpp">
       <Filter>Sources\App</Filter>
     </ClCompile>
-    <ClCompile Include="AppSurfaceSdlBase.cpp">
-      <Filter>Sources\App</Filter>
-    </ClCompile>
     <ClCompile Include="InputSdl.cpp">
       <Filter>Sources\Input</Filter>
     </ClCompile>
     <ClCompile Include="StopwatchSdl.cpp">
       <Filter>Sources\Time</Filter>
-    </ClCompile>
-    <ClCompile Include="AppSurfaceSdlGL.cpp">
-      <Filter>Sources\App</Filter>
     </ClCompile>
     <ClCompile Include="NuklearSdlGL.cpp">
       <Filter>Sources\UI</Filter>
@@ -252,6 +249,12 @@
     </ClCompile>
     <ClCompile Include="CityHash.cpp">
       <Filter>Sources\Aux</Filter>
+    </ClCompile>
+    <ClCompile Include="AppSurfaceSdlGL.cpp">
+      <Filter>Sources\App</Filter>
+    </ClCompile>
+    <ClCompile Include="AppSurfaceSdlVk.cpp">
+      <Filter>Sources\App</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

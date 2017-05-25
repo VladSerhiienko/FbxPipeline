@@ -3,7 +3,7 @@
 #include <GraphicsDevice.Vulkan.h>
 #include <TDispatchableHandle.Vulkan.h>
 
-namespace Core
+namespace apemode
 {
     template <>
     struct TDispatchableHandleDeleter<VkInstance> : public TDispatchableHandleHandleTypeResolver<VkInstance>

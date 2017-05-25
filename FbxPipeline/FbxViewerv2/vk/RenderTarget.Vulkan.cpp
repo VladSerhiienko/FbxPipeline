@@ -5,28 +5,28 @@
 /// ColorResourceView
 /// -------------------------------------------------------------------------------------------------------------------
 
-std::shared_ptr<Core::ColorResourceView> Core::ColorResourceView::MakeNewLinked ()
+std::shared_ptr<apemode::ColorResourceView> apemode::ColorResourceView::MakeNewLinked ()
 {
-    return std::shared_ptr<Core::ColorResourceView> (new ColorResourceView ());
+    return std::shared_ptr<apemode::ColorResourceView> (new ColorResourceView ());
 }
 
-std::unique_ptr<Core::ColorResourceView> Core::ColorResourceView::MakeNewUnique ()
+std::unique_ptr<apemode::ColorResourceView> apemode::ColorResourceView::MakeNewUnique ()
 {
-    return std::unique_ptr<Core::ColorResourceView>(new ColorResourceView());
+    return std::unique_ptr<apemode::ColorResourceView>(new ColorResourceView());
 }
 
-std::unique_ptr<Core::ColorResourceView> Core::ColorResourceView::MakeNullUnique ()
+std::unique_ptr<apemode::ColorResourceView> apemode::ColorResourceView::MakeNullUnique ()
 {
-    return std::unique_ptr<Core::ColorResourceView> (nullptr);
+    return std::unique_ptr<apemode::ColorResourceView> (nullptr);
 }
 
-Core::ColorResourceView::ColorResourceView () : bIsOwnedBySwapchain (false)
+apemode::ColorResourceView::ColorResourceView () : bIsOwnedBySwapchain (false)
 {
     Format   = VK_FORMAT_R8G8B8A8_UNORM;
     ViewType = kResourceViewType_RenderTarget;
 }
 
-Core::ColorResourceView::~ColorResourceView()
+apemode::ColorResourceView::~ColorResourceView()
 {
     if (bIsOwnedBySwapchain)
     {
@@ -37,7 +37,7 @@ Core::ColorResourceView::~ColorResourceView()
     _Aux_DebugTraceFunc;
 }
 
-bool Core::ColorResourceView::RecreateResourcesFor (GraphicsDevice & InGraphicsNode,
+bool apemode::ColorResourceView::RecreateResourcesFor (GraphicsDevice & InGraphicsNode,
                                                     VkFormat         InFmt,
                                                     VkImage          InImg)
 {

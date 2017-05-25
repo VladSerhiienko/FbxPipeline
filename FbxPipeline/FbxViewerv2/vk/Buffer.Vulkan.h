@@ -2,7 +2,7 @@
 
 #include <Resource.Vulkan.h>
 
-namespace Core
+namespace apemode
 {
     class _Graphics_ecosystem_dll_api BufferResourceView
         : public ResourceView
@@ -19,7 +19,7 @@ namespace Core
         uint32_t GetElementSizeInBytes () const;
         uint32_t GetTotalSizeInBytes () const;
 
-        void SetState (Core::CommandList &  CmdList,
+        void SetState (apemode::CommandList &  CmdList,
                        VkPipelineStageFlags PipelineStageFlags,
                        VkAccessFlags        AccessMask,
                        uint32_t             BufferSize,
@@ -30,7 +30,7 @@ namespace Core
         uint32_t                                ElementCount;
         uint32_t                                ElementStride;
         VkDescriptorBufferInfo                  BufferInfo;
-        Core::TDispatchableHandle<VkBufferView> BufferViewHandle;
-        Core::TDispatchableHandle<VkBuffer>     BufferHandle;
+        apemode::TDispatchableHandle<VkBufferView> BufferViewHandle;
+        apemode::TDispatchableHandle<VkBuffer>     BufferHandle;
     };
 }

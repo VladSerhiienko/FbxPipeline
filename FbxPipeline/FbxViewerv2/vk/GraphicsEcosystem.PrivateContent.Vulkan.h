@@ -1,18 +1,18 @@
 #pragma once
 
-struct Core::GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent
-    : public Aux::ScalableAllocPolicy
-    , public Aux::NoCopyAssignPolicy
+struct apemode::GraphicsEcosystem::PrivateContent
+    : public apemode::ScalableAllocPolicy
+    , public apemode::NoCopyAssignPolicy
 {
     struct APIVersion
-        : public Aux::ScalableAllocPolicy
+        : public apemode::ScalableAllocPolicy
     {
         uint32_t Major, Minor, Patch;
         APIVersion(bool bDump = true);
     };
 
     struct NativeLayerWrapper
-        : public Aux::ScalableAllocPolicy
+        : public apemode::ScalableAllocPolicy
     {
         typedef TInfoStruct<VkExtensionProperties>::Vector VkExtensionPropertiesVector;
 
@@ -26,7 +26,7 @@ struct Core::GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent
         void DumpExtensions() const;
     };
 
-    typedef GraphicsHeterogeneousMultiadapterEcosystem GraphicsEcosystem;
+    typedef GraphicsEcosystem GraphicsEcosystem;
 
     typedef std::vector<std::string>       String8Vector;
     typedef std::vector<NativeLayerWrapper> NativeLayerWrapperVector;

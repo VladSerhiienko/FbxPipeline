@@ -7,37 +7,37 @@
 /// BufferResourceView
 /// -------------------------------------------------------------------------------------------------------------------
 
-uint32_t Core::BufferResourceView::GetElementCount () const
+uint32_t apemode::BufferResourceView::GetElementCount () const
 {
     return ElementCount;
 }
 
-uint32_t Core::BufferResourceView::GetElementSizeInBytes () const
+uint32_t apemode::BufferResourceView::GetElementSizeInBytes () const
 {
     return ElementStride;
 }
 
-uint32_t Core::BufferResourceView::GetTotalSizeInBytes () const
+uint32_t apemode::BufferResourceView::GetTotalSizeInBytes () const
 {
     return ElementStride * ElementCount;
 }
 
-std::shared_ptr<Core::BufferResourceView> Core::BufferResourceView::MakeNewLinked ()
+std::shared_ptr<apemode::BufferResourceView> apemode::BufferResourceView::MakeNewLinked ()
 {
     return std::shared_ptr<BufferResourceView> (new BufferResourceView ());
 }
 
-std::unique_ptr<Core::BufferResourceView> Core::BufferResourceView::MakeNewUnique ()
+std::unique_ptr<apemode::BufferResourceView> apemode::BufferResourceView::MakeNewUnique ()
 {
     return std::unique_ptr<BufferResourceView> (new BufferResourceView ());
 }
 
-Core::BufferResourceView::BufferResourceView ()
+apemode::BufferResourceView::BufferResourceView ()
 {
     ViewType = kResourceViewType_Buffer;
 }
 
-void Core::BufferResourceView::SetState (Core::CommandList &  CmdList,
+void apemode::BufferResourceView::SetState (apemode::CommandList &  CmdList,
                                          VkPipelineStageFlags PipelineStageFlags,
                                          VkAccessFlags        AccessMask,
                                          uint32_t             BufferSize,
@@ -77,6 +77,6 @@ void Core::BufferResourceView::SetState (Core::CommandList &  CmdList,
     }
 }
 
-Core::BufferResourceView::~BufferResourceView ()
+apemode::BufferResourceView::~BufferResourceView ()
 {
 }

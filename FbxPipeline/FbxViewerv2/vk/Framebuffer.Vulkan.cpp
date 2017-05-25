@@ -9,14 +9,14 @@
 /// FramebufferManager PrivateContent
 /// -------------------------------------------------------------------------------------------------------------------
 
-struct Core::FramebufferManager::PrivateContent
-    : public Aux::ScalableAllocPolicy
-    , public Aux::NoCopyAssignPolicy
+struct apemode::FramebufferManager::PrivateContent
+    : public apemode::ScalableAllocPolicy
+    , public apemode::NoCopyAssignPolicy
 {
-    typedef Aux::TSafeDeleteObjOp<Framebuffer > FBObjDeleter;
+    typedef apemode::TSafeDeleteObjOp<Framebuffer > FBObjDeleter;
     typedef std::unique_ptr<Framebuffer, FBObjDeleter> FBObjUniquePtr;
-    typedef Aux::CityHash64Wrapper::ValueType  HashType;
-    typedef Aux::CityHash64Wrapper::CmpOpLess  HashOpLess;
+    typedef apemode::CityHash64Wrapper::ValueType  HashType;
+    typedef apemode::CityHash64Wrapper::CmpOpLess  HashOpLess;
     typedef std::map<HashType, FBObjUniquePtr, HashOpLess> FramebufferMap;
 
     //std::mutex      Lock;
@@ -28,19 +28,19 @@ struct Core::FramebufferManager::PrivateContent
 /// FramebufferManager
 /// -------------------------------------------------------------------------------------------------------------------
 
-Core::FramebufferManager::FramebufferManager()
+apemode::FramebufferManager::FramebufferManager()
     : Content(new PrivateContent())
 {
 }
 
-Core::FramebufferManager::~FramebufferManager()
+apemode::FramebufferManager::~FramebufferManager()
 {
-    Aux::TSafeDeleteObj(Content);
+    apemode::TSafeDeleteObj(Content);
 }
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-void Core::FramebufferManager::AddNewFramebuffer(Core::Framebuffer & Framebuffer)
+void apemode::FramebufferManager::AddNewFramebuffer(apemode::Framebuffer & Framebuffer)
 {
     //std::lock_guard<std::mutex> LockGuard(Content->Lock);
     std::lock_guard<std::mutex> LockGuard(Content->Lock);
@@ -53,7 +53,7 @@ void Core::FramebufferManager::AddNewFramebuffer(Core::Framebuffer & Framebuffer
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-Core::Framebuffer const * Core::FramebufferManager::TryGetFramebufferObjectByHash(uint64_t Hash)
+apemode::Framebuffer const * apemode::FramebufferManager::TryGetFramebufferObjectByHash(uint64_t Hash)
 {
     //std::lock_guard<std::mutex> LockGuard (Content->Lock);
     std::lock_guard<std::mutex> LockGuard(Content->Lock);
@@ -71,15 +71,15 @@ Core::Framebuffer const * Core::FramebufferManager::TryGetFramebufferObjectByHas
 /// FramebufferBuilder
 /// -------------------------------------------------------------------------------------------------------------------
 
-void Core::FramebufferBuilder::Attach (TextureResourceView const & TextureView)
+void apemode::FramebufferBuilder::Attach (TextureResourceView const & TextureView)
 {
-    _Game_engine_Assert ((TextureView.CanGet<Core::ColorResourceView> ()
-                          || TextureView.CanGet<Core::DepthStencilResourceView> ())
+    _Game_engine_Assert ((TextureView.CanGet<apemode::ColorResourceView> ()
+                          || TextureView.CanGet<apemode::DepthStencilResourceView> ())
                              && (TextureView.Width != 0 && TextureView.Height != 0),
                          "Invalid texture view.");
 
-    if (TextureView.CanGet<Core::ColorResourceView> ()
-        || TextureView.CanGet<Core::DepthStencilResourceView> ())
+    if (TextureView.CanGet<apemode::ColorResourceView> ()
+        || TextureView.CanGet<apemode::DepthStencilResourceView> ())
     {
         if (TemporaryDesc.Desc->width == 0 &&
             TemporaryDesc.Desc->height == 0)
@@ -99,14 +99,14 @@ void Core::FramebufferBuilder::Attach (TextureResourceView const & TextureView)
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-void Core::FramebufferBuilder::SetRenderPass(RenderPass const & pRenderPass)
+void apemode::FramebufferBuilder::SetRenderPass(RenderPass const & pRenderPass)
 {
     TemporaryDesc.pRenderPass = &pRenderPass;
 }
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-Core::Framebuffer const * Core::FramebufferBuilder::RecreateFramebuffer(Core::GraphicsDevice & GraphicsNode)
+apemode::Framebuffer const * apemode::FramebufferBuilder::RecreateFramebuffer(apemode::GraphicsDevice & GraphicsNode)
 {
     if (GraphicsNode.IsValid())
     {
@@ -130,7 +130,7 @@ Core::Framebuffer const * Core::FramebufferBuilder::RecreateFramebuffer(Core::Gr
                           std::back_inserter (ImgViews),
                           ExtractTextureViewFn);
 
-        Aux::AliasStructs (ImgViews,
+        apemode::AliasStructs (ImgViews,
                            TemporaryDesc.Desc->pAttachments,
                            TemporaryDesc.Desc->attachmentCount);
 
@@ -145,7 +145,7 @@ Core::Framebuffer const * Core::FramebufferBuilder::RecreateFramebuffer(Core::Gr
         TDispatchableHandle<VkFramebuffer> NewHandle;
         if (NewHandle.Recreate (GraphicsNode, TemporaryDesc.Desc))
         {
-            auto pFramebuffer   = new Core::Framebuffer ();
+            auto pFramebuffer   = new apemode::Framebuffer ();
             pFramebuffer->Hash  = Hash;
             pFramebuffer->pDesc = FramebufferDescription::MakeNewFromTemporary (TemporaryDesc);
             pFramebuffer->Handle.Swap (NewHandle);
@@ -162,7 +162,7 @@ Core::Framebuffer const * Core::FramebufferBuilder::RecreateFramebuffer(Core::Gr
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-void Core::FramebufferBuilder::Reset()
+void apemode::FramebufferBuilder::Reset()
 {
     TemporaryDesc.Reset();
 }
@@ -171,14 +171,14 @@ void Core::FramebufferBuilder::Reset()
 /// FramebufferDescription
 /// -------------------------------------------------------------------------------------------------------------------
 
-Core::FramebufferDescription::FramebufferDescription()
+apemode::FramebufferDescription::FramebufferDescription()
 {
     Reset();
 }
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-void Core::FramebufferDescription::Reset()
+void apemode::FramebufferDescription::Reset()
 {
     Hash        = 0;
     pRenderPass = nullptr;
@@ -191,14 +191,14 @@ void Core::FramebufferDescription::Reset()
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-uint64_t Core::FramebufferDescription::UpdateHash()
+uint64_t apemode::FramebufferDescription::UpdateHash()
 {
     VkFramebufferCreateInfo PartialDesc = Desc;
 
     auto pAttachments        = PartialDesc.pAttachments;
     PartialDesc.pAttachments = nullptr;
 
-    auto HashWrapper = Aux::CityHash64Wrapper ();
+    auto HashWrapper = apemode::CityHash64Wrapper ();
     HashWrapper.CombineWith (PartialDesc);
 
     auto const pAttachmentIt    = pAttachments;
@@ -211,10 +211,10 @@ uint64_t Core::FramebufferDescription::UpdateHash()
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-Core::FramebufferDescription const *
-Core::FramebufferDescription::MakeNewFromTemporary(FramebufferDescription const & TemporaryDesc)
+apemode::FramebufferDescription const *
+apemode::FramebufferDescription::MakeNewFromTemporary(FramebufferDescription const & TemporaryDesc)
 {
-    if (auto pFramebuffer = new Core::FramebufferDescription())
+    if (auto pFramebuffer = new apemode::FramebufferDescription())
     {
         pFramebuffer->Hash        = TemporaryDesc.Hash;
         pFramebuffer->Desc        = TemporaryDesc.Desc;

@@ -4,26 +4,26 @@
 #include <TInfoStruct.Vulkan.h>
 #include <NativeDispatchableHandles.Vulkan.h>
 
-namespace Core
+namespace apemode
 {
     class CommandList;
     class RootSignature;
     class DescriptorSet;
     class DescriptorPool;
 
-    class _Graphics_ecosystem_dll_api DescriptorSet : public Aux::ScalableAllocPolicy,
-                                                      public Aux::NoCopyAssignPolicy
+    class _Graphics_ecosystem_dll_api DescriptorSet : public apemode::ScalableAllocPolicy,
+                                                      public apemode::NoCopyAssignPolicy
     {
     public:
         DescriptorSet();
         ~DescriptorSet();
 
-        bool RecreateResourcesFor (Core::GraphicsDevice & GraphicsNode,
-                                   Core::DescriptorPool & DescPool,
-                                   Core::RootSignature &  RootSign,
+        bool RecreateResourcesFor (apemode::GraphicsDevice & GraphicsNode,
+                                   apemode::DescriptorPool & DescPool,
+                                   apemode::RootSignature &  RootSign,
                                    uint32_t               DescSetLayoutIndex);
 
-        void BindTo(Core::CommandList & CmdList,
+        void BindTo(apemode::CommandList & CmdList,
                     VkPipelineBindPoint PipelineBindPoint,
                     uint32_t            DynamicOffsetCount,
                     const uint32_t *    DynamicOffsets);
@@ -32,16 +32,16 @@ namespace Core
         operator VkDescriptorSet() const;
 
     public:
-        Core::GraphicsDevice const *               pGraphicsNode;
-        Core::RootSignature const *                pRootSign;
-        Core::DescriptorPool const *               pDescPool;
-        Core::TDispatchableHandle<VkDescriptorSet> hDescSet;
+        apemode::GraphicsDevice const *               pGraphicsNode;
+        apemode::RootSignature const *                pRootSign;
+        apemode::DescriptorPool const *               pDescPool;
+        apemode::TDispatchableHandle<VkDescriptorSet> hDescSet;
     };
 
-    class _Graphics_ecosystem_dll_api DescriptorSetUpdater : public Aux::ScalableAllocPolicy,
-                                                             public Aux::NoCopyAssignPolicy
+    class _Graphics_ecosystem_dll_api DescriptorSetUpdater : public apemode::ScalableAllocPolicy,
+                                                             public apemode::NoCopyAssignPolicy
     {
-        bool SetGraphicsNode (Core::GraphicsDevice const & GraphicsNode);
+        bool SetGraphicsNode (apemode::GraphicsDevice const & GraphicsNode);
 
     public:
         DescriptorSetUpdater ();
@@ -50,7 +50,7 @@ namespace Core
         void Reset (uint32_t MaxWrites, uint32_t MaxCopies);
 
         /** DescSet must be initialized. */
-        bool WriteUniformBuffer (Core::DescriptorSet const & DescSet,
+        bool WriteUniformBuffer (apemode::DescriptorSet const & DescSet,
                                  VkBuffer                    Buffer,
                                  uint32_t                    Offset,
                                  uint32_t                    Range,
@@ -58,7 +58,7 @@ namespace Core
                                  uint32_t                    Count);
 
         /** DescSet must be initialized. */
-        bool WriteCombinedImgSampler (Core::DescriptorSet const & DescSet,
+        bool WriteCombinedImgSampler (apemode::DescriptorSet const & DescSet,
                                       VkImageView                 ImgView,
                                       VkImageLayout               ImgLayout,
                                       VkSampler                   Sampler,
@@ -68,22 +68,22 @@ namespace Core
         void Flush ();
 
     public:
-        Core::GraphicsDevice const *                 pGraphicsNode;
+        apemode::GraphicsDevice const *                 pGraphicsNode;
         std::vector<VkDescriptorBufferInfo> BufferInfos;
         std::vector<VkDescriptorImageInfo>  ImgInfos;
         std::vector<VkWriteDescriptorSet>   Writes;
         std::vector<VkCopyDescriptorSet>    Copies;
     };
 
-    class _Graphics_ecosystem_dll_api DescriptorPool : public Aux::ScalableAllocPolicy,
-                                                       public Aux::NoCopyAssignPolicy
+    class _Graphics_ecosystem_dll_api DescriptorPool : public apemode::ScalableAllocPolicy,
+                                                       public apemode::NoCopyAssignPolicy
     {
     public:
         DescriptorPool();
         ~DescriptorPool();
 
         bool RecreateResourcesFor (
-            Core::GraphicsDevice & GraphicsNode,
+            apemode::GraphicsDevice & GraphicsNode,
             uint32_t MaxSets,
             uint32_t MaxSamplerCount,              // VK_DESCRIPTOR_TYPE_SAMPLER
             uint32_t MaxCombinedImgSamplerCount,   // VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
@@ -105,8 +105,8 @@ namespace Core
         operator VkDescriptorPool() const;
 
     public:
-        Core::GraphicsDevice const *                pGraphicsNode;
-        Core::TDispatchableHandle<VkDescriptorPool> hDescPool;
+        apemode::GraphicsDevice const *                pGraphicsNode;
+        apemode::TDispatchableHandle<VkDescriptorPool> hDescPool;
 
         friend DescriptorSet;
 

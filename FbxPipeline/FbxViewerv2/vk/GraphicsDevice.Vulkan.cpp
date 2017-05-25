@@ -24,46 +24,46 @@
 /// GraphicsDevice PrivateContent
 /// -------------------------------------------------------------------------------------------------------------------
 
-Core::GraphicsDevice::PrivateContent::PrivateContent()
-    : RenderPassManager(new Core::RenderPassManager())
-    , FramebufferManager(new Core::FramebufferManager())
-    , RootSignatureManager(new Core::RootSignatureManager())
-    , ShaderManager(new Core::ShaderManager())
+apemode::GraphicsDevice::PrivateContent::PrivateContent()
+    : RenderPassManager(new apemode::RenderPassManager())
+    , FramebufferManager(new apemode::FramebufferManager())
+    , RootSignatureManager(new apemode::RootSignatureManager())
+    , ShaderManager(new apemode::ShaderManager())
 {
 }
 
-Core::GraphicsDevice::PrivateContent::NativeDeviceWrapper::NativeLayerWrapper &
-Core::GraphicsDevice::PrivateContent::NativeDeviceWrapper::GetUnnamedLayer()
+apemode::GraphicsDevice::PrivateContent::NativeDeviceWrapper::NativeLayerWrapper &
+apemode::GraphicsDevice::PrivateContent::NativeDeviceWrapper::GetUnnamedLayer()
 {
     _Game_engine_Assert(LayerWrappers.front().IsUnnamedLayer(), "vkEnumerateInstanceExtensionProperties failed.");
     return LayerWrappers.front();
 }
 
-bool Core::GraphicsDevice::PrivateContent::NativeDeviceWrapper::SupportsGraphics(uint32_t QueueFamilyId)
+bool apemode::GraphicsDevice::PrivateContent::NativeDeviceWrapper::SupportsGraphics(uint32_t QueueFamilyId)
 {
     _Game_engine_Assert(QueueFamilyId < QueueProps.size(), "Out of range.");
-    return Aux::HasFlagEql(QueueProps[QueueFamilyId]->queueFlags, VK_QUEUE_GRAPHICS_BIT);
+    return apemode::HasFlagEql(QueueProps[QueueFamilyId]->queueFlags, VK_QUEUE_GRAPHICS_BIT);
 }
 
-bool Core::GraphicsDevice::PrivateContent::NativeDeviceWrapper::SupportsCompute(uint32_t QueueFamilyId)
+bool apemode::GraphicsDevice::PrivateContent::NativeDeviceWrapper::SupportsCompute(uint32_t QueueFamilyId)
 {
     _Game_engine_Assert(QueueFamilyId < QueueProps.size(), "Out of range.");
-    return Aux::HasFlagEql(QueueProps[QueueFamilyId]->queueFlags, VK_QUEUE_COMPUTE_BIT);
+    return apemode::HasFlagEql(QueueProps[QueueFamilyId]->queueFlags, VK_QUEUE_COMPUTE_BIT);
 }
 
-bool Core::GraphicsDevice::PrivateContent::NativeDeviceWrapper::SupportsSparseBinding(uint32_t QueueFamilyId)
+bool apemode::GraphicsDevice::PrivateContent::NativeDeviceWrapper::SupportsSparseBinding(uint32_t QueueFamilyId)
 {
     _Game_engine_Assert(QueueFamilyId < QueueProps.size(), "Out of range.");
-    return Aux::HasFlagEql(QueueProps[QueueFamilyId]->queueFlags, VK_QUEUE_SPARSE_BINDING_BIT);
+    return apemode::HasFlagEql(QueueProps[QueueFamilyId]->queueFlags, VK_QUEUE_SPARSE_BINDING_BIT);
 }
 
-bool Core::GraphicsDevice::PrivateContent::NativeDeviceWrapper::SupportsTransfer(uint32_t QueueFamilyId)
+bool apemode::GraphicsDevice::PrivateContent::NativeDeviceWrapper::SupportsTransfer(uint32_t QueueFamilyId)
 {
     _Game_engine_Assert(QueueFamilyId < QueueProps.size(), "Out of range.");
-    return Aux::HasFlagEql(QueueProps[QueueFamilyId]->queueFlags, VK_QUEUE_TRANSFER_BIT);
+    return apemode::HasFlagEql(QueueProps[QueueFamilyId]->queueFlags, VK_QUEUE_TRANSFER_BIT);
 }
 
-bool Core::GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::NativeLayerWrapper::IsValidDeviceLayer() const
+bool apemode::GraphicsEcosystem::PrivateContent::NativeLayerWrapper::IsValidDeviceLayer() const
 {
     if (IsUnnamedLayer())
     {
@@ -95,11 +95,11 @@ bool Core::GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::NativeLay
     return true;
 }
 
-Core::GraphicsDevice::PrivateContent::NativeDeviceWrapper::NativeDeviceWrapper()
+apemode::GraphicsDevice::PrivateContent::NativeDeviceWrapper::NativeDeviceWrapper()
 {
 }
 
-bool Core::GraphicsDevice::PrivateContent::NativeDeviceWrapper::ScanDeviceQueues()
+bool apemode::GraphicsDevice::PrivateContent::NativeDeviceWrapper::ScanDeviceQueues()
 {
     uint32_t QueuesFound = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(AdapterHandle, &QueuesFound, NULL);
@@ -121,7 +121,7 @@ bool Core::GraphicsDevice::PrivateContent::NativeDeviceWrapper::ScanDeviceQueues
         QueuePrioritiesStorage.resize(TotalQueuePrioritiesCount);
         std::for_each(QueueProps.begin(), QueueProps.end(), [&](VkQueueFamilyProperties & QueueProp)
         {
-            auto & QueueReq = Aux::PushBackAndGet( QueueReqs);
+            auto & QueueReq = apemode::PushBackAndGet( QueueReqs);
             QueueReq->pNext = NULL;
             QueueReq->queueFamilyIndex = static_cast<uint32_t>(std::distance(QueueProps.data(), &QueueProp));
             QueueReq->queueCount = QueueProp.queueCount;
@@ -134,7 +134,7 @@ bool Core::GraphicsDevice::PrivateContent::NativeDeviceWrapper::ScanDeviceQueues
     return true;
 }
 
-bool Core::GraphicsDevice::PrivateContent::NativeDeviceWrapper::ScanDeviceLayerProperties ()
+bool apemode::GraphicsDevice::PrivateContent::NativeDeviceWrapper::ScanDeviceLayerProperties ()
 {
     ResultHandle ErrorHandle;
 
@@ -158,7 +158,7 @@ bool Core::GraphicsDevice::PrivateContent::NativeDeviceWrapper::ScanDeviceLayerP
     return false;
 }
 
-bool Core::GraphicsDevice::PrivateContent::NativeDeviceWrapper::ScanFormatProperties()
+bool apemode::GraphicsDevice::PrivateContent::NativeDeviceWrapper::ScanFormatProperties()
 {
     VkFormat NativeFormatIt = VK_FORMAT_UNDEFINED;
     for (; NativeFormatIt < VK_FORMAT_RANGE_SIZE; )
@@ -171,7 +171,7 @@ bool Core::GraphicsDevice::PrivateContent::NativeDeviceWrapper::ScanFormatProper
     return true;
 }
 
-bool Core::GraphicsDevice::PrivateContent::NativeDeviceWrapper::Recreate(CreateArgs * Args)
+bool apemode::GraphicsDevice::PrivateContent::NativeDeviceWrapper::Recreate(CreateArgs * Args)
 {
     _Game_engine_Assert(Args != nullptr, "Ecosystem is required in case of Vulkan.");
 
@@ -220,50 +220,50 @@ bool Core::GraphicsDevice::PrivateContent::NativeDeviceWrapper::Recreate(CreateA
 /// GraphicsDevice
 /// -------------------------------------------------------------------------------------------------------------------
 
-std::unique_ptr<Core::GraphicsDevice> Core::GraphicsDevice::MakeNewUnique ()
+std::unique_ptr<apemode::GraphicsDevice> apemode::GraphicsDevice::MakeNewUnique ()
 {
     return std::unique_ptr<GraphicsDevice>(new GraphicsDevice());
 }
 
-std::unique_ptr<Core::GraphicsDevice> Core::GraphicsDevice::MakeNullUnique ()
+std::unique_ptr<apemode::GraphicsDevice> apemode::GraphicsDevice::MakeNullUnique ()
 {
     return std::unique_ptr<GraphicsDevice>(nullptr);
 }
 
-Core::GraphicsDevice::GraphicsDevice()
+apemode::GraphicsDevice::GraphicsDevice()
     : pContent(new PrivateContent())
     , pGraphicsEcosystem(nullptr)
 {
     _Game_engine_Assert(pContent != nullptr, "Out of system memory");
 }
 
-Core::GraphicsDevice::~GraphicsDevice()
+apemode::GraphicsDevice::~GraphicsDevice()
 {
-    Aux::TSafeDeleteObj(pContent);
+    apemode::TSafeDeleteObj(pContent);
     _Aux_DebugTraceFunc;
 }
 
-Core::GraphicsDevice::operator VkDevice() const
+apemode::GraphicsDevice::operator VkDevice() const
 {
     return pContent->DeviceHandle.LogicalDeviceHandle;
 }
 
-Core::GraphicsDevice::operator VkPhysicalDevice() const
+apemode::GraphicsDevice::operator VkPhysicalDevice() const
 {
     return pContent->DeviceHandle.AdapterHandle;
 }
 
-Core::GraphicsDevice::operator VkInstance() const
+apemode::GraphicsDevice::operator VkInstance() const
 {
     return pGraphicsEcosystem->pContent->InstanceHandle;
 }
 
-bool Core::GraphicsDevice::IsValid() const
+bool apemode::GraphicsDevice::IsValid() const
 {
     return pContent->DeviceHandle.LogicalDeviceHandle.IsNotNull();
 }
 
-bool Core::GraphicsDevice::Await ()
+bool apemode::GraphicsDevice::Await ()
 {
     _Game_engine_Assert (IsValid (), "Must be valid.");
 
@@ -273,49 +273,49 @@ bool Core::GraphicsDevice::Await ()
     return eDeviceWaitIdleOk.Succeeded ();
 }
 
-Core::GraphicsHeterogeneousMultiadapterEcosystem & Core::GraphicsDevice::GetGraphicsEcosystem()
+apemode::GraphicsEcosystem & apemode::GraphicsDevice::GetGraphicsEcosystem()
 {
     return *pGraphicsEcosystem;
 }
 
-Core::RenderPassManager & Core::GraphicsDevice::GetDefaultRenderPassManager()
+apemode::RenderPassManager & apemode::GraphicsDevice::GetDefaultRenderPassManager()
 {
     return *pContent->RenderPassManager;
 }
 
-Core::FramebufferManager & Core::GraphicsDevice::GetDefaultFramebufferManager()
+apemode::FramebufferManager & apemode::GraphicsDevice::GetDefaultFramebufferManager()
 {
     return *pContent->FramebufferManager;
 }
 
-Core::RootSignatureManager & Core::GraphicsDevice::GetDefaultRootSignatureManager()
+apemode::RootSignatureManager & apemode::GraphicsDevice::GetDefaultRootSignatureManager()
 {
     return *pContent->RootSignatureManager;
 }
 
-Core::PipelineStateManager & Core::GraphicsDevice::GetDefaultPipelineStateManager()
+apemode::PipelineStateManager & apemode::GraphicsDevice::GetDefaultPipelineStateManager()
 {
     return *pContent->PipelineStateManager;
 }
 
-Core::ShaderManager & Core::GraphicsDevice::GetDefaultShaderManager()
+apemode::ShaderManager & apemode::GraphicsDevice::GetDefaultShaderManager()
 {
     return *pContent->ShaderManager;
 }
 
-uint32_t Core::GraphicsDevice::GetQueueFamilyCount()
+uint32_t apemode::GraphicsDevice::GetQueueFamilyCount()
 {
     return _Get_collection_length_u (pContent->DeviceHandle.QueueReqs);
 }
 
-uint32_t Core::GraphicsDevice::GetQueueCountInQueueFamily(uint32_t QueueFamilyId)
+uint32_t apemode::GraphicsDevice::GetQueueCountInQueueFamily(uint32_t QueueFamilyId)
 {
     _Game_engine_Assert(QueueFamilyId < GetQueueFamilyCount(), "Out of range.");
     return pContent->DeviceHandle.QueueReqs[QueueFamilyId]->queueCount;
 }
 
 bool
-Core::GraphicsDevice::RecreateResourcesFor(void * pDeviceCreateArgs)
+apemode::GraphicsDevice::RecreateResourcesFor(void * pDeviceCreateArgs)
 {
     typedef PrivateContent::NativeDeviceWrapper::CreateArgs DeviceCreateArgs;
 
@@ -333,7 +333,7 @@ Core::GraphicsDevice::RecreateResourcesFor(void * pDeviceCreateArgs)
     return false;
 }
 
-Core::GraphicsDevice::operator PrivateContent&()
+apemode::GraphicsDevice::operator PrivateContent&()
 {
     return *pContent;
 }

@@ -54,7 +54,7 @@ void operator delete[]( void *p ) throw( ) {
     dlfree( p );
 }
 
-namespace fbxv {
+namespace apemode {
     void *Malloc( size_t bytes ) {
         return dlmalloc( bytes );
     }

@@ -7,21 +7,21 @@
 /// RootParameter
 /// -------------------------------------------------------------------------------------------------------------------
 
-Core::RootParameter::RootParameter()
+apemode::RootParameter::RootParameter()
 {
     Clear();
 }
 
-Core::RootParameter::~RootParameter()
+apemode::RootParameter::~RootParameter()
 {
 }
 
-void Core::RootParameter::Clear()
+void apemode::RootParameter::Clear()
 {
     Binding.ZeroMemory();
 }
 
-void Core::RootParameter::InitAsUniformBuffer(uint32_t         Register,
+void apemode::RootParameter::InitAsUniformBuffer(uint32_t         Register,
                                               uint32_t         Count,
                                               ShaderVisibility StageFlags,
                                               uint32_t         Set)
@@ -33,7 +33,7 @@ void Core::RootParameter::InitAsUniformBuffer(uint32_t         Register,
     Binding->stageFlags      = static_cast<VkShaderStageFlagBits>(StageFlags);
 }
 
-void Core::RootParameter::InitAsUniformBufferDynamic(uint32_t         Register,
+void apemode::RootParameter::InitAsUniformBufferDynamic(uint32_t         Register,
                                                      uint32_t         Count,
                                                      ShaderVisibility StageFlags,
                                                      uint32_t         Set)
@@ -45,7 +45,7 @@ void Core::RootParameter::InitAsUniformBufferDynamic(uint32_t         Register,
     Binding->stageFlags      = static_cast<VkShaderStageFlagBits>(StageFlags);
 }
 
-void Core::RootParameter::InitAsSampler(uint32_t         Register,
+void apemode::RootParameter::InitAsSampler(uint32_t         Register,
                                         uint32_t         Count,
                                         ShaderVisibility StageFlags,
                                         uint32_t         Set)
@@ -57,7 +57,7 @@ void Core::RootParameter::InitAsSampler(uint32_t         Register,
     Binding->stageFlags      = static_cast<VkShaderStageFlagBits>(StageFlags);
 }
 
-void Core::RootParameter::InitAsCombinedImageSampler(uint32_t         Register,
+void apemode::RootParameter::InitAsCombinedImageSampler(uint32_t         Register,
                                                      uint32_t         Count,
                                                      VkSampler *      pImmutableSamplers,
                                                      ShaderVisibility StageFlags,
@@ -71,7 +71,7 @@ void Core::RootParameter::InitAsCombinedImageSampler(uint32_t         Register,
     Binding->stageFlags         = static_cast<VkShaderStageFlagBits>(StageFlags);
 }
 
-Core::RootParameter::operator VkDescriptorSetLayoutBinding() const
+apemode::RootParameter::operator VkDescriptorSetLayoutBinding() const
 {
     return Binding;
 }
@@ -80,13 +80,13 @@ Core::RootParameter::operator VkDescriptorSetLayoutBinding() const
 /// RootSignature
 /// -------------------------------------------------------------------------------------------------------------------
 
-Core::RootSignature::RootSignature()
+apemode::RootSignature::RootSignature()
     : pDesc(nullptr)
     , pGraphicsNode(nullptr)
 {
 }
 
-Core::RootSignature::~RootSignature()
+apemode::RootSignature::~RootSignature()
 {
     if (_Game_engine_Likely (pGraphicsNode != nullptr && !DescSetLayouts.empty ()))
     {
@@ -94,13 +94,13 @@ Core::RootSignature::~RootSignature()
                          DescSetLayouts.end (),
                          [&](VkDescriptorSetLayout SetLayoutHandle) 
                          {
-                             Core::TDispatchableHandle<VkDescriptorSetLayout> DestroySetLayout (
+                             apemode::TDispatchableHandle<VkDescriptorSetLayout> DestroySetLayout (
                                  *pGraphicsNode, SetLayoutHandle);
                          });
     }
 }
 
-Core::RootSignature::operator VkPipelineLayout() const
+apemode::RootSignature::operator VkPipelineLayout() const
 {
     return PipelineLayoutHandle;
 }
@@ -109,27 +109,27 @@ Core::RootSignature::operator VkPipelineLayout() const
 /// RootSignatureDescription
 /// -------------------------------------------------------------------------------------------------------------------
 
-Core::RootSignatureDescription::RootSignatureDescription()
+apemode::RootSignatureDescription::RootSignatureDescription()
 {
     Reset();
 }
 
-Core::RootSignatureDescription::~RootSignatureDescription()
+apemode::RootSignatureDescription::~RootSignatureDescription()
 {
 }
 
-void Core::RootSignatureDescription::Reset()
+void apemode::RootSignatureDescription::Reset()
 {
     Params.clear();
 }
 
-uint32_t Core::RootSignatureDescription::GetParamCount() const
+uint32_t apemode::RootSignatureDescription::GetParamCount() const
 {
     return _Get_collection_length_u (Params);
 }
 
-Core::RootParameter const &
-Core::RootSignatureDescription::GetParameter(uint32_t ParameterIndex) const
+apemode::RootParameter const &
+apemode::RootSignatureDescription::GetParameter(uint32_t ParameterIndex) const
 {
     _Game_engine_Assert (Params.size () < ParameterIndex, 
                          "Index is out of range.");
@@ -137,9 +137,9 @@ Core::RootSignatureDescription::GetParameter(uint32_t ParameterIndex) const
     return Params[ParameterIndex];
 }
 
-uint64_t Core::RootSignatureDescription::UpdateHash()
+uint64_t apemode::RootSignatureDescription::UpdateHash()
 {
-    Aux::CityHash64Wrapper HashBuilder;
+    apemode::CityHash64Wrapper HashBuilder;
     HashBuilder.CombineWithArray (Params.data (), Params.size ());
     HashBuilder.CombineWithArray (PushConstRanges.data (), PushConstRanges.size ());
 
@@ -147,10 +147,10 @@ uint64_t Core::RootSignatureDescription::UpdateHash()
     return HashBuilder.Value;
 }
 
-Core::RootSignatureDescription const *
-Core::RootSignatureDescription::MakeNewFromTemporary(RootSignatureDescription const & TemporaryDesc)
+apemode::RootSignatureDescription const *
+apemode::RootSignatureDescription::MakeNewFromTemporary(RootSignatureDescription const & TemporaryDesc)
 {
-    auto pOutDesc = new Core::RootSignatureDescription();
+    auto pOutDesc = new apemode::RootSignatureDescription();
 
     if (!TemporaryDesc.Params.empty())
     {
@@ -175,11 +175,11 @@ Core::RootSignatureDescription::MakeNewFromTemporary(RootSignatureDescription co
 /// RootSignatureBuilder
 /// -------------------------------------------------------------------------------------------------------------------
 
-Core::RootSignatureBuilder::RootSignatureBuilder()
+apemode::RootSignatureBuilder::RootSignatureBuilder()
 {
 }
 
-void Core::RootSignatureBuilder::Reset (uint32_t BindingCount, uint32_t PushConstRangeCount)
+void apemode::RootSignatureBuilder::Reset (uint32_t BindingCount, uint32_t PushConstRangeCount)
 {
     TemporaryDesc.Params.clear ();
     TemporaryDesc.Params.reserve (BindingCount);
@@ -187,18 +187,18 @@ void Core::RootSignatureBuilder::Reset (uint32_t BindingCount, uint32_t PushCons
     TemporaryDesc.PushConstRanges.reserve (PushConstRangeCount);
 }
 
-Core::RootParameter & Core::RootSignatureBuilder::AddParameter()
+apemode::RootParameter & apemode::RootSignatureBuilder::AddParameter()
 {
-    return Aux::PushBackAndGet( TemporaryDesc.Params);
+    return apemode::PushBackAndGet( TemporaryDesc.Params);
 }
 
-VkPushConstantRange & Core::RootSignatureBuilder::AddPushConstRange()
+VkPushConstantRange & apemode::RootSignatureBuilder::AddPushConstRange()
 {
-    return Aux::PushBackAndGet(TemporaryDesc.PushConstRanges);
+    return apemode::PushBackAndGet(TemporaryDesc.PushConstRanges);
 }
 
-Core::RootSignature const *
-Core::RootSignatureBuilder::RecreateRootSignature(Core::GraphicsDevice & GraphicsNode)
+apemode::RootSignature const *
+apemode::RootSignatureBuilder::RecreateRootSignature(apemode::GraphicsDevice & GraphicsNode)
 {
     using SetKey                = uint32_t;
     using Binding               = VkDescriptorSetLayoutBinding;
@@ -225,7 +225,7 @@ Core::RootSignatureBuilder::RecreateRootSignature(Core::GraphicsDevice & Graphic
         {
             std::for_each (TemporaryDesc.Params.begin (),
                              TemporaryDesc.Params.end (),
-                             [&](Core::RootParameter const & Param)
+                             [&](apemode::RootParameter const & Param)
                              {
                                  Bindings.insert (std::make_pair (
                                      Param.DescSet, Param.Binding.Desc));
@@ -244,7 +244,7 @@ Core::RootSignatureBuilder::RecreateRootSignature(Core::GraphicsDevice & Graphic
                     SetLayoutBindings.push_back (Pair.second);
                 });
 
-                Aux::CityHash64Wrapper DescSetLayoutHashBuilder;
+                apemode::CityHash64Wrapper DescSetLayoutHashBuilder;
                 DescSetLayoutHashBuilder.CombineWithArray (SetLayoutBindings.data (),
                                                            SetLayoutBindings.size ());
 
@@ -254,13 +254,13 @@ Core::RootSignatureBuilder::RecreateRootSignature(Core::GraphicsDevice & Graphic
                 }
                 else
                 {
-                    Core::TInfoStruct<VkDescriptorSetLayoutCreateInfo> DescSetLayoutDesc;
+                    apemode::TInfoStruct<VkDescriptorSetLayoutCreateInfo> DescSetLayoutDesc;
 
-                    Aux::AliasStructs (SetLayoutBindings,
+                    apemode::AliasStructs (SetLayoutBindings,
                                        DescSetLayoutDesc->pBindings,
                                        DescSetLayoutDesc->bindingCount);
 
-                    Core::TDispatchableHandle<VkDescriptorSetLayout> TempDescSetLayout;
+                    apemode::TDispatchableHandle<VkDescriptorSetLayout> TempDescSetLayout;
                     if (!TempDescSetLayout.Recreate (GraphicsNode, DescSetLayoutDesc))
                     {
                         _Game_engine_Error ("Failed to create descriptor set layout.");
@@ -276,18 +276,18 @@ Core::RootSignatureBuilder::RecreateRootSignature(Core::GraphicsDevice & Graphic
         }
 
         TInfoStruct<VkPipelineLayoutCreateInfo> PipelineLayoutDesc;
-        Aux::AliasStructs (DescSetLayouts,
+        apemode::AliasStructs (DescSetLayouts,
                            PipelineLayoutDesc->pSetLayouts,
                            PipelineLayoutDesc->setLayoutCount);
 
         if (!TemporaryDesc.PushConstRanges.empty())
         {
-            Aux::AliasStructs (TemporaryDesc.PushConstRanges,
+            apemode::AliasStructs (TemporaryDesc.PushConstRanges,
                                PipelineLayoutDesc->pPushConstantRanges,
                                PipelineLayoutDesc->pushConstantRangeCount);
         }
 
-        Core::TDispatchableHandle<VkPipelineLayout> PipelineLayoutHandle;
+        apemode::TDispatchableHandle<VkPipelineLayout> PipelineLayoutHandle;
         if (!PipelineLayoutHandle.Recreate(GraphicsNode, PipelineLayoutDesc))
         {
             return false;
@@ -295,7 +295,7 @@ Core::RootSignatureBuilder::RecreateRootSignature(Core::GraphicsDevice & Graphic
 
         if (_Game_engine_Likely (PipelineLayoutHandle.IsNotNull ()))
         {
-            auto pRootSign = new Core::RootSignature();
+            auto pRootSign = new apemode::RootSignature();
 
             pRootSign->DescSetLayouts.swap(DescSetLayouts);
             pRootSign->PipelineLayoutHandle.Swap(PipelineLayoutHandle);
@@ -316,14 +316,14 @@ Core::RootSignatureBuilder::RecreateRootSignature(Core::GraphicsDevice & Graphic
 /// RootSignatureManager PrivateContent
 /// -------------------------------------------------------------------------------------------------------------------
 
-struct Core::RootSignatureManager::PrivateContent : public Aux::ScalableAllocPolicy,
-                                                    public Aux::NoCopyAssignPolicy
+struct apemode::RootSignatureManager::PrivateContent : public apemode::ScalableAllocPolicy,
+                                                    public apemode::NoCopyAssignPolicy
 {
-    using HashType            = Aux::CityHash64Wrapper::ValueType;
-    using HashOpLess          = Aux::CityHash64Wrapper::CmpOpLess;
-    using HashOp              = Aux::CityHash64Wrapper::HashOp<>;
-    using HashOpEqual         = Aux::CityHash64Wrapper::CmpOpEqual;
-    using RootSignatureLookup = std::map<HashType, std::unique_ptr<Core::RootSignature> >;
+    using HashType            = apemode::CityHash64Wrapper::ValueType;
+    using HashOpLess          = apemode::CityHash64Wrapper::CmpOpLess;
+    using HashOp              = apemode::CityHash64Wrapper::HashOp<>;
+    using HashOpEqual         = apemode::CityHash64Wrapper::CmpOpEqual;
+    using RootSignatureLookup = std::map<HashType, std::unique_ptr<apemode::RootSignature> >;
     using DescriptorSetLayoutLookup = std::map<HashType, VkDescriptorSetLayout>;
 
     std::mutex                 Lock;
@@ -335,16 +335,16 @@ struct Core::RootSignatureManager::PrivateContent : public Aux::ScalableAllocPol
 /// RootSignatureManager
 /// -------------------------------------------------------------------------------------------------------------------
 
-Core::RootSignatureManager::RootSignatureManager () : pContent (new PrivateContent ())
+apemode::RootSignatureManager::RootSignatureManager () : pContent (new PrivateContent ())
 {
 }
 
-Core::RootSignatureManager::~RootSignatureManager ()
+apemode::RootSignatureManager::~RootSignatureManager ()
 {
-    Aux::TSafeDeleteObj (pContent);
+    apemode::TSafeDeleteObj (pContent);
 }
 
-VkDescriptorSetLayout Core::RootSignatureManager::GetDescSetLayout (uint64_t Hash)
+VkDescriptorSetLayout apemode::RootSignatureManager::GetDescSetLayout (uint64_t Hash)
 {
     auto DescSetLayoutIt = pContent->StoredDescSetLayouts.find (Hash);
     if (DescSetLayoutIt != pContent->StoredDescSetLayouts.end ())
@@ -353,7 +353,7 @@ VkDescriptorSetLayout Core::RootSignatureManager::GetDescSetLayout (uint64_t Has
     return VK_NULL_HANDLE;
 }
 
-void Core::RootSignatureManager::SetDescSetLayout (uint64_t Hash, VkDescriptorSetLayout SetLayout)
+void apemode::RootSignatureManager::SetDescSetLayout (uint64_t Hash, VkDescriptorSetLayout SetLayout)
 {
     _Game_engine_Assert (pContent->StoredDescSetLayouts.find (Hash)
                              == pContent->StoredDescSetLayouts.end (),
@@ -362,7 +362,7 @@ void Core::RootSignatureManager::SetDescSetLayout (uint64_t Hash, VkDescriptorSe
     pContent->StoredDescSetLayouts[ Hash ] = SetLayout;
 }
 
-void Core::RootSignatureManager::AddNewRootSignatureObject (Core::RootSignature & RootSign)
+void apemode::RootSignatureManager::AddNewRootSignatureObject (apemode::RootSignature & RootSign)
 {
     std::lock_guard<std::mutex> LockGuard (pContent->Lock);
 
@@ -373,8 +373,8 @@ void Core::RootSignatureManager::AddNewRootSignatureObject (Core::RootSignature 
     pContent->StoredRootSigns[ RootSign.Hash ].reset (&RootSign);
 }
 
-Core::RootSignature const *
-Core::RootSignatureManager::TryGetRootSignatureObjectByHash (uint64_t Hash)
+apemode::RootSignature const *
+apemode::RootSignatureManager::TryGetRootSignatureObjectByHash (uint64_t Hash)
 {
     std::lock_guard<std::mutex> LockGuard (pContent->Lock);
 

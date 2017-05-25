@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <functional>
 
-namespace Aux
+namespace apemode
 {
     // Hash function for a byte array.
     unsigned long long CityHash64(const char *buf, unsigned long long len);
@@ -14,7 +14,7 @@ namespace Aux
         template<typename T>
         static unsigned long long CityHash64(T const & Obj)
         {
-            return Aux::CityHash64(
+            return apemode::CityHash64(
                 reinterpret_cast<const char *>(&Obj), 
                 sizeof(T)
                 );

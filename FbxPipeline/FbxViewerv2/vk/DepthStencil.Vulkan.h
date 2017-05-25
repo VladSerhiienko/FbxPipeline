@@ -2,7 +2,7 @@
 
 #include <Texture.Vulkan.h>
 
-namespace Core
+namespace apemode
 {
     class _Graphics_ecosystem_dll_api DepthStencilResourceView : public TextureResourceView
     {

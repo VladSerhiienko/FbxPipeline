@@ -3,7 +3,7 @@
 #include <GraphicsDevice.Vulkan.h>
 #include <NativeDispatchableHandles.Vulkan.h>
 
-namespace Core
+namespace apemode
 {
     class CommandList;
     class CommandQueue;
@@ -12,8 +12,8 @@ namespace Core
     class RootSignature;
     class PipelineState;
 
-    class _Graphics_ecosystem_dll_api CommandList : public Aux::ScalableAllocPolicy,
-                                                    public Aux::NoCopyAssignPolicy
+    class _Graphics_ecosystem_dll_api CommandList : public apemode::ScalableAllocPolicy,
+                                                    public apemode::NoCopyAssignPolicy
     {
     public:
         enum CommandListType
@@ -83,7 +83,7 @@ namespace Core
         operator VkCommandBuffer() const;
 
     protected:
-        struct StagedBarrier : public Aux::ScalableAllocPolicy
+        struct StagedBarrier : public apemode::ScalableAllocPolicy
         {
             enum EType
             {
@@ -146,20 +146,20 @@ namespace Core
         uint32_t                ImgBarrierCount;
         uint32_t                BufferBarrierCount;
 
-        Core::RenderPass const *                   pRenderPass;
-        Core::Framebuffer const *                  pFramebuffer;
-        Core::RootSignature const *                pRootSignature;
-        Core::PipelineState const *                pPipelineState;
-        Core::TDispatchableHandle<VkCommandBuffer> hCmdList;
-        Core::TDispatchableHandle<VkCommandPool>   hCmdAlloc;
+        apemode::RenderPass const *                   pRenderPass;
+        apemode::Framebuffer const *                  pFramebuffer;
+        apemode::RootSignature const *                pRootSignature;
+        apemode::PipelineState const *                pPipelineState;
+        apemode::TDispatchableHandle<VkCommandBuffer> hCmdList;
+        apemode::TDispatchableHandle<VkCommandPool>   hCmdAlloc;
     };
 
     /**
      * Stores reserved command queues of devices. This class is used by queues,
      * but can also be potentially used by the graphics devices.
      */
-    class _Graphics_ecosystem_dll_api CommandQueueReserver : public Aux::ScalableAllocPolicy,
-                                                             public Aux::NoCopyAssignPolicy
+    class _Graphics_ecosystem_dll_api CommandQueueReserver : public apemode::ScalableAllocPolicy,
+                                                             public apemode::NoCopyAssignPolicy
     {
         friend CommandQueue;
         friend GraphicsDevice;
@@ -211,8 +211,8 @@ namespace Core
         static CommandQueueReserver & Get ();
     };
 
-    class _Graphics_ecosystem_dll_api CommandQueue : public Aux::ScalableAllocPolicy,
-                                                     public Aux::NoCopyAssignPolicy
+    class _Graphics_ecosystem_dll_api CommandQueue : public apemode::ScalableAllocPolicy,
+                                                     public apemode::NoCopyAssignPolicy
     {
     public:
         CommandQueue ();

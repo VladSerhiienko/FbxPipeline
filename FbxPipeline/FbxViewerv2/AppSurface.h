@@ -2,8 +2,8 @@
 
 #include <AppSurfaceBase.h>
 
-namespace fbxv {
-    class AppSurface : public fbxv::AppSurfaceBase {
+namespace apemode {
+    class AppSurface : public apemode::AppSurfaceBase {
     public:
         AppSurface( );
         virtual ~AppSurface( );

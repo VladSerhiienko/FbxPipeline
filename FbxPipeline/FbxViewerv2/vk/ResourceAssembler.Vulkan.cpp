@@ -1,12 +1,12 @@
 //#include <GameEngine.GraphicsEcosystem.Precompiled.h>
 #include <ResourceAssembler.Vulkan.h>
 
-std::shared_ptr<Core::ResourceAssembler> Core::ResourceAssembler::MakeNewUnique ()
+std::shared_ptr<apemode::ResourceAssembler> apemode::ResourceAssembler::MakeNewUnique ()
 {
-    return std::shared_ptr<Core::ResourceAssembler> (new ResourceAssembler ());
+    return std::shared_ptr<apemode::ResourceAssembler> (new ResourceAssembler ());
 }
 
-std::unique_ptr<Core::ResourceAssembler> Core::ResourceAssembler::MakeNullUnique ()
+std::unique_ptr<apemode::ResourceAssembler> apemode::ResourceAssembler::MakeNullUnique ()
 {
-    return std::unique_ptr<Core::ResourceAssembler> (new ResourceAssembler ());
+    return std::unique_ptr<apemode::ResourceAssembler> (new ResourceAssembler ());
 }

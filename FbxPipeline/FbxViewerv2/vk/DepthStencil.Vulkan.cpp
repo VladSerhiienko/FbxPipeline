@@ -6,22 +6,22 @@
 /// DepthStencilResourceView
 /// -------------------------------------------------------------------------------------------------------------------
 
-std::shared_ptr<Core::DepthStencilResourceView> Core::DepthStencilResourceView::MakeNewLinked()
+std::shared_ptr<apemode::DepthStencilResourceView> apemode::DepthStencilResourceView::MakeNewLinked()
 {
     return std::shared_ptr<DepthStencilResourceView> (new DepthStencilResourceView ());
 }
 
-std::unique_ptr<Core::DepthStencilResourceView> Core::DepthStencilResourceView::MakeNewUnique()
+std::unique_ptr<apemode::DepthStencilResourceView> apemode::DepthStencilResourceView::MakeNewUnique()
 {
     return std::unique_ptr<DepthStencilResourceView> (new DepthStencilResourceView ());
 }
 
-std::unique_ptr<Core::DepthStencilResourceView> Core::DepthStencilResourceView::MakeNullUnique ()
+std::unique_ptr<apemode::DepthStencilResourceView> apemode::DepthStencilResourceView::MakeNullUnique ()
 {
     return std::unique_ptr<DepthStencilResourceView> (nullptr);
 }
 
-Core::DepthStencilResourceView::DepthStencilResourceView ()
+apemode::DepthStencilResourceView::DepthStencilResourceView ()
     : DepthFormat (VK_FORMAT_UNDEFINED), StencilFormat (VK_FORMAT_UNDEFINED)
 {
     ViewType = kResourceViewType_DepthStencil;
@@ -48,12 +48,12 @@ Core::DepthStencilResourceView::DepthStencilResourceView ()
         ImgAspect |= VK_IMAGE_ASPECT_STENCIL_BIT;
 }
 
-Core::DepthStencilResourceView::~DepthStencilResourceView()
+apemode::DepthStencilResourceView::~DepthStencilResourceView()
 {
     _Aux_DebugTraceFunc;
 }
 
-bool Core::DepthStencilResourceView::RecreateResourcesFor (GraphicsDevice & InGraphicsNode,
+bool apemode::DepthStencilResourceView::RecreateResourcesFor (GraphicsDevice & InGraphicsNode,
                                                            VkFormat         InFmt,
                                                            uint32_t         InWidth,
                                                            uint32_t         InHeight,

@@ -5,7 +5,7 @@
 #include <TInfoStruct.Vulkan.h>
 #include <NativeDispatchableHandles.Vulkan.h>
 
-namespace Core
+namespace apemode
 {
     class RenderPass;
     class TextureResourceView;
@@ -14,25 +14,25 @@ namespace Core
 
     class FramebufferDescription;
 
-    class _Graphics_ecosystem_dll_api Framebuffer : public Aux::ScalableAllocPolicy,
-                                                    public Aux::NoCopyAssignPolicy
+    class _Graphics_ecosystem_dll_api Framebuffer : public apemode::ScalableAllocPolicy,
+                                                    public apemode::NoCopyAssignPolicy
     {
     public:
         uint64_t                                 Hash;
-        Core::TDispatchableHandle<VkFramebuffer> Handle;
-        Core::FramebufferDescription const *     pDesc;
+        apemode::TDispatchableHandle<VkFramebuffer> Handle;
+        apemode::FramebufferDescription const *     pDesc;
 
     public:
         operator VkFramebuffer() const { return Handle; }
     };
 
-    class _Graphics_ecosystem_dll_api FramebufferDescription : public Aux::ScalableAllocPolicy,
-                                                               public Aux::NoCopyAssignPolicy
+    class _Graphics_ecosystem_dll_api FramebufferDescription : public apemode::ScalableAllocPolicy,
+                                                               public apemode::NoCopyAssignPolicy
     {
     public:
         uint64_t                                          Hash;
-        Core::RenderPass const *                          pRenderPass;
-        Core::TInfoStruct<VkFramebufferCreateInfo>        Desc;
+        apemode::RenderPass const *                          pRenderPass;
+        apemode::TInfoStruct<VkFramebufferCreateInfo>        Desc;
         std::vector<TextureResourceView const *> TextureViews;
 
     public:
@@ -47,31 +47,31 @@ namespace Core
         operator VkFramebufferCreateInfo() const { return Desc; }
 
     public:
-        static Core::FramebufferDescription const *
-        MakeNewFromTemporary (Core::FramebufferDescription const & TemporaryDesc);
+        static apemode::FramebufferDescription const *
+        MakeNewFromTemporary (apemode::FramebufferDescription const & TemporaryDesc);
     };
 
-    class _Graphics_ecosystem_dll_api FramebufferBuilder : public Aux::ScalableAllocPolicy,
-                                                           public Aux::NoCopyAssignPolicy
+    class _Graphics_ecosystem_dll_api FramebufferBuilder : public apemode::ScalableAllocPolicy,
+                                                           public apemode::NoCopyAssignPolicy
     {
     public:
-        Core::FramebufferDescription TemporaryDesc;
+        apemode::FramebufferDescription TemporaryDesc;
 
     public:
         void Attach (TextureResourceView const & TextureView);
         void SetRenderPass (RenderPass const & pRenderPass);
 
-        Core::Framebuffer const * RecreateFramebuffer (Core::GraphicsDevice & GraphicsNode);
+        apemode::Framebuffer const * RecreateFramebuffer (apemode::GraphicsDevice & GraphicsNode);
 
         void Reset();
 
     };
 
-    class _Graphics_ecosystem_dll_api FramebufferManager : public Aux::ScalableAllocPolicy,
-                                                           public Aux::NoCopyAssignPolicy
+    class _Graphics_ecosystem_dll_api FramebufferManager : public apemode::ScalableAllocPolicy,
+                                                           public apemode::NoCopyAssignPolicy
     {
-        friend Core::GraphicsDevice;
-        friend Core::FramebufferBuilder;
+        friend apemode::GraphicsDevice;
+        friend apemode::FramebufferBuilder;
 
         struct PrivateContent;
         struct FramebufferContent;
@@ -82,7 +82,7 @@ namespace Core
         FramebufferManager();
         ~FramebufferManager();
 
-        void AddNewFramebuffer (Core::Framebuffer & Framebuffer);
-        Core::Framebuffer const * TryGetFramebufferObjectByHash (uint64_t Hash);
+        void AddNewFramebuffer (apemode::Framebuffer & Framebuffer);
+        apemode::Framebuffer const * TryGetFramebufferObjectByHash (uint64_t Hash);
     };
 }

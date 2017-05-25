@@ -2,13 +2,13 @@
 
 #include <fbxvpch.h>
 
-namespace fbxv {
+namespace apemode {
     void *Malloc( size_t bytes );
     void *Memalign( size_t alignment, size_t bytes );
     void Free( void *p );
 }
 
-namespace fbxv {
+namespace apemode {
 
     struct SceneMaterial {
         mathfu::vec4 albedo;

@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <type_traits>
 
-namespace fbxv
+namespace apemode
 {
     enum DigitalInput
     {

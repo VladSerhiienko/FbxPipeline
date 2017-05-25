@@ -4,7 +4,7 @@
 #include <NativeDispatchableHandles.Vulkan.h>
 #include <RenderPassResources.Vulkan.h>
 
-namespace Core
+namespace apemode
 {
     class CommandList;
     class CommandQueue;
@@ -12,8 +12,8 @@ namespace Core
     class ColorResourceView;
     class RenderPassResources;
 
-    class _Graphics_ecosystem_dll_api Swapchain : public Aux::ScalableAllocPolicy,
-                                                  public Aux::NoCopyAssignPolicy
+    class _Graphics_ecosystem_dll_api Swapchain : public apemode::ScalableAllocPolicy,
+                                                  public apemode::NoCopyAssignPolicy
     {
     public:
 #ifdef _WIN32
@@ -33,8 +33,8 @@ namespace Core
          * Initialized surface, render targets` and depth stencils` views.
          * @return True if initialization went ok, false otherwise.
          */
-        bool RecreateResourceFor (Core::GraphicsDevice & InGraphicsNode,
-                                  Core::CommandQueue &   InCmdQueue,
+        bool RecreateResourceFor (apemode::GraphicsDevice & InGraphicsNode,
+                                  apemode::CommandQueue &   InCmdQueue,
 #ifdef _WIN32
                                   ModuleHandle InInst,
                                   WindowHandle InWnd,
@@ -46,15 +46,15 @@ namespace Core
          * Checks if passed command queue supports swapchain presenting.
          * @return True if it does, false otherwise.
          */
-        bool SupportsPresenting (Core::GraphicsDevice const & InGraphicsNode,
-                                 Core::CommandQueue const &   InCmdQueue) const;
+        bool SupportsPresenting (apemode::GraphicsDevice const & InGraphicsNode,
+                                 apemode::CommandQueue const &   InCmdQueue) const;
 
         /**
          * Acquires next swapchain buffer
          * @return true If the swapchain buffer was acquired, false otherwise.
          * @note Sets write frame for provided renderpass resources instance.
          */
-        bool OnFrameMove (Core::RenderPassResources & Resources,
+        bool OnFrameMove (apemode::RenderPassResources & Resources,
                           VkSemaphore                 hSemaphore,
                           VkFence                     hFence,
                           uint64_t                    Timeout = kMaxTimeout);
@@ -64,8 +64,8 @@ namespace Core
          * @return true If presented succeessfully, false otherwise.
          * @note Advances frame counters for provided renderpass resources instance.
          */
-        bool OnFramePresent (Core::CommandQueue &        CmdQueue,
-                             Core::RenderPassResources & Resources,
+        bool OnFramePresent (apemode::CommandQueue &        CmdQueue,
+                             apemode::RenderPassResources & Resources,
                              VkSemaphore *               pWaitSemaphores    = nullptr,
                              uint32_t                    WaitSemaphoreCount = 0);
 
@@ -82,8 +82,8 @@ namespace Core
         uint32_t GetBufferCount () const;
 
     public:
-        Core::GraphicsDevice * pGraphicsNode;
-        Core::CommandQueue *   pCmdQueue;
+        apemode::GraphicsDevice * pGraphicsNode;
+        apemode::CommandQueue *   pCmdQueue;
 
     public:
         uint16_t                                  Id;
@@ -93,8 +93,8 @@ namespace Core
         VkPresentModeKHR                          ePresentMode;
         VkSurfaceTransformFlagsKHR                eSurfaceTransform;
         VkSurfaceCapabilitiesKHR                  SurfaceCaps;
-        Core::TDispatchableHandle<VkSwapchainKHR> hSwapchain;
-        Core::TDispatchableHandle<VkSurfaceKHR>   hSurface;
+        apemode::TDispatchableHandle<VkSwapchainKHR> hSwapchain;
+        apemode::TDispatchableHandle<VkSurfaceKHR>   hSurface;
         std::vector<VkImage>             hBuffers;
 
         /*std::vector<VkSemaphore> hPresentSemaphores;

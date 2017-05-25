@@ -19,7 +19,7 @@
 #define _Game_engine_Halt(...)
 #define _Get_collection_length_u(c) ((uint32_t) c.size())
 
-namespace Aux {
+namespace apemode {
     struct ScalableAllocPolicy {};
     struct NoCopyAssignPolicy {};
 }
@@ -30,7 +30,7 @@ namespace Aux {
 
 #define _Aux_TArrayTraits_Has_array_traits 1
 
-namespace Aux
+namespace apemode
 {
     template <typename TArray>
     struct TArrayTraits;
@@ -42,7 +42,7 @@ namespace Aux
     };
 }
 
-namespace Aux {
+namespace apemode {
 
 #ifdef ZeroMemory
 #undef ZeroMemory
@@ -76,11 +76,11 @@ namespace Aux {
 #undef _Get_array_length_u
 #endif
 
-#define _Get_array_length(Array) Aux::TArrayTraits<decltype (Array)>::ArrayLength
+#define _Get_array_length(Array) apemode::TArrayTraits<decltype (Array)>::ArrayLength
 #define _Get_array_length_u(Array) static_cast<unsigned int> (_Get_array_length (Array))
 #define ARRAYSIZE _Get_array_length_u
 
-namespace Aux
+namespace apemode
 {
     namespace Details
     {
@@ -133,7 +133,7 @@ namespace Aux
 
 #define _Aux_DebugTraceFunc
 
-namespace Aux
+namespace apemode
 {
     template <typename T>
     static void TSafeDeleteObj (_Inout_ _Maybenull_ T *& pObj)
@@ -153,14 +153,14 @@ namespace Aux
     struct TSafeDeleteObjOp
     {
         using TObj = typename std::decay<TDecoratedObj>::type;
-        void operator () (_In_ _Maybenull_ TObj *pObj) { Aux::TSafeDeleteObj<TObj>(pObj); }
-        void operator () (_In_ _Maybenull_ TObj const *pObj) { Aux::TSafeDeleteObj<TObj>(pObj); }
+        void operator () (_In_ _Maybenull_ TObj *pObj) { apemode::TSafeDeleteObj<TObj>(pObj); }
+        void operator () (_In_ _Maybenull_ TObj const *pObj) { apemode::TSafeDeleteObj<TObj>(pObj); }
     };
 }
 
 
 
-namespace Aux
+namespace apemode
 {
     template <size_t _TEnumSize_>
     struct TIntTypeForEnumOfSize;
@@ -214,55 +214,55 @@ extern "C++"                                                                    
 inline  _TEnum_                                                                                    \
         operator| (_TEnum_ a, _TEnum_ b)                                                           \
         {                                                                                          \
-            return _TEnum_ (((Aux::TIntTypeForEnum<_TEnum_>::SignedIntType) a)                     \
-                            | ((Aux::TIntTypeForEnum<_TEnum_>::SignedIntType) b));                 \
+            return _TEnum_ (((apemode::TIntTypeForEnum<_TEnum_>::SignedIntType) a)                     \
+                            | ((apemode::TIntTypeForEnum<_TEnum_>::SignedIntType) b));                 \
         }                                                                                          \
         \
 inline  _TEnum_ &                                                                                  \
         operator|= (_TEnum_ & a, _TEnum_ b)                                                        \
         {                                                                                          \
-            return (_TEnum_ &) (((Aux::TIntTypeForEnum<_TEnum_>::SignedIntType &) a)               \
-                                |= ((Aux::TIntTypeForEnum<_TEnum_>::SignedIntType) b));            \
+            return (_TEnum_ &) (((apemode::TIntTypeForEnum<_TEnum_>::SignedIntType &) a)               \
+                                |= ((apemode::TIntTypeForEnum<_TEnum_>::SignedIntType) b));            \
         }                                                                                          \
         \
 inline _TEnum_                                                                                     \
         operator& (_TEnum_ a, _TEnum_ b)                                                           \
         {                                                                                          \
-            return _TEnum_ (((Aux::TIntTypeForEnum<_TEnum_>::SignedIntType) a)                     \
-                            & ((Aux::TIntTypeForEnum<_TEnum_>::SignedIntType) b));                 \
+            return _TEnum_ (((apemode::TIntTypeForEnum<_TEnum_>::SignedIntType) a)                     \
+                            & ((apemode::TIntTypeForEnum<_TEnum_>::SignedIntType) b));                 \
         }                                                                                          \
         \
 inline  _TEnum_ &                                                                                  \
         operator&= (_TEnum_ & a, _TEnum_ b)                                                        \
         {                                                                                          \
-            return (_TEnum_ &) (((Aux::TIntTypeForEnum<_TEnum_>::SignedIntType &) a)               \
-                                &= ((Aux::TIntTypeForEnum<_TEnum_>::SignedIntType) b));            \
+            return (_TEnum_ &) (((apemode::TIntTypeForEnum<_TEnum_>::SignedIntType &) a)               \
+                                &= ((apemode::TIntTypeForEnum<_TEnum_>::SignedIntType) b));            \
         }                                                                                          \
         \
 inline _TEnum_                                                                                     \
         operator~ (_TEnum_ a)                                                                      \
         {                                                                                          \
-            return _TEnum_ (~((Aux::TIntTypeForEnum<_TEnum_>::SignedIntType) a));                  \
+            return _TEnum_ (~((apemode::TIntTypeForEnum<_TEnum_>::SignedIntType) a));                  \
         }                                                                                          \
         \
 inline  _TEnum_                                                                                    \
         operator^ (_TEnum_ a, _TEnum_ b)                                                           \
         {                                                                                          \
-            return _TEnum_ (((Aux::TIntTypeForEnum<_TEnum_>::SignedIntType) a)                     \
-                            ^ ((Aux::TIntTypeForEnum<_TEnum_>::SignedIntType) b));                 \
+            return _TEnum_ (((apemode::TIntTypeForEnum<_TEnum_>::SignedIntType) a)                     \
+                            ^ ((apemode::TIntTypeForEnum<_TEnum_>::SignedIntType) b));                 \
         }                                                                                          \
         \
 inline  _TEnum_ &                                                                                  \
         operator^= (_TEnum_ & a, _TEnum_ b)                                                        \
         {                                                                                          \
-            return (_TEnum_ &) (((Aux::TIntTypeForEnum<_TEnum_>::SignedIntType &) a)               \
-                                ^= ((Aux::TIntTypeForEnum<_TEnum_>::SignedIntType) b));            \
+            return (_TEnum_ &) (((apemode::TIntTypeForEnum<_TEnum_>::SignedIntType &) a)               \
+                                ^= ((apemode::TIntTypeForEnum<_TEnum_>::SignedIntType) b));            \
         }                                                                                          \
     \
 }
 
 
-namespace Core
+namespace apemode
 {
     struct ResultHandle
     {

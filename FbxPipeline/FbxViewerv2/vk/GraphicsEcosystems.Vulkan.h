@@ -2,11 +2,11 @@
 
 #include <GraphicsDevice.Vulkan.h>
 
-namespace Core
+namespace apemode
 {
-    class _Graphics_ecosystem_dll_api GraphicsHeterogeneousMultiadapterEcosystem
-        : public Aux::ScalableAllocPolicy,
-          public Aux::NoCopyAssignPolicy
+    class _Graphics_ecosystem_dll_api GraphicsEcosystem
+        : public apemode::ScalableAllocPolicy,
+          public apemode::NoCopyAssignPolicy
     {
     public:
         struct PrivateContent;
@@ -20,8 +20,8 @@ namespace Core
         };
 
     public:
-        GraphicsHeterogeneousMultiadapterEcosystem ();
-        ~GraphicsHeterogeneousMultiadapterEcosystem ();
+        GraphicsEcosystem ();
+        ~GraphicsEcosystem ();
 
     public:
         inline GraphicsDevice * GetPrimaryGraphicsNode () { return PrimaryNode.get(); }
@@ -33,7 +33,7 @@ namespace Core
        bool RecreateGraphicsNodes(EFlags Flags = kFlag_None);
 
     private:
-        typedef Aux::TSafeDeleteObjOp<PrivateContent> PrivateContentDeleter;
+        typedef apemode::TSafeDeleteObjOp<PrivateContent> PrivateContentDeleter;
         typedef std::unique_ptr<PrivateContent, PrivateContentDeleter> PrivateContentUqPtr;
 
         friend GraphicsDevice;
@@ -49,4 +49,4 @@ namespace Core
     };
 }
 
-_Game_engine_Define_enum_flag_operators(Core::GraphicsHeterogeneousMultiadapterEcosystem::EFlags);
+_Game_engine_Define_enum_flag_operators(apemode::GraphicsEcosystem::EFlags);

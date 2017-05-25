@@ -1,17 +1,17 @@
 #pragma once
 
-struct Core::GraphicsDevice::PrivateContent : public Aux::ScalableAllocPolicy,
-                                              public Aux::NoCopyAssignPolicy
+struct apemode::GraphicsDevice::PrivateContent : public apemode::ScalableAllocPolicy,
+                                              public apemode::NoCopyAssignPolicy
 {
-    struct NativeDeviceWrapper : public Aux::ScalableAllocPolicy,
-                                 public Aux::NoCopyAssignPolicy
+    struct NativeDeviceWrapper : public apemode::ScalableAllocPolicy,
+                                 public apemode::NoCopyAssignPolicy
     {
         typedef std::vector<float> FloatVector;
         typedef TInfoStruct<VkLayerProperties>::Vector       VkLayerPropertiesVector;
         typedef TInfoStruct<VkQueueFamilyProperties>::Vector VkQueueFamilyPropertiesVector;
         typedef TInfoStruct<VkDeviceQueueCreateInfo>::Vector VkDeviceQueueCreateInfoVector;
 
-        typedef Core::GraphicsHeterogeneousMultiadapterEcosystem   GraphicsEcosystem;
+        typedef apemode::GraphicsEcosystem   GraphicsEcosystem;
         typedef GraphicsEcosystem::PrivateContent                  GraphicsEcosystemContent;
         typedef GraphicsEcosystemContent::NativeLayerWrapper       NativeLayerWrapper;
         typedef GraphicsEcosystemContent::NativeLayerWrapperVector NativeLayerWrapperVector;
@@ -47,18 +47,18 @@ struct Core::GraphicsDevice::PrivateContent : public Aux::ScalableAllocPolicy,
         bool Recreate(CreateArgs * Args);
     };
 
-    typedef Aux::TSafeDeleteObjOp<Core::RenderPassManager> RenderPassManagerDeleter;
-    typedef Aux::TSafeDeleteObjOp<Core::FramebufferManager> FramebufferManagerDeleter;
-    typedef Aux::TSafeDeleteObjOp<Core::RootSignatureManager> RootSignatureManagerDeleter;
-    typedef Aux::TSafeDeleteObjOp<Core::PipelineStateManager> PipelineStateManagerDeleter;
-    typedef Aux::TSafeDeleteObjOp<Core::ShaderManager> ShaderManagerDeleter;
+    typedef apemode::TSafeDeleteObjOp<apemode::RenderPassManager> RenderPassManagerDeleter;
+    typedef apemode::TSafeDeleteObjOp<apemode::FramebufferManager> FramebufferManagerDeleter;
+    typedef apemode::TSafeDeleteObjOp<apemode::RootSignatureManager> RootSignatureManagerDeleter;
+    typedef apemode::TSafeDeleteObjOp<apemode::PipelineStateManager> PipelineStateManagerDeleter;
+    typedef apemode::TSafeDeleteObjOp<apemode::ShaderManager> ShaderManagerDeleter;
 
     NativeDeviceWrapper DeviceHandle;
-    std::unique_ptr<Core::RenderPassManager, RenderPassManagerDeleter> RenderPassManager;
-    std::unique_ptr<Core::FramebufferManager, FramebufferManagerDeleter> FramebufferManager;
-    std::unique_ptr<Core::RootSignatureManager, RootSignatureManagerDeleter> RootSignatureManager;
-    std::unique_ptr<Core::PipelineStateManager, PipelineStateManagerDeleter> PipelineStateManager;
-    std::unique_ptr<Core::ShaderManager, ShaderManagerDeleter> ShaderManager;
+    std::unique_ptr<apemode::RenderPassManager, RenderPassManagerDeleter> RenderPassManager;
+    std::unique_ptr<apemode::FramebufferManager, FramebufferManagerDeleter> FramebufferManager;
+    std::unique_ptr<apemode::RootSignatureManager, RootSignatureManagerDeleter> RootSignatureManager;
+    std::unique_ptr<apemode::PipelineStateManager, PipelineStateManagerDeleter> PipelineStateManager;
+    std::unique_ptr<apemode::ShaderManager, ShaderManagerDeleter> ShaderManager;
 
     PrivateContent();
 

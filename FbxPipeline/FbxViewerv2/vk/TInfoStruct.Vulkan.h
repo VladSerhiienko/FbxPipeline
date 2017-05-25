@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Core
+namespace apemode
 {
     namespace Traits
     {
@@ -170,7 +170,7 @@ namespace Core
         TInfoStruct(SelfType const & Other) : Desc(Other.Desc) {}
         TInfoStruct(TVulkanNativeStruct const & OtherDesc) : Desc(OtherDesc) { SetStructType<>(); }
 
-        void ZeroMemory() { Aux::ZeroMemory(Desc); SetStructType<>(); }
+        void ZeroMemory() { apemode::ZeroMemory(Desc); SetStructType<>(); }
 
         SelfType & operator =(SelfType && Other) { Desc = Other.Desc; Validate(); return *this; }
         SelfType & operator =(TVulkanNativeStruct && OtherDesc) { Desc = OtherDesc; Validate(); return *this; }
@@ -200,7 +200,7 @@ namespace Core
     };
 }
 
-namespace Aux
+namespace apemode
 {
     template <typename T>
     inline uint32_t GetSizeU(T const & c) {

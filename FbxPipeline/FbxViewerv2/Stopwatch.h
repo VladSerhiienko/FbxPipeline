@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-namespace fbxv
+namespace apemode
 {
     class Stopwatch
     {

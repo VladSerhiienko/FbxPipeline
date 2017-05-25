@@ -4,7 +4,7 @@
 #include <TInfoStruct.Vulkan.h>
 #include <NativeDispatchableHandles.Vulkan.h>
 
-namespace Core
+namespace apemode
 {
     class CommandList;
     class RenderPass;
@@ -23,8 +23,8 @@ namespace Core
         kShaderType_Unknown,
     };
 
-    class _Graphics_ecosystem_dll_api ShaderBytecode : public Aux::ScalableAllocPolicy,
-                                                       public Aux::NoCopyAssignPolicy
+    class _Graphics_ecosystem_dll_api ShaderBytecode : public apemode::ScalableAllocPolicy,
+                                                       public apemode::NoCopyAssignPolicy
     {
     public:
         uint64_t                      Hash;
@@ -52,12 +52,12 @@ namespace Core
         void SetBytecode (const void * pBytecode, size_t BytecodeLength);
 
     public:
-        Core::ShaderBytecode & operator= (ShaderBytecode && Other);
-        Core::ShaderBytecode & operator= (ShaderBytecode const & Other);
+        apemode::ShaderBytecode & operator= (ShaderBytecode && Other);
+        apemode::ShaderBytecode & operator= (ShaderBytecode const & Other);
     };
 
-    class _Graphics_ecosystem_dll_api PipelineStateDescription : public Aux::ScalableAllocPolicy,
-                                                                 public Aux::NoCopyAssignPolicy
+    class _Graphics_ecosystem_dll_api PipelineStateDescription : public apemode::ScalableAllocPolicy,
+                                                                 public apemode::NoCopyAssignPolicy
     {
     public:
         uint64_t                 Hash;
@@ -65,27 +65,27 @@ namespace Core
         RenderPass const *       pRenderPass;
         RootSignature const *    pRootSignature;
 
-        Core::TInfoStruct<VkPipelineVertexInputStateCreateInfo>   VertexInputState;
-        Core::TInfoStruct<VkPipelineInputAssemblyStateCreateInfo> InputAssemblyState;
+        apemode::TInfoStruct<VkPipelineVertexInputStateCreateInfo>   VertexInputState;
+        apemode::TInfoStruct<VkPipelineInputAssemblyStateCreateInfo> InputAssemblyState;
         std::vector<VkVertexInputBindingDescription>     InputBindings;
         std::vector<VkVertexInputAttributeDescription>   InputAttributes;
 
         VkSampleMask                                              SampleMask;
-        Core::TInfoStruct<VkPipelineMultisampleStateCreateInfo>   MultisampleState;
-        Core::TInfoStruct<VkPipelineRasterizationStateCreateInfo> RasterizationState;
+        apemode::TInfoStruct<VkPipelineMultisampleStateCreateInfo>   MultisampleState;
+        apemode::TInfoStruct<VkPipelineRasterizationStateCreateInfo> RasterizationState;
 
-        Core::TInfoStruct<VkPipelineViewportStateCreateInfo> ViewportState;
+        apemode::TInfoStruct<VkPipelineViewportStateCreateInfo> ViewportState;
         std::vector<VkViewport>                     Viewports;
         std::vector<VkRect2D>                       ScissorRects;
 
-        Core::TInfoStruct<VkPipelineDepthStencilStateCreateInfo> DepthStencilState;
-        Core::TInfoStruct<VkPipelineColorBlendStateCreateInfo>   ColorBlendState;
+        apemode::TInfoStruct<VkPipelineDepthStencilStateCreateInfo> DepthStencilState;
+        apemode::TInfoStruct<VkPipelineColorBlendStateCreateInfo>   ColorBlendState;
         VkPipelineColorBlendAttachmentState                      ColorBlendAttachmentStates[8];
 
-        Core::TInfoStruct<VkPipelineDynamicStateCreateInfo> DynamicState;
+        apemode::TInfoStruct<VkPipelineDynamicStateCreateInfo> DynamicState;
         VkDynamicState EnabledDynamicStates[VK_DYNAMIC_STATE_RANGE_SIZE];
 
-        Core::TInfoStruct<VkPipelineShaderStageCreateInfo> ShaderStages[5];
+        apemode::TInfoStruct<VkPipelineShaderStageCreateInfo> ShaderStages[5];
         ShaderBytecode                                     ShaderBytecodes[5];
         VkSpecializationInfo                               ShaderSpecializations[5];
 
@@ -100,40 +100,40 @@ namespace Core
         bool IsDynamicStateEnabled(VkDynamicState eDynamicState) const;
     };
 
-    class _Graphics_ecosystem_dll_api PipelineState : public Aux::ScalableAllocPolicy,
-                                                      public Aux::NoCopyAssignPolicy
+    class _Graphics_ecosystem_dll_api PipelineState : public apemode::ScalableAllocPolicy,
+                                                      public apemode::NoCopyAssignPolicy
     {
     public:
         uint64_t                                   Hash;
         VkPipelineBindPoint                        eBindPoint;
-        Core::TDispatchableHandle<VkPipeline>      hPipeline;
-        Core::TDispatchableHandle<VkPipelineCache> hPipelineCache;
-        Core::PipelineStateDescription const *     pDesc;
-        Core::RenderPass const *                   pRenderPass;
-        Core::RootSignature const *                pRootSignature;
-        Core::GraphicsDevice const *               pGraphicsNode;
+        apemode::TDispatchableHandle<VkPipeline>      hPipeline;
+        apemode::TDispatchableHandle<VkPipelineCache> hPipelineCache;
+        apemode::PipelineStateDescription const *     pDesc;
+        apemode::RenderPass const *                   pRenderPass;
+        apemode::RootSignature const *                pRootSignature;
+        apemode::GraphicsDevice const *               pGraphicsNode;
 
     public:
         PipelineState();
         ~PipelineState();
 
-        void BindTo(Core::CommandList & CmdList);
+        void BindTo(apemode::CommandList & CmdList);
 
     public:
         operator VkPipeline() const;
         operator VkPipelineCache() const;
     };
 
-    class _Graphics_ecosystem_dll_api PipelineStateBuilder : public Aux::ScalableAllocPolicy,
-                                                             public Aux::NoCopyAssignPolicy
+    class _Graphics_ecosystem_dll_api PipelineStateBuilder : public apemode::ScalableAllocPolicy,
+                                                             public apemode::NoCopyAssignPolicy
     {
     public:
         class InputLayoutBuilder;
         friend InputLayoutBuilder;
 
     public:
-        class _Graphics_ecosystem_dll_api InputLayoutBuilder : public Aux::ScalableAllocPolicy,
-                                                               public Aux::NoCopyAssignPolicy
+        class _Graphics_ecosystem_dll_api InputLayoutBuilder : public apemode::ScalableAllocPolicy,
+                                                               public apemode::NoCopyAssignPolicy
         {
             PipelineStateBuilder &            Bilder;
             VkVertexInputBindingDescription * pBinding;
@@ -174,7 +174,7 @@ namespace Core
 
         void Reset();
 
-        Core::PipelineStateDescription & GetDesc();
+        apemode::PipelineStateDescription & GetDesc();
 
         //
         // DynamicState
@@ -235,8 +235,8 @@ namespace Core
         void SetScissorRects (VkRect2D const * pScissorRects, size_t ScissorRectCount);
         void ResetScissorRects ();
 
-        void SetRenderPass (Core::RenderPass const & RenderPass, uint32_t SubpassId);
-        void SetRootSignature (Core::RootSignature const & RootSignature);
+        void SetRenderPass (apemode::RenderPass const & RenderPass, uint32_t SubpassId);
+        void SetRootSignature (apemode::RootSignature const & RootSignature);
 
         //
         // Stages
@@ -279,18 +279,18 @@ namespace Core
         void SetPrimitiveTopology (VkPrimitiveTopology Topology, bool bEnableRestart);
 
     public:
-        Core::PipelineState const * RecreatePipelineState (Core::GraphicsDevice & GraphicsNode);
+        apemode::PipelineState const * RecreatePipelineState (apemode::GraphicsDevice & GraphicsNode);
 
     private:
         InputLayoutBuilder       InputEditor;
         PipelineStateDescription TemporaryDesc;
     };
 
-    class _Graphics_ecosystem_dll_api PipelineStateManager : public Aux::ScalableAllocPolicy,
-                                                             public Aux::NoCopyAssignPolicy
+    class _Graphics_ecosystem_dll_api PipelineStateManager : public apemode::ScalableAllocPolicy,
+                                                             public apemode::NoCopyAssignPolicy
     {
-        friend Core::GraphicsDevice;
-        friend Core::PipelineStateBuilder;
+        friend apemode::GraphicsDevice;
+        friend apemode::PipelineStateBuilder;
         struct PipelineStateContent;
         struct PrivateContent;
 
@@ -300,7 +300,7 @@ namespace Core
         PipelineStateManager ();
         ~PipelineStateManager ();
 
-        void AddNewPipelineStateObject (Core::PipelineState & PipelineState);
-        Core::PipelineState const * TryGetPipelineStateObjectByHash (uint64_t Hash);
+        void AddNewPipelineStateObject (apemode::PipelineState & PipelineState);
+        apemode::PipelineState const * TryGetPipelineStateObjectByHash (uint64_t Hash);
     };
 }

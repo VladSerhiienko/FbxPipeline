@@ -11,10 +11,10 @@
 #include <GraphicsEcosystem.PrivateCreateDeviceArgs.Vulkan.h>
 
 /// -------------------------------------------------------------------------------------------------------------------
-/// GraphicsHeterogeneousMultiadapterEcosystem PrivateContent
+/// GraphicsEcosystem PrivateContent
 /// -------------------------------------------------------------------------------------------------------------------
 
-Core:: GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::APIVersion::APIVersion(bool bDump)
+apemode:: GraphicsEcosystem::PrivateContent::APIVersion::APIVersion(bool bDump)
     : Major(VK_API_VERSION_1_0 >> 22)
     , Minor((VK_API_VERSION_1_0 >> 12) & 0x3ff)
     , Patch(VK_API_VERSION_1_0 & 0xfff)
@@ -26,7 +26,7 @@ Core:: GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::APIVersion::A
 #define _Game_app_filter_length sizeof(_Game_app_filter)
 #define _Game_app_UUID_length 64
 
-Core:: GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::PrivateContent()
+apemode:: GraphicsEcosystem::PrivateContent::PrivateContent()
     : EngineName("GameEngine")
     , AppName()
 {
@@ -34,7 +34,7 @@ Core:: GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::PrivateConten
 
     /*
     std::string::value_type AppUUID[_Game_app_UUID_length];
-    Aux::NewUUID(AppUUID, _Game_app_UUID_length, AppUUIDSize);
+    apemode::NewUUID(AppUUID, _Game_app_UUID_length, AppUUIDSize);
 
     AppName.reserve(_Game_app_filter_length + _Game_app_UUID_length);
     AppName = _Game_app_filter;
@@ -47,7 +47,7 @@ Core:: GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::PrivateConten
     //TbbAux::AllocationCallbacks::Initialize(this);
 }
 
-bool Core:: GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::ScanInstanceLayerProperties()
+bool apemode:: GraphicsEcosystem::PrivateContent::ScanInstanceLayerProperties()
 {
     uint32_t LayerPropertyCount = 0;
     ResultHandle ErrorHandle;
@@ -75,7 +75,7 @@ bool Core:: GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::ScanInst
         uint32_t LayerExtensionCount = 0;
 
         const bool bIsUnnamed = !Layer;
-        auto & LayerWrapper = Aux::PushBackAndGet(LayerWrappers);
+        auto & LayerWrapper = apemode::PushBackAndGet(LayerWrappers);
         char const * LayerName = bIsUnnamed ? LayerWrapper.Layer->layerName : nullptr;
 
         LayerWrapper.Layer = !bIsUnnamed ? *Layer : VkLayerProperties();
@@ -145,8 +145,8 @@ bool Core:: GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::ScanInst
     return ErrorHandle.Succeeded();
 }
 
-bool Core:: GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::ScanAdapters(
-    GraphicsHeterogeneousMultiadapterEcosystem & Ecosys
+bool apemode:: GraphicsEcosystem::PrivateContent::ScanAdapters(
+    GraphicsEcosystem & Ecosys
     )
 {
     uint32_t AdaptersFound = 0;
@@ -195,14 +195,14 @@ bool Core:: GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::ScanAdap
     return AdaptersFound != 0;
 }
 
-Core:: GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::NativeLayerWrapper &
-Core:: GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::GetUnnamedLayer()
+apemode:: GraphicsEcosystem::PrivateContent::NativeLayerWrapper &
+apemode:: GraphicsEcosystem::PrivateContent::GetUnnamedLayer()
 {
     _Game_engine_Assert(LayerWrappers.front().IsUnnamedLayer(), "vkEnumerateInstanceExtensionProperties failed.");
     return LayerWrappers.front();
 }
 
-bool Core:: GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::InitializeInstance(GraphicsEcosystem & Ecosys)
+bool apemode:: GraphicsEcosystem::PrivateContent::InitializeInstance(GraphicsEcosystem & Ecosys)
 {
     if (!ScanInstanceLayerProperties())
         return false;
@@ -262,7 +262,7 @@ bool Core:: GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::Initiali
 }
 
 VKAPI_ATTR VkBool32 VKAPI_CALL
-Core::GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::BreakCallback(VkFlags                    msgFlags,
+apemode::GraphicsEcosystem::PrivateContent::BreakCallback(VkFlags                    msgFlags,
                                                                                 VkDebugReportObjectTypeEXT objType,
                                                                                 uint64_t                   srcObject,
                                                                                 size_t                     location,
@@ -273,7 +273,7 @@ Core::GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::BreakCallback(
 {
     if (msgFlags & VK_DEBUG_REPORT_ERROR_BIT_EXT)
     {
-        //Aux::Platform::DebugBreak();
+        //apemode::Platform::DebugBreak();
     }
 
     /*
@@ -288,7 +288,7 @@ Core::GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::BreakCallback(
 }
 
 VKAPI_ATTR VkBool32 VKAPI_CALL
-Core::GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::DebugCallback(VkFlags                    msgFlags,
+apemode::GraphicsEcosystem::PrivateContent::DebugCallback(VkFlags                    msgFlags,
                                                                                 VkDebugReportObjectTypeEXT objType,
                                                                                 uint64_t                   srcObject,
                                                                                 size_t                     location,
@@ -299,23 +299,23 @@ Core::GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::DebugCallback(
 {
     if (msgFlags & VK_DEBUG_REPORT_ERROR_BIT_EXT)
     {
-        /*Aux::DebugTrace<true, Aux::Error> (
+        /*apemode::DebugTrace<true, apemode::Error> (
             "\tDebugCallback: [%s] Code %d: %s", pLayerPrefix, msgCode, pMsg);
-        Aux::Platform::DebugBreak ();*/
+        apemode::Platform::DebugBreak ();*/
     }
     else if (msgFlags & VK_DEBUG_REPORT_WARNING_BIT_EXT)
     {
-        /*Aux::DebugTrace<true, Aux::Warning> (
+        /*apemode::DebugTrace<true, apemode::Warning> (
             "\tDebugCallback: [%s] Code %d: %s", pLayerPrefix, msgCode, pMsg);*/
     }
     else if (msgFlags & VK_DEBUG_REPORT_INFORMATION_BIT_EXT)
     {
-        /*Aux::DebugTrace<true, Aux::Info> (
+        /*apemode::DebugTrace<true, apemode::Info> (
             "\tDebugCallback: [%s] Code %d: %s", pLayerPrefix, msgCode, pMsg);*/
     }
     else if (msgFlags & VK_DEBUG_REPORT_DEBUG_BIT_EXT)
     {
-        /*Aux::DebugTrace<true, Aux::Debug> (
+        /*apemode::DebugTrace<true, apemode::Debug> (
             "\tDebugCallback: [%s] Code %d: %s", pLayerPrefix, msgCode, pMsg);*/
     }
 
@@ -330,12 +330,12 @@ Core::GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::DebugCallback(
     return false;
 }
 
-bool Core:: GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::NativeLayerWrapper::IsUnnamedLayer() const
+bool apemode:: GraphicsEcosystem::PrivateContent::NativeLayerWrapper::IsUnnamedLayer() const
 {
     return bIsUnnamed;
 }
 
-bool Core:: GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::NativeLayerWrapper::IsValidInstanceLayer() const
+bool apemode:: GraphicsEcosystem::PrivateContent::NativeLayerWrapper::IsValidInstanceLayer() const
 {
     if (IsUnnamedLayer())
     {
@@ -363,12 +363,12 @@ bool Core:: GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::NativeLa
     return true;
 }
 
-void Core:: GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::NativeLayerWrapper::DumpExtensions() const
+void apemode:: GraphicsEcosystem::PrivateContent::NativeLayerWrapper::DumpExtensions() const
 {
     /*_Aux_DebugTrace_separator_header;
     _Aux_DebugTraceFunc;
 
-    Aux::DebugTrace("\t Layer %s (impl 0x%08x, spec 0x%08x):"
+    apemode::DebugTrace("\t Layer %s (impl 0x%08x, spec 0x%08x):"
         , bIsUnnamed ? "<Global>" : Layer->layerName
         , Layer->implementationVersion
         , Layer->specVersion
@@ -376,7 +376,7 @@ void Core:: GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::NativeLa
 
     std::for_each(Extensions.begin(), Extensions.end(), [&](VkExtensionProperties const & Extension)
     {
-        Aux::DebugTrace("\t\t Extension %s (spec 0x%08x)"
+        apemode::DebugTrace("\t\t Extension %s (spec 0x%08x)"
             , Extension.extensionName
             , Extension.specVersion
             );
@@ -386,22 +386,22 @@ void Core:: GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::NativeLa
 }
 
 /// -------------------------------------------------------------------------------------------------------------------
-/// GraphicsHeterogeneousMultiadapterEcosystem
+/// GraphicsEcosystem
 /// -------------------------------------------------------------------------------------------------------------------
 
-Core::GraphicsHeterogeneousMultiadapterEcosystem::GraphicsHeterogeneousMultiadapterEcosystem()
+apemode::GraphicsEcosystem::GraphicsEcosystem()
     : pContent(new PrivateContent())
 {
     _Aux_DebugTraceFunc;
 }
 
-Core::GraphicsHeterogeneousMultiadapterEcosystem::~GraphicsHeterogeneousMultiadapterEcosystem()
+apemode::GraphicsEcosystem::~GraphicsEcosystem()
 {
     _Aux_DebugTraceFunc;
-    Aux::TSafeDeleteObj (pContent);
+    apemode::TSafeDeleteObj (pContent);
 }
 
-bool Core::GraphicsHeterogeneousMultiadapterEcosystem::RecreateGraphicsNodes(EFlags Flags)
+bool apemode::GraphicsEcosystem::RecreateGraphicsNodes(EFlags Flags)
 {
     _Unreferenced_parameter_ (Flags);
 

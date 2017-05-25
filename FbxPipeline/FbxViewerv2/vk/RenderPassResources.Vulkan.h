@@ -4,14 +4,14 @@
 #include <RenderTarget.Vulkan.h>
 #include <DepthStencil.Vulkan.h>
 
-namespace Core
+namespace apemode
 {
     class CommandList;
     class RenderPass;
     class Framebuffer;
 
-    class _Graphics_ecosystem_dll_api RenderPassResources : public Aux::ScalableAllocPolicy,
-                                                            public Aux::NoCopyAssignPolicy
+    class _Graphics_ecosystem_dll_api RenderPassResources : public apemode::ScalableAllocPolicy,
+                                                            public apemode::NoCopyAssignPolicy
     {
     public:
         enum
@@ -21,15 +21,15 @@ namespace Core
         };
 
     public:
-        using TextureViewPtr      = std::shared_ptr<Core::TextureResourceView>;
-        using ColorViewPtr        = std::shared_ptr<Core::ColorResourceView>;
-        using DepthStencilViewPtr = std::shared_ptr<Core::DepthStencilResourceView>;
+        using TextureViewPtr      = std::shared_ptr<apemode::TextureResourceView>;
+        using ColorViewPtr        = std::shared_ptr<apemode::ColorResourceView>;
+        using DepthStencilViewPtr = std::shared_ptr<apemode::DepthStencilResourceView>;
 
     public:
         struct BeginEndScope;
         friend BeginEndScope;
-        struct _Graphics_ecosystem_dll_api BeginEndScope : public Aux::ScalableAllocPolicy,
-                                                           public Aux::NoCopyAssignPolicy
+        struct _Graphics_ecosystem_dll_api BeginEndScope : public apemode::ScalableAllocPolicy,
+                                                           public apemode::NoCopyAssignPolicy
         {
             CommandList &         AssocCmdList;
             RenderPassResources & AssocResources;
@@ -39,9 +39,9 @@ namespace Core
         };
 
     public:
-        bool RecreateResourcesFor (Core::GraphicsDevice &   InGraphicsNode,
-                                   Core::RenderPass const & InRenderPass,
-                                   Core::Swapchain **       ppInSwapchains,
+        bool RecreateResourcesFor (apemode::GraphicsDevice &   InGraphicsNode,
+                                   apemode::RenderPass const & InRenderPass,
+                                   apemode::Swapchain **       ppInSwapchains,
                                    uint32_t                 InSwapchainCount,
                                    uint32_t                 InFrameCount,
                                    uint32_t                 InColorWidth,
@@ -57,8 +57,8 @@ namespace Core
         uint32_t                  GetWriteFrame() const;
         uint32_t                  GetFrameCount () const;
         uint32_t                  GetAttachmentCount() const;
-        Core::RenderPass const *  GetRenderPass () const;
-        Core::Framebuffer const * GetWriteFramebuffer() const;
+        apemode::RenderPass const *  GetRenderPass () const;
+        apemode::Framebuffer const * GetWriteFramebuffer() const;
 
         /**
          * Sets WriteFrame value to the provided one (once all the conditions are satisfied),
@@ -82,7 +82,7 @@ namespace Core
         std::vector< ColorViewPtr >          ColorAttachments[ kFrameMaxCount ];
         std::vector< DepthStencilViewPtr >   DepthStencilAttachments[ kFrameMaxCount ];
         std::vector< TextureResourceView * > TextureViews[ kFrameMaxCount ];
-        Core::RenderPass const *             pRenderPass;
-        Core::Framebuffer const *            ppFramebuffers[ kFrameMaxCount ];
+        apemode::RenderPass const *             pRenderPass;
+        apemode::Framebuffer const *            ppFramebuffers[ kFrameMaxCount ];
     };
 }

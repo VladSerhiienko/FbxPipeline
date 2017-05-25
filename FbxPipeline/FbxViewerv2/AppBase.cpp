@@ -11,14 +11,14 @@
 //
 
 #include <AppBase.h>
-#include <AppSurfaceBase.h>
+#include <IAppSurface.h>
 #include <Input.h>
 #include <Stopwatch.h>
 
-class fbxv::AppContent
+class apemode::AppContent
 {
 public:
-    AppSurfaceBase * pSurface;
+    IAppSurface * pSurface;
     Stopwatch        Stopwatch;
     Input            InputState;
     InputManager     InputManager;
@@ -31,7 +31,7 @@ public:
     {
     }
 
-    bool Initialize (fbxv::AppSurfaceBase * pInSurface)
+    bool Initialize (apemode::IAppSurface * pInSurface)
     {
         SDL_LogVerbose (SDL_LOG_CATEGORY_APPLICATION, "AppContent/Initialize.");
 
@@ -62,15 +62,15 @@ public:
 // AppBase
 //
 
-void fbxv::AppBase::HandleWindowSizeChanged()
+void apemode::AppBase::HandleWindowSizeChanged()
 {
 }
 
-fbxv::AppBase::AppBase () : pAppContent (nullptr)
+apemode::AppBase::AppBase () : pAppContent (nullptr)
 {
 }
 
-fbxv::AppBase::~AppBase ()
+apemode::AppBase::~AppBase ()
 {
     if (pAppContent)
     {
@@ -79,25 +79,25 @@ fbxv::AppBase::~AppBase ()
     }
 }
 
-bool fbxv::AppBase::Initialize (int Args, char * ppArgs[])
+bool apemode::AppBase::Initialize (int Args, char * ppArgs[])
 {
     pAppContent = new AppContent ();
     return pAppContent && pAppContent->Initialize (CreateAppSurface ());
 }
 
-fbxv::AppSurfaceBase * fbxv::AppBase::CreateAppSurface ()
+apemode::IAppSurface * apemode::AppBase::CreateAppSurface ()
 {
-    return new AppSurfaceBase ();
+    return new IAppSurface ();
 }
 
-fbxv::AppSurfaceBase * fbxv::AppBase::GetSurface()
+apemode::IAppSurface * apemode::AppBase::GetSurface()
 {
     return pAppContent ? pAppContent->pSurface : nullptr;
 }
 
-void fbxv::AppBase::OnFrameMove ()
+void apemode::AppBase::OnFrameMove ()
 {
-    using namespace fbxv;
+    using namespace apemode;
 
     assert (pAppContent && "Not initialized.");
 
@@ -117,13 +117,13 @@ void fbxv::AppBase::OnFrameMove ()
     Surface.OnFrameDone ();
 }
 
-void fbxv::AppBase::Update (float /*DeltaSecs*/, Input const & /*InputState*/)
+void apemode::AppBase::Update (float /*DeltaSecs*/, Input const & /*InputState*/)
 {
 }
 
-bool fbxv::AppBase::IsRunning ()
+bool apemode::AppBase::IsRunning ()
 {
-    using namespace fbxv;
+    using namespace apemode;
 
     assert (pAppContent && "Not initialized.");
     return !pAppContent->InputState.bIsQuitRequested

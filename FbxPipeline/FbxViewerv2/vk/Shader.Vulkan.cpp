@@ -8,35 +8,35 @@
 #define _Get_hspv_bytecode_length(Name) _Get_array_length(_Get_hspv_bytecode(Name))
 #define _Get_hspv(Name) _Get_hspv_bytecode(Name), _Get_hspv_bytecode_length(Name)
 
-struct Core::ShaderManager::PrivateContent : public Aux::ScalableAllocPolicy,
-                                             public Aux::NoCopyAssignPolicy
+struct apemode::ShaderManager::PrivateContent : public apemode::ScalableAllocPolicy,
+                                             public apemode::NoCopyAssignPolicy
 {
 };
 
-Core::ShaderManager::ShaderManager () : pImpl (new PrivateContent ())
+apemode::ShaderManager::ShaderManager () : pImpl (new PrivateContent ())
 {
 }
 
-Core::ShaderManager::~ShaderManager ()
+apemode::ShaderManager::~ShaderManager ()
 {
-    Aux::TSafeDeleteObj (pImpl);
+    apemode::TSafeDeleteObj (pImpl);
 }
 
-Core::TDispatchableHandle<VkShaderModule> &&
-Core::ShaderManager::GetShaderModule (Core::GraphicsDevice & GraphicsNode,
+apemode::TDispatchableHandle<VkShaderModule> &&
+apemode::ShaderManager::GetShaderModule (apemode::GraphicsDevice & GraphicsNode,
                                       ShaderBytecode const & Bytecode)
 {
-    Core::TInfoStruct<VkShaderModuleCreateInfo> ShaderModuleDesc;
+    apemode::TInfoStruct<VkShaderModuleCreateInfo> ShaderModuleDesc;
     ShaderModuleDesc->pCode    = reinterpret_cast<uint32_t const *> (Bytecode.Bytecode.data ());
     ShaderModuleDesc->codeSize = Bytecode.Bytecode.size ();
 
-    Core::TDispatchableHandle<VkShaderModule> hShaderModule;
+    apemode::TDispatchableHandle<VkShaderModule> hShaderModule;
     hShaderModule.Recreate (GraphicsNode, ShaderModuleDesc);
 
     return std::move (hShaderModule);
 }
 
-Core::ShaderReflection const * Core::ShaderManager::Reflect (Core::GraphicsDevice & GraphicsNode,
+apemode::ShaderReflection const * apemode::ShaderManager::Reflect (apemode::GraphicsDevice & GraphicsNode,
                                                              ShaderBytecode const & Bytecode)
 {
     return nullptr;

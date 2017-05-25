@@ -7,80 +7,80 @@
 /// BufferPool
 /// -------------------------------------------------------------------------------------------------------------------
 
-Core::BufferPool::BufferPool(BufferPoolType PoolType)
+apemode::BufferPool::BufferPool(BufferPoolType PoolType)
     : ePoolType(PoolType)
 {
     _Aux_DebugTraceFunc;
 }
 
-Core::BufferPool::~BufferPool()
+apemode::BufferPool::~BufferPool()
 {
     _Aux_DebugTraceFunc;
 }
 
-bool Core::BufferPool::RecreateResourcesFor(GraphicsDevice & InGraphicsNode)
+bool apemode::BufferPool::RecreateResourcesFor(GraphicsDevice & InGraphicsNode)
 {
     Pages.clear();
     pGraphicsNode = &InGraphicsNode;
     return true;
 }
 
-void Core::BufferPool::OnResourcesEvicted(GraphicsDevice & InGraphicsNode)
+void apemode::BufferPool::OnResourcesEvicted(GraphicsDevice & InGraphicsNode)
 {
 }
 
-void Core::BufferPool::OnCommandListReset(CommandList & CmdList)
+void apemode::BufferPool::OnCommandListReset(CommandList & CmdList)
 {
 }
 
-Core::BufferPool::Range Core::BufferPool::Suballocate(CommandList & CmdList, uint32_t Size)
+apemode::BufferPool::Range apemode::BufferPool::Suballocate(CommandList & CmdList, uint32_t Size)
 {
-    Core::BufferPool::Range RetRange;
+    apemode::BufferPool::Range RetRange;
     const bool bSuballocated = Suballocate(CmdList, Size, RetRange);
     _Game_engine_Assert(bSuballocated, "Out of memory");
     return RetRange;
 }
 
-bool Core::BufferPool::Suballocate(CommandList & CmdList, uint32_t Size, Range & OutRange)
+bool apemode::BufferPool::Suballocate(CommandList & CmdList, uint32_t Size, Range & OutRange)
 {
     return false;
 }
 
-void Core::BufferPool::OnCommandListExecutePreview(CommandList & CmdList)
+void apemode::BufferPool::OnCommandListExecutePreview(CommandList & CmdList)
 {
 }
 
-bool Core::BufferPool::IsOutOfMemory() const
+bool apemode::BufferPool::IsOutOfMemory() const
 {
     return bIsOutOfMemory;
 }
 
-Core::BufferPoolType Core::BufferPool::GetBufferPoolType() const
+apemode::BufferPoolType apemode::BufferPool::GetBufferPoolType() const
 {
     return ePoolType;
 }
 
-Core::BufferPool::Page * Core::BufferPool::Page::MakeNew ()
+apemode::BufferPool::Page * apemode::BufferPool::Page::MakeNew ()
 {
     return new Page ();
 }
 
-std::shared_ptr<Core::BufferPool::Page> Core::BufferPool::Page::MakeNewShared ()
+std::shared_ptr<apemode::BufferPool::Page> apemode::BufferPool::Page::MakeNewShared ()
 {
-    return std::shared_ptr<Core::BufferPool::Page> (MakeNew ());
+    return std::shared_ptr<apemode::BufferPool::Page> (MakeNew ());
 }
 
-std::unique_ptr<Core::BufferPool::Page> Core::BufferPool::Page::MakeNewUnique ()
+std::unique_ptr<apemode::BufferPool::Page> apemode::BufferPool::Page::MakeNewUnique ()
 {
-    return std::unique_ptr<Core::BufferPool::Page> (MakeNew ());
+    return std::unique_ptr<apemode::BufferPool::Page> (MakeNew ());
 }
 
-Core::BufferPool::Page::Page ()
+apemode::BufferPool::Page::Page ()
 {
     _Aux_DebugTraceFunc;
 }
 
-Core::BufferPool::Page::~Page ()
+apemode::BufferPool::Page::~Page ()
 {
     _Aux_DebugTraceFunc;
 }
