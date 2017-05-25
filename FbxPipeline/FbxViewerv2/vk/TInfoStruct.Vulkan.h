@@ -202,6 +202,11 @@ namespace Core
 
 namespace Aux
 {
+    template <typename T>
+    inline uint32_t GetSizeU(T const & c) {
+        return _Get_collection_length_u(c);
+    }
+
     /** Aliasing cares only about size matching. */
     template <typename TVector, typename TNativeDesc>
     static void AliasStructs (TVector const &      Descs,

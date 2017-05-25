@@ -1,17 +1,14 @@
 //#include <GameEngine.GraphicsEcosystem.Precompiled.h>
 #include <GraphicsEcosystems.Vulkan.h>
 
-#include <UUID.Current.h>
-#include <EastlTbbString.h>
-
 #include <TInfoStruct.Vulkan.h>
 #include <NativeDispatchableHandles.Vulkan.h>
 #include <SystemAllocationCallbacks.Vulkan.h>
 
-#include <Private/GraphicsEcosystem.KnownLayers.Vulkan.h>
-#include <Private/GraphicsEcosystem.KnownExtensions.Vulkan.h>
-#include <Private/GraphicsEcosystem.PrivateContent.Vulkan.h>
-#include <Private/GraphicsEcosystem.PrivateCreateDeviceArgs.Vulkan.h>
+#include <GraphicsEcosystem.KnownLayers.Vulkan.h>
+#include <GraphicsEcosystem.KnownExtensions.Vulkan.h>
+#include <GraphicsEcosystem.PrivateContent.Vulkan.h>
+#include <GraphicsEcosystem.PrivateCreateDeviceArgs.Vulkan.h>
 
 /// -------------------------------------------------------------------------------------------------------------------
 /// GraphicsHeterogeneousMultiadapterEcosystem PrivateContent
@@ -22,7 +19,7 @@ Core:: GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::APIVersion::A
     , Minor((VK_API_VERSION_1_0 >> 12) & 0x3ff)
     , Patch(VK_API_VERSION_1_0 & 0xfff)
 {
-    _Aux_DebugTraceF("Vulkan %u.%u.%u", Major, Minor, Patch);
+    //_Aux_DebugTraceF("Vulkan %u.%u.%u", Major, Minor, Patch);
 }
 
 #define _Game_app_filter "GameApp/"
@@ -35,6 +32,7 @@ Core:: GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::PrivateConten
 {
     size_t AppUUIDSize = 0;
 
+    /*
     std::string::value_type AppUUID[_Game_app_UUID_length];
     Aux::NewUUID(AppUUID, _Game_app_UUID_length, AppUUIDSize);
 
@@ -44,8 +42,9 @@ Core:: GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::PrivateConten
 
     _Aux_DebugTraceF("App %s", AppName.c_str());
     _Aux_DebugTraceF("Engine %s", EngineName.c_str());
+    */
 
-    TbbAux::AllocationCallbacks::Initialize(this);
+    //TbbAux::AllocationCallbacks::Initialize(this);
 }
 
 bool Core:: GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::ScanInstanceLayerProperties()
@@ -76,7 +75,7 @@ bool Core:: GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::ScanInst
         uint32_t LayerExtensionCount = 0;
 
         const bool bIsUnnamed = !Layer;
-        auto & LayerWrapper = LayerWrappers.push_back();
+        auto & LayerWrapper = Aux::PushBackAndGet(LayerWrappers);
         char const * LayerName = bIsUnnamed ? LayerWrapper.Layer->layerName : nullptr;
 
         LayerWrapper.Layer = !bIsUnnamed ? *Layer : VkLayerProperties();
@@ -121,12 +120,12 @@ bool Core:: GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::ScanInst
         if (strcmp(LayerWrapper.Layer->layerName, "VK_LAYER_LUNARG_vktrace") &&
             strcmp(LayerWrapper.Layer->layerName, "VK_LAYER_RENDERDOC_Capture"))
         {
-            _Aux_DebugTraceF(" + %s", LayerWrapper.Layer->layerName);
+            //_Aux_DebugTraceF(" + %s", LayerWrapper.Layer->layerName);
             PresentLayers.push_back(LayerWrapper.Layer->layerName);
         }
         else
         {
-            _Aux_DebugTraceF(" - %s ", LayerWrapper.Layer->layerName);
+            //_Aux_DebugTraceF(" - %s ", LayerWrapper.Layer->layerName);
         }
     };
 
@@ -138,7 +137,7 @@ bool Core:: GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::ScanInst
     auto const ExtensionEndIt = GetUnnamedLayer().Extensions.end();
     auto ResolveExtensionName = [&](VkExtensionProperties const & Extension) 
     { 
-        _Aux_DebugTraceF(" > %s", Extension.extensionName);
+        //_Aux_DebugTraceF(" > %s", Extension.extensionName);
         return Extension.extensionName; 
     };
     std::transform(ExtensionIt, ExtensionEndIt, std::back_inserter(PresentExtensions), ResolveExtensionName);
@@ -174,13 +173,13 @@ bool Core:: GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::ScanAdap
         {
             Ecosys.PrimaryNode.swap(GraphicsDevice::MakeNewUnique());
             CurrentNode = Ecosys.GetPrimaryGraphicsNode();
-            _Aux_DebugTraceF("Creating primary node...");
+            //_Aux_DebugTraceF("Creating primary node...");
         }
         else if (Ecosys.GetSecondaryGraphicsNode() == nullptr)
         {
             Ecosys.SecondaryNode.swap(GraphicsDevice::MakeNewUnique());
             CurrentNode = Ecosys.GetSecondaryGraphicsNode();
-            _Aux_DebugTraceF("Creating secondary node...");
+            //_Aux_DebugTraceF("Creating secondary node...");
         }
 
         if (CurrentNode != nullptr)
@@ -189,7 +188,7 @@ bool Core:: GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::ScanAdap
         }
         else
         {
-            _Game_engine_Warn_once_if(true, "We can handle at most 2 devices with this ecosystem.");
+            //_Game_engine_Warn_once_if(true, "We can handle at most 2 devices with this ecosystem.");
         }
     });
 
@@ -274,7 +273,7 @@ Core::GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::BreakCallback(
 {
     if (msgFlags & VK_DEBUG_REPORT_ERROR_BIT_EXT)
     {
-        Aux::Platform::DebugBreak();
+        //Aux::Platform::DebugBreak();
     }
 
     /*
@@ -300,24 +299,24 @@ Core::GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::DebugCallback(
 {
     if (msgFlags & VK_DEBUG_REPORT_ERROR_BIT_EXT)
     {
-        Aux::DebugTrace<true, Aux::Error> (
+        /*Aux::DebugTrace<true, Aux::Error> (
             "\tDebugCallback: [%s] Code %d: %s", pLayerPrefix, msgCode, pMsg);
-        Aux::Platform::DebugBreak ();
+        Aux::Platform::DebugBreak ();*/
     }
     else if (msgFlags & VK_DEBUG_REPORT_WARNING_BIT_EXT)
     {
-        Aux::DebugTrace<true, Aux::Warning> (
-            "\tDebugCallback: [%s] Code %d: %s", pLayerPrefix, msgCode, pMsg);
+        /*Aux::DebugTrace<true, Aux::Warning> (
+            "\tDebugCallback: [%s] Code %d: %s", pLayerPrefix, msgCode, pMsg);*/
     }
     else if (msgFlags & VK_DEBUG_REPORT_INFORMATION_BIT_EXT)
     {
-        Aux::DebugTrace<true, Aux::Info> (
-            "\tDebugCallback: [%s] Code %d: %s", pLayerPrefix, msgCode, pMsg);
+        /*Aux::DebugTrace<true, Aux::Info> (
+            "\tDebugCallback: [%s] Code %d: %s", pLayerPrefix, msgCode, pMsg);*/
     }
     else if (msgFlags & VK_DEBUG_REPORT_DEBUG_BIT_EXT)
     {
-        Aux::DebugTrace<true, Aux::Debug> (
-            "\tDebugCallback: [%s] Code %d: %s", pLayerPrefix, msgCode, pMsg);
+        /*Aux::DebugTrace<true, Aux::Debug> (
+            "\tDebugCallback: [%s] Code %d: %s", pLayerPrefix, msgCode, pMsg);*/
     }
 
     /*
@@ -366,7 +365,7 @@ bool Core:: GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::NativeLa
 
 void Core:: GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::NativeLayerWrapper::DumpExtensions() const
 {
-    _Aux_DebugTrace_separator_header;
+    /*_Aux_DebugTrace_separator_header;
     _Aux_DebugTraceFunc;
 
     Aux::DebugTrace("\t Layer %s (impl 0x%08x, spec 0x%08x):"
@@ -383,7 +382,7 @@ void Core:: GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent::NativeLa
             );
     });
 
-    _Aux_DebugTrace_separator_footer;
+    _Aux_DebugTrace_separator_footer;*/
 }
 
 /// -------------------------------------------------------------------------------------------------------------------

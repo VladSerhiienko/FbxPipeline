@@ -14,7 +14,6 @@ struct Core::GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent
     struct NativeLayerWrapper
         : public Aux::ScalableAllocPolicy
     {
-        typedef TbbAux::ScalableEastlAllocator CommonAlloc;
         typedef TInfoStruct<VkExtensionProperties>::Vector VkExtensionPropertiesVector;
 
         bool                           bIsUnnamed;
@@ -27,14 +26,13 @@ struct Core::GraphicsHeterogeneousMultiadapterEcosystem::PrivateContent
         void DumpExtensions() const;
     };
 
-    typedef TbbAux::ScalableEastlAllocator CommonAlloc;
     typedef GraphicsHeterogeneousMultiadapterEcosystem GraphicsEcosystem;
 
-    typedef std::vector<std::string, CommonAlloc>       String8Vector;
-    typedef std::vector<NativeLayerWrapper, CommonAlloc> NativeLayerWrapperVector;
+    typedef std::vector<std::string>       String8Vector;
+    typedef std::vector<NativeLayerWrapper> NativeLayerWrapperVector;
     typedef TInfoStruct<VkLayerProperties>::Vector VkLayerPropertiesVector;
     typedef TInfoStruct<VkPhysicalDevice>::Vector  VkPhysicalDeviceVector;
-    typedef std::vector<const char *, CommonAlloc> LpstrVector;
+    typedef std::vector<const char *> LpstrVector;
 
     APIVersion               Version;
     std::string             AppName;

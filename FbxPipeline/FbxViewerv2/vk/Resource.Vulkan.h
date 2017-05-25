@@ -37,8 +37,8 @@ namespace Core
 
     public:
         typedef Aux::TSafeDeleteObjOp<ResourceReference> ResourceDeleter;
-        typedef std::linked_ptr<ResourceReference, ResourceDeleter> LkPtr;
-        typedef std::unique_ptr<ResourceReference, ResourceDeleter> UqPtr;
+        typedef std::shared_ptr<ResourceReference> LkPtr;
+        typedef std::unique_ptr<ResourceReference> UqPtr;
 
     public:
         static LkPtr MakeNewLinked(GraphicsDevice & GraphicsNode);

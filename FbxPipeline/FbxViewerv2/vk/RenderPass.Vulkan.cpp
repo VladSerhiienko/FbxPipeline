@@ -137,8 +137,8 @@ void Core::RenderPassBuilder::AddColorToSubpass (uint32_t      SubpassId,
                                                  VkImageLayout ImgSubpassLayout)
 {
     auto & Subpass    = GetOrCreateSubpass (SubpassId);
-    auto & ColorRef   = Subpass.ColorRefs.push_back ();
-    auto & ResolveRef = Subpass.ResolveRefs.push_back ();
+    auto & ColorRef   = Aux::PushBackAndGet( Subpass.ColorRefs);
+    auto & ResolveRef = Aux::PushBackAndGet(Subpass.ResolveRefs);
 
     ColorRef.attachment = AttachmentId;
     ColorRef.layout     = ImgSubpassLayout;
@@ -154,8 +154,8 @@ void Core::RenderPassBuilder::AddColorToSubpass (uint32_t      SubpassId,
                                                  VkImageLayout ResolveImgSubpassLayout)
 {
     auto & Subpass    = GetOrCreateSubpass (SubpassId);
-    auto & ColorRef   = Subpass.ColorRefs.push_back ();
-    auto & ResolveRef = Subpass.ResolveRefs.push_back ();
+    auto & ColorRef   = Aux::PushBackAndGet(Subpass.ColorRefs);
+    auto & ResolveRef = Aux::PushBackAndGet(Subpass.ResolveRefs);
 
     ColorRef.attachment = AttachmentId;
     ColorRef.layout     = ImgSubpassLayout;
@@ -169,7 +169,7 @@ void Core::RenderPassBuilder::AddInputToSubpass (uint32_t      SubpassId,
                                                  VkImageLayout ImgSubpassLayout)
 {
     auto & Subpass  = GetOrCreateSubpass (SubpassId);
-    auto & InputRef = Subpass.InputRefs.push_back ();
+    auto & InputRef = Aux::PushBackAndGet(Subpass.InputRefs);
 
     InputRef.attachment = AttachmentId;
     InputRef.layout     = ImgSubpassLayout;
@@ -200,7 +200,7 @@ void Core::RenderPassBuilder::SetSubpassDependency(uint32_t             SrcSubpa
                                                    VkAccessFlags        DstSubpassAccess,
                                                    bool                 bDependentByRegion)
 {
-    auto & SubpassDependency = TemporaryDesc.SubpassDependencies.push_back ();
+    auto & SubpassDependency = Aux::PushBackAndGet(TemporaryDesc.SubpassDependencies);
 
     SubpassDependency               = TInfoStruct<VkSubpassDependency> ();
     SubpassDependency.srcSubpass    = SrcSubpassId;
@@ -324,14 +324,14 @@ Core::RenderPassDescription::SubpassDescription::UqPtr
 Core::RenderPassDescription::SubpassDescription::MakeNewUnique (uint32_t SubpassId)
 {
     using Deleter = Core::RenderPassDescription::SubpassDescription::UqPtr::deleter_type;
-    return std::make_unique<SubpassDescription, Deleter> (SubpassId);
+    return std::make_unique<SubpassDescription> (SubpassId);
 }
 
 Core::RenderPassDescription::SubpassDescription::LkPtr
 Core::RenderPassDescription::SubpassDescription::MakeNewLinked(uint32_t SubpassId)
 {
     using Deleter = Core::RenderPassDescription::SubpassDescription::UqPtr::deleter_type;
-    return std::make_linked<SubpassDescription, Deleter> (SubpassId);
+    return std::make_shared<SubpassDescription> (SubpassId);
 }
 
 /// -------------------------------------------------------------------------------------------------------------------
@@ -344,7 +344,7 @@ struct Core::RenderPassManager::PrivateContent : public Aux::ScalableAllocPolicy
     using HashType         = Aux::CityHash64Wrapper::ValueType;
     using RenderPassLookup = std::map<HashType, std::unique_ptr<RenderPass> >;
 
-    Aux::Lock        Lock;
+    std::mutex        Lock;
     RenderPassLookup StoredRenderPasses;
 };
 
@@ -500,10 +500,11 @@ Core::RenderPassDescription::MakeNewFromTemporary(RenderPassDescription const & 
 
         if (!TemporaryDesc.SubpassDescriptions.empty ())
         {
-            pNewDesc->SubpassDescriptions.reserve (TemporaryDesc.SubpassDescriptions.size ());
-            std::copy (TemporaryDesc.SubpassDescriptions.begin (),
+            //pNewDesc->SubpassDescriptions.reserve (TemporaryDesc.SubpassDescriptions.size ());
+            /*std::copy (TemporaryDesc.SubpassDescriptions.begin (),
                          TemporaryDesc.SubpassDescriptions.end (),
-                         std::back_inserter (pNewDesc->SubpassDescriptions));
+                         std::back_inserter (pNewDesc->SubpassDescriptions));*/
+            pNewDesc->SubpassDescriptions = TemporaryDesc.SubpassDescriptions;
 
             // Note: Here we set pSubpasses to nullptr, as we maintain separate custom type
             //       describing subpasses within render pass (cannot be aliased).
@@ -544,7 +545,7 @@ Core::RenderPassDescription::MakeNewFromTemporary(RenderPassDescription const & 
 
 void Core::RenderPassManager::AddNewRenderPassObject(Core::RenderPass & NewRenderPass)
 {
-    Aux::Lock::GuardWrite LockGuard (pContent->Lock);
+    std::lock_guard<std::mutex> LockGuard (pContent->Lock);
 
     _Game_engine_Assert (pContent->StoredRenderPasses.find (NewRenderPass.Hash)
                              == pContent->StoredRenderPasses.end (),
@@ -568,7 +569,7 @@ Core::RenderPassManager::~RenderPassManager()
 Core::RenderPass const *
 Core::RenderPassManager::TryGetRenderPassObjectByHash(uint64_t Hash)
 {
-    Aux::Lock::GuardWrite LockGuard (pContent->Lock);
+    std::lock_guard<std::mutex> LockGuard (pContent->Lock);
 
     auto RenderPassCotentIt = pContent->StoredRenderPasses.find(Hash);
     if (RenderPassCotentIt != pContent->StoredRenderPasses.end ())

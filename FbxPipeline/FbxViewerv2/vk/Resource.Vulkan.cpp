@@ -6,9 +6,9 @@
 //#include <TDataHandle.h>
 #include <TInfoStruct.Vulkan.h>
 
-#include <Private/GraphicsEcosystem.KnownExtensions.Vulkan.h>
-#include <Private/GraphicsEcosystem.PrivateContent.Vulkan.h>
-#include <Private/GraphicsDevice.PrivateContent.Vulkan.h>
+#include <GraphicsEcosystem.KnownExtensions.Vulkan.h>
+#include <GraphicsEcosystem.PrivateContent.Vulkan.h>
+#include <GraphicsDevice.PrivateContent.Vulkan.h>
 
 /// -------------------------------------------------------------------------------------------------------------------
 /// ResourceReference
@@ -16,7 +16,7 @@
 
 Core::ResourceReference::LkPtr Core::ResourceReference::MakeNewLinked(GraphicsDevice & GraphicsNode)
 {
-    return std::make_linked<ResourceReference, ResourceDeleter>(GraphicsNode);
+    return std::make_shared<ResourceReference>(GraphicsNode);
 }
 
 Core::ResourceReference::ResourceReference(GraphicsDevice & GraphicsNode)
@@ -316,7 +316,7 @@ bool Core::ResourceReference::GetMemoryTypeFromProperties(GraphicsDevice & InGra
 
 Core::ResourceView::ResourceView()
 {
-    MemoryStates.reserve(16);
+    //MemoryStates.reserve(16);
 }
 
 Core::ResourceView::MemoryState Core::ResourceView::GetState(Core::CommandList & CmdList) const
@@ -345,10 +345,10 @@ Core::ResourceView::MemoryState::MemoryState ()
     , PipelineStageFlags (VK_PIPELINE_STAGE_FLAG_BITS_MAX_ENUM)
 {
     ImgSubresRange.aspectMask     = VK_IMAGE_ASPECT_FLAG_BITS_MAX_ENUM;
-    ImgSubresRange.baseArrayLayer = UINT32_ERROR;
-    ImgSubresRange.baseMipLevel   = UINT32_ERROR;
-    ImgSubresRange.layerCount     = UINT32_ERROR;
-    ImgSubresRange.levelCount     = UINT32_ERROR;
+    ImgSubresRange.baseArrayLayer = -1;
+    ImgSubresRange.baseMipLevel   = -1;
+    ImgSubresRange.layerCount     = -1;
+    ImgSubresRange.levelCount     = -1;
 }
 
 Core::ResourceView::MemoryState::MemoryState (VkPipelineStageFlags PipelineStageFlags,

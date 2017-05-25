@@ -128,8 +128,7 @@ namespace Core
 
             using Key       = uint64_t;
             using KeyLessOp = std::less<uint64_t>;
-            using PairAlloc = TbbAux::CacheAlignedEastlAllocator;
-            using Multimap  = std::multimap<const Key, const StagedBarrier, KeyLessOp, PairAlloc>;
+            using Multimap  = std::multimap<const Key, const StagedBarrier, KeyLessOp>;
             using It        = Multimap::iterator;
             using ItRange   = std::pair<It, It>;
             using Pair      = std::pair<Key, StagedBarrier>;
@@ -165,8 +164,6 @@ namespace Core
         friend CommandQueue;
         friend GraphicsDevice;
 
-        using Alloc = TbbAux::ScalableEastlAllocator;
-
         struct Key
         {
             uint64_t GraphicsNodeHash;
@@ -200,7 +197,7 @@ namespace Core
             void Release();
 
             using CmpOpLess       = Key::CmpOpLess;
-            using LookupContainer = std::vector_map<Key, Reservation, CmpOpLess, Alloc>;
+            using LookupContainer = std::map<Key, Reservation, CmpOpLess>;
         };
 
         Reservation::LookupContainer ReservationStorage;

@@ -4,12 +4,11 @@
 #include <CommandQueue.Vulkan.h>
 #include <GraphicsEcosystems.Vulkan.h>
 #include <RenderPassResources.Vulkan.h>
-//#include <TDataHandle.h>
 #include <TInfoStruct.Vulkan.h>
 
-#include <Private/GraphicsEcosystem.KnownExtensions.Vulkan.h>
-#include <Private/GraphicsEcosystem.PrivateContent.Vulkan.h>
-#include <Private/GraphicsDevice.PrivateContent.Vulkan.h>
+#include <GraphicsEcosystem.KnownExtensions.Vulkan.h>
+#include <GraphicsEcosystem.PrivateContent.Vulkan.h>
+#include <GraphicsDevice.PrivateContent.Vulkan.h>
 
 /// -------------------------------------------------------------------------------------------------------------------
 

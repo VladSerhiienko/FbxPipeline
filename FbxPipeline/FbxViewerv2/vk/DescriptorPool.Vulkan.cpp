@@ -214,8 +214,8 @@ bool Core::DescriptorSetUpdater::WriteUniformBuffer (DescriptorSet const & DescS
     }
 
     uintptr_t BufferInfoIdx = BufferInfos.size ();
-    auto &    Write         = Writes.push_back ();
-    auto &    BufferInfo    = BufferInfos.push_back ();
+    auto &    Write         = Aux::PushBackAndGet(Writes);
+    auto &    BufferInfo    = Aux::PushBackAndGet(BufferInfos);
 
     BufferInfo.buffer = Buffer;
     BufferInfo.offset = Offset;
@@ -250,8 +250,8 @@ bool Core::DescriptorSetUpdater::WriteCombinedImgSampler (DescriptorSet const & 
     }
 
     uintptr_t ImgInfoIdx = ImgInfos.size();
-    auto &    Write      = Writes.push_back();
-    auto &    ImgInfo    = ImgInfos.push_back();
+    auto &    Write      = Aux::PushBackAndGet(Writes);
+    auto &    ImgInfo    = Aux::PushBackAndGet(ImgInfos);
 
     ImgInfo.sampler     = Sampler;
     ImgInfo.imageView   = ImgView;

@@ -6,8 +6,7 @@ struct Core::GraphicsDevice::PrivateContent : public Aux::ScalableAllocPolicy,
     struct NativeDeviceWrapper : public Aux::ScalableAllocPolicy,
                                  public Aux::NoCopyAssignPolicy
     {
-        typedef TbbAux::ScalableEastlAllocator CommonAlloc;
-        typedef std::vector<float, CommonAlloc> FloatVector;
+        typedef std::vector<float> FloatVector;
         typedef TInfoStruct<VkLayerProperties>::Vector       VkLayerPropertiesVector;
         typedef TInfoStruct<VkQueueFamilyProperties>::Vector VkQueueFamilyPropertiesVector;
         typedef TInfoStruct<VkDeviceQueueCreateInfo>::Vector VkDeviceQueueCreateInfoVector;

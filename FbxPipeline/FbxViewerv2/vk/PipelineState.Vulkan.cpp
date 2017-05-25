@@ -325,7 +325,7 @@ void Core::PipelineStateBuilder::AddInputElement (
     uint32_t                                  InputAttributeCount)
 {
     const uint32_t BindingIdx = _Get_collection_length_u (TemporaryDesc.InputBindings);
-    auto & Binding = TemporaryDesc.InputBindings.push_back ();
+    auto & Binding = Aux::PushBackAndGet(TemporaryDesc.InputBindings);
 
     Binding           = TInfoStruct<VkVertexInputBindingDescription> ();
     Binding.stride    = VertexStride;
@@ -334,7 +334,7 @@ void Core::PipelineStateBuilder::AddInputElement (
 
     for (uint32_t AttrIdx = 0; AttrIdx < InputAttributeCount; ++AttrIdx)
     {
-        auto & InputAttribute   = TemporaryDesc.InputAttributes.push_back ();
+        auto & InputAttribute   = Aux::PushBackAndGet(TemporaryDesc.InputAttributes);
         InputAttribute.format   = InputAttributes[ AttrIdx ].format;
         InputAttribute.location = InputAttributes[ AttrIdx ].location;
         InputAttribute.offset   = InputAttributes[ AttrIdx ].offset;
@@ -578,7 +578,7 @@ Core::PipelineStateBuilder::InputLayoutBuilder::AddInputElement (uint32_t       
 {
     const auto BindingIdx = _Get_collection_length_u (Bilder.TemporaryDesc.InputBindings);
 
-    pBinding  = &Bilder.TemporaryDesc.InputBindings.push_back ();
+    pBinding  = &Aux::PushBackAndGet(Bilder.TemporaryDesc.InputBindings);
     *pBinding = TInfoStruct<VkVertexInputBindingDescription> ();
 
     pBinding->inputRate = InputRate;
@@ -595,7 +595,7 @@ Core::PipelineStateBuilder::InputLayoutBuilder::AddInputElement (uint32_t       
 Core::PipelineStateBuilder::InputLayoutBuilder &
 Core::PipelineStateBuilder::InputLayoutBuilder::AddAttribute (VkFormat Fmt)
 {
-    auto & Attribute   = Bilder.TemporaryDesc.InputAttributes.push_back ();
+    auto & Attribute   = Aux::PushBackAndGet(Bilder.TemporaryDesc.InputAttributes);
     Attribute.binding  = pBinding->binding;
     Attribute.location = AttributeLocation++;
     Attribute.offset   = AttributeOffset;
@@ -651,7 +651,7 @@ struct Core::PipelineStateManager::PrivateContent : public Aux::ScalableAllocPol
                                                    std::unique_ptr<PipelineState>,
                                                    Aux::CityHash64Wrapper::CmpOpLess>;
 
-    Aux::Lock            Lock;
+    std::mutex            Lock;
     PipelineStateHashMap StoredPipelineStates;
 };
 
@@ -671,7 +671,7 @@ Core::PipelineStateManager::~PipelineStateManager ()
 
 void Core::PipelineStateManager::AddNewPipelineStateObject (Core::PipelineState & PipelineState)
 {
-    Aux::Lock::GuardWrite LockGuard (pContent->Lock);
+    std::lock_guard<std::mutex> LockGuard (pContent->Lock);
 
     _Game_engine_Assert (pContent->StoredPipelineStates.find (PipelineState.Hash)
                              == pContent->StoredPipelineStates.end (),
@@ -683,7 +683,7 @@ void Core::PipelineStateManager::AddNewPipelineStateObject (Core::PipelineState 
 Core::PipelineState const *
 Core::PipelineStateManager::TryGetPipelineStateObjectByHash (uint64_t Hash)
 {
-    Aux::Lock::GuardWrite LockGuard (pContent->Lock);
+    std::lock_guard<std::mutex> LockGuard (pContent->Lock);
 
     auto RenderPassCotentIt = pContent->StoredPipelineStates.find (Hash);
     if (RenderPassCotentIt != pContent->StoredPipelineStates.end ())

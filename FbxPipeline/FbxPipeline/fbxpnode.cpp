@@ -87,6 +87,8 @@ void PreprocessMeshes( FbxScene* scene ) {
 
 void PreprocessAnimation( FbxScene* scene ) {
     auto& s = fbxp::Get( );
+    FbxAnimCurveFilterConstantKeyReducer;
+    FbxAnimCurveFilterResample;
 
 }
 

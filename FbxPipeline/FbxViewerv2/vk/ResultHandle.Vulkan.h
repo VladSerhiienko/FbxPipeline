@@ -5,6 +5,7 @@
 #include <map>
 #include <algorithm>
 #include <iterator>
+#include <mutex>
 
 #define VK_USE_PLATFORM_WIN32_KHR 1
 #include <vulkan/vulkan.h>
@@ -15,7 +16,6 @@
 #define _Game_engine_Likely(...) __VA_ARGS__
 #define _Game_engine_Unlikely(...) __VA_ARGS__
 #define _Game_engine_Error(...)
-#define _Game_engine_Define_enum_flag_operators(...)
 #define _Game_engine_Halt(...)
 #define _Get_collection_length_u(c) ((uint32_t) c.size())
 
@@ -40,6 +40,32 @@ namespace Aux
     {
         static const size_t ArrayLength = N;
     };
+}
+
+namespace Aux {
+
+#ifdef ZeroMemory
+#undef ZeroMemory
+#endif
+
+    template <typename T>
+    inline void ZeroMemory(T & pObj)
+    {
+        memset(&pObj, 0, sizeof(T));
+    }
+
+    template <typename T, size_t Count>
+    inline void ZeroMemory(T (&pObj)[Count])
+    {
+        memset(pObj, 0, sizeof(T));
+    }
+
+    template <typename T, typename... TArgs>
+    inline T & PushBackAndGet(std::vector<T> & _collection, TArgs... args) {
+        _collection.emplace_back(std::forward<TArgs>(args)...);
+        return _collection.back();
+    }
+
 }
 
 #ifdef _Get_array_length

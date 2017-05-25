@@ -13,14 +13,14 @@ struct Core::FramebufferManager::PrivateContent
     : public Aux::ScalableAllocPolicy
     , public Aux::NoCopyAssignPolicy
 {
-    typedef TbbAux::ScalableEastlAllocator     Alloc;
     typedef Aux::TSafeDeleteObjOp<Framebuffer > FBObjDeleter;
     typedef std::unique_ptr<Framebuffer, FBObjDeleter> FBObjUniquePtr;
     typedef Aux::CityHash64Wrapper::ValueType  HashType;
     typedef Aux::CityHash64Wrapper::CmpOpLess  HashOpLess;
-    typedef std::vector_map<HashType, FBObjUniquePtr, HashOpLess, Alloc> FramebufferMap;
+    typedef std::map<HashType, FBObjUniquePtr, HashOpLess> FramebufferMap;
 
-    Aux::Lock      Lock;
+    //std::mutex      Lock;
+    std::mutex Lock;
     FramebufferMap StoredFramebuffers;
 };
 
@@ -42,7 +42,8 @@ Core::FramebufferManager::~FramebufferManager()
 
 void Core::FramebufferManager::AddNewFramebuffer(Core::Framebuffer & Framebuffer)
 {
-    Aux::Lock::GuardWrite LockGuard(Content->Lock);
+    //std::lock_guard<std::mutex> LockGuard(Content->Lock);
+    std::lock_guard<std::mutex> LockGuard(Content->Lock);
 
     _Game_engine_Assert(Content->StoredFramebuffers.find(Framebuffer.Hash) == Content->StoredFramebuffers.end(),
                         "See TryGetFramebufferObjectByHash(...).");
@@ -54,7 +55,8 @@ void Core::FramebufferManager::AddNewFramebuffer(Core::Framebuffer & Framebuffer
 
 Core::Framebuffer const * Core::FramebufferManager::TryGetFramebufferObjectByHash(uint64_t Hash)
 {
-    Aux::Lock::GuardWrite LockGuard (Content->Lock);
+    //std::lock_guard<std::mutex> LockGuard (Content->Lock);
+    std::lock_guard<std::mutex> LockGuard(Content->Lock);
 
     auto RenderPassCotentIt = Content->StoredFramebuffers.find(Hash);
     if (RenderPassCotentIt != Content->StoredFramebuffers.end())

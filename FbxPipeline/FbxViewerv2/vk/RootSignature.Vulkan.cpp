@@ -189,12 +189,12 @@ void Core::RootSignatureBuilder::Reset (uint32_t BindingCount, uint32_t PushCons
 
 Core::RootParameter & Core::RootSignatureBuilder::AddParameter()
 {
-    return TemporaryDesc.Params.push_back();
+    return Aux::PushBackAndGet( TemporaryDesc.Params);
 }
 
 VkPushConstantRange & Core::RootSignatureBuilder::AddPushConstRange()
 {
-    return TemporaryDesc.PushConstRanges.push_back();
+    return Aux::PushBackAndGet(TemporaryDesc.PushConstRanges);
 }
 
 Core::RootSignature const *
@@ -227,8 +227,8 @@ Core::RootSignatureBuilder::RecreateRootSignature(Core::GraphicsDevice & Graphic
                              TemporaryDesc.Params.end (),
                              [&](Core::RootParameter const & Param)
                              {
-                                 Bindings.insert (std::make_pair<SetKey, Binding> (
-                                     Param.DescSet, Param.Binding));
+                                 Bindings.insert (std::make_pair (
+                                     Param.DescSet, Param.Binding.Desc));
                              });
 
             SetToBindingItRange ItRange;
@@ -319,7 +319,6 @@ Core::RootSignatureBuilder::RecreateRootSignature(Core::GraphicsDevice & Graphic
 struct Core::RootSignatureManager::PrivateContent : public Aux::ScalableAllocPolicy,
                                                     public Aux::NoCopyAssignPolicy
 {
-    using Alloc               = Aux::ScalableAlloc;
     using HashType            = Aux::CityHash64Wrapper::ValueType;
     using HashOpLess          = Aux::CityHash64Wrapper::CmpOpLess;
     using HashOp              = Aux::CityHash64Wrapper::HashOp<>;
@@ -327,7 +326,7 @@ struct Core::RootSignatureManager::PrivateContent : public Aux::ScalableAllocPol
     using RootSignatureLookup = std::map<HashType, std::unique_ptr<Core::RootSignature> >;
     using DescriptorSetLayoutLookup = std::map<HashType, VkDescriptorSetLayout>;
 
-    Aux::Lock                 Lock;
+    std::mutex                 Lock;
     RootSignatureLookup       StoredRootSigns;
     DescriptorSetLayoutLookup StoredDescSetLayouts;
 };
@@ -365,7 +364,7 @@ void Core::RootSignatureManager::SetDescSetLayout (uint64_t Hash, VkDescriptorSe
 
 void Core::RootSignatureManager::AddNewRootSignatureObject (Core::RootSignature & RootSign)
 {
-    Aux::Lock::GuardWrite LockGuard (pContent->Lock);
+    std::lock_guard<std::mutex> LockGuard (pContent->Lock);
 
     _Game_engine_Assert (pContent->StoredRootSigns.find (RootSign.Hash)
                              == pContent->StoredRootSigns.end (),
@@ -377,7 +376,7 @@ void Core::RootSignatureManager::AddNewRootSignatureObject (Core::RootSignature 
 Core::RootSignature const *
 Core::RootSignatureManager::TryGetRootSignatureObjectByHash (uint64_t Hash)
 {
-    Aux::Lock::GuardWrite LockGuard (pContent->Lock);
+    std::lock_guard<std::mutex> LockGuard (pContent->Lock);
 
     auto RenderPassContentIt = pContent->StoredRootSigns.find (Hash);
     if (RenderPassContentIt != pContent->StoredRootSigns.end ())

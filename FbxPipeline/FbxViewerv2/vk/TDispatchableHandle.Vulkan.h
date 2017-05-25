@@ -11,7 +11,8 @@ namespace Core
         typedef typename std::remove_pointer<TNativeHandle>::type HandleType;
         operator VkAllocationCallbacks const * ()
         {
-            return TbbAux::AllocationCallbacks ();
+            return nullptr;
+            //return TbbAux::AllocationCallbacks ();
         }
     };
 
@@ -68,8 +69,9 @@ namespace Core
 
         operator VkAllocationCallbacks const *()
         {
-            TbbAux::AllocationCallbacks AllocCallbacks;
-            return AllocCallbacks;
+            return nullptr;
+            //TbbAux::AllocationCallbacks AllocCallbacks;
+            //return AllocCallbacks;
         }
 
         void Swap(SelfType & Other)

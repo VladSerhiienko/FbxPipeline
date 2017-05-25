@@ -121,7 +121,7 @@ bool Core::GraphicsDevice::PrivateContent::NativeDeviceWrapper::ScanDeviceQueues
         QueuePrioritiesStorage.resize(TotalQueuePrioritiesCount);
         std::for_each(QueueProps.begin(), QueueProps.end(), [&](VkQueueFamilyProperties & QueueProp)
         {
-            auto & QueueReq = QueueReqs.push_back();
+            auto & QueueReq = Aux::PushBackAndGet( QueueReqs);
             QueueReq->pNext = NULL;
             QueueReq->queueFamilyIndex = static_cast<uint32_t>(std::distance(QueueProps.data(), &QueueProp));
             QueueReq->queueCount = QueueProp.queueCount;

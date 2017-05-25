@@ -3,8 +3,6 @@
 #include <Shader.Vulkan.h>
 
 #include <CityHash.h>
-#include <HSPV/Cube.frag.spv.h>
-#include <HSPV/Cube.vert.spv.h>
 
 #define _Get_hspv_bytecode(Name) Name##_spv
 #define _Get_hspv_bytecode_length(Name) _Get_array_length(_Get_hspv_bytecode(Name))

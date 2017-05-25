@@ -1,6 +1,7 @@
 #pragma once
 
 //#include <GameEngine.GraphicsEcosystem.Precompiled.h>
+#include <ResultHandle.Vulkan.h>
 
 namespace TbbAux
 {

@@ -2,7 +2,7 @@
 
 #include <GraphicsDevice.Vulkan.h>
 #include <Resource.Vulkan.h>
-#include <M128CacheAlignedBuffer.h>
+//#include <M128CacheAlignedBuffer.h>
 
 #define _Core_BufferPool_UseIntermediateSystemBuffer 1
 
@@ -54,11 +54,11 @@ namespace Core
 
             BufferPool *                      PoolRef;
             BufferPoolType                    PoolType;
-            Aux::Lock                         Lock;
+            //std::mutex                         Lock;
             TDispatchableHandle<VkDeviceMemory>          Memory;
             TDispatchableHandle<VkBuffer>                BufferHandle;
             TDispatchableHandle<VkBuffer>                BufferViewHandle;
-            TbbAux::M128CacheAlignedBuffer    SupplyMemory;
+            //TbbAux::M128CacheAlignedBuffer    SupplyMemory;
             TInfoStruct<VkMemoryRequirements> MemoryReqs;
             TInfoStruct<VkMemoryAllocateInfo> MemoryAllocInfo;
             bool                              bIsHostVisible;
@@ -101,8 +101,8 @@ namespace Core
     };
 
     template <typename TSrc> class TDynamicConstantBufferView
-        : public TbbAux::TbbScalableAlignedAllocPolicy<TDynamicConstantBufferView<TSrc>>
-        , public Aux::NoCopyAssignPolicy
+        //: public TbbAux::TbbScalableAlignedAllocPolicy<TDynamicConstantBufferView<TSrc>>
+        //, public Aux::NoCopyAssignPolicy
     {
         TSrc              Src;
         bool              bIsSrcStale;
