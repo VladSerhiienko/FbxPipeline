@@ -3,7 +3,7 @@
 #include <App.h>
 #include <AppSurfaceSdlVk.h>
 #include <Input.h>
-#include <NuklearSdl.h>
+#include <NuklearSdlBase.h>
 
 #include <Scene.h>
 
@@ -12,16 +12,16 @@
 using namespace apemode;
 
 struct apemode::AppContent {
-    nk_context* nk = nullptr;
-    nk_color    diffColor;
-    nk_color    specColor;
-    uint32_t    width      = 0;
-    uint32_t    height     = 0;
-    uint32_t    resetFlags = 0;
-    uint32_t    envId      = 0;
-    uint32_t    sceneId    = 0;
-    uint32_t    maskId     = 0;
-    Scene*      scenes[ 2 ];
+    NuklearSdlBase* Nk = nullptr;
+    nk_color        diffColor;
+    nk_color        specColor;
+    uint32_t        width      = 0;
+    uint32_t        height     = 0;
+    uint32_t        resetFlags = 0;
+    uint32_t        envId      = 0;
+    uint32_t        sceneId    = 0;
+    uint32_t        maskId     = 0;
+    Scene*          scenes[ 2 ];
 };
 
 App::App( ) : content( new AppContent( ) ) {

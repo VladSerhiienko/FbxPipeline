@@ -28,7 +28,9 @@
     <ClInclude Include="fbxvpch.h" />
     <ClInclude Include="IAppSurface.h" />
     <ClInclude Include="Input.h" />
-    <ClInclude Include="NuklearSdl.h" />
+    <ClInclude Include="NuklearSdlBase.h" />
+    <ClInclude Include="NuklearSdlGL.h" />
+    <ClInclude Include="NuklearSdlVk.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Stopwatch.h" />
     <ClInclude Include="vk\Buffer.Vulkan.h" />
@@ -70,7 +72,9 @@
     <ClCompile Include="CityHash.cpp" />
     <ClCompile Include="fbxvpch.cpp" />
     <ClCompile Include="InputSdl.cpp" />
+    <ClCompile Include="NuklearSdlBase.cpp" />
     <ClCompile Include="NuklearSdlGL.cpp" />
+    <ClCompile Include="NuklearSdlVk.cpp" />
     <ClCompile Include="StopwatchSdl.cpp" />
     <ClCompile Include="vk\Buffer.Vulkan.cpp" />
     <ClCompile Include="vk\BufferPools.Vulkan.cpp" />

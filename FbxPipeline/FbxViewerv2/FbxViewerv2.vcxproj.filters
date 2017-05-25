@@ -62,9 +62,6 @@
     <ClInclude Include="Scene.h">
       <Filter>Sources\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="NuklearSdl.h">
-      <Filter>Sources\UI</Filter>
-    </ClInclude>
     <ClInclude Include="vk\Buffer.Vulkan.h">
       <Filter>Sources\Graphics\Vk</Filter>
     </ClInclude>
@@ -164,6 +161,15 @@
     <ClInclude Include="IAppSurface.h">
       <Filter>Sources\App</Filter>
     </ClInclude>
+    <ClInclude Include="NuklearSdlBase.h">
+      <Filter>Sources\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="NuklearSdlVk.h">
+      <Filter>Sources\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="NuklearSdlGL.h">
+      <Filter>Sources\UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="fbxvpch.cpp">
@@ -255,6 +261,12 @@
     </ClCompile>
     <ClCompile Include="AppSurfaceSdlVk.cpp">
       <Filter>Sources\App</Filter>
+    </ClCompile>
+    <ClCompile Include="NuklearSdlVk.cpp">
+      <Filter>Sources\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="NuklearSdlBase.cpp">
+      <Filter>Sources\UI</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
