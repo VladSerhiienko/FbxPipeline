@@ -1,7 +1,7 @@
 #pragma once
 
-#include <SDL.h>
 #include <IAppSurface.h>
+#include <SDL.h>
 
 #define NK_INCLUDE_FIXED_TYPES
 #define NK_INCLUDE_STANDARD_IO
@@ -23,26 +23,35 @@ namespace apemode {
             nk_byte col[ 4 ];
         };
 
+        struct InitParametersBase {};
+
+        struct RenderParametersBase {
+            float            dims[ 2 ];
+            float            scale[ 2 ];
+            nk_anti_aliasing aa;
+            int              max_vertex_buffer;
+            int              max_element_buffer;
+        };
+
+    public:
         nk_context           Context;
-        IAppSurface *        pSurface;
-        void *               pRenderAssets;
         nk_draw_null_texture NullTexture;
         nk_font *            pDefaultFont;
         nk_font_atlas        Atlas;
         nk_buffer            RenderCmds;
 
     public:
-        nk_context *  Init( IAppSurface *win );
-        void          FontStashBegin( nk_font_atlas **atlas );
-        void          FontStashEnd( );
-        int           HandleEvent( SDL_Event *evt );
-        void          Shutdown( );
-        void          SetStyle( Theme theme );
+        void FontStashBegin( nk_font_atlas **atlas );
+        void FontStashEnd( );
+        int HandleEvent( SDL_Event *evt );
+        void Shutdown( );
+        void SetStyle( Theme theme );
 
     public:
-        virtual void  Render( nk_anti_aliasing, int max_vertex_buffer, int max_element_buffer );
-        virtual void  DeviceDestroy( );
-        virtual void  DeviceCreate( );
+        virtual nk_context *Init( InitParametersBase *init_params );
+        virtual void Render( RenderParametersBase *render_params );
+        virtual void DeviceDestroy( );
+        virtual void DeviceCreate( InitParametersBase *init_params );
         virtual void *DeviceUploadAtlas( const void *image, int width, int height );
 
     public:

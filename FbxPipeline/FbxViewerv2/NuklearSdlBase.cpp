@@ -27,15 +27,13 @@ void *apemode::NuklearSdlBase::DeviceUploadAtlas( const void *image, int width, 
     return nullptr;
 }
 
-nk_context *apemode::NuklearSdlBase::Init( apemode::IAppSurface *surface ) {
-    pSurface = surface;
-
+nk_context *apemode::NuklearSdlBase::Init( InitParametersBase *init_params ) {
     nk_init_default( &Context, 0 );
     Context.clip.copy     = SdlClipbardCopy;
     Context.clip.paste    = SdlClipbardPaste;
     Context.clip.userdata = nk_handle_ptr( 0 );
 
-    DeviceCreate( );
+    DeviceCreate( init_params );
 
 #include <droidsans.ttf.h>
 
@@ -69,7 +67,7 @@ void apemode::NuklearSdlBase::FontStashEnd( ) {
         nk_style_set_font( &Context, &Atlas.default_font->handle );
 }
 
-void apemode::NuklearSdlBase::Render( nk_anti_aliasing, int max_vertex_buffer, int max_element_buffer ) {
+void apemode::NuklearSdlBase::Render( RenderParametersBase *render_params ) {
 }
 
 void apemode::NuklearSdlBase::Shutdown( ) {
@@ -82,7 +80,7 @@ void apemode::NuklearSdlBase::Shutdown( ) {
 void apemode::NuklearSdlBase::DeviceDestroy( ) {
 }
 
-void apemode::NuklearSdlBase::DeviceCreate( ) {
+void apemode::NuklearSdlBase::DeviceCreate( InitParametersBase *init_params ) {
 }
 
 void apemode::NuklearSdlBase::SetStyle( Theme theme ) {
