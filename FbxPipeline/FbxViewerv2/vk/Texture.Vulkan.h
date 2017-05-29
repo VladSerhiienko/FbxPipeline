@@ -4,7 +4,7 @@
 
 namespace apemode
 {
-    class _Graphics_ecosystem_dll_api TextureResourceView : public ResourceView
+    class TextureResourceView : public ResourceView
     {
     public:
         template <typename N = decltype(ElementCount)>  N GetElementCount() const { return static_cast<N> (ElementCount); }

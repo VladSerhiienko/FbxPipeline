@@ -4,7 +4,7 @@
 
 namespace apemode
 {
-    class _Graphics_ecosystem_dll_api DepthStencilResourceView : public TextureResourceView
+    class DepthStencilResourceView : public TextureResourceView
     {
     public:
         static std::shared_ptr<DepthStencilResourceView> MakeNewLinked ();

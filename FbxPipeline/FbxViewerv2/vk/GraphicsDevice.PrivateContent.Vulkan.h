@@ -49,14 +49,14 @@ struct apemode::GraphicsDevice::PrivateContent : public apemode::ScalableAllocPo
 
     typedef apemode::TSafeDeleteObjOp<apemode::RenderPassManager> RenderPassManagerDeleter;
     typedef apemode::TSafeDeleteObjOp<apemode::FramebufferManager> FramebufferManagerDeleter;
-    typedef apemode::TSafeDeleteObjOp<apemode::RootSignatureManager> RootSignatureManagerDeleter;
+    typedef apemode::TSafeDeleteObjOp<apemode::PipelineLayoutManager> PipelineLayoutManagerDeleter;
     typedef apemode::TSafeDeleteObjOp<apemode::PipelineStateManager> PipelineStateManagerDeleter;
     typedef apemode::TSafeDeleteObjOp<apemode::ShaderManager> ShaderManagerDeleter;
 
     NativeDeviceWrapper DeviceHandle;
     std::unique_ptr<apemode::RenderPassManager, RenderPassManagerDeleter> RenderPassManager;
     std::unique_ptr<apemode::FramebufferManager, FramebufferManagerDeleter> FramebufferManager;
-    std::unique_ptr<apemode::RootSignatureManager, RootSignatureManagerDeleter> RootSignatureManager;
+    std::unique_ptr<apemode::PipelineLayoutManager, PipelineLayoutManagerDeleter> PipelineLayoutManager;
     std::unique_ptr<apemode::PipelineStateManager, PipelineStateManagerDeleter> PipelineStateManager;
     std::unique_ptr<apemode::ShaderManager, ShaderManagerDeleter> ShaderManager;
 

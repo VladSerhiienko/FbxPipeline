@@ -303,4 +303,9 @@ namespace apemode
         void AddNewPipelineStateObject (apemode::PipelineState & PipelineState);
         apemode::PipelineState const * TryGetPipelineStateObjectByHash (uint64_t Hash);
     };
-}
+
+    class _Graphics_ecosystem_dll_api PipelineCache : public apemode::ScalableAllocPolicy, public apemode::NoCopyAssignPolicy {
+        apemode::TDispatchableHandle< VkPipelineCache > hPipelineCache;
+
+    };
+} // namespace apemode

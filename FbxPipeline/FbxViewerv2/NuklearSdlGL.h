@@ -3,18 +3,18 @@
 
 namespace apemode {
     class NuklearSdlGL : public NuklearSdlBase {
-        GLuint vbo          = 0;
-        GLuint vao          = 0;
-        GLuint ebo          = 0;
-        GLuint prog         = 0;
-        GLuint vert_shdr    = 0;
-        GLuint frag_shdr    = 0;
-        GLint  attrib_pos   = 0;
-        GLint  attrib_uv    = 0;
-        GLint  attrib_col   = 0;
-        GLint  uniform_tex  = 0;
-        GLint  uniform_proj = 0;
-        GLuint font_tex     = 0;
+        uint32_t vbo          = 0;
+        uint32_t vao          = 0;
+        uint32_t ebo          = 0;
+        uint32_t prog         = 0;
+        uint32_t vert_shdr    = 0;
+        uint32_t frag_shdr    = 0;
+        int32_t  attrib_pos   = 0;
+        int32_t  attrib_uv    = 0;
+        int32_t  attrib_col   = 0;
+        int32_t  uniform_tex  = 0;
+        int32_t  uniform_proj = 0;
+        uint32_t font_tex     = 0;
 
     public:
         virtual void Render( RenderParametersBase *render_params ) override;

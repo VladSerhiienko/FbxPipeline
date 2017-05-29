@@ -5,7 +5,7 @@
 namespace apemode
 {
     class Swapchain;
-    class _Graphics_ecosystem_dll_api ColorResourceView : public TextureResourceView
+    class ColorResourceView : public TextureResourceView
     {
         bool bIsOwnedBySwapchain;
 

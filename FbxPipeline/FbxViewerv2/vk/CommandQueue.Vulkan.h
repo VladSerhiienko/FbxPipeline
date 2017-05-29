@@ -9,10 +9,10 @@ namespace apemode
     class CommandQueue;
     class RenderPass;
     class Framebuffer;
-    class RootSignature;
+    class PipelineLayout;
     class PipelineState;
 
-    class _Graphics_ecosystem_dll_api CommandList : public apemode::ScalableAllocPolicy,
+    class CommandList : public apemode::ScalableAllocPolicy,
                                                     public apemode::NoCopyAssignPolicy
     {
     public:
@@ -38,7 +38,7 @@ namespace apemode
         static std::shared_ptr<CommandList> MakeNewLinked ();
 
     public:
-        struct _Graphics_ecosystem_dll_api BeginEndScope
+        struct BeginEndScope
         {
             CommandList & AssociatedCmdList;
             BeginEndScope (CommandList & CmdList, bool bOneTimeSubmit);
@@ -148,7 +148,7 @@ namespace apemode
 
         apemode::RenderPass const *                   pRenderPass;
         apemode::Framebuffer const *                  pFramebuffer;
-        apemode::RootSignature const *                pRootSignature;
+        apemode::PipelineLayout const *                pPipelineLayout;
         apemode::PipelineState const *                pPipelineState;
         apemode::TDispatchableHandle<VkCommandBuffer> hCmdList;
         apemode::TDispatchableHandle<VkCommandPool>   hCmdAlloc;
@@ -158,7 +158,7 @@ namespace apemode
      * Stores reserved command queues of devices. This class is used by queues,
      * but can also be potentially used by the graphics devices.
      */
-    class _Graphics_ecosystem_dll_api CommandQueueReserver : public apemode::ScalableAllocPolicy,
+    class CommandQueueReserver : public apemode::ScalableAllocPolicy,
                                                              public apemode::NoCopyAssignPolicy
     {
         friend CommandQueue;
@@ -211,7 +211,7 @@ namespace apemode
         static CommandQueueReserver & Get ();
     };
 
-    class _Graphics_ecosystem_dll_api CommandQueue : public apemode::ScalableAllocPolicy,
+    class CommandQueue : public apemode::ScalableAllocPolicy,
                                                      public apemode::NoCopyAssignPolicy
     {
     public:
@@ -242,7 +242,7 @@ namespace apemode
         operator VkQueue () const;
 
     public:
-        GraphicsDevice *             pGraphicsNode;
+        GraphicsDevice *             pNode;
         TDispatchableHandle<VkQueue> hCmdQueue;
         uint32_t                     QueueFamilyId;
         uint32_t                     QueueId;

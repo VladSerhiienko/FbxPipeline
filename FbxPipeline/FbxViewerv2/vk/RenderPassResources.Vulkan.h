@@ -10,7 +10,7 @@ namespace apemode
     class RenderPass;
     class Framebuffer;
 
-    class _Graphics_ecosystem_dll_api RenderPassResources : public apemode::ScalableAllocPolicy,
+    class RenderPassResources : public apemode::ScalableAllocPolicy,
                                                             public apemode::NoCopyAssignPolicy
     {
     public:
@@ -28,7 +28,7 @@ namespace apemode
     public:
         struct BeginEndScope;
         friend BeginEndScope;
-        struct _Graphics_ecosystem_dll_api BeginEndScope : public apemode::ScalableAllocPolicy,
+        struct BeginEndScope : public apemode::ScalableAllocPolicy,
                                                            public apemode::NoCopyAssignPolicy
         {
             CommandList &         AssocCmdList;

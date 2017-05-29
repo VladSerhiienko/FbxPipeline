@@ -898,20 +898,19 @@ namespace apemode
     };
 
     template <>
-    struct TDispatchableHandle<VkDescriptorSet> : public TDispatchableHandleBase<VkDescriptorSet>
-    {
-        bool Recreate(VkDevice InLogicalDeviceHandle, VkDescriptorPool InDescPoolHandle, VkDescriptorSetAllocateInfo const & AllocInfo)
-        {
-            _Game_engine_Assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required.");
+    struct TDispatchableHandle< VkDescriptorSet > : public TDispatchableHandleBase< VkDescriptorSet > {
+        bool Recreate( VkDevice InLogicalDeviceHandle,
+                       VkDescriptorPool InDescPoolHandle,
+                       VkDescriptorSetAllocateInfo const &AllocInfo ) {
+            _Game_engine_Assert( InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required." );
 
-            Deleter(Handle);
-            if (InLogicalDeviceHandle != nullptr)
-            {
+            Deleter( Handle );
+            if ( InLogicalDeviceHandle != nullptr ) {
                 Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
 
-                const ResultHandle ErrorHandle = vkAllocateDescriptorSets(InLogicalDeviceHandle, &AllocInfo, *this);
-                _Game_engine_Assert(ErrorHandle, "vkAllocateDescriptorSets failed.");
-                return ErrorHandle.Succeeded();
+                const ResultHandle ErrorHandle = vkAllocateDescriptorSets( InLogicalDeviceHandle, &AllocInfo, *this );
+                _Game_engine_Assert( ErrorHandle, "vkAllocateDescriptorSets failed." );
+                return ErrorHandle.Succeeded( );
             }
 
             return false;
@@ -919,20 +918,17 @@ namespace apemode
     };
 
     template <>
-    struct TDispatchableHandle<VkDescriptorPool> : public TDispatchableHandleBase<VkDescriptorPool>
-    {
-        bool Recreate(VkDevice InLogicalDeviceHandle, VkDescriptorPoolCreateInfo const & CreateInfo)
-        {
-            _Game_engine_Assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required.");
+    struct TDispatchableHandle< VkDescriptorPool > : public TDispatchableHandleBase< VkDescriptorPool > {
+        bool Recreate( VkDevice InLogicalDeviceHandle, VkDescriptorPoolCreateInfo const &CreateInfo ) {
+            _Game_engine_Assert( InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required." );
 
-            Deleter(Handle);
-            if (InLogicalDeviceHandle != nullptr)
-            {
+            Deleter( Handle );
+            if ( InLogicalDeviceHandle != nullptr ) {
                 Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
 
-                const ResultHandle ErrorHandle = vkCreateDescriptorPool(InLogicalDeviceHandle, &CreateInfo, *this, *this);
-                _Game_engine_Assert(ErrorHandle, "vkCreateDescriptorSetLayout failed.");
-                return ErrorHandle.Succeeded();
+                const ResultHandle ErrorHandle = vkCreateDescriptorPool( InLogicalDeviceHandle, &CreateInfo, *this, *this );
+                _Game_engine_Assert( ErrorHandle, "vkCreateDescriptorSetLayout failed." );
+                return ErrorHandle.Succeeded( );
             }
 
             return false;
@@ -940,58 +936,35 @@ namespace apemode
     };
 
     template <>
-    struct TDispatchableHandle<VkPipeline> : public TDispatchableHandleBase<VkPipeline>
-    {
-        bool Recreate(VkDevice InLogicalDeviceHandle, VkPipelineCache pCache, VkGraphicsPipelineCreateInfo const & CreateInfo)
-        {
-            _Game_engine_Assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required.");
+    struct TDispatchableHandle< VkPipeline > : public TDispatchableHandleBase< VkPipeline > {
+        bool Recreate( VkDevice InLogicalDeviceHandle,
+                       VkPipelineCache pCache,
+                       VkGraphicsPipelineCreateInfo const &CreateInfo ) {
+            _Game_engine_Assert( InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required." );
 
-            Deleter(Handle);
-            if (InLogicalDeviceHandle != nullptr)
-            {
+            Deleter( Handle );
+            if ( InLogicalDeviceHandle != nullptr ) {
                 Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
 
-                const ResultHandle ErrorHandle = vkCreateGraphicsPipelines(InLogicalDeviceHandle, pCache, 1, &CreateInfo, *this, *this);
-                _Game_engine_Assert(ErrorHandle, "vkCreateGraphicsPipelines failed.");
-                return ErrorHandle.Succeeded();
+                const ResultHandle ErrorHandle = vkCreateGraphicsPipelines( InLogicalDeviceHandle, pCache, 1, &CreateInfo, *this, *this );
+                _Game_engine_Assert( ErrorHandle, "vkCreateGraphicsPipelines failed." );
+                return ErrorHandle.Succeeded( );
             }
 
             return false;
         }
 
-        bool Recreate(VkDevice InLogicalDeviceHandle, VkPipelineCache pCache, VkComputePipelineCreateInfo const & CreateInfo)
-        {
-            _Game_engine_Assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required.");
+        bool Recreate( VkDevice InLogicalDeviceHandle, VkPipelineCache pCache, VkComputePipelineCreateInfo const &CreateInfo ) {
+            _Game_engine_Assert( InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required." );
 
-            Deleter(Handle);
-            if (InLogicalDeviceHandle != nullptr)
-            {
+            Deleter( Handle );
+            if ( InLogicalDeviceHandle != nullptr ) {
                 Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
 
-                const ResultHandle ErrorHandle = vkCreateComputePipelines(InLogicalDeviceHandle, pCache, 1, &CreateInfo, *this, *this);
-                _Game_engine_Assert(ErrorHandle, "vkCreateGraphicsPipelines failed.");
-                return ErrorHandle.Succeeded();
-            }
-
-            return false;
-        }
-    };
-
-    template <>
-    struct TDispatchableHandle<VkShaderModule> : public TDispatchableHandleBase<VkShaderModule>
-    {
-        bool Recreate(VkDevice InLogicalDeviceHandle, VkShaderModuleCreateInfo const & CreateInfo)
-        {
-            _Game_engine_Assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required.");
-
-            Deleter(Handle);
-            if (InLogicalDeviceHandle != nullptr)
-            {
-                Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
-
-                const ResultHandle ErrorHandle = vkCreateShaderModule(InLogicalDeviceHandle, &CreateInfo, *this, *this);
-                _Game_engine_Assert(ErrorHandle, "vkCreateShaderModule failed.");
-                return ErrorHandle.Succeeded();
+                const ResultHandle ErrorHandle =
+                    vkCreateComputePipelines( InLogicalDeviceHandle, pCache, 1, &CreateInfo, *this, *this );
+                _Game_engine_Assert( ErrorHandle, "vkCreateGraphicsPipelines failed." );
+                return ErrorHandle.Succeeded( );
             }
 
             return false;
@@ -999,24 +972,49 @@ namespace apemode
     };
 
     template <>
-    struct TDispatchableHandle<VkSemaphore> : public TDispatchableHandleBase<VkSemaphore>
-    {
-        bool Recreate(VkDevice InLogicalDeviceHandle, VkSemaphoreCreateInfo const & CreateInfo)
-        {
-            _Game_engine_Assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required.");
+    struct TDispatchableHandle< VkShaderModule > : public TDispatchableHandleBase< VkShaderModule > {
+        bool Recreate( VkDevice InLogicalDeviceHandle, VkShaderModuleCreateInfo const &CreateInfo ) {
+            _Game_engine_Assert( InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required." );
 
-            Deleter(Handle);
-            if (InLogicalDeviceHandle != nullptr)
-            {
+            Deleter( Handle );
+            if ( InLogicalDeviceHandle != nullptr ) {
                 Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
 
-                const ResultHandle ErrorHandle = vkCreateSemaphore(InLogicalDeviceHandle, &CreateInfo, *this, *this);
-                _Game_engine_Assert(ErrorHandle, "vkCreateSemaphore failed.");
-                return ErrorHandle.Succeeded();
+                const ResultHandle ErrorHandle = vkCreateShaderModule( InLogicalDeviceHandle, &CreateInfo, *this, *this );
+                _Game_engine_Assert( ErrorHandle, "vkCreateShaderModule failed." );
+                return ErrorHandle.Succeeded( );
             }
 
             return false;
         }
     };
 
+    template <>
+    struct TDispatchableHandle< VkSemaphore > : public TDispatchableHandleBase< VkSemaphore > {
+        bool Recreate( VkDevice InLogicalDeviceHandle, VkSemaphoreCreateInfo const &CreateInfo ) {
+            _Game_engine_Assert( InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required." );
+
+            Deleter( Handle );
+            if ( InLogicalDeviceHandle != nullptr ) {
+                Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
+
+                const ResultHandle ErrorHandle = vkCreateSemaphore( InLogicalDeviceHandle, &CreateInfo, *this, *this );
+                _Game_engine_Assert( ErrorHandle, "vkCreateSemaphore failed." );
+                return ErrorHandle.Succeeded( );
+            }
+
+            return false;
+        }
+    };
+
+    template <>
+    struct TDispatchableHandle< VkSampler > : public TDispatchableHandleBase< VkSampler > {
+        bool Recreate( VkDevice InLogicalDeviceHandle, VkSamplerCreateInfo const &CreateInfo ) {
+            Deleter( Handle );
+
+            const ResultHandle ErrorHandle = vkCreateSampler( InLogicalDeviceHandle, &CreateInfo, *this, *this );
+            _Game_engine_Assert( ErrorHandle, "vkCreateInstance failed." );
+            return ErrorHandle.Succeeded( );
+        }
+    };
 }

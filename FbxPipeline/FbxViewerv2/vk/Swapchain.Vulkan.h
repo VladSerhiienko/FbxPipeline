@@ -12,7 +12,7 @@ namespace apemode
     class ColorResourceView;
     class RenderPassResources;
 
-    class _Graphics_ecosystem_dll_api Swapchain : public apemode::ScalableAllocPolicy,
+    class Swapchain : public apemode::ScalableAllocPolicy,
                                                   public apemode::NoCopyAssignPolicy
     {
     public:
@@ -82,7 +82,7 @@ namespace apemode
         uint32_t GetBufferCount () const;
 
     public:
-        apemode::GraphicsDevice * pGraphicsNode;
+        apemode::GraphicsDevice * pNode;
         apemode::CommandQueue *   pCmdQueue;
 
     public:

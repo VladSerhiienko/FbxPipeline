@@ -4,7 +4,7 @@
 
 #include <RenderPass.Vulkan.h>
 #include <Framebuffer.Vulkan.h>
-#include <RootSignature.Vulkan.h>
+#include <PipelineLayout.Vulkan.h>
 #include <PipelineState.Vulkan.h>
 #include <Shader.Vulkan.h>
 
@@ -27,7 +27,7 @@
 apemode::GraphicsDevice::PrivateContent::PrivateContent()
     : RenderPassManager(new apemode::RenderPassManager())
     , FramebufferManager(new apemode::FramebufferManager())
-    , RootSignatureManager(new apemode::RootSignatureManager())
+    , PipelineLayoutManager(new apemode::PipelineLayoutManager())
     , ShaderManager(new apemode::ShaderManager())
 {
 }
@@ -288,9 +288,9 @@ apemode::FramebufferManager & apemode::GraphicsDevice::GetDefaultFramebufferMana
     return *pContent->FramebufferManager;
 }
 
-apemode::RootSignatureManager & apemode::GraphicsDevice::GetDefaultRootSignatureManager()
+apemode::PipelineLayoutManager & apemode::GraphicsDevice::GetDefaultPipelineLayoutManager()
 {
-    return *pContent->RootSignatureManager;
+    return *pContent->PipelineLayoutManager;
 }
 
 apemode::PipelineStateManager & apemode::GraphicsDevice::GetDefaultPipelineStateManager()

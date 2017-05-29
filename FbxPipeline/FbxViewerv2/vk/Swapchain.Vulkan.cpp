@@ -23,11 +23,11 @@ static bool ExtractSwapchainBuffers (apemode::GraphicsDevice &          InGraphi
     _Game_engine_Assert (InGraphicsNode.IsValid () && hSwapchain, "Not initialized.");
 
     uint32_t OutSwapchainBufferCount = 0;
-    if (_Game_engine_Likely (apemode::ResultHandle::Succeeded (vkGetSwapchainImagesKHR (
+    if (apemode_likely (apemode::ResultHandle::Succeeded (vkGetSwapchainImagesKHR (
             InGraphicsNode, hSwapchain, &OutSwapchainBufferCount, nullptr))))
     {
         OutSwapchainBufferImgs.resize (OutSwapchainBufferCount, VkImage (nullptr));
-        if (_Game_engine_Likely (apemode::ResultHandle::Succeeded (
+        if (apemode_likely (apemode::ResultHandle::Succeeded (
                 vkGetSwapchainImagesKHR (InGraphicsNode,
                                          hSwapchain,
                                          &OutSwapchainBufferCount,
@@ -51,7 +51,7 @@ uint32_t const                      apemode::Swapchain::kExtentMatchFullscreen =
 uint32_t const                      apemode::Swapchain::kExtentMatchWindow     = 0;
 apemode::Swapchain::ModuleHandle const apemode::Swapchain::kCurrentExecutable     = nullptr;
 
-apemode::Swapchain::Swapchain () : pGraphicsNode (nullptr), pCmdQueue (nullptr)
+apemode::Swapchain::Swapchain () : pNode (nullptr), pCmdQueue (nullptr)
 {
     static uint16_t sSwapchainNextId = 0;
     Id = sSwapchainNextId++;
@@ -61,16 +61,16 @@ apemode::Swapchain::~Swapchain()
 {
     _Aux_DebugTraceFunc;
 
-    if (pGraphicsNode)
+    if (pNode)
     {
-        const bool bOk = pGraphicsNode->Await ();
+        const bool bOk = pNode->Await ();
         _Game_engine_Assert (bOk, "Failed to wait for device prior work done.");
 
         for (auto & hBuffer : hBuffers)
             if (hBuffer)
             {
                 apemode::TDispatchableHandle<VkImage> hImg;
-                hImg.Deleter.LogicalDeviceHandle = *pGraphicsNode;
+                hImg.Deleter.LogicalDeviceHandle = *pNode;
                 hImg.Handle = hBuffer;
                 hImg.Destroy ();
             }
@@ -79,7 +79,7 @@ apemode::Swapchain::~Swapchain()
             if (hPresentSemaphore)
             {
                 apemode::TDispatchableHandle<VkSemaphore> hSemaphore;
-                hSemaphore.Deleter.LogicalDeviceHandle = *pGraphicsNode;
+                hSemaphore.Deleter.LogicalDeviceHandle = *pNode;
                 hSemaphore.Handle = hPresentSemaphore;
                 hSemaphore.Destroy ();
             }*/
@@ -101,7 +101,7 @@ bool apemode::Swapchain::RecreateResourceFor (GraphicsDevice & InGraphicsNode,
         return false;
     }
 
-    if (!InCmdQueue.hCmdQueue.IsNotNull () || InCmdQueue.pGraphicsNode != &InGraphicsNode)
+    if (!InCmdQueue.hCmdQueue.IsNotNull () || InCmdQueue.pNode != &InGraphicsNode)
     {
         _Game_engine_Halt ("Provided command queue is incompatible.");
         return false;
@@ -116,7 +116,7 @@ bool apemode::Swapchain::RecreateResourceFor (GraphicsDevice & InGraphicsNode,
     if (InInst == kCurrentExecutable)
         InInst = GetModuleHandle(NULL);
 
-    pGraphicsNode = &InGraphicsNode;
+    pNode = &InGraphicsNode;
     pCmdQueue     = &InCmdQueue;
 
     TInfoStruct<VkWin32SurfaceCreateInfoKHR> SurfaceDesc;
@@ -330,15 +330,15 @@ bool apemode::Swapchain::OnFrameMove (apemode::RenderPassResources & Resources,
                                    VkFence                     hFence,
                                    uint64_t                    Timeout)
 {
-    _Game_engine_Assert(pGraphicsNode != nullptr, "Not initialized.");
+    _Game_engine_Assert(pNode != nullptr, "Not initialized.");
 
     uint32_t OutSwapchainBufferIdx = 0xffffffff;
 
     //AdvancePresentSemaphoreIdx ();
     const auto eImgAcquiredError = vkAcquireNextImageKHR (
-        *pGraphicsNode, hSwapchain, Timeout, hSemaphore, hFence, &OutSwapchainBufferIdx);
+        *pNode, hSwapchain, Timeout, hSemaphore, hFence, &OutSwapchainBufferIdx);
 
-    if (_Game_engine_Likely (eImgAcquiredError == ResultHandle::Success ||
+    if (apemode_likely (eImgAcquiredError == ResultHandle::Success ||
                              eImgAcquiredError == ResultHandle::Suboptimal))
     {
         _Game_engine_Assert (eImgAcquiredError == ResultHandle::Success, "Reconfigure.");
@@ -376,12 +376,12 @@ bool apemode::Swapchain::OnFramePresent (apemode::CommandQueue &        CmdQueue
     PresentDesc->pResults           = &eSwapchainResult;
 
     VkResult ePresentResult = vkQueuePresentKHR (CmdQueue, PresentDesc);
-    if (_Game_engine_Likely (ResultHandle::Succeeded (ePresentResult)))
+    if (apemode_likely (ResultHandle::Succeeded (ePresentResult)))
     {
         const bool bIsOk = ResultHandle::Succeeded (eSwapchainResult);
         _Game_engine_Assert (bIsOk, "Failed to present to swapchain.");
 
-        return _Game_engine_Likely (bIsOk);
+        return apemode_likely (bIsOk);
     }
 
     _Game_engine_Halt ("Failed to present.");

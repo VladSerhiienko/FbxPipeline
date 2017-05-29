@@ -17,6 +17,12 @@ namespace apemode {
     public:
         enum Theme { Black, White, Red, Blue, Dark };
 
+        enum Impl {
+            kImpl_Unknown,
+            kImpl_GL,
+            kImpl_Vk
+        };
+
         struct Vertex {
             float   position[ 2 ];
             float   uv[ 2 ];
@@ -26,14 +32,15 @@ namespace apemode {
         struct InitParametersBase {};
 
         struct RenderParametersBase {
-            float            dims[ 2 ];
-            float            scale[ 2 ];
-            nk_anti_aliasing aa;
-            int              max_vertex_buffer;
-            int              max_element_buffer;
+            float            dims[ 2 ]          = {};
+            float            scale[ 2 ]         = {};
+            nk_anti_aliasing aa                 = NK_ANTI_ALIASING_ON;
+            int              max_vertex_buffer  = 65536;
+            int              max_element_buffer = 65536;
         };
 
     public:
+        Impl                 Impl;
         nk_context           Context;
         nk_draw_null_texture NullTexture;
         nk_font *            pDefaultFont;

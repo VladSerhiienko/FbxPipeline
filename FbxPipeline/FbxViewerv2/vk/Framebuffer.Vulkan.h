@@ -14,7 +14,7 @@ namespace apemode
 
     class FramebufferDescription;
 
-    class _Graphics_ecosystem_dll_api Framebuffer : public apemode::ScalableAllocPolicy,
+    class Framebuffer : public apemode::ScalableAllocPolicy,
                                                     public apemode::NoCopyAssignPolicy
     {
     public:
@@ -26,7 +26,7 @@ namespace apemode
         operator VkFramebuffer() const { return Handle; }
     };
 
-    class _Graphics_ecosystem_dll_api FramebufferDescription : public apemode::ScalableAllocPolicy,
+    class FramebufferDescription : public apemode::ScalableAllocPolicy,
                                                                public apemode::NoCopyAssignPolicy
     {
     public:
@@ -51,7 +51,7 @@ namespace apemode
         MakeNewFromTemporary (apemode::FramebufferDescription const & TemporaryDesc);
     };
 
-    class _Graphics_ecosystem_dll_api FramebufferBuilder : public apemode::ScalableAllocPolicy,
+    class FramebufferBuilder : public apemode::ScalableAllocPolicy,
                                                            public apemode::NoCopyAssignPolicy
     {
     public:
@@ -67,7 +67,7 @@ namespace apemode
 
     };
 
-    class _Graphics_ecosystem_dll_api FramebufferManager : public apemode::ScalableAllocPolicy,
+    class FramebufferManager : public apemode::ScalableAllocPolicy,
                                                            public apemode::NoCopyAssignPolicy
     {
         friend apemode::GraphicsDevice;

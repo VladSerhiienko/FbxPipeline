@@ -1,27 +1,27 @@
 //#include <GameEngine.GraphicsEcosystem.Precompiled.h>
-#include <RootSignature.Vulkan.h>
+#include <PipelineLayout.Vulkan.h>
 
 #include <CityHash.h>
 
 /// -------------------------------------------------------------------------------------------------------------------
-/// RootParameter
+/// PipelineLayoutParameter
 /// -------------------------------------------------------------------------------------------------------------------
 
-apemode::RootParameter::RootParameter()
+apemode::PipelineLayoutParameter::PipelineLayoutParameter()
 {
     Clear();
 }
 
-apemode::RootParameter::~RootParameter()
+apemode::PipelineLayoutParameter::~PipelineLayoutParameter()
 {
 }
 
-void apemode::RootParameter::Clear()
+void apemode::PipelineLayoutParameter::Clear()
 {
     Binding.ZeroMemory();
 }
 
-void apemode::RootParameter::InitAsUniformBuffer(uint32_t         Register,
+void apemode::PipelineLayoutParameter::InitAsUniformBuffer(uint32_t         Register,
                                               uint32_t         Count,
                                               ShaderVisibility StageFlags,
                                               uint32_t         Set)
@@ -33,7 +33,7 @@ void apemode::RootParameter::InitAsUniformBuffer(uint32_t         Register,
     Binding->stageFlags      = static_cast<VkShaderStageFlagBits>(StageFlags);
 }
 
-void apemode::RootParameter::InitAsUniformBufferDynamic(uint32_t         Register,
+void apemode::PipelineLayoutParameter::InitAsUniformBufferDynamic(uint32_t         Register,
                                                      uint32_t         Count,
                                                      ShaderVisibility StageFlags,
                                                      uint32_t         Set)
@@ -45,7 +45,7 @@ void apemode::RootParameter::InitAsUniformBufferDynamic(uint32_t         Registe
     Binding->stageFlags      = static_cast<VkShaderStageFlagBits>(StageFlags);
 }
 
-void apemode::RootParameter::InitAsSampler(uint32_t         Register,
+void apemode::PipelineLayoutParameter::InitAsSampler(uint32_t         Register,
                                         uint32_t         Count,
                                         ShaderVisibility StageFlags,
                                         uint32_t         Set)
@@ -57,12 +57,8 @@ void apemode::RootParameter::InitAsSampler(uint32_t         Register,
     Binding->stageFlags      = static_cast<VkShaderStageFlagBits>(StageFlags);
 }
 
-void apemode::RootParameter::InitAsCombinedImageSampler(uint32_t         Register,
-                                                     uint32_t         Count,
-                                                     VkSampler *      pImmutableSamplers,
-                                                     ShaderVisibility StageFlags,
-                                                     uint32_t         Set)
-{
+void apemode::PipelineLayoutParameter::InitAsCombinedImageSampler(
+    uint32_t Register, uint32_t Count, VkSampler* pImmutableSamplers, ShaderVisibility StageFlags, uint32_t Set ) {
     DescSet                     = Set;
     Binding->binding            = Register;
     Binding->pImmutableSamplers = pImmutableSamplers;
@@ -71,65 +67,61 @@ void apemode::RootParameter::InitAsCombinedImageSampler(uint32_t         Registe
     Binding->stageFlags         = static_cast<VkShaderStageFlagBits>(StageFlags);
 }
 
-apemode::RootParameter::operator VkDescriptorSetLayoutBinding() const
+apemode::PipelineLayoutParameter::operator VkDescriptorSetLayoutBinding() const
 {
     return Binding;
 }
 
 /// -------------------------------------------------------------------------------------------------------------------
-/// RootSignature
+/// PipelineLayout
 /// -------------------------------------------------------------------------------------------------------------------
 
-apemode::RootSignature::RootSignature()
+apemode::PipelineLayout::PipelineLayout()
     : pDesc(nullptr)
-    , pGraphicsNode(nullptr)
+    , pNode(nullptr)
 {
 }
 
-apemode::RootSignature::~RootSignature()
+apemode::PipelineLayout::~PipelineLayout()
 {
-    if (_Game_engine_Likely (pGraphicsNode != nullptr && !DescSetLayouts.empty ()))
+    if (apemode_likely (pNode != nullptr && !DescSetLayouts.empty ()))
     {
-        std::for_each (DescSetLayouts.begin (),
-                         DescSetLayouts.end (),
-                         [&](VkDescriptorSetLayout SetLayoutHandle) 
-                         {
-                             apemode::TDispatchableHandle<VkDescriptorSetLayout> DestroySetLayout (
-                                 *pGraphicsNode, SetLayoutHandle);
-                         });
+        std::for_each( DescSetLayouts.begin( ), DescSetLayouts.end( ), [&]( VkDescriptorSetLayout SetLayoutHandle ) {
+            apemode::TDispatchableHandle< VkDescriptorSetLayout > DestroySetLayout( *pNode, SetLayoutHandle );
+        } );
     }
 }
 
-apemode::RootSignature::operator VkPipelineLayout() const
+apemode::PipelineLayout::operator VkPipelineLayout() const
 {
     return PipelineLayoutHandle;
 }
 
 /// -------------------------------------------------------------------------------------------------------------------
-/// RootSignatureDescription
+/// PipelineLayoutDescription
 /// -------------------------------------------------------------------------------------------------------------------
 
-apemode::RootSignatureDescription::RootSignatureDescription()
+apemode::PipelineLayoutDescription::PipelineLayoutDescription()
 {
     Reset();
 }
 
-apemode::RootSignatureDescription::~RootSignatureDescription()
+apemode::PipelineLayoutDescription::~PipelineLayoutDescription()
 {
 }
 
-void apemode::RootSignatureDescription::Reset()
+void apemode::PipelineLayoutDescription::Reset()
 {
     Params.clear();
 }
 
-uint32_t apemode::RootSignatureDescription::GetParamCount() const
+uint32_t apemode::PipelineLayoutDescription::GetParamCount() const
 {
     return _Get_collection_length_u (Params);
 }
 
-apemode::RootParameter const &
-apemode::RootSignatureDescription::GetParameter(uint32_t ParameterIndex) const
+apemode::PipelineLayoutParameter const &
+apemode::PipelineLayoutDescription::GetParameter(uint32_t ParameterIndex) const
 {
     _Game_engine_Assert (Params.size () < ParameterIndex, 
                          "Index is out of range.");
@@ -137,7 +129,7 @@ apemode::RootSignatureDescription::GetParameter(uint32_t ParameterIndex) const
     return Params[ParameterIndex];
 }
 
-uint64_t apemode::RootSignatureDescription::UpdateHash()
+uint64_t apemode::PipelineLayoutDescription::UpdateHash()
 {
     apemode::CityHash64Wrapper HashBuilder;
     HashBuilder.CombineWithArray (Params.data (), Params.size ());
@@ -147,10 +139,10 @@ uint64_t apemode::RootSignatureDescription::UpdateHash()
     return HashBuilder.Value;
 }
 
-apemode::RootSignatureDescription const *
-apemode::RootSignatureDescription::MakeNewFromTemporary(RootSignatureDescription const & TemporaryDesc)
+apemode::PipelineLayoutDescription const *
+apemode::PipelineLayoutDescription::MakeNewFromTemporary(PipelineLayoutDescription const & TemporaryDesc)
 {
-    auto pOutDesc = new apemode::RootSignatureDescription();
+    auto pOutDesc = new apemode::PipelineLayoutDescription();
 
     if (!TemporaryDesc.Params.empty())
     {
@@ -172,14 +164,14 @@ apemode::RootSignatureDescription::MakeNewFromTemporary(RootSignatureDescription
 }
 
 /// -------------------------------------------------------------------------------------------------------------------
-/// RootSignatureBuilder
+/// PipelineLayoutBuilder
 /// -------------------------------------------------------------------------------------------------------------------
 
-apemode::RootSignatureBuilder::RootSignatureBuilder()
+apemode::PipelineLayoutBuilder::PipelineLayoutBuilder()
 {
 }
 
-void apemode::RootSignatureBuilder::Reset (uint32_t BindingCount, uint32_t PushConstRangeCount)
+void apemode::PipelineLayoutBuilder::Reset (uint32_t BindingCount, uint32_t PushConstRangeCount)
 {
     TemporaryDesc.Params.clear ();
     TemporaryDesc.Params.reserve (BindingCount);
@@ -187,18 +179,18 @@ void apemode::RootSignatureBuilder::Reset (uint32_t BindingCount, uint32_t PushC
     TemporaryDesc.PushConstRanges.reserve (PushConstRangeCount);
 }
 
-apemode::RootParameter & apemode::RootSignatureBuilder::AddParameter()
+apemode::PipelineLayoutParameter & apemode::PipelineLayoutBuilder::AddParameter()
 {
     return apemode::PushBackAndGet( TemporaryDesc.Params);
 }
 
-VkPushConstantRange & apemode::RootSignatureBuilder::AddPushConstRange()
+VkPushConstantRange & apemode::PipelineLayoutBuilder::AddPushConstRange()
 {
     return apemode::PushBackAndGet(TemporaryDesc.PushConstRanges);
 }
 
-apemode::RootSignature const *
-apemode::RootSignatureBuilder::RecreateRootSignature(apemode::GraphicsDevice & GraphicsNode)
+apemode::PipelineLayout const *
+apemode::PipelineLayoutBuilder::RecreatePipelineLayout(apemode::GraphicsDevice & GraphicsNode)
 {
     using SetKey                = uint32_t;
     using Binding               = VkDescriptorSetLayoutBinding;
@@ -209,27 +201,25 @@ apemode::RootSignatureBuilder::RecreateRootSignature(apemode::GraphicsDevice & G
     using SetToBindingItRange  = std::pair<SetToBindingIt, SetToBindingIt>;
     using SetToBindingPair     = std::pair<SetKey, VkDescriptorSetLayoutBinding>;
 
-    if (_Game_engine_Likely (GraphicsNode.IsValid ()))
+    if (apemode_likely (GraphicsNode.IsValid ()))
     {
         SetToBindingMultimap Bindings;
         BindingVector        SetLayoutBindings;
 
         auto   Hash    = TemporaryDesc.UpdateHash ();
-        auto & Manager = GraphicsNode.GetDefaultRootSignatureManager ();
+        auto & Manager = GraphicsNode.GetDefaultPipelineLayoutManager ();
 
-        if (auto pStoredRootSign = Manager.TryGetRootSignatureObjectByHash (Hash))
+        if (auto pStoredRootSign = Manager.TryGetPipelineLayoutObjectByHash (Hash))
             return pStoredRootSign;
 
         std::vector<VkDescriptorSetLayout> DescSetLayouts;
-        if (_Game_engine_Likely (!TemporaryDesc.Params.empty ()))
+        if (apemode_likely (!TemporaryDesc.Params.empty ()))
         {
-            std::for_each (TemporaryDesc.Params.begin (),
-                             TemporaryDesc.Params.end (),
-                             [&](apemode::RootParameter const & Param)
-                             {
-                                 Bindings.insert (std::make_pair (
-                                     Param.DescSet, Param.Binding.Desc));
-                             });
+            std::for_each( TemporaryDesc.Params.begin( ),
+                           TemporaryDesc.Params.end( ),
+                           [&]( apemode::PipelineLayoutParameter const& Param ) {
+                               Bindings.insert( std::make_pair( Param.DescSet, Param.Binding.Desc ) );
+                           } );
 
             SetToBindingItRange ItRange;
             SetToBindingIt      It = Bindings.begin ();
@@ -237,74 +227,59 @@ apemode::RootSignatureBuilder::RecreateRootSignature(apemode::GraphicsDevice & G
             {
                 ItRange = Bindings.equal_range (It->first);
 
-                const auto BindingCount = std::distance (ItRange.first, ItRange.second);
-                SetLayoutBindings.reserve (static_cast<size_t> (BindingCount));
+                const auto BindingCount = std::distance( ItRange.first, ItRange.second );
+                SetLayoutBindings.reserve( static_cast< size_t >( BindingCount ) );
 
-                std::for_each (ItRange.first, ItRange.second, [&](SetToBindingPair const & Pair) {
-                    SetLayoutBindings.push_back (Pair.second);
-                });
+                std::for_each( ItRange.first, ItRange.second, [&]( SetToBindingPair const& Pair ) {
+                    SetLayoutBindings.push_back( Pair.second );
+                } );
 
                 apemode::CityHash64Wrapper DescSetLayoutHashBuilder;
-                DescSetLayoutHashBuilder.CombineWithArray (SetLayoutBindings.data (),
-                                                           SetLayoutBindings.size ());
+                DescSetLayoutHashBuilder.CombineWithArray( SetLayoutBindings.data( ), SetLayoutBindings.size( ) );
 
-                if (auto StoredDescSetLayout = Manager.GetDescSetLayout(DescSetLayoutHashBuilder.Value))
-                {
+                if ( auto StoredDescSetLayout = Manager.GetDescSetLayout( DescSetLayoutHashBuilder.Value ) ) {
                     DescSetLayouts.push_back (StoredDescSetLayout);
-                }
-                else
-                {
-                    apemode::TInfoStruct<VkDescriptorSetLayoutCreateInfo> DescSetLayoutDesc;
+                } else {
+                    apemode::TInfoStruct< VkDescriptorSetLayoutCreateInfo > DescSetLayoutDesc;
+                    apemode::AliasStructs( SetLayoutBindings, DescSetLayoutDesc->pBindings, DescSetLayoutDesc->bindingCount );
 
-                    apemode::AliasStructs (SetLayoutBindings,
-                                       DescSetLayoutDesc->pBindings,
-                                       DescSetLayoutDesc->bindingCount);
-
-                    apemode::TDispatchableHandle<VkDescriptorSetLayout> TempDescSetLayout;
-                    if (!TempDescSetLayout.Recreate (GraphicsNode, DescSetLayoutDesc))
-                    {
-                        _Game_engine_Error ("Failed to create descriptor set layout.");
+                    apemode::TDispatchableHandle< VkDescriptorSetLayout > TempDescSetLayout;
+                    if ( !TempDescSetLayout.Recreate( GraphicsNode, DescSetLayoutDesc ) ) {
+                        _Game_engine_Error( "Failed to create descriptor set layout." );
                         return false;
                     }
 
-                    auto DestSetLayoutHandle = TempDescSetLayout.Release ();
-                    Manager.SetDescSetLayout (DescSetLayoutHashBuilder.Value, DestSetLayoutHandle);
-
-                    DescSetLayouts.push_back (DestSetLayoutHandle);
+                    auto DestSetLayoutHandle = TempDescSetLayout.Release( );
+                    Manager.SetDescSetLayout( DescSetLayoutHashBuilder.Value, DestSetLayoutHandle );
+                    DescSetLayouts.push_back( DestSetLayoutHandle );
                 }
             }
         }
 
-        TInfoStruct<VkPipelineLayoutCreateInfo> PipelineLayoutDesc;
-        apemode::AliasStructs (DescSetLayouts,
-                           PipelineLayoutDesc->pSetLayouts,
-                           PipelineLayoutDesc->setLayoutCount);
+        TInfoStruct< VkPipelineLayoutCreateInfo > PipelineLayoutDesc;
+        apemode::AliasStructs( DescSetLayouts, PipelineLayoutDesc->pSetLayouts, PipelineLayoutDesc->setLayoutCount );
 
-        if (!TemporaryDesc.PushConstRanges.empty())
-        {
-            apemode::AliasStructs (TemporaryDesc.PushConstRanges,
-                               PipelineLayoutDesc->pPushConstantRanges,
-                               PipelineLayoutDesc->pushConstantRangeCount);
+        if ( !TemporaryDesc.PushConstRanges.empty( ) ) {
+            apemode::AliasStructs( TemporaryDesc.PushConstRanges,
+                                   PipelineLayoutDesc->pPushConstantRanges,
+                                   PipelineLayoutDesc->pushConstantRangeCount );
         }
 
-        apemode::TDispatchableHandle<VkPipelineLayout> PipelineLayoutHandle;
-        if (!PipelineLayoutHandle.Recreate(GraphicsNode, PipelineLayoutDesc))
-        {
+        apemode::TDispatchableHandle< VkPipelineLayout > PipelineLayoutHandle;
+        if ( !PipelineLayoutHandle.Recreate( GraphicsNode, PipelineLayoutDesc ) ) {
             return false;
         }
 
-        if (_Game_engine_Likely (PipelineLayoutHandle.IsNotNull ()))
-        {
-            auto pRootSign = new apemode::RootSignature();
+        if ( apemode_likely( PipelineLayoutHandle.IsNotNull( ) ) ) {
+            auto pRootSign = new apemode::PipelineLayout( );
 
-            pRootSign->DescSetLayouts.swap(DescSetLayouts);
-            pRootSign->PipelineLayoutHandle.Swap(PipelineLayoutHandle);
-            pRootSign->Hash          = Hash;
-            pRootSign->pGraphicsNode = &GraphicsNode;
-            pRootSign->pDesc = RootSignatureDescription::MakeNewFromTemporary(TemporaryDesc);
+            pRootSign->DescSetLayouts.swap( DescSetLayouts );
+            pRootSign->PipelineLayoutHandle.Swap( PipelineLayoutHandle );
+            pRootSign->Hash  = Hash;
+            pRootSign->pNode = &GraphicsNode;
+            pRootSign->pDesc = PipelineLayoutDescription::MakeNewFromTemporary( TemporaryDesc );
 
-            Manager.AddNewRootSignatureObject(*pRootSign);
-
+            Manager.AddNewPipelineLayoutObject( *pRootSign );
             return pRootSign;
         }
     }
@@ -313,38 +288,38 @@ apemode::RootSignatureBuilder::RecreateRootSignature(apemode::GraphicsDevice & G
 }
 
 /// -------------------------------------------------------------------------------------------------------------------
-/// RootSignatureManager PrivateContent
+/// PipelineLayoutManager PrivateContent
 /// -------------------------------------------------------------------------------------------------------------------
 
-struct apemode::RootSignatureManager::PrivateContent : public apemode::ScalableAllocPolicy,
+struct apemode::PipelineLayoutManager::PrivateContent : public apemode::ScalableAllocPolicy,
                                                     public apemode::NoCopyAssignPolicy
 {
     using HashType            = apemode::CityHash64Wrapper::ValueType;
     using HashOpLess          = apemode::CityHash64Wrapper::CmpOpLess;
     using HashOp              = apemode::CityHash64Wrapper::HashOp<>;
     using HashOpEqual         = apemode::CityHash64Wrapper::CmpOpEqual;
-    using RootSignatureLookup = std::map<HashType, std::unique_ptr<apemode::RootSignature> >;
+    using PipelineLayoutLookup = std::map<HashType, std::unique_ptr<apemode::PipelineLayout> >;
     using DescriptorSetLayoutLookup = std::map<HashType, VkDescriptorSetLayout>;
 
     std::mutex                 Lock;
-    RootSignatureLookup       StoredRootSigns;
+    PipelineLayoutLookup       StoredRootSigns;
     DescriptorSetLayoutLookup StoredDescSetLayouts;
 };
 
 /// -------------------------------------------------------------------------------------------------------------------
-/// RootSignatureManager
+/// PipelineLayoutManager
 /// -------------------------------------------------------------------------------------------------------------------
 
-apemode::RootSignatureManager::RootSignatureManager () : pContent (new PrivateContent ())
+apemode::PipelineLayoutManager::PipelineLayoutManager () : pContent (new PrivateContent ())
 {
 }
 
-apemode::RootSignatureManager::~RootSignatureManager ()
+apemode::PipelineLayoutManager::~PipelineLayoutManager ()
 {
     apemode::TSafeDeleteObj (pContent);
 }
 
-VkDescriptorSetLayout apemode::RootSignatureManager::GetDescSetLayout (uint64_t Hash)
+VkDescriptorSetLayout apemode::PipelineLayoutManager::GetDescSetLayout (uint64_t Hash)
 {
     auto DescSetLayoutIt = pContent->StoredDescSetLayouts.find (Hash);
     if (DescSetLayoutIt != pContent->StoredDescSetLayouts.end ())
@@ -353,7 +328,7 @@ VkDescriptorSetLayout apemode::RootSignatureManager::GetDescSetLayout (uint64_t 
     return VK_NULL_HANDLE;
 }
 
-void apemode::RootSignatureManager::SetDescSetLayout (uint64_t Hash, VkDescriptorSetLayout SetLayout)
+void apemode::PipelineLayoutManager::SetDescSetLayout (uint64_t Hash, VkDescriptorSetLayout SetLayout)
 {
     _Game_engine_Assert (pContent->StoredDescSetLayouts.find (Hash)
                              == pContent->StoredDescSetLayouts.end (),
@@ -362,7 +337,7 @@ void apemode::RootSignatureManager::SetDescSetLayout (uint64_t Hash, VkDescripto
     pContent->StoredDescSetLayouts[ Hash ] = SetLayout;
 }
 
-void apemode::RootSignatureManager::AddNewRootSignatureObject (apemode::RootSignature & RootSign)
+void apemode::PipelineLayoutManager::AddNewPipelineLayoutObject (apemode::PipelineLayout & RootSign)
 {
     std::lock_guard<std::mutex> LockGuard (pContent->Lock);
 
@@ -373,8 +348,8 @@ void apemode::RootSignatureManager::AddNewRootSignatureObject (apemode::RootSign
     pContent->StoredRootSigns[ RootSign.Hash ].reset (&RootSign);
 }
 
-apemode::RootSignature const *
-apemode::RootSignatureManager::TryGetRootSignatureObjectByHash (uint64_t Hash)
+apemode::PipelineLayout const *
+apemode::PipelineLayoutManager::TryGetPipelineLayoutObjectByHash (uint64_t Hash)
 {
     std::lock_guard<std::mutex> LockGuard (pContent->Lock);
 

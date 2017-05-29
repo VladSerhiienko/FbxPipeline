@@ -113,7 +113,7 @@ bool apemode::RenderTargets::RecreateResourcesFor (GraphicsDevice & InGraphicsNo
             pViewports[ AttIdx ].maxDepth = 1.0f;
         }
 
-        if (_Game_engine_Likely (InDepthStencilFmt != VK_FORMAT_UNDEFINED))
+        if (apemode_likely (InDepthStencilFmt != VK_FORMAT_UNDEFINED))
         {
             _Game_engine_Assert (InDepthStencilWidth != 0 && InDepthStencilHeight != 0,
                                  "DSV dimensions.");
@@ -139,7 +139,7 @@ bool apemode::RenderTargets::RecreateResourcesFor (GraphicsDevice & InGraphicsNo
         }
     }
 
-    if (_Game_engine_Likely (AttachmentCount))
+    if (apemode_likely (AttachmentCount))
     {
         static const uint32_t kDefaultSubpassId = 0;
 
@@ -178,7 +178,7 @@ bool apemode::RenderTargets::RecreateResourcesFor (GraphicsDevice & InGraphicsNo
                 FramebufferBuilder.Attach (*ppColorViews[ FrameIdx ][ AttIdx ]);
             }
 
-            if (_Game_engine_Likely (pDepthStencilViews[ FrameIdx ]))
+            if (apemode_likely (pDepthStencilViews[ FrameIdx ]))
             {
                 FramebufferBuilder.Attach (*pDepthStencilViews[ FrameIdx ]);
             }

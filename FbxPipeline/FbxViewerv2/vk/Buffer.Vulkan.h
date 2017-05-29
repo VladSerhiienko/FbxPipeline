@@ -4,7 +4,7 @@
 
 namespace apemode
 {
-    class _Graphics_ecosystem_dll_api BufferResourceView
+    class BufferResourceView
         : public ResourceView
     {
     public:

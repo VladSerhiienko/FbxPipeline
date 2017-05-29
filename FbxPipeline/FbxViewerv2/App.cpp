@@ -3,7 +3,7 @@
 #include <App.h>
 #include <AppSurfaceSdlVk.h>
 #include <Input.h>
-#include <NuklearSdlBase.h>
+#include <NuklearSdlVk.h>
 
 #include <Scene.h>
 
@@ -38,7 +38,9 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
     if ( AppBase::Initialize( Args, ppArgs ) ) {
         totalSecs = 0.0f;
 
-        //content->nk = nk_sdl_init( (SDL_Window*) GetSurface( )->GetWindowHandle( ) );
+        content->Nk = new NuklearSdlVk();
+        NuklearSdlVk::InitParametersVk initParams;
+        content->Nk->Init( &initParams );
 
         apemode::EmbeddedShaderPreprocessor preproc;
         std::vector< std::string > definitions = {"AM_OPTION_1=1", "AM_OPTION_2=0"};

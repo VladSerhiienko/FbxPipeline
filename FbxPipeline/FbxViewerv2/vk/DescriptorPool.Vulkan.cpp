@@ -2,9 +2,9 @@
 #include <DescriptorPool.Vulkan.h>
 
 #include <CommandQueue.Vulkan.h>
-#include <RootSignature.Vulkan.h>
+#include <PipelineLayout.Vulkan.h>
 
-apemode::DescriptorPool::DescriptorPool () : pGraphicsNode (nullptr)
+apemode::DescriptorPool::DescriptorPool () : pNode (nullptr)
 {
 }
 
@@ -86,9 +86,9 @@ bool apemode::DescriptorPool::RecreateResourcesFor (GraphicsDevice & GraphicsNod
     DescPoolDesc->pPoolSizes    = LclSubpoolSizes;
     DescPoolDesc->poolSizeCount = LclSubpoolSizeCounter;
 
-    if (_Game_engine_Likely (hDescPool.Recreate (GraphicsNode, DescPoolDesc)))
+    if (apemode_likely (hDescPool.Recreate (GraphicsNode, DescPoolDesc)))
     {
-        pGraphicsNode = &GraphicsNode;
+        pNode = &GraphicsNode;
         return true;
     }
 
@@ -102,7 +102,7 @@ apemode::DescriptorPool::operator VkDescriptorPool() const
 
 apemode::DescriptorSet::DescriptorSet() : pDescPool(nullptr)
                                      , pRootSign(nullptr)
-                                     , pGraphicsNode(nullptr)
+                                     , pNode(nullptr)
 {
 }
 
@@ -115,7 +115,7 @@ apemode::DescriptorSet::~DescriptorSet()
 
 bool apemode::DescriptorSet::RecreateResourcesFor (GraphicsDevice & GraphicsNode,
                                                 DescriptorPool & DescPool,
-                                                RootSignature &  RootSign,
+                                                PipelineLayout &  RootSign,
                                                 uint32_t         DescSetLayoutIndex)
 {
     if (DescPool.DescSetCounter >= 1)
@@ -125,11 +125,11 @@ bool apemode::DescriptorSet::RecreateResourcesFor (GraphicsDevice & GraphicsNode
         AllocInfo->descriptorPool     = DescPool;
         AllocInfo->descriptorSetCount = 1;
 
-        if (_Game_engine_Likely (hDescSet.Recreate (GraphicsNode, DescPool, AllocInfo)))
+        if (apemode_likely (hDescSet.Recreate (GraphicsNode, DescPool, AllocInfo)))
         {
             pDescPool     = &DescPool;
             pRootSign     = &RootSign;
-            pGraphicsNode = &GraphicsNode;
+            pNode = &GraphicsNode;
 
             --DescPool.DescSetCounter;
             return true;
@@ -145,7 +145,7 @@ void apemode::DescriptorSet::BindTo (apemode::CommandList & CmdList,
                                   const uint32_t *    DynamicOffsets)
 {
     _Game_engine_Assert (pRootSign != nullptr && hDescSet.IsNotNull (), "Not initialized.");
-    if (_Game_engine_Likely (pRootSign != nullptr && hDescSet.IsNotNull ()))
+    if (apemode_likely (pRootSign != nullptr && hDescSet.IsNotNull ()))
     {
         vkCmdBindDescriptorSets (CmdList,
                                  PipelineBindPoint,
@@ -169,7 +169,7 @@ apemode::DescriptorSetUpdater::DescriptorSetUpdater ()
 
 void apemode::DescriptorSetUpdater::Reset (uint32_t MaxWrites, uint32_t MaxCopies)
 {
-    pGraphicsNode = nullptr;
+    pNode = nullptr;
 
     BufferInfos.clear ();
     ImgInfos.clear ();
@@ -184,14 +184,14 @@ void apemode::DescriptorSetUpdater::Reset (uint32_t MaxWrites, uint32_t MaxCopie
 
 bool apemode::DescriptorSetUpdater::SetGraphicsNode (GraphicsDevice const & GraphicsNode)
 {
-    if (_Game_engine_Likely (pGraphicsNode))
+    if (apemode_likely (pNode))
     {
-        _Game_engine_Assert (pGraphicsNode == &GraphicsNode,
+        _Game_engine_Assert (pNode == &GraphicsNode,
                              "Descriptor sets of different devices.");
-        return pGraphicsNode == &GraphicsNode;
+        return pNode == &GraphicsNode;
     }
 
-    pGraphicsNode = &GraphicsNode;
+    pNode = &GraphicsNode;
     return true;
 }
 
@@ -208,7 +208,7 @@ bool apemode::DescriptorSetUpdater::WriteUniformBuffer (DescriptorSet const & De
         return false;
     }
 
-    if (!SetGraphicsNode (*DescSet.pGraphicsNode))
+    if (!SetGraphicsNode (*DescSet.pNode))
     {
         return false;
     }
@@ -244,7 +244,7 @@ bool apemode::DescriptorSetUpdater::WriteCombinedImgSampler (DescriptorSet const
         return false;
     }
 
-    if (!SetGraphicsNode(*DescSet.pGraphicsNode))
+    if (!SetGraphicsNode(*DescSet.pNode))
     {
         return false;
     }
@@ -283,12 +283,12 @@ void apemode::DescriptorSetUpdater::Flush()
         }
     }
 
-    _Game_engine_Assert (pGraphicsNode != nullptr,
+    _Game_engine_Assert (pNode != nullptr,
                          "No writes or copies were submitted.");
 
-    if (_Game_engine_Likely (pGraphicsNode != nullptr))
+    if (apemode_likely (pNode != nullptr))
     {
-        vkUpdateDescriptorSets (*pGraphicsNode,
+        vkUpdateDescriptorSets (*pNode,
                                 _Get_collection_length_u (Writes),
                                 Writes.empty () ? nullptr : Writes.data (),
                                 _Get_collection_length_u (Copies),

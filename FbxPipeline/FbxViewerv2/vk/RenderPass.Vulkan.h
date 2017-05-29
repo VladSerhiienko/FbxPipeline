@@ -16,14 +16,14 @@ namespace apemode
     class RenderPassDescription;
     class RenderPassBuilder;
 
-    class _Graphics_ecosystem_dll_api RenderPass : public apemode::ScalableAllocPolicy,
+    class RenderPass : public apemode::ScalableAllocPolicy,
                                                    public apemode::NoCopyAssignPolicy
     {
     public:
         uint64_t                                Hash;
         apemode::TDispatchableHandle<VkRenderPass> Handle;
         apemode::RenderPassDescription const *     pDesc;
-        apemode::GraphicsDevice const *            pGraphicsNode;
+        apemode::GraphicsDevice const *            pNode;
 
     public:
         RenderPass();
@@ -32,11 +32,11 @@ namespace apemode
         operator VkRenderPass() const;
     };
 
-    class _Graphics_ecosystem_dll_api RenderPassDescription : public apemode::ScalableAllocPolicy,
+    class RenderPassDescription : public apemode::ScalableAllocPolicy,
                                                               public apemode::NoCopyAssignPolicy
     {
     public:
-        struct _Graphics_ecosystem_dll_api SubpassDescription : public apemode::ScalableAllocPolicy,
+        struct SubpassDescription : public apemode::ScalableAllocPolicy,
                                                                 public apemode::NoCopyAssignPolicy
         {
             using NativeSubpassDescription  = TInfoStruct<VkSubpassDescription>;
@@ -87,7 +87,7 @@ namespace apemode
         MakeNewFromTemporary (RenderPassDescription const & TemporaryDesc);
     };
 
-    class _Graphics_ecosystem_dll_api RenderPassBuilder : public apemode::ScalableAllocPolicy,
+    class RenderPassBuilder : public apemode::ScalableAllocPolicy,
                                                           public apemode::NoCopyAssignPolicy
     {
     public:
@@ -168,7 +168,7 @@ namespace apemode
         RenderPassDescription::SubpassDescription & GetOrCreateSubpass(uint32_t SubpassId);
     };
 
-    class _Graphics_ecosystem_dll_api RenderPassManager
+    class RenderPassManager
     {
         friend apemode::GraphicsDevice;
         friend apemode::RenderPassBuilder;

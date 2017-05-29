@@ -1,0 +1,227 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{93478497-F808-45BC-9EBC-AEC43BA94F4D}</ProjectGuid>
+    <RootNamespace>EmbeddedShaderCompiler</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)lib\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)lib\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)lib\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)lib\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(VK_SDK_PATH)\shaderc\libshaderc\include\;$(VK_SDK_PATH)\shaderc\libshaderc_util\include\;$(VK_SDK_PATH)\shaderc\third_party\glslang\;$(VK_SDK_PATH)\shaderc\third_party\spirv-tools\include\;$(VK_SDK_PATH)\shaderc\third_party\spirv-tools\source\;$(VK_SDK_PATH)\shaderc\third_party\spirv-tools\external\spirv-headers\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>SPIRV_WINDOWS=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <PreBuildEvent>
+      <Command>python $(VK_SDK_PATH)\shaderc\utils\update_build_version.py $(VK_SDK_PATH)\shaderc\ $(VK_SDK_PATH)\shaderc\third_party\spirv-tools\ $(VK_SDK_PATH)\shaderc\third_party\glslang\ </Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(VK_SDK_PATH)\shaderc\libshaderc\include\;$(VK_SDK_PATH)\shaderc\libshaderc_util\include\;$(VK_SDK_PATH)\shaderc\third_party\glslang\;$(VK_SDK_PATH)\shaderc\third_party\spirv-tools\include\;$(VK_SDK_PATH)\shaderc\third_party\spirv-tools\source\;$(VK_SDK_PATH)\shaderc\third_party\spirv-tools\external\spirv-headers\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>SPIRV_WINDOWS=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <PreBuildEvent>
+      <Command>python $(VK_SDK_PATH)\shaderc\utils\update_build_version.py $(VK_SDK_PATH)\shaderc\ $(VK_SDK_PATH)\shaderc\third_party\spirv-tools\ $(VK_SDK_PATH)\shaderc\third_party\glslang\ </Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(VK_SDK_PATH)\shaderc\libshaderc\include\;$(VK_SDK_PATH)\shaderc\libshaderc_util\include\;$(VK_SDK_PATH)\shaderc\third_party\glslang\;$(VK_SDK_PATH)\shaderc\third_party\spirv-tools\include\;$(VK_SDK_PATH)\shaderc\third_party\spirv-tools\source\;$(VK_SDK_PATH)\shaderc\third_party\spirv-tools\external\spirv-headers\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>SPIRV_WINDOWS=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <PreBuildEvent>
+      <Command>python $(VK_SDK_PATH)\shaderc\utils\update_build_version.py $(VK_SDK_PATH)\shaderc\ $(VK_SDK_PATH)\shaderc\third_party\spirv-tools\ $(VK_SDK_PATH)\shaderc\third_party\glslang\ </Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(VK_SDK_PATH)\shaderc\libshaderc\include\;$(VK_SDK_PATH)\shaderc\libshaderc_util\include\;$(VK_SDK_PATH)\shaderc\third_party\glslang\;$(VK_SDK_PATH)\shaderc\third_party\spirv-tools\include\;$(VK_SDK_PATH)\shaderc\third_party\spirv-tools\source\;$(VK_SDK_PATH)\shaderc\third_party\spirv-tools\external\spirv-headers\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>SPIRV_WINDOWS=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <PreBuildEvent>
+      <Command>python $(VK_SDK_PATH)\shaderc\utils\update_build_version.py $(VK_SDK_PATH)\shaderc\ $(VK_SDK_PATH)\shaderc\third_party\spirv-tools\ $(VK_SDK_PATH)\shaderc\third_party\glslang\ </Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\libshaderc\src\shaderc.cc" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\libshaderc_util\src\compiler.cc" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\libshaderc_util\src\file_finder.cc" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\libshaderc_util\src\io.cc" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\libshaderc_util\src\message.cc" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\libshaderc_util\src\resources.cc" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\libshaderc_util\src\shader_stage.cc" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\libshaderc_util\src\spirv_tools_wrapper.cc" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\libshaderc_util\src\version_profile.cc" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\glslang\SPIRV\disassemble.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\glslang\SPIRV\doc.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\glslang\SPIRV\GlslangToSpv.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\glslang\SPIRV\InReadableOrder.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\glslang\SPIRV\Logger.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\glslang\SPIRV\SpvBuilder.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\glslang\SPIRV\SPVRemapper.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\assembly_grammar.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\binary.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\diagnostic.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\disassemble.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\enum_string_mapping.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\extensions.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\ext_inst.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\libspirv.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\message.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\name_mapper.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\opcode.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\operand.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\opt\basic_block.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\opt\build_module.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\opt\compact_ids_pass.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\opt\def_use_manager.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\opt\eliminate_dead_constant_pass.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\opt\flatten_decoration_pass.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\opt\fold_spec_constant_op_and_composite_pass.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\opt\freeze_spec_constant_value_pass.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\opt\function.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\opt\inline_pass.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\opt\instruction.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\opt\ir_loader.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\opt\module.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\opt\optimizer.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\opt\pass_manager.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\opt\set_spec_constant_default_value_pass.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\opt\strip_debug_info_pass.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\opt\types.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\opt\type_manager.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\opt\unify_const_pass.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\parsed_operand.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\print.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\software_version.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\spirv_endian.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\spirv_stats.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\spirv_target_env.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\spirv_validator_options.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\table.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\text.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\text_handler.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\util\bit_stream.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\util\parse_number.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\util\string_utils.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\validate.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\validate_capability.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\validate_cfg.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\validate_datarules.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\validate_decorations.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\validate_id.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\validate_instruction.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\validate_layout.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\validate_type_unique.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\val\basic_block.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\val\construct.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\val\function.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\val\instruction.cpp" />
+    <ClCompile Include="C:\VulkanSDK\1.0.49.0\shaderc\third_party\spirv-tools\source\val\validation_state.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -18,7 +18,7 @@ namespace apemode
     class ColorResourceView;
     class DepthStencilResourceView;
 
-    class _Graphics_ecosystem_dll_api ResourceReference : public apemode::ScalableAllocPolicy,
+    class ResourceReference : public apemode::ScalableAllocPolicy,
                                                           public apemode::NoCopyAssignPolicy
     {
     public:
@@ -53,11 +53,11 @@ namespace apemode
         TInfoStruct<VkMemoryRequirements> MemoryReqs;
     };
 
-    class _Graphics_ecosystem_dll_api ResourceView : public apemode::ScalableAllocPolicy,
+    class ResourceView : public apemode::ScalableAllocPolicy,
                                                      public apemode::NoCopyAssignPolicy
     {
     public:
-        class _Graphics_ecosystem_dll_api MemoryState : public apemode::ScalableAllocPolicy
+        class MemoryState : public apemode::ScalableAllocPolicy
         {
         public:
             enum EType

@@ -1,22 +1,46 @@
 #pragma once
+
 #include <NuklearSdlBase.h>
+
+#include <GraphicsDevice.Vulkan.h>
+#include <DescriptorPool.Vulkan.h>
+#include <GraphicsEcosystems.Vulkan.h>
+#include <NativeDispatchableHandles.Vulkan.h>
+#include <PipelineState.Vulkan.h>
+#include <PipelineLayout.Vulkan.h>
+#include <RenderPass.Vulkan.h>
+#include <CommandQueue.Vulkan.h>
+
+#include <TInfoStruct.Vulkan.h>
 
 namespace apemode {
 
     class NuklearSdlVk : public NuklearSdlBase {
     public:
-        struct InitParametersVk {
-            VkAllocationCallbacks *allocator          = nullptr;
-            VkPhysicalDevice       gpu                = VK_NULL_HANDLE;
-            VkDevice               device             = VK_NULL_HANDLE;
-            VkRenderPass           render_pass        = VK_NULL_HANDLE;
-            VkPipelineCache        pipeline_cache     = VK_NULL_HANDLE;
-            VkDescriptorPool       descriptor_pool    = VK_NULL_HANDLE;
-            void ( *check_vk_result )( VkResult err ) = nullptr;
+        struct InitParametersVk : InitParametersBase {
+            VkAllocationCallbacks *pAlloc      = nullptr;
+            GraphicsDevice *       pDevice     = nullptr;
+            DescriptorPool *       pDescPool   = nullptr;
+            RenderPass *           pRenderPass = nullptr;
+        };
+
+        struct RenderParametersVk : RenderParametersBase {
+            CommandList *pCmdBuffer = nullptr;
         };
 
     public:
-        VkAllocationCallbacks *Allocator               = NULL;
+        VkAllocationCallbacks *pAlloc          = nullptr;
+        GraphicsDevice *       pDevice         = nullptr;
+        DescriptorPool *       pDescPool       = nullptr;
+        RenderPass *           pRenderPass     = nullptr;
+        CommandList *          pCmdBuffer      = nullptr;
+        const PipelineState *  pPipelineState  = nullptr;
+        const PipelineLayout * pPipelineLayout = nullptr;
+
+        TDispatchableHandle< VkShaderModule > hVertexShaderModule;
+        TDispatchableHandle< VkShaderModule > hFragmentShaderModule;
+        TDispatchableHandle< VkSampler >      hFontSampler;
+
         VkPhysicalDevice       Gpu                     = VK_NULL_HANDLE;
         VkDevice               Device                  = VK_NULL_HANDLE;
         VkRenderPass           RenderPass              = VK_NULL_HANDLE;

@@ -21,7 +21,7 @@ apemode::BufferPool::~BufferPool()
 bool apemode::BufferPool::RecreateResourcesFor(GraphicsDevice & InGraphicsNode)
 {
     Pages.clear();
-    pGraphicsNode = &InGraphicsNode;
+    pNode = &InGraphicsNode;
     return true;
 }
 

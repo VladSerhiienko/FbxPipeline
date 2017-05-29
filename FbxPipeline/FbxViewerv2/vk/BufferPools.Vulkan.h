@@ -25,7 +25,7 @@ namespace apemode
         kBufferPoolStandardPageSize_Invalid = SIZE_MAX,
     };
 
-    class _Graphics_ecosystem_dll_api BufferPool
+    class BufferPool
         : public apemode::ScalableAllocPolicy
         , public apemode::NoCopyAssignPolicy
     {
@@ -34,7 +34,7 @@ namespace apemode
         struct Range;
 
     public:
-        struct _Graphics_ecosystem_dll_api Range : public apemode::ScalableAllocPolicy
+        struct Range : public apemode::ScalableAllocPolicy
         {
             Page *                              PageRef;
             VkDeviceSize                        Offset;
@@ -47,7 +47,7 @@ namespace apemode
         };
 
     public:
-        struct _Graphics_ecosystem_dll_api Page : public apemode::ScalableAllocPolicy,
+        struct Page : public apemode::ScalableAllocPolicy,
                                                   public apemode::NoCopyAssignPolicy
         {
             friend BufferPool;
@@ -90,7 +90,7 @@ namespace apemode
         BufferPoolType GetBufferPoolType () const;
 
     private:
-        GraphicsDevice * pGraphicsNode;
+        GraphicsDevice * pNode;
         BufferPoolType   ePoolType;
 
         std::vector<Page *> Pages;

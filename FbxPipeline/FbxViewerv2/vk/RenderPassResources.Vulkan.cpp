@@ -31,7 +31,7 @@ static bool ExtractSwapchainBuffers (apemode::GraphicsDevice &          InGraphi
                          "Not initialized.");
 
     uint32_t OutSwapchainBufferCount = 0;
-    if (_Game_engine_Likely (apemode::ResultHandle::Succeeded (vkGetSwapchainImagesKHR (
+    if (apemode_likely (apemode::ResultHandle::Succeeded (vkGetSwapchainImagesKHR (
             InGraphicsNode, InSwapchain.hSwapchain, &OutSwapchainBufferCount, nullptr))))
     {
         _Game_engine_Assert (OutSwapchainBufferCount != InFrameCount,
@@ -40,7 +40,7 @@ static bool ExtractSwapchainBuffers (apemode::GraphicsDevice &          InGraphi
                              InFrameCount);
 
         OutSwapchainBufferImgs.resize (OutSwapchainBufferCount, VkImage (nullptr));
-        if (_Game_engine_Likely (apemode::ResultHandle::Succeeded (
+        if (apemode_likely (apemode::ResultHandle::Succeeded (
                 vkGetSwapchainImagesKHR (InGraphicsNode,
                                          InSwapchain.hSwapchain,
                                          &OutSwapchainBufferCount,
@@ -86,7 +86,7 @@ bool apemode::RenderPassResources::RecreateResourcesFor (apemode::GraphicsDevice
                                                       VkClearValue             InDepthStencilClear,
                                                       bool                     bInReversedZ)
 {
-    if (_Game_engine_Unlikely (InRenderPass.pGraphicsNode != &InGraphicsNode
+    if (_Game_engine_Unlikely (InRenderPass.pNode != &InGraphicsNode
                                || InRenderPass.pDesc == nullptr))
     {
         _Game_engine_Halt ("Render pass is not initialized, or logical device mismatch.");

@@ -48,7 +48,7 @@ void apemode::TextureResourceView::SetState(apemode::CommandList &  CmdList,
                               ? StateIt->second
                               : MemoryStates[nullptr];
 
-    if (_Game_engine_Likely (State.AccessMask != AccessMask
+    if (apemode_likely (State.AccessMask != AccessMask
                              || State.ImgLayout != ImgLayout
                              || State.QueueFamily != QueueFamily
                              || State.PipelineStageFlags != PipelineStageFlags

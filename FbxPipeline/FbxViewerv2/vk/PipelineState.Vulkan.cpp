@@ -3,7 +3,7 @@
 
 #include <RenderPass.Vulkan.h>
 #include <CommandQueue.Vulkan.h>
-#include <RootSignature.Vulkan.h>
+#include <PipelineLayout.Vulkan.h>
 #include <Resource.Vulkan.h>
 
 #include <CityHash.h>
@@ -44,7 +44,7 @@ void apemode::PipelineStateDescription::Reset()
     Hash           = 0;
     bIsGraphics    = true;
     pRenderPass    = nullptr;
-    pRootSignature = nullptr;
+    pPipelineLayout = nullptr;
 
     DynamicState->pDynamicStates = EnabledDynamicStates;
 
@@ -241,7 +241,7 @@ uint64_t apemode::PipelineStateDescription::UpdateHash()
 
 apemode::PipelineState::PipelineState ()
     : pRenderPass (nullptr)
-    , pRootSignature (nullptr)
+    , pPipelineLayout (nullptr)
     , pGraphicsNode (nullptr)
     , pDesc (nullptr)
 {
@@ -294,11 +294,11 @@ void apemode::PipelineStateBuilder::SetRenderPass (apemode::RenderPass const & R
     TemporaryDesc.Graphics->renderPass = RenderPass;
 }
 
-void apemode::PipelineStateBuilder::SetRootSignature (apemode::RootSignature const & RootSignature)
+void apemode::PipelineStateBuilder::SetPipelineLayout (apemode::PipelineLayout const & PipelineLayout)
 {
-    TemporaryDesc.pRootSignature = &RootSignature;
+    TemporaryDesc.pPipelineLayout = &PipelineLayout;
 
-    TemporaryDesc.Graphics->layout = RootSignature;
+    TemporaryDesc.Graphics->layout = PipelineLayout;
 }
 
 apemode::PipelineStateBuilder::InputLayoutBuilder &

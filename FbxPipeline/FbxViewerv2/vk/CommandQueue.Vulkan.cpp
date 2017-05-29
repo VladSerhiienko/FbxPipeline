@@ -22,7 +22,7 @@ apemode::CommandList::CommandList ()
     : eType (kCommandListType_Invalid)
     , pRenderPass (nullptr)
     , pFramebuffer (nullptr)
-    , pRootSignature (nullptr)
+    , pPipelineLayout (nullptr)
     , pPipelineState (nullptr)
     , BarrierCount (0)
     , ImgBarrierCount (0)
@@ -165,7 +165,7 @@ void apemode::CommandList::FlushStagedBarriers()
                              || !BufferBarriers.empty (),
                              "Nothing to submit to the command list.");
 
-        if (_Game_engine_Likely (!Barriers.empty ()
+        if (apemode_likely (!Barriers.empty ()
                                  || !ImgBarriers.empty ()
                                  || !BufferBarriers.empty ()))
         {
@@ -203,7 +203,7 @@ bool apemode::CommandList::IsDirect () const
 /// CommandQueue
 /// -------------------------------------------------------------------------------------------------------------------
 
-apemode::CommandQueue::CommandQueue () : pGraphicsNode (nullptr), QueueFamilyId (0), QueueId (0)
+apemode::CommandQueue::CommandQueue () : pNode (nullptr), QueueFamilyId (0), QueueId (0)
 {
 }
 
@@ -211,9 +211,9 @@ apemode::CommandQueue::CommandQueue () : pGraphicsNode (nullptr), QueueFamilyId 
 
 apemode::CommandQueue::~CommandQueue ()
 {
-    if (pGraphicsNode != nullptr)
+    if (pNode != nullptr)
     {
-        CommandQueueReserver::Get ().Unreserve (*pGraphicsNode, QueueFamilyId, QueueId);
+        CommandQueueReserver::Get ().Unreserve (*pNode, QueueFamilyId, QueueId);
     }
 }
 
@@ -225,7 +225,7 @@ bool apemode::CommandQueue::RecreateResourcesFor (GraphicsDevice & InGraphicsNod
 {
     if (CommandQueueReserver::Get ().TryReserve (InGraphicsNode, InQueueFamilyId, InQueueId))
     {
-        pGraphicsNode = &InGraphicsNode;
+        pNode = &InGraphicsNode;
         QueueFamilyId = InQueueFamilyId;
         QueueId       = InQueueId;
 
@@ -258,7 +258,7 @@ bool apemode::CommandQueue::Execute (CommandList & CmdList,
                                   VkFence       hFence)
 {
     _Game_engine_Assert (hCmdQueue.IsNotNull (), "Not initialized.");
-    if (_Game_engine_Likely (hCmdQueue.IsNotNull ()))
+    if (apemode_likely (hCmdQueue.IsNotNull ()))
     {
         auto hCmdList = static_cast<VkCommandBuffer> (CmdList);
 
@@ -277,7 +277,7 @@ bool apemode::CommandQueue::Execute (CommandList & CmdList,
 bool apemode::CommandQueue::Execute (CommandList & CmdList, VkFence Fence)
 {
     _Game_engine_Assert (hCmdQueue.IsNotNull (), "Not initialized.");
-    if (_Game_engine_Likely (hCmdQueue.IsNotNull ()))
+    if (apemode_likely (hCmdQueue.IsNotNull ()))
     {
         auto hCmdList = static_cast<VkCommandBuffer> (CmdList);
 
@@ -304,7 +304,7 @@ apemode::CommandQueue::operator VkQueue () const
 bool apemode::CommandQueue::Execute (CommandList * CmdLists, uint32_t CmdListCount, VkFence Fence)
 {
     _Game_engine_Assert (hCmdQueue.IsNotNull (), "Not initialized.");
-    if (_Game_engine_Likely (hCmdQueue.IsNotNull ()))
+    if (apemode_likely (hCmdQueue.IsNotNull ()))
     {
         std::vector<VkCommandBuffer> CmdListHandles;
         CmdListHandles.reserve (CmdListCount);
@@ -320,7 +320,7 @@ bool apemode::CommandQueue::Execute (CommandList * CmdLists, uint32_t CmdListCou
                            SubmitDesc->pCommandBuffers,
                            SubmitDesc->commandBufferCount);
 
-        return _Game_engine_Likely(ResultHandle::Succeeded(vkQueueSubmit(
+        return apemode_likely(ResultHandle::Succeeded(vkQueueSubmit(
             hCmdQueue, 1, SubmitDesc, Fence
             )));
     }

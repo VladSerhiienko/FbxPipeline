@@ -9,7 +9,7 @@ namespace apemode
     class ShaderBytecode;
     class ShaderReflection;
 
-    class _Graphics_ecosystem_dll_api ShaderObject : public apemode::ScalableAllocPolicy,
+    class ShaderObject : public apemode::ScalableAllocPolicy,
                                                      public apemode::NoCopyAssignPolicy
     {
     public:
@@ -21,7 +21,7 @@ namespace apemode
         apemode::TDispatchableHandle<VkShaderModule> pShaderModule;
     };
 
-    class _Graphics_ecosystem_dll_api ShaderManager : public apemode::ScalableAllocPolicy,
+    class ShaderManager : public apemode::ScalableAllocPolicy,
                                                       public apemode::NoCopyAssignPolicy
     {
         struct PrivateContent;

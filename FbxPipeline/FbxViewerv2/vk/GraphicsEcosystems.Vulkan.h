@@ -4,7 +4,7 @@
 
 namespace apemode
 {
-    class _Graphics_ecosystem_dll_api GraphicsEcosystem
+    class GraphicsEcosystem
         : public apemode::ScalableAllocPolicy,
           public apemode::NoCopyAssignPolicy
     {

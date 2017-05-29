@@ -273,7 +273,7 @@ apemode::RenderPassBuilder::RecreateRenderPass(apemode::GraphicsDevice & Graphic
             auto pRenderPass = new apemode::RenderPass();
             pRenderPass->Handle.Swap(NewHandle);
             pRenderPass->Hash          = Hash;
-            pRenderPass->pGraphicsNode = &GraphicsNode;
+            pRenderPass->pNode = &GraphicsNode;
             pRenderPass->pDesc         = RenderPassDescription::MakeNewFromTemporary(TemporaryDesc);
 
             // Stores compiled render passes, so we could reuse them later
@@ -382,14 +382,14 @@ uint64_t apemode::RenderPassDescription::UpdateHash()
     auto HashWrapper = apemode::CityHash64Wrapper ();
     HashWrapper.CombineWith (PartialDesc);
 
-    if (_Game_engine_Likely (PartialDesc.attachmentCount != 0))
+    if (apemode_likely (PartialDesc.attachmentCount != 0))
     {
         auto const pAttachmentIt    = pAttachments;
         auto const pAttachmentItEnd = pAttachments + PartialDesc.attachmentCount;
         HashWrapper.CombineWithArray(pAttachmentIt, pAttachmentItEnd);
     }
 
-    if (_Game_engine_Likely (PartialDesc.dependencyCount != 0))
+    if (apemode_likely (PartialDesc.dependencyCount != 0))
     {
         auto const pDependencyIt    = pDependencies;
         auto const pDependencyItEnd = pDependencies + PartialDesc.dependencyCount;
@@ -578,7 +578,7 @@ apemode::RenderPassManager::TryGetRenderPassObjectByHash(uint64_t Hash)
     return nullptr;
 }
 
-apemode::RenderPass::RenderPass () : pGraphicsNode (nullptr), pDesc (nullptr), Hash (0)
+apemode::RenderPass::RenderPass () : pNode (nullptr), pDesc (nullptr), Hash (0)
 {
 }
 

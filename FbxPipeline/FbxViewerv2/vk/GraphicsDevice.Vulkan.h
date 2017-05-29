@@ -8,13 +8,13 @@ namespace apemode
     class CommandQueue;
     class ResourceReference;
     class RenderPassManager;
-    class RootSignatureManager;
+    class PipelineLayoutManager;
     class PipelineStateManager;
     class ShaderManager;
     class FramebufferManager;
     class GraphicsEcosystem;
 
-    class _Graphics_ecosystem_dll_api GraphicsDevice : public apemode::ScalableAllocPolicy,
+    class GraphicsDevice : public apemode::ScalableAllocPolicy,
                                                        public apemode::NoCopyAssignPolicy
     {
     public:
@@ -40,7 +40,7 @@ namespace apemode
         ShaderManager &        GetDefaultShaderManager();
         RenderPassManager &    GetDefaultRenderPassManager();
         FramebufferManager &   GetDefaultFramebufferManager();
-        RootSignatureManager & GetDefaultRootSignatureManager();
+        PipelineLayoutManager & GetDefaultPipelineLayoutManager();
         PipelineStateManager & GetDefaultPipelineStateManager();
 
     private:
