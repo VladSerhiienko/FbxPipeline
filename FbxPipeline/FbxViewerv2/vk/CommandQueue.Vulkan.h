@@ -5,14 +5,14 @@
 
 namespace apemode
 {
-    class CommandList;
+    class CommandBuffer;
     class CommandQueue;
     class RenderPass;
     class Framebuffer;
     class PipelineLayout;
     class PipelineState;
 
-    class CommandList : public apemode::ScalableAllocPolicy,
+    class CommandBuffer : public apemode::ScalableAllocPolicy,
                                                     public apemode::NoCopyAssignPolicy
     {
     public:
@@ -31,25 +31,25 @@ namespace apemode
         using BarrierVector       = std::vector<VkMemoryBarrier>;
         using ImageBarrierVector  = std::vector<VkImageMemoryBarrier>;
         using BufferBarrierVector = std::vector<VkBufferMemoryBarrier>;
-        using PtrVector           = std::vector<CommandList *>;
+        using PtrVector           = std::vector<CommandBuffer *>;
 
     public:
-        static std::unique_ptr<CommandList> MakeNewUnique ();
-        static std::shared_ptr<CommandList> MakeNewLinked ();
+        static std::unique_ptr<CommandBuffer> MakeNewUnique ();
+        static std::shared_ptr<CommandBuffer> MakeNewLinked ();
 
     public:
         struct BeginEndScope
         {
-            CommandList & AssociatedCmdList;
-            BeginEndScope (CommandList & CmdList, bool bOneTimeSubmit);
-            BeginEndScope (CommandList &                          CmdList,
+            CommandBuffer & AssociatedCmdList;
+            BeginEndScope (CommandBuffer & CmdBuffer, bool bOneTimeSubmit);
+            BeginEndScope (CommandBuffer &                          CmdBuffer,
                            VkCommandBufferInheritanceInfo const & Inheritance,
                            bool                                   bOneTimeSubmit);
             ~BeginEndScope ();
         };
 
     public:
-        CommandList();
+        CommandBuffer();
 
         /**
          * Creates command buffer and command pool objects.
@@ -223,13 +223,13 @@ namespace apemode
                                    uint32_t         QueueFamilyId,
                                    uint32_t         QueueId);
 
-        bool Execute (CommandList & CmdList,
+        bool Execute (CommandBuffer & CmdBuffer,
                       VkSemaphore * hWaitSemaphore,
                       uint32_t      WaitSemaphoreCount,
                       VkFence       hFence);
 
-        bool Execute (CommandList & CmdList, VkFence hFence);
-        bool Execute (CommandList * pCmdLists, uint32_t CmdListCount, VkFence Fence);
+        bool Execute (CommandBuffer & CmdBuffer, VkFence hFence);
+        bool Execute (CommandBuffer * pCmdLists, uint32_t CmdListCount, VkFence Fence);
 
         /** 
          * Waits on the completion of all work within a single queue.

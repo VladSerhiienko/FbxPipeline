@@ -6,7 +6,7 @@
 
 namespace apemode
 {
-    class CommandList;
+    class CommandBuffer;
     class RenderPass;
     class Framebuffer;
 
@@ -27,10 +27,10 @@ namespace apemode
         struct BeginEndScope : public apemode::ScalableAllocPolicy,
                                                            public apemode::NoCopyAssignPolicy
         {
-            CommandList &   AssociatedCmdList;
+            CommandBuffer &   AssociatedCmdList;
             RenderTargets & AssociatedRenderTargets;
 
-            BeginEndScope (CommandList & CmdList, RenderTargets & RenderTargets);
+            BeginEndScope (CommandBuffer & CmdBuffer, RenderTargets & RenderTargets);
             ~BeginEndScope();
         };
 

@@ -19,7 +19,7 @@ namespace apemode
         TextureResourceView();
         ~TextureResourceView();
 
-        void SetState(apemode::CommandList &  CmdList,
+        void SetState(apemode::CommandBuffer &  CmdBuffer,
                       VkPipelineStageFlags PipelineStageFlags,
                       VkAccessFlags        AccessMask,
                       VkImageLayout        ImgLayout,

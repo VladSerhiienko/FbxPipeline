@@ -37,14 +37,14 @@ apemode::BufferResourceView::BufferResourceView ()
     ViewType = kResourceViewType_Buffer;
 }
 
-void apemode::BufferResourceView::SetState (apemode::CommandList &  CmdList,
+void apemode::BufferResourceView::SetState (apemode::CommandBuffer &  CmdBuffer,
                                          VkPipelineStageFlags PipelineStageFlags,
                                          VkAccessFlags        AccessMask,
                                          uint32_t             BufferSize,
                                          uint32_t             BufferOffset,
                                          uint32_t             QueueFamily)
 {
-    const auto StateIt = MemoryStates.find (&CmdList);
+    const auto StateIt = MemoryStates.find (&CmdBuffer);
     const MemoryState & State = StateIt != MemoryStates.end()
                               ? StateIt->second
                               : MemoryStates[nullptr];
@@ -64,11 +64,11 @@ void apemode::BufferResourceView::SetState (apemode::CommandList &  CmdList,
         Barrier->srcQueueFamilyIndex = State.QueueFamily;
         Barrier->dstQueueFamilyIndex = QueueFamily;
 
-        CmdList.InsertBarrier(State.PipelineStageFlags, 
+        CmdBuffer.InsertBarrier(State.PipelineStageFlags, 
                               PipelineStageFlags, 
                               Barrier);
 
-        ResourceView::SetState (CmdList,
+        ResourceView::SetState (CmdBuffer,
                                 MemoryState (PipelineStageFlags,
                                              AccessMask,
                                              QueueFamily,

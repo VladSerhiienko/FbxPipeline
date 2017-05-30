@@ -272,11 +272,11 @@ apemode::Framebuffer const * apemode::RenderPassResources::GetWriteFramebuffer (
 /// RenderPassResources BeginEndScope
 /// -------------------------------------------------------------------------------------------------------------------
 
-apemode::RenderPassResources::BeginEndScope::BeginEndScope (CommandList &         CmdList,
+apemode::RenderPassResources::BeginEndScope::BeginEndScope (CommandBuffer &         CmdBuffer,
                                                          RenderPassResources & Resources)
-    : AssocCmdList (CmdList), AssocResources (Resources)
+    : AssocCmdList (CmdBuffer), AssocResources (Resources)
 {
-    _Game_engine_Assert (CmdList.bIsInBeginEndScope,
+    _Game_engine_Assert (CmdBuffer.bIsInBeginEndScope,
                          "Not started.");
     _Game_engine_Assert (Resources.GetRenderPass () != nullptr && Resources.GetWriteFramebuffer () != nullptr,
                          "Not initialized.");
@@ -288,16 +288,16 @@ apemode::RenderPassResources::BeginEndScope::BeginEndScope (CommandList &       
     RenderPassBeginDesc->framebuffer     = *Resources.GetWriteFramebuffer ();
     RenderPassBeginDesc->renderPass      = *Resources.GetRenderPass ();
 
-    vkCmdBeginRenderPass (CmdList,
+    vkCmdBeginRenderPass (CmdBuffer,
                           RenderPassBeginDesc,
-                          CmdList.IsDirect () ? VK_SUBPASS_CONTENTS_INLINE
+                          CmdBuffer.IsDirect () ? VK_SUBPASS_CONTENTS_INLINE
                                               : VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
 
-    //vkCmdSetViewport (CmdList, 0, _Get_collection_length_u (Resources.Viewports), Resources.Viewports.data ());
-    //vkCmdSetScissor (CmdList, 0, _Get_collection_length_u (Resources.Scissors), Resources.Scissors.data ());
+    //vkCmdSetViewport (CmdBuffer, 0, _Get_collection_length_u (Resources.Viewports), Resources.Viewports.data ());
+    //vkCmdSetScissor (CmdBuffer, 0, _Get_collection_length_u (Resources.Scissors), Resources.Scissors.data ());
 
-    CmdList.pRenderPass  = Resources.GetRenderPass ();
-    CmdList.pFramebuffer = Resources.GetWriteFramebuffer ();
+    CmdBuffer.pRenderPass  = Resources.GetRenderPass ();
+    CmdBuffer.pFramebuffer = Resources.GetWriteFramebuffer ();
 }
 
 apemode::RenderPassResources::BeginEndScope::~BeginEndScope ()

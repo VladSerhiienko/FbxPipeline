@@ -33,7 +33,7 @@ apemode::TextureResourceView::TextureResourceView ()
     ViewType = kResourceViewType_Texture;
 }
 
-void apemode::TextureResourceView::SetState(apemode::CommandList &  CmdList,
+void apemode::TextureResourceView::SetState(apemode::CommandBuffer &  CmdBuffer,
                                          VkPipelineStageFlags PipelineStageFlags,
                                          VkAccessFlags        AccessMask,
                                          VkImageLayout        ImgLayout,
@@ -43,7 +43,7 @@ void apemode::TextureResourceView::SetState(apemode::CommandList &  CmdList,
                                          uint32_t             ArrayLayerCount,
                                          uint32_t             QueueFamily)
 {
-    const auto StateIt = MemoryStates.find(&CmdList);
+    const auto StateIt = MemoryStates.find(&CmdBuffer);
     const MemoryState & State = StateIt != MemoryStates.end()
                               ? StateIt->second
                               : MemoryStates[nullptr];
@@ -72,11 +72,11 @@ void apemode::TextureResourceView::SetState(apemode::CommandList &  CmdList,
         ImgBarrier->subresourceRange.layerCount     = ArrayLayerCount;
         ImgBarrier->subresourceRange.levelCount     = MipLevelCount;
 
-        CmdList.InsertBarrier (State.PipelineStageFlags,
+        CmdBuffer.InsertBarrier (State.PipelineStageFlags,
                                PipelineStageFlags,
                                ImgBarrier);
 
-        ResourceView::SetState (CmdList,
+        ResourceView::SetState (CmdBuffer,
                                 MemoryState (PipelineStageFlags,
                                              AccessMask,
                                              QueueFamily,

@@ -29,24 +29,24 @@ void apemode::BufferPool::OnResourcesEvicted(GraphicsDevice & InGraphicsNode)
 {
 }
 
-void apemode::BufferPool::OnCommandListReset(CommandList & CmdList)
+void apemode::BufferPool::OnCommandListReset(CommandBuffer & CmdBuffer)
 {
 }
 
-apemode::BufferPool::Range apemode::BufferPool::Suballocate(CommandList & CmdList, uint32_t Size)
+apemode::BufferPool::Range apemode::BufferPool::Suballocate(CommandBuffer & CmdBuffer, uint32_t Size)
 {
     apemode::BufferPool::Range RetRange;
-    const bool bSuballocated = Suballocate(CmdList, Size, RetRange);
+    const bool bSuballocated = Suballocate(CmdBuffer, Size, RetRange);
     _Game_engine_Assert(bSuballocated, "Out of memory");
     return RetRange;
 }
 
-bool apemode::BufferPool::Suballocate(CommandList & CmdList, uint32_t Size, Range & OutRange)
+bool apemode::BufferPool::Suballocate(CommandBuffer & CmdBuffer, uint32_t Size, Range & OutRange)
 {
     return false;
 }
 
-void apemode::BufferPool::OnCommandListExecutePreview(CommandList & CmdList)
+void apemode::BufferPool::OnCommandListExecutePreview(CommandBuffer & CmdBuffer)
 {
 }
 

@@ -100,10 +100,7 @@ apemode::DescriptorPool::operator VkDescriptorPool() const
     return hDescPool;
 }
 
-apemode::DescriptorSet::DescriptorSet() : pDescPool(nullptr)
-                                     , pRootSign(nullptr)
-                                     , pNode(nullptr)
-{
+apemode::DescriptorSet::DescriptorSet( ) : pDescPool( nullptr ), pNode( nullptr ) {
 }
 
 apemode::DescriptorSet::~DescriptorSet()
@@ -113,22 +110,19 @@ apemode::DescriptorSet::~DescriptorSet()
     }
 }
 
-bool apemode::DescriptorSet::RecreateResourcesFor (GraphicsDevice & GraphicsNode,
-                                                DescriptorPool & DescPool,
-                                                PipelineLayout &  RootSign,
-                                                uint32_t         DescSetLayoutIndex)
-{
-    if (DescPool.DescSetCounter >= 1)
-    {
-        TInfoStruct<VkDescriptorSetAllocateInfo> AllocInfo;
-        AllocInfo->pSetLayouts        = &RootSign.DescSetLayouts[ DescSetLayoutIndex ];
+bool apemode::DescriptorSet::RecreateResourcesFor( apemode::GraphicsDevice& GraphicsNode,
+                                                   apemode::DescriptorPool& DescPool,
+                                                   VkDescriptorSetLayout    DescSetLayout ) {
+    if ( DescPool.DescSetCounter >= 1 ) {
+        TInfoStruct< VkDescriptorSetAllocateInfo > AllocInfo;
+        AllocInfo->pSetLayouts        = &DescSetLayout;
         AllocInfo->descriptorPool     = DescPool;
         AllocInfo->descriptorSetCount = 1;
 
         if (apemode_likely (hDescSet.Recreate (GraphicsNode, DescPool, AllocInfo)))
         {
             pDescPool     = &DescPool;
-            pRootSign     = &RootSign;
+            //pRootSign     = &RootSign;
             pNode = &GraphicsNode;
 
             --DescPool.DescSetCounter;
@@ -139,15 +133,15 @@ bool apemode::DescriptorSet::RecreateResourcesFor (GraphicsDevice & GraphicsNode
     return false;
 }
 
-void apemode::DescriptorSet::BindTo (apemode::CommandList & CmdList,
+void apemode::DescriptorSet::BindTo (apemode::CommandBuffer & CmdBuffer,
                                   VkPipelineBindPoint PipelineBindPoint,
                                   uint32_t            DynamicOffsetCount,
                                   const uint32_t *    DynamicOffsets)
 {
-    _Game_engine_Assert (pRootSign != nullptr && hDescSet.IsNotNull (), "Not initialized.");
+    /*_Game_engine_Assert (pRootSign != nullptr && hDescSet.IsNotNull (), "Not initialized.");
     if (apemode_likely (pRootSign != nullptr && hDescSet.IsNotNull ()))
     {
-        vkCmdBindDescriptorSets (CmdList,
+        vkCmdBindDescriptorSets (CmdBuffer,
                                  PipelineBindPoint,
                                  *pRootSign,
                                  0,
@@ -155,7 +149,7 @@ void apemode::DescriptorSet::BindTo (apemode::CommandList & CmdList,
                                  hDescSet,
                                  DynamicOffsetCount,
                                  DynamicOffsets);
-    }
+    }*/
 }
 
 apemode::DescriptorSet::operator VkDescriptorSet() const

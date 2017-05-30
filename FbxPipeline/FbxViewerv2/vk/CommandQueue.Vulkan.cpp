@@ -5,20 +5,20 @@
 #include <TInfoStruct.Vulkan.h>
 
 /// -------------------------------------------------------------------------------------------------------------------
-/// CommandList
+/// CommandBuffer
 /// -------------------------------------------------------------------------------------------------------------------
 
-std::unique_ptr<apemode::CommandList> apemode::CommandList::MakeNewUnique ()
+std::unique_ptr<apemode::CommandBuffer> apemode::CommandBuffer::MakeNewUnique ()
 {
-    return std::unique_ptr<apemode::CommandList> (new CommandList ());
+    return std::unique_ptr<apemode::CommandBuffer> (new CommandBuffer ());
 }
 
-std::shared_ptr<apemode::CommandList> apemode::CommandList::MakeNewLinked ()
+std::shared_ptr<apemode::CommandBuffer> apemode::CommandBuffer::MakeNewLinked ()
 {
-    return std::shared_ptr<apemode::CommandList> (new CommandList ());
+    return std::shared_ptr<apemode::CommandBuffer> (new CommandBuffer ());
 }
 
-apemode::CommandList::CommandList ()
+apemode::CommandBuffer::CommandBuffer ()
     : eType (kCommandListType_Invalid)
     , pRenderPass (nullptr)
     , pFramebuffer (nullptr)
@@ -32,7 +32,7 @@ apemode::CommandList::CommandList ()
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-bool apemode::CommandList::RecreateResourcesFor (GraphicsDevice & GraphicsNode,
+bool apemode::CommandBuffer::RecreateResourcesFor (GraphicsDevice & GraphicsNode,
                                               uint32_t         QueueFamilyId,
                                               bool             bIsDirect,
                                               bool             bIsTransient)
@@ -79,7 +79,7 @@ bool apemode::CommandList::RecreateResourcesFor (GraphicsDevice & GraphicsNode,
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-bool apemode::CommandList::Reset (bool bReleaseResources)
+bool apemode::CommandBuffer::Reset (bool bReleaseResources)
 {
     const VkCommandBufferResetFlags ResetFlags = bReleaseResources 
         ? VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT 
@@ -94,7 +94,7 @@ static uint64_t ComposeKey (VkPipelineStageFlags SrcFlags, VkPipelineStageFlags 
     return static_cast<uint64_t> (SrcFlags) << 32 | static_cast<uint64_t> (DstFlags);
 }
 
-void apemode::CommandList::InsertBarrier (VkPipelineStageFlags    SrcFlags,
+void apemode::CommandBuffer::InsertBarrier (VkPipelineStageFlags    SrcFlags,
                                        VkPipelineStageFlags    DstFlags,
                                        VkMemoryBarrier const & Barrier)
 {
@@ -104,7 +104,7 @@ void apemode::CommandList::InsertBarrier (VkPipelineStageFlags    SrcFlags,
     StagedBarriers.insert (std::make_pair<> (CmdBarrier.StageHash, CmdBarrier));
 }
 
-void apemode::CommandList::InsertBarrier (VkPipelineStageFlags         SrcFlags,
+void apemode::CommandBuffer::InsertBarrier (VkPipelineStageFlags         SrcFlags,
                                        VkPipelineStageFlags         DstFlags,
                                        VkImageMemoryBarrier const & Barrier)
 {
@@ -114,7 +114,7 @@ void apemode::CommandList::InsertBarrier (VkPipelineStageFlags         SrcFlags,
     StagedBarriers.insert (std::make_pair<> (CmdBarrier.StageHash, CmdBarrier));
 }
 
-void apemode::CommandList::InsertBarrier (VkPipelineStageFlags          SrcFlags,
+void apemode::CommandBuffer::InsertBarrier (VkPipelineStageFlags          SrcFlags,
                                        VkPipelineStageFlags          DstFlags,
                                        VkBufferMemoryBarrier const & Barrier)
 {
@@ -124,7 +124,7 @@ void apemode::CommandList::InsertBarrier (VkPipelineStageFlags          SrcFlags
     StagedBarriers.insert (std::make_pair<> (CmdBarrier.StageHash, CmdBarrier));
 }
 
-void apemode::CommandList::FlushStagedBarriers()
+void apemode::CommandBuffer::FlushStagedBarriers()
 {
     Barriers.reserve (BarrierCount);
     ImgBarriers.reserve (ImgBarrierCount);
@@ -189,12 +189,12 @@ void apemode::CommandList::FlushStagedBarriers()
     StagedBarriers.clear ();
 }
 
-apemode::CommandList::operator VkCommandBuffer () const
+apemode::CommandBuffer::operator VkCommandBuffer () const
 {
     return hCmdList;
 }
 
-bool apemode::CommandList::IsDirect () const
+bool apemode::CommandBuffer::IsDirect () const
 {
     return eType == kCommandListType_Direct;
 }
@@ -252,7 +252,7 @@ bool apemode::CommandQueue::Await ()
     return eQueueWaitIdleOk.Succeeded ();
 }
 
-bool apemode::CommandQueue::Execute (CommandList & CmdList,
+bool apemode::CommandQueue::Execute (CommandBuffer & CmdBuffer,
                                   VkSemaphore * hWaitSemaphores,
                                   uint32_t      WaitSemaphoreCount,
                                   VkFence       hFence)
@@ -260,7 +260,7 @@ bool apemode::CommandQueue::Execute (CommandList & CmdList,
     _Game_engine_Assert (hCmdQueue.IsNotNull (), "Not initialized.");
     if (apemode_likely (hCmdQueue.IsNotNull ()))
     {
-        auto hCmdList = static_cast<VkCommandBuffer> (CmdList);
+        auto hCmdList = static_cast<VkCommandBuffer> (CmdBuffer);
 
         TInfoStruct<VkSubmitInfo> SubmitDesc;
         SubmitDesc->commandBufferCount = 1;
@@ -274,12 +274,12 @@ bool apemode::CommandQueue::Execute (CommandList & CmdList,
     return false;
 }
 
-bool apemode::CommandQueue::Execute (CommandList & CmdList, VkFence Fence)
+bool apemode::CommandQueue::Execute (CommandBuffer & CmdBuffer, VkFence Fence)
 {
     _Game_engine_Assert (hCmdQueue.IsNotNull (), "Not initialized.");
     if (apemode_likely (hCmdQueue.IsNotNull ()))
     {
-        auto hCmdList = static_cast<VkCommandBuffer> (CmdList);
+        auto hCmdList = static_cast<VkCommandBuffer> (CmdBuffer);
 
         TInfoStruct<VkSubmitInfo> SubmitDesc;
         SubmitDesc->pCommandBuffers    = &hCmdList;
@@ -301,7 +301,7 @@ apemode::CommandQueue::operator VkQueue () const
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-bool apemode::CommandQueue::Execute (CommandList * CmdLists, uint32_t CmdListCount, VkFence Fence)
+bool apemode::CommandQueue::Execute (CommandBuffer * CmdLists, uint32_t CmdListCount, VkFence Fence)
 {
     _Game_engine_Assert (hCmdQueue.IsNotNull (), "Not initialized.");
     if (apemode_likely (hCmdQueue.IsNotNull ()))
@@ -313,7 +313,7 @@ bool apemode::CommandQueue::Execute (CommandList * CmdLists, uint32_t CmdListCou
             CmdLists,
             CmdLists + CmdListCount,
             std::back_inserter (CmdListHandles),
-            [&](CommandList const & CmdList) { return static_cast<VkCommandBuffer> (CmdList); });
+            [&](CommandBuffer const & CmdBuffer) { return static_cast<VkCommandBuffer> (CmdBuffer); });
 
         TInfoStruct<VkSubmitInfo> SubmitDesc;
         apemode::AliasStructs (CmdListHandles,
@@ -467,18 +467,18 @@ void apemode::CommandQueueReserver::Unreserve (GraphicsDevice const & GraphicsNo
 }
 
 /// -------------------------------------------------------------------------------------------------------------------
-/// CommandList BeginEndScope
+/// CommandBuffer BeginEndScope
 /// -------------------------------------------------------------------------------------------------------------------
 
-apemode::CommandList::BeginEndScope::BeginEndScope (CommandList & CmdList, bool bOneTimeSubmit)
-    : BeginEndScope (CmdList, TInfoStruct<VkCommandBufferInheritanceInfo> (), bOneTimeSubmit)
+apemode::CommandBuffer::BeginEndScope::BeginEndScope (CommandBuffer & CmdBuffer, bool bOneTimeSubmit)
+    : BeginEndScope (CmdBuffer, TInfoStruct<VkCommandBufferInheritanceInfo> (), bOneTimeSubmit)
 {
 }
 
-apemode::CommandList::BeginEndScope::BeginEndScope (CommandList &                          CmdList,
+apemode::CommandBuffer::BeginEndScope::BeginEndScope (CommandBuffer &                          CmdBuffer,
                                                  VkCommandBufferInheritanceInfo const & CmdInherit,
                                                  bool bOneTimeSubmit)
-    : AssociatedCmdList (CmdList)
+    : AssociatedCmdList (CmdBuffer)
 {
     TInfoStruct<VkCommandBufferInheritanceInfo> CmdInheritanceDesc;
     CmdInheritanceDesc = CmdInherit;
@@ -487,36 +487,36 @@ apemode::CommandList::BeginEndScope::BeginEndScope (CommandList &               
     CmdBeginDesc->pInheritanceInfo = CmdInheritanceDesc;
     CmdBeginDesc->flags |= bOneTimeSubmit ? VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT : 0;
 
-    const ResultHandle eOk = vkBeginCommandBuffer (CmdList, CmdBeginDesc);
-    CmdList.bIsInBeginEndScope = eOk.Succeeded ();
+    const ResultHandle eOk = vkBeginCommandBuffer (CmdBuffer, CmdBeginDesc);
+    CmdBuffer.bIsInBeginEndScope = eOk.Succeeded ();
 }
 
 
-apemode::CommandList::BeginEndScope::~BeginEndScope ()
+apemode::CommandBuffer::BeginEndScope::~BeginEndScope ()
 {
     AssociatedCmdList.bIsInBeginEndScope = false;
     vkEndCommandBuffer (AssociatedCmdList);
 }
 
 /// -------------------------------------------------------------------------------------------------------------------
-/// CommandList StagedBarrier
+/// CommandBuffer StagedBarrier
 /// -------------------------------------------------------------------------------------------------------------------
 
-apemode::CommandList::StagedBarrier::StagedBarrier (VkPipelineStageFlags    SrcStage,
+apemode::CommandBuffer::StagedBarrier::StagedBarrier (VkPipelineStageFlags    SrcStage,
                                                  VkPipelineStageFlags    DstStage,
                                                  VkMemoryBarrier const & Barrier)
     : SrcStage (SrcStage), DstStage (DstStage), Barrier (Barrier)
 {
 }
 
-apemode::CommandList::StagedBarrier::StagedBarrier (VkPipelineStageFlags         SrcStage,
+apemode::CommandBuffer::StagedBarrier::StagedBarrier (VkPipelineStageFlags         SrcStage,
                                                  VkPipelineStageFlags         DstStage,
                                                  VkImageMemoryBarrier const & Barrier)
     : SrcStage (SrcStage), DstStage (DstStage), ImgBarrier (Barrier)
 {
 }
 
-apemode::CommandList::StagedBarrier::StagedBarrier (VkPipelineStageFlags          SrcStage,
+apemode::CommandBuffer::StagedBarrier::StagedBarrier (VkPipelineStageFlags          SrcStage,
                                                  VkPipelineStageFlags          DstStage,
                                                  VkBufferMemoryBarrier const & Barrier)
     : SrcStage (SrcStage), DstStage (DstStage), BufferBarrier (Barrier)

@@ -242,7 +242,7 @@ uint64_t apemode::PipelineStateDescription::UpdateHash()
 apemode::PipelineState::PipelineState ()
     : pRenderPass (nullptr)
     , pPipelineLayout (nullptr)
-    , pGraphicsNode (nullptr)
+    , pNode (nullptr)
     , pDesc (nullptr)
 {
 }
@@ -251,9 +251,9 @@ apemode::PipelineState::~PipelineState ()
 {
 }
 
-void apemode::PipelineState::BindTo (apemode::CommandList & CmdList)
+void apemode::PipelineState::BindTo (apemode::CommandBuffer & CmdBuffer)
 {
-    vkCmdBindPipeline (CmdList, eBindPoint, hPipeline);
+    vkCmdBindPipeline (CmdBuffer, eBindPoint, hPipeline);
 }
 
 apemode::PipelineState::operator VkPipeline () const
@@ -459,7 +459,7 @@ void apemode::PipelineStateBuilder::SetViewports(VkViewport const * pViewports, 
 {
     TemporaryDesc.ViewportState->viewportCount = static_cast<uint32_t>(ViewportCount);
 
-    if (_Game_engine_Likely (pViewports != nullptr && ViewportCount != 0))
+    if (apemode_likely (pViewports != nullptr && ViewportCount != 0))
     {
         TemporaryDesc.Viewports.reserve (ViewportCount);
         std::copy (pViewports, pViewports + ViewportCount,
@@ -483,7 +483,7 @@ void apemode::PipelineStateBuilder::SetScissorRects(VkRect2D const * pRects, siz
 {
     TemporaryDesc.ViewportState->scissorCount = static_cast<uint32_t>(RectCount);
 
-    if (_Game_engine_Likely (pRects != nullptr && RectCount != 0))
+    if (apemode_likely (pRects != nullptr && RectCount != 0))
     {
         TemporaryDesc.ScissorRects.reserve (RectCount);
         std::copy (pRects, pRects + RectCount, std::back_inserter (TemporaryDesc.ScissorRects));
@@ -545,7 +545,7 @@ void apemode::PipelineStateBuilder::SetShader (const char * pId,
 
     auto & ShaderStage = TemporaryDesc.ShaderStages[ ShaderBytecode.eType ];
     ShaderStage->pName = ShaderBytecode.MainFn.c_str ();
-    ShaderStage->stage = static_cast<VkShaderStageFlagBits> (ShaderBytecode.eType);
+    ShaderStage->stage = (VkShaderStageFlagBits) (ShaderBytecode.eType);
 
     ++TemporaryDesc.Graphics->stageCount;
 }
@@ -628,7 +628,7 @@ void apemode::PipelineStateBuilder::SetPrimitiveTopology (VkPrimitiveTopology To
 apemode::PipelineState const *
 apemode::PipelineStateBuilder::RecreatePipelineState (apemode::GraphicsDevice & GraphicsNode)
 {
-    if (_Game_engine_Likely (GraphicsNode.IsValid ()))
+    if (apemode_likely (GraphicsNode.IsValid ()))
     {
         auto   Hash    = TemporaryDesc.UpdateHash ();
         auto & Manager = GraphicsNode.GetDefaultPipelineStateManager ();

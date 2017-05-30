@@ -23,7 +23,7 @@ void apemode::PipelineLayoutParameter::Clear()
 
 void apemode::PipelineLayoutParameter::InitAsUniformBuffer(uint32_t         Register,
                                               uint32_t         Count,
-                                              ShaderVisibility StageFlags,
+                                              VkShaderStageFlagBits StageFlags,
                                               uint32_t         Set)
 {
     DescSet                  = Set;
@@ -35,7 +35,7 @@ void apemode::PipelineLayoutParameter::InitAsUniformBuffer(uint32_t         Regi
 
 void apemode::PipelineLayoutParameter::InitAsUniformBufferDynamic(uint32_t         Register,
                                                      uint32_t         Count,
-                                                     ShaderVisibility StageFlags,
+                                                     VkShaderStageFlagBits StageFlags,
                                                      uint32_t         Set)
 {
     DescSet                  = Set;
@@ -47,7 +47,7 @@ void apemode::PipelineLayoutParameter::InitAsUniformBufferDynamic(uint32_t      
 
 void apemode::PipelineLayoutParameter::InitAsSampler(uint32_t         Register,
                                         uint32_t         Count,
-                                        ShaderVisibility StageFlags,
+                                        VkShaderStageFlagBits StageFlags,
                                         uint32_t         Set)
 {
     DescSet                  = Set;
@@ -58,7 +58,7 @@ void apemode::PipelineLayoutParameter::InitAsSampler(uint32_t         Register,
 }
 
 void apemode::PipelineLayoutParameter::InitAsCombinedImageSampler(
-    uint32_t Register, uint32_t Count, VkSampler* pImmutableSamplers, ShaderVisibility StageFlags, uint32_t Set ) {
+    uint32_t Register, uint32_t Count, VkSampler* pImmutableSamplers, VkShaderStageFlagBits StageFlags, uint32_t Set ) {
     DescSet                     = Set;
     Binding->binding            = Register;
     Binding->pImmutableSamplers = pImmutableSamplers;

@@ -8,7 +8,7 @@
 
 namespace apemode
 {
-    class CommandList;
+    class CommandBuffer;
 
     enum BufferPoolType
     {
@@ -80,10 +80,10 @@ namespace apemode
 
         bool RecreateResourcesFor (GraphicsDevice & GraphicsNode);
         void OnResourcesEvicted (GraphicsDevice & GraphicsNode);
-        void OnCommandListReset (CommandList & CmdList);
-        void OnCommandListExecutePreview (CommandList & CmdList);
-        bool Suballocate (CommandList & CmdList, uint32_t Size, Range & OutRange);
-        Range Suballocate (CommandList & CmdList, uint32_t Size);
+        void OnCommandListReset (CommandBuffer & CmdBuffer);
+        void OnCommandListExecutePreview (CommandBuffer & CmdBuffer);
+        bool Suballocate (CommandBuffer & CmdBuffer, uint32_t Size, Range & OutRange);
+        Range Suballocate (CommandBuffer & CmdBuffer, uint32_t Size);
 
     public:
         bool           IsOutOfMemory () const;

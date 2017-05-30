@@ -19,7 +19,7 @@ namespace apemode
         uint32_t GetElementSizeInBytes () const;
         uint32_t GetTotalSizeInBytes () const;
 
-        void SetState (apemode::CommandList &  CmdList,
+        void SetState (apemode::CommandBuffer &  CmdBuffer,
                        VkPipelineStageFlags PipelineStageFlags,
                        VkAccessFlags        AccessMask,
                        uint32_t             BufferSize,

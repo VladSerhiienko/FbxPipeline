@@ -12,17 +12,6 @@ namespace apemode
     class PipelineLayout;
     class PipelineLayoutBuilder;
 
-    enum ShaderVisibility {
-        kShaderVisibility_Vertex                = VK_SHADER_STAGE_VERTEX_BIT,
-        kShaderVisibility_Fragment              = VK_SHADER_STAGE_FRAGMENT_BIT,
-        kShaderVisibility_TesselationControl    = VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT,
-        kShaderVisibility_TesselationEvaluation = VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,
-        kShaderVisibility_Geometry              = VK_SHADER_STAGE_GEOMETRY_BIT,
-        kShaderVisibility_Compute               = VK_SHADER_STAGE_COMPUTE_BIT,
-        kShaderVisibility_AllGraphics           = VK_SHADER_STAGE_ALL_GRAPHICS,
-        kShaderVisibility_All                   = VK_SHADER_STAGE_ALL,
-    };
-
     class PipelineLayoutParameter : public ScalableAllocPolicy {
         friend PipelineLayout;
         friend PipelineLayoutBuilder;
@@ -38,19 +27,19 @@ namespace apemode
 
         void Clear( );
 
-        void InitAsUniformBuffer( uint32_t Register, uint32_t Count, ShaderVisibility StageFlags, uint32_t Set = 0 );
+        void InitAsUniformBuffer( uint32_t Register, uint32_t Count, VkShaderStageFlagBits StageFlags, uint32_t Set = 0 );
 
-        void InitAsUniformBufferDynamic( uint32_t Register, uint32_t Count, ShaderVisibility StageFlags, uint32_t Set = 0 );
+        void InitAsUniformBufferDynamic( uint32_t Register, uint32_t Count, VkShaderStageFlagBits StageFlags, uint32_t Set = 0 );
 
         void InitAsSampler( uint32_t         Register,
                             uint32_t         Count,
-                            ShaderVisibility StageFlags = kShaderVisibility_Fragment,
+                            VkShaderStageFlagBits StageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
                             uint32_t         Set        = 0 );
 
         void InitAsCombinedImageSampler( uint32_t         Register,
                                          uint32_t         Count,
                                          VkSampler*       pImmutableSamplers,
-                                         ShaderVisibility StageFlags = kShaderVisibility_Fragment,
+                                         VkShaderStageFlagBits StageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
                                          uint32_t         Set        = 0 );
 
     public:
@@ -122,5 +111,3 @@ namespace apemode
         PipelineLayout const* TryGetPipelineLayoutObjectByHash( uint64_t Hash );
     };
 }
-
-_Game_engine_Define_enum_flag_operators(apemode::ShaderVisibility);

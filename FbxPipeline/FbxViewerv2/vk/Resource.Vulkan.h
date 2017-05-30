@@ -7,7 +7,7 @@
 
 namespace apemode
 {
-    class CommandList;
+    class CommandBuffer;
     class ResourceView;
     class BufferResourceView;
     class IntermediateResourceView;
@@ -145,14 +145,14 @@ namespace apemode
         template <typename U> inline U *TryGet() { if (CanGet<U>()) return static_cast<U*>(this); return nullptr; }
         template <typename U> inline U const *TryGet() const { if (CanGet<U>()) return static_cast<U const*>(this); return nullptr; }
 
-        MemoryState GetState(apemode::CommandList & CmdList) const;
-        void SetState (apemode::CommandList & CmdList, MemoryState const & State);
+        MemoryState GetState(apemode::CommandBuffer & CmdBuffer) const;
+        void SetState (apemode::CommandBuffer & CmdBuffer, MemoryState const & State);
 
     public:
         ResourceViewType                              ViewType;
         VkDeviceSize                                  VirtualAddressOffset;
         std::shared_ptr<ResourceReference>            ResourceRef;
-        std::map<CommandList *, MemoryState> MemoryStates;
+        std::map<CommandBuffer *, MemoryState> MemoryStates;
     };
 
 }

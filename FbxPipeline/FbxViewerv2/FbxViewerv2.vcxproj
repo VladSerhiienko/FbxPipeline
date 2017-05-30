@@ -56,7 +56,7 @@
     <ClInclude Include="vk\Resource.Vulkan.h" />
     <ClInclude Include="vk\ResourceAssembler.Vulkan.h" />
     <ClInclude Include="vk\ResultHandle.Vulkan.h" />
-    <ClInclude Include="vk\RootSignature.Vulkan.h" />
+    <ClInclude Include="vk\PipelineLayout.Vulkan.h" />
     <ClInclude Include="vk\Shader.Vulkan.h" />
     <ClInclude Include="vk\Swapchain.Vulkan.h" />
     <ClInclude Include="vk\TDispatchableHandle.Vulkan.h" />
@@ -92,7 +92,7 @@
     <ClCompile Include="vk\RenderTargets.Vulkan.cpp" />
     <ClCompile Include="vk\Resource.Vulkan.cpp" />
     <ClCompile Include="vk\ResourceAssembler.Vulkan.cpp" />
-    <ClCompile Include="vk\RootSignature.Vulkan.cpp" />
+    <ClCompile Include="vk\PipelineLayout.Vulkan.cpp" />
     <ClCompile Include="vk\Shader.Vulkan.cpp" />
     <ClCompile Include="vk\Swapchain.Vulkan.cpp" />
     <ClCompile Include="vk\Texture.Vulkan.cpp" />

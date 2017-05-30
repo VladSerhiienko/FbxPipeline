@@ -6,7 +6,7 @@
 
 namespace apemode
 {
-    class CommandList;
+    class CommandBuffer;
     class CommandQueue;
     class GraphicsDevice;
     class ColorResourceView;

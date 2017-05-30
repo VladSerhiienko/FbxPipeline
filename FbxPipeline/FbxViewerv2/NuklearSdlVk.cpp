@@ -95,8 +95,8 @@ void apemode::NuklearSdlVk::DeviceCreate( InitParametersBase* init_params ) {
     vertexShaderCreateInfo->pCode = (const uint32_t*) nuklear_compiled[ 1 ].begin( );
     vertexShaderCreateInfo->codeSize = (size_t) std::distance( nuklear_compiled[ 1 ].begin( ), nuklear_compiled[ 1 ].end( ) );
 
-    if ( false == hVertexShaderModule.Recreate( Device, vertexShaderCreateInfo ) ||
-         false == hFragmentShaderModule.Recreate( Device, fragmentShaderCreateInfo ) ) {
+    if ( false == hVertexShaderModule.Recreate( *pDevice, vertexShaderCreateInfo ) ||
+         false == hFragmentShaderModule.Recreate( *pDevice, fragmentShaderCreateInfo ) ) {
         DebugBreak( );
         return;
     }
@@ -117,26 +117,37 @@ void apemode::NuklearSdlVk::DeviceCreate( InitParametersBase* init_params ) {
             return;
         }
     }
-    if ( nullptr != pDevice && nullptr == pPipelineLayout ) {
-        PipelineLayoutBuilder pipelineLayoutBuilder;
-        pipelineLayoutBuilder.AddParameter( ).InitAsCombinedImageSampler( 0, 1, hFontSampler );
-        pPipelineLayout = pipelineLayoutBuilder.RecreatePipelineLayout( *pDevice );
+    if ( nullptr != pDevice && false == hDescSetLayout.IsNotNull( ) ) {
+        VkDescriptorSetLayoutBinding binding[ 1 ];
+        apemode::ZeroMemory( binding );
 
-        if ( nullptr == pPipelineLayout ) {
+        binding[ 0 ].descriptorType     = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        binding[ 0 ].descriptorCount    = 1;
+        binding[ 0 ].stageFlags         = VK_SHADER_STAGE_FRAGMENT_BIT;
+        binding[ 0 ].pImmutableSamplers = hFontSampler;
+
+        TInfoStruct< VkDescriptorSetLayoutCreateInfo > descSetLayoutCreateInfo;
+        descSetLayoutCreateInfo->bindingCount = 1;
+        descSetLayoutCreateInfo->pBindings    = binding;
+
+        if ( false == hDescSetLayout.Recreate( *pDevice, descSetLayoutCreateInfo ) ) {
             DebugBreak( );
             return;
         }
     }
 
-    if ( nullptr != pDevice && nullptr == pPipelineLayout ) {
+    if ( nullptr != pDevice && false == hPipelineLayout.IsNotNull( ) ) {
 
-        pDescPool->
+/*
+
+        pDescSet = new DescriptorSet( );
+        pDescSet->RecreateResourcesFor( *pDevice, *pDescPool, hDescSetLayout );
 
         VkDescriptorSetAllocateInfo alloc_info = {};
         alloc_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
         alloc_info.descriptorPool = g_DescriptorPool;
         alloc_info.descriptorSetCount = 1;
-        alloc_info.pSetLayouts = &g_DescriptorSetLayout;
+        alloc_info.pSetLayouts = &g_DescriptorSetLayout;*/
     }
 }
 

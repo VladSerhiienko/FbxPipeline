@@ -270,12 +270,12 @@ apemode::Framebuffer const * apemode::RenderTargets::GetWriteFramebuffer() const
 /// RenderTargets BeginEndScope
 /// -------------------------------------------------------------------------------------------------------------------
 
-apemode::RenderTargets::BeginEndScope::BeginEndScope (CommandList &   CmdList,
+apemode::RenderTargets::BeginEndScope::BeginEndScope (CommandBuffer &   CmdBuffer,
                                                    RenderTargets & RenderTargets)
-    : AssociatedCmdList (CmdList)
+    : AssociatedCmdList (CmdBuffer)
     , AssociatedRenderTargets (RenderTargets)
 {
-    _Game_engine_Assert (CmdList.bIsInBeginEndScope,
+    _Game_engine_Assert (CmdBuffer.bIsInBeginEndScope,
                          "Command recording was not started.");
     _Game_engine_Assert (!!RenderTargets.pRenderPass
                              && !!RenderTargets.ppFramebuffers[ RenderTargets.WriteFrame ],
@@ -289,18 +289,18 @@ apemode::RenderTargets::BeginEndScope::BeginEndScope (CommandList &   CmdList,
     RenderPassBeginDesc->renderPass      = *RenderTargets.pRenderPass;
 
     //TODO Is it correct? I`m not quite sure, see docs.
-    //TODO CmdList.Type == CommandList::kCommandListType_Direct should be moved to a function
-    //TODO Branching can be removed with static_cast and additional assertion (for CmdList.Type {0, 1} range).
-    auto SubpassContents = CmdList.eType == CommandList::kCommandListType_Direct
+    //TODO CmdBuffer.Type == CommandBuffer::kCommandListType_Direct should be moved to a function
+    //TODO Branching can be removed with static_cast and additional assertion (for CmdBuffer.Type {0, 1} range).
+    auto SubpassContents = CmdBuffer.eType == CommandBuffer::kCommandListType_Direct
         ? VK_SUBPASS_CONTENTS_INLINE
         : VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS;
 
-    vkCmdBeginRenderPass (CmdList, RenderPassBeginDesc, SubpassContents);
-    vkCmdSetViewport (CmdList, 0, RenderTargets.AttachmentCount, RenderTargets.pViewports);
-    vkCmdSetScissor (CmdList, 0, RenderTargets.AttachmentCount, RenderTargets.pScissors);
+    vkCmdBeginRenderPass (CmdBuffer, RenderPassBeginDesc, SubpassContents);
+    vkCmdSetViewport (CmdBuffer, 0, RenderTargets.AttachmentCount, RenderTargets.pViewports);
+    vkCmdSetScissor (CmdBuffer, 0, RenderTargets.AttachmentCount, RenderTargets.pScissors);
 
-    CmdList.pRenderPass  = RenderTargets.pRenderPass;
-    CmdList.pFramebuffer = RenderTargets.ppFramebuffers[RenderTargets.WriteFrame];
+    CmdBuffer.pRenderPass  = RenderTargets.pRenderPass;
+    CmdBuffer.pFramebuffer = RenderTargets.ppFramebuffers[RenderTargets.WriteFrame];
 }
 
 /// -------------------------------------------------------------------------------------------------------------------

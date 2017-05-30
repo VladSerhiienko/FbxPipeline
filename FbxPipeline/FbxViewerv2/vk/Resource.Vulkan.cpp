@@ -319,16 +319,16 @@ apemode::ResourceView::ResourceView()
     //MemoryStates.reserve(16);
 }
 
-apemode::ResourceView::MemoryState apemode::ResourceView::GetState(apemode::CommandList & CmdList) const
+apemode::ResourceView::MemoryState apemode::ResourceView::GetState(apemode::CommandBuffer & CmdBuffer) const
 {
-    const auto StateIt = MemoryStates.find (&CmdList);
+    const auto StateIt = MemoryStates.find (&CmdBuffer);
     const bool bHasCmdListAssociation = StateIt != MemoryStates.end ();
     return bHasCmdListAssociation ? StateIt->second : MemoryState ();
 }
 
-void apemode::ResourceView::SetState (apemode::CommandList & CmdList, MemoryState const & State)
+void apemode::ResourceView::SetState (apemode::CommandBuffer & CmdBuffer, MemoryState const & State)
 {
-    MemoryStates[&CmdList ] = State;
+    MemoryStates[&CmdBuffer ] = State;
 }
 
 apemode::ResourceView::ResourceViewType

@@ -13,7 +13,7 @@
 #define _Graphics_ecosystem_dll_api
 #define _Force_inline_function inline
 #define _Game_engine_Assert(...)
-#define _Game_engine_Likely(...) __VA_ARGS__
+#define apemode_likely(...) __VA_ARGS__
 #define _Game_engine_Unlikely(...) __VA_ARGS__
 #define _Game_engine_Error(...)
 #define _Game_engine_Halt(...)
@@ -138,14 +138,14 @@ namespace apemode
     template <typename T>
     static void TSafeDeleteObj (_Inout_ _Maybenull_ T *& pObj)
     {
-        if (_Game_engine_Likely (pObj != nullptr))
+        if (apemode_likely (pObj != nullptr))
             delete pObj, pObj = nullptr;
     }
 
     template <typename T>
     static void TSafeDeleteObj (_Inout_ _Maybenull_ T const *& pObj)
     {
-        if (_Game_engine_Likely (pObj != nullptr))
+        if (apemode_likely (pObj != nullptr))
             delete const_cast<T *> (pObj), pObj = nullptr;
     }
 

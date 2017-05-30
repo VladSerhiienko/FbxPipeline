@@ -131,9 +131,6 @@
     <ClInclude Include="vk\ResultHandle.Vulkan.h">
       <Filter>Sources\Graphics\Vk</Filter>
     </ClInclude>
-    <ClInclude Include="vk\RootSignature.Vulkan.h">
-      <Filter>Sources\Graphics\Vk</Filter>
-    </ClInclude>
     <ClInclude Include="vk\Shader.Vulkan.h">
       <Filter>Sources\Graphics\Vk</Filter>
     </ClInclude>
@@ -169,6 +166,9 @@
     </ClInclude>
     <ClInclude Include="NuklearSdlGL.h">
       <Filter>Sources\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="vk\PipelineLayout.Vulkan.h">
+      <Filter>Sources\Graphics\Vk</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -241,9 +241,6 @@
     <ClCompile Include="vk\ResourceAssembler.Vulkan.cpp">
       <Filter>Sources\Graphics\Vk</Filter>
     </ClCompile>
-    <ClCompile Include="vk\RootSignature.Vulkan.cpp">
-      <Filter>Sources\Graphics\Vk</Filter>
-    </ClCompile>
     <ClCompile Include="vk\Shader.Vulkan.cpp">
       <Filter>Sources\Graphics\Vk</Filter>
     </ClCompile>
@@ -267,6 +264,9 @@
     </ClCompile>
     <ClCompile Include="NuklearSdlBase.cpp">
       <Filter>Sources\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="vk\PipelineLayout.Vulkan.cpp">
+      <Filter>Sources\Graphics\Vk</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

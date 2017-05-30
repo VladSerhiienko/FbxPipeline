@@ -25,7 +25,7 @@ namespace apemode {
         };
 
         struct RenderParametersVk : RenderParametersBase {
-            CommandList *pCmdBuffer = nullptr;
+            CommandBuffer *pCmdBuffer = nullptr;
         };
 
     public:
@@ -33,26 +33,27 @@ namespace apemode {
         GraphicsDevice *       pDevice         = nullptr;
         DescriptorPool *       pDescPool       = nullptr;
         RenderPass *           pRenderPass     = nullptr;
-        CommandList *          pCmdBuffer      = nullptr;
-        const PipelineState *  pPipelineState  = nullptr;
-        const PipelineLayout * pPipelineLayout = nullptr;
+        CommandBuffer *        pCmdBuffer      = nullptr;
+        TDescriptorSets< 1 >   DescSet;
+        //const PipelineState *  pPipelineState  = nullptr;
+        //const PipelineLayout * pPipelineLayout = nullptr;
 
-        TDispatchableHandle< VkShaderModule > hVertexShaderModule;
-        TDispatchableHandle< VkShaderModule > hFragmentShaderModule;
-        TDispatchableHandle< VkSampler >      hFontSampler;
+        TDispatchableHandle< VkShaderModule >        hVertexShaderModule;
+        TDispatchableHandle< VkShaderModule >        hFragmentShaderModule;
+        TDispatchableHandle< VkSampler >             hFontSampler;
+        TDispatchableHandle< VkDescriptorSetLayout > hDescSetLayout;
+        TDispatchableHandle< VkPipelineLayout >      hPipelineLayout;
 
-        VkPhysicalDevice       Gpu                     = VK_NULL_HANDLE;
-        VkDevice               Device                  = VK_NULL_HANDLE;
-        VkRenderPass           RenderPass              = VK_NULL_HANDLE;
-        VkPipelineCache        PipelineCache           = VK_NULL_HANDLE;
-        VkDescriptorPool       DescriptorPool          = VK_NULL_HANDLE;
+        //VkRenderPass           RenderPass              = VK_NULL_HANDLE;
+        //VkPipelineCache        PipelineCache           = VK_NULL_HANDLE;
+        //VkDescriptorPool       DescriptorPool          = VK_NULL_HANDLE;
         VkCommandBuffer        CommandBuffer           = VK_NULL_HANDLE;
         size_t                 BufferMemoryAlignment   = 256;
         VkPipelineCreateFlags  PipelineCreateFlags     = 0;
         int                    FrameIndex              = 0;
-        VkDescriptorSetLayout  DescriptorSetLayout     = VK_NULL_HANDLE;
-        VkPipelineLayout       PipelineLayout          = VK_NULL_HANDLE;
-        VkDescriptorSet        DescriptorSet           = VK_NULL_HANDLE;
+        VkDescriptorSetLayout  DescSetLayout           = VK_NULL_HANDLE;
+        //VkPipelineLayout       PipelineLayout          = VK_NULL_HANDLE;
+        //VkDescriptorSet        DescriptorSet           = VK_NULL_HANDLE;
         VkPipeline             Pipeline                = VK_NULL_HANDLE;
         VkSampler              FontSampler             = VK_NULL_HANDLE;
         VkDeviceMemory         FontMemory              = VK_NULL_HANDLE;

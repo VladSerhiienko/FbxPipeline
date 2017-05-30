@@ -6,9 +6,9 @@
 
 namespace apemode
 {
-    class CommandList;
+    class CommandBuffer;
     class RenderPass;
-    class RootSignature;
+    class PipelineLayout;
     class PipelineState;
     class PipelineStateDescription;
 
@@ -23,7 +23,7 @@ namespace apemode
         kShaderType_Unknown,
     };
 
-    class _Graphics_ecosystem_dll_api ShaderBytecode : public apemode::ScalableAllocPolicy,
+    class ShaderBytecode : public apemode::ScalableAllocPolicy,
                                                        public apemode::NoCopyAssignPolicy
     {
     public:
@@ -56,14 +56,14 @@ namespace apemode
         apemode::ShaderBytecode & operator= (ShaderBytecode const & Other);
     };
 
-    class _Graphics_ecosystem_dll_api PipelineStateDescription : public apemode::ScalableAllocPolicy,
+    class PipelineStateDescription : public apemode::ScalableAllocPolicy,
                                                                  public apemode::NoCopyAssignPolicy
     {
     public:
         uint64_t                 Hash;
         bool                     bIsGraphics;
         RenderPass const *       pRenderPass;
-        RootSignature const *    pRootSignature;
+        PipelineLayout const *    pPipelineLayout;
 
         apemode::TInfoStruct<VkPipelineVertexInputStateCreateInfo>   VertexInputState;
         apemode::TInfoStruct<VkPipelineInputAssemblyStateCreateInfo> InputAssemblyState;
@@ -100,7 +100,7 @@ namespace apemode
         bool IsDynamicStateEnabled(VkDynamicState eDynamicState) const;
     };
 
-    class _Graphics_ecosystem_dll_api PipelineState : public apemode::ScalableAllocPolicy,
+    class PipelineState : public apemode::ScalableAllocPolicy,
                                                       public apemode::NoCopyAssignPolicy
     {
     public:
@@ -110,21 +110,21 @@ namespace apemode
         apemode::TDispatchableHandle<VkPipelineCache> hPipelineCache;
         apemode::PipelineStateDescription const *     pDesc;
         apemode::RenderPass const *                   pRenderPass;
-        apemode::RootSignature const *                pRootSignature;
-        apemode::GraphicsDevice const *               pGraphicsNode;
+        apemode::PipelineLayout const *                pPipelineLayout;
+        apemode::GraphicsDevice const *               pNode;
 
     public:
         PipelineState();
         ~PipelineState();
 
-        void BindTo(apemode::CommandList & CmdList);
+        void BindTo(apemode::CommandBuffer & CmdBuffer);
 
     public:
         operator VkPipeline() const;
         operator VkPipelineCache() const;
     };
 
-    class _Graphics_ecosystem_dll_api PipelineStateBuilder : public apemode::ScalableAllocPolicy,
+    class PipelineStateBuilder : public apemode::ScalableAllocPolicy,
                                                              public apemode::NoCopyAssignPolicy
     {
     public:
@@ -132,7 +132,7 @@ namespace apemode
         friend InputLayoutBuilder;
 
     public:
-        class _Graphics_ecosystem_dll_api InputLayoutBuilder : public apemode::ScalableAllocPolicy,
+        class InputLayoutBuilder : public apemode::ScalableAllocPolicy,
                                                                public apemode::NoCopyAssignPolicy
         {
             PipelineStateBuilder &            Bilder;
@@ -236,7 +236,7 @@ namespace apemode
         void ResetScissorRects ();
 
         void SetRenderPass (apemode::RenderPass const & RenderPass, uint32_t SubpassId);
-        void SetRootSignature (apemode::RootSignature const & RootSignature);
+        void SetPipelineLayout (apemode::PipelineLayout const & PipelineLayout);
 
         //
         // Stages
@@ -286,7 +286,7 @@ namespace apemode
         PipelineStateDescription TemporaryDesc;
     };
 
-    class _Graphics_ecosystem_dll_api PipelineStateManager : public apemode::ScalableAllocPolicy,
+    class PipelineStateManager : public apemode::ScalableAllocPolicy,
                                                              public apemode::NoCopyAssignPolicy
     {
         friend apemode::GraphicsDevice;
@@ -304,7 +304,7 @@ namespace apemode
         apemode::PipelineState const * TryGetPipelineStateObjectByHash (uint64_t Hash);
     };
 
-    class _Graphics_ecosystem_dll_api PipelineCache : public apemode::ScalableAllocPolicy, public apemode::NoCopyAssignPolicy {
+    class PipelineCache : public apemode::ScalableAllocPolicy, public apemode::NoCopyAssignPolicy {
         apemode::TDispatchableHandle< VkPipelineCache > hPipelineCache;
 
     };
