@@ -14,10 +14,9 @@ namespace apemode
     class FramebufferManager;
     class GraphicsEcosystem;
 
-    class GraphicsDevice : public apemode::ScalableAllocPolicy,
-                                                       public apemode::NoCopyAssignPolicy
+    class GraphicsDevice : public apemode::ScalableAllocPolicy, public apemode::NoCopyAssignPolicy
     {
-    public:
+       public:
         static std::unique_ptr<GraphicsDevice> MakeNewUnique ();
         static std::unique_ptr<GraphicsDevice> MakeNullUnique ();
 

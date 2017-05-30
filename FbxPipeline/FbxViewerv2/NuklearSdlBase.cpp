@@ -23,7 +23,7 @@ void apemode::NuklearSdlBase::SdlClipbardCopy( nk_handle usr, const char *text, 
     }
 }
 
-void *apemode::NuklearSdlBase::DeviceUploadAtlas( const void *image, int width, int height ) {
+void *apemode::NuklearSdlBase::DeviceUploadAtlas(InitParametersBase *init_params, const void *image, int width, int height ) {
     return nullptr;
 }
 
@@ -40,7 +40,7 @@ nk_context *apemode::NuklearSdlBase::Init( InitParametersBase *init_params ) {
     nk_font_atlas *atlas;
     FontStashBegin( &atlas );
     pDefaultFont = nk_font_atlas_add_from_memory( atlas, (void *) s_droidSansTtf, sizeof( s_droidSansTtf ), 14, 0 );
-    FontStashEnd( );
+    FontStashEnd(init_params);
 
     SetStyle( Dark );
     Context.style.font = &pDefaultFont->handle;
@@ -56,11 +56,11 @@ void apemode::NuklearSdlBase::FontStashBegin( nk_font_atlas **atlas ) {
     *atlas = &Atlas;
 }
 
-void apemode::NuklearSdlBase::FontStashEnd( ) {
+void apemode::NuklearSdlBase::FontStashEnd(InitParametersBase *init_params) {
     int         imageWidth  = 0;
     int         imageHeight = 0;
     const void *imageData   = nk_font_atlas_bake( &Atlas, &imageWidth, &imageHeight, NK_FONT_ATLAS_RGBA32 );
-    auto        atlasHandle = DeviceUploadAtlas( imageData, imageWidth, imageHeight );
+    auto        atlasHandle = DeviceUploadAtlas(init_params, imageData, imageWidth, imageHeight );
 
     nk_font_atlas_end( &Atlas, nk_handle_ptr( atlasHandle ), &NullTexture );
     if ( pDefaultFont )

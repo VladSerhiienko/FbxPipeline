@@ -140,8 +140,10 @@ namespace apemode
     struct TDispatchableHandleDeleter<VkImage> : public TDispatchableHandleHandleTypeResolver<VkImage>
     {
         VkDevice LogicalDeviceHandle;
+        VkPhysicalDevice PhysicalDeviceHandle;
 
-        TDispatchableHandleDeleter() : LogicalDeviceHandle(VK_NULL_HANDLE) {}
+        TDispatchableHandleDeleter() : LogicalDeviceHandle(VK_NULL_HANDLE)
+                                     , PhysicalDeviceHandle(VK_NULL_HANDLE) {}
 
         void operator()(VkImage & Handle)
         {
@@ -194,8 +196,10 @@ namespace apemode
     struct TDispatchableHandleDeleter<VkBuffer> : public TDispatchableHandleHandleTypeResolver<VkBuffer>
     {
         VkDevice LogicalDeviceHandle;
+        VkPhysicalDevice PhysicalDeviceHandle;
 
-        TDispatchableHandleDeleter() : LogicalDeviceHandle(VK_NULL_HANDLE) {}
+        TDispatchableHandleDeleter() : LogicalDeviceHandle(VK_NULL_HANDLE)
+                                     , PhysicalDeviceHandle(VK_NULL_HANDLE){}
 
         void operator()(VkBuffer & Handle)
         {
@@ -648,10 +652,22 @@ namespace apemode
         _Force_inline_function bool     Failed() const { return ResultHandle(Status()).Failed(); }
     };
 
+    inline uint32_t ResolveMemoryType(VkPhysicalDevice gpu, VkMemoryPropertyFlags properties, uint32_t type_bits)
+    {
+        VkPhysicalDeviceMemoryProperties physicalDeviceMemoryProperties;
+        vkGetPhysicalDeviceMemoryProperties(gpu, &physicalDeviceMemoryProperties);
+        for (uint32_t i = 0; i < physicalDeviceMemoryProperties.memoryTypeCount; i++)
+            if ((physicalDeviceMemoryProperties.memoryTypes[i].propertyFlags & properties) == properties && type_bits & (1 << i))
+                return i;
+
+        // Unable to find memoryType
+        return uint32_t(-1);
+    }
+
     template <>
     struct TDispatchableHandle<VkImage> : public TDispatchableHandleBase<VkImage>
     {
-        bool Assign(VkDevice InLogicalDeviceHandle, VkImage Img, bool bTakeOwnership)
+        bool Assign(VkDevice InLogicalDeviceHandle, VkPhysicalDevice InPhysicalDeviceHandle, VkImage Img, bool bTakeOwnership)
         {
             Deleter(Handle);
 
@@ -662,6 +678,7 @@ namespace apemode
             if (bCaseOk || bCaseNull)
             {
                 Handle = Img;
+                Deleter.PhysicalDeviceHandle = InPhysicalDeviceHandle;
                 Deleter.LogicalDeviceHandle = bTakeOwnership 
                     ? InLogicalDeviceHandle 
                     : nullptr;
@@ -671,7 +688,7 @@ namespace apemode
             return false;
         }
 
-        bool Recreate(VkDevice InLogicalDeviceHandle, VkImageCreateInfo const & CreateInfo)
+        bool Recreate(VkDevice InLogicalDeviceHandle, VkPhysicalDevice InPhysicalDeviceHandle, VkImageCreateInfo const & CreateInfo)
         {
             _Game_engine_Assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required.");
 
@@ -679,6 +696,7 @@ namespace apemode
             if (InLogicalDeviceHandle != nullptr)
             {
                 Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
+                Deleter.PhysicalDeviceHandle = InPhysicalDeviceHandle;
 
                 const ResultHandle ErrorHandle = vkCreateImage(InLogicalDeviceHandle, &CreateInfo, *this, *this);
                 _Game_engine_Assert(ErrorHandle, "vkCreateImage failed.");
@@ -686,6 +704,30 @@ namespace apemode
             }
 
             return false;
+        }
+
+        VkMemoryRequirements GetMemoryRequirements() {
+            _Game_engine_Assert(IsNotNull(), "Null.");
+
+            VkMemoryRequirements memoryRequirements;
+            vkGetImageMemoryRequirements(Deleter.LogicalDeviceHandle, *this, &memoryRequirements);
+            return memoryRequirements;
+        }
+
+        VkMemoryAllocateInfo GetMemoryAllocateInfo(VkMemoryPropertyFlags memoryPropertyFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) {
+
+            VkMemoryRequirements memoryRequirements = GetMemoryRequirements();
+
+            TInfoStruct< VkMemoryAllocateInfo> memoryAllocInfo;
+            memoryAllocInfo->allocationSize = memoryRequirements.size;
+            memoryAllocInfo->memoryTypeIndex = ResolveMemoryType(Deleter.PhysicalDeviceHandle, memoryPropertyFlags, memoryRequirements.memoryTypeBits);
+
+            return memoryAllocInfo;
+        }
+
+        bool BindMemory(VkDeviceMemory hMemory, uint32_t Offset = 0) {
+            const ResultHandle ErrorHandle = vkBindImageMemory(Deleter.LogicalDeviceHandle, *this, hMemory, Offset);
+            return ErrorHandle.Succeeded();
         }
     };
 
@@ -713,42 +755,84 @@ namespace apemode
     template <>
     struct TDispatchableHandle<VkDeviceMemory> : public TDispatchableHandleBase<VkDeviceMemory>
     {
-        bool Recreate(VkDevice InLogicalDeviceHandle, VkMemoryAllocateInfo const & AllocInfo)
-        {
-            _Game_engine_Assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required.");
+        bool Recreate( VkDevice InLogicalDeviceHandle, VkMemoryAllocateInfo const &AllocInfo ) {
+            _Game_engine_Assert( InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required." );
 
-            Deleter(Handle);
-            if (InLogicalDeviceHandle != nullptr)
-            {
+            Deleter( Handle );
+            if ( InLogicalDeviceHandle != nullptr ) {
                 Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
 
-                const ResultHandle ErrorHandle = vkAllocateMemory(InLogicalDeviceHandle, &AllocInfo, *this, *this);
-                _Game_engine_Assert(ErrorHandle, "vkAllocateMemory failed.");
-                return ErrorHandle.Succeeded();
+                const ResultHandle ErrorHandle = vkAllocateMemory( InLogicalDeviceHandle, &AllocInfo, *this, *this );
+                _Game_engine_Assert( ErrorHandle, "vkAllocateMemory failed." );
+                return ErrorHandle.Succeeded( );
             }
 
             return false;
+        }
+
+        uint8_t *Map( uint32_t mappedMemoryOffset, uint32_t mappedMemorySize, VkMemoryHeapFlags mapFlags ) {
+            _Game_engine_Assert( Deleter.LogicalDeviceHandle != VK_NULL_HANDLE, "Device is required." );
+
+            uint8_t *mappedData = nullptr;
+            if ( ResultHandle::Failed( vkMapMemory( Deleter.LogicalDeviceHandle,
+                                                    *this,
+                                                    mappedMemoryOffset,
+                                                    mappedMemorySize,
+                                                    mapFlags,
+                                                    reinterpret_cast< void ** >( &mappedData ) ) ) )
+                return nullptr;
+
+            return mappedData;
+        }
+
+        void Unmap( ) {
+            _Game_engine_Assert( Deleter.LogicalDeviceHandle != VK_NULL_HANDLE, "Device is required." );
+            vkUnmapMemory( Deleter.LogicalDeviceHandle, *this );
         }
     };
 
     template <>
     struct TDispatchableHandle<VkBuffer> : public TDispatchableHandleBase<VkBuffer>
     {
-        bool Recreate(VkDevice InLogicalDeviceHandle, VkBufferCreateInfo const & CreateInfo)
-        {
-            _Game_engine_Assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required.");
+        bool Recreate( VkDevice                  InLogicalDeviceHandle,
+                       VkPhysicalDevice          InPhysicalDeviceHandle,
+                       VkBufferCreateInfo const &CreateInfo ) {
+            _Game_engine_Assert( InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required." );
 
-            Deleter(Handle);
-            if (InLogicalDeviceHandle != nullptr)
-            {
-                Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
+            Deleter( Handle );
+            if ( InLogicalDeviceHandle != nullptr ) {
+                Deleter.LogicalDeviceHandle  = InLogicalDeviceHandle;
+                Deleter.PhysicalDeviceHandle = InPhysicalDeviceHandle;
 
-                const ResultHandle ErrorHandle = vkCreateBuffer(InLogicalDeviceHandle, &CreateInfo, *this, *this);
-                _Game_engine_Assert(ErrorHandle, "vkCreateBuffer failed.");
-                return ErrorHandle.Succeeded();
+                const ResultHandle ErrorHandle = vkCreateBuffer( InLogicalDeviceHandle, &CreateInfo, *this, *this );
+                _Game_engine_Assert( ErrorHandle, "vkCreateBuffer failed." );
+                return ErrorHandle.Succeeded( );
             }
 
             return false;
+        }
+
+        VkMemoryRequirements GetMemoryRequirements( ) {
+            _Game_engine_Assert( IsNotNull( ), "Null." );
+
+            VkMemoryRequirements memoryRequirements;
+            vkGetBufferMemoryRequirements( Deleter.LogicalDeviceHandle, *this, &memoryRequirements );
+            return memoryRequirements;
+        }
+
+        VkMemoryAllocateInfo GetMemoryAllocateInfo( VkMemoryPropertyFlags memoryPropertyFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT ) {
+            VkMemoryRequirements memoryRequirements = GetMemoryRequirements( );
+
+            TInfoStruct< VkMemoryAllocateInfo > memoryAllocInfo;
+            memoryAllocInfo->allocationSize = memoryRequirements.size;
+            memoryAllocInfo->memoryTypeIndex = ResolveMemoryType( Deleter.PhysicalDeviceHandle, memoryPropertyFlags, memoryRequirements.memoryTypeBits );
+
+            return memoryAllocInfo;
+        }
+
+        bool BindMemory( VkDeviceMemory hMemory, uint32_t Offset = 0 ) {
+            const ResultHandle ErrorHandle = vkBindBufferMemory( Deleter.LogicalDeviceHandle, *this, hMemory, Offset );
+            return ErrorHandle.Succeeded( );
         }
     };
 

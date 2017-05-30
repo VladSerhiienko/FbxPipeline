@@ -6,13 +6,14 @@
 #include <algorithm>
 #include <iterator>
 #include <mutex>
+#include <assert.h>
 
 #define VK_USE_PLATFORM_WIN32_KHR 1
 #include <vulkan/vulkan.h>
 
 #define _Graphics_ecosystem_dll_api
 #define _Force_inline_function inline
-#define _Game_engine_Assert(...)
+#define _Game_engine_Assert(...) //assert(__VA_ARGS__)
 #define apemode_likely(...) __VA_ARGS__
 #define _Game_engine_Unlikely(...) __VA_ARGS__
 #define _Game_engine_Error(...)

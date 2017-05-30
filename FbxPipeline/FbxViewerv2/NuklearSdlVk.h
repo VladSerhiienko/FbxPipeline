@@ -22,6 +22,7 @@ namespace apemode {
             GraphicsDevice *       pDevice     = nullptr;
             DescriptorPool *       pDescPool   = nullptr;
             RenderPass *           pRenderPass = nullptr;
+            CommandBuffer *        pCmdBuffer  = nullptr;
         };
 
         struct RenderParametersVk : RenderParametersBase {
@@ -35,14 +36,15 @@ namespace apemode {
         RenderPass *           pRenderPass     = nullptr;
         CommandBuffer *        pCmdBuffer      = nullptr;
         TDescriptorSets< 1 >   DescSet;
-        //const PipelineState *  pPipelineState  = nullptr;
-        //const PipelineLayout * pPipelineLayout = nullptr;
-
-        TDispatchableHandle< VkShaderModule >        hVertexShaderModule;
-        TDispatchableHandle< VkShaderModule >        hFragmentShaderModule;
         TDispatchableHandle< VkSampler >             hFontSampler;
         TDispatchableHandle< VkDescriptorSetLayout > hDescSetLayout;
         TDispatchableHandle< VkPipelineLayout >      hPipelineLayout;
+        TDispatchableHandle< VkPipeline >            hPipeline;
+        TDispatchableHandle< VkImage >               hFontImg;
+        TDispatchableHandle< VkImageView >           hFontImgView;
+        TDispatchableHandle< VkDeviceMemory >        hFontImgMemory;
+        TDispatchableHandle< VkBuffer >              hUploadBuffer;
+        TDispatchableHandle< VkDeviceMemory >        hUploadBufferMemory;
 
         //VkRenderPass           RenderPass              = VK_NULL_HANDLE;
         //VkPipelineCache        PipelineCache           = VK_NULL_HANDLE;
@@ -74,7 +76,7 @@ namespace apemode {
         virtual void Render( RenderParametersBase *render_params ) override;
         virtual void DeviceDestroy( ) override;
         virtual void DeviceCreate( InitParametersBase *init_params ) override;
-        virtual void *DeviceUploadAtlas( const void *image, int width, int height ) override;
+        virtual void *DeviceUploadAtlas( InitParametersBase *init_params, const void *image, int width, int height ) override;
     };
 
 } // namespace apemode

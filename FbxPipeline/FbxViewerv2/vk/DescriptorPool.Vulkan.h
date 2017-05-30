@@ -16,6 +16,7 @@ namespace apemode
 
     template < uint32_t TCount >
     class TDescriptorSets {
+    public:
         VkDevice              hNode              = VK_NULL_HANDLE;
         VkDescriptorPool      hPool              = VK_NULL_HANDLE;
         VkDescriptorSet       hSets[ TCount ]    = {VK_NULL_HANDLE};
@@ -23,7 +24,6 @@ namespace apemode
         uint32_t              Offsets[ TCount ]  = {0};
         uint32_t              Counts[ TCount ]   = {0};
 
-    public:
         TDescriptorSets( ) {
         }
 

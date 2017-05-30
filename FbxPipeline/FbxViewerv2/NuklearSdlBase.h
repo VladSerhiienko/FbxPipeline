@@ -30,6 +30,7 @@ namespace apemode {
         };
 
         struct InitParametersBase {};
+        struct UploadFontAtlasParametersBase {};
 
         struct RenderParametersBase {
             float            dims[ 2 ]          = {};
@@ -49,7 +50,7 @@ namespace apemode {
 
     public:
         void FontStashBegin( nk_font_atlas **atlas );
-        void FontStashEnd( );
+        void FontStashEnd( InitParametersBase *init_params );
         int HandleEvent( SDL_Event *evt );
         void Shutdown( );
         void SetStyle( Theme theme );
@@ -59,7 +60,7 @@ namespace apemode {
         virtual void Render( RenderParametersBase *render_params );
         virtual void DeviceDestroy( );
         virtual void DeviceCreate( InitParametersBase *init_params );
-        virtual void *DeviceUploadAtlas( const void *image, int width, int height );
+        virtual void *DeviceUploadAtlas( InitParametersBase *init_params, const void *image, int width, int height );
 
     public:
         static void SdlClipbardPaste( nk_handle usr, struct nk_text_edit *edit );
