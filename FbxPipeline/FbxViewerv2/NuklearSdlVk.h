@@ -41,6 +41,7 @@ namespace apemode {
         apemodevk::TDispatchableHandle< VkSampler >             hFontSampler;
         apemodevk::TDispatchableHandle< VkDescriptorSetLayout > hDescSetLayout;
         apemodevk::TDispatchableHandle< VkPipelineLayout >      hPipelineLayout;
+        apemodevk::TDispatchableHandle< VkPipelineCache >       hPipelineCache;
         apemodevk::TDispatchableHandle< VkPipeline >            hPipeline;
         apemodevk::TDispatchableHandle< VkImage >               hFontImg;
         apemodevk::TDispatchableHandle< VkImageView >           hFontImgView;
@@ -51,6 +52,8 @@ namespace apemode {
         apemodevk::TDispatchableHandle< VkDeviceMemory >        hVertexBufferMemory[2];
         apemodevk::TDispatchableHandle< VkBuffer >              hIndexBuffer[2];
         apemodevk::TDispatchableHandle< VkDeviceMemory >        hIndexBufferMemory[2];
+        apemodevk::TDispatchableHandle< VkBuffer >              hUniformBuffer[2];
+        apemodevk::TDispatchableHandle< VkDeviceMemory >        hUniformBufferMemory[2];
         size_t                 VertexBufferSize[2] = {};
         size_t                 IndexBufferSize[2] = {};
         size_t                 FrameIndex = 0;

@@ -199,87 +199,62 @@ void apemode::NuklearSdlVk::DeviceDestroy( ) {
 
 void apemode::NuklearSdlVk::DeviceCreate( InitParametersBase* init_params ) {
     const char* vertex_shader =
-        "#version 440 core\n"
-        "layout(push_constant) uniform PushConst { mat4 ProjMtx; } uPushConst;\n"
-        "layout(location=0) in vec2 Position;\n"
-        "layout(location=1) in vec2 TexCoord;\n"
-        "layout(location=2) in vec4 Color;\n"
-        "layout(location=0) out vec2 Frag_UV;\n"
-        "layout(location=1) out vec4 Frag_Color;\n"
+        "#version 450\n"
+        "#extension GL_ARB_separate_shader_objects : enable\n"
+        "layout(push_constant) uniform PushConstants { mat4 modelViewProjection; } pushConstants;\n"
+        "layout(location=0) in vec2 inPosition;\n"
+        "layout(location=1) in vec2 inTexcoords;\n"
+        "layout(location=2) in vec4 inColor;\n"
+        "layout(location=0) out vec2 outTexcoords;\n"
+        "layout(location=1) out vec4 outColor;\n"
         "void main() {\n"
-        "   Frag_UV = TexCoord;\n"
-        "   Frag_Color = Color;\n"
-        "   gl_Position = uPushConst.ProjMtx * vec4(Position.xy, 0, 1);\n"
+        "   outTexcoords = inTexcoords;\n"
+        "   outColor = inColor;\n"
+        "   gl_Position = pushConstants.modelViewProjection * vec4(inPosition.xy, 0, 1);\n"
         "}\n";
-    /*const char* vertex_shader =
-        "#version 450 core\n"
-        "layout(push_constant) uniform PushConst {\n"
-        "mat4 ProjMtx;\n"
-        "} uPushConst;\n"
-        "layout(location=0) in vec2 Position;\n"
-        "layout(location=1) in vec2 TexCoord;\n"
-        "layout(location=2) in vec4 Color;\n"
-        "out gl_PerVertex{ vec4 gl_Position; };\n"
-        "layout(location = 0) out struct {\n"
-        "vec2 Frag_UV;\n"
-        "vec4 Frag_Color;\n"
-        "} Out;\n"
-        "void main() {\n"
-        "   Out.Frag_UV = TexCoord;\n"
-        "   Out.Frag_Color = Color;\n"
-        "   gl_Position = uPushConst.ProjMtx * vec4(Position.xy, 0, 1);\n"
-        "}\n";*/
 
     const char* fragment_shader =
-        "#version 440 core\n"
-        "layout(set=0, binding=0) uniform sampler2D FontSampler;\n"
-        "layout(location=0) in vec2 Frag_UV;\n"
-        "layout(location=1) in vec4 Frag_Color;\n"
-        "layout(location=0) out vec4 Out_Color;\n"
+        "#version 450\n"
+        "#extension GL_ARB_separate_shader_objects : enable\n"
+        "layout(set=0, binding=0) uniform sampler2D samplerFont;\n"
+        "layout(location=0) in vec2 inTexcoords;\n"
+        "layout(location=1) in vec4 inColor;\n"
+        "layout(location=0) out vec4 outColor;\n"
         "void main(){\n"
-        "   Out_Color = Frag_Color * texture(FontSampler, Frag_UV.st);\n"
+        "   outColor = inColor * texture(samplerFont, inTexcoords.st);\n"
         "}\n";
-    /*const char* fragment_shader =
-        "#version 450 core\n"
-        "layout(location=0) out vec4 Out_Color;\n"
-        "layout(set=0, binding=0) uniform sampler2D Texture;\n"
-        "layout(location=0) in struct {\n"
-        "vec2 Frag_UV;\n"
-        "vec4 Frag_Color;\n"
-        "} In;\n"
-        "void main(){\n"
-        "   Out_Color = In.Frag_Color * texture(Texture, In.Frag_UV.st);\n"
-        "}\n";*/
+
 
     shaderc::Compiler compiler;
-    
+
     shaderc::CompileOptions options;
     options.SetSourceLanguage( shaderc_source_language_glsl );
     options.SetOptimizationLevel( shaderc_optimization_level_size );
+    options.SetTargetEnvironment( shaderc_target_env_vulkan, 0 );
 
     shaderc::PreprocessedSourceCompilationResult nuklear_preprocessed[] = {
-        compiler.PreprocessGlsl( vertex_shader, shaderc_glsl_default_vertex_shader, "nuklear.vert", options ),
-        compiler.PreprocessGlsl( fragment_shader, shaderc_glsl_default_fragment_shader, "nuklear.frag", options )};
+        compiler.PreprocessGlsl( vertex_shader, shaderc_glsl_vertex_shader, "nuklear.vert", options ),
+        compiler.PreprocessGlsl( fragment_shader, shaderc_glsl_fragment_shader, "nuklear.frag", options )};
 
     if ( shaderc_compilation_status_success != nuklear_preprocessed[ 0 ].GetCompilationStatus( ) ||
          shaderc_compilation_status_success != nuklear_preprocessed[ 1 ].GetCompilationStatus( ) ) {
+        OutputDebugStringA(nuklear_preprocessed[0].GetErrorMessage().c_str());
+        OutputDebugStringA(nuklear_preprocessed[1].GetErrorMessage().c_str());
         DebugBreak( );
         return;
     }
 
-    /*shaderc::SpvCompilationResult nuklear_compiled[] = {
-        compiler.CompileGlslToSpv( nuklear_preprocessed[ 0 ].begin(), shaderc_glsl_default_vertex_shader, "nuklear.vert.spv", options ),
-        compiler.CompileGlslToSpv( nuklear_preprocessed[ 1 ].begin(), shaderc_glsl_default_fragment_shader, "nuklear.frag.spv", options )};
-
-    if ( shaderc_compilation_status_success != nuklear_compiled[ 0 ].GetCompilationStatus( ) ||
-         shaderc_compilation_status_success != nuklear_compiled[ 1 ].GetCompilationStatus( ) ) {
-        DebugBreak( );
-        return;
-    }*/
+#if 0
 
     shaderc::AssemblyCompilationResult nuklear_compiled_assembly[] = {
-        compiler.CompileGlslToSpvAssembly(nuklear_preprocessed[0].begin(), shaderc_glsl_default_vertex_shader, "nuklear.vert.spv", options),
-        compiler.CompileGlslToSpvAssembly(nuklear_preprocessed[1].begin(), shaderc_glsl_default_fragment_shader, "nuklear.frag.spv", options) };
+        compiler.CompileGlslToSpvAssembly(nuklear_preprocessed[0].begin(), shaderc_glsl_vertex_shader, "nuklear.vert.spv", options),
+        compiler.CompileGlslToSpvAssembly(nuklear_preprocessed[1].begin(), shaderc_glsl_fragment_shader, "nuklear.frag.spv", options) };
+
+    OutputDebugStringA("-------------------------------------------\n");
+    OutputDebugStringA(nuklear_compiled_assembly[0].begin());
+    OutputDebugStringA("-------------------------------------------\n");
+    OutputDebugStringA(nuklear_compiled_assembly[1].begin());
+    OutputDebugStringA("-------------------------------------------\n");
 
     if (shaderc_compilation_status_success != nuklear_compiled_assembly[0].GetCompilationStatus() ||
         shaderc_compilation_status_success != nuklear_compiled_assembly[1].GetCompilationStatus()) {
@@ -288,6 +263,18 @@ void apemode::NuklearSdlVk::DeviceCreate( InitParametersBase* init_params ) {
         OutputDebugStringA(nuklear_compiled_assembly[1].GetErrorMessage().c_str());
 
         DebugBreak();
+        return;
+    }
+
+#endif
+
+    shaderc::SpvCompilationResult nuklear_compiled[] = {
+        compiler.CompileGlslToSpv( nuklear_preprocessed[ 0 ].begin(), shaderc_glsl_default_vertex_shader, "nuklear.vert.spv", options ),
+        compiler.CompileGlslToSpv( nuklear_preprocessed[ 1 ].begin(), shaderc_glsl_default_fragment_shader, "nuklear.frag.spv", options )};
+
+    if ( shaderc_compilation_status_success != nuklear_compiled[ 0 ].GetCompilationStatus( ) ||
+         shaderc_compilation_status_success != nuklear_compiled[ 1 ].GetCompilationStatus( ) ) {
+        DebugBreak( );
         return;
     }
 
@@ -301,6 +288,7 @@ void apemode::NuklearSdlVk::DeviceCreate( InitParametersBase* init_params ) {
     pDescPool   = initParametersVk->pDescPool;
     pRenderPass = initParametersVk->pRenderPass;
 
+#if 0
     apemodevk::TInfoStruct< VkShaderModuleCreateInfo > vertexShaderCreateInfo;
     vertexShaderCreateInfo->pCode = (const uint32_t*)nuklear_compiled_assembly[ 0 ].begin( );
     vertexShaderCreateInfo->codeSize = (size_t) std::distance(nuklear_compiled_assembly[ 0 ].begin( ), nuklear_compiled_assembly[ 0 ].end( ) );
@@ -309,13 +297,17 @@ void apemode::NuklearSdlVk::DeviceCreate( InitParametersBase* init_params ) {
     fragmentShaderCreateInfo->pCode = (const uint32_t*)nuklear_compiled_assembly[ 1 ].begin( );
     fragmentShaderCreateInfo->codeSize = (size_t) std::distance(nuklear_compiled_assembly[ 1 ].begin( ), nuklear_compiled_assembly[ 1 ].end( ) );
 
-    /*apemodevk::TInfoStruct< VkShaderModuleCreateInfo > vertexShaderCreateInfo;
+#else
+
+    apemodevk::TInfoStruct< VkShaderModuleCreateInfo > vertexShaderCreateInfo;
     vertexShaderCreateInfo->pCode = (const uint32_t*)nuklear_compiled[0].begin();
-    vertexShaderCreateInfo->codeSize = (size_t)std::distance(nuklear_compiled[0].begin(), nuklear_compiled[0].end());
+    vertexShaderCreateInfo->codeSize = (size_t)std::distance(nuklear_compiled[0].begin(), nuklear_compiled[0].end()) * sizeof(uint32_t);
 
     apemodevk::TInfoStruct< VkShaderModuleCreateInfo > fragmentShaderCreateInfo;
     fragmentShaderCreateInfo->pCode = (const uint32_t*)nuklear_compiled[1].begin();
-    fragmentShaderCreateInfo->codeSize = (size_t)std::distance(nuklear_compiled[1].begin(), nuklear_compiled[1].end());*/
+    fragmentShaderCreateInfo->codeSize = (size_t)std::distance(nuklear_compiled[1].begin(), nuklear_compiled[1].end()) * sizeof(uint32_t);
+
+#endif
 
     apemodevk::TDispatchableHandle< VkShaderModule > hVertexShaderModule;
     apemodevk::TDispatchableHandle< VkShaderModule > hFragmentShaderModule;
@@ -476,7 +468,12 @@ void apemode::NuklearSdlVk::DeviceCreate( InitParametersBase* init_params ) {
     graphicsPipeline->layout              = hPipelineLayout;
     graphicsPipeline->renderPass          = pRenderPass;
 
-    if ( false == hPipeline.Recreate( pDevice, VK_NULL_HANDLE, graphicsPipeline ) ) {
+    apemodevk::TInfoStruct<VkPipelineCacheCreateInfo> pipelineCacheCreateInfo;
+    pipelineCacheCreateInfo->pInitialData = nullptr;
+    pipelineCacheCreateInfo->initialDataSize = 0;
+    hPipelineCache.Recreate( pDevice, pipelineCacheCreateInfo );
+
+    if ( false == hPipeline.Recreate( pDevice, hPipelineCache, graphicsPipeline ) ) {
         DebugBreak( );
         return;
     }
