@@ -40,12 +40,9 @@
     <ClInclude Include="vk\DescriptorPool.Vulkan.h" />
     <ClInclude Include="vk\ExecutionSync.Vulkan.h" />
     <ClInclude Include="vk\Framebuffer.Vulkan.h" />
-    <ClInclude Include="vk\GraphicsDevice.PrivateContent.Vulkan.h" />
     <ClInclude Include="vk\GraphicsDevice.Vulkan.h" />
     <ClInclude Include="vk\GraphicsManager.KnownExtensions.Vulkan.h" />
     <ClInclude Include="vk\GraphicsManager.KnownLayers.Vulkan.h" />
-    <ClInclude Include="vk\GraphicsManager.PrivateContent.Vulkan.h" />
-    <ClInclude Include="vk\GraphicsManager.PrivateCreateDeviceArgs.Vulkan.h" />
     <ClInclude Include="vk\GraphicsManager.Vulkan.h" />
     <ClInclude Include="vk\NativeDispatchableHandles.Vulkan.h" />
     <ClInclude Include="vk\PipelineState.Vulkan.h" />

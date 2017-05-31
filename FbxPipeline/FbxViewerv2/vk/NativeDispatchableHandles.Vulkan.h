@@ -1,6 +1,5 @@
 #pragma once
 
-#include <GraphicsDevice.Vulkan.h>
 #include <TDispatchableHandle.Vulkan.h>
 
 namespace apemode

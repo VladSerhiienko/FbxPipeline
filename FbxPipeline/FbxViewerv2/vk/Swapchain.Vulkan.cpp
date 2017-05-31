@@ -7,8 +7,6 @@
 #include <TInfoStruct.Vulkan.h>
 
 #include <GraphicsManager.KnownExtensions.Vulkan.h>
-#include <GraphicsManager.PrivateContent.Vulkan.h>
-#include <GraphicsDevice.PrivateContent.Vulkan.h>
 
 /// -------------------------------------------------------------------------------------------------------------------
 

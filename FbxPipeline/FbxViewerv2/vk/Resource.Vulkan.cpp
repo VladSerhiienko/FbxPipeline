@@ -7,8 +7,6 @@
 #include <TInfoStruct.Vulkan.h>
 
 #include <GraphicsManager.KnownExtensions.Vulkan.h>
-#include <GraphicsManager.PrivateContent.Vulkan.h>
-#include <GraphicsDevice.PrivateContent.Vulkan.h>
 
 /// -------------------------------------------------------------------------------------------------------------------
 /// ResourceReference
@@ -286,8 +284,7 @@ bool apemode::ResourceReference::GetMemoryTypeFromProperties(GraphicsDevice & In
                                                           VkFlags          InRequirementsMask,
                                                           uint32_t &       OutTypeIndex)
 {
-    auto &     NodeContent     = static_cast<GraphicsDevice::PrivateContent &>(InGraphicsNode);
-    auto const NodeMemoryTypeCount = _Get_array_length(NodeContent.DeviceHandle.MemoryProps.memoryTypes);
+    auto const NodeMemoryTypeCount = _Get_array_length(InGraphicsNode.MemoryProps.memoryTypes);
 
     // Search memtypes to find first index with those properties
     for (uint32_t i = 0; i < NodeMemoryTypeCount; i++)
@@ -295,7 +292,7 @@ bool apemode::ResourceReference::GetMemoryTypeFromProperties(GraphicsDevice & In
         if ((InTypeBits & 1) == 1)
         {
             // Type is available, does it match user properties?
-            auto & TypeProps = NodeContent.DeviceHandle.MemoryProps.memoryTypes[i];
+            auto & TypeProps = InGraphicsNode.MemoryProps.memoryTypes[i];
             if ((TypeProps.propertyFlags & InRequirementsMask) == InRequirementsMask)
             {
                 OutTypeIndex = i;

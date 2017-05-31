@@ -38,8 +38,14 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
     if ( AppBase::Initialize( Args, ppArgs ) ) {
         totalSecs = 0.0f;
 
+        auto appSurface = GetSurface();
+        auto graphicsHandle = (GraphicsManager*) appSurface->GetGraphicsHandle();
+
         content->Nk = new NuklearSdlVk();
         NuklearSdlVk::InitParametersVk initParams;
+        initParams.pAlloc = nullptr;
+        initParams.pDevice = graphicsHandle->GetPrimaryGraphicsNode();
+
         content->Nk->Init( &initParams );
 
         apemode::EmbeddedShaderPreprocessor preproc;

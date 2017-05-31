@@ -83,9 +83,6 @@
     <ClInclude Include="vk\Framebuffer.Vulkan.h">
       <Filter>Sources\Graphics\Vk</Filter>
     </ClInclude>
-    <ClInclude Include="vk\GraphicsDevice.PrivateContent.Vulkan.h">
-      <Filter>Sources\Graphics\Vk</Filter>
-    </ClInclude>
     <ClInclude Include="vk\GraphicsDevice.Vulkan.h">
       <Filter>Sources\Graphics\Vk</Filter>
     </ClInclude>
@@ -156,12 +153,6 @@
       <Filter>Sources\Graphics\Vk</Filter>
     </ClInclude>
     <ClInclude Include="vk\GraphicsManager.Vulkan.h">
-      <Filter>Sources\Graphics\Vk</Filter>
-    </ClInclude>
-    <ClInclude Include="vk\GraphicsManager.PrivateCreateDeviceArgs.Vulkan.h">
-      <Filter>Sources\Graphics\Vk</Filter>
-    </ClInclude>
-    <ClInclude Include="vk\GraphicsManager.PrivateContent.Vulkan.h">
       <Filter>Sources\Graphics\Vk</Filter>
     </ClInclude>
     <ClInclude Include="vk\GraphicsManager.KnownLayers.Vulkan.h">

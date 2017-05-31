@@ -37,10 +37,15 @@ struct apemode::AppSurfaceSdlVk::PrivateContent {
     HWND        hWnd;
     HINSTANCE   hInstance;
 
-    std::unique_ptr< GraphicsManager > pDeviceManager;
-    std::unique_ptr< Swapchain >         pSwapchain;
-    std::unique_ptr< CommandQueue >      pCmdQueue;
-    GraphicsDevice*                      pNode;
+    std::unique_ptr<GraphicsManager> pDeviceManager;
+    std::unique_ptr<Swapchain> pSwapchain;
+    std::unique_ptr<CommandQueue> pCmdQueue;
+    std::unique_ptr<CommandBuffer> pCmdBuffer;
+
+
+
+
+    GraphicsDevice* pNode;
 
     PrivateContent( ) : pSdlWindow( nullptr ) {
     }
