@@ -51,6 +51,7 @@ namespace apemode
         inline operator TNativeHandle const *() const { return &Handle; }
         inline operator TNativeHandle() const { return Handle; }
         inline operator bool() const { return Handle != nullptr; }
+        inline bool IsNull() const { return Handle == nullptr; }
         inline bool IsNotNull() const { return Handle != nullptr; }
         inline void Destroy() { Deleter(Handle); }
 

@@ -16,6 +16,182 @@ static uint32_t MemoryType( VkPhysicalDevice gpu, VkMemoryPropertyFlags properti
 }
 
 void apemode::NuklearSdlVk::Render( RenderParametersBase* p ) {
+
+    auto renderParams = (RenderParametersVk*)p;
+
+    if (hVertexBuffer[FrameIndex].IsNull() || VertexBufferSize[FrameIndex] < p->max_vertex_buffer)
+    {
+        hVertexBuffer[FrameIndex].Destroy();
+        hVertexBufferMemory[FrameIndex].Destroy();
+
+        TInfoStruct<VkBufferCreateInfo> bufferCreateInfo;
+        bufferCreateInfo->size = p->max_vertex_buffer;
+        bufferCreateInfo->usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+        bufferCreateInfo->sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+        if (false == hVertexBuffer[FrameIndex].Recreate(*pDevice, *pDevice, bufferCreateInfo)) {
+            DebugBreak();
+            return;
+        }
+
+        if (false == hVertexBufferMemory[FrameIndex].Recreate(*pDevice, hVertexBuffer[FrameIndex].GetMemoryAllocateInfo(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT))) {
+            DebugBreak();
+            return;
+        }
+
+        if (false == hVertexBuffer[FrameIndex].BindMemory(hVertexBufferMemory[FrameIndex], 0)) {
+            DebugBreak();
+            return;
+        }
+
+        VertexBufferSize[FrameIndex] = p->max_vertex_buffer;
+    }
+
+    if (hIndexBuffer[FrameIndex].IsNull() || IndexBufferSize[FrameIndex] < p->max_element_buffer)
+    {
+        hIndexBuffer[FrameIndex].Destroy();
+        hIndexBufferMemory[FrameIndex].Destroy();
+
+        TInfoStruct<VkBufferCreateInfo> bufferCreateInfo;
+        bufferCreateInfo->size = p->max_element_buffer;
+        bufferCreateInfo->usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+        bufferCreateInfo->sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+        if (false == hIndexBuffer[FrameIndex].Recreate(*pDevice, *pDevice, bufferCreateInfo)) {
+            DebugBreak();
+            return;
+        }
+
+        if (false == hIndexBufferMemory[FrameIndex].Recreate(*pDevice, hIndexBuffer[FrameIndex].GetMemoryAllocateInfo(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT))) {
+            DebugBreak();
+            return;
+        }
+
+        if (false == hIndexBuffer[FrameIndex].BindMemory(hIndexBufferMemory[FrameIndex], 0)) {
+            DebugBreak();
+            return;
+        }
+
+        IndexBufferSize[FrameIndex] = p->max_element_buffer;
+    }
+
+    {
+        /* convert from command queue into draw list and draw to screen */
+        void * vertices = nullptr;
+        void * elements = nullptr;
+
+        /* load vertices/elements directly into vertex/element buffer */
+        vertices = hVertexBufferMemory[FrameIndex].Map(0, VertexBufferSize[FrameIndex], 0);
+        elements = hIndexBufferMemory[FrameIndex].Map(0, IndexBufferSize[FrameIndex], 0);
+        {
+            /* fill convert configuration */
+            struct nk_convert_config config;
+            static const struct nk_draw_vertex_layout_element vertex_layout[] = {
+                { NK_VERTEX_POSITION, NK_FORMAT_FLOAT, NK_OFFSETOF(Vertex, position) },
+                { NK_VERTEX_TEXCOORD, NK_FORMAT_FLOAT, NK_OFFSETOF(Vertex, uv) },
+                { NK_VERTEX_COLOR, NK_FORMAT_R8G8B8A8, NK_OFFSETOF(Vertex, col) },
+                { NK_VERTEX_LAYOUT_END } };
+
+            memset(&config, 0, sizeof(config));
+            config.vertex_layout = vertex_layout;
+            config.vertex_size = sizeof(Vertex);
+            config.vertex_alignment = NK_ALIGNOF(Vertex);
+            config.null = NullTexture;
+            config.circle_segment_count = 22;
+            config.curve_segment_count = 22;
+            config.arc_segment_count = 22;
+            config.global_alpha = 1.0f;
+            config.shape_AA = p->aa;
+            config.line_AA = p->aa;
+
+            /* setup buffers to load vertices and elements */
+            {
+                nk_buffer vbuf, ebuf;
+                nk_buffer_init_fixed(&vbuf, vertices, (nk_size)p->max_vertex_buffer);
+                nk_buffer_init_fixed(&ebuf, elements, (nk_size)p->max_element_buffer);
+                nk_convert(&Context, &RenderCmds, &vbuf, &ebuf, &config);
+            }
+        }
+
+        VkMappedMemoryRange range[2] = {};
+        range[0].sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
+        range[0].memory = hVertexBufferMemory[FrameIndex];
+        range[0].size = VK_WHOLE_SIZE;
+        range[1].sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
+        range[1].memory = hIndexBufferMemory[FrameIndex];
+        range[1].size = VK_WHOLE_SIZE;
+
+        if (ResultHandle::Failed(vkFlushMappedMemoryRanges(*pDevice, 2, range))) {
+            DebugBreak();
+            return;
+        }
+
+        hVertexBufferMemory[FrameIndex].Unmap();
+        hIndexBufferMemory[FrameIndex].Unmap();
+    }
+
+    // Bind pipeline and descriptor sets:
+    {
+        VkDescriptorSet descSets[1] = { DescSet.hSets[0] };
+        vkCmdBindPipeline(*renderParams->pCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, hPipeline);
+        vkCmdBindDescriptorSets(*renderParams->pCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, hPipelineLayout, 0, 1, descSets, 0, NULL);
+    }
+
+    // Bind Vertex And Index Buffer:
+    {
+        VkBuffer vertexBuffers[1] = { hVertexBuffer[FrameIndex] };
+        VkDeviceSize vertexOffsets[1] = { 0 };
+        vkCmdBindVertexBuffers(*renderParams->pCmdBuffer, 0, 1, vertexBuffers, vertexOffsets);
+        vkCmdBindIndexBuffer(*renderParams->pCmdBuffer, hIndexBuffer[FrameIndex], 0, VK_INDEX_TYPE_UINT16);
+    }
+
+    // Setup viewport:
+    {
+        VkViewport viewport;
+        viewport.x = 0;
+        viewport.y = 0;
+        viewport.width = p->dims[0] * p->scale[0];
+        viewport.height = p->dims[1] * p->scale[1];
+        viewport.minDepth = 0.0f;
+        viewport.maxDepth = 1.0f;
+        vkCmdSetViewport(*renderParams->pCmdBuffer, 0, 1, &viewport);
+    }
+
+
+    // Setup scale and translation:
+    {
+        const float ortho[4][4] = {
+            { 2.0f / p->dims[0], 0.0f, 0.0f, 0.0f },
+            { 0.0f, -2.0f / p->dims[1], 0.0f, 0.0f },
+            { 0.0f, 0.0f, -1.0f, 0.0f },
+            { -1.0f, 1.0f, 0.0f, 1.0f },
+        };
+
+        vkCmdPushConstants(*renderParams->pCmdBuffer, hPipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(float [4][4]), ortho);
+    }
+
+    const nk_draw_command *cmd = nullptr;
+    uint32_t  offset = 0;
+    uint32_t vtx_offset = 0;
+
+    /* iterate over and execute each draw command */
+    nk_draw_foreach(cmd, &Context, &RenderCmds) {
+        if (!cmd->elem_count)
+            continue;
+
+        VkRect2D scissor;
+        scissor.offset.x = (cmd->clip_rect.x * p->scale[0]);
+        scissor.offset.y = ((p->dims[1] - (cmd->clip_rect.y + cmd->clip_rect.h)) * p->scale[1]);
+        scissor.extent.width = (cmd->clip_rect.w * p->scale[0]);
+        scissor.extent.height = (cmd->clip_rect.h * p->scale[1]);
+
+        vkCmdSetScissor(*renderParams->pCmdBuffer, 0, 1, &scissor);
+        vkCmdDrawIndexed(*renderParams->pCmdBuffer, cmd->elem_count, 1, offset, vtx_offset, 0);
+
+        offset += cmd->elem_count;
+    }
+
+    nk_clear(&Context);
 }
 
 void apemode::NuklearSdlVk::DeviceDestroy( ) {
@@ -146,13 +322,12 @@ void apemode::NuklearSdlVk::DeviceCreate( InitParametersBase* init_params ) {
             return;
         }
 
-        VkPushConstantRange pushConstants[ 1 ] = {};
-        pushConstants[ 0 ].stageFlags          = VK_SHADER_STAGE_VERTEX_BIT;
-        pushConstants[ 0 ].offset              = sizeof( float ) * 0;
-        pushConstants[ 0 ].size                = sizeof( float ) * 4;
+        VkPushConstantRange pushConstants[ 1 ];
+        apemode::ZeroMemory(pushConstants);
+        pushConstants[ 0 ].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+        pushConstants[ 0 ].size       = sizeof( float [4][4] );
 
         TInfoStruct< VkPipelineLayoutCreateInfo > pipelineLayoutCreateInfo;
-
         pipelineLayoutCreateInfo->setLayoutCount         = 1;
         pipelineLayoutCreateInfo->pSetLayouts            = descSetLayouts;
         pipelineLayoutCreateInfo->pushConstantRangeCount = 1;
@@ -186,10 +361,12 @@ void apemode::NuklearSdlVk::DeviceCreate( InitParametersBase* init_params ) {
     inputAttributeDesc[ 0 ].binding  = bindingDescs[ 0 ].binding;
     inputAttributeDesc[ 0 ].format   = VK_FORMAT_R32G32_SFLOAT;
     inputAttributeDesc[ 0 ].offset   = ( size_t )( &( (Vertex*) 0 )->position );
+
     inputAttributeDesc[ 1 ].location = 1;
     inputAttributeDesc[ 1 ].binding  = bindingDescs[ 0 ].binding;
     inputAttributeDesc[ 1 ].format   = VK_FORMAT_R32G32_SFLOAT;
     inputAttributeDesc[ 1 ].offset   = ( size_t )( &( (Vertex*) 0 )->uv );
+
     inputAttributeDesc[ 2 ].location = 2;
     inputAttributeDesc[ 2 ].binding  = bindingDescs[ 0 ].binding;
     inputAttributeDesc[ 2 ].format   = VK_FORMAT_R8G8B8A8_UNORM;

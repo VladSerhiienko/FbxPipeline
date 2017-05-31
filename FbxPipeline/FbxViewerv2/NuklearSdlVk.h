@@ -45,6 +45,10 @@ namespace apemode {
         TDispatchableHandle< VkDeviceMemory >        hFontImgMemory;
         TDispatchableHandle< VkBuffer >              hUploadBuffer;
         TDispatchableHandle< VkDeviceMemory >        hUploadBufferMemory;
+        TDispatchableHandle< VkBuffer >              hVertexBuffer[2];
+        TDispatchableHandle< VkDeviceMemory >        hVertexBufferMemory[2];
+        TDispatchableHandle< VkBuffer >              hIndexBuffer[2];
+        TDispatchableHandle< VkDeviceMemory >        hIndexBufferMemory[2];
 
         //VkRenderPass           RenderPass              = VK_NULL_HANDLE;
         //VkPipelineCache        PipelineCache           = VK_NULL_HANDLE;
