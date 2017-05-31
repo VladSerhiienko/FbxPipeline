@@ -10,7 +10,7 @@
 /// RenderTargets
 /// -------------------------------------------------------------------------------------------------------------------
 
-apemode::RenderTargets::RenderTargets()
+apemodevk::RenderTargets::RenderTargets()
 {
     WriteFrame = 0;
     ReadFrame  = kFrameMaxCount - 1;
@@ -24,14 +24,14 @@ apemode::RenderTargets::RenderTargets()
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-apemode::RenderTargets::~RenderTargets()
+apemodevk::RenderTargets::~RenderTargets()
 {
     _Aux_DebugTraceFunc;
 }
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-bool apemode::RenderTargets::RecreateResourcesFor (GraphicsDevice & InGraphicsNode,
+bool apemodevk::RenderTargets::RecreateResourcesFor (GraphicsDevice & InGraphicsNode,
                                                 VkSwapchainKHR   InSwapchainHandle,
                                                 VkFormat         InColorFmt,
                                                 uint32_t         InColorWidth,
@@ -143,7 +143,7 @@ bool apemode::RenderTargets::RecreateResourcesFor (GraphicsDevice & InGraphicsNo
     {
         static const uint32_t kDefaultSubpassId = 0;
 
-        apemode::RenderPassBuilder RenderPassBuilder;
+        apemodevk::RenderPassBuilder RenderPassBuilder;
         RenderPassBuilder.Reset (2, 0, 1);
         auto ColorId = RenderPassBuilder.AddAttachment (InColorFmt,
                                                         VK_SAMPLE_COUNT_1_BIT,
@@ -170,7 +170,7 @@ bool apemode::RenderTargets::RecreateResourcesFor (GraphicsDevice & InGraphicsNo
 
         pRenderPass = RenderPassBuilder.RecreateRenderPass (InGraphicsNode);
 
-        apemode::FramebufferBuilder FramebufferBuilder;
+        apemodevk::FramebufferBuilder FramebufferBuilder;
         for (uint32_t FrameIdx = 0; FrameIdx < FrameCount; FrameIdx++)
         {
             for (uint32_t AttIdx = 0; AttIdx < AttachmentCount; AttIdx++)
@@ -198,7 +198,7 @@ bool apemode::RenderTargets::RecreateResourcesFor (GraphicsDevice & InGraphicsNo
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-void apemode::RenderTargets::SetRenderTargetClearValues (uint32_t                  InOffset,
+void apemodevk::RenderTargets::SetRenderTargetClearValues (uint32_t                  InOffset,
                                                       uint32_t                  InClearValueCount,
                                                       VkClearColorValue const * InClearValues)
 {
@@ -224,7 +224,7 @@ void apemode::RenderTargets::SetRenderTargetClearValues (uint32_t               
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-void apemode::RenderTargets::SetDepthStencilClearValue (
+void apemodevk::RenderTargets::SetDepthStencilClearValue (
     VkClearDepthStencilValue DepthStencilClearValue)
 {
     for (uint32_t CurrentFrame = 0; CurrentFrame < FrameCount; CurrentFrame++)
@@ -235,33 +235,33 @@ void apemode::RenderTargets::SetDepthStencilClearValue (
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-void apemode::RenderTargets::AdvanceFrameCounters ()
+void apemodevk::RenderTargets::AdvanceFrameCounters ()
 {
     ReadFrame  = WriteFrame;
     WriteFrame = (WriteFrame + 1) % FrameCount;
 }
 
-uint32_t apemode::RenderTargets::GetWriteFrame () const
+uint32_t apemodevk::RenderTargets::GetWriteFrame () const
 {
     return WriteFrame;
 }
 
-uint32_t apemode::RenderTargets::GetReadFrame () const
+uint32_t apemodevk::RenderTargets::GetReadFrame () const
 {
     return ReadFrame;
 }
 
-uint32_t apemode::RenderTargets::GetAttachmentCount () const
+uint32_t apemodevk::RenderTargets::GetAttachmentCount () const
 {
     return AttachmentCount;
 }
 
-apemode::RenderPass const * apemode::RenderTargets::GetRenderPass () const
+apemodevk::RenderPass const * apemodevk::RenderTargets::GetRenderPass () const
 {
     return pRenderPass;
 }
 
-apemode::Framebuffer const * apemode::RenderTargets::GetWriteFramebuffer() const
+apemodevk::Framebuffer const * apemodevk::RenderTargets::GetWriteFramebuffer() const
 {
     return ppFramebuffers[WriteFrame];
 }
@@ -270,7 +270,7 @@ apemode::Framebuffer const * apemode::RenderTargets::GetWriteFramebuffer() const
 /// RenderTargets BeginEndScope
 /// -------------------------------------------------------------------------------------------------------------------
 
-apemode::RenderTargets::BeginEndScope::BeginEndScope (CommandBuffer &   CmdBuffer,
+apemodevk::RenderTargets::BeginEndScope::BeginEndScope (CommandBuffer &   CmdBuffer,
                                                    RenderTargets & RenderTargets)
     : AssociatedCmdList (CmdBuffer)
     , AssociatedRenderTargets (RenderTargets)
@@ -305,7 +305,7 @@ apemode::RenderTargets::BeginEndScope::BeginEndScope (CommandBuffer &   CmdBuffe
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-apemode::RenderTargets::BeginEndScope::~BeginEndScope ()
+apemodevk::RenderTargets::BeginEndScope::~BeginEndScope ()
 {
     AssociatedCmdList.pRenderPass = nullptr;
     AssociatedCmdList.pFramebuffer = nullptr;

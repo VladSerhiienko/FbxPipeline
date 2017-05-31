@@ -20,11 +20,11 @@ union ExposedSwapchainAttachment {
 /// RenderPassBuilder
 /// -------------------------------------------------------------------------------------------------------------------
 
-apemode::RenderPassBuilder::RenderPassBuilder()
+apemodevk::RenderPassBuilder::RenderPassBuilder()
 {
 }
 
-void apemode::RenderPassBuilder::Reset (uint32_t MaxAttachments,
+void apemodevk::RenderPassBuilder::Reset (uint32_t MaxAttachments,
                                      uint32_t MaxDependencies,
                                      uint32_t MaxSwaphchainAttachments)
 {
@@ -36,8 +36,8 @@ void apemode::RenderPassBuilder::Reset (uint32_t MaxAttachments,
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-apemode::RenderPassDescription::SubpassDescription &
-apemode::RenderPassBuilder::GetOrCreateSubpass(uint32_t SubpassId)
+apemodevk::RenderPassDescription::SubpassDescription &
+apemodevk::RenderPassBuilder::GetOrCreateSubpass(uint32_t SubpassId)
 {
     auto const SubpassIt    = TemporaryDesc.SubpassDescriptions.find(SubpassId);
     auto const SubpassItEnd = TemporaryDesc.SubpassDescriptions.end();
@@ -55,7 +55,7 @@ apemode::RenderPassBuilder::GetOrCreateSubpass(uint32_t SubpassId)
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-void apemode::RenderPassBuilder::ResetSubpass (uint32_t SubpassId,
+void apemodevk::RenderPassBuilder::ResetSubpass (uint32_t SubpassId,
                                             uint32_t MaxColors,
                                             uint32_t MaxInputs,
                                             uint32_t MaxPreserves)
@@ -69,7 +69,7 @@ void apemode::RenderPassBuilder::ResetSubpass (uint32_t SubpassId,
     Subpass.DepthStencilRef.layout = VK_IMAGE_LAYOUT_MAX_ENUM;
 }
 
-uint32_t apemode::RenderPassBuilder::AddAttachment (VkFormat            ImgFmt,
+uint32_t apemodevk::RenderPassBuilder::AddAttachment (VkFormat            ImgFmt,
                                                  VkSampleCountFlags  SampleCount,
                                                  VkImageLayout       ImgInitialLayout,
                                                  VkImageLayout       ImgFinalLayout,
@@ -106,7 +106,7 @@ uint32_t apemode::RenderPassBuilder::AddAttachment (VkFormat            ImgFmt,
     return OutId;
 }
 
-uint32_t apemode::RenderPassBuilder::AddAttachment (VkFormat            ImgFmt,
+uint32_t apemodevk::RenderPassBuilder::AddAttachment (VkFormat            ImgFmt,
                                                  VkSampleCountFlags  ImgSampleCount,
                                                  VkImageLayout       ImgInitialLayout,
                                                  VkImageLayout       ImgFinalLayout,
@@ -132,13 +132,13 @@ uint32_t apemode::RenderPassBuilder::AddAttachment (VkFormat            ImgFmt,
     return OutId;
 }
 
-void apemode::RenderPassBuilder::AddColorToSubpass (uint32_t      SubpassId,
+void apemodevk::RenderPassBuilder::AddColorToSubpass (uint32_t      SubpassId,
                                                  uint32_t      AttachmentId,
                                                  VkImageLayout ImgSubpassLayout)
 {
     auto & Subpass    = GetOrCreateSubpass (SubpassId);
-    auto & ColorRef   = apemode::PushBackAndGet( Subpass.ColorRefs);
-    auto & ResolveRef = apemode::PushBackAndGet(Subpass.ResolveRefs);
+    auto & ColorRef   = apemodevk::PushBackAndGet( Subpass.ColorRefs);
+    auto & ResolveRef = apemodevk::PushBackAndGet(Subpass.ResolveRefs);
 
     ColorRef.attachment = AttachmentId;
     ColorRef.layout     = ImgSubpassLayout;
@@ -147,15 +147,15 @@ void apemode::RenderPassBuilder::AddColorToSubpass (uint32_t      SubpassId,
     ResolveRef.layout     = VK_IMAGE_LAYOUT_UNDEFINED;
 }
 
-void apemode::RenderPassBuilder::AddColorToSubpass (uint32_t      SubpassId,
+void apemodevk::RenderPassBuilder::AddColorToSubpass (uint32_t      SubpassId,
                                                  uint32_t      AttachmentId,
                                                  VkImageLayout ImgSubpassLayout,
                                                  uint32_t      ResolveAttachmentId,
                                                  VkImageLayout ResolveImgSubpassLayout)
 {
     auto & Subpass    = GetOrCreateSubpass (SubpassId);
-    auto & ColorRef   = apemode::PushBackAndGet(Subpass.ColorRefs);
-    auto & ResolveRef = apemode::PushBackAndGet(Subpass.ResolveRefs);
+    auto & ColorRef   = apemodevk::PushBackAndGet(Subpass.ColorRefs);
+    auto & ResolveRef = apemodevk::PushBackAndGet(Subpass.ResolveRefs);
 
     ColorRef.attachment = AttachmentId;
     ColorRef.layout     = ImgSubpassLayout;
@@ -164,18 +164,18 @@ void apemode::RenderPassBuilder::AddColorToSubpass (uint32_t      SubpassId,
     ResolveRef.layout     = ResolveImgSubpassLayout;
 }
 
-void apemode::RenderPassBuilder::AddInputToSubpass (uint32_t      SubpassId,
+void apemodevk::RenderPassBuilder::AddInputToSubpass (uint32_t      SubpassId,
                                                  uint32_t      AttachmentId,
                                                  VkImageLayout ImgSubpassLayout)
 {
     auto & Subpass  = GetOrCreateSubpass (SubpassId);
-    auto & InputRef = apemode::PushBackAndGet(Subpass.InputRefs);
+    auto & InputRef = apemodevk::PushBackAndGet(Subpass.InputRefs);
 
     InputRef.attachment = AttachmentId;
     InputRef.layout     = ImgSubpassLayout;
 }
 
-void apemode::RenderPassBuilder::SetDepthToSubpass (uint32_t      SubpassId,
+void apemodevk::RenderPassBuilder::SetDepthToSubpass (uint32_t      SubpassId,
                                                  uint32_t      AttachmentId,
                                                  VkImageLayout ImgSubpassLayout)
 {
@@ -185,14 +185,14 @@ void apemode::RenderPassBuilder::SetDepthToSubpass (uint32_t      SubpassId,
     Subpass.DepthStencilRef.layout     = ImgSubpassLayout;
 }
 
-void apemode::RenderPassBuilder::PreserveInSubpass (uint32_t SubpassId, uint32_t AttachmentId)
+void apemodevk::RenderPassBuilder::PreserveInSubpass (uint32_t SubpassId, uint32_t AttachmentId)
 {
     auto & Subpass = GetOrCreateSubpass (SubpassId);
 
     Subpass.PreserveIndices.push_back (AttachmentId);
 }
 
-void apemode::RenderPassBuilder::SetSubpassDependency(uint32_t             SrcSubpassId,
+void apemodevk::RenderPassBuilder::SetSubpassDependency(uint32_t             SrcSubpassId,
                                                    VkPipelineStageFlags SrcSubpassStage,
                                                    VkAccessFlags        SrcSubpassAccess,
                                                    uint32_t             DstSubpassId,
@@ -200,7 +200,7 @@ void apemode::RenderPassBuilder::SetSubpassDependency(uint32_t             SrcSu
                                                    VkAccessFlags        DstSubpassAccess,
                                                    bool                 bDependentByRegion)
 {
-    auto & SubpassDependency = apemode::PushBackAndGet(TemporaryDesc.SubpassDependencies);
+    auto & SubpassDependency = apemodevk::PushBackAndGet(TemporaryDesc.SubpassDependencies);
 
     SubpassDependency               = TInfoStruct<VkSubpassDependency> ();
     SubpassDependency.srcSubpass    = SrcSubpassId;
@@ -214,10 +214,10 @@ void apemode::RenderPassBuilder::SetSubpassDependency(uint32_t             SrcSu
         SubpassDependency.dependencyFlags |= VK_DEPENDENCY_BY_REGION_BIT;
 }
 
-apemode::RenderPass const *
-apemode::RenderPassBuilder::RecreateRenderPass(apemode::GraphicsDevice & GraphicsNode)
+apemodevk::RenderPass const *
+apemodevk::RenderPassBuilder::RecreateRenderPass(apemodevk::GraphicsDevice & GraphicsNode)
 {
-    using SubpassIdPair = std::pair<uint32_t, apemode::RenderPassDescription::SubpassDescription::LkPtr>;
+    using SubpassIdPair = std::pair<uint32_t, apemodevk::RenderPassDescription::SubpassDescription::LkPtr>;
 
     if (GraphicsNode.IsValid() && VerifySubpasses())
     {
@@ -253,11 +253,11 @@ apemode::RenderPassBuilder::RecreateRenderPass(apemode::GraphicsDevice & Graphic
 
         //TODO Fill render pass create info...
 
-        apemode::AliasStructs (TemporaryDesc.Attachments,
+        apemodevk::AliasStructs (TemporaryDesc.Attachments,
                            TemporaryDesc.Desc->pAttachments,
                            TemporaryDesc.Desc->attachmentCount);
 
-        apemode::AliasStructs(Subpasses,
+        apemodevk::AliasStructs(Subpasses,
                           TemporaryDesc.Desc->pSubpasses,
                           TemporaryDesc.Desc->subpassCount);
 
@@ -270,7 +270,7 @@ apemode::RenderPassBuilder::RecreateRenderPass(apemode::GraphicsDevice & Graphic
         TDispatchableHandle<VkRenderPass> NewHandle;
         if (NewHandle.Recreate(GraphicsNode, TemporaryDesc.Desc))
         {
-            auto pRenderPass = new apemode::RenderPass();
+            auto pRenderPass = new apemodevk::RenderPass();
             pRenderPass->Handle.Swap(NewHandle);
             pRenderPass->Hash          = Hash;
             pRenderPass->pNode = &GraphicsNode;
@@ -287,7 +287,7 @@ apemode::RenderPassBuilder::RecreateRenderPass(apemode::GraphicsDevice & Graphic
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-bool apemode::RenderPassBuilder::VerifySubpasses() const
+bool apemodevk::RenderPassBuilder::VerifySubpasses() const
 {
     if (!TemporaryDesc.SubpassDescriptions.empty())
     {
@@ -310,27 +310,27 @@ bool apemode::RenderPassBuilder::VerifySubpasses() const
 /// RenderPassDescription SubpassDescription
 /// -------------------------------------------------------------------------------------------------------------------
 
-apemode::RenderPassDescription::SubpassDescription::SubpassDescription ( uint32_t Id ) : Id ( Id )
+apemodevk::RenderPassDescription::SubpassDescription::SubpassDescription ( uint32_t Id ) : Id ( Id )
 {
     DepthStencilRef.layout = VK_IMAGE_LAYOUT_MAX_ENUM;
 }
 
-bool apemode::RenderPassDescription::SubpassDescription::HasDepthStencilRef () const
+bool apemodevk::RenderPassDescription::SubpassDescription::HasDepthStencilRef () const
 {
     return DepthStencilRef.layout == VK_IMAGE_LAYOUT_MAX_ENUM;
 }
 
-apemode::RenderPassDescription::SubpassDescription::UqPtr
-apemode::RenderPassDescription::SubpassDescription::MakeNewUnique (uint32_t SubpassId)
+apemodevk::RenderPassDescription::SubpassDescription::UqPtr
+apemodevk::RenderPassDescription::SubpassDescription::MakeNewUnique (uint32_t SubpassId)
 {
-    using Deleter = apemode::RenderPassDescription::SubpassDescription::UqPtr::deleter_type;
+    using Deleter = apemodevk::RenderPassDescription::SubpassDescription::UqPtr::deleter_type;
     return std::make_unique<SubpassDescription> (SubpassId);
 }
 
-apemode::RenderPassDescription::SubpassDescription::LkPtr
-apemode::RenderPassDescription::SubpassDescription::MakeNewLinked(uint32_t SubpassId)
+apemodevk::RenderPassDescription::SubpassDescription::LkPtr
+apemodevk::RenderPassDescription::SubpassDescription::MakeNewLinked(uint32_t SubpassId)
 {
-    using Deleter = apemode::RenderPassDescription::SubpassDescription::UqPtr::deleter_type;
+    using Deleter = apemodevk::RenderPassDescription::SubpassDescription::UqPtr::deleter_type;
     return std::make_shared<SubpassDescription> (SubpassId);
 }
 
@@ -338,8 +338,8 @@ apemode::RenderPassDescription::SubpassDescription::MakeNewLinked(uint32_t Subpa
 /// RenderPassManager PrivateContent
 /// -------------------------------------------------------------------------------------------------------------------
 
-struct apemode::RenderPassManager::PrivateContent : public apemode::ScalableAllocPolicy,
-                                                 public apemode::NoCopyAssignPolicy
+struct apemodevk::RenderPassManager::PrivateContent : public apemodevk::ScalableAllocPolicy,
+                                                 public apemodevk::NoCopyAssignPolicy
 {
     using HashType         = apemode::CityHash64Wrapper::ValueType;
     using RenderPassLookup = std::map<HashType, std::unique_ptr<RenderPass> >;
@@ -352,12 +352,12 @@ struct apemode::RenderPassManager::PrivateContent : public apemode::ScalableAllo
 /// RenderPassDescription
 /// -------------------------------------------------------------------------------------------------------------------
 
-apemode::RenderPassDescription::RenderPassDescription () : Hash (0)
+apemodevk::RenderPassDescription::RenderPassDescription () : Hash (0)
 {
     Reset ();
 }
 
-void apemode::RenderPassDescription::Reset ()
+void apemodevk::RenderPassDescription::Reset ()
 {
     Hash = 0;
     Desc.ZeroMemory ();
@@ -367,7 +367,7 @@ void apemode::RenderPassDescription::Reset ()
     SwapchainAttachmentHashes.clear ();
 }
 
-uint64_t apemode::RenderPassDescription::UpdateHash()
+uint64_t apemodevk::RenderPassDescription::UpdateHash()
 {
     VkRenderPassCreateInfo PartialDesc = Desc;
 
@@ -454,7 +454,7 @@ uint64_t apemode::RenderPassDescription::UpdateHash()
     return HashWrapper;
 }
 
-bool apemode::RenderPassDescription::GetSwapchainAttachmentInfo (uint32_t   AttachmentId,
+bool apemodevk::RenderPassDescription::GetSwapchainAttachmentInfo (uint32_t   AttachmentId,
                                                               uint32_t & OutSwapchainId) const
 {
     if (!SwapchainAttachmentHashes.empty ())
@@ -474,10 +474,10 @@ bool apemode::RenderPassDescription::GetSwapchainAttachmentInfo (uint32_t   Atta
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-apemode::RenderPassDescription const *
-apemode::RenderPassDescription::MakeNewFromTemporary(RenderPassDescription const & TemporaryDesc)
+apemodevk::RenderPassDescription const *
+apemodevk::RenderPassDescription::MakeNewFromTemporary(RenderPassDescription const & TemporaryDesc)
 {
-    if (auto pNewDesc = new apemode::RenderPassDescription())
+    if (auto pNewDesc = new apemodevk::RenderPassDescription())
     {
         pNewDesc->Hash = TemporaryDesc.Hash;
 
@@ -493,7 +493,7 @@ apemode::RenderPassDescription::MakeNewFromTemporary(RenderPassDescription const
                          TemporaryDesc.Attachments.end (),
                          std::back_inserter (pNewDesc->Attachments));
 
-            apemode::AliasStructs (pNewDesc->Attachments,
+            apemodevk::AliasStructs (pNewDesc->Attachments,
                                pNewDesc->Desc->pAttachments,
                                pNewDesc->Desc->attachmentCount);
         }
@@ -519,7 +519,7 @@ apemode::RenderPassDescription::MakeNewFromTemporary(RenderPassDescription const
                          TemporaryDesc.SubpassDependencies.end (),
                          std::back_inserter (pNewDesc->SubpassDependencies));
 
-            apemode::AliasStructs (pNewDesc->SubpassDependencies,
+            apemodevk::AliasStructs (pNewDesc->SubpassDependencies,
                                pNewDesc->Desc->pDependencies,
                                pNewDesc->Desc->dependencyCount);
         }
@@ -543,7 +543,7 @@ apemode::RenderPassDescription::MakeNewFromTemporary(RenderPassDescription const
 /// RenderPassManager
 /// -------------------------------------------------------------------------------------------------------------------
 
-void apemode::RenderPassManager::AddNewRenderPassObject(apemode::RenderPass & NewRenderPass)
+void apemodevk::RenderPassManager::AddNewRenderPassObject(apemodevk::RenderPass & NewRenderPass)
 {
     std::lock_guard<std::mutex> LockGuard (pContent->Lock);
 
@@ -556,18 +556,18 @@ void apemode::RenderPassManager::AddNewRenderPassObject(apemode::RenderPass & Ne
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-apemode::RenderPassManager::RenderPassManager()
+apemodevk::RenderPassManager::RenderPassManager()
     : pContent(new PrivateContent())
 {
 }
 
-apemode::RenderPassManager::~RenderPassManager()
+apemodevk::RenderPassManager::~RenderPassManager()
 {
-    apemode::TSafeDeleteObj (pContent);
+    apemodevk::TSafeDeleteObj (pContent);
 }
 
-apemode::RenderPass const *
-apemode::RenderPassManager::TryGetRenderPassObjectByHash(uint64_t Hash)
+apemodevk::RenderPass const *
+apemodevk::RenderPassManager::TryGetRenderPassObjectByHash(uint64_t Hash)
 {
     std::lock_guard<std::mutex> LockGuard (pContent->Lock);
 
@@ -578,11 +578,11 @@ apemode::RenderPassManager::TryGetRenderPassObjectByHash(uint64_t Hash)
     return nullptr;
 }
 
-apemode::RenderPass::RenderPass () : pNode (nullptr), pDesc (nullptr), Hash (0)
+apemodevk::RenderPass::RenderPass () : pNode (nullptr), pDesc (nullptr), Hash (0)
 {
 }
 
-apemode::RenderPass::operator VkRenderPass () const
+apemodevk::RenderPass::operator VkRenderPass () const
 {
     return Handle;
 }

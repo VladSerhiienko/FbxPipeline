@@ -8,35 +8,35 @@
 #define _Get_hspv_bytecode_length(Name) _Get_array_length(_Get_hspv_bytecode(Name))
 #define _Get_hspv(Name) _Get_hspv_bytecode(Name), _Get_hspv_bytecode_length(Name)
 
-struct apemode::ShaderManager::PrivateContent : public apemode::ScalableAllocPolicy,
-                                             public apemode::NoCopyAssignPolicy
+struct apemodevk::ShaderManager::PrivateContent : public apemodevk::ScalableAllocPolicy,
+                                             public apemodevk::NoCopyAssignPolicy
 {
 };
 
-apemode::ShaderManager::ShaderManager () : pImpl (new PrivateContent ())
+apemodevk::ShaderManager::ShaderManager () : pImpl (new PrivateContent ())
 {
 }
 
-apemode::ShaderManager::~ShaderManager ()
+apemodevk::ShaderManager::~ShaderManager ()
 {
-    apemode::TSafeDeleteObj (pImpl);
+    apemodevk::TSafeDeleteObj (pImpl);
 }
 
-apemode::TDispatchableHandle<VkShaderModule> &&
-apemode::ShaderManager::GetShaderModule (apemode::GraphicsDevice & GraphicsNode,
+apemodevk::TDispatchableHandle<VkShaderModule> &&
+apemodevk::ShaderManager::GetShaderModule (apemodevk::GraphicsDevice & GraphicsNode,
                                       ShaderBytecode const & Bytecode)
 {
-    apemode::TInfoStruct<VkShaderModuleCreateInfo> ShaderModuleDesc;
+    apemodevk::TInfoStruct<VkShaderModuleCreateInfo> ShaderModuleDesc;
     ShaderModuleDesc->pCode    = reinterpret_cast<uint32_t const *> (Bytecode.Bytecode.data ());
     ShaderModuleDesc->codeSize = Bytecode.Bytecode.size ();
 
-    apemode::TDispatchableHandle<VkShaderModule> hShaderModule;
+    apemodevk::TDispatchableHandle<VkShaderModule> hShaderModule;
     hShaderModule.Recreate (GraphicsNode, ShaderModuleDesc);
 
     return std::move (hShaderModule);
 }
 
-apemode::ShaderReflection const * apemode::ShaderManager::Reflect (apemode::GraphicsDevice & GraphicsNode,
+apemodevk::ShaderReflection const * apemodevk::ShaderManager::Reflect (apemodevk::GraphicsDevice & GraphicsNode,
                                                              ShaderBytecode const & Bytecode)
 {
     return nullptr;

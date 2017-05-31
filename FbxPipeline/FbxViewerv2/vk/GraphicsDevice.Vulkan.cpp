@@ -20,32 +20,38 @@
 /// GraphicsDevice PrivateContent
 /// -------------------------------------------------------------------------------------------------------------------
 
-apemode::GraphicsDevice::NativeLayerWrapper& apemode::GraphicsDevice::GetUnnamedLayer( ) {
+apemodevk::GraphicsDevice::NativeLayerWrapper& apemodevk::GraphicsDevice::GetUnnamedLayer( ) {
     _Game_engine_Assert( LayerWrappers.front( ).IsUnnamedLayer( ), "vkEnumerateInstanceExtensionProperties failed." );
     return LayerWrappers.front( );
 }
 
-bool apemode::GraphicsDevice::SupportsGraphics( uint32_t QueueFamilyId ) {
+bool apemodevk::GraphicsDevice::SupportsGraphics( uint32_t QueueFamilyId ) const {
     _Game_engine_Assert( QueueFamilyId < QueueProps.size( ), "Out of range." );
-    return apemode::HasFlagEql( QueueProps[ QueueFamilyId ]->queueFlags, VK_QUEUE_GRAPHICS_BIT );
+    return apemodevk::HasFlagEql( QueueProps[ QueueFamilyId ]->queueFlags, VK_QUEUE_GRAPHICS_BIT );
 }
 
-bool apemode::GraphicsDevice::SupportsCompute( uint32_t QueueFamilyId ) {
+bool apemodevk::GraphicsDevice::SupportsCompute( uint32_t QueueFamilyId ) const {
     _Game_engine_Assert( QueueFamilyId < QueueProps.size( ), "Out of range." );
-    return apemode::HasFlagEql( QueueProps[ QueueFamilyId ]->queueFlags, VK_QUEUE_COMPUTE_BIT );
+    return apemodevk::HasFlagEql( QueueProps[ QueueFamilyId ]->queueFlags, VK_QUEUE_COMPUTE_BIT );
 }
 
-bool apemode::GraphicsDevice::SupportsSparseBinding( uint32_t QueueFamilyId ) {
+bool apemodevk::GraphicsDevice::SupportsSparseBinding( uint32_t QueueFamilyId ) const {
     _Game_engine_Assert( QueueFamilyId < QueueProps.size( ), "Out of range." );
-    return apemode::HasFlagEql( QueueProps[ QueueFamilyId ]->queueFlags, VK_QUEUE_SPARSE_BINDING_BIT );
+    return apemodevk::HasFlagEql( QueueProps[ QueueFamilyId ]->queueFlags, VK_QUEUE_SPARSE_BINDING_BIT );
 }
 
-bool apemode::GraphicsDevice::SupportsTransfer( uint32_t QueueFamilyId ) {
+bool apemodevk::GraphicsDevice::SupportsTransfer( uint32_t QueueFamilyId ) const {
     _Game_engine_Assert( QueueFamilyId < QueueProps.size( ), "Out of range." );
-    return apemode::HasFlagEql( QueueProps[ QueueFamilyId ]->queueFlags, VK_QUEUE_TRANSFER_BIT );
+    return apemodevk::HasFlagEql( QueueProps[ QueueFamilyId ]->queueFlags, VK_QUEUE_TRANSFER_BIT );
 }
 
-bool apemode::GraphicsManager::NativeLayerWrapper::IsValidDeviceLayer( ) const {
+bool apemodevk::GraphicsDevice::SupportsPresenting( uint32_t QueueFamilyId, VkSurfaceKHR hSurface ) const {
+    VkBool32 bIsSupported = false;
+    const auto eSupport = vkGetPhysicalDeviceSurfaceSupportKHR( *this, QueueFamilyId, hSurface, &bIsSupported );
+    return ResultHandle::Succeeded( eSupport ) && ResultHandle::Succeeded( bIsSupported );
+}
+
+bool apemodevk::GraphicsManager::NativeLayerWrapper::IsValidDeviceLayer( ) const {
     if ( IsUnnamedLayer( ) ) {
         auto const KnownExtensionBeginIt = Vulkan::KnownDeviceExtensions;
         auto const KnownExtensionEndIt   = Vulkan::KnownDeviceExtensions + Vulkan::KnownDeviceExtensionCount;
@@ -73,7 +79,7 @@ bool apemode::GraphicsManager::NativeLayerWrapper::IsValidDeviceLayer( ) const {
     return true;
 }
 
-bool apemode::GraphicsDevice::ScanDeviceQueues( ) {
+bool apemodevk::GraphicsDevice::ScanDeviceQueues( ) {
     uint32_t QueuesFound = 0;
     vkGetPhysicalDeviceQueueFamilyProperties( AdapterHandle, &QueuesFound, NULL );
 
@@ -91,7 +97,7 @@ bool apemode::GraphicsDevice::ScanDeviceQueues( ) {
         uint32_t QueuePrioritiesAssigned = 0;
         QueuePrioritiesStorage.resize( TotalQueuePrioritiesCount );
         std::for_each( QueueProps.begin( ), QueueProps.end( ), [&]( VkQueueFamilyProperties& QueueProp ) {
-            auto& QueueReq             = apemode::PushBackAndGet( QueueReqs );
+            auto& QueueReq             = apemodevk::PushBackAndGet( QueueReqs );
             QueueReq->pNext            = NULL;
             QueueReq->queueFamilyIndex = static_cast< uint32_t >( std::distance( QueueProps.data( ), &QueueProp ) );
             QueueReq->queueCount       = QueueProp.queueCount;
@@ -104,7 +110,7 @@ bool apemode::GraphicsDevice::ScanDeviceQueues( ) {
     return true;
 }
 
-bool apemode::GraphicsDevice::ScanDeviceLayerProperties( ) {
+bool apemodevk::GraphicsDevice::ScanDeviceLayerProperties( ) {
     ResultHandle ErrorHandle;
 
     uint32_t ExtPropCount            = 0;
@@ -125,7 +131,7 @@ bool apemode::GraphicsDevice::ScanDeviceLayerProperties( ) {
     return false;
 }
 
-bool apemode::GraphicsDevice::ScanFormatProperties( ) {
+bool apemodevk::GraphicsDevice::ScanFormatProperties( ) {
     VkFormat NativeFormatIt = VK_FORMAT_UNDEFINED;
     for ( ; NativeFormatIt < VK_FORMAT_RANGE_SIZE; ) {
         const VkFormat NativeFormat = NativeFormatIt;
@@ -136,9 +142,11 @@ bool apemode::GraphicsDevice::ScanFormatProperties( ) {
     return true;
 }
 
-bool apemode::GraphicsDevice::RecreateResourcesFor( VkPhysicalDevice AdapterHandle, GraphicsManager& GraphicsEcosystem ) {
+bool apemodevk::GraphicsDevice::RecreateResourcesFor( VkPhysicalDevice InAdapterHandle, GraphicsManager& GraphicsEcosystem ) {
     pGraphicsEcosystem = &GraphicsEcosystem;
     _Game_engine_Assert( Args != nullptr, "Ecosystem is required in case of Vulkan." );
+
+    AdapterHandle = InAdapterHandle;
 
     // Physical device is required to create a related logical device.
     // Likewise, vulkan instance is required for physical device.
@@ -181,40 +189,40 @@ bool apemode::GraphicsDevice::RecreateResourcesFor( VkPhysicalDevice AdapterHand
 /// GraphicsDevice
 /// -------------------------------------------------------------------------------------------------------------------
 
-std::unique_ptr< apemode::GraphicsDevice > apemode::GraphicsDevice::MakeNewUnique( ) {
+std::unique_ptr< apemodevk::GraphicsDevice > apemodevk::GraphicsDevice::MakeNewUnique( ) {
     return std::unique_ptr< GraphicsDevice >( new GraphicsDevice( ) );
 }
 
-std::unique_ptr< apemode::GraphicsDevice > apemode::GraphicsDevice::MakeNullUnique( ) {
+std::unique_ptr< apemodevk::GraphicsDevice > apemodevk::GraphicsDevice::MakeNullUnique( ) {
     return std::unique_ptr< GraphicsDevice >( nullptr );
 }
 
-apemode::GraphicsDevice::GraphicsDevice( ) : pGraphicsEcosystem( nullptr ) {
+apemodevk::GraphicsDevice::GraphicsDevice( ) : pGraphicsEcosystem( nullptr ) {
     //_Game_engine_Assert(pContent != nullptr, "Out of system memory");
 }
 
-apemode::GraphicsDevice::~GraphicsDevice( ) {
-    // apemode::TSafeDeleteObj(pContent);
+apemodevk::GraphicsDevice::~GraphicsDevice( ) {
+    // apemodevk::TSafeDeleteObj(pContent);
     _Aux_DebugTraceFunc;
 }
 
-apemode::GraphicsDevice::operator VkDevice( ) const {
+apemodevk::GraphicsDevice::operator VkDevice( ) const {
     return LogicalDeviceHandle;
 }
 
-apemode::GraphicsDevice::operator VkPhysicalDevice( ) const {
+apemodevk::GraphicsDevice::operator VkPhysicalDevice( ) const {
     return AdapterHandle;
 }
 
-apemode::GraphicsDevice::operator VkInstance( ) const {
+apemodevk::GraphicsDevice::operator VkInstance( ) const {
     return pGraphicsEcosystem->InstanceHandle;
 }
 
-bool apemode::GraphicsDevice::IsValid( ) const {
+bool apemodevk::GraphicsDevice::IsValid( ) const {
     return LogicalDeviceHandle.IsNotNull( );
 }
 
-bool apemode::GraphicsDevice::Await( ) {
+bool apemodevk::GraphicsDevice::Await( ) {
     _Game_engine_Assert( IsValid( ), "Must be valid." );
 
     ResultHandle eDeviceWaitIdleOk = vkDeviceWaitIdle( *this );
@@ -223,35 +231,35 @@ bool apemode::GraphicsDevice::Await( ) {
     return eDeviceWaitIdleOk.Succeeded( );
 }
 
-apemode::GraphicsManager& apemode::GraphicsDevice::GetGraphicsEcosystem( ) {
+apemodevk::GraphicsManager& apemodevk::GraphicsDevice::GetGraphicsEcosystem( ) {
     return *pGraphicsEcosystem;
 }
 
-apemode::RenderPassManager& apemode::GraphicsDevice::GetDefaultRenderPassManager( ) {
+apemodevk::RenderPassManager& apemodevk::GraphicsDevice::GetDefaultRenderPassManager( ) {
     return *RenderPassManager;
 }
 
-apemode::FramebufferManager& apemode::GraphicsDevice::GetDefaultFramebufferManager( ) {
+apemodevk::FramebufferManager& apemodevk::GraphicsDevice::GetDefaultFramebufferManager( ) {
     return *FramebufferManager;
 }
 
-apemode::PipelineLayoutManager& apemode::GraphicsDevice::GetDefaultPipelineLayoutManager( ) {
+apemodevk::PipelineLayoutManager& apemodevk::GraphicsDevice::GetDefaultPipelineLayoutManager( ) {
     return *PipelineLayoutManager;
 }
 
-apemode::PipelineStateManager& apemode::GraphicsDevice::GetDefaultPipelineStateManager( ) {
+apemodevk::PipelineStateManager& apemodevk::GraphicsDevice::GetDefaultPipelineStateManager( ) {
     return *PipelineStateManager;
 }
 
-apemode::ShaderManager& apemode::GraphicsDevice::GetDefaultShaderManager( ) {
+apemodevk::ShaderManager& apemodevk::GraphicsDevice::GetDefaultShaderManager( ) {
     return *ShaderManager;
 }
 
-uint32_t apemode::GraphicsDevice::GetQueueFamilyCount( ) {
+uint32_t apemodevk::GraphicsDevice::GetQueueFamilyCount( ) {
     return _Get_collection_length_u( QueueReqs );
 }
 
-uint32_t apemode::GraphicsDevice::GetQueueCountInQueueFamily( uint32_t QueueFamilyId ) {
+uint32_t apemodevk::GraphicsDevice::GetQueueCountInQueueFamily( uint32_t QueueFamilyId ) {
     _Game_engine_Assert( QueueFamilyId < GetQueueFamilyCount( ), "Out of range." );
     return QueueReqs[ QueueFamilyId ]->queueCount;
 }

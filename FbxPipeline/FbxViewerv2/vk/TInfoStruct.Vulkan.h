@@ -1,6 +1,6 @@
 #pragma once
 
-namespace apemode
+namespace apemodevk
 {
     namespace Traits
     {
@@ -45,6 +45,7 @@ namespace apemode
             _Define_has_struct_type(VkPipelineViewportStateCreateInfo);
             _Define_has_struct_type(VkPipelineMultisampleStateCreateInfo);
             _Define_has_struct_type(VkPipelineShaderStageCreateInfo);
+            _Define_has_struct_type(VkPipelineLayoutCreateInfo);
             _Define_has_struct_type(VkPipelineCacheCreateInfo);
             _Define_has_struct_type(VkDescriptorPoolCreateInfo);
             _Define_has_struct_type(VkDescriptorSetAllocateInfo);
@@ -127,6 +128,7 @@ namespace apemode
             _Define_resolve_struct_type(VkFramebufferCreateInfo, VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO);
             _Define_resolve_struct_type(VkCommandPoolCreateInfo, VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO);
             _Define_resolve_struct_type(VkCommandBufferAllocateInfo, VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO);
+            _Define_resolve_struct_type(VkPipelineLayoutCreateInfo, VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO);
             _Define_resolve_struct_type(VkApplicationInfo, VK_STRUCTURE_TYPE_APPLICATION_INFO);
             _Define_resolve_struct_type(VkInstanceCreateInfo, VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO);
             _Define_resolve_struct_type(VkDebugReportCallbackCreateInfoEXT, VK_STRUCTURE_TYPE_DEBUG_REPORT_CREATE_INFO_EXT);
@@ -170,7 +172,7 @@ namespace apemode
         TInfoStruct(SelfType const & Other) : Desc(Other.Desc) {}
         TInfoStruct(TVulkanNativeStruct const & OtherDesc) : Desc(OtherDesc) { SetStructType<>(); }
 
-        void ZeroMemory() { apemode::ZeroMemory(Desc); SetStructType<>(); }
+        void ZeroMemory() { apemodevk::ZeroMemory(Desc); SetStructType<>(); }
 
         SelfType & operator =(SelfType && Other) { Desc = Other.Desc; Validate(); return *this; }
         SelfType & operator =(TVulkanNativeStruct && OtherDesc) { Desc = OtherDesc; Validate(); return *this; }
@@ -200,7 +202,7 @@ namespace apemode
     };
 }
 
-namespace apemode
+namespace apemodevk
 {
     template <typename T>
     inline uint32_t GetSizeU(T const & c) {

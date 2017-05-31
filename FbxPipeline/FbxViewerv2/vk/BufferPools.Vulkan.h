@@ -6,7 +6,7 @@
 
 #define _Core_BufferPool_UseIntermediateSystemBuffer 1
 
-namespace apemode
+namespace apemodevk
 {
     class CommandBuffer;
 
@@ -26,15 +26,15 @@ namespace apemode
     };
 
     class BufferPool
-        : public apemode::ScalableAllocPolicy
-        , public apemode::NoCopyAssignPolicy
+        : public apemodevk::ScalableAllocPolicy
+        , public apemodevk::NoCopyAssignPolicy
     {
     public:
         struct Page;
         struct Range;
 
     public:
-        struct Range : public apemode::ScalableAllocPolicy
+        struct Range : public apemodevk::ScalableAllocPolicy
         {
             Page *                              PageRef;
             VkDeviceSize                        Offset;
@@ -47,8 +47,8 @@ namespace apemode
         };
 
     public:
-        struct Page : public apemode::ScalableAllocPolicy,
-                                                  public apemode::NoCopyAssignPolicy
+        struct Page : public apemodevk::ScalableAllocPolicy,
+                                                  public apemodevk::NoCopyAssignPolicy
         {
             friend BufferPool;
 
@@ -102,7 +102,7 @@ namespace apemode
 
     template <typename TSrc> class TDynamicConstantBufferView
         //: public TbbAux::TbbScalableAlignedAllocPolicy<TDynamicConstantBufferView<TSrc>>
-        //, public apemode::NoCopyAssignPolicy
+        //, public apemodevk::NoCopyAssignPolicy
     {
         TSrc              Src;
         bool              bIsSrcStale;

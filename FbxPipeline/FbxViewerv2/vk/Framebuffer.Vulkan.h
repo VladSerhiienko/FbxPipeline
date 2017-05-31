@@ -5,7 +5,7 @@
 #include <TInfoStruct.Vulkan.h>
 #include <NativeDispatchableHandles.Vulkan.h>
 
-namespace apemode
+namespace apemodevk
 {
     class RenderPass;
     class TextureResourceView;
@@ -14,25 +14,25 @@ namespace apemode
 
     class FramebufferDescription;
 
-    class Framebuffer : public apemode::ScalableAllocPolicy,
-                                                    public apemode::NoCopyAssignPolicy
+    class Framebuffer : public apemodevk::ScalableAllocPolicy,
+                                                    public apemodevk::NoCopyAssignPolicy
     {
     public:
         uint64_t                                 Hash;
-        apemode::TDispatchableHandle<VkFramebuffer> Handle;
-        apemode::FramebufferDescription const *     pDesc;
+        apemodevk::TDispatchableHandle<VkFramebuffer> Handle;
+        apemodevk::FramebufferDescription const *     pDesc;
 
     public:
         operator VkFramebuffer() const { return Handle; }
     };
 
-    class FramebufferDescription : public apemode::ScalableAllocPolicy,
-                                                               public apemode::NoCopyAssignPolicy
+    class FramebufferDescription : public apemodevk::ScalableAllocPolicy,
+                                                               public apemodevk::NoCopyAssignPolicy
     {
     public:
         uint64_t                                          Hash;
-        apemode::RenderPass const *                          pRenderPass;
-        apemode::TInfoStruct<VkFramebufferCreateInfo>        Desc;
+        apemodevk::RenderPass const *                          pRenderPass;
+        apemodevk::TInfoStruct<VkFramebufferCreateInfo>        Desc;
         std::vector<TextureResourceView const *> TextureViews;
 
     public:
@@ -47,31 +47,31 @@ namespace apemode
         operator VkFramebufferCreateInfo() const { return Desc; }
 
     public:
-        static apemode::FramebufferDescription const *
-        MakeNewFromTemporary (apemode::FramebufferDescription const & TemporaryDesc);
+        static apemodevk::FramebufferDescription const *
+        MakeNewFromTemporary (apemodevk::FramebufferDescription const & TemporaryDesc);
     };
 
-    class FramebufferBuilder : public apemode::ScalableAllocPolicy,
-                                                           public apemode::NoCopyAssignPolicy
+    class FramebufferBuilder : public apemodevk::ScalableAllocPolicy,
+                                                           public apemodevk::NoCopyAssignPolicy
     {
     public:
-        apemode::FramebufferDescription TemporaryDesc;
+        apemodevk::FramebufferDescription TemporaryDesc;
 
     public:
         void Attach (TextureResourceView const & TextureView);
         void SetRenderPass (RenderPass const & pRenderPass);
 
-        apemode::Framebuffer const * RecreateFramebuffer (apemode::GraphicsDevice & GraphicsNode);
+        apemodevk::Framebuffer const * RecreateFramebuffer (apemodevk::GraphicsDevice & GraphicsNode);
 
         void Reset();
 
     };
 
-    class FramebufferManager : public apemode::ScalableAllocPolicy,
-                                                           public apemode::NoCopyAssignPolicy
+    class FramebufferManager : public apemodevk::ScalableAllocPolicy,
+                                                           public apemodevk::NoCopyAssignPolicy
     {
-        friend apemode::GraphicsDevice;
-        friend apemode::FramebufferBuilder;
+        friend apemodevk::GraphicsDevice;
+        friend apemodevk::FramebufferBuilder;
 
         struct PrivateContent;
         struct FramebufferContent;
@@ -82,7 +82,7 @@ namespace apemode
         FramebufferManager();
         ~FramebufferManager();
 
-        void AddNewFramebuffer (apemode::Framebuffer & Framebuffer);
-        apemode::Framebuffer const * TryGetFramebufferObjectByHash (uint64_t Hash);
+        void AddNewFramebuffer (apemodevk::Framebuffer & Framebuffer);
+        apemodevk::Framebuffer const * TryGetFramebufferObjectByHash (uint64_t Hash);
     };
 }

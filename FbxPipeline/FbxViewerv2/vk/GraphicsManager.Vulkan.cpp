@@ -13,7 +13,7 @@
 /// GraphicsEcosystem PrivateContent
 /// -------------------------------------------------------------------------------------------------------------------
 
-apemode::GraphicsManager::APIVersion::APIVersion( bool bDump )
+apemodevk::GraphicsManager::APIVersion::APIVersion( bool bDump )
     : Major( VK_API_VERSION_1_0 >> 22 )
     , Minor( ( VK_API_VERSION_1_0 >> 12 ) & 0x3ff )
     , Patch( VK_API_VERSION_1_0 & 0xfff ) {
@@ -24,7 +24,7 @@ apemode::GraphicsManager::APIVersion::APIVersion( bool bDump )
 #define _Game_app_filter_length sizeof( _Game_app_filter )
 #define _Game_app_UUID_length 64
 
-bool apemode::GraphicsManager::ScanInstanceLayerProperties( ) {
+bool apemodevk::GraphicsManager::ScanInstanceLayerProperties( ) {
     uint32_t                LayerPropertyCount = 0;
     ResultHandle            ErrorHandle;
     VkLayerPropertiesVector GlobalLayers;
@@ -48,7 +48,7 @@ bool apemode::GraphicsManager::ScanInstanceLayerProperties( ) {
         uint32_t     LayerExtensionCount = 0;
 
         const bool  bIsUnnamed   = !Layer;
-        auto &      LayerWrapper = apemode::PushBackAndGet( LayerWrappers );
+        auto &      LayerWrapper = apemodevk::PushBackAndGet( LayerWrappers );
         char const *LayerName    = bIsUnnamed ? LayerWrapper.Layer->layerName : nullptr;
 
         LayerWrapper.Layer      = !bIsUnnamed ? *Layer : VkLayerProperties( );
@@ -110,7 +110,7 @@ bool apemode::GraphicsManager::ScanInstanceLayerProperties( ) {
     return ErrorHandle.Succeeded( );
 }
 
-bool apemode::GraphicsManager::ScanAdapters( ) {
+bool apemodevk::GraphicsManager::ScanAdapters( ) {
     uint32_t               AdaptersFound = 0;
     VkPhysicalDeviceVector Adapters;
 
@@ -149,12 +149,12 @@ bool apemode::GraphicsManager::ScanAdapters( ) {
     return AdaptersFound != 0;
 }
 
-apemode::GraphicsManager::NativeLayerWrapper &apemode::GraphicsManager::GetUnnamedLayer( ) {
+apemodevk::GraphicsManager::NativeLayerWrapper &apemodevk::GraphicsManager::GetUnnamedLayer( ) {
     _Game_engine_Assert( LayerWrappers.front( ).IsUnnamedLayer( ), "vkEnumerateInstanceExtensionProperties failed." );
     return LayerWrappers.front( );
 }
 
-bool apemode::GraphicsManager::InitializeInstance( ) {
+bool apemodevk::GraphicsManager::InitializeInstance( ) {
     if ( !ScanInstanceLayerProperties( ) )
         return false;
 
@@ -212,7 +212,7 @@ bool apemode::GraphicsManager::InitializeInstance( ) {
     return true;
 }
 
-VKAPI_ATTR VkBool32 VKAPI_CALL apemode::GraphicsManager::BreakCallback( VkFlags                    msgFlags,
+VKAPI_ATTR VkBool32 VKAPI_CALL apemodevk::GraphicsManager::BreakCallback( VkFlags                    msgFlags,
                                                                         VkDebugReportObjectTypeEXT objType,
                                                                         uint64_t                   srcObject,
                                                                         size_t                     location,
@@ -221,7 +221,7 @@ VKAPI_ATTR VkBool32 VKAPI_CALL apemode::GraphicsManager::BreakCallback( VkFlags 
                                                                         const char *               pMsg,
                                                                         void *                     pUserData ) {
     if ( msgFlags & VK_DEBUG_REPORT_ERROR_BIT_EXT ) {
-        // apemode::Platform::DebugBreak();
+        DebugBreak();
     }
 
     /*
@@ -235,7 +235,7 @@ VKAPI_ATTR VkBool32 VKAPI_CALL apemode::GraphicsManager::BreakCallback( VkFlags 
     return false;
 }
 
-VKAPI_ATTR VkBool32 VKAPI_CALL apemode::GraphicsManager::DebugCallback( VkFlags                    msgFlags,
+VKAPI_ATTR VkBool32 VKAPI_CALL apemodevk::GraphicsManager::DebugCallback( VkFlags                    msgFlags,
                                                                         VkDebugReportObjectTypeEXT objType,
                                                                         uint64_t                   srcObject,
                                                                         size_t                     location,
@@ -244,17 +244,27 @@ VKAPI_ATTR VkBool32 VKAPI_CALL apemode::GraphicsManager::DebugCallback( VkFlags 
                                                                         const char *               pMsg,
                                                                         void *                     pUserData ) {
     if ( msgFlags & VK_DEBUG_REPORT_ERROR_BIT_EXT ) {
-        /*apemode::DebugTrace<true, apemode::Error> (
+        OutputDebugStringA("\n E R R O R:");
+        OutputDebugStringA(pLayerPrefix);
+        OutputDebugStringA("\n");
+        OutputDebugStringA(pMsg);
+        OutputDebugStringA("\n");
+        /*apemodevk::DebugTrace<true, apemodevk::Error> (
             "\tDebugCallback: [%s] Code %d: %s", pLayerPrefix, msgCode, pMsg);
-        apemode::Platform::DebugBreak ();*/
+        apemodevk::Platform::DebugBreak ();*/
     } else if ( msgFlags & VK_DEBUG_REPORT_WARNING_BIT_EXT ) {
-        /*apemode::DebugTrace<true, apemode::Warning> (
+        OutputDebugStringA("\n W A R N I N G:");
+        OutputDebugStringA(pLayerPrefix);
+        OutputDebugStringA("\n");
+        OutputDebugStringA(pMsg);
+        OutputDebugStringA("\n");
+        /*apemodevk::DebugTrace<true, apemodevk::Warning> (
             "\tDebugCallback: [%s] Code %d: %s", pLayerPrefix, msgCode, pMsg);*/
     } else if ( msgFlags & VK_DEBUG_REPORT_INFORMATION_BIT_EXT ) {
-        /*apemode::DebugTrace<true, apemode::Info> (
+        /*apemodevk::DebugTrace<true, apemodevk::Info> (
             "\tDebugCallback: [%s] Code %d: %s", pLayerPrefix, msgCode, pMsg);*/
     } else if ( msgFlags & VK_DEBUG_REPORT_DEBUG_BIT_EXT ) {
-        /*apemode::DebugTrace<true, apemode::Debug> (
+        /*apemodevk::DebugTrace<true, apemodevk::Debug> (
             "\tDebugCallback: [%s] Code %d: %s", pLayerPrefix, msgCode, pMsg);*/
     }
 
@@ -269,11 +279,11 @@ VKAPI_ATTR VkBool32 VKAPI_CALL apemode::GraphicsManager::DebugCallback( VkFlags 
     return false;
 }
 
-bool apemode::GraphicsManager::NativeLayerWrapper::IsUnnamedLayer( ) const {
+bool apemodevk::GraphicsManager::NativeLayerWrapper::IsUnnamedLayer( ) const {
     return bIsUnnamed;
 }
 
-bool apemode::GraphicsManager::NativeLayerWrapper::IsValidInstanceLayer( ) const {
+bool apemodevk::GraphicsManager::NativeLayerWrapper::IsValidInstanceLayer( ) const {
     if ( IsUnnamedLayer( ) ) {
         auto const KnownExtensionBeginIt = Vulkan::KnownInstanceExtensions;
         auto const KnownExtensionEndIt   = Vulkan::KnownInstanceExtensions + Vulkan::KnownInstanceExtensionCount;
@@ -299,11 +309,11 @@ bool apemode::GraphicsManager::NativeLayerWrapper::IsValidInstanceLayer( ) const
     return true;
 }
 
-void apemode::GraphicsManager::NativeLayerWrapper::DumpExtensions( ) const {
+void apemodevk::GraphicsManager::NativeLayerWrapper::DumpExtensions( ) const {
     /*_Aux_DebugTrace_separator_header;
     _Aux_DebugTraceFunc;
 
-    apemode::DebugTrace("\t Layer %s (impl 0x%08x, spec 0x%08x):"
+    apemodevk::DebugTrace("\t Layer %s (impl 0x%08x, spec 0x%08x):"
         , bIsUnnamed ? "<Global>" : Layer->layerName
         , Layer->implementationVersion
         , Layer->specVersion
@@ -311,7 +321,7 @@ void apemode::GraphicsManager::NativeLayerWrapper::DumpExtensions( ) const {
 
     std::for_each(Extensions.begin(), Extensions.end(), [&](VkExtensionProperties const & Extension)
     {
-        apemode::DebugTrace("\t\t Extension %s (spec 0x%08x)"
+        apemodevk::DebugTrace("\t\t Extension %s (spec 0x%08x)"
             , Extension.extensionName
             , Extension.specVersion
             );
@@ -324,21 +334,24 @@ void apemode::GraphicsManager::NativeLayerWrapper::DumpExtensions( ) const {
 /// GraphicsEcosystem
 /// -------------------------------------------------------------------------------------------------------------------
 
-apemode::GraphicsManager::GraphicsManager( ) {
+apemodevk::GraphicsManager::GraphicsManager( ) {
     _Aux_DebugTraceFunc;
 }
 
-apemode::GraphicsManager::~GraphicsManager( ) {
+apemodevk::GraphicsManager::~GraphicsManager( ) {
     _Aux_DebugTraceFunc;
 }
 
-bool apemode::GraphicsManager::RecreateGraphicsNodes( EFlags Flags ) {
-    _Unreferenced_parameter_( Flags );
+ apemodevk::GraphicsDevice * apemodevk::GraphicsManager::GetPrimaryGraphicsNode() {
+    return PrimaryNode.get();
+}
 
+apemodevk::GraphicsDevice * apemodevk::GraphicsManager::GetSecondaryGraphicsNode() {
+    return SecondaryNode.get();
+}
+
+bool apemodevk::GraphicsManager::RecreateGraphicsNodes( ) {
     auto const bIsInstInitialized = InitializeInstance( );
     _Game_engine_Assert( bIsInstInitialized, "Vulkan Instance initialization failed." );
-
-    // ...
-
     return bIsInstInitialized;
 }

@@ -4,13 +4,13 @@
 #include <TInfoStruct.Vulkan.h>
 #include <NativeDispatchableHandles.Vulkan.h>
 
-namespace apemode
+namespace apemodevk
 {
     class ShaderBytecode;
     class ShaderReflection;
 
-    class ShaderObject : public apemode::ScalableAllocPolicy,
-                                                     public apemode::NoCopyAssignPolicy
+    class ShaderObject : public apemodevk::ScalableAllocPolicy,
+                                                     public apemodevk::NoCopyAssignPolicy
     {
     public:
         std::string                              Id;
@@ -18,11 +18,11 @@ namespace apemode
         uint64_t                                  BytecodeHash;
         VkShaderStageFlags                        StageFlags;
         ShaderReflection *                        pReflection;
-        apemode::TDispatchableHandle<VkShaderModule> pShaderModule;
+        apemodevk::TDispatchableHandle<VkShaderModule> pShaderModule;
     };
 
-    class ShaderManager : public apemode::ScalableAllocPolicy,
-                                                      public apemode::NoCopyAssignPolicy
+    class ShaderManager : public apemodevk::ScalableAllocPolicy,
+                                                      public apemodevk::NoCopyAssignPolicy
     {
         struct PrivateContent;
         friend PrivateContent;
@@ -34,12 +34,12 @@ namespace apemode
         ShaderManager();
         ~ShaderManager();
 
-        apemode::TDispatchableHandle<VkShaderModule> &&
-        GetShaderModule (apemode::GraphicsDevice & GraphicsNode,
+        apemodevk::TDispatchableHandle<VkShaderModule> &&
+        GetShaderModule (apemodevk::GraphicsDevice & GraphicsNode,
                          ShaderBytecode const & Bytecode);
 
         /** Not implemented. */
-        ShaderReflection const * Reflect (apemode::GraphicsDevice & GraphicsNode,
+        ShaderReflection const * Reflect (apemodevk::GraphicsDevice & GraphicsNode,
                                           ShaderBytecode const & Bytecode);
     };
 }

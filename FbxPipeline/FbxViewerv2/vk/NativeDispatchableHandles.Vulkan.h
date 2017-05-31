@@ -2,7 +2,7 @@
 
 #include <TDispatchableHandle.Vulkan.h>
 
-namespace apemode
+namespace apemodevk
 {
     template <>
     struct TDispatchableHandleDeleter<VkInstance> : public TDispatchableHandleHandleTypeResolver<VkInstance>
@@ -718,7 +718,7 @@ namespace apemode
             VkMemoryRequirements memoryRequirements = GetMemoryRequirements();
 
             VkMemoryAllocateInfo memoryAllocInfo;
-            apemode::ZeroMemory(memoryAllocInfo);
+            apemodevk::ZeroMemory(memoryAllocInfo);
             memoryAllocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
             memoryAllocInfo.allocationSize = memoryRequirements.size;
             memoryAllocInfo.memoryTypeIndex = ResolveMemoryType(Deleter.PhysicalDeviceHandle, memoryPropertyFlags, memoryRequirements.memoryTypeBits);
@@ -825,7 +825,7 @@ namespace apemode
             VkMemoryRequirements memoryRequirements = GetMemoryRequirements( );
 
             VkMemoryAllocateInfo memoryAllocInfo;
-            apemode::ZeroMemory(memoryAllocInfo);
+            apemodevk::ZeroMemory(memoryAllocInfo);
             memoryAllocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
             memoryAllocInfo.allocationSize = memoryRequirements.size;
             memoryAllocInfo.memoryTypeIndex = ResolveMemoryType( Deleter.PhysicalDeviceHandle, memoryPropertyFlags, memoryRequirements.memoryTypeBits );

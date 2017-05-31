@@ -7,21 +7,21 @@
 /// PipelineLayoutParameter
 /// -------------------------------------------------------------------------------------------------------------------
 
-apemode::PipelineLayoutParameter::PipelineLayoutParameter()
+apemodevk::PipelineLayoutParameter::PipelineLayoutParameter()
 {
     Clear();
 }
 
-apemode::PipelineLayoutParameter::~PipelineLayoutParameter()
+apemodevk::PipelineLayoutParameter::~PipelineLayoutParameter()
 {
 }
 
-void apemode::PipelineLayoutParameter::Clear()
+void apemodevk::PipelineLayoutParameter::Clear()
 {
     Binding.ZeroMemory();
 }
 
-void apemode::PipelineLayoutParameter::InitAsUniformBuffer(uint32_t         Register,
+void apemodevk::PipelineLayoutParameter::InitAsUniformBuffer(uint32_t         Register,
                                               uint32_t         Count,
                                               VkShaderStageFlagBits StageFlags,
                                               uint32_t         Set)
@@ -33,7 +33,7 @@ void apemode::PipelineLayoutParameter::InitAsUniformBuffer(uint32_t         Regi
     Binding->stageFlags      = static_cast<VkShaderStageFlagBits>(StageFlags);
 }
 
-void apemode::PipelineLayoutParameter::InitAsUniformBufferDynamic(uint32_t         Register,
+void apemodevk::PipelineLayoutParameter::InitAsUniformBufferDynamic(uint32_t         Register,
                                                      uint32_t         Count,
                                                      VkShaderStageFlagBits StageFlags,
                                                      uint32_t         Set)
@@ -45,7 +45,7 @@ void apemode::PipelineLayoutParameter::InitAsUniformBufferDynamic(uint32_t      
     Binding->stageFlags      = static_cast<VkShaderStageFlagBits>(StageFlags);
 }
 
-void apemode::PipelineLayoutParameter::InitAsSampler(uint32_t         Register,
+void apemodevk::PipelineLayoutParameter::InitAsSampler(uint32_t         Register,
                                         uint32_t         Count,
                                         VkShaderStageFlagBits StageFlags,
                                         uint32_t         Set)
@@ -57,7 +57,7 @@ void apemode::PipelineLayoutParameter::InitAsSampler(uint32_t         Register,
     Binding->stageFlags      = static_cast<VkShaderStageFlagBits>(StageFlags);
 }
 
-void apemode::PipelineLayoutParameter::InitAsCombinedImageSampler(
+void apemodevk::PipelineLayoutParameter::InitAsCombinedImageSampler(
     uint32_t Register, uint32_t Count, VkSampler* pImmutableSamplers, VkShaderStageFlagBits StageFlags, uint32_t Set ) {
     DescSet                     = Set;
     Binding->binding            = Register;
@@ -67,7 +67,7 @@ void apemode::PipelineLayoutParameter::InitAsCombinedImageSampler(
     Binding->stageFlags         = static_cast<VkShaderStageFlagBits>(StageFlags);
 }
 
-apemode::PipelineLayoutParameter::operator VkDescriptorSetLayoutBinding() const
+apemodevk::PipelineLayoutParameter::operator VkDescriptorSetLayoutBinding() const
 {
     return Binding;
 }
@@ -76,23 +76,23 @@ apemode::PipelineLayoutParameter::operator VkDescriptorSetLayoutBinding() const
 /// PipelineLayout
 /// -------------------------------------------------------------------------------------------------------------------
 
-apemode::PipelineLayout::PipelineLayout()
+apemodevk::PipelineLayout::PipelineLayout()
     : pDesc(nullptr)
     , pNode(nullptr)
 {
 }
 
-apemode::PipelineLayout::~PipelineLayout()
+apemodevk::PipelineLayout::~PipelineLayout()
 {
     if (apemode_likely (pNode != nullptr && !DescSetLayouts.empty ()))
     {
         std::for_each( DescSetLayouts.begin( ), DescSetLayouts.end( ), [&]( VkDescriptorSetLayout SetLayoutHandle ) {
-            apemode::TDispatchableHandle< VkDescriptorSetLayout > DestroySetLayout( *pNode, SetLayoutHandle );
+            apemodevk::TDispatchableHandle< VkDescriptorSetLayout > DestroySetLayout( *pNode, SetLayoutHandle );
         } );
     }
 }
 
-apemode::PipelineLayout::operator VkPipelineLayout() const
+apemodevk::PipelineLayout::operator VkPipelineLayout() const
 {
     return PipelineLayoutHandle;
 }
@@ -101,27 +101,27 @@ apemode::PipelineLayout::operator VkPipelineLayout() const
 /// PipelineLayoutDescription
 /// -------------------------------------------------------------------------------------------------------------------
 
-apemode::PipelineLayoutDescription::PipelineLayoutDescription()
+apemodevk::PipelineLayoutDescription::PipelineLayoutDescription()
 {
     Reset();
 }
 
-apemode::PipelineLayoutDescription::~PipelineLayoutDescription()
+apemodevk::PipelineLayoutDescription::~PipelineLayoutDescription()
 {
 }
 
-void apemode::PipelineLayoutDescription::Reset()
+void apemodevk::PipelineLayoutDescription::Reset()
 {
     Params.clear();
 }
 
-uint32_t apemode::PipelineLayoutDescription::GetParamCount() const
+uint32_t apemodevk::PipelineLayoutDescription::GetParamCount() const
 {
     return _Get_collection_length_u (Params);
 }
 
-apemode::PipelineLayoutParameter const &
-apemode::PipelineLayoutDescription::GetParameter(uint32_t ParameterIndex) const
+apemodevk::PipelineLayoutParameter const &
+apemodevk::PipelineLayoutDescription::GetParameter(uint32_t ParameterIndex) const
 {
     _Game_engine_Assert (Params.size () < ParameterIndex, 
                          "Index is out of range.");
@@ -129,7 +129,7 @@ apemode::PipelineLayoutDescription::GetParameter(uint32_t ParameterIndex) const
     return Params[ParameterIndex];
 }
 
-uint64_t apemode::PipelineLayoutDescription::UpdateHash()
+uint64_t apemodevk::PipelineLayoutDescription::UpdateHash()
 {
     apemode::CityHash64Wrapper HashBuilder;
     HashBuilder.CombineWithArray (Params.data (), Params.size ());
@@ -139,10 +139,10 @@ uint64_t apemode::PipelineLayoutDescription::UpdateHash()
     return HashBuilder.Value;
 }
 
-apemode::PipelineLayoutDescription const *
-apemode::PipelineLayoutDescription::MakeNewFromTemporary(PipelineLayoutDescription const & TemporaryDesc)
+apemodevk::PipelineLayoutDescription const *
+apemodevk::PipelineLayoutDescription::MakeNewFromTemporary(PipelineLayoutDescription const & TemporaryDesc)
 {
-    auto pOutDesc = new apemode::PipelineLayoutDescription();
+    auto pOutDesc = new apemodevk::PipelineLayoutDescription();
 
     if (!TemporaryDesc.Params.empty())
     {
@@ -167,11 +167,11 @@ apemode::PipelineLayoutDescription::MakeNewFromTemporary(PipelineLayoutDescripti
 /// PipelineLayoutBuilder
 /// -------------------------------------------------------------------------------------------------------------------
 
-apemode::PipelineLayoutBuilder::PipelineLayoutBuilder()
+apemodevk::PipelineLayoutBuilder::PipelineLayoutBuilder()
 {
 }
 
-void apemode::PipelineLayoutBuilder::Reset (uint32_t BindingCount, uint32_t PushConstRangeCount)
+void apemodevk::PipelineLayoutBuilder::Reset (uint32_t BindingCount, uint32_t PushConstRangeCount)
 {
     TemporaryDesc.Params.clear ();
     TemporaryDesc.Params.reserve (BindingCount);
@@ -179,18 +179,18 @@ void apemode::PipelineLayoutBuilder::Reset (uint32_t BindingCount, uint32_t Push
     TemporaryDesc.PushConstRanges.reserve (PushConstRangeCount);
 }
 
-apemode::PipelineLayoutParameter & apemode::PipelineLayoutBuilder::AddParameter()
+apemodevk::PipelineLayoutParameter & apemodevk::PipelineLayoutBuilder::AddParameter()
 {
-    return apemode::PushBackAndGet( TemporaryDesc.Params);
+    return apemodevk::PushBackAndGet( TemporaryDesc.Params);
 }
 
-VkPushConstantRange & apemode::PipelineLayoutBuilder::AddPushConstRange()
+VkPushConstantRange & apemodevk::PipelineLayoutBuilder::AddPushConstRange()
 {
-    return apemode::PushBackAndGet(TemporaryDesc.PushConstRanges);
+    return apemodevk::PushBackAndGet(TemporaryDesc.PushConstRanges);
 }
 
-apemode::PipelineLayout const *
-apemode::PipelineLayoutBuilder::RecreatePipelineLayout(apemode::GraphicsDevice & GraphicsNode)
+apemodevk::PipelineLayout const *
+apemodevk::PipelineLayoutBuilder::RecreatePipelineLayout(apemodevk::GraphicsDevice & GraphicsNode)
 {
     using SetKey                = uint32_t;
     using Binding               = VkDescriptorSetLayoutBinding;
@@ -217,7 +217,7 @@ apemode::PipelineLayoutBuilder::RecreatePipelineLayout(apemode::GraphicsDevice &
         {
             std::for_each( TemporaryDesc.Params.begin( ),
                            TemporaryDesc.Params.end( ),
-                           [&]( apemode::PipelineLayoutParameter const& Param ) {
+                           [&]( apemodevk::PipelineLayoutParameter const& Param ) {
                                Bindings.insert( std::make_pair( Param.DescSet, Param.Binding.Desc ) );
                            } );
 
@@ -240,10 +240,10 @@ apemode::PipelineLayoutBuilder::RecreatePipelineLayout(apemode::GraphicsDevice &
                 if ( auto StoredDescSetLayout = Manager.GetDescSetLayout( DescSetLayoutHashBuilder.Value ) ) {
                     DescSetLayouts.push_back (StoredDescSetLayout);
                 } else {
-                    apemode::TInfoStruct< VkDescriptorSetLayoutCreateInfo > DescSetLayoutDesc;
-                    apemode::AliasStructs( SetLayoutBindings, DescSetLayoutDesc->pBindings, DescSetLayoutDesc->bindingCount );
+                    apemodevk::TInfoStruct< VkDescriptorSetLayoutCreateInfo > DescSetLayoutDesc;
+                    apemodevk::AliasStructs( SetLayoutBindings, DescSetLayoutDesc->pBindings, DescSetLayoutDesc->bindingCount );
 
-                    apemode::TDispatchableHandle< VkDescriptorSetLayout > TempDescSetLayout;
+                    apemodevk::TDispatchableHandle< VkDescriptorSetLayout > TempDescSetLayout;
                     if ( !TempDescSetLayout.Recreate( GraphicsNode, DescSetLayoutDesc ) ) {
                         _Game_engine_Error( "Failed to create descriptor set layout." );
                         return false;
@@ -257,21 +257,21 @@ apemode::PipelineLayoutBuilder::RecreatePipelineLayout(apemode::GraphicsDevice &
         }
 
         TInfoStruct< VkPipelineLayoutCreateInfo > PipelineLayoutDesc;
-        apemode::AliasStructs( DescSetLayouts, PipelineLayoutDesc->pSetLayouts, PipelineLayoutDesc->setLayoutCount );
+        apemodevk::AliasStructs( DescSetLayouts, PipelineLayoutDesc->pSetLayouts, PipelineLayoutDesc->setLayoutCount );
 
         if ( !TemporaryDesc.PushConstRanges.empty( ) ) {
-            apemode::AliasStructs( TemporaryDesc.PushConstRanges,
+            apemodevk::AliasStructs( TemporaryDesc.PushConstRanges,
                                    PipelineLayoutDesc->pPushConstantRanges,
                                    PipelineLayoutDesc->pushConstantRangeCount );
         }
 
-        apemode::TDispatchableHandle< VkPipelineLayout > PipelineLayoutHandle;
+        apemodevk::TDispatchableHandle< VkPipelineLayout > PipelineLayoutHandle;
         if ( !PipelineLayoutHandle.Recreate( GraphicsNode, PipelineLayoutDesc ) ) {
             return false;
         }
 
         if ( apemode_likely( PipelineLayoutHandle.IsNotNull( ) ) ) {
-            auto pRootSign = new apemode::PipelineLayout( );
+            auto pRootSign = new apemodevk::PipelineLayout( );
 
             pRootSign->DescSetLayouts.swap( DescSetLayouts );
             pRootSign->PipelineLayoutHandle.Swap( PipelineLayoutHandle );
@@ -291,14 +291,14 @@ apemode::PipelineLayoutBuilder::RecreatePipelineLayout(apemode::GraphicsDevice &
 /// PipelineLayoutManager PrivateContent
 /// -------------------------------------------------------------------------------------------------------------------
 
-struct apemode::PipelineLayoutManager::PrivateContent : public apemode::ScalableAllocPolicy,
-                                                    public apemode::NoCopyAssignPolicy
+struct apemodevk::PipelineLayoutManager::PrivateContent : public apemodevk::ScalableAllocPolicy,
+                                                    public apemodevk::NoCopyAssignPolicy
 {
     using HashType            = apemode::CityHash64Wrapper::ValueType;
     using HashOpLess          = apemode::CityHash64Wrapper::CmpOpLess;
     using HashOp              = apemode::CityHash64Wrapper::HashOp<>;
     using HashOpEqual         = apemode::CityHash64Wrapper::CmpOpEqual;
-    using PipelineLayoutLookup = std::map<HashType, std::unique_ptr<apemode::PipelineLayout> >;
+    using PipelineLayoutLookup = std::map<HashType, std::unique_ptr<apemodevk::PipelineLayout> >;
     using DescriptorSetLayoutLookup = std::map<HashType, VkDescriptorSetLayout>;
 
     std::mutex                 Lock;
@@ -310,16 +310,16 @@ struct apemode::PipelineLayoutManager::PrivateContent : public apemode::Scalable
 /// PipelineLayoutManager
 /// -------------------------------------------------------------------------------------------------------------------
 
-apemode::PipelineLayoutManager::PipelineLayoutManager () : pContent (new PrivateContent ())
+apemodevk::PipelineLayoutManager::PipelineLayoutManager () : pContent (new PrivateContent ())
 {
 }
 
-apemode::PipelineLayoutManager::~PipelineLayoutManager ()
+apemodevk::PipelineLayoutManager::~PipelineLayoutManager ()
 {
-    apemode::TSafeDeleteObj (pContent);
+    apemodevk::TSafeDeleteObj (pContent);
 }
 
-VkDescriptorSetLayout apemode::PipelineLayoutManager::GetDescSetLayout (uint64_t Hash)
+VkDescriptorSetLayout apemodevk::PipelineLayoutManager::GetDescSetLayout (uint64_t Hash)
 {
     auto DescSetLayoutIt = pContent->StoredDescSetLayouts.find (Hash);
     if (DescSetLayoutIt != pContent->StoredDescSetLayouts.end ())
@@ -328,7 +328,7 @@ VkDescriptorSetLayout apemode::PipelineLayoutManager::GetDescSetLayout (uint64_t
     return VK_NULL_HANDLE;
 }
 
-void apemode::PipelineLayoutManager::SetDescSetLayout (uint64_t Hash, VkDescriptorSetLayout SetLayout)
+void apemodevk::PipelineLayoutManager::SetDescSetLayout (uint64_t Hash, VkDescriptorSetLayout SetLayout)
 {
     _Game_engine_Assert (pContent->StoredDescSetLayouts.find (Hash)
                              == pContent->StoredDescSetLayouts.end (),
@@ -337,7 +337,7 @@ void apemode::PipelineLayoutManager::SetDescSetLayout (uint64_t Hash, VkDescript
     pContent->StoredDescSetLayouts[ Hash ] = SetLayout;
 }
 
-void apemode::PipelineLayoutManager::AddNewPipelineLayoutObject (apemode::PipelineLayout & RootSign)
+void apemodevk::PipelineLayoutManager::AddNewPipelineLayoutObject (apemodevk::PipelineLayout & RootSign)
 {
     std::lock_guard<std::mutex> LockGuard (pContent->Lock);
 
@@ -348,8 +348,8 @@ void apemode::PipelineLayoutManager::AddNewPipelineLayoutObject (apemode::Pipeli
     pContent->StoredRootSigns[ RootSign.Hash ].reset (&RootSign);
 }
 
-apemode::PipelineLayout const *
-apemode::PipelineLayoutManager::TryGetPipelineLayoutObjectByHash (uint64_t Hash)
+apemodevk::PipelineLayout const *
+apemodevk::PipelineLayoutManager::TryGetPipelineLayoutObjectByHash (uint64_t Hash)
 {
     std::lock_guard<std::mutex> LockGuard (pContent->Lock);
 

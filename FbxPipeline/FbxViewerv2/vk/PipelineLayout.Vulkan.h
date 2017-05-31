@@ -4,7 +4,7 @@
 #include <TInfoStruct.Vulkan.h>
 #include <NativeDispatchableHandles.Vulkan.h>
 
-namespace apemode
+namespace apemodevk
 {
     class PipelineLayoutParameter;
     class PipelineLayout;

@@ -5,28 +5,28 @@
 /// ColorResourceView
 /// -------------------------------------------------------------------------------------------------------------------
 
-std::shared_ptr<apemode::ColorResourceView> apemode::ColorResourceView::MakeNewLinked ()
+std::shared_ptr<apemodevk::ColorResourceView> apemodevk::ColorResourceView::MakeNewLinked ()
 {
-    return std::shared_ptr<apemode::ColorResourceView> (new ColorResourceView ());
+    return std::shared_ptr<apemodevk::ColorResourceView> (new ColorResourceView ());
 }
 
-std::unique_ptr<apemode::ColorResourceView> apemode::ColorResourceView::MakeNewUnique ()
+std::unique_ptr<apemodevk::ColorResourceView> apemodevk::ColorResourceView::MakeNewUnique ()
 {
-    return std::unique_ptr<apemode::ColorResourceView>(new ColorResourceView());
+    return std::unique_ptr<apemodevk::ColorResourceView>(new ColorResourceView());
 }
 
-std::unique_ptr<apemode::ColorResourceView> apemode::ColorResourceView::MakeNullUnique ()
+std::unique_ptr<apemodevk::ColorResourceView> apemodevk::ColorResourceView::MakeNullUnique ()
 {
-    return std::unique_ptr<apemode::ColorResourceView> (nullptr);
+    return std::unique_ptr<apemodevk::ColorResourceView> (nullptr);
 }
 
-apemode::ColorResourceView::ColorResourceView () : bIsOwnedBySwapchain (false)
+apemodevk::ColorResourceView::ColorResourceView () : bIsOwnedBySwapchain (false)
 {
     Format   = VK_FORMAT_R8G8B8A8_UNORM;
     ViewType = kResourceViewType_RenderTarget;
 }
 
-apemode::ColorResourceView::~ColorResourceView()
+apemodevk::ColorResourceView::~ColorResourceView()
 {
     if (bIsOwnedBySwapchain)
     {
@@ -37,7 +37,7 @@ apemode::ColorResourceView::~ColorResourceView()
     _Aux_DebugTraceFunc;
 }
 
-bool apemode::ColorResourceView::RecreateResourcesFor (GraphicsDevice & InGraphicsNode,
+bool apemodevk::ColorResourceView::RecreateResourcesFor (GraphicsDevice & InGraphicsNode,
                                                     VkFormat         InFmt,
                                                     VkImage          InImg)
 {

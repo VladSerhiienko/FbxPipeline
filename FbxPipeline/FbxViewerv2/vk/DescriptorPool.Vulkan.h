@@ -4,7 +4,7 @@
 #include <TInfoStruct.Vulkan.h>
 #include <NativeDispatchableHandles.Vulkan.h>
 
-namespace apemode
+namespace apemodevk
 {
     class CommandBuffer;
     class PipelineLayout;
@@ -50,8 +50,8 @@ namespace apemode
                 return false;
             }
 
-            apemode::ZeroMemory( Offsets );
-            apemode::ZeroMemory( Counts );
+            apemodevk::ZeroMemory( Offsets );
+            apemodevk::ZeroMemory( Counts );
 
             uint32_t layoutIndex   = 0;
             uint32_t descSetOffset = 0;
@@ -91,16 +91,16 @@ namespace apemode
         }
     };
 
-    class DescriptorSet : public apemode::ScalableAllocPolicy, public apemode::NoCopyAssignPolicy {
+    class DescriptorSet : public apemodevk::ScalableAllocPolicy, public apemodevk::NoCopyAssignPolicy {
     public:
         DescriptorSet( );
         ~DescriptorSet( );
 
-        bool RecreateResourcesFor( apemode::GraphicsDevice& GraphicsNode,
-                                   apemode::DescriptorPool& DescPool,
+        bool RecreateResourcesFor( apemodevk::GraphicsDevice& GraphicsNode,
+                                   apemodevk::DescriptorPool& DescPool,
                                    VkDescriptorSetLayout    DescSetLayout );
 
-        void BindTo( apemode::CommandBuffer& CmdBuffer,
+        void BindTo( apemodevk::CommandBuffer& CmdBuffer,
                      VkPipelineBindPoint     PipelineBindPoint,
                      uint32_t                DynamicOffsetCount,
                      const uint32_t*         DynamicOffsets );
@@ -109,14 +109,14 @@ namespace apemode
         operator VkDescriptorSet() const;
 
     public:
-        apemode::GraphicsDevice const*                  pNode;
-        apemode::DescriptorPool const*                  pDescPool;
-        apemode::TDispatchableHandle< VkDescriptorSet > hDescSet;
+        apemodevk::GraphicsDevice const*                  pNode;
+        apemodevk::DescriptorPool const*                  pDescPool;
+        apemodevk::TDispatchableHandle< VkDescriptorSet > hDescSet;
         VkDescriptorSetLayout                           hDescSetLayout;
     };
 
-    class DescriptorSetUpdater : public apemode::ScalableAllocPolicy, public apemode::NoCopyAssignPolicy {
-        bool SetGraphicsNode (apemode::GraphicsDevice const & GraphicsNode);
+    class DescriptorSetUpdater : public apemodevk::ScalableAllocPolicy, public apemodevk::NoCopyAssignPolicy {
+        bool SetGraphicsNode (apemodevk::GraphicsDevice const & GraphicsNode);
 
     public:
         DescriptorSetUpdater ();
@@ -125,7 +125,7 @@ namespace apemode
         void Reset( uint32_t MaxWrites, uint32_t MaxCopies );
 
         /** DescSet must be initialized. */
-        bool WriteUniformBuffer( apemode::DescriptorSet const& DescSet,
+        bool WriteUniformBuffer( apemodevk::DescriptorSet const& DescSet,
                                  VkBuffer                      Buffer,
                                  uint32_t                      Offset,
                                  uint32_t                      Range,
@@ -133,7 +133,7 @@ namespace apemode
                                  uint32_t                      Count );
 
         /** DescSet must be initialized. */
-        bool WriteCombinedImgSampler( apemode::DescriptorSet const& DescSet,
+        bool WriteCombinedImgSampler( apemodevk::DescriptorSet const& DescSet,
                                       VkImageView                   ImgView,
                                       VkImageLayout                 ImgLayout,
                                       VkSampler                     Sampler,
@@ -143,19 +143,19 @@ namespace apemode
         void Flush( );
 
     public:
-        apemode::GraphicsDevice const*        pNode;
+        apemodevk::GraphicsDevice const*        pNode;
         std::vector< VkDescriptorBufferInfo > BufferInfos;
         std::vector< VkDescriptorImageInfo >  ImgInfos;
         std::vector< VkWriteDescriptorSet >   Writes;
         std::vector< VkCopyDescriptorSet >    Copies;
     };
 
-    class DescriptorPool : public apemode::ScalableAllocPolicy, public apemode::NoCopyAssignPolicy {
+    class DescriptorPool : public apemodevk::ScalableAllocPolicy, public apemodevk::NoCopyAssignPolicy {
     public:
         DescriptorPool( );
         ~DescriptorPool( );
 
-        bool RecreateResourcesFor( apemode::GraphicsDevice& GraphicsNode,
+        bool RecreateResourcesFor( apemodevk::GraphicsDevice& GraphicsNode,
                                    uint32_t MaxSets,
                                    uint32_t MaxSamplerCount,                 // VK_DESCRIPTOR_TYPE_SAMPLER
                                    uint32_t MaxCombinedImgSamplerCount,      // VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
@@ -177,8 +177,8 @@ namespace apemode
         operator VkDescriptorPool( ) const;
 
     public:
-        apemode::GraphicsDevice const *                pNode;
-        apemode::TDispatchableHandle<VkDescriptorPool> hDescPool;
+        apemodevk::GraphicsDevice const *                pNode;
+        apemodevk::TDispatchableHandle<VkDescriptorPool> hDescPool;
 
         friend DescriptorSet;
 

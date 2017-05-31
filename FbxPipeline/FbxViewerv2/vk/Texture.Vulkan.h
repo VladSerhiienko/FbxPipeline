@@ -2,7 +2,7 @@
 
 #include <Resource.Vulkan.h>
 
-namespace apemode
+namespace apemodevk
 {
     class TextureResourceView : public ResourceView
     {
@@ -19,7 +19,7 @@ namespace apemode
         TextureResourceView();
         ~TextureResourceView();
 
-        void SetState(apemode::CommandBuffer &  CmdBuffer,
+        void SetState(apemodevk::CommandBuffer &  CmdBuffer,
                       VkPipelineStageFlags PipelineStageFlags,
                       VkAccessFlags        AccessMask,
                       VkImageLayout        ImgLayout,
@@ -44,8 +44,8 @@ namespace apemode
         VkImageTiling                          ImgTiling;
         VkImageUsageFlags                      ImgUsage;
         VkImageAspectFlags                     ImgAspect;
-        apemode::TDispatchableHandle<VkImage>     ImgHandle;
-        apemode::TDispatchableHandle<VkImageView> ImgViewHandle;
+        apemodevk::TDispatchableHandle<VkImage>     ImgHandle;
+        apemodevk::TDispatchableHandle<VkImageView> ImgViewHandle;
     };
 
 }

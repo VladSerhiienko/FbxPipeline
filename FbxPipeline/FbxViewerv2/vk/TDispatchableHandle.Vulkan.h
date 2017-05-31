@@ -3,7 +3,7 @@
 #include <SystemAllocationCallbacks.Vulkan.h>
 #include <type_traits>
 
-namespace apemode
+namespace apemodevk
 {
     template <typename TNativeHandle>
     struct TDispatchableHandleHandleTypeResolver
@@ -18,7 +18,7 @@ namespace apemode
 
     template <typename TNativeHandle>
     struct TDispatchableHandleDeleter : public TDispatchableHandleHandleTypeResolver<TNativeHandle>,
-                                        public apemode::ScalableAllocPolicy
+                                        public apemodevk::ScalableAllocPolicy
     {
         void operator()(HandleType *& Handle)
         {
@@ -32,8 +32,8 @@ namespace apemode
     //  object of a dispatchable type has a unique handle value.
     template <typename TNativeHandle,
               typename TDeleter = TDispatchableHandleDeleter<TNativeHandle>>
-    struct TDispatchableHandleBase : public apemode::ScalableAllocPolicy,
-                                     public apemode::NoCopyAssignPolicy
+    struct TDispatchableHandleBase : public apemodevk::ScalableAllocPolicy,
+                                     public apemodevk::NoCopyAssignPolicy
     {
         typedef TDeleter TDeleter;
         typedef TNativeHandle TNativeHandle;

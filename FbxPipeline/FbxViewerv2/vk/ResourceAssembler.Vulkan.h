@@ -2,11 +2,11 @@
 
 #include <GraphicsDevice.Vulkan.h>
 
-namespace apemode
+namespace apemodevk
 {
     // TODO Owned by graphics ecosystem (can support multiple devices)
-    class ResourceAssembler : public apemode::ScalableAllocPolicy,
-                                                          public apemode::NoCopyAssignPolicy
+    class ResourceAssembler : public apemodevk::ScalableAllocPolicy,
+                                                          public apemodevk::NoCopyAssignPolicy
     {
     public:
         static std::shared_ptr<ResourceAssembler> MakeNewUnique ();

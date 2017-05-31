@@ -2,6 +2,7 @@
 
 #include <App.h>
 #include <AppSurfaceSdlVk.h>
+#include <Swapchain.Vulkan.h>
 #include <Input.h>
 #include <NuklearSdlVk.h>
 
@@ -12,7 +13,6 @@
 using namespace apemode;
 
 struct apemode::AppContent {
-    NuklearSdlBase* Nk = nullptr;
     nk_color        diffColor;
     nk_color        specColor;
     uint32_t        width      = 0;
@@ -22,6 +22,15 @@ struct apemode::AppContent {
     uint32_t        sceneId    = 0;
     uint32_t        maskId     = 0;
     Scene*          scenes[ 2 ];
+
+    NuklearSdlBase* Nk = nullptr;
+
+    std::unique_ptr< apemodevk::CommandBuffer > pCmdBuffer;
+    std::unique_ptr<apemodevk::DescriptorPool> pDescPool;
+    apemodevk::TDispatchableHandle<VkRenderPass> hRenderPass;
+    apemodevk::TDispatchableHandle<VkCommandPool> hCmdPool;
+    std::vector<apemodevk::TDispatchableHandle<VkFramebuffer>> hFramebuffers;
+
 };
 
 App::App( ) : content( new AppContent( ) ) {
@@ -39,12 +48,80 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         totalSecs = 0.0f;
 
         auto appSurface = GetSurface();
-        auto graphicsHandle = (GraphicsManager*) appSurface->GetGraphicsHandle();
+        if (appSurface->GetImpl() != kAppSurfaceImpl_SdlVk)
+            return false;
+
+        auto appSurfaceVk = (AppSurfaceSdlVk*)appSurface;
+        if (auto swapchain = appSurfaceVk->pSwapchain.get())
+        {
+            VkAttachmentDescription attachment = {};
+            attachment.format = swapchain->eColorFormat;
+            attachment.samples = VK_SAMPLE_COUNT_1_BIT;
+            attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+            attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+            attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+            attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+            attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+            attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+            VkAttachmentReference color_attachment = {};
+            color_attachment.attachment = 0;
+            color_attachment.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+            VkSubpassDescription subpass = {};
+            subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+            subpass.colorAttachmentCount = 1;
+            subpass.pColorAttachments = &color_attachment;
+
+            apemodevk::TInfoStruct<VkRenderPassCreateInfo> renderPassCreateInfo = {};
+            renderPassCreateInfo->attachmentCount = 1;
+            renderPassCreateInfo->pAttachments = &attachment;
+            renderPassCreateInfo->subpassCount = 1;
+            renderPassCreateInfo->pSubpasses = &subpass;
+
+            if (false == content->hRenderPass.Recreate(*appSurfaceVk->pNode, renderPassCreateInfo)) {
+                DebugBreak();
+                return false;
+            }
+
+            for (auto & imgView : swapchain->hImgViews) {
+                apemodevk::TInfoStruct<VkFramebufferCreateInfo > framebufferCreateInfo;
+                framebufferCreateInfo->renderPass = content->hRenderPass;
+                framebufferCreateInfo->attachmentCount = 1;
+                framebufferCreateInfo->pAttachments = imgView;
+                framebufferCreateInfo->width = swapchain->ColorExtent.width;
+                framebufferCreateInfo->height = swapchain->ColorExtent.height;
+                framebufferCreateInfo->layers = 1;
+
+                auto & framebuffer = apemodevk::PushBackAndGet(content->hFramebuffers);
+                if (false == framebuffer.Recreate(*appSurfaceVk->pNode, framebufferCreateInfo)) {
+                    DebugBreak();
+                    return false;
+                }
+            }
+        }
+
+        content->pCmdBuffer = std::move(std::make_unique< apemodevk::CommandBuffer >());
+        if (false == content->pCmdBuffer->RecreateResourcesFor(*appSurfaceVk->pNode, appSurfaceVk->pCmdQueue->QueueFamilyId, true, false)) {
+            DebugBreak();
+            return false;
+        }
+
+        content->pDescPool = std::move(std::make_unique< apemodevk::DescriptorPool >());
+        if (false == content->pDescPool->RecreateResourcesFor(*appSurfaceVk->pNode, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256 )) {
+            DebugBreak();
+            return false;
+        }
 
         content->Nk = new NuklearSdlVk();
+
         NuklearSdlVk::InitParametersVk initParams;
         initParams.pAlloc = nullptr;
-        initParams.pDevice = graphicsHandle->GetPrimaryGraphicsNode();
+        initParams.pDevice = *appSurfaceVk->pNode;
+        initParams.pPhysicalDevice = *appSurfaceVk->pNode;
+        initParams.pCmdBuffer = *content->pCmdBuffer;
+        initParams.pRenderPass = content->hRenderPass;
+        initParams.pDescPool = *content->pDescPool;
 
         content->Nk->Init( &initParams );
 

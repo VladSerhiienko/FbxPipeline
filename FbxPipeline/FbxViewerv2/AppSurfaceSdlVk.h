@@ -2,38 +2,41 @@
 
 #include <IAppSurface.h>
 
-namespace apemode
-{
-class AppSurfaceSettings;
+namespace apemodevk {
+    class GraphicsManager;
+    class GraphicsDevice;
+    class Swapchain;
+    class CommandQueue;
+}
 
-/**
-* Contains handle to window and graphics context.
-*/
-class AppSurfaceSdlVk : public IAppSurface
-{
-    struct PrivateContent;
-    friend PrivateContent;
-    PrivateContent* pContent;
+namespace apemode {
+    class AppSurfaceSettings;
 
-public:
-    AppSurfaceSdlVk();
-    virtual ~AppSurfaceSdlVk();
+    /**
+     * Contains handle to window and graphics context.
+     **/
+    class AppSurfaceSdlVk : public IAppSurface {
+    public:
+        AppSurfaceSdlVk( );
+        virtual ~AppSurfaceSdlVk( );
 
-    /** Creates window and initializes its graphics context. */
-    virtual bool Initialize() override;
+        virtual bool Initialize( ) override;
+        virtual void Finalize( ) override;
 
-    /** Releases graphics context and destroyes window. */
-    virtual void Finalize() override;
+        virtual void OnFrameMove( ) override;
+        virtual void OnFrameDone( ) override;
 
-    /** Must be called when new frame starts. */
-    virtual void OnFrameMove() override;
+        virtual uint32_t GetWidth( ) const override;
+        virtual uint32_t GetHeight( ) const override;
+        virtual void*    GetWindowHandle( ) override;
+        virtual void*    GetGraphicsHandle( ) override;
 
-    /** Must be called when the current frame is done. */
-    virtual void OnFrameDone() override;
-
-    virtual uint32_t GetWidth() const override;
-    virtual uint32_t GetHeight() const override;
-    virtual void* GetWindowHandle() override;
-    virtual void* GetGraphicsHandle() override;
-};
+        SDL_Window*                                   pSdlWindow;
+        HWND                                          hWnd;
+        HINSTANCE                                     hInstance;
+        std::unique_ptr< apemodevk::GraphicsManager > pDeviceManager;
+        std::unique_ptr< apemodevk::Swapchain >       pSwapchain;
+        std::unique_ptr< apemodevk::CommandQueue >    pCmdQueue;
+        apemodevk::GraphicsDevice*                    pNode;
+    };
 }

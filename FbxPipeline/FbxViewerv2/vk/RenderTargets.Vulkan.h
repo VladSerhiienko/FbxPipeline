@@ -4,14 +4,14 @@
 #include <RenderTarget.Vulkan.h>
 #include <DepthStencil.Vulkan.h>
 
-namespace apemode
+namespace apemodevk
 {
     class CommandBuffer;
     class RenderPass;
     class Framebuffer;
 
-    class RenderTargets : public apemode::ScalableAllocPolicy,
-                                                      public apemode::NoCopyAssignPolicy
+    class RenderTargets : public apemodevk::ScalableAllocPolicy,
+                                                      public apemodevk::NoCopyAssignPolicy
     {
     public:
         enum
@@ -24,8 +24,8 @@ namespace apemode
         struct BeginEndScope;
         friend BeginEndScope;
 
-        struct BeginEndScope : public apemode::ScalableAllocPolicy,
-                                                           public apemode::NoCopyAssignPolicy
+        struct BeginEndScope : public apemodevk::ScalableAllocPolicy,
+                                                           public apemodevk::NoCopyAssignPolicy
         {
             CommandBuffer &   AssociatedCmdList;
             RenderTargets & AssociatedRenderTargets;
@@ -59,8 +59,8 @@ namespace apemode
         uint32_t                  GetReadFrame () const;
         uint32_t                  GetWriteFrame () const;
         uint32_t                  GetAttachmentCount () const;
-        apemode::RenderPass const *  GetRenderPass () const;
-        apemode::Framebuffer const * GetWriteFramebuffer () const;
+        apemodevk::RenderPass const *  GetRenderPass () const;
+        apemodevk::Framebuffer const * GetWriteFramebuffer () const;
 
     public:
         uint32_t ReadFrame;
@@ -77,11 +77,11 @@ namespace apemode
         VkClearValue ClearValues[kFrameMaxCount][kColorMaxCount + 1];
 
         VkFormat                                         DepthStencilFormat;
-        std::shared_ptr<apemode::DepthStencilResourceView>  pDepthStencilViews[ kFrameMaxCount ];
+        std::shared_ptr<apemodevk::DepthStencilResourceView>  pDepthStencilViews[ kFrameMaxCount ];
         VkFormat                                         pColorFormats[ kColorMaxCount ];
-        std::shared_ptr<apemode::ColorResourceView> ppColorViews[ kFrameMaxCount ][ kColorMaxCount ];
+        std::shared_ptr<apemodevk::ColorResourceView> ppColorViews[ kFrameMaxCount ][ kColorMaxCount ];
 
-        apemode::RenderPass const *  pRenderPass;
-        apemode::Framebuffer const * ppFramebuffers[ kFrameMaxCount ];
+        apemodevk::RenderPass const *  pRenderPass;
+        apemodevk::Framebuffer const * ppFramebuffers[ kFrameMaxCount ];
     };
 }

@@ -6,22 +6,22 @@
 /// DepthStencilResourceView
 /// -------------------------------------------------------------------------------------------------------------------
 
-std::shared_ptr<apemode::DepthStencilResourceView> apemode::DepthStencilResourceView::MakeNewLinked()
+std::shared_ptr<apemodevk::DepthStencilResourceView> apemodevk::DepthStencilResourceView::MakeNewLinked()
 {
     return std::shared_ptr<DepthStencilResourceView> (new DepthStencilResourceView ());
 }
 
-std::unique_ptr<apemode::DepthStencilResourceView> apemode::DepthStencilResourceView::MakeNewUnique()
+std::unique_ptr<apemodevk::DepthStencilResourceView> apemodevk::DepthStencilResourceView::MakeNewUnique()
 {
     return std::unique_ptr<DepthStencilResourceView> (new DepthStencilResourceView ());
 }
 
-std::unique_ptr<apemode::DepthStencilResourceView> apemode::DepthStencilResourceView::MakeNullUnique ()
+std::unique_ptr<apemodevk::DepthStencilResourceView> apemodevk::DepthStencilResourceView::MakeNullUnique ()
 {
     return std::unique_ptr<DepthStencilResourceView> (nullptr);
 }
 
-apemode::DepthStencilResourceView::DepthStencilResourceView ()
+apemodevk::DepthStencilResourceView::DepthStencilResourceView ()
     : DepthFormat (VK_FORMAT_UNDEFINED), StencilFormat (VK_FORMAT_UNDEFINED)
 {
     ViewType = kResourceViewType_DepthStencil;
@@ -48,12 +48,12 @@ apemode::DepthStencilResourceView::DepthStencilResourceView ()
         ImgAspect |= VK_IMAGE_ASPECT_STENCIL_BIT;
 }
 
-apemode::DepthStencilResourceView::~DepthStencilResourceView()
+apemodevk::DepthStencilResourceView::~DepthStencilResourceView()
 {
     _Aux_DebugTraceFunc;
 }
 
-bool apemode::DepthStencilResourceView::RecreateResourcesFor (GraphicsDevice & InGraphicsNode,
+bool apemodevk::DepthStencilResourceView::RecreateResourcesFor (GraphicsDevice & InGraphicsNode,
                                                            VkFormat         InFmt,
                                                            uint32_t         InWidth,
                                                            uint32_t         InHeight,

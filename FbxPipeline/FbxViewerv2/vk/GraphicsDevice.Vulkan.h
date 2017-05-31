@@ -2,7 +2,7 @@
 
 #include <GraphicsManager.Vulkan.h>
 
-namespace apemode {
+namespace apemodevk {
     class Swapchain;
     class CommandQueue;
     class ResourceReference;
@@ -13,90 +13,74 @@ namespace apemode {
     class FramebufferManager;
     class GraphicsManager;
 
-    class GraphicsDevice : public apemode::ScalableAllocPolicy, public apemode::NoCopyAssignPolicy {
+    class GraphicsDevice : public apemodevk::ScalableAllocPolicy, public apemodevk::NoCopyAssignPolicy {
     public:
-        static std::unique_ptr< GraphicsDevice > MakeNewUnique( );
-        static std::unique_ptr< GraphicsDevice > MakeNullUnique( );
-
-    public:
-        GraphicsDevice( );
-        ~GraphicsDevice( );
-
-        bool RecreateResourcesFor( VkPhysicalDevice AdapterHandle, GraphicsManager &GraphicsEcosystem );
-
-        operator VkDevice( ) const;
-        operator VkPhysicalDevice( ) const;
-        operator VkInstance( ) const;
-
-        bool     IsValid( ) const;
-        bool     Await( );
-        uint32_t GetQueueFamilyCount( );
-        uint32_t GetQueueCountInQueueFamily( uint32_t QueueFamilyId );
-        GraphicsManager &GetGraphicsEcosystem( );
-
-        ShaderManager &        GetDefaultShaderManager( );
-        RenderPassManager &    GetDefaultRenderPassManager( );
-        FramebufferManager &   GetDefaultFramebufferManager( );
-        PipelineStateManager & GetDefaultPipelineStateManager( );
-        PipelineLayoutManager &GetDefaultPipelineLayoutManager( );
+        friend Swapchain;
+        friend ResourceReference;
+        friend GraphicsManager;
 
         typedef std::vector< float >                           FloatVector;
         typedef TInfoStruct< VkLayerProperties >::Vector       VkLayerPropertiesVector;
         typedef TInfoStruct< VkQueueFamilyProperties >::Vector VkQueueFamilyPropertiesVector;
         typedef TInfoStruct< VkDeviceQueueCreateInfo >::Vector VkDeviceQueueCreateInfoVector;
+        typedef GraphicsManager::NativeLayerWrapper            NativeLayerWrapper;
+        typedef GraphicsManager::NativeLayerWrapperVector      NativeLayerWrapperVector;
+        typedef GraphicsManager::LpstrVector                   LpstrVector;
+        typedef VkFormatProperties                             VkFormatPropertiesArray[ VK_FORMAT_RANGE_SIZE ];
 
-        typedef GraphicsManager::NativeLayerWrapper       NativeLayerWrapper;
-        typedef GraphicsManager::NativeLayerWrapperVector NativeLayerWrapperVector;
-        typedef GraphicsManager::LpstrVector              LpstrVector;
-        typedef VkFormatProperties                        VkFormatPropertiesArray[ VK_FORMAT_RANGE_SIZE ];
+        static std::unique_ptr< GraphicsDevice > MakeNewUnique( );
+        static std::unique_ptr< GraphicsDevice > MakeNullUnique( );
 
-        TDispatchableHandle< VkDevice >      LogicalDeviceHandle;
-        VkPhysicalDevice                     AdapterHandle;
-        VkPhysicalDeviceProperties           AdapterProps;
-        VkQueueFamilyPropertiesVector        QueueProps;
-        VkDeviceQueueCreateInfoVector        QueueReqs;
-        VkPhysicalDeviceMemoryProperties     MemoryProps;
-        VkPhysicalDeviceFeatures             Features;
-        FloatVector                          QueuePrioritiesStorage;
-        VkFormatPropertiesArray              FormatProperties;
-        NativeLayerWrapperVector             LayerWrappers;
-        LpstrVector                          PresentLayers;
-        std::vector< VkExtensionProperties > DeviceExtensionProps;
+        GraphicsDevice( );
+        ~GraphicsDevice( );
 
-        bool                ScanDeviceQueues( );
-        bool                ScanDeviceLayerProperties( );
-        bool                ScanFormatProperties( );
-        NativeLayerWrapper &GetUnnamedLayer( );
+        bool RecreateResourcesFor( VkPhysicalDevice AdapterHandle, GraphicsManager &GraphicsEcosystem );
 
-        bool SupportsGraphics( uint32_t QueueFamilyId );
-        bool SupportsCompute( uint32_t QueueFamilyId );
-        bool SupportsSparseBinding( uint32_t QueueFamilyId );
-        bool SupportsTransfer( uint32_t QueueFamilyId );
+        bool IsValid( ) const;
+        bool Await( );
 
-    private:
-        struct PrivateContent;
+        uint32_t GetQueueFamilyCount( );
+        uint32_t GetQueueCountInQueueFamily( uint32_t QueueFamilyId );
 
-    private:
-        friend Swapchain;
-        friend ResourceReference;
-        friend PrivateContent;
-        friend GraphicsManager;
+        GraphicsManager &      GetGraphicsEcosystem( );
+        ShaderManager &        GetDefaultShaderManager( );
+        RenderPassManager &    GetDefaultRenderPassManager( );
+        FramebufferManager &   GetDefaultFramebufferManager( );
+        PipelineStateManager & GetDefaultPipelineStateManager( );
+        PipelineLayoutManager &GetDefaultPipelineLayoutManager( );
+        NativeLayerWrapper &   GetUnnamedLayer( );
 
-    private:
-        operator PrivateContent &( );
+        bool SupportsGraphics( uint32_t QueueFamilyId ) const;
+        bool SupportsCompute( uint32_t QueueFamilyId ) const;
+        bool SupportsSparseBinding( uint32_t QueueFamilyId ) const;
+        bool SupportsTransfer( uint32_t QueueFamilyId ) const;
+        bool SupportsPresenting( uint32_t QueueFamilyId, VkSurfaceKHR hSurface ) const;
 
-        typedef apemode::TSafeDeleteObjOp< apemode::RenderPassManager >     RenderPassManagerDeleter;
-        typedef apemode::TSafeDeleteObjOp< apemode::FramebufferManager >    FramebufferManagerDeleter;
-        typedef apemode::TSafeDeleteObjOp< apemode::PipelineLayoutManager > PipelineLayoutManagerDeleter;
-        typedef apemode::TSafeDeleteObjOp< apemode::PipelineStateManager >  PipelineStateManagerDeleter;
-        typedef apemode::TSafeDeleteObjOp< apemode::ShaderManager >         ShaderManagerDeleter;
+        bool ScanDeviceQueues( );
+        bool ScanDeviceLayerProperties( );
+        bool ScanFormatProperties( );
 
-        std::unique_ptr< apemode::RenderPassManager, RenderPassManagerDeleter >         RenderPassManager;
-        std::unique_ptr< apemode::FramebufferManager, FramebufferManagerDeleter >       FramebufferManager;
-        std::unique_ptr< apemode::PipelineLayoutManager, PipelineLayoutManagerDeleter > PipelineLayoutManager;
-        std::unique_ptr< apemode::PipelineStateManager, PipelineStateManagerDeleter >   PipelineStateManager;
-        std::unique_ptr< apemode::ShaderManager, ShaderManagerDeleter >                 ShaderManager;
+        operator VkDevice( ) const;
+        operator VkPhysicalDevice( ) const;
+        operator VkInstance( ) const;
 
-        GraphicsManager *pGraphicsEcosystem;
+        GraphicsManager *                                   pGraphicsEcosystem;
+        TDispatchableHandle< VkDevice >                     LogicalDeviceHandle;
+        VkPhysicalDevice                                    AdapterHandle;
+        VkPhysicalDeviceProperties                          AdapterProps;
+        VkQueueFamilyPropertiesVector                       QueueProps;
+        VkDeviceQueueCreateInfoVector                       QueueReqs;
+        VkPhysicalDeviceMemoryProperties                    MemoryProps;
+        VkPhysicalDeviceFeatures                            Features;
+        FloatVector                                         QueuePrioritiesStorage;
+        VkFormatPropertiesArray                             FormatProperties;
+        NativeLayerWrapperVector                            LayerWrappers;
+        LpstrVector                                         PresentLayers;
+        std::vector< VkExtensionProperties >                DeviceExtensionProps;
+        std::unique_ptr< apemodevk::RenderPassManager >     RenderPassManager;
+        std::unique_ptr< apemodevk::FramebufferManager >    FramebufferManager;
+        std::unique_ptr< apemodevk::PipelineLayoutManager > PipelineLayoutManager;
+        std::unique_ptr< apemodevk::PipelineStateManager >  PipelineStateManager;
+        std::unique_ptr< apemodevk::ShaderManager >         ShaderManager;
     };
 }

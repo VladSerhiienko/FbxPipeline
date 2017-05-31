@@ -32,30 +32,9 @@ public:
     }
 };
 
-struct apemode::AppSurfaceSdlVk::PrivateContent {
-    SDL_Window* pSdlWindow;
-    HWND        hWnd;
-    HINSTANCE   hInstance;
 
-    std::unique_ptr<GraphicsManager> pDeviceManager;
-    std::unique_ptr<Swapchain> pSwapchain;
-    std::unique_ptr<CommandQueue> pCmdQueue;
-    std::unique_ptr<CommandBuffer> pCmdBuffer;
-
-
-
-
-    GraphicsDevice* pNode;
-
-    PrivateContent( ) : pSdlWindow( nullptr ) {
-    }
-
-    ~PrivateContent( ) {
-        pSdlWindow = nullptr;
-    }
-};
-
-apemode::AppSurfaceSdlVk::AppSurfaceSdlVk( ) : pContent( nullptr ) {
+apemode::AppSurfaceSdlVk::AppSurfaceSdlVk( ) {
+    Impl = kAppSurfaceImpl_SdlVk;
 }
 
 apemode::AppSurfaceSdlVk::~AppSurfaceSdlVk( ) {
@@ -65,10 +44,9 @@ apemode::AppSurfaceSdlVk::~AppSurfaceSdlVk( ) {
 bool apemode::AppSurfaceSdlVk::Initialize( ) {
     SDL_Log( "apemode/AppSurfaceSdlVk/Initialize" );
 
-    pContent = new PrivateContent( );
     if ( !SDL_Init( SDL_INIT_VIDEO ) ) {
         AppSurfaceSettings defaultSettings;
-        pContent->pSdlWindow = SDL_CreateWindow( defaultSettings.pName,
+        pSdlWindow = SDL_CreateWindow( defaultSettings.pName,
                                                  SDL_WINDOWPOS_CENTERED,
                                                  SDL_WINDOWPOS_CENTERED,
                                                  defaultSettings.Width,
@@ -78,59 +56,63 @@ bool apemode::AppSurfaceSdlVk::Initialize( ) {
         SDL_Log( "apemode/AppSurfaceSdlVk/Initialize: Created window." );
 
         SDL_SysWMinfo windowInfo{};
-        if ( SDL_TRUE == SDL_GetWindowWMInfo( pContent->pSdlWindow, &windowInfo ) ) {
-            pContent->hWnd      = windowInfo.info.win.window;
-            pContent->hInstance = (HINSTANCE) GetWindowLongPtrA( windowInfo.info.win.window, GWLP_HINSTANCE );
+        if ( SDL_TRUE == SDL_GetWindowWMInfo( pSdlWindow, &windowInfo ) ) {
+            hWnd      = windowInfo.info.win.window;
+            hInstance = (HINSTANCE) GetWindowLongPtrA( windowInfo.info.win.window, GWLP_HINSTANCE );
 
-            pContent->pDeviceManager = std::move( std::make_unique< GraphicsManager >( ) );
-            if ( pContent->pDeviceManager->RecreateGraphicsNodes( ) ) {
-                pContent->pNode = pContent->pDeviceManager->GetPrimaryGraphicsNode( );
+            pDeviceManager = std::move( std::make_unique< apemodevk::GraphicsManager >( ) );
+            if ( pDeviceManager->RecreateGraphicsNodes( ) ) {
+                pNode = pDeviceManager->GetPrimaryGraphicsNode( );
 
-                pContent->pCmdQueue = std::move( std::make_unique< CommandQueue >( ) );
-                pContent->pCmdQueue->RecreateResourcesFor( *pContent->pNode, 0, 0 );
+                uint32_t queueFamilyId    = 0;
+                uint32_t queueFamilyCount = pNode->QueueProps.size( );
+                for ( ; queueFamilyId < queueFamilyCount; ++queueFamilyId ) {
 
-                pContent->pSwapchain = std::move( std::make_unique< Swapchain >( ) );
-                pContent->pSwapchain->RecreateResourceFor(
-                    *pContent->pNode, *pContent->pCmdQueue,
-                    pContent->hInstance, pContent->hWnd,
-                    GetWidth( ), GetHeight( ) );
+                    pSwapchain = std::move(std::make_unique< apemodevk::Swapchain >());
+                    if (true == pSwapchain->RecreateResourceFor(*pNode, queueFamilyId,  hInstance, hWnd, GetWidth(), GetHeight())) {
+                        if ( pNode->SupportsGraphics( queueFamilyId ) && pNode->SupportsPresenting( queueFamilyId, pSwapchain->hSurface ) ) {
+                            if ( nullptr == pCmdQueue )
+                                pCmdQueue = std::move( std::make_unique< apemodevk::CommandQueue >( ) );
+                            if ( pCmdQueue->RecreateResourcesFor( *pNode, queueFamilyId, 0 ) )
+                                break;
+                        }
+                    }
+                }
+
+                if ( nullptr == pCmdQueue ) {
+                    return false;
+                }
             }
         }
 
-        SDL_Log( "apemode/AppSurfaceSdlVk/Initialize: Initialized GLEW." );
-        return nullptr != pContent->pNode;
+        SDL_Log( "apemode/AppSurfaceSdlVk/Initialize: Initialized Vk." );
+        return true;
     }
 
     return false;
 }
 
 void apemode::AppSurfaceSdlVk::Finalize( ) {
-    if ( pContent->pSdlWindow ) {
+    if ( pSdlWindow ) {
         SDL_Log( "apemode/AppSurfaceSdlVk/Finalize: Deleting window." );
-        SDL_DestroyWindow( pContent->pSdlWindow );
-        pContent->pSdlWindow = nullptr;
-    }
-
-    if ( pContent ) {
-        SDL_Log( "apemode/AppSurfaceSdlVk/Finalize: Deleting content." );
-        delete pContent;
-        pContent = nullptr;
+        SDL_DestroyWindow( pSdlWindow );
+        pSdlWindow = nullptr;
     }
 }
 
 uint32_t apemode::AppSurfaceSdlVk::GetWidth( ) const {
-    assert( pContent->pSdlWindow && "Not initialized." );
+    assert( pSdlWindow && "Not initialized." );
 
     int OutWidth;
-    SDL_GetWindowSize( pContent->pSdlWindow, &OutWidth, nullptr );
+    SDL_GetWindowSize( pSdlWindow, &OutWidth, nullptr );
     return static_cast< uint32_t >( OutWidth );
 }
 
 uint32_t apemode::AppSurfaceSdlVk::GetHeight( ) const {
-    assert( pContent->pSdlWindow && "Not initialized." );
+    assert( pSdlWindow && "Not initialized." );
 
     int OutHeight;
-    SDL_GetWindowSize( pContent->pSdlWindow, nullptr, &OutHeight );
+    SDL_GetWindowSize( pSdlWindow, nullptr, &OutHeight );
     return static_cast< uint32_t >( OutHeight );
 }
 
@@ -138,13 +120,13 @@ void apemode::AppSurfaceSdlVk::OnFrameMove( ) {
 }
 
 void apemode::AppSurfaceSdlVk::OnFrameDone( ) {
-    SDL_GL_SwapWindow( pContent->pSdlWindow );
+    SDL_GL_SwapWindow( pSdlWindow );
 }
 
 void* apemode::AppSurfaceSdlVk::GetWindowHandle( ) {
-    return reinterpret_cast< void* >( pContent->pSdlWindow );
+    return reinterpret_cast< void* >( pSdlWindow );
 }
 
 void* apemode::AppSurfaceSdlVk::GetGraphicsHandle( ) {
-    return reinterpret_cast< void* >( pContent->pDeviceManager.get() );
+    return reinterpret_cast< void* >( pDeviceManager.get( ) );
 }

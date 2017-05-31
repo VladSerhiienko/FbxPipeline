@@ -3,7 +3,7 @@
 #include <GraphicsDevice.Vulkan.h>
 #include <NativeDispatchableHandles.Vulkan.h>
 
-namespace apemode
+namespace apemodevk
 {
     struct ExecutionSync
     {

@@ -6,7 +6,7 @@
 #include <CityHash.h>
 #include <NativeDispatchableHandles.Vulkan.h>
 
-namespace apemode
+namespace apemodevk
 {
     class ResourceView;
     class ColorResourceView;
@@ -16,14 +16,14 @@ namespace apemode
     class RenderPassDescription;
     class RenderPassBuilder;
 
-    class RenderPass : public apemode::ScalableAllocPolicy,
-                                                   public apemode::NoCopyAssignPolicy
+    class RenderPass : public apemodevk::ScalableAllocPolicy,
+                                                   public apemodevk::NoCopyAssignPolicy
     {
     public:
         uint64_t                                Hash;
-        apemode::TDispatchableHandle<VkRenderPass> Handle;
-        apemode::RenderPassDescription const *     pDesc;
-        apemode::GraphicsDevice const *            pNode;
+        apemodevk::TDispatchableHandle<VkRenderPass> Handle;
+        apemodevk::RenderPassDescription const *     pDesc;
+        apemodevk::GraphicsDevice const *            pNode;
 
     public:
         RenderPass();
@@ -32,12 +32,12 @@ namespace apemode
         operator VkRenderPass() const;
     };
 
-    class RenderPassDescription : public apemode::ScalableAllocPolicy,
-                                                              public apemode::NoCopyAssignPolicy
+    class RenderPassDescription : public apemodevk::ScalableAllocPolicy,
+                                                              public apemodevk::NoCopyAssignPolicy
     {
     public:
-        struct SubpassDescription : public apemode::ScalableAllocPolicy,
-                                                                public apemode::NoCopyAssignPolicy
+        struct SubpassDescription : public apemodevk::ScalableAllocPolicy,
+                                                                public apemodevk::NoCopyAssignPolicy
         {
             using NativeSubpassDescription  = TInfoStruct<VkSubpassDescription>;
             using NativeAttachmentReference = TInfoStruct<VkAttachmentReference>;
@@ -68,7 +68,7 @@ namespace apemode
 
     public:
         uint64_t                                      Hash;
-        apemode::TInfoStruct<VkRenderPassCreateInfo>     Desc;
+        apemodevk::TInfoStruct<VkRenderPassCreateInfo>     Desc;
         std::vector<VkAttachmentDescription> Attachments;
         std::vector<VkSubpassDependency>     SubpassDependencies;
         std::vector<uint64_t>                SwapchainAttachmentHashes;
@@ -87,8 +87,8 @@ namespace apemode
         MakeNewFromTemporary (RenderPassDescription const & TemporaryDesc);
     };
 
-    class RenderPassBuilder : public apemode::ScalableAllocPolicy,
-                                                          public apemode::NoCopyAssignPolicy
+    class RenderPassBuilder : public apemodevk::ScalableAllocPolicy,
+                                                          public apemodevk::NoCopyAssignPolicy
     {
     public:
         static const uint32_t sInvalidSwapchainId = 0xffffffff;
@@ -156,7 +156,7 @@ namespace apemode
                                    VkAccessFlags        eDstSubpassAccess,
                                    bool                 bDependentByRegion);
 
-        apemode::RenderPass const * RecreateRenderPass (apemode::GraphicsDevice & GraphicsNode);
+        apemodevk::RenderPass const * RecreateRenderPass (apemodevk::GraphicsDevice & GraphicsNode);
 
         /**
          * Checks whether subpasses are complete.
@@ -170,8 +170,8 @@ namespace apemode
 
     class RenderPassManager
     {
-        friend apemode::GraphicsDevice;
-        friend apemode::RenderPassBuilder;
+        friend apemodevk::GraphicsDevice;
+        friend apemodevk::RenderPassBuilder;
         struct RenderPassContent;
         struct PrivateContent;
 
@@ -181,7 +181,7 @@ namespace apemode
         RenderPassManager ();
         ~RenderPassManager ();
 
-        void AddNewRenderPassObject (apemode::RenderPass & RenderPass);
-        apemode::RenderPass const * TryGetRenderPassObjectByHash (uint64_t Hash);
+        void AddNewRenderPassObject (apemodevk::RenderPass & RenderPass);
+        apemodevk::RenderPass const * TryGetRenderPassObjectByHash (uint64_t Hash);
     };
 }

@@ -7,17 +7,17 @@
 /// TextureResourceView
 /// -------------------------------------------------------------------------------------------------------------------
 
-std::shared_ptr<apemode::TextureResourceView> apemode::TextureResourceView::MakeNewLinked ()
+std::shared_ptr<apemodevk::TextureResourceView> apemodevk::TextureResourceView::MakeNewLinked ()
 {
     return std::shared_ptr<TextureResourceView> (new TextureResourceView ());
 }
 
-std::unique_ptr<apemode::TextureResourceView> apemode::TextureResourceView::MakeNewUnique ()
+std::unique_ptr<apemodevk::TextureResourceView> apemodevk::TextureResourceView::MakeNewUnique ()
 {
     return std::unique_ptr<TextureResourceView> (new TextureResourceView ());
 }
 
-apemode::TextureResourceView::TextureResourceView ()
+apemodevk::TextureResourceView::TextureResourceView ()
     : bIsCube (false)
     , Width (0)
     , Height (0)
@@ -33,7 +33,7 @@ apemode::TextureResourceView::TextureResourceView ()
     ViewType = kResourceViewType_Texture;
 }
 
-void apemode::TextureResourceView::SetState(apemode::CommandBuffer &  CmdBuffer,
+void apemodevk::TextureResourceView::SetState(apemodevk::CommandBuffer &  CmdBuffer,
                                          VkPipelineStageFlags PipelineStageFlags,
                                          VkAccessFlags        AccessMask,
                                          VkImageLayout        ImgLayout,
@@ -85,6 +85,6 @@ void apemode::TextureResourceView::SetState(apemode::CommandBuffer &  CmdBuffer,
     }
 }
 
-apemode::TextureResourceView::~TextureResourceView()
+apemodevk::TextureResourceView::~TextureResourceView()
 {
 }

@@ -4,20 +4,20 @@
 #include <CommandQueue.Vulkan.h>
 #include <PipelineLayout.Vulkan.h>
 
-apemode::DescriptorPool::DescriptorPool () : pNode (nullptr)
+apemodevk::DescriptorPool::DescriptorPool () : pNode (nullptr)
 {
 }
 
-apemode::DescriptorPool::~DescriptorPool()
+apemodevk::DescriptorPool::~DescriptorPool()
 {
 }
 
-uint32_t apemode::DescriptorPool::GetAvailableSetCount () const
+uint32_t apemodevk::DescriptorPool::GetAvailableSetCount () const
 {
     return DescSetCounter;
 }
 
-uint32_t apemode::DescriptorPool::GetAvailableDescCount (VkDescriptorType DescType) const
+uint32_t apemodevk::DescriptorPool::GetAvailableDescCount (VkDescriptorType DescType) const
 {
     _Game_engine_Assert (DescPoolCounters[ DescType ].type == DescType,
                          "Desc type mismatch.");
@@ -25,7 +25,7 @@ uint32_t apemode::DescriptorPool::GetAvailableDescCount (VkDescriptorType DescTy
     return DescPoolCounters[ DescType ].descriptorCount;
 }
 
-bool apemode::DescriptorPool::RecreateResourcesFor (GraphicsDevice & GraphicsNode,
+bool apemodevk::DescriptorPool::RecreateResourcesFor (GraphicsDevice & GraphicsNode,
                                                  uint32_t         MaxSets,
                                                  uint32_t         MaxSamplerCount,
                                                  uint32_t         MaxCombinedImgCount,
@@ -44,8 +44,8 @@ bool apemode::DescriptorPool::RecreateResourcesFor (GraphicsDevice & GraphicsNod
     // This array is used for creating descriptor pool.
     VkDescriptorPoolSize LclSubpoolSizes[ VK_DESCRIPTOR_TYPE_RANGE_SIZE ];
 
-    apemode::ZeroMemory (DescPoolCounters);
-    apemode::ZeroMemory (LclSubpoolSizes);
+    apemodevk::ZeroMemory (DescPoolCounters);
+    apemodevk::ZeroMemory (LclSubpoolSizes);
 
     uint32_t DescTypeCounter       = 0;
     uint32_t SubpoolSizeCounter    = 0;
@@ -95,23 +95,23 @@ bool apemode::DescriptorPool::RecreateResourcesFor (GraphicsDevice & GraphicsNod
     return false;
 }
 
-apemode::DescriptorPool::operator VkDescriptorPool() const
+apemodevk::DescriptorPool::operator VkDescriptorPool() const
 {
     return hDescPool;
 }
 
-apemode::DescriptorSet::DescriptorSet( ) : pDescPool( nullptr ), pNode( nullptr ) {
+apemodevk::DescriptorSet::DescriptorSet( ) : pDescPool( nullptr ), pNode( nullptr ) {
 }
 
-apemode::DescriptorSet::~DescriptorSet()
+apemodevk::DescriptorSet::~DescriptorSet()
 {
     if (pDescPool)
     {
     }
 }
 
-bool apemode::DescriptorSet::RecreateResourcesFor( apemode::GraphicsDevice& GraphicsNode,
-                                                   apemode::DescriptorPool& DescPool,
+bool apemodevk::DescriptorSet::RecreateResourcesFor( apemodevk::GraphicsDevice& GraphicsNode,
+                                                   apemodevk::DescriptorPool& DescPool,
                                                    VkDescriptorSetLayout    DescSetLayout ) {
     if ( DescPool.DescSetCounter >= 1 ) {
         TInfoStruct< VkDescriptorSetAllocateInfo > AllocInfo;
@@ -133,7 +133,7 @@ bool apemode::DescriptorSet::RecreateResourcesFor( apemode::GraphicsDevice& Grap
     return false;
 }
 
-void apemode::DescriptorSet::BindTo (apemode::CommandBuffer & CmdBuffer,
+void apemodevk::DescriptorSet::BindTo (apemodevk::CommandBuffer & CmdBuffer,
                                   VkPipelineBindPoint PipelineBindPoint,
                                   uint32_t            DynamicOffsetCount,
                                   const uint32_t *    DynamicOffsets)
@@ -152,16 +152,16 @@ void apemode::DescriptorSet::BindTo (apemode::CommandBuffer & CmdBuffer,
     }*/
 }
 
-apemode::DescriptorSet::operator VkDescriptorSet() const
+apemodevk::DescriptorSet::operator VkDescriptorSet() const
 {
     return hDescSet;
 }
 
-apemode::DescriptorSetUpdater::DescriptorSetUpdater ()
+apemodevk::DescriptorSetUpdater::DescriptorSetUpdater ()
 {
 }
 
-void apemode::DescriptorSetUpdater::Reset (uint32_t MaxWrites, uint32_t MaxCopies)
+void apemodevk::DescriptorSetUpdater::Reset (uint32_t MaxWrites, uint32_t MaxCopies)
 {
     pNode = nullptr;
 
@@ -176,7 +176,7 @@ void apemode::DescriptorSetUpdater::Reset (uint32_t MaxWrites, uint32_t MaxCopie
     Copies.reserve (MaxCopies);
 }
 
-bool apemode::DescriptorSetUpdater::SetGraphicsNode (GraphicsDevice const & GraphicsNode)
+bool apemodevk::DescriptorSetUpdater::SetGraphicsNode (GraphicsDevice const & GraphicsNode)
 {
     if (apemode_likely (pNode))
     {
@@ -189,7 +189,7 @@ bool apemode::DescriptorSetUpdater::SetGraphicsNode (GraphicsDevice const & Grap
     return true;
 }
 
-bool apemode::DescriptorSetUpdater::WriteUniformBuffer (DescriptorSet const & DescSet,
+bool apemodevk::DescriptorSetUpdater::WriteUniformBuffer (DescriptorSet const & DescSet,
                                                      VkBuffer              Buffer,
                                                      uint32_t              Offset,
                                                      uint32_t              Range,
@@ -208,8 +208,8 @@ bool apemode::DescriptorSetUpdater::WriteUniformBuffer (DescriptorSet const & De
     }
 
     uintptr_t BufferInfoIdx = BufferInfos.size ();
-    auto &    Write         = apemode::PushBackAndGet(Writes);
-    auto &    BufferInfo    = apemode::PushBackAndGet(BufferInfos);
+    auto &    Write         = apemodevk::PushBackAndGet(Writes);
+    auto &    BufferInfo    = apemodevk::PushBackAndGet(BufferInfos);
 
     BufferInfo.buffer = Buffer;
     BufferInfo.offset = Offset;
@@ -225,7 +225,7 @@ bool apemode::DescriptorSetUpdater::WriteUniformBuffer (DescriptorSet const & De
     return true;
 }
 
-bool apemode::DescriptorSetUpdater::WriteCombinedImgSampler (DescriptorSet const & DescSet,
+bool apemodevk::DescriptorSetUpdater::WriteCombinedImgSampler (DescriptorSet const & DescSet,
                                                           VkImageView           ImgView,
                                                           VkImageLayout         ImgLayout,
                                                           VkSampler             Sampler,
@@ -244,8 +244,8 @@ bool apemode::DescriptorSetUpdater::WriteCombinedImgSampler (DescriptorSet const
     }
 
     uintptr_t ImgInfoIdx = ImgInfos.size();
-    auto &    Write      = apemode::PushBackAndGet(Writes);
-    auto &    ImgInfo    = apemode::PushBackAndGet(ImgInfos);
+    auto &    Write      = apemodevk::PushBackAndGet(Writes);
+    auto &    ImgInfo    = apemodevk::PushBackAndGet(ImgInfos);
 
     ImgInfo.sampler     = Sampler;
     ImgInfo.imageView   = ImgView;
@@ -261,7 +261,7 @@ bool apemode::DescriptorSetUpdater::WriteCombinedImgSampler (DescriptorSet const
     return true;
 }
 
-void apemode::DescriptorSetUpdater::Flush()
+void apemodevk::DescriptorSetUpdater::Flush()
 {
     for (auto & Write : Writes)
     {

@@ -3,7 +3,7 @@
 #include <GraphicsDevice.Vulkan.h>
 #include <NativeDispatchableHandles.Vulkan.h>
 
-namespace apemode
+namespace apemodevk
 {
     class CommandBuffer;
     class CommandQueue;
@@ -12,8 +12,8 @@ namespace apemode
     class PipelineLayout;
     class PipelineState;
 
-    class CommandBuffer : public apemode::ScalableAllocPolicy,
-                                                    public apemode::NoCopyAssignPolicy
+    class CommandBuffer : public apemodevk::ScalableAllocPolicy,
+                                                    public apemodevk::NoCopyAssignPolicy
     {
     public:
         enum CommandListType
@@ -83,7 +83,7 @@ namespace apemode
         operator VkCommandBuffer() const;
 
     protected:
-        struct StagedBarrier : public apemode::ScalableAllocPolicy
+        struct StagedBarrier : public apemodevk::ScalableAllocPolicy
         {
             enum EType
             {
@@ -146,20 +146,20 @@ namespace apemode
         uint32_t                ImgBarrierCount;
         uint32_t                BufferBarrierCount;
 
-        apemode::RenderPass const *                   pRenderPass;
-        apemode::Framebuffer const *                  pFramebuffer;
-        apemode::PipelineLayout const *                pPipelineLayout;
-        apemode::PipelineState const *                pPipelineState;
-        apemode::TDispatchableHandle<VkCommandBuffer> hCmdList;
-        apemode::TDispatchableHandle<VkCommandPool>   hCmdAlloc;
+        apemodevk::RenderPass const *                   pRenderPass;
+        apemodevk::Framebuffer const *                  pFramebuffer;
+        apemodevk::PipelineLayout const *                pPipelineLayout;
+        apemodevk::PipelineState const *                pPipelineState;
+        apemodevk::TDispatchableHandle<VkCommandBuffer> hCmdList;
+        apemodevk::TDispatchableHandle<VkCommandPool>   hCmdAlloc;
     };
 
     /**
      * Stores reserved command queues of devices. This class is used by queues,
      * but can also be potentially used by the graphics devices.
      */
-    class CommandQueueReserver : public apemode::ScalableAllocPolicy,
-                                                             public apemode::NoCopyAssignPolicy
+    class CommandQueueReserver : public apemodevk::ScalableAllocPolicy,
+                                                             public apemodevk::NoCopyAssignPolicy
     {
         friend CommandQueue;
         friend GraphicsDevice;
@@ -211,8 +211,8 @@ namespace apemode
         static CommandQueueReserver & Get ();
     };
 
-    class CommandQueue : public apemode::ScalableAllocPolicy,
-                                                     public apemode::NoCopyAssignPolicy
+    class CommandQueue : public apemodevk::ScalableAllocPolicy,
+                                                     public apemodevk::NoCopyAssignPolicy
     {
     public:
         CommandQueue ();

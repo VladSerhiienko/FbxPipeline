@@ -12,17 +12,17 @@
 /// ResourceReference
 /// -------------------------------------------------------------------------------------------------------------------
 
-apemode::ResourceReference::LkPtr apemode::ResourceReference::MakeNewLinked(GraphicsDevice & GraphicsNode)
+apemodevk::ResourceReference::LkPtr apemodevk::ResourceReference::MakeNewLinked(GraphicsDevice & GraphicsNode)
 {
     return std::make_shared<ResourceReference>(GraphicsNode);
 }
 
-apemode::ResourceReference::ResourceReference(GraphicsDevice & GraphicsNode)
+apemodevk::ResourceReference::ResourceReference(GraphicsDevice & GraphicsNode)
     : GraphicsNode(GraphicsNode)
 {
 }
 
-uint32_t apemode::ResourceReference::GetElementSizeInBytes(VkFormat Format)
+uint32_t apemodevk::ResourceReference::GetElementSizeInBytes(VkFormat Format)
 {
     switch (Format)
     {
@@ -183,7 +183,7 @@ uint32_t apemode::ResourceReference::GetElementSizeInBytes(VkFormat Format)
     }
 }
 
-bool apemode::ResourceReference::IsSRGBFormat(VkFormat Format)
+bool apemodevk::ResourceReference::IsSRGBFormat(VkFormat Format)
 {
     switch (Format)
     {
@@ -222,7 +222,7 @@ bool apemode::ResourceReference::IsSRGBFormat(VkFormat Format)
     return false;
 }
 
-bool apemode::ResourceReference::IsDepthStencilFormat (VkFormat Format)
+bool apemodevk::ResourceReference::IsDepthStencilFormat (VkFormat Format)
 {
     switch (Format)
     {
@@ -238,7 +238,7 @@ bool apemode::ResourceReference::IsDepthStencilFormat (VkFormat Format)
     return false;
 }
 
-bool apemode::ResourceReference::GetDepthStencilFormats(VkFormat DSVFormat, VkFormat & DepthFormat, VkFormat & StencilFormat)
+bool apemodevk::ResourceReference::GetDepthStencilFormats(VkFormat DSVFormat, VkFormat & DepthFormat, VkFormat & StencilFormat)
 {
     bool bOk = false;
 
@@ -279,7 +279,7 @@ bool apemode::ResourceReference::GetDepthStencilFormats(VkFormat DSVFormat, VkFo
     return bOk;
 }
 
-bool apemode::ResourceReference::GetMemoryTypeFromProperties(GraphicsDevice & InGraphicsNode,
+bool apemodevk::ResourceReference::GetMemoryTypeFromProperties(GraphicsDevice & InGraphicsNode,
                                                           uint32_t         InTypeBits,
                                                           VkFlags          InRequirementsMask,
                                                           uint32_t &       OutTypeIndex)
@@ -311,30 +311,30 @@ bool apemode::ResourceReference::GetMemoryTypeFromProperties(GraphicsDevice & In
 /// ResourceView
 /// -------------------------------------------------------------------------------------------------------------------
 
-apemode::ResourceView::ResourceView()
+apemodevk::ResourceView::ResourceView()
 {
     //MemoryStates.reserve(16);
 }
 
-apemode::ResourceView::MemoryState apemode::ResourceView::GetState(apemode::CommandBuffer & CmdBuffer) const
+apemodevk::ResourceView::MemoryState apemodevk::ResourceView::GetState(apemodevk::CommandBuffer & CmdBuffer) const
 {
     const auto StateIt = MemoryStates.find (&CmdBuffer);
     const bool bHasCmdListAssociation = StateIt != MemoryStates.end ();
     return bHasCmdListAssociation ? StateIt->second : MemoryState ();
 }
 
-void apemode::ResourceView::SetState (apemode::CommandBuffer & CmdBuffer, MemoryState const & State)
+void apemodevk::ResourceView::SetState (apemodevk::CommandBuffer & CmdBuffer, MemoryState const & State)
 {
     MemoryStates[&CmdBuffer ] = State;
 }
 
-apemode::ResourceView::ResourceViewType
-apemode::ResourceView::GetBaseResourceViewType (ResourceViewType eViewType)
+apemodevk::ResourceView::ResourceViewType
+apemodevk::ResourceView::GetBaseResourceViewType (ResourceViewType eViewType)
 {
     return (eViewType & kResourceViewTypeBaseMask);
 }
 
-apemode::ResourceView::MemoryState::MemoryState ()
+apemodevk::ResourceView::MemoryState::MemoryState ()
     : eType (kType_Undefined)
     , AccessMask (VK_ACCESS_FLAG_BITS_MAX_ENUM)
     , ImgLayout (VK_IMAGE_LAYOUT_MAX_ENUM)
@@ -348,7 +348,7 @@ apemode::ResourceView::MemoryState::MemoryState ()
     ImgSubresRange.levelCount     = -1;
 }
 
-apemode::ResourceView::MemoryState::MemoryState (VkPipelineStageFlags PipelineStageFlags,
+apemodevk::ResourceView::MemoryState::MemoryState (VkPipelineStageFlags PipelineStageFlags,
                                               VkAccessFlags        AccessMask,
                                               uint32_t             QueueFamily,
                                               uint32_t             BufferSize,
@@ -362,7 +362,7 @@ apemode::ResourceView::MemoryState::MemoryState (VkPipelineStageFlags PipelineSt
 {
 }
 
-apemode::ResourceView::MemoryState::MemoryState (VkPipelineStageFlags    PipelineStageFlags,
+apemodevk::ResourceView::MemoryState::MemoryState (VkPipelineStageFlags    PipelineStageFlags,
                                               VkAccessFlags           AccessMask,
                                               uint32_t                QueueFamily,
                                               VkImageLayout           ImgLayout,
@@ -376,12 +376,12 @@ apemode::ResourceView::MemoryState::MemoryState (VkPipelineStageFlags    Pipelin
 {
 }
 
-bool apemode::ResourceView::MemoryState::IsValid () const
+bool apemodevk::ResourceView::MemoryState::IsValid () const
 {
     return eType != kType_Undefined;
 }
 
-bool apemode::ResourceView::MemoryState::IsImgBarrier () const
+bool apemodevk::ResourceView::MemoryState::IsImgBarrier () const
 {
     return eType == kType_Image;
 }

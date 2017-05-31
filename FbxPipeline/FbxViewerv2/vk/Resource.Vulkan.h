@@ -5,7 +5,7 @@
 #include <TInfoStruct.Vulkan.h>
 //#include <TDataHandle.h>
 
-namespace apemode
+namespace apemodevk
 {
     class CommandBuffer;
     class ResourceView;
@@ -18,8 +18,8 @@ namespace apemode
     class ColorResourceView;
     class DepthStencilResourceView;
 
-    class ResourceReference : public apemode::ScalableAllocPolicy,
-                                                          public apemode::NoCopyAssignPolicy
+    class ResourceReference : public apemodevk::ScalableAllocPolicy,
+                                                          public apemodevk::NoCopyAssignPolicy
     {
     public:
 
@@ -36,7 +36,7 @@ namespace apemode
                                                 uint32_t &       OutTypeIndex);
 
     public:
-        typedef apemode::TSafeDeleteObjOp<ResourceReference> ResourceDeleter;
+        typedef apemodevk::TSafeDeleteObjOp<ResourceReference> ResourceDeleter;
         typedef std::shared_ptr<ResourceReference> LkPtr;
         typedef std::unique_ptr<ResourceReference> UqPtr;
 
@@ -53,11 +53,11 @@ namespace apemode
         TInfoStruct<VkMemoryRequirements> MemoryReqs;
     };
 
-    class ResourceView : public apemode::ScalableAllocPolicy,
-                                                     public apemode::NoCopyAssignPolicy
+    class ResourceView : public apemodevk::ScalableAllocPolicy,
+                                                     public apemodevk::NoCopyAssignPolicy
     {
     public:
-        class MemoryState : public apemode::ScalableAllocPolicy
+        class MemoryState : public apemodevk::ScalableAllocPolicy
         {
         public:
             enum EType
@@ -131,8 +131,8 @@ namespace apemode
         template <typename U> inline bool CanGet() const { return false; }
         template <> inline bool CanGet<ResourceView>() const { return true; }
         template <> inline bool CanGet<IntermediateResourceView>() const { return CanGet<BufferResourceView>(); }
-        template <> inline bool CanGet<BufferResourceView>() const { return apemode::HasFlagEql(ViewType, kResourceViewType_Buffer); }
-        template <> inline bool CanGet<TextureResourceView>() const { return apemode::HasFlagEql(ViewType, kResourceViewType_Texture); }
+        template <> inline bool CanGet<BufferResourceView>() const { return apemodevk::HasFlagEql(ViewType, kResourceViewType_Buffer); }
+        template <> inline bool CanGet<TextureResourceView>() const { return apemodevk::HasFlagEql(ViewType, kResourceViewType_Texture); }
         template <> inline bool CanGet<ConstantBufferResource>() const { return ViewType == kResourceViewType_ConstantBuffer; }
         template <> inline bool CanGet<IndexBufferResourceView>() const { return ViewType == kResourceViewType_IndexBuffer; }
         template <> inline bool CanGet<VertexBufferResourceView>() const { return ViewType == kResourceViewType_VertexBuffer; }
@@ -145,8 +145,8 @@ namespace apemode
         template <typename U> inline U *TryGet() { if (CanGet<U>()) return static_cast<U*>(this); return nullptr; }
         template <typename U> inline U const *TryGet() const { if (CanGet<U>()) return static_cast<U const*>(this); return nullptr; }
 
-        MemoryState GetState(apemode::CommandBuffer & CmdBuffer) const;
-        void SetState (apemode::CommandBuffer & CmdBuffer, MemoryState const & State);
+        MemoryState GetState(apemodevk::CommandBuffer & CmdBuffer) const;
+        void SetState (apemodevk::CommandBuffer & CmdBuffer, MemoryState const & State);
 
     public:
         ResourceViewType                              ViewType;
@@ -157,6 +157,6 @@ namespace apemode
 
 }
 
-_Game_engine_Define_enum_flag_operators(apemode::ResourceView::ResourceViewType);
-//_Game_engine_Define_enum_flag_operators(apemode::ResourceView::ResourceAccessFlags);
+_Game_engine_Define_enum_flag_operators(apemodevk::ResourceView::ResourceViewType);
+//_Game_engine_Define_enum_flag_operators(apemodevk::ResourceView::ResourceAccessFlags);
 

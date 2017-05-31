@@ -4,14 +4,14 @@
 #include <RenderTarget.Vulkan.h>
 #include <DepthStencil.Vulkan.h>
 
-namespace apemode
+namespace apemodevk
 {
     class CommandBuffer;
     class RenderPass;
     class Framebuffer;
 
-    class RenderPassResources : public apemode::ScalableAllocPolicy,
-                                                            public apemode::NoCopyAssignPolicy
+    class RenderPassResources : public apemodevk::ScalableAllocPolicy,
+                                                            public apemodevk::NoCopyAssignPolicy
     {
     public:
         enum
@@ -21,15 +21,15 @@ namespace apemode
         };
 
     public:
-        using TextureViewPtr      = std::shared_ptr<apemode::TextureResourceView>;
-        using ColorViewPtr        = std::shared_ptr<apemode::ColorResourceView>;
-        using DepthStencilViewPtr = std::shared_ptr<apemode::DepthStencilResourceView>;
+        using TextureViewPtr      = std::shared_ptr<apemodevk::TextureResourceView>;
+        using ColorViewPtr        = std::shared_ptr<apemodevk::ColorResourceView>;
+        using DepthStencilViewPtr = std::shared_ptr<apemodevk::DepthStencilResourceView>;
 
     public:
         struct BeginEndScope;
         friend BeginEndScope;
-        struct BeginEndScope : public apemode::ScalableAllocPolicy,
-                                                           public apemode::NoCopyAssignPolicy
+        struct BeginEndScope : public apemodevk::ScalableAllocPolicy,
+                                                           public apemodevk::NoCopyAssignPolicy
         {
             CommandBuffer &         AssocCmdList;
             RenderPassResources & AssocResources;
@@ -39,9 +39,9 @@ namespace apemode
         };
 
     public:
-        bool RecreateResourcesFor (apemode::GraphicsDevice &   InGraphicsNode,
-                                   apemode::RenderPass const & InRenderPass,
-                                   apemode::Swapchain **       ppInSwapchains,
+        bool RecreateResourcesFor (apemodevk::GraphicsDevice &   InGraphicsNode,
+                                   apemodevk::RenderPass const & InRenderPass,
+                                   apemodevk::Swapchain **       ppInSwapchains,
                                    uint32_t                 InSwapchainCount,
                                    uint32_t                 InFrameCount,
                                    uint32_t                 InColorWidth,
@@ -57,8 +57,8 @@ namespace apemode
         uint32_t                  GetWriteFrame() const;
         uint32_t                  GetFrameCount () const;
         uint32_t                  GetAttachmentCount() const;
-        apemode::RenderPass const *  GetRenderPass () const;
-        apemode::Framebuffer const * GetWriteFramebuffer() const;
+        apemodevk::RenderPass const *  GetRenderPass () const;
+        apemodevk::Framebuffer const * GetWriteFramebuffer() const;
 
         /**
          * Sets WriteFrame value to the provided one (once all the conditions are satisfied),
@@ -82,7 +82,7 @@ namespace apemode
         std::vector< ColorViewPtr >          ColorAttachments[ kFrameMaxCount ];
         std::vector< DepthStencilViewPtr >   DepthStencilAttachments[ kFrameMaxCount ];
         std::vector< TextureResourceView * > TextureViews[ kFrameMaxCount ];
-        apemode::RenderPass const *             pRenderPass;
-        apemode::Framebuffer const *            ppFramebuffers[ kFrameMaxCount ];
+        apemodevk::RenderPass const *             pRenderPass;
+        apemodevk::Framebuffer const *            ppFramebuffers[ kFrameMaxCount ];
     };
 }
