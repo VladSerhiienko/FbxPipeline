@@ -718,9 +718,11 @@ namespace apemode
 
             VkMemoryRequirements memoryRequirements = GetMemoryRequirements();
 
-            TInfoStruct< VkMemoryAllocateInfo> memoryAllocInfo;
-            memoryAllocInfo->allocationSize = memoryRequirements.size;
-            memoryAllocInfo->memoryTypeIndex = ResolveMemoryType(Deleter.PhysicalDeviceHandle, memoryPropertyFlags, memoryRequirements.memoryTypeBits);
+            VkMemoryAllocateInfo memoryAllocInfo;
+            apemode::ZeroMemory(memoryAllocInfo);
+            memoryAllocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+            memoryAllocInfo.allocationSize = memoryRequirements.size;
+            memoryAllocInfo.memoryTypeIndex = ResolveMemoryType(Deleter.PhysicalDeviceHandle, memoryPropertyFlags, memoryRequirements.memoryTypeBits);
 
             return memoryAllocInfo;
         }
@@ -823,9 +825,11 @@ namespace apemode
         VkMemoryAllocateInfo GetMemoryAllocateInfo( VkMemoryPropertyFlags memoryPropertyFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT ) {
             VkMemoryRequirements memoryRequirements = GetMemoryRequirements( );
 
-            TInfoStruct< VkMemoryAllocateInfo > memoryAllocInfo;
-            memoryAllocInfo->allocationSize = memoryRequirements.size;
-            memoryAllocInfo->memoryTypeIndex = ResolveMemoryType( Deleter.PhysicalDeviceHandle, memoryPropertyFlags, memoryRequirements.memoryTypeBits );
+            VkMemoryAllocateInfo memoryAllocInfo;
+            apemode::ZeroMemory(memoryAllocInfo);
+            memoryAllocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+            memoryAllocInfo.allocationSize = memoryRequirements.size;
+            memoryAllocInfo.memoryTypeIndex = ResolveMemoryType( Deleter.PhysicalDeviceHandle, memoryPropertyFlags, memoryRequirements.memoryTypeBits );
 
             return memoryAllocInfo;
         }

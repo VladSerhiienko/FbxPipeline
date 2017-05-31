@@ -42,11 +42,11 @@
     <ClInclude Include="vk\Framebuffer.Vulkan.h" />
     <ClInclude Include="vk\GraphicsDevice.PrivateContent.Vulkan.h" />
     <ClInclude Include="vk\GraphicsDevice.Vulkan.h" />
-    <ClInclude Include="vk\GraphicsEcosystem.KnownExtensions.Vulkan.h" />
-    <ClInclude Include="vk\GraphicsEcosystem.KnownLayers.Vulkan.h" />
-    <ClInclude Include="vk\GraphicsEcosystem.PrivateContent.Vulkan.h" />
-    <ClInclude Include="vk\GraphicsEcosystem.PrivateCreateDeviceArgs.Vulkan.h" />
-    <ClInclude Include="vk\GraphicsEcosystems.Vulkan.h" />
+    <ClInclude Include="vk\GraphicsManager.KnownExtensions.Vulkan.h" />
+    <ClInclude Include="vk\GraphicsManager.KnownLayers.Vulkan.h" />
+    <ClInclude Include="vk\GraphicsManager.PrivateContent.Vulkan.h" />
+    <ClInclude Include="vk\GraphicsManager.PrivateCreateDeviceArgs.Vulkan.h" />
+    <ClInclude Include="vk\GraphicsManager.Vulkan.h" />
     <ClInclude Include="vk\NativeDispatchableHandles.Vulkan.h" />
     <ClInclude Include="vk\PipelineState.Vulkan.h" />
     <ClInclude Include="vk\RenderPass.Vulkan.h" />
@@ -84,7 +84,7 @@
     <ClCompile Include="vk\ExecutionSync.Vulkan.cpp" />
     <ClCompile Include="vk\Framebuffer.Vulkan.cpp" />
     <ClCompile Include="vk\GraphicsDevice.Vulkan.cpp" />
-    <ClCompile Include="vk\GraphicsEcosystems.Vulkan.cpp" />
+    <ClCompile Include="vk\GraphicsManager.Vulkan.cpp" />
     <ClCompile Include="vk\PipelineState.Vulkan.cpp" />
     <ClCompile Include="vk\RenderPass.Vulkan.cpp" />
     <ClCompile Include="vk\RenderPassResources.Vulkan.cpp" />

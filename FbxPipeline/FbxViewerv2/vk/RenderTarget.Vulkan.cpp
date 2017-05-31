@@ -73,7 +73,7 @@ bool apemode::ColorResourceView::RecreateResourcesFor (GraphicsDevice & InGraphi
                                            ImgSubresRange);
 
     // Swapchain owns images, no ownership will be acquired.
-    if (!ImgHandle.Assign (InGraphicsNode, InImg, false)
+    if (!ImgHandle.Assign (InGraphicsNode, InGraphicsNode, InImg, false)
         || !ImgViewHandle.Recreate (InGraphicsNode, ImgViewDesc))
     {
         _Game_engine_Error("Failed to assign image / create image view.");

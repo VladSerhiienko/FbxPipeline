@@ -1,6 +1,6 @@
 //#include <GameEngine.GraphicsEcosystem.Precompiled.h>
 #include <GraphicsDevice.Vulkan.h>
-#include <GraphicsEcosystems.Vulkan.h>
+#include <GraphicsManager.Vulkan.h>
 
 #include <RenderPass.Vulkan.h>
 #include <Framebuffer.Vulkan.h>
@@ -15,9 +15,9 @@
 #include <NativeDispatchableHandles.Vulkan.h>
 #include <SystemAllocationCallbacks.Vulkan.h>
 
-#include <GraphicsEcosystem.KnownExtensions.Vulkan.h>
-#include <GraphicsEcosystem.PrivateContent.Vulkan.h>
-#include <GraphicsEcosystem.PrivateCreateDeviceArgs.Vulkan.h>
+#include <GraphicsManager.KnownExtensions.Vulkan.h>
+#include <GraphicsManager.PrivateContent.Vulkan.h>
+#include <GraphicsManager.PrivateCreateDeviceArgs.Vulkan.h>
 #include <GraphicsDevice.PrivateContent.Vulkan.h>
 
 /// -------------------------------------------------------------------------------------------------------------------
@@ -63,7 +63,7 @@ bool apemode::GraphicsDevice::PrivateContent::NativeDeviceWrapper::SupportsTrans
     return apemode::HasFlagEql(QueueProps[QueueFamilyId]->queueFlags, VK_QUEUE_TRANSFER_BIT);
 }
 
-bool apemode::GraphicsEcosystem::PrivateContent::NativeLayerWrapper::IsValidDeviceLayer() const
+bool apemode::GraphicsManager::PrivateContent::NativeLayerWrapper::IsValidDeviceLayer() const
 {
     if (IsUnnamedLayer())
     {
@@ -273,7 +273,7 @@ bool apemode::GraphicsDevice::Await ()
     return eDeviceWaitIdleOk.Succeeded ();
 }
 
-apemode::GraphicsEcosystem & apemode::GraphicsDevice::GetGraphicsEcosystem()
+apemode::GraphicsManager & apemode::GraphicsDevice::GetGraphicsEcosystem()
 {
     return *pGraphicsEcosystem;
 }

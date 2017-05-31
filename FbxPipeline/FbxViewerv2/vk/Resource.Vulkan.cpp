@@ -1,13 +1,13 @@
 //#include <GameEngine.GraphicsEcosystem.Precompiled.h>
 #include <Resource.Vulkan.h>
 
-#include <GraphicsEcosystems.Vulkan.h>
+#include <GraphicsManager.Vulkan.h>
 
 //#include <TDataHandle.h>
 #include <TInfoStruct.Vulkan.h>
 
-#include <GraphicsEcosystem.KnownExtensions.Vulkan.h>
-#include <GraphicsEcosystem.PrivateContent.Vulkan.h>
+#include <GraphicsManager.KnownExtensions.Vulkan.h>
+#include <GraphicsManager.PrivateContent.Vulkan.h>
 #include <GraphicsDevice.PrivateContent.Vulkan.h>
 
 /// -------------------------------------------------------------------------------------------------------------------

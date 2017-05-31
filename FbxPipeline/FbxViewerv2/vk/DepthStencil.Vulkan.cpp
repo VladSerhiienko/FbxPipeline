@@ -98,7 +98,7 @@ bool apemode::DepthStencilResourceView::RecreateResourcesFor (GraphicsDevice & I
     ImgDesc->usage         = ImgUsage;
     ImgDesc->flags         = 0;
 
-    if (ImgHandle.Recreate(InGraphicsNode, ImgDesc))
+    if (ImgHandle.Recreate(InGraphicsNode, InGraphicsNode, ImgDesc))
     {
         Width           = InWidth;
         Height          = InHeight;

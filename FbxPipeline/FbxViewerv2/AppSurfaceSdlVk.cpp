@@ -3,7 +3,7 @@
 #include <AppSurfaceSdlVk.h>
 #include <CommandQueue.Vulkan.h>
 #include <GraphicsDevice.Vulkan.h>
-#include <GraphicsEcosystems.Vulkan.h>
+#include <GraphicsManager.Vulkan.h>
 #include <Swapchain.Vulkan.h>
 
 class apemode::AppSurfaceSettings {
@@ -37,7 +37,7 @@ struct apemode::AppSurfaceSdlVk::PrivateContent {
     HWND        hWnd;
     HINSTANCE   hInstance;
 
-    std::unique_ptr< GraphicsEcosystem > pEcosystem;
+    std::unique_ptr< GraphicsManager > pDeviceManager;
     std::unique_ptr< Swapchain >         pSwapchain;
     std::unique_ptr< CommandQueue >      pCmdQueue;
     GraphicsDevice*                      pNode;
@@ -77,9 +77,9 @@ bool apemode::AppSurfaceSdlVk::Initialize( ) {
             pContent->hWnd      = windowInfo.info.win.window;
             pContent->hInstance = (HINSTANCE) GetWindowLongPtrA( windowInfo.info.win.window, GWLP_HINSTANCE );
 
-            pContent->pEcosystem = std::move( std::make_unique< GraphicsEcosystem >( ) );
-            if ( pContent->pEcosystem->RecreateGraphicsNodes( ) ) {
-                pContent->pNode = pContent->pEcosystem->GetPrimaryGraphicsNode( );
+            pContent->pDeviceManager = std::move( std::make_unique< GraphicsManager >( ) );
+            if ( pContent->pDeviceManager->RecreateGraphicsNodes( ) ) {
+                pContent->pNode = pContent->pDeviceManager->GetPrimaryGraphicsNode( );
 
                 pContent->pCmdQueue = std::move( std::make_unique< CommandQueue >( ) );
                 pContent->pCmdQueue->RecreateResourcesFor( *pContent->pNode, 0, 0 );
@@ -141,5 +141,5 @@ void* apemode::AppSurfaceSdlVk::GetWindowHandle( ) {
 }
 
 void* apemode::AppSurfaceSdlVk::GetGraphicsHandle( ) {
-    return reinterpret_cast< void* >( pContent->pEcosystem.get() );
+    return reinterpret_cast< void* >( pContent->pDeviceManager.get() );
 }

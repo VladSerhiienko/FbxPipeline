@@ -4,7 +4,7 @@
 
 #include <GraphicsDevice.Vulkan.h>
 #include <DescriptorPool.Vulkan.h>
-#include <GraphicsEcosystems.Vulkan.h>
+#include <GraphicsManager.Vulkan.h>
 #include <NativeDispatchableHandles.Vulkan.h>
 #include <PipelineState.Vulkan.h>
 #include <PipelineLayout.Vulkan.h>

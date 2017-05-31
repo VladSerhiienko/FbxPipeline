@@ -460,18 +460,18 @@ void* apemode::NuklearSdlVk::DeviceUploadAtlas( InitParametersBase* init_params,
 
         if ( false == hFontImg.Recreate( *pDevice, *pDevice, imageCreateInfo ) ) {
             DebugBreak( );
-            return;
+            return nullptr;
         }
 
         if ( false ==
              hFontImgMemory.Recreate( *pDevice, hFontImg.GetMemoryAllocateInfo( VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT ) ) ) {
             DebugBreak( );
-            return;
+            return nullptr;
         }
 
         if ( false == hFontImg.BindMemory( hFontImgMemory, 0 ) ) {
             DebugBreak( );
-            return;
+            return nullptr;
         }
     }
 
@@ -487,7 +487,7 @@ void* apemode::NuklearSdlVk::DeviceUploadAtlas( InitParametersBase* init_params,
 
         if ( false == hFontImgView.Recreate( *pDevice, fontImgView ) ) {
             DebugBreak( );
-            return;
+            return nullptr;
         }
     }
 
@@ -516,18 +516,18 @@ void* apemode::NuklearSdlVk::DeviceUploadAtlas( InitParametersBase* init_params,
 
         if ( false == hUploadBuffer.Recreate( *pDevice, *pDevice, bufferCreateInfo ) ) {
             DebugBreak( );
-            return;
+            return nullptr;
         }
 
         if ( false ==
              hUploadBufferMemory.Recreate( *pDevice, hUploadBuffer.GetMemoryAllocateInfo( VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT ) ) ) {
             DebugBreak( );
-            return;
+            return nullptr;
         }
 
         if ( false == hUploadBuffer.BindMemory( hUploadBufferMemory, 0 ) ) {
             DebugBreak( );
-            return;
+            return nullptr;
         }
     }
 
@@ -541,7 +541,7 @@ void* apemode::NuklearSdlVk::DeviceUploadAtlas( InitParametersBase* init_params,
         if ( ResultHandle::Failed( vkFlushMappedMemoryRanges( *pDevice, 1, range[ 0 ] ) ) ) {
             hUploadBufferMemory.Unmap( );
             DebugBreak( );
-            return;
+            return nullptr;
         }
 
         hUploadBufferMemory.Unmap( );

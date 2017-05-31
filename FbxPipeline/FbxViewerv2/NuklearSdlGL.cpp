@@ -196,7 +196,7 @@ void apemode::NuklearSdlGL::DeviceCreate( InitParametersBase *init_params ) {
     glBindVertexArray( 0 );
 }
 
-void *apemode::NuklearSdlGL::DeviceUploadAtlas( const void *image, int width, int height ) {
+void *apemode::NuklearSdlGL::DeviceUploadAtlas( InitParametersBase *init_params, const void *image, int width, int height ) {
     glGenTextures( 1, &font_tex );
     glBindTexture( GL_TEXTURE_2D, font_tex );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );

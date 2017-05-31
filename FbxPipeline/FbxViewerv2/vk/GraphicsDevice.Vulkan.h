@@ -12,7 +12,7 @@ namespace apemode
     class PipelineStateManager;
     class ShaderManager;
     class FramebufferManager;
-    class GraphicsEcosystem;
+    class GraphicsManager;
 
     class GraphicsDevice : public apemode::ScalableAllocPolicy, public apemode::NoCopyAssignPolicy
     {
@@ -34,7 +34,7 @@ namespace apemode
         bool     Await ();
         uint32_t GetQueueFamilyCount ();
         uint32_t GetQueueCountInQueueFamily (uint32_t QueueFamilyId);
-        GraphicsEcosystem & GetGraphicsEcosystem ();
+        GraphicsManager & GetGraphicsEcosystem ();
 
         ShaderManager &        GetDefaultShaderManager();
         RenderPassManager &    GetDefaultRenderPassManager();
@@ -49,13 +49,13 @@ namespace apemode
         friend Swapchain;
         friend ResourceReference;
         friend PrivateContent;
-        friend GraphicsEcosystem;
+        friend GraphicsManager;
 
     private:
         operator PrivateContent &();
 
         PrivateContent *                             pContent;
-        GraphicsEcosystem * pGraphicsEcosystem;
+        GraphicsManager * pGraphicsEcosystem;
     };
 
 

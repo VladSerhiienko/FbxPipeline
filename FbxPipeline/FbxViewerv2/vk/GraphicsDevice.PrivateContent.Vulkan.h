@@ -11,12 +11,12 @@ struct apemode::GraphicsDevice::PrivateContent : public apemode::ScalableAllocPo
         typedef TInfoStruct<VkQueueFamilyProperties>::Vector VkQueueFamilyPropertiesVector;
         typedef TInfoStruct<VkDeviceQueueCreateInfo>::Vector VkDeviceQueueCreateInfoVector;
 
-        typedef apemode::GraphicsEcosystem   GraphicsEcosystem;
-        typedef GraphicsEcosystem::PrivateContent                  GraphicsEcosystemContent;
+        typedef apemode::GraphicsManager   GraphicsEcosystem;
+        typedef GraphicsManager::PrivateContent                  GraphicsEcosystemContent;
         typedef GraphicsEcosystemContent::NativeLayerWrapper       NativeLayerWrapper;
         typedef GraphicsEcosystemContent::NativeLayerWrapperVector NativeLayerWrapperVector;
         typedef GraphicsEcosystemContent::LpstrVector              LpstrVector;
-        typedef GraphicsEcosystem::PrivateCreateDeviceArgs         CreateArgs;
+        typedef GraphicsManager::PrivateCreateDeviceArgs         CreateArgs;
         typedef VkFormatProperties                                 VkFormatPropertiesArray[VK_FORMAT_RANGE_SIZE];
 
         TDispatchableHandle<VkDevice>               LogicalDeviceHandle;

@@ -20,6 +20,6 @@ namespace apemode {
         virtual void Render( RenderParametersBase *render_params ) override;
         virtual void DeviceDestroy( ) override;
         virtual void DeviceCreate( InitParametersBase *init_params ) override;
-        virtual void *DeviceUploadAtlas( const void *image, int width, int height ) override;
+        virtual void *DeviceUploadAtlas( InitParametersBase *init_params, const void *image, int width, int height ) override;
     };
 } // namespace apemode
