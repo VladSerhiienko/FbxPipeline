@@ -15,13 +15,16 @@ namespace apemodevk {
 #ifdef _WIN32
         typedef HWND      WindowHandle;
         typedef HINSTANCE ModuleHandle;
+#else
+        typedef void *    WindowHandle;
+        typedef void *    ModuleHandle;
 #endif
         static uint32_t const     kExtentMatchFullscreen; // = -1;
         static uint32_t const     kExtentMatchWindow;     // =  0;
         static ModuleHandle const kCurrentExecutable;     // = nullptr;
         static uint64_t const     kMaxTimeout;            // = uint64_max;
+        static uint32_t const     kMaxImgs = 3;
 
-    public:
         Swapchain( );
         ~Swapchain( );
 
@@ -59,17 +62,8 @@ namespace apemodevk {
                              uint32_t                        WaitSemaphoreCount = 0 );
 
         bool ExtractSwapchainBuffers( std::vector< VkImage >& OutSwapchainBufferImgs );
+        bool ExtractSwapchainBuffers( VkImage *OutSwapchainBufferImgs );
 
-        /** @return Semaphore the current swapchain image was acquired. */
-        // VkSemaphore GetPresentSemaphore ();
-        /**
-        * @return Next semaphore the swapchain image was acquired with
-        * on the next OnFrameMove call.
-        */
-        /*VkSemaphore GetNextPresentSemaphore ();
-        void        AdvancePresentSemaphoreIdx ();*/
-
-    public:
         uint32_t GetBufferCount( ) const;
 
     public:
@@ -84,7 +78,8 @@ namespace apemodevk {
         VkSurfaceCapabilitiesKHR                                     SurfaceCaps;
         apemodevk::TDispatchableHandle< VkSwapchainKHR >             hSwapchain;
         apemodevk::TDispatchableHandle< VkSurfaceKHR >               hSurface;
-        std::vector< VkImage >                                       hImgs;
-        std::vector< apemodevk::TDispatchableHandle< VkImageView > > hImgViews;
+        VkImage                                       hImgs[kMaxImgs];
+        apemodevk::TDispatchableHandle< VkImageView > hImgViews[kMaxImgs];
+        uint32_t ImgCount;
     };
 }

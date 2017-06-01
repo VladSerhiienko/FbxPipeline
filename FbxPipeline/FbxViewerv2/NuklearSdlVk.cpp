@@ -18,8 +18,10 @@ static uint32_t MemoryType( VkPhysicalDevice gpu, VkMemoryPropertyFlags properti
 void apemode::NuklearSdlVk::Render( RenderParametersBase* p ) {
 
     auto renderParams = (RenderParametersVk*)p;
+    auto FrameIndex = renderParams->FrameIndex;
+    FrameIndex = (FrameIndex + 1) % kMaxFrameCount;
 
-    if (hVertexBuffer[FrameIndex].IsNull() || VertexBufferSize[FrameIndex] < p->max_vertex_buffer)
+    if (hVertexBuffer[FrameIndex].IsNull() || (VertexBufferSize[FrameIndex] < p->max_vertex_buffer))
     {
         hVertexBuffer[FrameIndex].Destroy();
         hVertexBufferMemory[FrameIndex].Destroy();
@@ -469,8 +471,6 @@ void apemode::NuklearSdlVk::DeviceCreate( InitParametersBase* init_params ) {
     graphicsPipeline->renderPass          = pRenderPass;
 
     apemodevk::TInfoStruct<VkPipelineCacheCreateInfo> pipelineCacheCreateInfo;
-    pipelineCacheCreateInfo->pInitialData = nullptr;
-    pipelineCacheCreateInfo->initialDataSize = 0;
     hPipelineCache.Recreate( pDevice, pipelineCacheCreateInfo );
 
     if ( false == hPipeline.Recreate( pDevice, hPipelineCache, graphicsPipeline ) ) {

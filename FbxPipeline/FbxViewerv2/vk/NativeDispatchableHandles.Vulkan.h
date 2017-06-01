@@ -557,7 +557,7 @@ namespace apemodevk
     template <>
     struct TDispatchableHandle<VkCommandBuffer> : public TDispatchableHandleBase<VkCommandBuffer>
     {
-       bool Allocate(VkDevice InLogicalDeviceHandle, VkCommandBufferAllocateInfo const &AllocInfo)
+       bool Recreate(VkDevice InLogicalDeviceHandle, VkCommandBufferAllocateInfo const &AllocInfo)
         {
             _Game_engine_Assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required.");
             _Game_engine_Assert(AllocInfo.commandPool != VK_NULL_HANDLE, "No default pools available.");

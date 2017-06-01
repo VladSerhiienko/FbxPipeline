@@ -12,25 +12,30 @@
 
 using namespace apemode;
 
+static const uint32_t kMaxFrames = apemodevk::Swapchain::kMaxImgs;
+
 struct apemode::AppContent {
-    nk_color        diffColor;
-    nk_color        specColor;
-    uint32_t        width      = 0;
-    uint32_t        height     = 0;
-    uint32_t        resetFlags = 0;
-    uint32_t        envId      = 0;
-    uint32_t        sceneId    = 0;
-    uint32_t        maskId     = 0;
-    Scene*          scenes[ 2 ];
+    nk_color diffColor;
+    nk_color specColor;
+    uint32_t width      = 0;
+    uint32_t height     = 0;
+    uint32_t resetFlags = 0;
+    uint32_t envId      = 0;
+    uint32_t sceneId    = 0;
+    uint32_t maskId     = 0;
+    Scene*   scenes[ 2 ];
 
     NuklearSdlBase* Nk = nullptr;
 
-    std::unique_ptr< apemodevk::CommandBuffer > pCmdBuffer;
-    std::unique_ptr<apemodevk::DescriptorPool> pDescPool;
-    apemodevk::TDispatchableHandle<VkRenderPass> hRenderPass;
-    apemodevk::TDispatchableHandle<VkCommandPool> hCmdPool;
-    std::vector<apemodevk::TDispatchableHandle<VkFramebuffer>> hFramebuffers;
-
+    uint32_t FrameCount = 0;
+    std::unique_ptr< apemodevk::DescriptorPool >      pDescPool;
+    apemodevk::TDispatchableHandle< VkRenderPass >    hRenderPass;
+    apemodevk::TDispatchableHandle< VkFramebuffer >   hFramebuffers[ kMaxFrames ];
+    apemodevk::TDispatchableHandle< VkCommandPool >   hCmdPool[ kMaxFrames ];
+    apemodevk::TDispatchableHandle< VkCommandBuffer > hCmdBuffers[ kMaxFrames ];
+    apemodevk::TDispatchableHandle< VkFence >         hFences[ kMaxFrames ];
+    apemodevk::TDispatchableHandle< VkSemaphore >     hPresentCompleteSemaphores[ kMaxFrames ];
+    apemodevk::TDispatchableHandle< VkSemaphore >     hRenderCompleteSemaphores[ kMaxFrames ];
 };
 
 App::App( ) : content( new AppContent( ) ) {
@@ -54,6 +59,8 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         auto appSurfaceVk = (AppSurfaceSdlVk*)appSurface;
         if (auto swapchain = appSurfaceVk->pSwapchain.get())
         {
+            content->FrameCount = swapchain->ImgCount;
+
             VkAttachmentDescription attachment = {};
             attachment.format = swapchain->eColorFormat;
             attachment.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -64,14 +71,14 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
             attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
             attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
-            VkAttachmentReference color_attachment = {};
-            color_attachment.attachment = 0;
-            color_attachment.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            VkAttachmentReference colorAttachment = {};
+            colorAttachment.attachment = 0;
+            colorAttachment.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
             VkSubpassDescription subpass = {};
             subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
             subpass.colorAttachmentCount = 1;
-            subpass.pColorAttachments = &color_attachment;
+            subpass.pColorAttachments = &colorAttachment;
 
             apemodevk::TInfoStruct<VkRenderPassCreateInfo> renderPassCreateInfo = {};
             renderPassCreateInfo->attachmentCount = 1;
@@ -84,28 +91,61 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
                 return false;
             }
 
-            for (auto & imgView : swapchain->hImgViews) {
+            for (uint32_t i = 0; i < content->FrameCount; ++i) {
                 apemodevk::TInfoStruct<VkFramebufferCreateInfo > framebufferCreateInfo;
                 framebufferCreateInfo->renderPass = content->hRenderPass;
                 framebufferCreateInfo->attachmentCount = 1;
-                framebufferCreateInfo->pAttachments = imgView;
+                framebufferCreateInfo->pAttachments = swapchain->hImgViews[i];
                 framebufferCreateInfo->width = swapchain->ColorExtent.width;
                 framebufferCreateInfo->height = swapchain->ColorExtent.height;
                 framebufferCreateInfo->layers = 1;
 
-                auto & framebuffer = apemodevk::PushBackAndGet(content->hFramebuffers);
-                if (false == framebuffer.Recreate(*appSurfaceVk->pNode, framebufferCreateInfo)) {
+                if (false == content->hFramebuffers[i].Recreate(*appSurfaceVk->pNode, framebufferCreateInfo)) {
+                    DebugBreak();
+                    return false;
+                }
+
+                apemodevk::TInfoStruct<VkCommandPoolCreateInfo > cmdPoolCreateInfo;
+                cmdPoolCreateInfo->flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+                cmdPoolCreateInfo->queueFamilyIndex = appSurfaceVk->pCmdQueue->QueueFamilyId;
+
+                if (false == content->hCmdPool[i].Recreate(*appSurfaceVk->pNode, cmdPoolCreateInfo)) {
+                    DebugBreak();
+                    return false;
+                }
+
+                apemodevk::TInfoStruct<VkCommandBufferAllocateInfo > cmdBufferAllocInfo;
+                cmdBufferAllocInfo->commandPool = content->hCmdPool[i];
+                cmdBufferAllocInfo->level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+                cmdBufferAllocInfo->commandBufferCount = 1;
+
+                if (false == content->hCmdBuffers[i].Recreate(*appSurfaceVk->pNode, cmdBufferAllocInfo)) {
+                    DebugBreak();
+                    return false;
+                }
+
+                apemodevk::TInfoStruct<VkFenceCreateInfo > fenceCreateInfo;
+                fenceCreateInfo->flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+                if (false == content->hFences[i].Recreate(*appSurfaceVk->pNode, fenceCreateInfo)) {
+                    DebugBreak();
+                    return false;
+                }
+
+                apemodevk::TInfoStruct<VkSemaphoreCreateInfo > semaphoreCreateInfo;
+                if (false == content->hPresentCompleteSemaphores[i].Recreate(*appSurfaceVk->pNode, semaphoreCreateInfo) || 
+                    false == content->hRenderCompleteSemaphores[i].Recreate(*appSurfaceVk->pNode, semaphoreCreateInfo)) {
                     DebugBreak();
                     return false;
                 }
             }
         }
 
-        content->pCmdBuffer = std::move(std::make_unique< apemodevk::CommandBuffer >());
+        /*content->pCmdBuffer = std::move(std::make_unique< apemodevk::CommandBuffer >());
         if (false == content->pCmdBuffer->RecreateResourcesFor(*appSurfaceVk->pNode, appSurfaceVk->pCmdQueue->QueueFamilyId, true, false)) {
             DebugBreak();
             return false;
-        }
+        }*/
 
         content->pDescPool = std::move(std::make_unique< apemodevk::DescriptorPool >());
         if (false == content->pDescPool->RecreateResourcesFor(*appSurfaceVk->pNode, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256 )) {
@@ -119,54 +159,11 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         initParams.pAlloc = nullptr;
         initParams.pDevice = *appSurfaceVk->pNode;
         initParams.pPhysicalDevice = *appSurfaceVk->pNode;
-        initParams.pCmdBuffer = *content->pCmdBuffer;
+        //initParams.pCmdBuffer = *content->pCmdBuffer;
         initParams.pRenderPass = content->hRenderPass;
         initParams.pDescPool = *content->pDescPool;
 
         content->Nk->Init( &initParams );
-
-        apemode::EmbeddedShaderPreprocessor preproc;
-        std::vector< std::string > definitions = {"AM_OPTION_1=1", "AM_OPTION_2=0"};
-        std::vector< std::string > shaderTable = {"func_1.glsl",
-                                                  "float func_1() { return 1.0; }",
-                                                  "func_2.glsl",
-                                                  "float func_2() { return 2.0; }",
-                                                  "func_3.glsl",
-                                                  "float func_3() { return 3.0; }",
-                                                  "test.glsl",
-                                                  "#if AM_OPTION_1\n"
-                                                  "#include <func_1.glsl>\n"
-                                                  "#endif\n"
-                                                  "#if AM_OPTION_2\n"
-                                                  "#include <func_2.glsl>\n"
-                                                  "#endif\n"
-                                                  "#include <func_3.glsl>\n"
-                                                  "\n"
-                                                  "void main () {\n"
-                                                  "float a = 1.0;\n"
-                                                  "#if AM_OPTION_1\n"
-                                                  "a += func_1();\n"
-                                                  "#endif\n"
-                                                  "#if AM_OPTION_2\n"
-                                                  "a += func_2();\n"
-                                                  "#endif\n"
-                                                  "a += func_3();\n"
-                                                  "gl_FragColor = vec4(a, a, a, 1.0);\n"
-                                                  "}\n"
-                                                  ""};
-
-        std::string shaderCode, log;
-        std::vector< uint32_t > dependencies;
-
-        preproc.Preprocess( nullptr,
-                            &shaderCode,
-                            &log,
-                            &dependencies,
-                            shaderTable,
-                            definitions,
-                            "test.glsl",
-                            apemode::EmbeddedShaderPreprocessor::OpenGLES20,
-                            apemode::EmbeddedShaderPreprocessor::Fragment );
 
         content->scenes[ 0 ] = LoadSceneFromFile( "../../../assets/iron-man.fbxp" );
         content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/kalestra-the-sorceress.fbxp" );

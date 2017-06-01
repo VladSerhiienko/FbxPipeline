@@ -9,6 +9,26 @@ uint64_t const Uint64Max = std::numeric_limits< uint64_t >::max( );
 
 /// -------------------------------------------------------------------------------------------------------------------
 
+bool apemodevk::Swapchain::ExtractSwapchainBuffers( VkImage * OutBufferImgs) {
+    _Game_engine_Assert(hSwapchain.IsNotNull(), "Not initialized.");
+
+    uint32_t OutSwapchainBufferCount = 0;
+    if (apemode_likely(apemodevk::ResultHandle::Succeeded( vkGetSwapchainImagesKHR(*pNode, hSwapchain, &OutSwapchainBufferCount, nullptr)))) {
+
+        if (OutSwapchainBufferCount > kMaxImgs) {
+            DebugBreak();
+            return false;
+        }
+
+        if (apemode_likely( apemodevk::ResultHandle::Succeeded(vkGetSwapchainImagesKHR(*pNode, hSwapchain, &OutSwapchainBufferCount, OutBufferImgs))))
+            return true;
+    }
+
+    _Game_engine_Halt("vkGetSwapchainImagesKHR failed.");
+    return false;
+
+}
+
 bool apemodevk::Swapchain::ExtractSwapchainBuffers( std::vector< VkImage >& OutSwapchainBufferImgs ) {
     _Game_engine_Assert( hSwapchain.IsNotNull( ), "Not initialized." );
 
@@ -176,20 +196,18 @@ bool apemodevk::Swapchain::RecreateResourceFor( GraphicsDevice& InGraphicsNode,
     // We desire to own only 1 image at a time, besides the
     // images being displayed and queued for display.
 
-    uint32_t BufferCount = SurfaceCaps.minImageCount + 1;
-    if ( ( SurfaceCaps.maxImageCount > 0 ) && ( SurfaceCaps.maxImageCount < BufferCount ) ) {
+    ImgCount = std::min<uint32_t>( kMaxImgs, SurfaceCaps.minImageCount + 1 );
+    if ( ( SurfaceCaps.maxImageCount > 0 ) && ( SurfaceCaps.maxImageCount < ImgCount) ) {
         // Application must settle for fewer images than desired.
-        BufferCount = SurfaceCaps.maxImageCount;
+        ImgCount = SurfaceCaps.maxImageCount;
     }
 
-    const bool bSurfaceSupportsIdentity =
-        apemodevk::HasFlagEql( SurfaceCaps.supportedTransforms, VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR );
-
+    const bool bSurfaceSupportsIdentity = apemodevk::HasFlagEql( SurfaceCaps.supportedTransforms, VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR );
     eSurfaceTransform = bSurfaceSupportsIdentity ? VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR : SurfaceCaps.currentTransform;
 
     TInfoStruct< VkSwapchainCreateInfoKHR > SwapchainDesc;
     SwapchainDesc->surface          = hSurface;
-    SwapchainDesc->minImageCount    = BufferCount;
+    SwapchainDesc->minImageCount    = ImgCount;
     SwapchainDesc->imageFormat      = eColorFormat;
     SwapchainDesc->imageColorSpace  = eColorSpace;
     SwapchainDesc->imageExtent      = ColorExtent;
@@ -227,60 +245,16 @@ bool apemodevk::Swapchain::RecreateResourceFor( GraphicsDevice& InGraphicsNode,
     imgViewCreateInfo->subresourceRange.layerCount     = 1;
     imgViewCreateInfo->subresourceRange.levelCount     = 1;
 
-    hImgViews.clear( );
-    for ( auto& hImg : hImgs ) {
-        auto& hImgView = apemodevk::PushBackAndGet( hImgViews );
-
-        imgViewCreateInfo->image = hImg;
-        hImgView.Recreate( *pNode, imgViewCreateInfo );
+    for (uint32_t i = 0;i < ImgCount; ++i) {
+        hImgViews[i].Recreate(*pNode, imgViewCreateInfo);
     }
-
-    /*TInfoStruct<VkFramebufferCreateInfo > framebufferCreateInfo;
-    for (auto & hImgView : hImgViews) {
-        framebufferCreateInfo->renderPass = g_RenderPass;
-        framebufferCreateInfo->attachmentCount = 1;
-        framebufferCreateInfo->pAttachments = attachment;
-        framebufferCreateInfo->width = fb_width;
-        framebufferCreateInfo->height = fb_height;
-        framebufferCreateInfo->layers = 1;
-    }*/
-
-    /*hPresentSemaphores.resize (hBuffers.size (), nullptr);
-    for (auto & hPresentSemaphore : hPresentSemaphores)
-    {
-        apemodevk::TDispatchableHandle<VkSemaphore> hSemaphore;
-        if (!hSemaphore.Recreate (InGraphicsNode, apemodevk::TInfoStruct<VkSemaphoreCreateInfo> ()))
-        {
-            _Game_engine_Halt ("Failed to create preseting semaphore.");
-            return false;
-        }
-
-        hPresentSemaphore = hSemaphore.Release ();
-    }*/
 
     return true;
 }
 
 uint32_t apemodevk::Swapchain::GetBufferCount( ) const {
-    return _Get_collection_length_u( hImgs );
+    return ImgCount;
 }
-
-// VkSemaphore apemodevk::Swapchain::GetPresentSemaphore ()
-//{
-//    return hPresentSemaphores[ PresentSemapforeIdx ];
-//}
-//
-// VkSemaphore apemodevk::Swapchain::GetNextPresentSemaphore ()
-//{
-//    const uint32_t Count = _Get_collection_length_u (hPresentSemaphores);
-//    return hPresentSemaphores[ (PresentSemapforeIdx + 1) % Count ];
-//}
-//
-// void apemodevk::Swapchain::AdvancePresentSemaphoreIdx ()
-//{
-//    const uint32_t Count = _Get_collection_length_u (hPresentSemaphores);
-//    PresentSemapforeIdx  = (PresentSemapforeIdx + 1) % Count;
-//}
 
 bool apemodevk::Swapchain::OnFrameMove( apemodevk::RenderPassResources& Resources,
                                         VkSemaphore                     hSemaphore,

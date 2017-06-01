@@ -2,14 +2,14 @@
 
 #include <NuklearSdlBase.h>
 
-#include <GraphicsDevice.Vulkan.h>
+#include <CommandQueue.Vulkan.h>
 #include <DescriptorPool.Vulkan.h>
+#include <GraphicsDevice.Vulkan.h>
 #include <GraphicsManager.Vulkan.h>
 #include <NativeDispatchableHandles.Vulkan.h>
-#include <PipelineState.Vulkan.h>
 #include <PipelineLayout.Vulkan.h>
+#include <PipelineState.Vulkan.h>
 #include <RenderPass.Vulkan.h>
-#include <CommandQueue.Vulkan.h>
 
 #include <TInfoStruct.Vulkan.h>
 
@@ -18,26 +18,30 @@ namespace apemode {
     class NuklearSdlVk : public NuklearSdlBase {
     public:
         struct InitParametersVk : InitParametersBase {
-            VkAllocationCallbacks *pAlloc = nullptr;
-            VkDevice pDevice = VK_NULL_HANDLE;
-            VkPhysicalDevice pPhysicalDevice = VK_NULL_HANDLE;
-            VkDescriptorPool pDescPool = VK_NULL_HANDLE;
-            VkRenderPass pRenderPass = VK_NULL_HANDLE;
-            VkCommandBuffer pCmdBuffer  = VK_NULL_HANDLE;
+            VkAllocationCallbacks *pAlloc          = nullptr;
+            VkDevice               pDevice         = VK_NULL_HANDLE;
+            VkPhysicalDevice       pPhysicalDevice = VK_NULL_HANDLE;
+            VkDescriptorPool       pDescPool       = VK_NULL_HANDLE;
+            VkRenderPass           pRenderPass     = VK_NULL_HANDLE;
+            VkCommandBuffer        pCmdBuffer      = VK_NULL_HANDLE;
+            uint32_t               FrameCount      = 0;
         };
 
         struct RenderParametersVk : RenderParametersBase {
             VkCommandBuffer pCmdBuffer = nullptr;
+            uint32_t        FrameIndex = 0;
         };
 
     public:
-        VkAllocationCallbacks *pAlloc = nullptr;
-        VkDevice pDevice = VK_NULL_HANDLE;
-        VkPhysicalDevice pPhysicalDevice = VK_NULL_HANDLE;
-        VkDescriptorPool pDescPool = VK_NULL_HANDLE;
-        VkRenderPass pRenderPass = VK_NULL_HANDLE;
-        VkCommandBuffer pCmdBuffer = VK_NULL_HANDLE;
-        apemodevk::TDescriptorSets< 1 >   DescSet;
+        static uint32_t const kMaxFrameCount = 3;
+
+        VkAllocationCallbacks *                                 pAlloc          = nullptr;
+        VkDevice                                                pDevice         = VK_NULL_HANDLE;
+        VkPhysicalDevice                                        pPhysicalDevice = VK_NULL_HANDLE;
+        VkDescriptorPool                                        pDescPool       = VK_NULL_HANDLE;
+        VkRenderPass                                            pRenderPass     = VK_NULL_HANDLE;
+        VkCommandBuffer                                         pCmdBuffer      = VK_NULL_HANDLE;
+        apemodevk::TDescriptorSets< 1 >                         DescSet;
         apemodevk::TDispatchableHandle< VkSampler >             hFontSampler;
         apemodevk::TDispatchableHandle< VkDescriptorSetLayout > hDescSetLayout;
         apemodevk::TDispatchableHandle< VkPipelineLayout >      hPipelineLayout;
@@ -48,39 +52,15 @@ namespace apemode {
         apemodevk::TDispatchableHandle< VkDeviceMemory >        hFontImgMemory;
         apemodevk::TDispatchableHandle< VkBuffer >              hUploadBuffer;
         apemodevk::TDispatchableHandle< VkDeviceMemory >        hUploadBufferMemory;
-        apemodevk::TDispatchableHandle< VkBuffer >              hVertexBuffer[2];
-        apemodevk::TDispatchableHandle< VkDeviceMemory >        hVertexBufferMemory[2];
-        apemodevk::TDispatchableHandle< VkBuffer >              hIndexBuffer[2];
-        apemodevk::TDispatchableHandle< VkDeviceMemory >        hIndexBufferMemory[2];
-        apemodevk::TDispatchableHandle< VkBuffer >              hUniformBuffer[2];
-        apemodevk::TDispatchableHandle< VkDeviceMemory >        hUniformBufferMemory[2];
-        size_t                 VertexBufferSize[2] = {};
-        size_t                 IndexBufferSize[2] = {};
-        size_t                 FrameIndex = 0;
 
-        //VkRenderPass           RenderPass              = VK_NULL_HANDLE;
-        //VkPipelineCache        PipelineCache           = VK_NULL_HANDLE;
-        //VkDescriptorPool       DescriptorPool          = VK_NULL_HANDLE;
-        //VkCommandBuffer        CommandBuffer           = VK_NULL_HANDLE;
-        //size_t                 BufferMemoryAlignment   = 256;
-        //VkPipelineCreateFlags  PipelineCreateFlags     = 0;
-        //int                    FrameIndex              = 0;
-        //VkDescriptorSetLayout  DescSetLayout           = VK_NULL_HANDLE;
-        ////VkPipelineLayout       PipelineLayout          = VK_NULL_HANDLE;
-        ////VkDescriptorSet        DescriptorSet           = VK_NULL_HANDLE;
-        //VkPipeline             Pipeline                = VK_NULL_HANDLE;
-        //VkSampler              FontSampler             = VK_NULL_HANDLE;
-        //VkDeviceMemory         FontMemory              = VK_NULL_HANDLE;
-        //VkImage                FontImage               = VK_NULL_HANDLE;
-        //VkImageView            FontView                = VK_NULL_HANDLE;
-        //VkDeviceMemory         VertexBufferMemory[ 2 ] = {};
-        //VkDeviceMemory         IndexBufferMemory[ 2 ]  = {};
-        //VkBuffer               VertexBuffer[ 2 ]       = {};
-        //VkBuffer               IndexBuffer[ 2 ]        = {};
-        //VkDeviceMemory         UploadBufferMemory      = VK_NULL_HANDLE;
-        //VkBuffer               UploadBuffer            = VK_NULL_HANDLE;
-
-        void ( *CheckVkResult )( VkResult err ) = NULL;
+        apemodevk::TDispatchableHandle< VkBuffer >       hVertexBuffer[ kMaxFrameCount ];
+        apemodevk::TDispatchableHandle< VkDeviceMemory > hVertexBufferMemory[ kMaxFrameCount ];
+        apemodevk::TDispatchableHandle< VkBuffer >       hIndexBuffer[ kMaxFrameCount ];
+        apemodevk::TDispatchableHandle< VkDeviceMemory > hIndexBufferMemory[ kMaxFrameCount ];
+        apemodevk::TDispatchableHandle< VkBuffer >       hUniformBuffer[ kMaxFrameCount ];
+        apemodevk::TDispatchableHandle< VkDeviceMemory > hUniformBufferMemory[ kMaxFrameCount ];
+        size_t                                           VertexBufferSize[ kMaxFrameCount ] = {};
+        size_t                                           IndexBufferSize[ kMaxFrameCount ]  = {};
 
     public:
         virtual void Render( RenderParametersBase *render_params ) override;
