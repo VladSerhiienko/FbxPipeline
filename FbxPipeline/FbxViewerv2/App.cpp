@@ -70,50 +70,10 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
             content->FrameCount = swapchain->ImgCount;
             content->FrameIndex = 0;
             content->FrameId    = 0;
-
-            VkAttachmentDescription attachment = {};
-            attachment.format = swapchain->eColorFormat;
-            attachment.samples = VK_SAMPLE_COUNT_1_BIT;
-            attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-            attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-            attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-            attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-            attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-            attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-            VkAttachmentReference colorAttachment = {};
-            colorAttachment.attachment = 0;
-            colorAttachment.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-            VkSubpassDescription subpass = {};
-            subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-            subpass.colorAttachmentCount = 1;
-            subpass.pColorAttachments = &colorAttachment;
-
-            TInfoStruct<VkRenderPassCreateInfo> renderPassCreateInfo = {};
-            renderPassCreateInfo->attachmentCount = 1;
-            renderPassCreateInfo->pAttachments = &attachment;
-            renderPassCreateInfo->subpassCount = 1;
-            renderPassCreateInfo->pSubpasses = &subpass;
-
-            if (false == content->hRenderPass.Recreate(*appSurfaceVk->pNode, renderPassCreateInfo)) {
-                DebugBreak();
-                return false;
-            }
+           
+            OnResized();
 
             for (uint32_t i = 0; i < content->FrameCount; ++i) {
-                TInfoStruct<VkFramebufferCreateInfo > framebufferCreateInfo;
-                framebufferCreateInfo->renderPass = content->hRenderPass;
-                framebufferCreateInfo->attachmentCount = 1;
-                framebufferCreateInfo->pAttachments = swapchain->hImgViews[i];
-                framebufferCreateInfo->width = swapchain->ColorExtent.width;
-                framebufferCreateInfo->height = swapchain->ColorExtent.height;
-                framebufferCreateInfo->layers = 1;
-
-                if (false == content->hFramebuffers[i].Recreate(*appSurfaceVk->pNode, framebufferCreateInfo)) {
-                    DebugBreak();
-                    return false;
-                }
 
                 TInfoStruct<VkCommandPoolCreateInfo > cmdPoolCreateInfo;
                 cmdPoolCreateInfo->flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
@@ -193,6 +153,63 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
     return false;
 }
 
+bool apemode::App::OnResized()
+{
+    if (auto appSurfaceVk = (AppSurfaceSdlVk*)GetSurface()) {
+        if (auto swapchain = appSurfaceVk->pSwapchain.get()) {
+            content->width = appSurfaceVk->GetWidth();
+            content->height = appSurfaceVk->GetHeight();
+
+            VkAttachmentDescription attachment = {};
+            attachment.format = swapchain->eColorFormat;
+            attachment.samples = VK_SAMPLE_COUNT_1_BIT;
+            attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+            attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+            attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+            attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+            attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+            attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+            VkAttachmentReference colorAttachment = {};
+            colorAttachment.attachment = 0;
+            colorAttachment.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+            VkSubpassDescription subpass = {};
+            subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+            subpass.colorAttachmentCount = 1;
+            subpass.pColorAttachments = &colorAttachment;
+
+            TInfoStruct<VkRenderPassCreateInfo> renderPassCreateInfo = {};
+            renderPassCreateInfo->attachmentCount = 1;
+            renderPassCreateInfo->pAttachments = &attachment;
+            renderPassCreateInfo->subpassCount = 1;
+            renderPassCreateInfo->pSubpasses = &subpass;
+
+            if (false == content->hRenderPass.Recreate(*appSurfaceVk->pNode, renderPassCreateInfo)) {
+                DebugBreak();
+                return false;
+            }
+
+            for (uint32_t i = 0; i < content->FrameCount; ++i) {
+                TInfoStruct<VkFramebufferCreateInfo > framebufferCreateInfo;
+                framebufferCreateInfo->renderPass = content->hRenderPass;
+                framebufferCreateInfo->attachmentCount = 1;
+                framebufferCreateInfo->pAttachments = swapchain->hImgViews[i];
+                framebufferCreateInfo->width = swapchain->ColorExtent.width;
+                framebufferCreateInfo->height = swapchain->ColorExtent.height;
+                framebufferCreateInfo->layers = 1;
+
+                if (false == content->hFramebuffers[i].Recreate(*appSurfaceVk->pNode, framebufferCreateInfo)) {
+                    DebugBreak();
+                    return false;
+                }
+            }
+        }
+    }
+
+    return true;
+}
+
 void App::OnFrameMove( ) {
     nk_input_begin( &content->Nk->Context ); {
         SDL_Event evt;
@@ -209,9 +226,6 @@ void App::OnFrameMove( ) {
 
 void App::Update( float deltaSecs, Input const& inputState ) {
     totalSecs += deltaSecs;
-
-    const uint32_t width  = GetSurface( )->GetWidth( );
-    const uint32_t height = GetSurface( )->GetHeight( );
 
     bool hovered = false;
     bool reset   = false;
@@ -293,8 +307,18 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         VkSemaphore     renderCompleteSemaphore  = content->hRenderCompleteSemaphores[ content->FrameIndex ];
         VkCommandPool   cmdPool                  = content->hCmdPool[ content->FrameIndex ];
         VkCommandBuffer cmdBuffer                = content->hCmdBuffers[ content->FrameIndex ];
-        VkRenderPass    renderPass               = content->hRenderPass;
-        VkFramebuffer   framebuffer              = content->hFramebuffers[ content->FrameIndex ];
+
+        const uint32_t width  = appSurfaceVk->GetWidth( );
+        const uint32_t height = appSurfaceVk->GetHeight( );
+
+        if ( width != content->width || height != content->height ) {
+            CheckedCall( vkDeviceWaitIdle( device ) );
+            OnResized( );
+
+        }
+
+        VkRenderPass  renderPass  = content->hRenderPass;
+        VkFramebuffer framebuffer = content->hFramebuffers[ content->FrameIndex ];
 
         while (true) {
             const auto waitForFencesErrorHandle = vkWaitForFences( device, 1, &fence, VK_TRUE, 100 );

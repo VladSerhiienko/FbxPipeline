@@ -31,6 +31,8 @@ namespace apemode {
         virtual void*    GetWindowHandle( ) override;
         virtual void*    GetGraphicsHandle( ) override;
 
+        uint32_t LastWidth;
+        uint32_t LastHeight;
         SDL_Window*                                   pSdlWindow;
         HWND                                          hWnd;
         HINSTANCE                                     hInstance;

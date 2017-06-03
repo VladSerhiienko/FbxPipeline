@@ -41,6 +41,8 @@ namespace apemodevk {
                                   uint32_t InDesiredColorWidth,
                                   uint32_t InDesiredColorHeight );
 
+        bool Resize(uint32_t InDesiredColorWidth, uint32_t InDesiredColorHeight);
+
         /**
          * Acquires next swapchain buffer
          * @return true If the swapchain buffer was acquired, false otherwise.

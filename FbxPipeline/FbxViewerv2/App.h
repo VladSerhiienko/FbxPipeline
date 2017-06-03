@@ -16,6 +16,7 @@ namespace apemode {
         virtual apemode::IAppSurface* CreateAppSurface( ) override;
 
     public:
+        bool         OnResized( );
         virtual void OnFrameMove( ) override;
         virtual void Update( float DeltaSecs, apemode::Input const& InputState ) override;
         virtual bool IsRunning( ) override;

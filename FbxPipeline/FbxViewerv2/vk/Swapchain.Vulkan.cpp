@@ -220,8 +220,6 @@ bool apemodevk::Swapchain::RecreateResourceFor( GraphicsDevice& InGraphicsNode,
     SwapchainDesc->oldSwapchain     = hSwapchain;
     SwapchainDesc->clipped          = true;
 
-    // TODO: Save previous here.
-
     if ( !hSwapchain.Recreate( InGraphicsNode, SwapchainDesc ) ) {
         _Game_engine_Halt( "Failed to create swapchain." );
         return false;
@@ -251,6 +249,89 @@ bool apemodevk::Swapchain::RecreateResourceFor( GraphicsDevice& InGraphicsNode,
         hImgViews[i].Recreate(*pNode, imgViewCreateInfo);
     }
 
+    return true;
+}
+
+bool apemodevk::Swapchain::Resize( uint32_t DesiredColorWidth, uint32_t DesiredColorHeight ) {
+
+    for (uint32_t i = 0;i < ImgCount; ++i) {
+        hImgViews[i].Destroy();
+    }
+
+
+    if ( ResultHandle::Failed( vkGetPhysicalDeviceSurfaceCapabilitiesKHR( *pNode, hSurface, &SurfaceCaps ) ) ) {
+        _Game_engine_Halt( "vkGetPhysicalDeviceSurfaceCapabilitiesKHR failed." );
+        return false;
+    }
+
+    const bool bMatchesWindow     = DesiredColorWidth == kExtentMatchWindow && DesiredColorHeight == kExtentMatchWindow;
+    const bool bMatchesFullscreen = DesiredColorWidth == kExtentMatchFullscreen && DesiredColorHeight == kExtentMatchFullscreen;
+    const bool bIsDefined         = !bMatchesWindow && !bMatchesFullscreen;
+    _Game_engine_Assert( bIsDefined || bMatchesFullscreen || bMatchesWindow, "Unexpected." );
+
+    ColorExtent.width  = 0;
+    ColorExtent.height = 0;
+
+    if ( SurfaceCaps.currentExtent.width == kExtentMatchFullscreen &&
+        SurfaceCaps.currentExtent.height == kExtentMatchFullscreen ) {
+        // If the surface size is undefined, the size is set to
+        // the size of the images requested.
+        _Game_engine_Assert( bIsDefined, "Unexpected." );
+
+        if ( bIsDefined ) {
+            ColorExtent.width  = DesiredColorWidth;
+            ColorExtent.height = DesiredColorHeight;
+        }
+    } else {
+        // If the surface size is defined, the swap chain size must match
+        ColorExtent = SurfaceCaps.currentExtent;
+    }
+
+    TInfoStruct< VkSwapchainCreateInfoKHR > SwapchainDesc;
+    SwapchainDesc->surface          = hSurface;
+    SwapchainDesc->minImageCount    = ImgCount;
+    SwapchainDesc->imageFormat      = eColorFormat;
+    SwapchainDesc->imageColorSpace  = eColorSpace;
+    SwapchainDesc->imageExtent      = ColorExtent;
+    SwapchainDesc->imageUsage       = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+    SwapchainDesc->preTransform     = static_cast< VkSurfaceTransformFlagBitsKHR >( eSurfaceTransform );
+    SwapchainDesc->compositeAlpha   = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+    SwapchainDesc->imageArrayLayers = 1;
+    SwapchainDesc->imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    SwapchainDesc->presentMode      = ePresentMode;
+    SwapchainDesc->oldSwapchain     = hSwapchain;
+    SwapchainDesc->clipped          = true;
+
+    if ( !hSwapchain.Recreate( *pNode, SwapchainDesc ) ) {
+        _Game_engine_Halt( "Failed to create swapchain." );
+        return false;
+    }
+
+    if ( !ExtractSwapchainBuffers( hImgs ) ) {
+        _Game_engine_Halt( "Failed to extract swapchain buffers." );
+        return false;
+    }
+
+    TInfoStruct< VkImageViewCreateInfo > imgViewCreateInfo;
+    imgViewCreateInfo->viewType                        = VK_IMAGE_VIEW_TYPE_2D;
+    imgViewCreateInfo->viewType                        = VK_IMAGE_VIEW_TYPE_2D;
+    imgViewCreateInfo->format                          = eColorFormat;
+    imgViewCreateInfo->components.r                    = VK_COMPONENT_SWIZZLE_R;
+    imgViewCreateInfo->components.g                    = VK_COMPONENT_SWIZZLE_G;
+    imgViewCreateInfo->components.b                    = VK_COMPONENT_SWIZZLE_B;
+    imgViewCreateInfo->components.a                    = VK_COMPONENT_SWIZZLE_A;
+    imgViewCreateInfo->subresourceRange.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
+    imgViewCreateInfo->subresourceRange.baseArrayLayer = 0;
+    imgViewCreateInfo->subresourceRange.baseMipLevel   = 0;
+    imgViewCreateInfo->subresourceRange.layerCount     = 1;
+    imgViewCreateInfo->subresourceRange.levelCount     = 1;
+
+    for (uint32_t i = 0;i < ImgCount; ++i) {
+        imgViewCreateInfo->image = hImgs[i];
+        hImgViews[i].Recreate(*pNode, imgViewCreateInfo);
+    }
+
+    /* TODO: Warning after resizing, consider changing image layouts manually. */
     return true;
 }
 

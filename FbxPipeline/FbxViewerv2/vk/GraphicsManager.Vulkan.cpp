@@ -87,6 +87,7 @@ bool apemodevk::GraphicsManager::ScanInstanceLayerProperties( ) {
 
     auto ResolveLayerName = [&]( NativeLayerWrapper const &LayerWrapper ) {
         if ( strcmp( LayerWrapper.Layer->layerName, "VK_LAYER_LUNARG_vktrace" ) &&
+             strcmp( LayerWrapper.Layer->layerName, "VK_LAYER_LUNARG_api_dump" ) &&
              strcmp( LayerWrapper.Layer->layerName, "VK_LAYER_RENDERDOC_Capture" ) ) {
             //_Aux_DebugTraceF(" + %s", LayerWrapper.Layer->layerName);
             PresentLayers.push_back( LayerWrapper.Layer->layerName );
@@ -249,6 +250,7 @@ VKAPI_ATTR VkBool32 VKAPI_CALL apemodevk::GraphicsManager::DebugCallback( VkFlag
         OutputDebugStringA("\n");
         OutputDebugStringA(pMsg);
         OutputDebugStringA("\n");
+        DebugBreak( );
         /*apemodevk::DebugTrace<true, apemodevk::Error> (
             "\tDebugCallback: [%s] Code %d: %s", pLayerPrefix, msgCode, pMsg);
         apemodevk::Platform::DebugBreak ();*/

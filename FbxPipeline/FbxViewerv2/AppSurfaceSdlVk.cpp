@@ -68,10 +68,15 @@ bool apemode::AppSurfaceSdlVk::Initialize( ) {
                 uint32_t queueFamilyCount = pNode->QueueProps.size( );
                 for ( ; queueFamilyId < queueFamilyCount; ++queueFamilyId ) {
                     pSwapchain = std::move( std::make_unique< apemodevk::Swapchain >( ) );
+
                     if ( true == pSwapchain->RecreateResourceFor( *pNode, queueFamilyId, hInstance, hWnd, GetWidth( ), GetHeight( ) ) ) {
+                        LastWidth = GetWidth();
+                        LastHeight = GetHeight();
+
                         if ( pNode->SupportsGraphics( queueFamilyId ) && pNode->SupportsPresenting( queueFamilyId, pSwapchain->hSurface ) ) {
                             if ( nullptr == pCmdQueue )
                                 pCmdQueue = std::move( std::make_unique< apemodevk::CommandQueue >( ) );
+
                             if ( pCmdQueue->RecreateResourcesFor( *pNode, queueFamilyId, 0 ) )
                                 break;
                         }
@@ -116,6 +121,16 @@ uint32_t apemode::AppSurfaceSdlVk::GetHeight( ) const {
 }
 
 void apemode::AppSurfaceSdlVk::OnFrameMove( ) {
+    const uint32_t width  = GetWidth( );
+    const uint32_t height = GetHeight( );
+
+    if ( width != LastWidth || height != LastHeight ) {
+        apemodevk::CheckedCall(vkDeviceWaitIdle(*pNode));
+
+        LastWidth  = width;
+        LastHeight = height;
+        pSwapchain->Resize( width, height );
+    }
 }
 
 void apemode::AppSurfaceSdlVk::OnFrameDone( ) {
