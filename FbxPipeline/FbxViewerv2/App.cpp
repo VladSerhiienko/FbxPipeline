@@ -10,9 +10,13 @@
 
 #include <EmbeddedShaderPreprocessor.h>
 
+namespace apemode {
+    using namespace apemodevk;
+}
+
 using namespace apemode;
 
-static const uint32_t kMaxFrames = apemodevk::Swapchain::kMaxImgs;
+static const uint32_t kMaxFrames = Swapchain::kMaxImgs;
 
 struct apemode::AppContent {
     nk_color diffColor;
@@ -28,14 +32,19 @@ struct apemode::AppContent {
     NuklearSdlBase* Nk = nullptr;
 
     uint32_t FrameCount = 0;
-    std::unique_ptr< apemodevk::DescriptorPool >      pDescPool;
-    apemodevk::TDispatchableHandle< VkRenderPass >    hRenderPass;
-    apemodevk::TDispatchableHandle< VkFramebuffer >   hFramebuffers[ kMaxFrames ];
-    apemodevk::TDispatchableHandle< VkCommandPool >   hCmdPool[ kMaxFrames ];
-    apemodevk::TDispatchableHandle< VkCommandBuffer > hCmdBuffers[ kMaxFrames ];
-    apemodevk::TDispatchableHandle< VkFence >         hFences[ kMaxFrames ];
-    apemodevk::TDispatchableHandle< VkSemaphore >     hPresentCompleteSemaphores[ kMaxFrames ];
-    apemodevk::TDispatchableHandle< VkSemaphore >     hRenderCompleteSemaphores[ kMaxFrames ];
+    uint32_t FrameIndex = 0;
+    uint64_t FrameId    = 0;
+
+    uint32_t BackbufferIndices[ kMaxFrames ] = {0};
+
+    std::unique_ptr< DescriptorPool >      pDescPool;
+    TDispatchableHandle< VkRenderPass >    hRenderPass;
+    TDispatchableHandle< VkFramebuffer >   hFramebuffers[ kMaxFrames ];
+    TDispatchableHandle< VkCommandPool >   hCmdPool[ kMaxFrames ];
+    TDispatchableHandle< VkCommandBuffer > hCmdBuffers[ kMaxFrames ];
+    TDispatchableHandle< VkFence >         hFences[ kMaxFrames ];
+    TDispatchableHandle< VkSemaphore >     hPresentCompleteSemaphores[ kMaxFrames ];
+    TDispatchableHandle< VkSemaphore >     hRenderCompleteSemaphores[ kMaxFrames ];
 };
 
 App::App( ) : content( new AppContent( ) ) {
@@ -57,9 +66,10 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
             return false;
 
         auto appSurfaceVk = (AppSurfaceSdlVk*)appSurface;
-        if (auto swapchain = appSurfaceVk->pSwapchain.get())
-        {
+        if ( auto swapchain = appSurfaceVk->pSwapchain.get( ) ) {
             content->FrameCount = swapchain->ImgCount;
+            content->FrameIndex = 0;
+            content->FrameId    = 0;
 
             VkAttachmentDescription attachment = {};
             attachment.format = swapchain->eColorFormat;
@@ -80,7 +90,7 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
             subpass.colorAttachmentCount = 1;
             subpass.pColorAttachments = &colorAttachment;
 
-            apemodevk::TInfoStruct<VkRenderPassCreateInfo> renderPassCreateInfo = {};
+            TInfoStruct<VkRenderPassCreateInfo> renderPassCreateInfo = {};
             renderPassCreateInfo->attachmentCount = 1;
             renderPassCreateInfo->pAttachments = &attachment;
             renderPassCreateInfo->subpassCount = 1;
@@ -92,7 +102,7 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
             }
 
             for (uint32_t i = 0; i < content->FrameCount; ++i) {
-                apemodevk::TInfoStruct<VkFramebufferCreateInfo > framebufferCreateInfo;
+                TInfoStruct<VkFramebufferCreateInfo > framebufferCreateInfo;
                 framebufferCreateInfo->renderPass = content->hRenderPass;
                 framebufferCreateInfo->attachmentCount = 1;
                 framebufferCreateInfo->pAttachments = swapchain->hImgViews[i];
@@ -105,7 +115,7 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
                     return false;
                 }
 
-                apemodevk::TInfoStruct<VkCommandPoolCreateInfo > cmdPoolCreateInfo;
+                TInfoStruct<VkCommandPoolCreateInfo > cmdPoolCreateInfo;
                 cmdPoolCreateInfo->flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
                 cmdPoolCreateInfo->queueFamilyIndex = appSurfaceVk->pCmdQueue->QueueFamilyId;
 
@@ -114,7 +124,7 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
                     return false;
                 }
 
-                apemodevk::TInfoStruct<VkCommandBufferAllocateInfo > cmdBufferAllocInfo;
+                TInfoStruct<VkCommandBufferAllocateInfo > cmdBufferAllocInfo;
                 cmdBufferAllocInfo->commandPool = content->hCmdPool[i];
                 cmdBufferAllocInfo->level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
                 cmdBufferAllocInfo->commandBufferCount = 1;
@@ -124,7 +134,7 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
                     return false;
                 }
 
-                apemodevk::TInfoStruct<VkFenceCreateInfo > fenceCreateInfo;
+                TInfoStruct<VkFenceCreateInfo > fenceCreateInfo;
                 fenceCreateInfo->flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
                 if (false == content->hFences[i].Recreate(*appSurfaceVk->pNode, fenceCreateInfo)) {
@@ -132,22 +142,16 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
                     return false;
                 }
 
-                apemodevk::TInfoStruct<VkSemaphoreCreateInfo > semaphoreCreateInfo;
-                if (false == content->hPresentCompleteSemaphores[i].Recreate(*appSurfaceVk->pNode, semaphoreCreateInfo) || 
-                    false == content->hRenderCompleteSemaphores[i].Recreate(*appSurfaceVk->pNode, semaphoreCreateInfo)) {
-                    DebugBreak();
+                TInfoStruct< VkSemaphoreCreateInfo > semaphoreCreateInfo;
+                if ( false == content->hPresentCompleteSemaphores[ i ].Recreate( *appSurfaceVk->pNode, semaphoreCreateInfo ) ||
+                     false == content->hRenderCompleteSemaphores[ i ].Recreate( *appSurfaceVk->pNode, semaphoreCreateInfo ) ) {
+                    DebugBreak( );
                     return false;
                 }
             }
         }
 
-        /*content->pCmdBuffer = std::move(std::make_unique< apemodevk::CommandBuffer >());
-        if (false == content->pCmdBuffer->RecreateResourcesFor(*appSurfaceVk->pNode, appSurfaceVk->pCmdQueue->QueueFamilyId, true, false)) {
-            DebugBreak();
-            return false;
-        }*/
-
-        content->pDescPool = std::move(std::make_unique< apemodevk::DescriptorPool >());
+        content->pDescPool = std::move(std::make_unique< DescriptorPool >());
         if (false == content->pDescPool->RecreateResourcesFor(*appSurfaceVk->pNode, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256 )) {
             DebugBreak();
             return false;
@@ -156,17 +160,18 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         content->Nk = new NuklearSdlVk();
 
         NuklearSdlVk::InitParametersVk initParams;
-        initParams.pAlloc = nullptr;
-        initParams.pDevice = *appSurfaceVk->pNode;
+        initParams.pAlloc          = nullptr;
+        initParams.pDevice         = *appSurfaceVk->pNode;
         initParams.pPhysicalDevice = *appSurfaceVk->pNode;
-        //initParams.pCmdBuffer = *content->pCmdBuffer;
-        initParams.pRenderPass = content->hRenderPass;
-        initParams.pDescPool = *content->pDescPool;
+        initParams.pRenderPass     = content->hRenderPass;
+        initParams.pDescPool       = *content->pDescPool;
+        initParams.pQueue          = *appSurfaceVk->pCmdQueue;
+        initParams.QueueFamilyId   = appSurfaceVk->pCmdQueue->QueueFamilyId;
 
         content->Nk->Init( &initParams );
 
-        content->scenes[ 0 ] = LoadSceneFromFile( "../../../assets/iron-man.fbxp" );
-        content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/kalestra-the-sorceress.fbxp" );
+        // content->scenes[ 0 ] = LoadSceneFromFile( "../../../assets/iron-man.fbxp" );
+        // content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/kalestra-the-sorceress.fbxp" );
         // content->scenes[ 0 ] = LoadSceneFromFile( "../../../assets/Mech6kv3ps.fbxp" );
         // content->scenes[ 0 ] = LoadSceneFromFile( "../../../assets/Mech6k_v2.fbxp" );
         // content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/P90_v2.fbxp" );
@@ -182,7 +187,6 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         // content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/Knife.fbxp" );
         // content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/mech-m-6k.fbxp" );
 
-
         return true;
     }
 
@@ -190,14 +194,17 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
 }
 
 void App::OnFrameMove( ) {
-    SDL_Event evt;
-   /* nk_input_begin( content->nk );
-    while ( SDL_PollEvent( &evt ) ) {
-        nk_sdl_handle_event( &evt );
+    nk_input_begin( &content->Nk->Context ); {
+        SDL_Event evt;
+        while ( SDL_PollEvent( &evt ) )
+            content->Nk->HandleEvent( &evt );
+        nk_input_end( &content->Nk->Context );
     }
-    nk_input_end( content->nk );*/
 
     AppBase::OnFrameMove( );
+
+    ++content->FrameId;
+    content->FrameIndex = content->FrameId % (uint64_t) content->FrameCount;
 }
 
 void App::Update( float deltaSecs, Input const& inputState ) {
@@ -209,64 +216,173 @@ void App::Update( float deltaSecs, Input const& inputState ) {
     bool hovered = false;
     bool reset   = false;
 
-    const nk_flags windowFlags = NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE;
+    const nk_flags windowFlags
+        = NK_WINDOW_BORDER
+        | NK_WINDOW_MOVABLE
+        | NK_WINDOW_SCALABLE
+        | NK_WINDOW_MINIMIZABLE;
 
-    //if ( nk_begin( content->nk, "FBXV: Demo.", nk_rect( 10, 60, 400, 600 ), windowFlags ) ) {
-    //    nk_layout_row_dynamic( content->nk, 20, 1 );
-    //    nk_labelf_wrap( content->nk, "Orbit - left button" );
-    //    nk_labelf_wrap( content->nk, "Zoom - right button" );
-    //    nk_labelf_wrap( content->nk, "Tab - statistics" );
+    auto ctx = &content->Nk->Context;
+    float clearColor[ 4 ] = {0};
 
-    //    nk_layout_row_dynamic( content->nk, 30, 1 );
-    //    //nk_property_float( content->nk, "Glossiness", 0, &content->uniforms.m_glossiness, 1, 0.01, 0.001 );
-    //    //nk_property_float( content->nk, "Reflectivity", 0, &content->uniforms.m_reflectivity, 1, 0.01, 0.001 );
+    if (nk_begin(ctx, "Calculator", nk_rect(10, 10, 180, 250),
+        NK_WINDOW_BORDER|NK_WINDOW_NO_SCROLLBAR|NK_WINDOW_MOVABLE))
+    {
+        static int set = 0, prev = 0, op = 0;
+        static const char numbers[] = "789456123";
+        static const char ops[] = "+-*/";
+        static double a = 0, b = 0;
+        static double *current = &a;
 
-    //    nk_layout_row_dynamic( content->nk, 30, 1 );
-    //    nk_label_wrap( content->nk, "Diffuse Color" );
+        size_t i = 0;
+        int solve = 0;
+        {int len; char buffer[256];
+        nk_layout_row_dynamic(ctx, 35, 1);
+        len = snprintf(buffer, 256, "%.2f", *current);
+        nk_edit_string(ctx, NK_EDIT_SIMPLE, buffer, &len, 255, nk_filter_float);
+        buffer[len] = 0;
+        *current = atof(buffer);}
 
-    //    nk_layout_row_dynamic( content->nk, 100, 1 );
-    //    content->diffColor = nk_color_picker( content->nk, content->diffColor, nk_color_format::NK_RGB );
-    //    //nk_color_fv( content->uniforms.m_rgbDiff, content->diffColor );
+        nk_layout_row_dynamic(ctx, 35, 4);
+        for (i = 0; i < 16; ++i) {
+            if (i >= 12 && i < 15) {
+                if (i > 12) continue;
+                if (nk_button_label(ctx, "C")) {
+                    a = b = op = 0; current = &a; set = 0;
+                } if (nk_button_label(ctx, "0")) {
+                    *current = *current*10.0f; set = 0;
+                } if (nk_button_label(ctx, "=")) {
+                    solve = 1; prev = op; op = 0;
+                }
+            } else if (((i+1) % 4)) {
+                if (nk_button_text(ctx, &numbers[(i/4)*3+i%4], 1)) {
+                    *current = *current * 10.0f + numbers[(i/4)*3+i%4] - '0';
+                    set = 0;
+                }
+            } else if (nk_button_text(ctx, &ops[i/4], 1)) {
+                if (!set) {
+                    if (current != &b) {
+                        current = &b;
+                    } else {
+                        prev = op;
+                        solve = 1;
+                    }
+                }
+                op = ops[i/4];
+                set = 1;
+            }
+        }
+        if (solve) {
+            if (prev == '+') a = a + b;
+            if (prev == '-') a = a - b;
+            if (prev == '*') a = a * b;
+            if (prev == '/') a = a / b;
+            current = &a;
+            if (set) current = &b;
+            b = 0; set = 0;
+        }
+    }
+    nk_end(ctx);
 
-    //    nk_layout_row_dynamic( content->nk, 10, 1 );
-    //    nk_spacing( content->nk, 1 );
+    if ( auto appSurfaceVk = (AppSurfaceSdlVk*) GetSurface( ) ) {
+        VkDevice        device                   = *appSurfaceVk->pNode;
+        VkQueue         queue                    = *appSurfaceVk->pCmdQueue;
+        VkSwapchainKHR  swapchain                = appSurfaceVk->pSwapchain->hSwapchain;
+        VkFence         fence                    = content->hFences[ content->FrameIndex ];
+        VkSemaphore     presentCompleteSemaphore = content->hPresentCompleteSemaphores[ content->FrameIndex ];
+        VkSemaphore     renderCompleteSemaphore  = content->hRenderCompleteSemaphores[ content->FrameIndex ];
+        VkCommandPool   cmdPool                  = content->hCmdPool[ content->FrameIndex ];
+        VkCommandBuffer cmdBuffer                = content->hCmdBuffers[ content->FrameIndex ];
+        VkRenderPass    renderPass               = content->hRenderPass;
+        VkFramebuffer   framebuffer              = content->hFramebuffers[ content->FrameIndex ];
 
-    //    nk_layout_row_dynamic( content->nk, 30, 1 );
-    //    nk_combobox_string( content->nk,
-    //                        "env/kyoto\0"
-    //                        "env/bolonga\0\0",
-    //                        (int*) &content->envId,
-    //                        2,
-    //                        30,
-    //                        nk_vec2( 300, 300 ) );
+        while (true) {
+            const auto waitForFencesErrorHandle = vkWaitForFences( device, 1, &fence, VK_TRUE, 100 );
+            if ( VK_SUCCESS == waitForFencesErrorHandle ) {
+                break;
+            } else if ( VK_TIMEOUT == waitForFencesErrorHandle ) {
+                continue;
+            } else {
+                assert( false );
+                return;
+            }
+        }
 
-    //    nk_combobox_string( content->nk,
-    //                        "scene/A45-AMG\0"
-    //                        "scene/Mech-6k\0\0",
-    //                        (int*) &content->sceneId,
-    //                        2,
-    //                        30,
-    //                        nk_vec2( 300, 300 ) );
+        CheckedCall( vkAcquireNextImageKHR( device,
+                                            swapchain,
+                                            UINT64_MAX,
+                                            presentCompleteSemaphore,
+                                            VK_NULL_HANDLE,
+                                            &content->BackbufferIndices[ content->FrameIndex ] ) );
 
-    //    nk_layout_row_dynamic( content->nk, 10, 1 );
-    //    nk_spacing( content->nk, 1 );
+        CheckedCall( vkResetCommandPool( device, cmdPool, 0 ) );
 
-    //    hovered = nk_window_is_any_hovered( content->nk );
-    //}
-    //nk_end( content->nk );
+        VkCommandBufferBeginInfo commandBufferBeginInfo;
+        InitializeStruct( commandBufferBeginInfo );
+        commandBufferBeginInfo.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+        CheckedCall( vkBeginCommandBuffer( cmdBuffer, &commandBufferBeginInfo ) );
 
-    //glClearColor( 0.0f, 1.0f, 1.0f, 1.0f );
-    //glClearDepth( 1.0 );
-    //glClearStencil( 0 );
+        VkClearValue clearValue;
+        clearValue.color.float32[ 0 ] = clearColor[ 0 ];
+        clearValue.color.float32[ 1 ] = clearColor[ 1 ];
+        clearValue.color.float32[ 2 ] = clearColor[ 2 ];
+        clearValue.color.float32[ 3 ] = clearColor[ 3 ];
 
-    //glEnable( GL_BLEND );
-    //glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-    //glEnable( GL_CULL_FACE );
-    //glDisable( GL_DEPTH_TEST );
+        VkRenderPassBeginInfo renderPassBeginInfo;
+        InitializeStruct( renderPassBeginInfo );
+        renderPassBeginInfo.renderPass               = renderPass;
+        renderPassBeginInfo.framebuffer              = framebuffer;
+        renderPassBeginInfo.renderArea.extent.width  = appSurfaceVk->GetWidth( );
+        renderPassBeginInfo.renderArea.extent.height = appSurfaceVk->GetHeight( );
+        renderPassBeginInfo.clearValueCount          = 1;
+        renderPassBeginInfo.pClearValues             = &clearValue;
 
-    //glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
+        vkCmdBeginRenderPass( cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE );
 
-    //nk_sdl_render( NK_ANTI_ALIASING_ON, 64 * 1024, 64 * 1024 );
+        NuklearSdlVk::RenderParametersVk renderParams;
+        renderParams.dims[0] = width;
+        renderParams.dims[1] = height;
+        renderParams.scale[0] = 1;
+        renderParams.scale[1] = 1;
+        renderParams.aa                 = NK_ANTI_ALIASING_ON;
+        renderParams.max_vertex_buffer  = 64 * 1024;
+        renderParams.max_element_buffer = 64 * 1024;
+        renderParams.FrameIndex         = content->FrameIndex;
+        renderParams.pCmdBuffer         = cmdBuffer;
+
+        content->Nk->Render(&renderParams);
+
+        vkCmdEndRenderPass( cmdBuffer );
+
+        VkPipelineStageFlags waitPipelineStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+
+        VkSubmitInfo submitInfo;
+        InitializeStruct( submitInfo );
+        submitInfo.signalSemaphoreCount = 1;
+        submitInfo.pSignalSemaphores    = &renderCompleteSemaphore;
+        submitInfo.waitSemaphoreCount   = 1;
+        submitInfo.pWaitSemaphores      = &presentCompleteSemaphore;
+        submitInfo.pWaitDstStageMask    = &waitPipelineStage;
+        submitInfo.commandBufferCount   = 1;
+        submitInfo.pCommandBuffers      = &cmdBuffer;
+
+        CheckedCall( vkEndCommandBuffer( cmdBuffer ) );
+        CheckedCall( vkResetFences( device, 1, &fence ) );
+        CheckedCall( vkQueueSubmit( queue, 1, &submitInfo, fence ) );
+
+        uint32_t presentIndex = ( content->FrameIndex + content->FrameCount - 1 ) % content->FrameCount;
+        VkSemaphore renderSemaphore = content->hRenderCompleteSemaphores[ presentIndex ];
+
+        VkPresentInfoKHR presentInfoKHR;
+        InitializeStruct( presentInfoKHR );
+        presentInfoKHR.waitSemaphoreCount = 1;
+        presentInfoKHR.pWaitSemaphores    = &renderSemaphore;
+        presentInfoKHR.swapchainCount     = 1;
+        presentInfoKHR.pSwapchains        = &swapchain;
+        presentInfoKHR.pImageIndices      = &content->BackbufferIndices[ presentIndex ];
+
+        CheckedCall( vkQueuePresentKHR( queue, &presentInfoKHR ) );
+    }
 }
 
 bool App::IsRunning( ) {

@@ -12,7 +12,6 @@
 #include <vulkan/vulkan.h>
 
 #define _Graphics_ecosystem_dll_api
-#define _Force_inline_function inline
 #define _Game_engine_Assert(...) //assert(__VA_ARGS__)
 #define apemode_likely(...) __VA_ARGS__
 #define _Game_engine_Unlikely(...) __VA_ARGS__
@@ -49,24 +48,26 @@ namespace apemodevk {
 #undef ZeroMemory
 #endif
 
-    template <typename T>
-    inline void ZeroMemory(T & pObj)
-    {
-        memset(&pObj, 0, sizeof(T));
+    template < typename T >
+    inline void ZeroMemory( T &pObj ) {
+        memset( &pObj, 0, sizeof( T ) );
     }
 
-    template <typename T, size_t Count>
-    inline void ZeroMemory(T (&pObj)[Count])
-    {
-        memset(pObj, 0, sizeof(T));
+    template < typename T, size_t TCount >
+    inline void ZeroMemory( T ( &pObj )[ TCount ] ) {
+        memset( &pObj[ 0 ], 0, sizeof( T ) * TCount );
     }
 
-    template <typename T, typename... TArgs>
-    inline T & PushBackAndGet(std::vector<T> & _collection, TArgs... args) {
-        _collection.emplace_back(std::forward<TArgs>(args)...);
-        return _collection.back();
+    template < typename T, size_t Count >
+    inline void ZeroMemory( T *pObj, size_t Count ) {
+        memset( pObj, 0, sizeof( T ) * Count );
     }
 
+    template < typename T, typename... TArgs >
+    inline T &PushBackAndGet( std::vector< T > &_collection, TArgs... args ) {
+        _collection.emplace_back( std::forward< TArgs >( args )... );
+        return _collection.back( );
+    }
 }
 
 #ifdef _Get_array_length
@@ -381,7 +382,14 @@ namespace apemodevk
         }
     };
 
-
+    /* Breaks on failures */
+    inline void CheckedCall( const ResultHandle &returnValue ) {
+#ifdef _DEBUG
+        if ( false == returnValue.Succeeded( ) ) {
+            DebugBreak( );
+        }
+#endif
+    }
 }
 
 #include <CityHash.h>

@@ -1,145 +1,134 @@
 
 #include <NuklearSdlVk.h>
-
 #include <shaderc/shaderc.hpp>
 
-static uint32_t MemoryType( VkPhysicalDevice gpu, VkMemoryPropertyFlags properties, uint32_t type_bits ) {
-
-    VkPhysicalDeviceMemoryProperties prop;
-    vkGetPhysicalDeviceMemoryProperties( gpu, &prop );
-    for ( uint32_t i = 0; i < prop.memoryTypeCount; i++ )
-        if ( ( prop.memoryTypes[ i ].propertyFlags & properties ) == properties && type_bits & ( 1 << i ) )
-            return i;
-
-    // Unable to find memoryType
-    return 0xffffffff;
+namespace apemode {
+    using namespace apemodevk;
 }
 
-void apemode::NuklearSdlVk::Render( RenderParametersBase* p ) {
+bool apemode::NuklearSdlVk::Render( RenderParametersBase* p ) {
+    auto renderParams = (RenderParametersVk*) p;
+    auto FrameIndex   = ( renderParams->FrameIndex ) % kMaxFrameCount;
 
-    auto renderParams = (RenderParametersVk*)p;
-    auto FrameIndex = renderParams->FrameIndex;
-    FrameIndex = (FrameIndex + 1) % kMaxFrameCount;
+    if ( hVertexBuffer[ FrameIndex ].IsNull( ) || ( VertexBufferSize[ FrameIndex ] < p->max_vertex_buffer ) ) {
+        hVertexBuffer[ FrameIndex ].Destroy( );
+        hVertexBufferMemory[ FrameIndex ].Destroy( );
 
-    if (hVertexBuffer[FrameIndex].IsNull() || (VertexBufferSize[FrameIndex] < p->max_vertex_buffer))
-    {
-        hVertexBuffer[FrameIndex].Destroy();
-        hVertexBufferMemory[FrameIndex].Destroy();
-
-        apemodevk::TInfoStruct<VkBufferCreateInfo> bufferCreateInfo;
-        bufferCreateInfo->size = p->max_vertex_buffer;
-        bufferCreateInfo->usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+        TInfoStruct< VkBufferCreateInfo > bufferCreateInfo;
+        bufferCreateInfo->size        = p->max_vertex_buffer;
+        bufferCreateInfo->usage       = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
         bufferCreateInfo->sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-        if (false == hVertexBuffer[FrameIndex].Recreate(pDevice, pPhysicalDevice, bufferCreateInfo)) {
-            DebugBreak();
-            return;
+        if ( false == hVertexBuffer[ FrameIndex ].Recreate( pDevice, pPhysicalDevice, bufferCreateInfo ) ) {
+            DebugBreak( );
+            return false;
         }
 
-        if (false == hVertexBufferMemory[FrameIndex].Recreate(pDevice, hVertexBuffer[FrameIndex].GetMemoryAllocateInfo(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT))) {
-            DebugBreak();
-            return;
+        auto memoryAllocateInfo = hVertexBuffer[ FrameIndex ].GetMemoryAllocateInfo( VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT );
+        if ( false == hVertexBufferMemory[ FrameIndex ].Recreate( pDevice, memoryAllocateInfo ) ) {
+            DebugBreak( );
+            return false;
         }
 
-        if (false == hVertexBuffer[FrameIndex].BindMemory(hVertexBufferMemory[FrameIndex], 0)) {
-            DebugBreak();
-            return;
+        if ( false == hVertexBuffer[ FrameIndex ].BindMemory( hVertexBufferMemory[ FrameIndex ], 0 ) ) {
+            DebugBreak( );
+            return false;
         }
 
-        VertexBufferSize[FrameIndex] = p->max_vertex_buffer;
+        VertexBufferSize[ FrameIndex ] = p->max_vertex_buffer;
     }
 
-    if (hIndexBuffer[FrameIndex].IsNull() || IndexBufferSize[FrameIndex] < p->max_element_buffer)
-    {
-        hIndexBuffer[FrameIndex].Destroy();
-        hIndexBufferMemory[FrameIndex].Destroy();
+    if ( hIndexBuffer[ FrameIndex ].IsNull( ) || IndexBufferSize[ FrameIndex ] < p->max_element_buffer ) {
+        hIndexBuffer[ FrameIndex ].Destroy( );
+        hIndexBufferMemory[ FrameIndex ].Destroy( );
 
-        apemodevk::TInfoStruct<VkBufferCreateInfo> bufferCreateInfo;
-        bufferCreateInfo->size = p->max_element_buffer;
-        bufferCreateInfo->usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+        TInfoStruct< VkBufferCreateInfo > bufferCreateInfo;
+        bufferCreateInfo->size        = p->max_element_buffer;
+        bufferCreateInfo->usage       = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
         bufferCreateInfo->sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-        if (false == hIndexBuffer[FrameIndex].Recreate(pDevice, pPhysicalDevice, bufferCreateInfo)) {
-            DebugBreak();
-            return;
+        if ( false == hIndexBuffer[ FrameIndex ].Recreate( pDevice, pPhysicalDevice, bufferCreateInfo ) ) {
+            DebugBreak( );
+            return false;
         }
 
-        if (false == hIndexBufferMemory[FrameIndex].Recreate(pDevice, hIndexBuffer[FrameIndex].GetMemoryAllocateInfo(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT))) {
-            DebugBreak();
-            return;
+        auto memoryAllocateInfo = hIndexBuffer[ FrameIndex ].GetMemoryAllocateInfo( VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT );
+        if ( false == hIndexBufferMemory[ FrameIndex ].Recreate( pDevice, memoryAllocateInfo ) ) {
+            DebugBreak( );
+            return false;
         }
 
-        if (false == hIndexBuffer[FrameIndex].BindMemory(hIndexBufferMemory[FrameIndex], 0)) {
-            DebugBreak();
-            return;
+        if ( false == hIndexBuffer[ FrameIndex ].BindMemory( hIndexBufferMemory[ FrameIndex ], 0 ) ) {
+            DebugBreak( );
+            return false;
         }
 
-        IndexBufferSize[FrameIndex] = p->max_element_buffer;
+        IndexBufferSize[ FrameIndex ] = p->max_element_buffer;
     }
 
     {
-        /* convert from command queue into draw list and draw to screen */
-        void * vertices = nullptr;
-        void * elements = nullptr;
+        /* Convert from command queue into draw list and draw to screen */
+        void* vertices = nullptr;
+        void* elements = nullptr;
 
-        /* load vertices/elements directly into vertex/element buffer */
-        vertices = hVertexBufferMemory[FrameIndex].Map(0, VertexBufferSize[FrameIndex], 0);
-        elements = hIndexBufferMemory[FrameIndex].Map(0, IndexBufferSize[FrameIndex], 0);
+        /* Load vertices/elements directly into vertex/element buffer */
+        vertices = hVertexBufferMemory[ FrameIndex ].Map( 0, VertexBufferSize[ FrameIndex ], 0 );
+        elements = hIndexBufferMemory[ FrameIndex ].Map( 0, IndexBufferSize[ FrameIndex ], 0 );
         {
-            /* fill convert configuration */
+            /* Fill convert configuration */
             struct nk_convert_config config;
             static const struct nk_draw_vertex_layout_element vertex_layout[] = {
-                { NK_VERTEX_POSITION, NK_FORMAT_FLOAT, NK_OFFSETOF(Vertex, position) },
-                { NK_VERTEX_TEXCOORD, NK_FORMAT_FLOAT, NK_OFFSETOF(Vertex, uv) },
-                { NK_VERTEX_COLOR, NK_FORMAT_R8G8B8A8, NK_OFFSETOF(Vertex, col) },
-                { NK_VERTEX_LAYOUT_END } };
+                {NK_VERTEX_POSITION, NK_FORMAT_FLOAT, NK_OFFSETOF( Vertex, pos )},
+                {NK_VERTEX_TEXCOORD, NK_FORMAT_FLOAT, NK_OFFSETOF( Vertex, uv )},
+                {NK_VERTEX_COLOR, NK_FORMAT_R8G8B8A8, NK_OFFSETOF( Vertex, col )},
+                {NK_VERTEX_LAYOUT_END}};
 
-            memset(&config, 0, sizeof(config));
-            config.vertex_layout = vertex_layout;
-            config.vertex_size = sizeof(Vertex);
-            config.vertex_alignment = NK_ALIGNOF(Vertex);
-            config.null = NullTexture;
+            memset( &config, 0, sizeof( config ) );
+            config.vertex_layout        = vertex_layout;
+            config.vertex_size          = sizeof( Vertex );
+            config.vertex_alignment     = NK_ALIGNOF( Vertex );
+            config.null                 = NullTexture;
             config.circle_segment_count = 22;
-            config.curve_segment_count = 22;
-            config.arc_segment_count = 22;
-            config.global_alpha = 1.0f;
-            config.shape_AA = p->aa;
-            config.line_AA = p->aa;
+            config.curve_segment_count  = 22;
+            config.arc_segment_count    = 22;
+            config.global_alpha         = 1.0f;
+            config.shape_AA             = p->aa;
+            config.line_AA              = p->aa;
 
-            /* setup buffers to load vertices and elements */
-            {
-                nk_buffer vbuf, ebuf;
-                nk_buffer_init_fixed(&vbuf, vertices, (nk_size)p->max_vertex_buffer);
-                nk_buffer_init_fixed(&ebuf, elements, (nk_size)p->max_element_buffer);
-                nk_convert(&Context, &RenderCmds, &vbuf, &ebuf, &config);
-            }
+            /* Setup buffers to load vertices and elements */
+            nk_buffer vbuf, ebuf;
+            nk_buffer_init_fixed( &vbuf, vertices, (nk_size) p->max_vertex_buffer );
+            nk_buffer_init_fixed( &ebuf, elements, (nk_size) p->max_element_buffer );
+            nk_convert( &Context, &RenderCmds, &vbuf, &ebuf, &config );
         }
 
-        VkMappedMemoryRange range[2] = {};
-        range[0].sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
-        range[0].memory = hVertexBufferMemory[FrameIndex];
-        range[0].size = VK_WHOLE_SIZE;
-        range[1].sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
-        range[1].memory = hIndexBufferMemory[FrameIndex];
-        range[1].size = VK_WHOLE_SIZE;
+        VkMappedMemoryRange range[ 2 ];
+        TInfoStruct< VkMappedMemoryRange >::SetStructType( range );
 
-        if (apemodevk::ResultHandle::Failed(vkFlushMappedMemoryRanges(pDevice, 2, range))) {
-            DebugBreak();
-            return;
+        range[ 0 ].sType  = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
+        range[ 0 ].memory = hVertexBufferMemory[ FrameIndex ];
+        range[ 0 ].size   = VK_WHOLE_SIZE;
+        range[ 1 ].sType  = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
+        range[ 1 ].memory = hIndexBufferMemory[ FrameIndex ];
+        range[ 1 ].size   = VK_WHOLE_SIZE;
+
+        if ( ResultHandle::Failed( vkFlushMappedMemoryRanges( pDevice, 2, range ) ) ) {
+            DebugBreak( );
+            return false;
         }
 
-        hVertexBufferMemory[FrameIndex].Unmap();
-        hIndexBufferMemory[FrameIndex].Unmap();
+        hVertexBufferMemory[ FrameIndex ].Unmap( );
+        hIndexBufferMemory[ FrameIndex ].Unmap( );
     }
 
-    // Bind pipeline and descriptor sets:
+    /* Bind pipeline and descriptor sets */
     {
         VkDescriptorSet descSets[1] = { DescSet.hSets[0] };
         vkCmdBindPipeline(renderParams->pCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, hPipeline);
         vkCmdBindDescriptorSets(renderParams->pCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, hPipelineLayout, 0, 1, descSets, 0, NULL);
     }
 
-    // Bind Vertex And Index Buffer:
+    /* Bind Vertex And Index Buffer */
     {
         VkBuffer vertexBuffers[1] = { hVertexBuffer[FrameIndex] };
         VkDeviceSize vertexOffsets[1] = { 0 };
@@ -147,45 +136,47 @@ void apemode::NuklearSdlVk::Render( RenderParametersBase* p ) {
         vkCmdBindIndexBuffer(renderParams->pCmdBuffer, hIndexBuffer[FrameIndex], 0, VK_INDEX_TYPE_UINT16);
     }
 
-    // Setup viewport:
-    {
-        VkViewport viewport;
-        viewport.x = 0;
-        viewport.y = 0;
-        viewport.width = p->dims[0] * p->scale[0];
-        viewport.height = p->dims[1] * p->scale[1];
-        viewport.minDepth = 0.0f;
-        viewport.maxDepth = 1.0f;
-        vkCmdSetViewport(renderParams->pCmdBuffer, 0, 1, &viewport);
-    }
+    VkViewport viewport;
+    viewport.x        = 0;
+    viewport.y        = 0;
+    viewport.width    = p->dims[ 0 ] * p->scale[ 0 ];
+    viewport.height   = p->dims[ 1 ] * p->scale[ 1 ];
+    viewport.minDepth = 0.0f;
+    viewport.maxDepth = 1.0f;
+    vkCmdSetViewport( renderParams->pCmdBuffer, 0, 1, &viewport );
 
-
-    // Setup scale and translation:
+    /* Setup scale and translation */
     {
-        const float ortho[4][4] = {
-            { 2.0f / p->dims[0], 0.0f, 0.0f, 0.0f },
-            { 0.0f, -2.0f / p->dims[1], 0.0f, 0.0f },
-            { 0.0f, 0.0f, -1.0f, 0.0f },
-            { -1.0f, 1.0f, 0.0f, 1.0f },
+        float offsetScale[ 4 ] = {
+            -1.0f,               /* Translation X */
+            -1.0f,               /* Translation Y */
+            2.0f / p->dims[ 0 ], /* Scaling X */
+            2.0f / p->dims[ 1 ], /* Scaling Y */
         };
 
-        vkCmdPushConstants(renderParams->pCmdBuffer, hPipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(float [4][4]), ortho);
+        vkCmdPushConstants(renderParams->pCmdBuffer, hPipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(float [4]), offsetScale);
     }
 
     const nk_draw_command *cmd = nullptr;
     uint32_t  offset = 0;
     uint32_t vtx_offset = 0;
 
-    /* iterate over and execute each draw command */
+    /* Iterate over and execute each draw command */
     nk_draw_foreach(cmd, &Context, &RenderCmds) {
         if (!cmd->elem_count)
             continue;
 
         VkRect2D scissor;
-        scissor.offset.x = (cmd->clip_rect.x * p->scale[0]);
-        scissor.offset.y = ((p->dims[1] - (cmd->clip_rect.y + cmd->clip_rect.h)) * p->scale[1]);
-        scissor.extent.width = (cmd->clip_rect.w * p->scale[0]);
-        scissor.extent.height = (cmd->clip_rect.h * p->scale[1]);
+
+        scissor.offset.x      = ( cmd->clip_rect.x * p->scale[ 0 ] );
+        scissor.offset.y      = ( cmd->clip_rect.y * p->scale[ 1 ] );
+        scissor.extent.width  = ( cmd->clip_rect.w * p->scale[ 0 ] );
+        scissor.extent.height = ( cmd->clip_rect.h * p->scale[ 1 ] );
+
+        scissor.offset.x      = std::max< int32_t >( 0, scissor.offset.x );
+        scissor.offset.y      = std::max< int32_t >( 0, scissor.offset.y );
+        scissor.extent.width  = std::min< uint32_t >( viewport.width, scissor.extent.width );
+        scissor.extent.height = std::min< uint32_t >( viewport.height, scissor.extent.height );
 
         vkCmdSetScissor(renderParams->pCmdBuffer, 0, 1, &scissor);
         vkCmdDrawIndexed(renderParams->pCmdBuffer, cmd->elem_count, 1, offset, vtx_offset, 0);
@@ -199,11 +190,12 @@ void apemode::NuklearSdlVk::Render( RenderParametersBase* p ) {
 void apemode::NuklearSdlVk::DeviceDestroy( ) {
 }
 
-void apemode::NuklearSdlVk::DeviceCreate( InitParametersBase* init_params ) {
+bool apemode::NuklearSdlVk::DeviceCreate( InitParametersBase* init_params ) {
     const char* vertex_shader =
         "#version 450\n"
         "#extension GL_ARB_separate_shader_objects : enable\n"
-        "layout(push_constant) uniform PushConstants { mat4 modelViewProjection; } pushConstants;\n"
+        "layout(push_constant) uniform PushConstants { vec4 offsetScale; } pushConstants;\n"
+        //"layout(push_constant) uniform PushConstants { mat4 modelViewProjection; } pushConstants;\n"
         "layout(location=0) in vec2 inPosition;\n"
         "layout(location=1) in vec2 inTexcoords;\n"
         "layout(location=2) in vec4 inColor;\n"
@@ -212,7 +204,8 @@ void apemode::NuklearSdlVk::DeviceCreate( InitParametersBase* init_params ) {
         "void main() {\n"
         "   outTexcoords = inTexcoords;\n"
         "   outColor = inColor;\n"
-        "   gl_Position = pushConstants.modelViewProjection * vec4(inPosition.xy, 0, 1);\n"
+        "   gl_Position = vec4(inPosition.xy * pushConstants.offsetScale.zw + pushConstants.offsetScale.xy, 0, 1);\n"
+        //"   gl_Position = pushConstants.modelViewProjection * vec4(inPosition.xy, 0, 1);\n"
         "}\n";
 
     const char* fragment_shader =
@@ -243,7 +236,7 @@ void apemode::NuklearSdlVk::DeviceCreate( InitParametersBase* init_params ) {
         OutputDebugStringA(nuklear_preprocessed[0].GetErrorMessage().c_str());
         OutputDebugStringA(nuklear_preprocessed[1].GetErrorMessage().c_str());
         DebugBreak( );
-        return;
+        return false;
     }
 
 #if 0
@@ -277,50 +270,52 @@ void apemode::NuklearSdlVk::DeviceCreate( InitParametersBase* init_params ) {
     if ( shaderc_compilation_status_success != nuklear_compiled[ 0 ].GetCompilationStatus( ) ||
          shaderc_compilation_status_success != nuklear_compiled[ 1 ].GetCompilationStatus( ) ) {
         DebugBreak( );
-        return;
+        return false;
     }
 
     auto initParametersVk = (InitParametersVk*) init_params;
-    if ( nullptr == initParametersVk )
-        return;
+    if ( nullptr == initParametersVk ) {
+        DebugBreak( );
+        return false;
+    }
 
-    pAlloc      = initParametersVk->pAlloc;
-    pDevice = initParametersVk->pDevice;
+    pAlloc          = initParametersVk->pAlloc;
+    pDevice         = initParametersVk->pDevice;
     pPhysicalDevice = initParametersVk->pPhysicalDevice;
-    pDescPool   = initParametersVk->pDescPool;
-    pRenderPass = initParametersVk->pRenderPass;
+    pDescPool       = initParametersVk->pDescPool;
+    pRenderPass     = initParametersVk->pRenderPass;
 
 #if 0
-    apemodevk::TInfoStruct< VkShaderModuleCreateInfo > vertexShaderCreateInfo;
+    TInfoStruct< VkShaderModuleCreateInfo > vertexShaderCreateInfo;
     vertexShaderCreateInfo->pCode = (const uint32_t*)nuklear_compiled_assembly[ 0 ].begin( );
     vertexShaderCreateInfo->codeSize = (size_t) std::distance(nuklear_compiled_assembly[ 0 ].begin( ), nuklear_compiled_assembly[ 0 ].end( ) );
 
-    apemodevk::TInfoStruct< VkShaderModuleCreateInfo > fragmentShaderCreateInfo;
+    TInfoStruct< VkShaderModuleCreateInfo > fragmentShaderCreateInfo;
     fragmentShaderCreateInfo->pCode = (const uint32_t*)nuklear_compiled_assembly[ 1 ].begin( );
     fragmentShaderCreateInfo->codeSize = (size_t) std::distance(nuklear_compiled_assembly[ 1 ].begin( ), nuklear_compiled_assembly[ 1 ].end( ) );
 
 #else
 
-    apemodevk::TInfoStruct< VkShaderModuleCreateInfo > vertexShaderCreateInfo;
+    TInfoStruct< VkShaderModuleCreateInfo > vertexShaderCreateInfo;
     vertexShaderCreateInfo->pCode = (const uint32_t*)nuklear_compiled[0].begin();
     vertexShaderCreateInfo->codeSize = (size_t)std::distance(nuklear_compiled[0].begin(), nuklear_compiled[0].end()) * sizeof(uint32_t);
 
-    apemodevk::TInfoStruct< VkShaderModuleCreateInfo > fragmentShaderCreateInfo;
+    TInfoStruct< VkShaderModuleCreateInfo > fragmentShaderCreateInfo;
     fragmentShaderCreateInfo->pCode = (const uint32_t*)nuklear_compiled[1].begin();
     fragmentShaderCreateInfo->codeSize = (size_t)std::distance(nuklear_compiled[1].begin(), nuklear_compiled[1].end()) * sizeof(uint32_t);
 
 #endif
 
-    apemodevk::TDispatchableHandle< VkShaderModule > hVertexShaderModule;
-    apemodevk::TDispatchableHandle< VkShaderModule > hFragmentShaderModule;
+    TDispatchableHandle< VkShaderModule > hVertexShaderModule;
+    TDispatchableHandle< VkShaderModule > hFragmentShaderModule;
     if ( false == hVertexShaderModule.Recreate( pDevice, vertexShaderCreateInfo ) ||
          false == hFragmentShaderModule.Recreate( pDevice, fragmentShaderCreateInfo ) ) {
         DebugBreak( );
-        return;
+        return false;
     }
 
     if ( nullptr != pDevice && false == hFontSampler.IsNotNull( ) ) {
-        apemodevk::TInfoStruct< VkSamplerCreateInfo > fontSamplerCreateInfo;
+        TInfoStruct< VkSamplerCreateInfo > fontSamplerCreateInfo;
         fontSamplerCreateInfo->magFilter    = VK_FILTER_LINEAR;
         fontSamplerCreateInfo->minFilter    = VK_FILTER_LINEAR;
         fontSamplerCreateInfo->mipmapMode   = VK_SAMPLER_MIPMAP_MODE_LINEAR;
@@ -332,25 +327,25 @@ void apemode::NuklearSdlVk::DeviceCreate( InitParametersBase* init_params ) {
 
         if ( false == hFontSampler.Recreate( pDevice, fontSamplerCreateInfo ) ) {
             DebugBreak( );
-            return;
+            return false;
         }
     }
     if ( nullptr != pDevice && false == hDescSetLayout.IsNotNull( ) ) {
         VkDescriptorSetLayoutBinding binding[ 1 ];
-        apemodevk::ZeroMemory( binding );
+        ZeroMemory( binding );
 
         binding[ 0 ].descriptorType     = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         binding[ 0 ].descriptorCount    = 1;
         binding[ 0 ].stageFlags         = VK_SHADER_STAGE_FRAGMENT_BIT;
         binding[ 0 ].pImmutableSamplers = hFontSampler;
 
-        apemodevk::TInfoStruct< VkDescriptorSetLayoutCreateInfo > descSetLayoutCreateInfo;
+        TInfoStruct< VkDescriptorSetLayoutCreateInfo > descSetLayoutCreateInfo;
         descSetLayoutCreateInfo->bindingCount = 1;
         descSetLayoutCreateInfo->pBindings    = binding;
 
         if ( false == hDescSetLayout.Recreate( pDevice, descSetLayoutCreateInfo ) ) {
             DebugBreak( );
-            return;
+            return false;
         }
     }
 
@@ -358,15 +353,15 @@ void apemode::NuklearSdlVk::DeviceCreate( InitParametersBase* init_params ) {
         VkDescriptorSetLayout descSetLayouts[] = {hDescSetLayout};
         if ( false == DescSet.RecreateResourcesFor( pDevice, pDescPool, descSetLayouts ) ) {
             DebugBreak( );
-            return;
+            return false;
         }
 
         VkPushConstantRange pushConstants[ 1 ];
-        apemodevk::ZeroMemory(pushConstants);
+        ZeroMemory(pushConstants);
         pushConstants[ 0 ].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-        pushConstants[ 0 ].size       = sizeof( float [4][4] );
+        pushConstants[ 0 ].size       = sizeof( float [4] );
 
-        apemodevk::TInfoStruct< VkPipelineLayoutCreateInfo > pipelineLayoutCreateInfo;
+        TInfoStruct< VkPipelineLayoutCreateInfo > pipelineLayoutCreateInfo;
         pipelineLayoutCreateInfo->setLayoutCount         = 1;
         pipelineLayoutCreateInfo->pSetLayouts            = descSetLayouts;
         pipelineLayoutCreateInfo->pushConstantRangeCount = 1;
@@ -374,11 +369,11 @@ void apemode::NuklearSdlVk::DeviceCreate( InitParametersBase* init_params ) {
 
         if ( false == hPipelineLayout.Recreate( pDevice, pipelineLayoutCreateInfo ) ) {
             DebugBreak( );
-            return;
+            return false;
         }
     }
 
-    apemodevk::TInfoStruct< VkPipelineShaderStageCreateInfo > pipelineStages[ 2 ];
+    TInfoStruct< VkPipelineShaderStageCreateInfo > pipelineStages[ 2 ];
 
     pipelineStages[ 0 ]->stage  = VK_SHADER_STAGE_VERTEX_BIT;
     pipelineStages[ 0 ]->module = hVertexShaderModule;
@@ -389,17 +384,17 @@ void apemode::NuklearSdlVk::DeviceCreate( InitParametersBase* init_params ) {
     pipelineStages[ 1 ]->pName  = "main";
 
     VkVertexInputBindingDescription bindingDescs[ 1 ];
-    apemodevk::ZeroMemory( bindingDescs );
+    ZeroMemory( bindingDescs );
     bindingDescs[ 0 ].stride    = sizeof( Vertex );
     bindingDescs[ 0 ].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
     VkVertexInputAttributeDescription inputAttributeDesc[ 3 ];
-    apemodevk::ZeroMemory( inputAttributeDesc );
+    ZeroMemory( inputAttributeDesc );
 
     inputAttributeDesc[ 0 ].location = 0;
     inputAttributeDesc[ 0 ].binding  = bindingDescs[ 0 ].binding;
     inputAttributeDesc[ 0 ].format   = VK_FORMAT_R32G32_SFLOAT;
-    inputAttributeDesc[ 0 ].offset   = ( size_t )( &( (Vertex*) 0 )->position );
+    inputAttributeDesc[ 0 ].offset   = ( size_t )( &( (Vertex*) 0 )->pos );
 
     inputAttributeDesc[ 1 ].location = 1;
     inputAttributeDesc[ 1 ].binding  = bindingDescs[ 0 ].binding;
@@ -411,30 +406,30 @@ void apemode::NuklearSdlVk::DeviceCreate( InitParametersBase* init_params ) {
     inputAttributeDesc[ 2 ].format   = VK_FORMAT_R8G8B8A8_UNORM;
     inputAttributeDesc[ 2 ].offset   = ( size_t )( &( (Vertex*) 0 )->col );
 
-    apemodevk::TInfoStruct< VkPipelineVertexInputStateCreateInfo > pipelineVertexInputState;
+    TInfoStruct< VkPipelineVertexInputStateCreateInfo > pipelineVertexInputState;
     pipelineVertexInputState->vertexBindingDescriptionCount   = _Get_array_length_u( bindingDescs );
     pipelineVertexInputState->pVertexBindingDescriptions      = bindingDescs;
     pipelineVertexInputState->vertexAttributeDescriptionCount = _Get_array_length_u( inputAttributeDesc );
     pipelineVertexInputState->pVertexAttributeDescriptions    = inputAttributeDesc;
 
-    apemodevk::TInfoStruct< VkPipelineInputAssemblyStateCreateInfo > pipelineInputAssemblyState;
+    TInfoStruct< VkPipelineInputAssemblyStateCreateInfo > pipelineInputAssemblyState;
     pipelineInputAssemblyState->topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 
-    apemodevk::TInfoStruct< VkPipelineViewportStateCreateInfo > pipelineViewportState;
+    TInfoStruct< VkPipelineViewportStateCreateInfo > pipelineViewportState;
     pipelineViewportState->viewportCount = 1;
     pipelineViewportState->scissorCount  = 1;
 
-    apemodevk::TInfoStruct< VkPipelineRasterizationStateCreateInfo > pipelineRasterizationState;
+    TInfoStruct< VkPipelineRasterizationStateCreateInfo > pipelineRasterizationState;
     pipelineRasterizationState->polygonMode = VK_POLYGON_MODE_FILL;
     pipelineRasterizationState->cullMode    = VK_CULL_MODE_NONE;
     pipelineRasterizationState->frontFace   = VK_FRONT_FACE_COUNTER_CLOCKWISE;
     pipelineRasterizationState->lineWidth   = 1.0f;
 
-    apemodevk::TInfoStruct< VkPipelineMultisampleStateCreateInfo > pipelineMultisampleState;
+    TInfoStruct< VkPipelineMultisampleStateCreateInfo > pipelineMultisampleState;
     pipelineMultisampleState->rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 
     VkPipelineColorBlendAttachmentState pipelineColorBlendAttachmentState[ 1 ];
-    apemodevk::ZeroMemory( pipelineColorBlendAttachmentState );
+    ZeroMemory( pipelineColorBlendAttachmentState );
     pipelineColorBlendAttachmentState[ 0 ].blendEnable         = VK_TRUE;
     pipelineColorBlendAttachmentState[ 0 ].srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
     pipelineColorBlendAttachmentState[ 0 ].dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
@@ -444,19 +439,19 @@ void apemode::NuklearSdlVk::DeviceCreate( InitParametersBase* init_params ) {
     pipelineColorBlendAttachmentState[ 0 ].alphaBlendOp        = VK_BLEND_OP_ADD;
     pipelineColorBlendAttachmentState[ 0 ].colorWriteMask      = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
 
-    apemodevk::TInfoStruct< VkPipelineDepthStencilStateCreateInfo > pipelineDepthStencilState;
+    TInfoStruct< VkPipelineDepthStencilStateCreateInfo > pipelineDepthStencilState;
 
-    apemodevk::TInfoStruct< VkPipelineColorBlendStateCreateInfo > pipelineColorBlendState;
+    TInfoStruct< VkPipelineColorBlendStateCreateInfo > pipelineColorBlendState;
     pipelineColorBlendState->attachmentCount = 1;
     pipelineColorBlendState->pAttachments    = pipelineColorBlendAttachmentState;
 
     VkDynamicState dynamicStates[ 2 ] = {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR};
 
-    apemodevk::TInfoStruct< VkPipelineDynamicStateCreateInfo > pipelineDynamicState;
+    TInfoStruct< VkPipelineDynamicStateCreateInfo > pipelineDynamicState;
     pipelineDynamicState->dynamicStateCount = _Get_array_length_u( dynamicStates );
     pipelineDynamicState->pDynamicStates    = dynamicStates;
 
-    apemodevk::TInfoStruct< VkGraphicsPipelineCreateInfo > graphicsPipeline;
+    TInfoStruct< VkGraphicsPipelineCreateInfo > graphicsPipeline;
     graphicsPipeline->stageCount          = _Get_array_length_u( pipelineStages );
     graphicsPipeline->pStages             = reinterpret_cast< const VkPipelineShaderStageCreateInfo* >( &pipelineStages[0] );
     graphicsPipeline->pVertexInputState   = pipelineVertexInputState;
@@ -470,12 +465,12 @@ void apemode::NuklearSdlVk::DeviceCreate( InitParametersBase* init_params ) {
     graphicsPipeline->layout              = hPipelineLayout;
     graphicsPipeline->renderPass          = pRenderPass;
 
-    apemodevk::TInfoStruct<VkPipelineCacheCreateInfo> pipelineCacheCreateInfo;
+    TInfoStruct<VkPipelineCacheCreateInfo> pipelineCacheCreateInfo;
     hPipelineCache.Recreate( pDevice, pipelineCacheCreateInfo );
 
     if ( false == hPipeline.Recreate( pDevice, hPipelineCache, graphicsPipeline ) ) {
         DebugBreak( );
-        return;
+        return false;
     }
 }
 
@@ -486,7 +481,7 @@ void* apemode::NuklearSdlVk::DeviceUploadAtlas( InitParametersBase* init_params,
 
     // Create the Image:
     {
-        apemodevk::TInfoStruct< VkImageCreateInfo > imageCreateInfo;
+        TInfoStruct< VkImageCreateInfo > imageCreateInfo;
         imageCreateInfo->imageType     = VK_IMAGE_TYPE_2D;
         imageCreateInfo->format        = VK_FORMAT_R8G8B8A8_UNORM;
         imageCreateInfo->extent.width  = width;
@@ -519,7 +514,7 @@ void* apemode::NuklearSdlVk::DeviceUploadAtlas( InitParametersBase* init_params,
 
     // Create the Image View:
     {
-        apemodevk::TInfoStruct< VkImageViewCreateInfo > fontImgView;
+        TInfoStruct< VkImageViewCreateInfo > fontImgView;
         fontImgView->image                       = hFontImg;
         fontImgView->viewType                    = VK_IMAGE_VIEW_TYPE_2D;
         fontImgView->format                      = VK_FORMAT_R8G8B8A8_UNORM;
@@ -536,12 +531,12 @@ void* apemode::NuklearSdlVk::DeviceUploadAtlas( InitParametersBase* init_params,
     // Update the Descriptor Set:
     {
         VkDescriptorImageInfo fontImgDescriptor[ 1 ];
-        apemodevk::ZeroMemory( fontImgDescriptor );
+        ZeroMemory( fontImgDescriptor );
         fontImgDescriptor[ 0 ].sampler     = hFontSampler;
         fontImgDescriptor[ 0 ].imageView   = hFontImgView;
         fontImgDescriptor[ 0 ].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
-        apemodevk::TInfoStruct< VkWriteDescriptorSet > writeDescriptorSet[ 1 ];
+        TInfoStruct< VkWriteDescriptorSet > writeDescriptorSet[ 1 ];
         writeDescriptorSet[ 0 ]->dstSet          = DescSet.hSets[ 0 ];
         writeDescriptorSet[ 0 ]->descriptorCount = 1;
         writeDescriptorSet[ 0 ]->descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -551,7 +546,7 @@ void* apemode::NuklearSdlVk::DeviceUploadAtlas( InitParametersBase* init_params,
 
     // Create the Upload Buffer:
     {
-        apemodevk::TInfoStruct< VkBufferCreateInfo > bufferCreateInfo;
+        TInfoStruct< VkBufferCreateInfo > bufferCreateInfo;
         bufferCreateInfo->size        = uploadSize;
         bufferCreateInfo->usage       = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
         bufferCreateInfo->sharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -577,10 +572,10 @@ void* apemode::NuklearSdlVk::DeviceUploadAtlas( InitParametersBase* init_params,
     if ( auto mappedUploadBufferData = hUploadBufferMemory.Map( 0, uploadSize, 0 ) ) {
         memcpy( mappedUploadBufferData, fontImgPixels, uploadSize );
 
-        apemodevk::TInfoStruct< VkMappedMemoryRange > range[ 1 ];
+        TInfoStruct< VkMappedMemoryRange > range[ 1 ];
         range[ 0 ]->memory = hUploadBufferMemory;
         range[ 0 ]->size   = uploadSize;
-        if ( apemodevk::ResultHandle::Failed( vkFlushMappedMemoryRanges( pDevice, 1, range[ 0 ] ) ) ) {
+        if ( ResultHandle::Failed( vkFlushMappedMemoryRanges( pDevice, 1, range[ 0 ] ) ) ) {
             hUploadBufferMemory.Unmap( );
             DebugBreak( );
             return nullptr;
@@ -589,21 +584,58 @@ void* apemode::NuklearSdlVk::DeviceUploadAtlas( InitParametersBase* init_params,
         hUploadBufferMemory.Unmap( );
     }
 
+    TDispatchableHandle< VkCommandPool > cmdPool;
+    TDispatchableHandle< VkCommandBuffer > cmdBuffer;
+    VkCommandBuffer finalCmdBuffer = initParametersVk->pCmdBuffer;
+
+    if ( VK_NULL_HANDLE == finalCmdBuffer ) {
+
+        TInfoStruct< VkCommandPoolCreateInfo > cmdPoolCreateInfo;
+        cmdPoolCreateInfo->flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+        cmdPoolCreateInfo->queueFamilyIndex = initParametersVk->QueueFamilyId;
+        if ( false == cmdPool.Recreate( initParametersVk->pDevice, cmdPoolCreateInfo ) ) {
+            DebugBreak( );
+            return nullptr;
+        }
+
+        TInfoStruct< VkCommandBufferAllocateInfo > cmdBufferAllocInfo;
+        cmdBufferAllocInfo->commandPool = cmdPool;
+        cmdBufferAllocInfo->level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        cmdBufferAllocInfo->commandBufferCount = 1;
+        if ( false == cmdBuffer.Recreate( initParametersVk->pDevice, cmdBufferAllocInfo ) ) {
+            DebugBreak( );
+            return nullptr;
+        }
+
+        finalCmdBuffer = cmdBuffer;
+
+        if ( false == cmdPool.Reset( false ) ) {
+            DebugBreak( );
+            return nullptr;
+        }
+
+        TInfoStruct< VkCommandBufferBeginInfo > cmdBufferBeginInfo;
+        cmdBufferBeginInfo->flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+        if ( ResultHandle::Failed( vkBeginCommandBuffer( cmdBuffer, cmdBufferBeginInfo ) ) ) {
+            DebugBreak( );
+            return nullptr;
+        }
+    }
+
     // Copy to Image:
     {
-        VkImageMemoryBarrier copy_barrier[ 1 ]        = {};
-        copy_barrier[ 0 ].sType                       = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-        copy_barrier[ 0 ].dstAccessMask               = VK_ACCESS_TRANSFER_WRITE_BIT;
-        copy_barrier[ 0 ].oldLayout                   = VK_IMAGE_LAYOUT_UNDEFINED;
-        copy_barrier[ 0 ].newLayout                   = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-        copy_barrier[ 0 ].srcQueueFamilyIndex         = VK_QUEUE_FAMILY_IGNORED;
-        copy_barrier[ 0 ].dstQueueFamilyIndex         = VK_QUEUE_FAMILY_IGNORED;
-        copy_barrier[ 0 ].image                       = hFontImg;
-        copy_barrier[ 0 ].subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        copy_barrier[ 0 ].subresourceRange.levelCount = 1;
-        copy_barrier[ 0 ].subresourceRange.layerCount = 1;
+        TInfoStruct< VkImageMemoryBarrier > copyBarrier;
+        copyBarrier->dstAccessMask               = VK_ACCESS_TRANSFER_WRITE_BIT;
+        copyBarrier->oldLayout                   = VK_IMAGE_LAYOUT_UNDEFINED;
+        copyBarrier->newLayout                   = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        copyBarrier->srcQueueFamilyIndex         = VK_QUEUE_FAMILY_IGNORED;
+        copyBarrier->dstQueueFamilyIndex         = VK_QUEUE_FAMILY_IGNORED;
+        copyBarrier->image                       = hFontImg;
+        copyBarrier->subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        copyBarrier->subresourceRange.levelCount = 1;
+        copyBarrier->subresourceRange.layerCount = 1;
 
-        vkCmdPipelineBarrier( initParametersVk->pCmdBuffer,
+        vkCmdPipelineBarrier( finalCmdBuffer,
                               VK_PIPELINE_STAGE_HOST_BIT,
                               VK_PIPELINE_STAGE_TRANSFER_BIT,
                               0,
@@ -612,7 +644,7 @@ void* apemode::NuklearSdlVk::DeviceUploadAtlas( InitParametersBase* init_params,
                               0,
                               NULL,
                               1,
-                              copy_barrier );
+                              copyBarrier );
 
         VkBufferImageCopy region           = {};
         region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -621,27 +653,26 @@ void* apemode::NuklearSdlVk::DeviceUploadAtlas( InitParametersBase* init_params,
         region.imageExtent.height          = height;
         region.imageExtent.depth           = 1;
 
-        vkCmdCopyBufferToImage( initParametersVk->pCmdBuffer,
+        vkCmdCopyBufferToImage( finalCmdBuffer,
                                 hUploadBuffer,
                                 hFontImg,
                                 VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                                 1,
                                 &region );
 
-        VkImageMemoryBarrier use_barrier[ 1 ]        = {};
-        use_barrier[ 0 ].sType                       = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-        use_barrier[ 0 ].srcAccessMask               = VK_ACCESS_TRANSFER_WRITE_BIT;
-        use_barrier[ 0 ].dstAccessMask               = VK_ACCESS_SHADER_READ_BIT;
-        use_barrier[ 0 ].oldLayout                   = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-        use_barrier[ 0 ].newLayout                   = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        use_barrier[ 0 ].srcQueueFamilyIndex         = VK_QUEUE_FAMILY_IGNORED;
-        use_barrier[ 0 ].dstQueueFamilyIndex         = VK_QUEUE_FAMILY_IGNORED;
-        use_barrier[ 0 ].image                       = hFontImg;
-        use_barrier[ 0 ].subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        use_barrier[ 0 ].subresourceRange.levelCount = 1;
-        use_barrier[ 0 ].subresourceRange.layerCount = 1;
+        TInfoStruct< VkImageMemoryBarrier > useBarrier;
+        useBarrier->srcAccessMask               = VK_ACCESS_TRANSFER_WRITE_BIT;
+        useBarrier->dstAccessMask               = VK_ACCESS_SHADER_READ_BIT;
+        useBarrier->oldLayout                   = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        useBarrier->newLayout                   = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        useBarrier->srcQueueFamilyIndex         = VK_QUEUE_FAMILY_IGNORED;
+        useBarrier->dstQueueFamilyIndex         = VK_QUEUE_FAMILY_IGNORED;
+        useBarrier->image                       = hFontImg;
+        useBarrier->subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        useBarrier->subresourceRange.levelCount = 1;
+        useBarrier->subresourceRange.layerCount = 1;
 
-        vkCmdPipelineBarrier( initParametersVk->pCmdBuffer,
+        vkCmdPipelineBarrier( cmdBuffer,
                               VK_PIPELINE_STAGE_TRANSFER_BIT,
                               VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
                               0,
@@ -650,7 +681,28 @@ void* apemode::NuklearSdlVk::DeviceUploadAtlas( InitParametersBase* init_params,
                               0,
                               NULL,
                               1,
-                              use_barrier );
+                              useBarrier );
+    }
+
+    if ( cmdBuffer.IsNotNull( ) ) {
+        TInfoStruct< VkSubmitInfo > submitInfo;
+        submitInfo->commandBufferCount = 1;
+        submitInfo->pCommandBuffers    = cmdBuffer;
+
+        if ( ResultHandle::Failed( vkEndCommandBuffer( cmdBuffer ) ) ) {
+            DebugBreak( );
+            return nullptr;
+        }
+
+        if ( ResultHandle::Failed( vkQueueSubmit( initParametersVk->pQueue, 1, submitInfo, VK_NULL_HANDLE ) ) ) {
+            DebugBreak( );
+            return nullptr;
+        }
+
+        if ( ResultHandle::Failed( vkDeviceWaitIdle( initParametersVk->pDevice ) ) ) {
+            DebugBreak( );
+            return nullptr;
+        }
     }
 
     return hFontImg.Handle;

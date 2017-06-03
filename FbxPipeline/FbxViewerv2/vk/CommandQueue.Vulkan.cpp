@@ -67,7 +67,7 @@ bool apemodevk::CommandBuffer::RecreateResourcesFor (GraphicsDevice & GraphicsNo
     CmdListDesc->commandPool        = hCmdAlloc;
     CmdListDesc->commandBufferCount = 1;
 
-    if (!hCmdList.Allocate (GraphicsNode, CmdListDesc))
+    if (!hCmdList.Recreate (GraphicsNode, CmdListDesc))
     {
         _Game_engine_Halt ("Failed to create command list.");
         return false;

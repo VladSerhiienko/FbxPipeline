@@ -18,18 +18,26 @@ namespace apemode {
     class NuklearSdlVk : public NuklearSdlBase {
     public:
         struct InitParametersVk : InitParametersBase {
-            VkAllocationCallbacks *pAlloc          = nullptr;
-            VkDevice               pDevice         = VK_NULL_HANDLE;
-            VkPhysicalDevice       pPhysicalDevice = VK_NULL_HANDLE;
-            VkDescriptorPool       pDescPool       = VK_NULL_HANDLE;
-            VkRenderPass           pRenderPass     = VK_NULL_HANDLE;
-            VkCommandBuffer        pCmdBuffer      = VK_NULL_HANDLE;
-            uint32_t               FrameCount      = 0;
+            VkAllocationCallbacks *pAlloc          = nullptr;        /* Null is ok */
+            VkDevice               pDevice         = VK_NULL_HANDLE; /* Required */
+            VkPhysicalDevice       pPhysicalDevice = VK_NULL_HANDLE; /* Required */
+            VkDescriptorPool       pDescPool       = VK_NULL_HANDLE; /* Required */
+            VkRenderPass           pRenderPass     = VK_NULL_HANDLE; /* Required */
+
+            /* User either provides a command buffer or a queue (with family id).
+             * In case the command buffer is null, it will be allocated
+             * and submitted to the queue and synchonized.
+             */
+
+            VkCommandBuffer pCmdBuffer    = VK_NULL_HANDLE; /* Optional (for uploading font img) */
+            VkQueue         pQueue        = VK_NULL_HANDLE; /* Optional (for uploading font img) */
+            uint32_t        QueueFamilyId = 0;              /* Optional (for uploading font img) */
+            uint32_t        FrameCount    = 0;              /* Required, swapchain img count typically */
         };
 
         struct RenderParametersVk : RenderParametersBase {
-            VkCommandBuffer pCmdBuffer = nullptr;
-            uint32_t        FrameIndex = 0;
+            VkCommandBuffer pCmdBuffer = VK_NULL_HANDLE; /* Required */
+            uint32_t        FrameIndex = 0;              /* Zero is ok */
         };
 
     public:
@@ -59,13 +67,13 @@ namespace apemode {
         apemodevk::TDispatchableHandle< VkDeviceMemory > hIndexBufferMemory[ kMaxFrameCount ];
         apemodevk::TDispatchableHandle< VkBuffer >       hUniformBuffer[ kMaxFrameCount ];
         apemodevk::TDispatchableHandle< VkDeviceMemory > hUniformBufferMemory[ kMaxFrameCount ];
-        size_t                                           VertexBufferSize[ kMaxFrameCount ] = {};
-        size_t                                           IndexBufferSize[ kMaxFrameCount ]  = {};
+        size_t                                           VertexBufferSize[ kMaxFrameCount ] = {0};
+        size_t                                           IndexBufferSize[ kMaxFrameCount ]  = {0};
 
     public:
-        virtual void Render( RenderParametersBase *render_params ) override;
-        virtual void DeviceDestroy( ) override;
-        virtual void DeviceCreate( InitParametersBase *init_params ) override;
+        virtual bool  Render( RenderParametersBase *render_params ) override;
+        virtual void  DeviceDestroy( ) override;
+        virtual bool  DeviceCreate( InitParametersBase *init_params ) override;
         virtual void *DeviceUploadAtlas( InitParametersBase *init_params, const void *image, int width, int height ) override;
     };
 

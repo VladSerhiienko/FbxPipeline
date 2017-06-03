@@ -191,7 +191,7 @@ namespace apemodevk
         TInfoStruct< VkDescriptorSetLayoutBinding > Binding;
 
         void Clear( ) {
-            Binding.ZeroMemory( );
+            Binding.InitializeStruct( );
         }
 
         void InitAsUniformBuffer( uint32_t Register, uint32_t Count, VkShaderStageFlagBits StageFlags, uint32_t Set = 0 ) {

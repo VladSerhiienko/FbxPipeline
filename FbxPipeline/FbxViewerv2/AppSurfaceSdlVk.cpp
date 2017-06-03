@@ -67,9 +67,8 @@ bool apemode::AppSurfaceSdlVk::Initialize( ) {
                 uint32_t queueFamilyId    = 0;
                 uint32_t queueFamilyCount = pNode->QueueProps.size( );
                 for ( ; queueFamilyId < queueFamilyCount; ++queueFamilyId ) {
-
-                    pSwapchain = std::move(std::make_unique< apemodevk::Swapchain >());
-                    if (true == pSwapchain->RecreateResourceFor(*pNode, queueFamilyId,  hInstance, hWnd, GetWidth(), GetHeight())) {
+                    pSwapchain = std::move( std::make_unique< apemodevk::Swapchain >( ) );
+                    if ( true == pSwapchain->RecreateResourceFor( *pNode, queueFamilyId, hInstance, hWnd, GetWidth( ), GetHeight( ) ) ) {
                         if ( pNode->SupportsGraphics( queueFamilyId ) && pNode->SupportsPresenting( queueFamilyId, pSwapchain->hSurface ) ) {
                             if ( nullptr == pCmdQueue )
                                 pCmdQueue = std::move( std::make_unique< apemodevk::CommandQueue >( ) );

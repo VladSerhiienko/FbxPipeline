@@ -12,7 +12,7 @@
 #define NK_SHADER_VERSION "#version 300 es\n"
 #endif
 
-void apemode::NuklearSdlGL::Render( RenderParametersBase *p ) {
+bool apemode::NuklearSdlGL::Render( RenderParametersBase *p ) {
     const GLfloat ortho[ 4 ][ 4 ] = {
         {2.0f / (GLfloat) p->dims[ 0 ], 0.0f, 0.0f, 0.0f},
         {0.0f, -2.0f / (GLfloat) p->dims[ 1 ], 0.0f, 0.0f},
@@ -20,8 +20,8 @@ void apemode::NuklearSdlGL::Render( RenderParametersBase *p ) {
         {-1.0f, 1.0f, 0.0f, 1.0f},
     };
 
-    /* setup global state */
-    glViewport( 0, 0, p->dims[ 0 ] * p->scale[ 0 ], p->dims[ 1 ] * p->scale[ 1 ] );
+    /* Setup global state */
+    glViewport( 0, 0, GLsizei( p->dims[ 0 ] * p->scale[ 0 ] ), GLsizei( p->dims[ 1 ] * p->scale[ 1 ] ) );
     glEnable( GL_BLEND );
     glBlendEquation( GL_FUNC_ADD );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
@@ -30,18 +30,18 @@ void apemode::NuklearSdlGL::Render( RenderParametersBase *p ) {
     glEnable( GL_SCISSOR_TEST );
     glActiveTexture( GL_TEXTURE0 );
 
-    /* setup program */
+    /* Setup program */
     glUseProgram( prog );
     glUniform1i( uniform_tex, 0 );
     glUniformMatrix4fv( uniform_proj, 1, GL_FALSE, &ortho[ 0 ][ 0 ] );
     {
-        /* convert from command queue into draw list and draw to screen */
+        /* Convert from command queue into draw list and draw to screen */
         const nk_draw_command *cmd      = nullptr;
         void *                 vertices = nullptr;
         void *                 elements = nullptr;
         const nk_draw_index *  offset   = nullptr;
 
-        /* allocate vertex and element buffer */
+        /* Allocate vertex and element buffer */
         glBindVertexArray( vao );
         glBindBuffer( GL_ARRAY_BUFFER, vbo );
         glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, ebo );
@@ -49,14 +49,14 @@ void apemode::NuklearSdlGL::Render( RenderParametersBase *p ) {
         glBufferData( GL_ARRAY_BUFFER, p->max_vertex_buffer, NULL, GL_STREAM_DRAW );
         glBufferData( GL_ELEMENT_ARRAY_BUFFER, p->max_element_buffer, NULL, GL_STREAM_DRAW );
 
-        /* load vertices/elements directly into vertex/element buffer */
+        /* Load vertices/elements directly into vertex/element buffer */
         vertices = glMapBuffer( GL_ARRAY_BUFFER, GL_WRITE_ONLY );
         elements = glMapBuffer( GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY );
         {
-            /* fill convert configuration */
-            struct nk_convert_config                          config;
+            /* Fill convert configuration */
+            struct nk_convert_config config;
             static const struct nk_draw_vertex_layout_element vertex_layout[] = {
-                {NK_VERTEX_POSITION, NK_FORMAT_FLOAT, NK_OFFSETOF( Vertex, position )},
+                {NK_VERTEX_POSITION, NK_FORMAT_FLOAT, NK_OFFSETOF( Vertex, pos )},
                 {NK_VERTEX_TEXCOORD, NK_FORMAT_FLOAT, NK_OFFSETOF( Vertex, uv )},
                 {NK_VERTEX_COLOR, NK_FORMAT_R8G8B8A8, NK_OFFSETOF( Vertex, col )},
                 {NK_VERTEX_LAYOUT_END}};
@@ -73,7 +73,7 @@ void apemode::NuklearSdlGL::Render( RenderParametersBase *p ) {
             config.shape_AA             = p->aa;
             config.line_AA              = p->aa;
 
-            /* setup buffers to load vertices and elements */
+            /* Setup buffers to load vertices and elements */
             {
                 nk_buffer vbuf, ebuf;
                 nk_buffer_init_fixed( &vbuf, vertices, (nk_size) p->max_vertex_buffer );
@@ -85,10 +85,11 @@ void apemode::NuklearSdlGL::Render( RenderParametersBase *p ) {
         glUnmapBuffer( GL_ARRAY_BUFFER );
         glUnmapBuffer( GL_ELEMENT_ARRAY_BUFFER );
 
-        /* iterate over and execute each draw command */
+        /* Iterate over and execute each draw command */
         nk_draw_foreach( cmd, &Context, &RenderCmds ) {
             if ( !cmd->elem_count )
                 continue;
+
             glBindTexture( GL_TEXTURE_2D, (GLuint) cmd->texture.id );
             glScissor( ( GLint )( cmd->clip_rect.x * p->scale[ 0 ] ),
                        ( GLint )( ( p->dims[ 1 ] - ( GLint )( cmd->clip_rect.y + cmd->clip_rect.h ) ) * p->scale[ 1 ] ),
@@ -107,6 +108,8 @@ void apemode::NuklearSdlGL::Render( RenderParametersBase *p ) {
     glBindVertexArray( 0 );
     glDisable( GL_BLEND );
     glDisable( GL_SCISSOR_TEST );
+
+    return true;
 }
 
 void apemode::NuklearSdlGL::DeviceDestroy( ) {
@@ -120,7 +123,7 @@ void apemode::NuklearSdlGL::DeviceDestroy( ) {
     glDeleteBuffers( 1, &ebo );
 }
 
-void apemode::NuklearSdlGL::DeviceCreate( InitParametersBase *init_params ) {
+bool apemode::NuklearSdlGL::DeviceCreate( InitParametersBase *init_params ) {
     const GLchar *vertex_shader = NK_SHADER_VERSION
         "uniform mat4 ProjMtx;\n"
         "in vec2 Position;\n"
@@ -146,7 +149,7 @@ void apemode::NuklearSdlGL::DeviceCreate( InitParametersBase *init_params ) {
 
     GLint status;
     nk_buffer_init_default( &RenderCmds );
-    prog      = glCreateProgram( );
+    prog = glCreateProgram( );
     vert_shdr = glCreateShader( GL_VERTEX_SHADER );
     frag_shdr = glCreateShader( GL_FRAGMENT_SHADER );
     glShaderSource( vert_shdr, 1, &vertex_shader, 0 );
@@ -170,7 +173,7 @@ void apemode::NuklearSdlGL::DeviceCreate( InitParametersBase *init_params ) {
     attrib_col   = glGetAttribLocation( prog, "Color" );
 
     GLsizei vs = sizeof( Vertex );
-    size_t  vp = offsetof( Vertex, position );
+    size_t  vp = offsetof( Vertex, pos );
     size_t  vt = offsetof( Vertex, uv );
     size_t  vc = offsetof( Vertex, col );
 
@@ -194,6 +197,8 @@ void apemode::NuklearSdlGL::DeviceCreate( InitParametersBase *init_params ) {
     glBindBuffer( GL_ARRAY_BUFFER, 0 );
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
     glBindVertexArray( 0 );
+
+    return true;
 }
 
 void *apemode::NuklearSdlGL::DeviceUploadAtlas( InitParametersBase *init_params, const void *image, int width, int height ) {
@@ -202,5 +207,6 @@ void *apemode::NuklearSdlGL::DeviceUploadAtlas( InitParametersBase *init_params,
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
     glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, (GLsizei) width, (GLsizei) height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image );
-    return (void *) font_tex;
+
+    return (void *) (uintptr_t) font_tex;
 }

@@ -234,6 +234,7 @@ bool apemodevk::Swapchain::RecreateResourceFor( GraphicsDevice& InGraphicsNode,
 
     TInfoStruct< VkImageViewCreateInfo > imgViewCreateInfo;
     imgViewCreateInfo->viewType                        = VK_IMAGE_VIEW_TYPE_2D;
+    imgViewCreateInfo->viewType                        = VK_IMAGE_VIEW_TYPE_2D;
     imgViewCreateInfo->format                          = eColorFormat;
     imgViewCreateInfo->components.r                    = VK_COMPONENT_SWIZZLE_R;
     imgViewCreateInfo->components.g                    = VK_COMPONENT_SWIZZLE_G;
@@ -246,6 +247,7 @@ bool apemodevk::Swapchain::RecreateResourceFor( GraphicsDevice& InGraphicsNode,
     imgViewCreateInfo->subresourceRange.levelCount     = 1;
 
     for (uint32_t i = 0;i < ImgCount; ++i) {
+        imgViewCreateInfo->image = hImgs[i];
         hImgViews[i].Recreate(*pNode, imgViewCreateInfo);
     }
 

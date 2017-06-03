@@ -186,7 +186,7 @@ void apemodevk::FramebufferDescription::Reset()
     TextureViews.clear();
     TextureViews.reserve(8 + 1);
 
-    Desc.ZeroMemory();
+    Desc.InitializeStruct( );
 }
 
 /// -------------------------------------------------------------------------------------------------------------------

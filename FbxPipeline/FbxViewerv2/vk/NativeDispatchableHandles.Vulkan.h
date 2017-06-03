@@ -605,10 +605,10 @@ namespace apemodevk
             return ErrorHandle.Succeeded();
         }
 
-        _Force_inline_function VkResult Status() const { return vkGetFenceStatus(Deleter.LogicalDeviceHandle, Handle); }
-        _Force_inline_function bool     IsSignalled() const { return Status() == ResultHandle::Success; }
-        _Force_inline_function bool     IsInProgress() const { return Status() == ResultHandle::NotReady; }
-        _Force_inline_function bool     Failed() const { return ResultHandle(Status()).Failed(); }
+        inline VkResult Status() const { return vkGetFenceStatus(Deleter.LogicalDeviceHandle, Handle); }
+        inline bool     IsSignalled() const { return Status() == ResultHandle::Success; }
+        inline bool     IsInProgress() const { return Status() == ResultHandle::NotReady; }
+        inline bool     Failed() const { return ResultHandle(Status()).Failed(); }
     };
 
     template <>
@@ -645,10 +645,10 @@ namespace apemodevk
             return ErrorHandle.Succeeded();
         }
 
-        _Force_inline_function VkResult Status() const { return vkGetEventStatus(Deleter.LogicalDeviceHandle, Handle); }
-        _Force_inline_function bool     IsSet() const { return Status() == ResultHandle::EventSet; }
-        _Force_inline_function bool     IsReset() const { return Status() == ResultHandle::EventReset; }
-        _Force_inline_function bool     Failed() const { return ResultHandle(Status()).Failed(); }
+        inline VkResult Status() const { return vkGetEventStatus(Deleter.LogicalDeviceHandle, Handle); }
+        inline bool     IsSet() const { return Status() == ResultHandle::EventSet; }
+        inline bool     IsReset() const { return Status() == ResultHandle::EventReset; }
+        inline bool     Failed() const { return ResultHandle(Status()).Failed(); }
     };
 
     inline uint32_t ResolveMemoryType(VkPhysicalDevice gpu, VkMemoryPropertyFlags properties, uint32_t type_bits)

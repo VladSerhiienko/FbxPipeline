@@ -14,18 +14,18 @@
 
 void apemodevk::PipelineStateDescription::Reset()
 {
-    DynamicState.ZeroMemory();
-    InputAssemblyState.ZeroMemory();
-    RasterizationState.ZeroMemory();
-    ColorBlendState.ZeroMemory();
-    DepthStencilState.ZeroMemory();
-    MultisampleState.ZeroMemory();
-    VertexInputState.ZeroMemory();
-    ViewportState.ZeroMemory();
-    Cache.ZeroMemory();
+    DynamicState.InitializeStruct( );
+    InputAssemblyState.InitializeStruct( );
+    RasterizationState.InitializeStruct( );
+    ColorBlendState.InitializeStruct( );
+    DepthStencilState.InitializeStruct( );
+    MultisampleState.InitializeStruct( );
+    VertexInputState.InitializeStruct( );
+    ViewportState.InitializeStruct( );
+    Cache.InitializeStruct( );
 
     for (auto & ShaderStage : ShaderStages)
-        ShaderStage.ZeroMemory();
+        ShaderStage.InitializeStruct( );
 
     for (auto & DynamicState : EnabledDynamicStates)
         DynamicState = VK_DYNAMIC_STATE_MAX_ENUM;
@@ -38,8 +38,8 @@ void apemodevk::PipelineStateDescription::Reset()
     for (auto & ColorBlendAttachmentState : ColorBlendAttachmentStates)
         apemodevk::ZeroMemory(ColorBlendAttachmentState);
 
-    Compute.ZeroMemory();
-    Graphics.ZeroMemory();
+    Compute.InitializeStruct( );
+    Graphics.InitializeStruct( );
 
     Hash           = 0;
     bIsGraphics    = true;

@@ -17,9 +17,9 @@ namespace apemode {
         uint32_t font_tex     = 0;
 
     public:
-        virtual void Render( RenderParametersBase *render_params ) override;
-        virtual void DeviceDestroy( ) override;
-        virtual void DeviceCreate( InitParametersBase *init_params ) override;
+        virtual bool  Render( RenderParametersBase *render_params ) override;
+        virtual void  DeviceDestroy( ) override;
+        virtual bool  DeviceCreate( InitParametersBase *init_params ) override;
         virtual void *DeviceUploadAtlas( InitParametersBase *init_params, const void *image, int width, int height ) override;
     };
 } // namespace apemode

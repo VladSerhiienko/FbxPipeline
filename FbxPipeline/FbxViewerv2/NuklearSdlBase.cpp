@@ -23,31 +23,43 @@ void apemode::NuklearSdlBase::SdlClipbardCopy( nk_handle usr, const char *text, 
     }
 }
 
-void *apemode::NuklearSdlBase::DeviceUploadAtlas(InitParametersBase *init_params, const void *image, int width, int height ) {
+void *apemode::NuklearSdlBase::DeviceUploadAtlas( InitParametersBase *initParamsBase,
+                                                  const void *        image,
+                                                  int                 width,
+                                                  int                 height ) {
+    (void) initParamsBase;
+    (void) image;
+    (void) width;
+    (void) height;
+
     return nullptr;
 }
 
-nk_context *apemode::NuklearSdlBase::Init( InitParametersBase *init_params ) {
-    nk_init_default( &Context, 0 );
-    Context.clip.copy     = SdlClipbardCopy;
-    Context.clip.paste    = SdlClipbardPaste;
-    Context.clip.userdata = nk_handle_ptr( 0 );
+bool apemode::NuklearSdlBase::Init( InitParametersBase *initParamsBase ) {
+    nk_init_default( &Context, nullptr /* User font */ );
+    nk_buffer_init_default( &RenderCmds );
+    Context.clip.copy     = initParamsBase->pClipbardCopyCallback;
+    Context.clip.paste    = initParamsBase->pClipbardPasteCallback;
+    Context.clip.userdata = nk_handle_ptr( this );
 
-    DeviceCreate( init_params );
+    /* Overrided */
+    DeviceCreate( initParamsBase );
 
 #include <droidsans.ttf.h>
 
-    nk_font_atlas *atlas;
+    nk_font_atlas *atlas = nullptr;
     FontStashBegin( &atlas );
     pDefaultFont = nk_font_atlas_add_from_memory( atlas, (void *) s_droidSansTtf, sizeof( s_droidSansTtf ), 14, 0 );
-    FontStashEnd(init_params);
+
+    /* Calls overrided DeviceUploadAtlas(). */
+    FontStashEnd( initParamsBase );
 
     SetStyle( Dark );
     Context.style.font = &pDefaultFont->handle;
     Atlas.default_font = pDefaultFont;
     nk_style_set_font( &Context, &pDefaultFont->handle );
 
-    return nullptr;
+    return true;
 }
 
 void apemode::NuklearSdlBase::FontStashBegin( nk_font_atlas **atlas ) {
@@ -56,31 +68,48 @@ void apemode::NuklearSdlBase::FontStashBegin( nk_font_atlas **atlas ) {
     *atlas = &Atlas;
 }
 
-void apemode::NuklearSdlBase::FontStashEnd(InitParametersBase *init_params) {
-    int         imageWidth  = 0;
-    int         imageHeight = 0;
-    const void *imageData   = nk_font_atlas_bake( &Atlas, &imageWidth, &imageHeight, NK_FONT_ATLAS_RGBA32 );
-    auto        atlasHandle = DeviceUploadAtlas(init_params, imageData, imageWidth, imageHeight );
+bool apemode::NuklearSdlBase::FontStashEnd( InitParametersBase *initParamsBase ) {
+    int imageWidth  = 0;
+    int imageHeight = 0;
 
-    nk_font_atlas_end( &Atlas, nk_handle_ptr( atlasHandle ), &NullTexture );
-    if ( pDefaultFont )
-        nk_style_set_font( &Context, &Atlas.default_font->handle );
+    if ( const void *imageData = nk_font_atlas_bake( &Atlas, &imageWidth, &imageHeight, NK_FONT_ATLAS_RGBA32 ) ) {
+        assert( imageWidth && imageHeight && "Invalid font image dimensions." );
+
+        /* Overrided */
+        if ( auto atlasHandle = DeviceUploadAtlas( initParamsBase, imageData, imageWidth, imageHeight ) ) {
+            nk_font_atlas_end( &Atlas, nk_handle_ptr( atlasHandle ), &NullTexture );
+
+            if ( pDefaultFont )
+                nk_style_set_font( &Context, &Atlas.default_font->handle );
+
+            return true;
+        }
+    }
+
+    return false;
 }
 
-void apemode::NuklearSdlBase::Render( RenderParametersBase *render_params ) {
+bool apemode::NuklearSdlBase::Render( RenderParametersBase *renderParamsBase ) {
+    (void) renderParamsBase;
+    return true;
 }
 
 void apemode::NuklearSdlBase::Shutdown( ) {
     nk_font_atlas_clear( &Atlas );
     nk_free( &Context );
+
+    /* Overrided */
     DeviceDestroy( );
+
     nk_buffer_free( &RenderCmds );
 }
 
 void apemode::NuklearSdlBase::DeviceDestroy( ) {
 }
 
-void apemode::NuklearSdlBase::DeviceCreate( InitParametersBase *init_params ) {
+bool apemode::NuklearSdlBase::DeviceCreate( InitParametersBase *initParamsBase ) {
+    (void) initParamsBase;
+    return true;
 }
 
 void apemode::NuklearSdlBase::SetStyle( Theme theme ) {

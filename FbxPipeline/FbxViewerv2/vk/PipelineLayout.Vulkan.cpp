@@ -18,7 +18,7 @@ apemodevk::PipelineLayoutParameter::~PipelineLayoutParameter()
 
 void apemodevk::PipelineLayoutParameter::Clear()
 {
-    Binding.ZeroMemory();
+    Binding.InitializeStruct( );
 }
 
 void apemodevk::PipelineLayoutParameter::InitAsUniformBuffer(uint32_t         Register,

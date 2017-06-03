@@ -15,21 +15,26 @@
 namespace apemode {
     class NuklearSdlBase {
     public:
-        enum Theme { Black, White, Red, Blue, Dark };
+        static void SdlClipbardPaste( nk_handle usr, struct nk_text_edit *edit );
+        static void SdlClipbardCopy( nk_handle usr, const char *text, int len );
 
-        enum Impl {
-            kImpl_Unknown,
-            kImpl_GL,
-            kImpl_Vk
-        };
+    public:
+        enum Theme { Black, White, Red, Blue, Dark };
+        enum Impl { kImpl_Unknown, kImpl_GL, kImpl_Vk };
 
         struct Vertex {
-            float   position[ 2 ];
-            float   uv[ 2 ];
-            nk_byte col[ 4 ];
+            float   pos [ 2 ];
+            float   uv  [ 2 ];
+            nk_byte col [ 4 ];
         };
 
-        struct InitParametersBase {};
+        struct InitParametersBase {
+            typedef void ( *NkClipbardPasteFn )( nk_handle, struct nk_text_edit * );
+            typedef void ( *NkClipbardCopyFn )( nk_handle, const char *, int );
+            NkClipbardPasteFn pClipbardPasteCallback = SdlClipbardPaste;
+            NkClipbardCopyFn  pClipbardCopyCallback  = SdlClipbardCopy;
+        };
+
         struct UploadFontAtlasParametersBase {};
 
         struct RenderParametersBase {
@@ -42,28 +47,24 @@ namespace apemode {
 
     public:
         Impl                 Impl;
-        nk_context           Context;
         nk_draw_null_texture NullTexture;
         nk_font *            pDefaultFont;
         nk_font_atlas        Atlas;
         nk_buffer            RenderCmds;
+        nk_context           Context;
 
     public:
         void FontStashBegin( nk_font_atlas **atlas );
-        void FontStashEnd( InitParametersBase *init_params );
-        int HandleEvent( SDL_Event *evt );
+        bool FontStashEnd( InitParametersBase *init_params );
+        int  HandleEvent( SDL_Event *evt );
         void Shutdown( );
         void SetStyle( Theme theme );
 
     public:
-        virtual nk_context *Init( InitParametersBase *init_params );
-        virtual void Render( RenderParametersBase *render_params );
-        virtual void DeviceDestroy( );
-        virtual void DeviceCreate( InitParametersBase *init_params );
+        virtual bool  Init( InitParametersBase *init_params );
+        virtual bool  Render( RenderParametersBase *render_params );
+        virtual void  DeviceDestroy( );
+        virtual bool  DeviceCreate( InitParametersBase *init_params );
         virtual void *DeviceUploadAtlas( InitParametersBase *init_params, const void *image, int width, int height );
-
-    public:
-        static void SdlClipbardPaste( nk_handle usr, struct nk_text_edit *edit );
-        static void SdlClipbardCopy( nk_handle usr, const char *text, int len );
     };
 }

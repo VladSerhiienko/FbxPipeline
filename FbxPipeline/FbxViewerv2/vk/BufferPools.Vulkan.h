@@ -110,9 +110,9 @@ namespace apemodevk
 
     public:
         TDynamicConstantBufferView() : bIsSrcStale(false) { }
-        _Force_inline_function TSrc &GetSrc() { bIsSrcStale = true; return Src; }
-        _Force_inline_function TSrc const &GetSrc() const { return Src; }
-        _Force_inline_function TSrc const &GetSrcReadOnly() const { return Src; }
+        inline TSrc &GetSrc() { bIsSrcStale = true; return Src; }
+        inline TSrc const &GetSrc() const { return Src; }
+        inline TSrc const &GetSrcReadOnly() const { return Src; }
 
     public:
 

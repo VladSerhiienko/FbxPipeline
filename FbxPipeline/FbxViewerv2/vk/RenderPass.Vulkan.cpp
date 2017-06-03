@@ -360,7 +360,7 @@ apemodevk::RenderPassDescription::RenderPassDescription () : Hash (0)
 void apemodevk::RenderPassDescription::Reset ()
 {
     Hash = 0;
-    Desc.ZeroMemory ();
+    Desc.InitializeStruct ();
     Attachments.clear ();
     SubpassDescriptions.clear ();
     SubpassDependencies.clear();

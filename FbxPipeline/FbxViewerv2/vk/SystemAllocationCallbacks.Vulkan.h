@@ -32,11 +32,11 @@ namespace TbbAux
         static void Initialize(void * pUserData);
 
     public:
-        _Force_inline_function operator VkAllocationCallbacks *()
+        inline operator VkAllocationCallbacks *()
         {
             return &AllocCallbacks;
         }
-        _Force_inline_function operator VkAllocationCallbacks const *() const
+        inline operator VkAllocationCallbacks const *() const
         {
             return &AllocCallbacks;
         }

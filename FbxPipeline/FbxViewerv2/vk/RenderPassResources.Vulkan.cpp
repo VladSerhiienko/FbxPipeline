@@ -155,7 +155,7 @@ bool apemodevk::RenderPassResources::RecreateResourcesFor (apemodevk::GraphicsDe
             {
                 _Game_engine_Assert (SwapchainId < InSwapchainCount, "Index is out of range.");
 
-                std::vector<VkImage> & SwapchainBuffers
+                auto & SwapchainBuffers
                     = ppInSwapchains[ SwapchainId ]->hImgs;
 
                 _Game_engine_Assert (SwapchainBuffers.size () == FrameCount,

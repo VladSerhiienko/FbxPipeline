@@ -20,7 +20,8 @@ AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
 AllowAllParametersOfDeclarationOnNextLine: true
 
-PointerAlignment: Middle
+PointerAlignment: Left
+# PointerAlignment: Middle
 AlignConsecutiveAssignments: true
 AlignConsecutiveDeclarations: true
 
