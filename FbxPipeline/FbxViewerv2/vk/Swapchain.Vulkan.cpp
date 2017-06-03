@@ -86,7 +86,7 @@ apemodevk::Swapchain::~Swapchain( ) {
 }
 
 bool apemodevk::Swapchain::RecreateResourceFor( GraphicsDevice& InGraphicsNode,
-    uint32_t CmdQueueFamilyId,
+                                                uint32_t        CmdQueueFamilyId,
 #ifdef _WIN32
                                                 ModuleHandle InInst,
                                                 WindowHandle InWnd,
@@ -128,11 +128,6 @@ bool apemodevk::Swapchain::RecreateResourceFor( GraphicsDevice& InGraphicsNode,
         return false;
     }
 
-    if ( ResultHandle::Failed( vkGetPhysicalDeviceSurfaceCapabilitiesKHR( InGraphicsNode, hSurface, &SurfaceCaps ) ) ) {
-        _Game_engine_Halt( "vkGetPhysicalDeviceSurfaceCapabilitiesKHR failed." );
-        return false;
-    }
-
     uint32_t SurfaceFormatCount = 0;
     if ( ResultHandle::Succeeded( vkGetPhysicalDeviceSurfaceFormatsKHR( InGraphicsNode, hSurface, &SurfaceFormatCount, nullptr ) ) ) {
         std::vector< VkSurfaceFormatKHR > SurfaceFormats( SurfaceFormatCount );
@@ -141,29 +136,6 @@ bool apemodevk::Swapchain::RecreateResourceFor( GraphicsDevice& InGraphicsNode,
             eColorFormat = bCanChooseAny ? VK_FORMAT_B8G8R8A8_UNORM : SurfaceFormats[ 0 ].format;
             eColorSpace = SurfaceFormats[ 0 ].colorSpace;
         }
-    }
-
-    const bool bMatchesWindow     = DesiredColorWidth == kExtentMatchWindow && DesiredColorHeight == kExtentMatchWindow;
-    const bool bMatchesFullscreen = DesiredColorWidth == kExtentMatchFullscreen && DesiredColorHeight == kExtentMatchFullscreen;
-    const bool bIsDefined         = !bMatchesWindow && !bMatchesFullscreen;
-    _Game_engine_Assert( bIsDefined || bMatchesFullscreen || bMatchesWindow, "Unexpected." );
-
-    ColorExtent.width  = 0;
-    ColorExtent.height = 0;
-
-    if ( SurfaceCaps.currentExtent.width == kExtentMatchFullscreen &&
-         SurfaceCaps.currentExtent.height == kExtentMatchFullscreen ) {
-        // If the surface size is undefined, the size is set to
-        // the size of the images requested.
-        _Game_engine_Assert( bIsDefined, "Unexpected." );
-
-        if ( bIsDefined ) {
-            ColorExtent.width  = DesiredColorWidth;
-            ColorExtent.height = DesiredColorHeight;
-        }
-    } else {
-        // If the surface size is defined, the swap chain size must match
-        ColorExtent = SurfaceCaps.currentExtent;
     }
 
     // We fall back to FIFO which is always available.
@@ -192,72 +164,33 @@ bool apemodevk::Swapchain::RecreateResourceFor( GraphicsDevice& InGraphicsNode,
         }
     }
 
+    Resize( DesiredColorWidth, DesiredColorHeight );
+
+    return true;
+}
+
+bool apemodevk::Swapchain::Resize( uint32_t DesiredColorWidth, uint32_t DesiredColorHeight ) {
+    for ( uint32_t i = 0; i < ImgCount; ++i ) {
+        hImgViews[ i ].Destroy( );
+    }
+
+    if ( ResultHandle::Failed( vkGetPhysicalDeviceSurfaceCapabilitiesKHR( *pNode, hSurface, &SurfaceCaps ) ) ) {
+        _Game_engine_Halt( "vkGetPhysicalDeviceSurfaceCapabilitiesKHR failed." );
+        return false;
+    }
+
     // Determine the number of VkImage's to use in the swap chain.
     // We desire to own only 1 image at a time, besides the
     // images being displayed and queued for display.
 
-    ImgCount = std::min<uint32_t>( kMaxImgs, SurfaceCaps.minImageCount + 1 );
-    if ( ( SurfaceCaps.maxImageCount > 0 ) && ( SurfaceCaps.maxImageCount < ImgCount) ) {
+    ImgCount = std::min< uint32_t >( kMaxImgs, SurfaceCaps.minImageCount + 1 );
+    if ( ( SurfaceCaps.maxImageCount > 0 ) && ( SurfaceCaps.maxImageCount < ImgCount ) ) {
         // Application must settle for fewer images than desired.
         ImgCount = SurfaceCaps.maxImageCount;
     }
 
     const bool bSurfaceSupportsIdentity = apemodevk::HasFlagEql( SurfaceCaps.supportedTransforms, VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR );
     eSurfaceTransform = bSurfaceSupportsIdentity ? VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR : SurfaceCaps.currentTransform;
-
-    TInfoStruct< VkSwapchainCreateInfoKHR > SwapchainDesc;
-    SwapchainDesc->surface          = hSurface;
-    SwapchainDesc->minImageCount    = ImgCount;
-    SwapchainDesc->imageFormat      = eColorFormat;
-    SwapchainDesc->imageColorSpace  = eColorSpace;
-    SwapchainDesc->imageExtent      = ColorExtent;
-    SwapchainDesc->imageUsage       = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-    SwapchainDesc->preTransform     = static_cast< VkSurfaceTransformFlagBitsKHR >( eSurfaceTransform );
-    SwapchainDesc->compositeAlpha   = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-    SwapchainDesc->imageArrayLayers = 1;
-    SwapchainDesc->imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-    SwapchainDesc->presentMode      = ePresentMode;
-    SwapchainDesc->oldSwapchain     = hSwapchain;
-    SwapchainDesc->clipped          = true;
-
-    if ( !hSwapchain.Recreate( InGraphicsNode, SwapchainDesc ) ) {
-        _Game_engine_Halt( "Failed to create swapchain." );
-        return false;
-    }
-
-    if ( !ExtractSwapchainBuffers( hImgs ) ) {
-        _Game_engine_Halt( "Failed to extract swapchain buffers." );
-        return false;
-    }
-
-    TInfoStruct< VkImageViewCreateInfo > imgViewCreateInfo;
-    imgViewCreateInfo->viewType                        = VK_IMAGE_VIEW_TYPE_2D;
-    imgViewCreateInfo->viewType                        = VK_IMAGE_VIEW_TYPE_2D;
-    imgViewCreateInfo->format                          = eColorFormat;
-    imgViewCreateInfo->components.r                    = VK_COMPONENT_SWIZZLE_R;
-    imgViewCreateInfo->components.g                    = VK_COMPONENT_SWIZZLE_G;
-    imgViewCreateInfo->components.b                    = VK_COMPONENT_SWIZZLE_B;
-    imgViewCreateInfo->components.a                    = VK_COMPONENT_SWIZZLE_A;
-    imgViewCreateInfo->subresourceRange.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
-    imgViewCreateInfo->subresourceRange.baseArrayLayer = 0;
-    imgViewCreateInfo->subresourceRange.baseMipLevel   = 0;
-    imgViewCreateInfo->subresourceRange.layerCount     = 1;
-    imgViewCreateInfo->subresourceRange.levelCount     = 1;
-
-    for (uint32_t i = 0;i < ImgCount; ++i) {
-        imgViewCreateInfo->image = hImgs[i];
-        hImgViews[i].Recreate(*pNode, imgViewCreateInfo);
-    }
-
-    return true;
-}
-
-bool apemodevk::Swapchain::Resize( uint32_t DesiredColorWidth, uint32_t DesiredColorHeight ) {
-
-    for (uint32_t i = 0;i < ImgCount; ++i) {
-        hImgViews[i].Destroy();
-    }
-
 
     if ( ResultHandle::Failed( vkGetPhysicalDeviceSurfaceCapabilitiesKHR( *pNode, hSurface, &SurfaceCaps ) ) ) {
         _Game_engine_Halt( "vkGetPhysicalDeviceSurfaceCapabilitiesKHR failed." );
@@ -273,7 +206,7 @@ bool apemodevk::Swapchain::Resize( uint32_t DesiredColorWidth, uint32_t DesiredC
     ColorExtent.height = 0;
 
     if ( SurfaceCaps.currentExtent.width == kExtentMatchFullscreen &&
-        SurfaceCaps.currentExtent.height == kExtentMatchFullscreen ) {
+         SurfaceCaps.currentExtent.height == kExtentMatchFullscreen ) {
         // If the surface size is undefined, the size is set to
         // the size of the images requested.
         _Game_engine_Assert( bIsDefined, "Unexpected." );
@@ -326,9 +259,9 @@ bool apemodevk::Swapchain::Resize( uint32_t DesiredColorWidth, uint32_t DesiredC
     imgViewCreateInfo->subresourceRange.layerCount     = 1;
     imgViewCreateInfo->subresourceRange.levelCount     = 1;
 
-    for (uint32_t i = 0;i < ImgCount; ++i) {
-        imgViewCreateInfo->image = hImgs[i];
-        hImgViews[i].Recreate(*pNode, imgViewCreateInfo);
+    for ( uint32_t i = 0; i < ImgCount; ++i ) {
+        imgViewCreateInfo->image = hImgs[ i ];
+        hImgViews[ i ].Recreate( *pNode, imgViewCreateInfo );
     }
 
     /* TODO: Warning after resizing, consider changing image layouts manually. */
