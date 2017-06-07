@@ -36,10 +36,14 @@ namespace apemodevk
     struct TArrayTraits;
 
     template <typename TArray, size_t N>
-    struct TArrayTraits<TArray[ N ]>
-    {
+    struct TArrayTraits<TArray[ N ]> {
         static const size_t ArrayLength = N;
     };
+
+    template <typename TArray, uint32_t TArraySize>
+    inline uint32_t GetArraySizeU(TArray(&)[TArraySize]) {
+        return TArraySize;
+    }
 }
 
 namespace apemodevk {

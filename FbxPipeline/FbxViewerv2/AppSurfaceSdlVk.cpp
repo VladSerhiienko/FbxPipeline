@@ -32,7 +32,6 @@ public:
     }
 };
 
-
 apemode::AppSurfaceSdlVk::AppSurfaceSdlVk( ) {
     Impl = kAppSurfaceImpl_SdlVk;
 }
@@ -47,11 +46,11 @@ bool apemode::AppSurfaceSdlVk::Initialize( ) {
     if ( !SDL_Init( SDL_INIT_VIDEO ) ) {
         AppSurfaceSettings defaultSettings;
         pSdlWindow = SDL_CreateWindow( defaultSettings.pName,
-                                                 SDL_WINDOWPOS_CENTERED,
-                                                 SDL_WINDOWPOS_CENTERED,
-                                                 defaultSettings.Width,
-                                                 defaultSettings.Height,
-                                                 SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE );
+                                       SDL_WINDOWPOS_CENTERED,
+                                       SDL_WINDOWPOS_CENTERED,
+                                       defaultSettings.Width,
+                                       defaultSettings.Height,
+                                       SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE );
 
         SDL_Log( "apemode/AppSurfaceSdlVk/Initialize: Created window." );
 
@@ -70,8 +69,8 @@ bool apemode::AppSurfaceSdlVk::Initialize( ) {
                     pSwapchain = std::move( std::make_unique< apemodevk::Swapchain >( ) );
 
                     if ( true == pSwapchain->RecreateResourceFor( *pNode, queueFamilyId, hInstance, hWnd, GetWidth( ), GetHeight( ) ) ) {
-                        LastWidth = GetWidth();
-                        LastHeight = GetHeight();
+                        LastWidth  = GetWidth( );
+                        LastHeight = GetHeight( );
 
                         if ( pNode->SupportsGraphics( queueFamilyId ) && pNode->SupportsPresenting( queueFamilyId, pSwapchain->hSurface ) ) {
                             if ( nullptr == pCmdQueue )
@@ -125,7 +124,7 @@ void apemode::AppSurfaceSdlVk::OnFrameMove( ) {
     const uint32_t height = GetHeight( );
 
     if ( width != LastWidth || height != LastHeight ) {
-        apemodevk::CheckedCall(vkDeviceWaitIdle(*pNode));
+        apemodevk::CheckedCall( vkDeviceWaitIdle( *pNode ) );
 
         LastWidth  = width;
         LastHeight = height;

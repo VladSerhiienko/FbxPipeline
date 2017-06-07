@@ -153,54 +153,53 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
     return false;
 }
 
-bool apemode::App::OnResized()
-{
-    if (auto appSurfaceVk = (AppSurfaceSdlVk*)GetSurface()) {
-        if (auto swapchain = appSurfaceVk->pSwapchain.get()) {
-            content->width = appSurfaceVk->GetWidth();
-            content->height = appSurfaceVk->GetHeight();
+bool apemode::App::OnResized( ) {
+    if ( auto appSurfaceVk = (AppSurfaceSdlVk*) GetSurface( ) ) {
+        if ( auto swapchain = appSurfaceVk->pSwapchain.get( ) ) {
+            content->width  = appSurfaceVk->GetWidth( );
+            content->height = appSurfaceVk->GetHeight( );
 
             VkAttachmentDescription attachment = {};
-            attachment.format = swapchain->eColorFormat;
-            attachment.samples = VK_SAMPLE_COUNT_1_BIT;
-            attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-            attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-            attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-            attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-            attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-            attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+            attachment.format                  = swapchain->eColorFormat;
+            attachment.samples                 = VK_SAMPLE_COUNT_1_BIT;
+            attachment.loadOp                  = VK_ATTACHMENT_LOAD_OP_CLEAR;
+            attachment.storeOp                 = VK_ATTACHMENT_STORE_OP_STORE;
+            attachment.stencilLoadOp           = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+            attachment.stencilStoreOp          = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+            attachment.initialLayout           = VK_IMAGE_LAYOUT_UNDEFINED;
+            attachment.finalLayout             = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
             VkAttachmentReference colorAttachment = {};
-            colorAttachment.attachment = 0;
-            colorAttachment.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            colorAttachment.attachment            = 0;
+            colorAttachment.layout                = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
             VkSubpassDescription subpass = {};
-            subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+            subpass.pipelineBindPoint    = VK_PIPELINE_BIND_POINT_GRAPHICS;
             subpass.colorAttachmentCount = 1;
-            subpass.pColorAttachments = &colorAttachment;
+            subpass.pColorAttachments    = &colorAttachment;
 
-            TInfoStruct<VkRenderPassCreateInfo> renderPassCreateInfo = {};
-            renderPassCreateInfo->attachmentCount = 1;
-            renderPassCreateInfo->pAttachments = &attachment;
-            renderPassCreateInfo->subpassCount = 1;
-            renderPassCreateInfo->pSubpasses = &subpass;
+            TInfoStruct< VkRenderPassCreateInfo > renderPassCreateInfo = {};
+            renderPassCreateInfo->attachmentCount                      = 1;
+            renderPassCreateInfo->pAttachments                         = &attachment;
+            renderPassCreateInfo->subpassCount                         = 1;
+            renderPassCreateInfo->pSubpasses                           = &subpass;
 
-            if (false == content->hRenderPass.Recreate(*appSurfaceVk->pNode, renderPassCreateInfo)) {
-                DebugBreak();
+            if ( false == content->hRenderPass.Recreate( *appSurfaceVk->pNode, renderPassCreateInfo ) ) {
+                DebugBreak( );
                 return false;
             }
 
-            for (uint32_t i = 0; i < content->FrameCount; ++i) {
-                TInfoStruct<VkFramebufferCreateInfo > framebufferCreateInfo;
-                framebufferCreateInfo->renderPass = content->hRenderPass;
+            for ( uint32_t i = 0; i < content->FrameCount; ++i ) {
+                TInfoStruct< VkFramebufferCreateInfo > framebufferCreateInfo;
+                framebufferCreateInfo->renderPass      = content->hRenderPass;
                 framebufferCreateInfo->attachmentCount = 1;
-                framebufferCreateInfo->pAttachments = swapchain->hImgViews[i];
-                framebufferCreateInfo->width = swapchain->ColorExtent.width;
-                framebufferCreateInfo->height = swapchain->ColorExtent.height;
-                framebufferCreateInfo->layers = 1;
+                framebufferCreateInfo->pAttachments    = swapchain->hImgViews[ i ];
+                framebufferCreateInfo->width           = swapchain->ColorExtent.width;
+                framebufferCreateInfo->height          = swapchain->ColorExtent.height;
+                framebufferCreateInfo->layers          = 1;
 
-                if (false == content->hFramebuffers[i].Recreate(*appSurfaceVk->pNode, framebufferCreateInfo)) {
-                    DebugBreak();
+                if ( false == content->hFramebuffers[ i ].Recreate( *appSurfaceVk->pNode, framebufferCreateInfo ) ) {
+                    DebugBreak( );
                     return false;
                 }
             }
@@ -394,18 +393,20 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         CheckedCall( vkResetFences( device, 1, &fence ) );
         CheckedCall( vkQueueSubmit( queue, 1, &submitInfo, fence ) );
 
-        uint32_t presentIndex = ( content->FrameIndex + content->FrameCount - 1 ) % content->FrameCount;
-        VkSemaphore renderSemaphore = content->hRenderCompleteSemaphores[ presentIndex ];
+        if ( content->FrameId ) {
+            uint32_t    presentIndex    = ( content->FrameIndex + content->FrameCount - 1 ) % content->FrameCount;
+            VkSemaphore renderSemaphore = content->hRenderCompleteSemaphores[ presentIndex ];
 
-        VkPresentInfoKHR presentInfoKHR;
-        InitializeStruct( presentInfoKHR );
-        presentInfoKHR.waitSemaphoreCount = 1;
-        presentInfoKHR.pWaitSemaphores    = &renderSemaphore;
-        presentInfoKHR.swapchainCount     = 1;
-        presentInfoKHR.pSwapchains        = &swapchain;
-        presentInfoKHR.pImageIndices      = &content->BackbufferIndices[ presentIndex ];
+            VkPresentInfoKHR presentInfoKHR;
+            InitializeStruct( presentInfoKHR );
+            presentInfoKHR.waitSemaphoreCount = 1;
+            presentInfoKHR.pWaitSemaphores    = &renderSemaphore;
+            presentInfoKHR.swapchainCount     = 1;
+            presentInfoKHR.pSwapchains        = &swapchain;
+            presentInfoKHR.pImageIndices      = &content->BackbufferIndices[ presentIndex ];
 
-        CheckedCall( vkQueuePresentKHR( queue, &presentInfoKHR ) );
+            CheckedCall( vkQueuePresentKHR( queue, &presentInfoKHR ) );
+        }
     }
 }
 

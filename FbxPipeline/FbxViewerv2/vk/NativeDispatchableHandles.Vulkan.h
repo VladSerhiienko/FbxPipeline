@@ -918,6 +918,8 @@ namespace apemodevk
                 _Game_engine_Assert(ErrorHandle, "vkCreatePipelineCache failed.");
                 return ErrorHandle.Succeeded();
             }
+
+            return false;
         }
     };
 

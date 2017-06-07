@@ -117,7 +117,7 @@ namespace apemodevk
                 auto sType = reinterpret_cast< VkStructureType * >( &NativeDescs[ 0 ] );
                 for ( auto &NativeDesc : NativeDescs ) {
                     *sType = sTypeResolver::ResolveFor< TVulkanNativeStruct >::eType;
-                    sType += sizeof( TVulkanNativeStruct );
+                    sType = reinterpret_cast<VkStructureType*>((reinterpret_cast<uint8_t*>(sType) + sizeof( TVulkanNativeStruct )));
                 }
             }
         }

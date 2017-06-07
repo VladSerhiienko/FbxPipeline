@@ -14,9 +14,7 @@
 /// -------------------------------------------------------------------------------------------------------------------
 
 apemodevk::GraphicsManager::APIVersion::APIVersion( bool bDump )
-    : Major( VK_API_VERSION_1_0 >> 22 )
-    , Minor( ( VK_API_VERSION_1_0 >> 12 ) & 0x3ff )
-    , Patch( VK_API_VERSION_1_0 & 0xfff ) {
+    : Major( VK_API_VERSION_1_0 >> 22 ), Minor( ( VK_API_VERSION_1_0 >> 12 ) & 0x3ff ), Patch( VK_API_VERSION_1_0 & 0xfff ) {
     //_Aux_DebugTraceF("Vulkan %u.%u.%u", Major, Minor, Patch);
 }
 
@@ -24,7 +22,7 @@ apemodevk::GraphicsManager::APIVersion::APIVersion( bool bDump )
 #define _Game_app_filter_length sizeof( _Game_app_filter )
 #define _Game_app_UUID_length 64
 
-bool apemodevk::GraphicsManager::ScanInstanceLayerProperties( ) {
+bool apemodevk::GraphicsManager::ScanInstanceLayerProperties( uint32_t flags ) {
     uint32_t                LayerPropertyCount = 0;
     ResultHandle            ErrorHandle;
     VkLayerPropertiesVector GlobalLayers;
@@ -86,9 +84,16 @@ bool apemodevk::GraphicsManager::ScanInstanceLayerProperties( ) {
     std::advance( LayerWrapperIt, 1 );
 
     auto ResolveLayerName = [&]( NativeLayerWrapper const &LayerWrapper ) {
-        if ( strcmp( LayerWrapper.Layer->layerName, "VK_LAYER_LUNARG_vktrace" ) &&
-             strcmp( LayerWrapper.Layer->layerName, "VK_LAYER_LUNARG_api_dump" ) &&
-             strcmp( LayerWrapper.Layer->layerName, "VK_LAYER_RENDERDOC_Capture" ) ) {
+
+        if ( !strcmp( LayerWrapper.Layer->layerName, "VK_LAYER_LUNARG_vktrace" ) && ( flags & kEnableVkTraceLayer ) ) {
+            PresentLayers.push_back( LayerWrapper.Layer->layerName );
+        } else if ( !strcmp( LayerWrapper.Layer->layerName, "VK_LAYER_LUNARG_api_dump" ) && ( flags & kEnableVkApiDumpLayer ) ) {
+            PresentLayers.push_back( LayerWrapper.Layer->layerName );
+        } else if ( !strcmp( LayerWrapper.Layer->layerName, "VK_LAYER_RENDERDOC_Capture" ) && ( flags & kEnableRenderDocLayer ) ) {
+            PresentLayers.push_back( LayerWrapper.Layer->layerName );
+        } else if ( strcmp( LayerWrapper.Layer->layerName, "VK_LAYER_LUNARG_vktrace" ) &&
+                    strcmp( LayerWrapper.Layer->layerName, "VK_LAYER_LUNARG_api_dump" ) &&
+                    strcmp( LayerWrapper.Layer->layerName, "VK_LAYER_RENDERDOC_Capture" ) && ( flags & kEnableLayers ) ) {
             //_Aux_DebugTraceF(" + %s", LayerWrapper.Layer->layerName);
             PresentLayers.push_back( LayerWrapper.Layer->layerName );
         } else {
@@ -155,8 +160,8 @@ apemodevk::GraphicsManager::NativeLayerWrapper &apemodevk::GraphicsManager::GetU
     return LayerWrappers.front( );
 }
 
-bool apemodevk::GraphicsManager::InitializeInstance( ) {
-    if ( !ScanInstanceLayerProperties( ) )
+bool apemodevk::GraphicsManager::InitializeInstance( uint32_t flags ) {
+    if ( !ScanInstanceLayerProperties( flags ) )
         return false;
 
     TInfoStruct< VkApplicationInfo > AppDesc;
@@ -214,15 +219,15 @@ bool apemodevk::GraphicsManager::InitializeInstance( ) {
 }
 
 VKAPI_ATTR VkBool32 VKAPI_CALL apemodevk::GraphicsManager::BreakCallback( VkFlags                    msgFlags,
-                                                                        VkDebugReportObjectTypeEXT objType,
-                                                                        uint64_t                   srcObject,
-                                                                        size_t                     location,
-                                                                        int32_t                    msgCode,
-                                                                        const char *               pLayerPrefix,
-                                                                        const char *               pMsg,
-                                                                        void *                     pUserData ) {
+                                                                          VkDebugReportObjectTypeEXT objType,
+                                                                          uint64_t                   srcObject,
+                                                                          size_t                     location,
+                                                                          int32_t                    msgCode,
+                                                                          const char *               pLayerPrefix,
+                                                                          const char *               pMsg,
+                                                                          void *                     pUserData ) {
     if ( msgFlags & VK_DEBUG_REPORT_ERROR_BIT_EXT ) {
-        DebugBreak();
+        DebugBreak( );
     }
 
     /*
@@ -237,29 +242,29 @@ VKAPI_ATTR VkBool32 VKAPI_CALL apemodevk::GraphicsManager::BreakCallback( VkFlag
 }
 
 VKAPI_ATTR VkBool32 VKAPI_CALL apemodevk::GraphicsManager::DebugCallback( VkFlags                    msgFlags,
-                                                                        VkDebugReportObjectTypeEXT objType,
-                                                                        uint64_t                   srcObject,
-                                                                        size_t                     location,
-                                                                        int32_t                    msgCode,
-                                                                        const char *               pLayerPrefix,
-                                                                        const char *               pMsg,
-                                                                        void *                     pUserData ) {
+                                                                          VkDebugReportObjectTypeEXT objType,
+                                                                          uint64_t                   srcObject,
+                                                                          size_t                     location,
+                                                                          int32_t                    msgCode,
+                                                                          const char *               pLayerPrefix,
+                                                                          const char *               pMsg,
+                                                                          void *                     pUserData ) {
     if ( msgFlags & VK_DEBUG_REPORT_ERROR_BIT_EXT ) {
-        OutputDebugStringA("\n E R R O R:");
-        OutputDebugStringA(pLayerPrefix);
-        OutputDebugStringA("\n");
-        OutputDebugStringA(pMsg);
-        OutputDebugStringA("\n");
+        OutputDebugStringA( "\n E R R O R:" );
+        OutputDebugStringA( pLayerPrefix );
+        OutputDebugStringA( "\n" );
+        OutputDebugStringA( pMsg );
+        OutputDebugStringA( "\n" );
         DebugBreak( );
         /*apemodevk::DebugTrace<true, apemodevk::Error> (
             "\tDebugCallback: [%s] Code %d: %s", pLayerPrefix, msgCode, pMsg);
         apemodevk::Platform::DebugBreak ();*/
     } else if ( msgFlags & VK_DEBUG_REPORT_WARNING_BIT_EXT ) {
-        OutputDebugStringA("\n W A R N I N G:");
-        OutputDebugStringA(pLayerPrefix);
-        OutputDebugStringA("\n");
-        OutputDebugStringA(pMsg);
-        OutputDebugStringA("\n");
+        OutputDebugStringA( "\n W A R N I N G:" );
+        OutputDebugStringA( pLayerPrefix );
+        OutputDebugStringA( "\n" );
+        OutputDebugStringA( pMsg );
+        OutputDebugStringA( "\n" );
         /*apemodevk::DebugTrace<true, apemodevk::Warning> (
             "\tDebugCallback: [%s] Code %d: %s", pLayerPrefix, msgCode, pMsg);*/
     } else if ( msgFlags & VK_DEBUG_REPORT_INFORMATION_BIT_EXT ) {
@@ -344,16 +349,16 @@ apemodevk::GraphicsManager::~GraphicsManager( ) {
     _Aux_DebugTraceFunc;
 }
 
- apemodevk::GraphicsDevice * apemodevk::GraphicsManager::GetPrimaryGraphicsNode() {
-    return PrimaryNode.get();
+apemodevk::GraphicsDevice *apemodevk::GraphicsManager::GetPrimaryGraphicsNode( ) {
+    return PrimaryNode.get( );
 }
 
-apemodevk::GraphicsDevice * apemodevk::GraphicsManager::GetSecondaryGraphicsNode() {
-    return SecondaryNode.get();
+apemodevk::GraphicsDevice *apemodevk::GraphicsManager::GetSecondaryGraphicsNode( ) {
+    return SecondaryNode.get( );
 }
 
-bool apemodevk::GraphicsManager::RecreateGraphicsNodes( ) {
-    auto const bIsInstInitialized = InitializeInstance( );
+bool apemodevk::GraphicsManager::RecreateGraphicsNodes( uint32_t flags ) {
+    auto const bIsInstInitialized = InitializeInstance( flags );
     _Game_engine_Assert( bIsInstInitialized, "Vulkan Instance initialization failed." );
     return bIsInstInitialized;
 }

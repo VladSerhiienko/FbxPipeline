@@ -10,6 +10,11 @@ namespace apemodevk {
     public:
         friend GraphicsDevice;
 
+        static uint32_t const kEnableRenderDocLayer = 1; // Must be enabled for RenderDoc tool.
+        static uint32_t const kEnableVkTraceLayer   = 2; // Must be enable for vktrace tool.
+        static uint32_t const kEnableVkApiDumpLayer = 4; // Traces every call to stdout.
+        static uint32_t const kEnableLayers         = 8; // Enables all the layers (except vktrace, api_dump, renderdoc).
+
         struct APIVersion : public apemodevk::ScalableAllocPolicy {
             uint32_t Major, Minor, Patch;
             APIVersion( bool bDump = true );
@@ -37,13 +42,13 @@ namespace apemodevk {
         GraphicsManager( );
         ~GraphicsManager( );
 
-        bool                RecreateGraphicsNodes( );
-        GraphicsDevice *    GetPrimaryGraphicsNode( );
-        GraphicsDevice *    GetSecondaryGraphicsNode( );
-        bool                ScanInstanceLayerProperties( );
-        bool                ScanAdapters( );
+        bool RecreateGraphicsNodes( uint32_t flags = 0 );
+        GraphicsDevice *GetPrimaryGraphicsNode( );
+        GraphicsDevice *GetSecondaryGraphicsNode( );
+        bool ScanInstanceLayerProperties( uint32_t flags );
+        bool ScanAdapters( );
         NativeLayerWrapper &GetUnnamedLayer( );
-        bool                InitializeInstance( );
+        bool InitializeInstance( uint32_t flags );
 
         static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback( VkFlags                    msgFlags,
                                                              VkDebugReportObjectTypeEXT objType,
