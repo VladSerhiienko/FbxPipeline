@@ -1,7 +1,6 @@
 #pragma once
 
 #include <NativeDispatchableHandles.Vulkan.h>
-#include <ResultHandle.Vulkan.h>
 #include <TInfoStruct.Vulkan.h>
 
 namespace apemodevk {
@@ -30,7 +29,6 @@ namespace apemodevk {
             bool IsUnnamedLayer( ) const;
             bool IsValidInstanceLayer( ) const;
             bool IsValidDeviceLayer( ) const;
-            void DumpExtensions( ) const;
         };
 
         typedef std::vector< std::string >               String8Vector;

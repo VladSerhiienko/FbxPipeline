@@ -19,7 +19,7 @@ uint32_t apemodevk::DescriptorPool::GetAvailableSetCount () const
 
 uint32_t apemodevk::DescriptorPool::GetAvailableDescCount (VkDescriptorType DescType) const
 {
-    _Game_engine_Assert (DescPoolCounters[ DescType ].type == DescType,
+    apemode_assert (DescPoolCounters[ DescType ].type == DescType,
                          "Desc type mismatch.");
 
     return DescPoolCounters[ DescType ].descriptorCount;
@@ -67,7 +67,7 @@ bool apemodevk::DescriptorPool::RecreateResourcesFor (GraphicsDevice & GraphicsN
         DescPoolCounters[ SubpoolSizeCounter ].descriptorCount = MaxDescTypeCount;
         DescPoolCounters[ SubpoolSizeCounter ].type            = DescType;
 
-        if (_Game_engine_Unlikely (MaxDescTypeCount))
+        if (apemode_unlikely (MaxDescTypeCount))
         {
             LclSubpoolSizes[ LclSubpoolSizeCounter ] = DescPoolCounters[ SubpoolSizeCounter ];
             ++LclSubpoolSizeCounter;
@@ -79,7 +79,7 @@ bool apemodevk::DescriptorPool::RecreateResourcesFor (GraphicsDevice & GraphicsN
 
     // TOFIX Does it make sense creating empty descriptor pool?
     // TOFIX Is it required by certain API functions just to provide a valid (even empty) pool?
-    _Game_engine_Assert (LclSubpoolSizeCounter && MaxSets, "Empty descriptor pool.");
+    apemode_assert (LclSubpoolSizeCounter && MaxSets, "Empty descriptor pool.");
 
     TInfoStruct<VkDescriptorPoolCreateInfo> DescPoolDesc;
     DescPoolDesc->maxSets       = MaxSets;
@@ -138,7 +138,7 @@ void apemodevk::DescriptorSet::BindTo (apemodevk::CommandBuffer & CmdBuffer,
                                   uint32_t            DynamicOffsetCount,
                                   const uint32_t *    DynamicOffsets)
 {
-    /*_Game_engine_Assert (pRootSign != nullptr && hDescSet.IsNotNull (), "Not initialized.");
+    /*apemode_assert (pRootSign != nullptr && hDescSet.IsNotNull (), "Not initialized.");
     if (apemode_likely (pRootSign != nullptr && hDescSet.IsNotNull ()))
     {
         vkCmdBindDescriptorSets (CmdBuffer,
@@ -180,7 +180,7 @@ bool apemodevk::DescriptorSetUpdater::SetGraphicsNode (GraphicsDevice const & Gr
 {
     if (apemode_likely (pNode))
     {
-        _Game_engine_Assert (pNode == &GraphicsNode,
+        apemode_assert (pNode == &GraphicsNode,
                              "Descriptor sets of different devices.");
         return pNode == &GraphicsNode;
     }
@@ -198,7 +198,7 @@ bool apemodevk::DescriptorSetUpdater::WriteUniformBuffer (DescriptorSet const & 
 {
     if (DescSet.pDescPool->GetAvailableDescCount (VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER) < Count)
     {
-        _Game_engine_Halt ("Reserve more.");
+        apemode_halt ("Reserve more.");
         return false;
     }
 
@@ -234,7 +234,7 @@ bool apemodevk::DescriptorSetUpdater::WriteCombinedImgSampler (DescriptorSet con
 {
     if (DescSet.pDescPool->GetAvailableDescCount(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER) < Count)
     {
-        _Game_engine_Halt ("Reserve more.");
+        apemode_halt ("Reserve more.");
         return false;
     }
 
@@ -277,7 +277,7 @@ void apemodevk::DescriptorSetUpdater::Flush()
         }
     }
 
-    _Game_engine_Assert (pNode != nullptr,
+    apemode_assert (pNode != nullptr,
                          "No writes or copies were submitted.");
 
     if (apemode_likely (pNode != nullptr))

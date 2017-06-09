@@ -10,13 +10,13 @@ uint64_t const Uint64Max = std::numeric_limits< uint64_t >::max( );
 /// -------------------------------------------------------------------------------------------------------------------
 
 bool apemodevk::Swapchain::ExtractSwapchainBuffers( VkImage * OutBufferImgs) {
-    _Game_engine_Assert(hSwapchain.IsNotNull(), "Not initialized.");
+    apemode_assert(hSwapchain.IsNotNull(), "Not initialized.");
 
     uint32_t OutSwapchainBufferCount = 0;
     if (apemode_likely(apemodevk::ResultHandle::Succeeded( vkGetSwapchainImagesKHR(*pNode, hSwapchain, &OutSwapchainBufferCount, nullptr)))) {
 
         if (OutSwapchainBufferCount > kMaxImgs) {
-            DebugBreak();
+            platform::DebugBreak();
             return false;
         }
 
@@ -24,13 +24,13 @@ bool apemodevk::Swapchain::ExtractSwapchainBuffers( VkImage * OutBufferImgs) {
             return true;
     }
 
-    _Game_engine_Halt("vkGetSwapchainImagesKHR failed.");
+    apemode_halt("vkGetSwapchainImagesKHR failed.");
     return false;
 
 }
 
 bool apemodevk::Swapchain::ExtractSwapchainBuffers( std::vector< VkImage >& OutSwapchainBufferImgs ) {
-    _Game_engine_Assert( hSwapchain.IsNotNull( ), "Not initialized." );
+    apemode_assert( hSwapchain.IsNotNull( ), "Not initialized." );
 
     uint32_t OutSwapchainBufferCount = 0;
     if ( apemode_likely( apemodevk::ResultHandle::Succeeded(
@@ -41,7 +41,7 @@ bool apemodevk::Swapchain::ExtractSwapchainBuffers( std::vector< VkImage >& OutS
             return true;
     }
 
-    _Game_engine_Halt( "vkGetSwapchainImagesKHR failed." );
+    apemode_halt( "vkGetSwapchainImagesKHR failed." );
     return false;
 }
 
@@ -60,11 +60,10 @@ apemodevk::Swapchain::Swapchain( ) : pNode( nullptr ), pCmdQueue( nullptr ) {
 }
 
 apemodevk::Swapchain::~Swapchain( ) {
-    _Aux_DebugTraceFunc;
 
     if ( pNode ) {
         const bool bOk = pNode->Await( );
-        _Game_engine_Assert( bOk, "Failed to wait for device prior work done." );
+        apemode_assert( bOk, "Failed to wait for device prior work done." );
 
         for ( auto& hBuffer : hImgs )
             if ( hBuffer ) {
@@ -94,12 +93,12 @@ bool apemodevk::Swapchain::RecreateResourceFor( GraphicsDevice& InGraphicsNode,
                                                 uint32_t DesiredColorWidth,
                                                 uint32_t DesiredColorHeight ) {
     if ( !InGraphicsNode.IsValid( ) ) {
-        _Game_engine_Halt( "Provided logical graphics device is invalid." );
+        apemode_halt( "Provided logical graphics device is invalid." );
         return false;
     }
 
     if ( !InWnd ) {
-        _Game_engine_Halt( "Provided window handle is null." );
+        apemode_halt( "Provided window handle is null." );
         return false;
     }
 
@@ -113,18 +112,18 @@ bool apemodevk::Swapchain::RecreateResourceFor( GraphicsDevice& InGraphicsNode,
     SurfaceDesc->hinstance = InInst;
 
     if ( !hSurface.Recreate( InGraphicsNode, SurfaceDesc ) ) {
-        _Game_engine_Halt( "Failed to create surface." );
+        apemode_halt( "Failed to create surface." );
         return false;
     }
 
     VkBool32 bSupported = false;
     if (ResultHandle::Failed(vkGetPhysicalDeviceSurfaceSupportKHR(InGraphicsNode, CmdQueueFamilyId, hSurface, &bSupported))) {
-        _Game_engine_Halt("vkGetPhysicalDeviceSurfaceCapabilitiesKHR failed.");
+        apemode_halt("vkGetPhysicalDeviceSurfaceCapabilitiesKHR failed.");
         return false;
     }
 
     if (false == bSupported) {
-        _Game_engine_Halt("vkGetPhysicalDeviceSurfaceCapabilitiesKHR failed.");
+        apemode_halt("vkGetPhysicalDeviceSurfaceCapabilitiesKHR failed.");
         return false;
     }
 
@@ -175,7 +174,7 @@ bool apemodevk::Swapchain::Resize( uint32_t DesiredColorWidth, uint32_t DesiredC
     }
 
     if ( ResultHandle::Failed( vkGetPhysicalDeviceSurfaceCapabilitiesKHR( *pNode, hSurface, &SurfaceCaps ) ) ) {
-        _Game_engine_Halt( "vkGetPhysicalDeviceSurfaceCapabilitiesKHR failed." );
+        apemode_halt( "vkGetPhysicalDeviceSurfaceCapabilitiesKHR failed." );
         return false;
     }
 
@@ -193,14 +192,14 @@ bool apemodevk::Swapchain::Resize( uint32_t DesiredColorWidth, uint32_t DesiredC
     eSurfaceTransform = bSurfaceSupportsIdentity ? VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR : SurfaceCaps.currentTransform;
 
     if ( ResultHandle::Failed( vkGetPhysicalDeviceSurfaceCapabilitiesKHR( *pNode, hSurface, &SurfaceCaps ) ) ) {
-        _Game_engine_Halt( "vkGetPhysicalDeviceSurfaceCapabilitiesKHR failed." );
+        apemode_halt( "vkGetPhysicalDeviceSurfaceCapabilitiesKHR failed." );
         return false;
     }
 
     const bool bMatchesWindow     = DesiredColorWidth == kExtentMatchWindow && DesiredColorHeight == kExtentMatchWindow;
     const bool bMatchesFullscreen = DesiredColorWidth == kExtentMatchFullscreen && DesiredColorHeight == kExtentMatchFullscreen;
     const bool bIsDefined         = !bMatchesWindow && !bMatchesFullscreen;
-    _Game_engine_Assert( bIsDefined || bMatchesFullscreen || bMatchesWindow, "Unexpected." );
+    apemode_assert( bIsDefined || bMatchesFullscreen || bMatchesWindow, "Unexpected." );
 
     ColorExtent.width  = 0;
     ColorExtent.height = 0;
@@ -209,7 +208,7 @@ bool apemodevk::Swapchain::Resize( uint32_t DesiredColorWidth, uint32_t DesiredC
          SurfaceCaps.currentExtent.height == kExtentMatchFullscreen ) {
         // If the surface size is undefined, the size is set to
         // the size of the images requested.
-        _Game_engine_Assert( bIsDefined, "Unexpected." );
+        apemode_assert( bIsDefined, "Unexpected." );
 
         if ( bIsDefined ) {
             ColorExtent.width  = DesiredColorWidth;
@@ -236,12 +235,12 @@ bool apemodevk::Swapchain::Resize( uint32_t DesiredColorWidth, uint32_t DesiredC
     SwapchainDesc->clipped          = true;
 
     if ( !hSwapchain.Recreate( *pNode, SwapchainDesc ) ) {
-        _Game_engine_Halt( "Failed to create swapchain." );
+        apemode_halt( "Failed to create swapchain." );
         return false;
     }
 
     if ( !ExtractSwapchainBuffers( hImgs ) ) {
-        _Game_engine_Halt( "Failed to extract swapchain buffers." );
+        apemode_halt( "Failed to extract swapchain buffers." );
         return false;
     }
 
@@ -276,7 +275,7 @@ bool apemodevk::Swapchain::OnFrameMove( apemodevk::RenderPassResources& Resource
                                         VkSemaphore                     hSemaphore,
                                         VkFence                         hFence,
                                         uint64_t                        Timeout ) {
-    _Game_engine_Assert( pNode != nullptr, "Not initialized." );
+    apemode_assert( pNode != nullptr, "Not initialized." );
 
     uint32_t OutSwapchainBufferIdx = 0xffffffff;
 
@@ -285,14 +284,14 @@ bool apemodevk::Swapchain::OnFrameMove( apemodevk::RenderPassResources& Resource
         vkAcquireNextImageKHR( *pNode, hSwapchain, Timeout, hSemaphore, hFence, &OutSwapchainBufferIdx );
 
     if ( apemode_likely( eImgAcquiredError == ResultHandle::Success || eImgAcquiredError == ResultHandle::Suboptimal ) ) {
-        _Game_engine_Assert( eImgAcquiredError == ResultHandle::Success, "Reconfigure." );
-        _Game_engine_Assert( Resources.GetFrameCount( ) == GetBufferCount( ), "Should match." );
+        apemode_assert( eImgAcquiredError == ResultHandle::Success, "Reconfigure." );
+        apemode_assert( Resources.GetFrameCount( ) == GetBufferCount( ), "Should match." );
 
         Resources.SetWriteFrame( OutSwapchainBufferIdx );
         return true;
     }
 
-    _Game_engine_Assert( eImgAcquiredError == ResultHandle::Timeout,
+    apemode_assert( eImgAcquiredError == ResultHandle::Timeout,
                          "Failed to acquire swapchain buffer "
                          "(and it`s not because of timeout)." );
     return false;
@@ -302,7 +301,7 @@ bool apemodevk::Swapchain::OnFramePresent( apemodevk::CommandQueue&        CmdQu
                                            apemodevk::RenderPassResources& Resources,
                                            VkSemaphore*                    pWaitSemaphores,
                                            uint32_t                        WaitSemaphoreCount ) {
-    _Game_engine_Assert( ( pWaitSemaphores && WaitSemaphoreCount ) || ( !pWaitSemaphores && !WaitSemaphoreCount ),
+    apemode_assert( ( pWaitSemaphores && WaitSemaphoreCount ) || ( !pWaitSemaphores && !WaitSemaphoreCount ),
                          "Missing info." );
 
     const uint32_t pImgIndices[] = {Resources.GetWriteFrame( )};
@@ -320,11 +319,11 @@ bool apemodevk::Swapchain::OnFramePresent( apemodevk::CommandQueue&        CmdQu
     VkResult ePresentResult = vkQueuePresentKHR( CmdQueue, PresentDesc );
     if ( apemode_likely( ResultHandle::Succeeded( ePresentResult ) ) ) {
         const bool bIsOk = ResultHandle::Succeeded( eSwapchainResult );
-        _Game_engine_Assert( bIsOk, "Failed to present to swapchain." );
+        apemode_assert( bIsOk, "Failed to present to swapchain." );
 
         return apemode_likely( bIsOk );
     }
 
-    _Game_engine_Halt( "Failed to present." );
+    apemode_halt( "Failed to present." );
     return false;
 }

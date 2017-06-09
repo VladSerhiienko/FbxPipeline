@@ -30,7 +30,7 @@ apemodevk::DepthStencilResourceView::DepthStencilResourceView ()
     Format = VK_FORMAT_D32_SFLOAT_S8_UINT;
     if (!ResourceReference::GetDepthStencilFormats (Format, DepthFormat, StencilFormat))
     {
-        _Game_engine_Halt ("Wrong depth format.");
+        apemode_halt ("Wrong depth format.");
     }
 
     ImgType       = VK_IMAGE_TYPE_2D;
@@ -50,7 +50,6 @@ apemodevk::DepthStencilResourceView::DepthStencilResourceView ()
 
 apemodevk::DepthStencilResourceView::~DepthStencilResourceView()
 {
-    _Aux_DebugTraceFunc;
 }
 
 bool apemodevk::DepthStencilResourceView::RecreateResourcesFor (GraphicsDevice & InGraphicsNode,
@@ -61,14 +60,14 @@ bool apemodevk::DepthStencilResourceView::RecreateResourcesFor (GraphicsDevice &
                                                            uint32_t         InClearStencil,
                                                            VkImageLayout    InInitialLayout)
 {
-    _Game_engine_Assert (InWidth != 0 && InHeight != 0, "Invalid dimensions.");
+    apemode_assert (InWidth != 0 && InHeight != 0, "Invalid dimensions.");
 
     if (InFmt != VK_FORMAT_UNDEFINED)
     {
         VkFormat OutDepthFmt, OutStencilFmt;
         if (!ResourceReference::GetDepthStencilFormats (InFmt, OutDepthFmt, OutStencilFmt))
         {
-            _Game_engine_Halt ("Wrong depth format.");
+            apemode_halt ("Wrong depth format.");
         }
         else
         {
@@ -123,7 +122,7 @@ bool apemodevk::DepthStencilResourceView::RecreateResourcesFor (GraphicsDevice &
                 0,
                 ResourceRef->MemoryAlloc->memoryTypeIndex))
         {
-            _Game_engine_Halt("GetMemoryTypeFromProperties failed. "
+            apemode_halt("GetMemoryTypeFromProperties failed. "
                               "No suitable memory available.");
             ResourceRef.reset();
             return false;
@@ -137,7 +136,7 @@ bool apemodevk::DepthStencilResourceView::RecreateResourcesFor (GraphicsDevice &
         if (!ResourceRef->MemoryHandle.Recreate (InGraphicsNode,
                                                  ResourceRef->MemoryAlloc))
         {
-            _Game_engine_Halt ("Failed to allocate memory.");
+            apemode_halt ("Failed to allocate memory.");
             ResourceRef.reset ();
             return false;
         }
@@ -148,7 +147,7 @@ bool apemodevk::DepthStencilResourceView::RecreateResourcesFor (GraphicsDevice &
                                                          ResourceRef->MemoryHandle,
                                                          VirtualAddressOffset)))
         {
-            _Game_engine_Halt ("vkBindImageMemory failed.");
+            apemode_halt ("vkBindImageMemory failed.");
             ResourceRef.reset ();
             return false;
         }
@@ -167,7 +166,7 @@ bool apemodevk::DepthStencilResourceView::RecreateResourcesFor (GraphicsDevice &
 
             if (!ImgViewHandle.Recreate (InGraphicsNode, DepthStencilViewDesc))
             {
-                _Game_engine_Halt("Invalid image view desc.");
+                apemode_halt("Invalid image view desc.");
                 return false;
             }
 
@@ -193,7 +192,7 @@ bool apemodevk::DepthStencilResourceView::RecreateResourcesFor (GraphicsDevice &
 
         //    if (!DepthImgViewHandle.Recreate(InGraphicsNode, DepthViewDesc))
         //    {
-        //        _Game_engine_Halt("Invalid image view desc.");
+        //        apemode_halt("Invalid image view desc.");
         //        return false;
         //    }
 
@@ -214,7 +213,7 @@ bool apemodevk::DepthStencilResourceView::RecreateResourcesFor (GraphicsDevice &
 
         //    if (!StencilImgViewHandle.Recreate (InGraphicsNode, StencilViewDesc))
         //    {
-        //        _Game_engine_Halt ("Invalid image view desc.");
+        //        apemode_halt ("Invalid image view desc.");
         //        return false;
         //    }
 

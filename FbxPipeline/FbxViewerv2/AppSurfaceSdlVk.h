@@ -1,12 +1,12 @@
 #pragma once
 
-#include <IAppSurface.h>
+#include <AppSurfaceSdlBase.h>
 
 namespace apemodevk {
     class GraphicsManager;
     class GraphicsDevice;
-    class Swapchain;
     class CommandQueue;
+    class Swapchain;
 }
 
 namespace apemode {
@@ -15,27 +15,19 @@ namespace apemode {
     /**
      * Contains handle to window and graphics context.
      **/
-    class AppSurfaceSdlVk : public IAppSurface {
+    class AppSurfaceSdlVk : public AppSurfaceSdlBase {
     public:
         AppSurfaceSdlVk( );
         virtual ~AppSurfaceSdlVk( );
 
-        virtual bool Initialize( ) override;
+        virtual bool Initialize( uint32_t width, uint32_t height, const char* name ) override;
         virtual void Finalize( ) override;
 
         virtual void OnFrameMove( ) override;
-        virtual void OnFrameDone( ) override;
-
-        virtual uint32_t GetWidth( ) const override;
-        virtual uint32_t GetHeight( ) const override;
-        virtual void*    GetWindowHandle( ) override;
-        virtual void*    GetGraphicsHandle( ) override;
+        virtual void* GetGraphicsHandle( ) override;
 
         uint32_t LastWidth;
         uint32_t LastHeight;
-        SDL_Window*                                   pSdlWindow;
-        HWND                                          hWnd;
-        HINSTANCE                                     hInstance;
         std::unique_ptr< apemodevk::GraphicsManager > pDeviceManager;
         std::unique_ptr< apemodevk::Swapchain >       pSwapchain;
         std::unique_ptr< apemodevk::CommandQueue >    pCmdQueue;

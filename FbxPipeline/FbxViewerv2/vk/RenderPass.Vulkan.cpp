@@ -302,7 +302,7 @@ bool apemodevk::RenderPassBuilder::VerifySubpasses() const
         return LastExpectedSubpassIndex == MaxSubpassIndex;
     }
 
-    _Game_engine_Error("No subpasses.");
+    apemode_error("No subpasses.");
     return false;
 }
 
@@ -535,7 +535,7 @@ apemodevk::RenderPassDescription::MakeNewFromTemporary(RenderPassDescription con
         return pNewDesc;
     }
 
-    _Game_engine_Error("Out of system memory.");
+    apemode_error("Out of system memory.");
     return nullptr;
 }
 
@@ -547,7 +547,7 @@ void apemodevk::RenderPassManager::AddNewRenderPassObject(apemodevk::RenderPass 
 {
     std::lock_guard<std::mutex> LockGuard (pContent->Lock);
 
-    _Game_engine_Assert (pContent->StoredRenderPasses.find (NewRenderPass.Hash)
+    apemode_assert (pContent->StoredRenderPasses.find (NewRenderPass.Hash)
                              == pContent->StoredRenderPasses.end (),
                          "Already exists, please see TryGetRenderPassObjectByHash function.");
 

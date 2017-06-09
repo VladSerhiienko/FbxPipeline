@@ -46,7 +46,7 @@ namespace apemodevk
 
             //TODO: Only for debugging.
             if ( false == std::is_sorted( &hLayouts[ 0 ], &hLayouts[ TCount ] ) ) {
-                DebugBreak( );
+                platform::DebugBreak( );
                 return false;
             }
 

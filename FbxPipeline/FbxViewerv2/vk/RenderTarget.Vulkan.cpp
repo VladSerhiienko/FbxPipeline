@@ -33,8 +33,6 @@ apemodevk::ColorResourceView::~ColorResourceView()
         ImgHandle.Release ();
         ImgViewHandle.Release ();
     }
-
-    _Aux_DebugTraceFunc;
 }
 
 bool apemodevk::ColorResourceView::RecreateResourcesFor (GraphicsDevice & InGraphicsNode,
@@ -76,7 +74,7 @@ bool apemodevk::ColorResourceView::RecreateResourcesFor (GraphicsDevice & InGrap
     if (!ImgHandle.Assign (InGraphicsNode, InGraphicsNode, InImg, false)
         || !ImgViewHandle.Recreate (InGraphicsNode, ImgViewDesc))
     {
-        _Game_engine_Error("Failed to assign image / create image view.");
+        apemode_error("Failed to assign image / create image view.");
         return false;
     }
 

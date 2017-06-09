@@ -38,7 +38,7 @@ public:
         assert (pInSurface && "Surface is required.");
         pSurface = pInSurface;
 
-        if (pSurface->Initialize ())
+        if (pSurface->Initialize (1280, 800, "FbxViewer v2"))
         {
             if (!InputManager.Initialize ())
                 return false;

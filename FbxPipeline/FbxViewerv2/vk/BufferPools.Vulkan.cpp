@@ -10,12 +10,10 @@
 apemodevk::BufferPool::BufferPool(BufferPoolType PoolType)
     : ePoolType(PoolType)
 {
-    _Aux_DebugTraceFunc;
 }
 
 apemodevk::BufferPool::~BufferPool()
 {
-    _Aux_DebugTraceFunc;
 }
 
 bool apemodevk::BufferPool::RecreateResourcesFor(GraphicsDevice & InGraphicsNode)
@@ -37,7 +35,7 @@ apemodevk::BufferPool::Range apemodevk::BufferPool::Suballocate(CommandBuffer & 
 {
     apemodevk::BufferPool::Range RetRange;
     const bool bSuballocated = Suballocate(CmdBuffer, Size, RetRange);
-    _Game_engine_Assert(bSuballocated, "Out of memory");
+    apemode_assert(bSuballocated, "Out of memory");
     return RetRange;
 }
 
@@ -77,10 +75,8 @@ std::unique_ptr<apemodevk::BufferPool::Page> apemodevk::BufferPool::Page::MakeNe
 
 apemodevk::BufferPool::Page::Page ()
 {
-    _Aux_DebugTraceFunc;
 }
 
 apemodevk::BufferPool::Page::~Page ()
 {
-    _Aux_DebugTraceFunc;
 }

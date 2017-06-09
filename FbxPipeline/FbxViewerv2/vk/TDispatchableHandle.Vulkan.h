@@ -22,7 +22,7 @@ namespace apemodevk
     {
         void operator()(HandleType *& Handle)
         {
-            _Game_engine_Error("Please, specialize the proprietary deleter for your class.");
+            apemode_error("Please, specialize the proprietary deleter for your class.");
             Handle = VK_NULL_HANDLE;
         }
     };

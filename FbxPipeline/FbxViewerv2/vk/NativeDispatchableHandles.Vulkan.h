@@ -48,7 +48,7 @@ namespace apemodevk
         void operator()(VkSurfaceKHR & Handle)
         {
             if (Handle == nullptr) return;
-            _Game_engine_Assert(InstanceHandle != nullptr, "Instance is required.");
+            apemode_assert(InstanceHandle != nullptr, "Instance is required.");
             vkDestroySurfaceKHR(InstanceHandle, Handle, *this);
             Handle = VK_NULL_HANDLE;
         }
@@ -64,7 +64,7 @@ namespace apemodevk
         void operator()(VkSwapchainKHR & Handle)
         {
             if (Handle == nullptr) return;
-            _Game_engine_Assert(LogicalDeviceHandle != nullptr, "Device is required.");
+            apemode_assert(LogicalDeviceHandle != nullptr, "Device is required.");
             vkDestroySwapchainKHR(LogicalDeviceHandle, Handle, *this);
             Handle = VK_NULL_HANDLE;
         }
@@ -80,7 +80,7 @@ namespace apemodevk
         void operator()(VkCommandPool & Handle)
         {
             if (Handle == nullptr) return;
-            _Game_engine_Assert(LogicalDeviceHandle != nullptr, "Device is required.");
+            apemode_assert(LogicalDeviceHandle != nullptr, "Device is required.");
             vkDestroyCommandPool(LogicalDeviceHandle, Handle, *this);
             Handle = VK_NULL_HANDLE;
         }
@@ -97,7 +97,7 @@ namespace apemodevk
         void operator()(VkCommandBuffer & Handle)
         {
             if (Handle == nullptr) return;
-            _Game_engine_Assert(LogicalDeviceHandle != nullptr, "Device is required.");
+            apemode_assert(LogicalDeviceHandle != nullptr, "Device is required.");
             vkFreeCommandBuffers(LogicalDeviceHandle, CmdPool, 1, &Handle);
             Handle = VK_NULL_HANDLE;
         }
@@ -113,7 +113,7 @@ namespace apemodevk
         void operator()(VkFence & Handle)
         {
             if (Handle == nullptr) return;
-            _Game_engine_Assert(LogicalDeviceHandle != nullptr, "Device is required.");
+            apemode_assert(LogicalDeviceHandle != nullptr, "Device is required.");
             vkDestroyFence(LogicalDeviceHandle, Handle, *this);
             Handle = VK_NULL_HANDLE;
         }
@@ -129,7 +129,7 @@ namespace apemodevk
         void operator()(VkEvent & Handle)
         {
             if (Handle == nullptr) return;
-            _Game_engine_Assert(LogicalDeviceHandle != nullptr, "Device is required.");
+            apemode_assert(LogicalDeviceHandle != nullptr, "Device is required.");
             vkDestroyEvent(LogicalDeviceHandle, Handle, *this);
             Handle = VK_NULL_HANDLE;
         }
@@ -151,7 +151,7 @@ namespace apemodevk
                 return;
 
             // Image can be assigned without ownership (by swapchain, for example).
-            //_Game_engine_Assert(LogicalDeviceHandle != nullptr, "Device is required.");
+            //apemode_assert(LogicalDeviceHandle != nullptr, "Device is required.");
             vkDestroyImage(LogicalDeviceHandle, Handle, *this);
             Handle = VK_NULL_HANDLE;
         }
@@ -168,7 +168,7 @@ namespace apemodevk
         {
             if (Handle == nullptr) return;
 
-            _Game_engine_Assert(LogicalDeviceHandle != nullptr, "Device is required.");
+            apemode_assert(LogicalDeviceHandle != nullptr, "Device is required.");
             vkDestroyImageView(LogicalDeviceHandle, Handle, *this);
             Handle = VK_NULL_HANDLE;
         }
@@ -185,7 +185,7 @@ namespace apemodevk
         {
             if (Handle == nullptr) return;
 
-            _Game_engine_Assert(LogicalDeviceHandle != nullptr, "Device is required.");
+            apemode_assert(LogicalDeviceHandle != nullptr, "Device is required.");
             vkFreeMemory(LogicalDeviceHandle, Handle, *this);
             Handle = VK_NULL_HANDLE;
         }
@@ -204,7 +204,7 @@ namespace apemodevk
         {
             if (Handle == nullptr) return;
 
-            _Game_engine_Assert(LogicalDeviceHandle != nullptr, "Device is required.");
+            apemode_assert(LogicalDeviceHandle != nullptr, "Device is required.");
             vkDestroyBuffer(LogicalDeviceHandle, Handle, *this);
             Handle = VK_NULL_HANDLE;
         }
@@ -221,7 +221,7 @@ namespace apemodevk
         {
             if (Handle == nullptr) return;
 
-            _Game_engine_Assert(LogicalDeviceHandle != nullptr, "Device is required.");
+            apemode_assert(LogicalDeviceHandle != nullptr, "Device is required.");
             vkDestroyBufferView(LogicalDeviceHandle, Handle, *this);
             Handle = VK_NULL_HANDLE;
         }
@@ -238,7 +238,7 @@ namespace apemodevk
         {
             if (Handle == nullptr) return;
 
-            _Game_engine_Assert(LogicalDeviceHandle != nullptr, "Device is required.");
+            apemode_assert(LogicalDeviceHandle != nullptr, "Device is required.");
             vkDestroyFramebuffer(LogicalDeviceHandle, Handle, *this);
             Handle = VK_NULL_HANDLE;
         }
@@ -255,7 +255,7 @@ namespace apemodevk
         {
             if (Handle == nullptr) return;
 
-            _Game_engine_Assert(LogicalDeviceHandle != nullptr, "Device is required.");
+            apemode_assert(LogicalDeviceHandle != nullptr, "Device is required.");
             vkDestroyRenderPass(LogicalDeviceHandle, Handle, *this);
             Handle = VK_NULL_HANDLE;
         }
@@ -272,7 +272,7 @@ namespace apemodevk
         {
             if (Handle == nullptr) return;
 
-            _Game_engine_Assert(LogicalDeviceHandle != nullptr, "Device is required.");
+            apemode_assert(LogicalDeviceHandle != nullptr, "Device is required.");
             vkDestroyPipelineCache(LogicalDeviceHandle, Handle, *this);
             Handle = VK_NULL_HANDLE;
         }
@@ -289,7 +289,7 @@ namespace apemodevk
         {
             if (Handle == nullptr) return;
 
-            _Game_engine_Assert(LogicalDeviceHandle != nullptr, "Device is required.");
+            apemode_assert(LogicalDeviceHandle != nullptr, "Device is required.");
             vkDestroyPipeline(LogicalDeviceHandle, Handle, *this);
             Handle = VK_NULL_HANDLE;
         }
@@ -306,7 +306,7 @@ namespace apemodevk
         {
             if (Handle == nullptr) return;
 
-            _Game_engine_Assert(LogicalDeviceHandle != nullptr, "Device is required.");
+            apemode_assert(LogicalDeviceHandle != nullptr, "Device is required.");
             vkDestroyDescriptorSetLayout(LogicalDeviceHandle, Handle, *this);
             Handle = VK_NULL_HANDLE;
         }
@@ -328,13 +328,13 @@ namespace apemodevk
         {
             if (Handle == nullptr) return;
 
-            _Game_engine_Assert(LogicalDeviceHandle != nullptr, 
+            apemode_assert(LogicalDeviceHandle != nullptr, 
                                 "Device is required.");
 
             const ResultHandle eIsFreed
                 = vkFreeDescriptorSets(LogicalDeviceHandle, hDescPool, 1, &Handle);
 
-            _Game_engine_Assert(eIsFreed.Succeeded(),
+            apemode_assert(eIsFreed.Succeeded(),
                                 "Failed to free descriptor set (vkFreeDescriptorSets).");
 
             Handle = VK_NULL_HANDLE;
@@ -355,7 +355,7 @@ namespace apemodevk
         {
             if (Handle == nullptr) return;
 
-            _Game_engine_Assert(LogicalDeviceHandle != nullptr, "Device is required.");
+            apemode_assert(LogicalDeviceHandle != nullptr, "Device is required.");
             vkDestroyDescriptorPool(LogicalDeviceHandle, Handle, *this);
             Handle = VK_NULL_HANDLE;
         }
@@ -372,7 +372,7 @@ namespace apemodevk
         {
             if (Handle == nullptr) return;
 
-            _Game_engine_Assert(LogicalDeviceHandle != nullptr, "Device is required.");
+            apemode_assert(LogicalDeviceHandle != nullptr, "Device is required.");
             vkDestroyPipelineLayout(LogicalDeviceHandle, Handle, *this);
             Handle = VK_NULL_HANDLE;
         }
@@ -389,7 +389,7 @@ namespace apemodevk
         {
             if (Handle == nullptr) return;
 
-            _Game_engine_Assert(LogicalDeviceHandle != nullptr, "Device is required.");
+            apemode_assert(LogicalDeviceHandle != nullptr, "Device is required.");
             vkDestroyShaderModule(LogicalDeviceHandle, Handle, *this);
             Handle = VK_NULL_HANDLE;
         }
@@ -406,7 +406,7 @@ namespace apemodevk
         {
             if (Handle == nullptr) return;
 
-            _Game_engine_Assert(LogicalDeviceHandle != nullptr, "Device is required.");
+            apemode_assert(LogicalDeviceHandle != nullptr, "Device is required.");
             vkDestroySemaphore(LogicalDeviceHandle, Handle, *this);
             Handle = VK_NULL_HANDLE;
         }
@@ -425,7 +425,7 @@ namespace apemodevk
             Deleter(Handle);
 
             const ResultHandle ErrorHandle = vkCreateInstance(&CreateInfo, *this, *this);
-            _Game_engine_Assert(ErrorHandle, "vkCreateInstance failed.");
+            apemode_assert(ErrorHandle, "vkCreateInstance failed.");
             return ErrorHandle.Succeeded();
         }
     };
@@ -435,13 +435,13 @@ namespace apemodevk
     {
        bool Recreate(VkPhysicalDevice AdapterHandle, VkDeviceCreateInfo const & CreateInfo)
         {
-            _Game_engine_Assert(AdapterHandle != VK_NULL_HANDLE, "Adapter must be valid");
+            apemode_assert(AdapterHandle != VK_NULL_HANDLE, "Adapter must be valid");
 
             Deleter(Handle);
             if (AdapterHandle != nullptr)
             {
                 const ResultHandle ErrorHandle = vkCreateDevice(AdapterHandle, &CreateInfo, *this, *this);
-                _Game_engine_Assert(ErrorHandle, "vkCreateDevice failed.");
+                apemode_assert(ErrorHandle, "vkCreateDevice failed.");
                 return ErrorHandle.Succeeded();
             }
 
@@ -454,7 +454,7 @@ namespace apemodevk
     {
         void Recreate(VkDevice InLogicalDeviceHandle, uint32_t QueueFamilyId, uint32_t QueueId)
         {
-            _Game_engine_Assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Device must be valid");
+            apemode_assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Device must be valid");
 
             if (InLogicalDeviceHandle != nullptr)
             {
@@ -468,14 +468,14 @@ namespace apemodevk
     {
         bool Recreate(VkInstance InInstanceHandle, VkWin32SurfaceCreateInfoKHR const &CreateInfo)
         {
-            _Game_engine_Assert(InInstanceHandle != VK_NULL_HANDLE, "Instance is required.");
+            apemode_assert(InInstanceHandle != VK_NULL_HANDLE, "Instance is required.");
 
             Deleter(Handle);
             if (InInstanceHandle)
             {
                 Deleter.InstanceHandle = InInstanceHandle;
                 ResultHandle ErrorHandle = vkCreateWin32SurfaceKHR(InInstanceHandle, &CreateInfo, *this, *this);
-                _Game_engine_Assert(ErrorHandle, "vkCreateWin32SurfaceKHR failed.");
+                apemode_assert(ErrorHandle, "vkCreateWin32SurfaceKHR failed.");
                 return ErrorHandle.Succeeded();
             }
 
@@ -495,14 +495,14 @@ namespace apemodevk
             auto PrevHandle = Handle;
             TDeleter PrevDeleter = Deleter;
 
-            _Game_engine_Assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Instance is required.");
+            apemode_assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Instance is required.");
 
             if (InLogicalDeviceHandle != nullptr)
             {
                 Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
 
                 const ResultHandle ErrorHandle = vkCreateSwapchainKHR(InLogicalDeviceHandle, &CreateInfo, *this, *this);
-                _Game_engine_Assert(ErrorHandle, "vkCreateSwapchainKHR failed.");
+                apemode_assert(ErrorHandle, "vkCreateSwapchainKHR failed.");
                 if (ErrorHandle.Succeeded())
                 {
                     // If we just re-created an existing swapchain, we should destroy the old
@@ -526,14 +526,14 @@ namespace apemodevk
     {
        bool Recreate(VkDevice InLogicalDeviceHandle, VkCommandPoolCreateInfo const &CreateInfo)
         {
-            _Game_engine_Assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required.");
+            apemode_assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required.");
 
             Deleter(Handle);
             if (InLogicalDeviceHandle != nullptr)
             {
                 Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
                 ResultHandle ErrorHandle = vkCreateCommandPool(InLogicalDeviceHandle, &CreateInfo, *this, *this);
-                _Game_engine_Assert(ErrorHandle, "vkCreateCommandPool failed.");
+                apemode_assert(ErrorHandle, "vkCreateCommandPool failed.");
                 return ErrorHandle.Succeeded();
             }
 
@@ -546,7 +546,7 @@ namespace apemodevk
             {
                 const auto ResetFlags = bRecycleResources ? VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT : 0u;
                 const ResultHandle ErrorHandle = vkResetCommandPool(Deleter.LogicalDeviceHandle, *this, ResetFlags);
-                _Game_engine_Assert(ErrorHandle, "vkResetCommandPool failed.");
+                apemode_assert(ErrorHandle, "vkResetCommandPool failed.");
                 return ErrorHandle.Succeeded();
             }
 
@@ -559,9 +559,9 @@ namespace apemodevk
     {
        bool Recreate(VkDevice InLogicalDeviceHandle, VkCommandBufferAllocateInfo const &AllocInfo)
         {
-            _Game_engine_Assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required.");
-            _Game_engine_Assert(AllocInfo.commandPool != VK_NULL_HANDLE, "No default pools available.");
-            _Game_engine_Assert(AllocInfo.commandBufferCount == 1, "This method handles single command list.");
+            apemode_assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required.");
+            apemode_assert(AllocInfo.commandPool != VK_NULL_HANDLE, "No default pools available.");
+            apemode_assert(AllocInfo.commandBufferCount == 1, "This method handles single command list.");
 
             Deleter(Handle);
             if (InLogicalDeviceHandle != nullptr)
@@ -570,7 +570,7 @@ namespace apemodevk
                 Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
 
                 const ResultHandle ErrorHandle = vkAllocateCommandBuffers(InLogicalDeviceHandle, &AllocInfo, *this);
-                _Game_engine_Assert(ErrorHandle, "vkAllocateCommandBuffers failed.");
+                apemode_assert(ErrorHandle, "vkAllocateCommandBuffers failed.");
                 return ErrorHandle.Succeeded();
             }
 
@@ -583,7 +583,7 @@ namespace apemodevk
     {
        bool Recreate(VkDevice InLogicalDeviceHandle, VkFenceCreateInfo const & CreateInfo)
         {
-            _Game_engine_Assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required.");
+            apemode_assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required.");
 
             Deleter(Handle);
             if (InLogicalDeviceHandle != nullptr)
@@ -591,7 +591,7 @@ namespace apemodevk
                 Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
 
                 const ResultHandle ErrorHandle = vkCreateFence(InLogicalDeviceHandle, &CreateInfo, *this, *this);
-                _Game_engine_Assert(ErrorHandle, "vkCreateFence failed.");
+                apemode_assert(ErrorHandle, "vkCreateFence failed.");
                 return ErrorHandle.Succeeded();
             }
 
@@ -601,7 +601,7 @@ namespace apemodevk
        bool Await() const
         {
             const ResultHandle ErrorHandle = vkWaitForFences(Deleter.LogicalDeviceHandle, 1, &Handle, true, UINT64_MAX);
-            _Game_engine_Assert(ErrorHandle, "vkWaitForFences failed.");
+            apemode_assert(ErrorHandle, "vkWaitForFences failed.");
             return ErrorHandle.Succeeded();
         }
 
@@ -616,7 +616,7 @@ namespace apemodevk
     {
        bool Recreate(VkDevice InLogicalDeviceHandle, VkEventCreateInfo const & CreateInfo)
         {
-            _Game_engine_Assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required.");
+            apemode_assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required.");
 
             Deleter(Handle);
             if (InLogicalDeviceHandle != nullptr)
@@ -624,7 +624,7 @@ namespace apemodevk
                 Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
 
                 const ResultHandle ErrorHandle = vkCreateEvent(InLogicalDeviceHandle, &CreateInfo, *this, *this);
-                _Game_engine_Assert(ErrorHandle, "vkCreateFence failed.");
+                apemode_assert(ErrorHandle, "vkCreateFence failed.");
                 return ErrorHandle.Succeeded();
             }
 
@@ -634,14 +634,14 @@ namespace apemodevk
        bool Set() const
         {
             const ResultHandle ErrorHandle = vkSetEvent(Deleter.LogicalDeviceHandle, Handle);
-            _Game_engine_Assert(ErrorHandle, "vkSetEvent failed.");
+            apemode_assert(ErrorHandle, "vkSetEvent failed.");
             return ErrorHandle.Succeeded();
         }
 
        bool Reset() const
         {
             const ResultHandle ErrorHandle = vkResetEvent(Deleter.LogicalDeviceHandle, Handle);
-            _Game_engine_Assert(ErrorHandle, "vkResetEvent failed.");
+            apemode_assert(ErrorHandle, "vkResetEvent failed.");
             return ErrorHandle.Succeeded();
         }
 
@@ -672,7 +672,7 @@ namespace apemodevk
 
             const bool bCaseOk = InLogicalDeviceHandle != VK_NULL_HANDLE && Img != VK_NULL_HANDLE;
             const bool bCaseNull = InLogicalDeviceHandle == VK_NULL_HANDLE && Img == VK_NULL_HANDLE;
-            _Game_engine_Assert(bCaseOk || bCaseNull, "Both handles should be null or valid.");
+            apemode_assert(bCaseOk || bCaseNull, "Both handles should be null or valid.");
 
             if (bCaseOk || bCaseNull)
             {
@@ -689,7 +689,7 @@ namespace apemodevk
 
         bool Recreate(VkDevice InLogicalDeviceHandle, VkPhysicalDevice InPhysicalDeviceHandle, VkImageCreateInfo const & CreateInfo)
         {
-            _Game_engine_Assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required.");
+            apemode_assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required.");
 
             Deleter(Handle);
             if (InLogicalDeviceHandle != nullptr)
@@ -698,7 +698,7 @@ namespace apemodevk
                 Deleter.PhysicalDeviceHandle = InPhysicalDeviceHandle;
 
                 const ResultHandle ErrorHandle = vkCreateImage(InLogicalDeviceHandle, &CreateInfo, *this, *this);
-                _Game_engine_Assert(ErrorHandle, "vkCreateImage failed.");
+                apemode_assert(ErrorHandle, "vkCreateImage failed.");
                 return ErrorHandle.Succeeded();
             }
 
@@ -706,7 +706,7 @@ namespace apemodevk
         }
 
         VkMemoryRequirements GetMemoryRequirements() {
-            _Game_engine_Assert(IsNotNull(), "Null.");
+            apemode_assert(IsNotNull(), "Null.");
 
             VkMemoryRequirements memoryRequirements;
             vkGetImageMemoryRequirements(Deleter.LogicalDeviceHandle, *this, &memoryRequirements);
@@ -737,7 +737,7 @@ namespace apemodevk
     {
         bool Recreate(VkDevice InLogicalDeviceHandle, VkImageViewCreateInfo const & CreateInfo)
         {
-            _Game_engine_Assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required.");
+            apemode_assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required.");
 
             Deleter(Handle);
             if (InLogicalDeviceHandle != nullptr)
@@ -745,7 +745,7 @@ namespace apemodevk
                 Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
 
                 const ResultHandle ErrorHandle = vkCreateImageView(InLogicalDeviceHandle, &CreateInfo, *this, *this);
-                _Game_engine_Assert(ErrorHandle, "vkCreateImageView failed.");
+                apemode_assert(ErrorHandle, "vkCreateImageView failed.");
                 return ErrorHandle.Succeeded();
             }
 
@@ -757,14 +757,14 @@ namespace apemodevk
     struct TDispatchableHandle<VkDeviceMemory> : public TDispatchableHandleBase<VkDeviceMemory>
     {
         bool Recreate( VkDevice InLogicalDeviceHandle, VkMemoryAllocateInfo const &AllocInfo ) {
-            _Game_engine_Assert( InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required." );
+            apemode_assert( InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required." );
 
             Deleter( Handle );
             if ( InLogicalDeviceHandle != nullptr ) {
                 Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
 
                 const ResultHandle ErrorHandle = vkAllocateMemory( InLogicalDeviceHandle, &AllocInfo, *this, *this );
-                _Game_engine_Assert( ErrorHandle, "vkAllocateMemory failed." );
+                apemode_assert( ErrorHandle, "vkAllocateMemory failed." );
                 return ErrorHandle.Succeeded( );
             }
 
@@ -772,7 +772,7 @@ namespace apemodevk
         }
 
         uint8_t *Map( uint32_t mappedMemoryOffset, uint32_t mappedMemorySize, VkMemoryHeapFlags mapFlags ) {
-            _Game_engine_Assert( Deleter.LogicalDeviceHandle != VK_NULL_HANDLE, "Device is required." );
+            apemode_assert( Deleter.LogicalDeviceHandle != VK_NULL_HANDLE, "Device is required." );
 
             uint8_t *mappedData = nullptr;
             if ( ResultHandle::Failed( vkMapMemory( Deleter.LogicalDeviceHandle,
@@ -787,7 +787,7 @@ namespace apemodevk
         }
 
         void Unmap( ) {
-            _Game_engine_Assert( Deleter.LogicalDeviceHandle != VK_NULL_HANDLE, "Device is required." );
+            apemode_assert( Deleter.LogicalDeviceHandle != VK_NULL_HANDLE, "Device is required." );
             vkUnmapMemory( Deleter.LogicalDeviceHandle, *this );
         }
     };
@@ -798,7 +798,7 @@ namespace apemodevk
         bool Recreate( VkDevice                  InLogicalDeviceHandle,
                        VkPhysicalDevice          InPhysicalDeviceHandle,
                        VkBufferCreateInfo const &CreateInfo ) {
-            _Game_engine_Assert( InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required." );
+            apemode_assert( InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required." );
 
             Deleter( Handle );
             if ( InLogicalDeviceHandle != nullptr ) {
@@ -806,7 +806,7 @@ namespace apemodevk
                 Deleter.PhysicalDeviceHandle = InPhysicalDeviceHandle;
 
                 const ResultHandle ErrorHandle = vkCreateBuffer( InLogicalDeviceHandle, &CreateInfo, *this, *this );
-                _Game_engine_Assert( ErrorHandle, "vkCreateBuffer failed." );
+                apemode_assert( ErrorHandle, "vkCreateBuffer failed." );
                 return ErrorHandle.Succeeded( );
             }
 
@@ -814,7 +814,7 @@ namespace apemodevk
         }
 
         VkMemoryRequirements GetMemoryRequirements( ) {
-            _Game_engine_Assert( IsNotNull( ), "Null." );
+            apemode_assert( IsNotNull( ), "Null." );
 
             VkMemoryRequirements memoryRequirements;
             vkGetBufferMemoryRequirements( Deleter.LogicalDeviceHandle, *this, &memoryRequirements );
@@ -844,7 +844,7 @@ namespace apemodevk
     {
         bool Recreate(VkDevice InLogicalDeviceHandle, VkBufferViewCreateInfo const & CreateInfo)
         {
-            _Game_engine_Assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required.");
+            apemode_assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required.");
 
             Deleter(Handle);
             if (InLogicalDeviceHandle != nullptr)
@@ -852,7 +852,7 @@ namespace apemodevk
                 Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
 
                 const ResultHandle ErrorHandle = vkCreateBufferView(InLogicalDeviceHandle, &CreateInfo, *this, *this);
-                _Game_engine_Assert(ErrorHandle, "vkCreateBufferView failed.");
+                apemode_assert(ErrorHandle, "vkCreateBufferView failed.");
                 return ErrorHandle.Succeeded();
             }
 
@@ -865,7 +865,7 @@ namespace apemodevk
     {
         bool Recreate(VkDevice InLogicalDeviceHandle, VkFramebufferCreateInfo const & CreateInfo)
         {
-            _Game_engine_Assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required.");
+            apemode_assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required.");
 
             Deleter(Handle);
             if (InLogicalDeviceHandle != nullptr)
@@ -873,7 +873,7 @@ namespace apemodevk
                 Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
 
                 const ResultHandle ErrorHandle = vkCreateFramebuffer(InLogicalDeviceHandle, &CreateInfo, *this, *this);
-                _Game_engine_Assert(ErrorHandle, "vkCreateFramebuffer failed.");
+                apemode_assert(ErrorHandle, "vkCreateFramebuffer failed.");
                 return ErrorHandle.Succeeded();
             }
 
@@ -886,7 +886,7 @@ namespace apemodevk
     {
         bool Recreate(VkDevice InLogicalDeviceHandle, VkRenderPassCreateInfo const & CreateInfo)
         {
-            _Game_engine_Assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required.");
+            apemode_assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required.");
 
             Deleter(Handle);
             if (InLogicalDeviceHandle != nullptr)
@@ -894,7 +894,7 @@ namespace apemodevk
                 Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
 
                 const ResultHandle ErrorHandle = vkCreateRenderPass(InLogicalDeviceHandle, &CreateInfo, *this, *this);
-                _Game_engine_Assert(ErrorHandle, "vkCreateRenderPass failed.");
+                apemode_assert(ErrorHandle, "vkCreateRenderPass failed.");
                 return ErrorHandle.Succeeded();
             }
 
@@ -907,7 +907,7 @@ namespace apemodevk
     {
         bool Recreate(VkDevice InLogicalDeviceHandle, VkPipelineCacheCreateInfo const & CreateInfo)
         {
-            _Game_engine_Assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required.");
+            apemode_assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required.");
 
             Deleter(Handle);
             if (InLogicalDeviceHandle != nullptr)
@@ -915,7 +915,7 @@ namespace apemodevk
                 Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
 
                 const ResultHandle ErrorHandle = vkCreatePipelineCache(InLogicalDeviceHandle, &CreateInfo, *this, *this);
-                _Game_engine_Assert(ErrorHandle, "vkCreatePipelineCache failed.");
+                apemode_assert(ErrorHandle, "vkCreatePipelineCache failed.");
                 return ErrorHandle.Succeeded();
             }
 
@@ -928,7 +928,7 @@ namespace apemodevk
     {
         bool Recreate(VkDevice InLogicalDeviceHandle, VkPipelineLayoutCreateInfo const & CreateInfo)
         {
-            _Game_engine_Assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required.");
+            apemode_assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required.");
 
             Deleter(Handle);
             if (InLogicalDeviceHandle != nullptr)
@@ -936,7 +936,7 @@ namespace apemodevk
                 Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
 
                 const ResultHandle ErrorHandle = vkCreatePipelineLayout(InLogicalDeviceHandle, &CreateInfo, *this, *this);
-                _Game_engine_Assert(ErrorHandle, "vkCreatePipelineLayout failed.");
+                apemode_assert(ErrorHandle, "vkCreatePipelineLayout failed.");
                 return ErrorHandle.Succeeded();
             }
 
@@ -970,7 +970,7 @@ namespace apemodevk
 
         bool Recreate(VkDevice InLogicalDeviceHandle, VkDescriptorSetLayoutCreateInfo const & CreateInfo)
         {
-            _Game_engine_Assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required.");
+            apemode_assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required.");
 
             Deleter(Handle);
             if (InLogicalDeviceHandle != nullptr)
@@ -978,7 +978,7 @@ namespace apemodevk
                 Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
 
                 const ResultHandle ErrorHandle = vkCreateDescriptorSetLayout(InLogicalDeviceHandle, &CreateInfo, *this, *this);
-                _Game_engine_Assert(ErrorHandle, "vkCreateDescriptorSetLayout failed.");
+                apemode_assert(ErrorHandle, "vkCreateDescriptorSetLayout failed.");
                 return ErrorHandle.Succeeded();
             }
 
@@ -991,14 +991,14 @@ namespace apemodevk
         bool Recreate( VkDevice InLogicalDeviceHandle,
                        VkDescriptorPool InDescPoolHandle,
                        VkDescriptorSetAllocateInfo const &AllocInfo ) {
-            _Game_engine_Assert( InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required." );
+            apemode_assert( InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required." );
 
             Deleter( Handle );
             if ( InLogicalDeviceHandle != nullptr ) {
                 Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
 
                 const ResultHandle ErrorHandle = vkAllocateDescriptorSets( InLogicalDeviceHandle, &AllocInfo, *this );
-                _Game_engine_Assert( ErrorHandle, "vkAllocateDescriptorSets failed." );
+                apemode_assert( ErrorHandle, "vkAllocateDescriptorSets failed." );
                 return ErrorHandle.Succeeded( );
             }
 
@@ -1009,14 +1009,14 @@ namespace apemodevk
     template <>
     struct TDispatchableHandle< VkDescriptorPool > : public TDispatchableHandleBase< VkDescriptorPool > {
         bool Recreate( VkDevice InLogicalDeviceHandle, VkDescriptorPoolCreateInfo const &CreateInfo ) {
-            _Game_engine_Assert( InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required." );
+            apemode_assert( InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required." );
 
             Deleter( Handle );
             if ( InLogicalDeviceHandle != nullptr ) {
                 Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
 
                 const ResultHandle ErrorHandle = vkCreateDescriptorPool( InLogicalDeviceHandle, &CreateInfo, *this, *this );
-                _Game_engine_Assert( ErrorHandle, "vkCreateDescriptorSetLayout failed." );
+                apemode_assert( ErrorHandle, "vkCreateDescriptorSetLayout failed." );
                 return ErrorHandle.Succeeded( );
             }
 
@@ -1029,14 +1029,14 @@ namespace apemodevk
         bool Recreate( VkDevice InLogicalDeviceHandle,
                        VkPipelineCache pCache,
                        VkGraphicsPipelineCreateInfo const &CreateInfo ) {
-            _Game_engine_Assert( InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required." );
+            apemode_assert( InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required." );
 
             Deleter( Handle );
             if ( InLogicalDeviceHandle != nullptr ) {
                 Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
 
                 const ResultHandle ErrorHandle = vkCreateGraphicsPipelines( InLogicalDeviceHandle, pCache, 1, &CreateInfo, *this, *this );
-                _Game_engine_Assert( ErrorHandle, "vkCreateGraphicsPipelines failed." );
+                apemode_assert( ErrorHandle, "vkCreateGraphicsPipelines failed." );
                 return ErrorHandle.Succeeded( );
             }
 
@@ -1044,7 +1044,7 @@ namespace apemodevk
         }
 
         bool Recreate( VkDevice InLogicalDeviceHandle, VkPipelineCache pCache, VkComputePipelineCreateInfo const &CreateInfo ) {
-            _Game_engine_Assert( InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required." );
+            apemode_assert( InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required." );
 
             Deleter( Handle );
             if ( InLogicalDeviceHandle != nullptr ) {
@@ -1052,7 +1052,7 @@ namespace apemodevk
 
                 const ResultHandle ErrorHandle =
                     vkCreateComputePipelines( InLogicalDeviceHandle, pCache, 1, &CreateInfo, *this, *this );
-                _Game_engine_Assert( ErrorHandle, "vkCreateGraphicsPipelines failed." );
+                apemode_assert( ErrorHandle, "vkCreateGraphicsPipelines failed." );
                 return ErrorHandle.Succeeded( );
             }
 
@@ -1063,14 +1063,14 @@ namespace apemodevk
     template <>
     struct TDispatchableHandle< VkShaderModule > : public TDispatchableHandleBase< VkShaderModule > {
         bool Recreate( VkDevice InLogicalDeviceHandle, VkShaderModuleCreateInfo const &CreateInfo ) {
-            _Game_engine_Assert( InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required." );
+            apemode_assert( InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required." );
 
             Deleter( Handle );
             if ( InLogicalDeviceHandle != nullptr ) {
                 Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
 
                 const ResultHandle ErrorHandle = vkCreateShaderModule( InLogicalDeviceHandle, &CreateInfo, *this, *this );
-                _Game_engine_Assert( ErrorHandle, "vkCreateShaderModule failed." );
+                apemode_assert( ErrorHandle, "vkCreateShaderModule failed." );
                 return ErrorHandle.Succeeded( );
             }
 
@@ -1081,14 +1081,14 @@ namespace apemodevk
     template <>
     struct TDispatchableHandle< VkSemaphore > : public TDispatchableHandleBase< VkSemaphore > {
         bool Recreate( VkDevice InLogicalDeviceHandle, VkSemaphoreCreateInfo const &CreateInfo ) {
-            _Game_engine_Assert( InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required." );
+            apemode_assert( InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required." );
 
             Deleter( Handle );
             if ( InLogicalDeviceHandle != nullptr ) {
                 Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
 
                 const ResultHandle ErrorHandle = vkCreateSemaphore( InLogicalDeviceHandle, &CreateInfo, *this, *this );
-                _Game_engine_Assert( ErrorHandle, "vkCreateSemaphore failed." );
+                apemode_assert( ErrorHandle, "vkCreateSemaphore failed." );
                 return ErrorHandle.Succeeded( );
             }
 
@@ -1102,7 +1102,7 @@ namespace apemodevk
             Deleter( Handle );
 
             const ResultHandle ErrorHandle = vkCreateSampler( InLogicalDeviceHandle, &CreateInfo, *this, *this );
-            _Game_engine_Assert( ErrorHandle, "vkCreateInstance failed." );
+            apemode_assert( ErrorHandle, "vkCreateInstance failed." );
             return ErrorHandle.Succeeded( );
         }
     };

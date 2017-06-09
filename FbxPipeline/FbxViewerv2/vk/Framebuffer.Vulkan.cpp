@@ -45,7 +45,7 @@ void apemodevk::FramebufferManager::AddNewFramebuffer(apemodevk::Framebuffer & F
     //std::lock_guard<std::mutex> LockGuard(Content->Lock);
     std::lock_guard<std::mutex> LockGuard(Content->Lock);
 
-    _Game_engine_Assert(Content->StoredFramebuffers.find(Framebuffer.Hash) == Content->StoredFramebuffers.end(),
+    apemode_assert(Content->StoredFramebuffers.find(Framebuffer.Hash) == Content->StoredFramebuffers.end(),
                         "See TryGetFramebufferObjectByHash(...).");
 
     Content->StoredFramebuffers[Framebuffer.Hash].reset(&Framebuffer);
@@ -73,7 +73,7 @@ apemodevk::Framebuffer const * apemodevk::FramebufferManager::TryGetFramebufferO
 
 void apemodevk::FramebufferBuilder::Attach (TextureResourceView const & TextureView)
 {
-    _Game_engine_Assert ((TextureView.CanGet<apemodevk::ColorResourceView> ()
+    apemode_assert ((TextureView.CanGet<apemodevk::ColorResourceView> ()
                           || TextureView.CanGet<apemodevk::DepthStencilResourceView> ())
                              && (TextureView.Width != 0 && TextureView.Height != 0),
                          "Invalid texture view.");
@@ -88,7 +88,7 @@ void apemodevk::FramebufferBuilder::Attach (TextureResourceView const & TextureV
             TemporaryDesc.Desc->height = TextureView.Height;
         }
 
-        _Game_engine_Assert (TemporaryDesc.Desc->width == TextureView.Width
+        apemode_assert (TemporaryDesc.Desc->width == TextureView.Width
                                  && TemporaryDesc.Desc->height == TextureView.Height,
                              "Dimension mismatch.");
     }
@@ -112,13 +112,13 @@ apemodevk::Framebuffer const * apemodevk::FramebufferBuilder::RecreateFramebuffe
     {
         if (!TemporaryDesc.pRenderPass)
         {
-            _Game_engine_Halt("Render pass was not set.");
+            apemode_halt("Render pass was not set.");
             return nullptr;
         }
 
         auto ExtractTextureViewFn = [&](TextureResourceView const * pTextureView)
         {
-            _Game_engine_Assert (pTextureView != nullptr, "Cannot be null.");
+            apemode_assert (pTextureView != nullptr, "Cannot be null.");
             return pTextureView ? pTextureView->ImgViewHandle.Handle : nullptr;
         };
 
@@ -156,7 +156,7 @@ apemodevk::Framebuffer const * apemodevk::FramebufferBuilder::RecreateFramebuffe
         }
     }
 
-    _Game_engine_Error ("Out of GPU or system memory.");
+    apemode_error ("Out of GPU or system memory.");
     return nullptr;
 }
 
@@ -227,6 +227,6 @@ apemodevk::FramebufferDescription::MakeNewFromTemporary(FramebufferDescription c
         return pFramebuffer;
     }
 
-    _Game_engine_Error("Out of system memory.");
+    apemode_error("Out of system memory.");
     return nullptr;
 }

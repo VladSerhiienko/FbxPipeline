@@ -226,7 +226,7 @@ uint64_t apemodevk::PipelineStateDescription::UpdateHash()
                 break;
             }
 
-        _Game_engine_Assert (bFoundComputeShader, "No compute shader.");
+        apemode_assert (bFoundComputeShader, "No compute shader.");
         HashBuilder.CombineWith (Compute->layout);
         HashBuilder.CombineWith (Compute->flags);
     }
@@ -600,14 +600,14 @@ apemodevk::PipelineStateBuilder::InputLayoutBuilder::AddAttribute (VkFormat Fmt)
     Attribute.location = AttributeLocation++;
     Attribute.offset   = AttributeOffset;
     Attribute.format   = Fmt;
-    _Game_engine_Assert (AttributeLocation < AttributeCount,
+    apemode_assert (AttributeLocation < AttributeCount,
                          "Too many attributes for the binding.");
 
     const auto ElementByteWidth = apemodevk::ResourceReference::GetElementSizeInBytes (Fmt);
-    _Game_engine_Assert (ElementByteWidth != 0, "Unsupported attribute type.");
+    apemode_assert (ElementByteWidth != 0, "Unsupported attribute type.");
 
     AttributeOffset += ElementByteWidth;
-    _Game_engine_Assert (AttributeOffset <= pBinding->stride, "Attribute is too large.");
+    apemode_assert (AttributeOffset <= pBinding->stride, "Attribute is too large.");
 
     return *this;
 }
@@ -673,7 +673,7 @@ void apemodevk::PipelineStateManager::AddNewPipelineStateObject (apemodevk::Pipe
 {
     std::lock_guard<std::mutex> LockGuard (pContent->Lock);
 
-    _Game_engine_Assert (pContent->StoredPipelineStates.find (PipelineState.Hash)
+    apemode_assert (pContent->StoredPipelineStates.find (PipelineState.Hash)
                              == pContent->StoredPipelineStates.end (),
                          "See TryGetPipelineStateObjectByHash(...).");
 

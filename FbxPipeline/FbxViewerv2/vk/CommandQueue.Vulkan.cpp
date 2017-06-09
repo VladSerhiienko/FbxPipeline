@@ -58,7 +58,7 @@ bool apemodevk::CommandBuffer::RecreateResourcesFor (GraphicsDevice & GraphicsNo
 
     if (!hCmdAlloc.Recreate (GraphicsNode, CmdAllocDesc))
     {
-        _Game_engine_Halt("Failed to create command allocator.");
+        apemode_halt("Failed to create command allocator.");
         return false;
     }
 
@@ -69,7 +69,7 @@ bool apemodevk::CommandBuffer::RecreateResourcesFor (GraphicsDevice & GraphicsNo
 
     if (!hCmdList.Recreate (GraphicsNode, CmdListDesc))
     {
-        _Game_engine_Halt ("Failed to create command list.");
+        apemode_halt ("Failed to create command list.");
         return false;
     }
 
@@ -148,7 +148,7 @@ void apemodevk::CommandBuffer::FlushStagedBarriers()
             BufferBarriers.push_back (KeydStagedBarrier.second.BufferBarrier);
             break;
         default:
-            _Game_engine_Halt ("Memory corruption.");
+            apemode_halt ("Memory corruption.");
             break;
         }
     };
@@ -160,7 +160,7 @@ void apemodevk::CommandBuffer::FlushStagedBarriers()
         StagedBarrierItRange = StagedBarriers.equal_range(StagedBarrierIt->first);
         std::for_each(StagedBarrierItRange.first, StagedBarrierItRange.second, FillBarriersFn);
 
-        _Game_engine_Assert (!Barriers.empty ()
+        apemode_assert (!Barriers.empty ()
                              || !ImgBarriers.empty ()
                              || !BufferBarriers.empty (),
                              "Nothing to submit to the command list.");
@@ -233,7 +233,7 @@ bool apemodevk::CommandQueue::RecreateResourcesFor (GraphicsDevice & InGraphicsN
         return hCmdQueue.IsNotNull ();
     }
 
-    _Game_engine_Halt ("Such queue is already resolved: Device = %#p, Family = %u Id = %u",
+    apemode_halt ("Such queue is already resolved: Device = %#p, Family = %u Id = %u",
                        static_cast<VkDevice> (InGraphicsNode),
                        InQueueFamilyId,
                        InQueueId);
@@ -244,10 +244,10 @@ bool apemodevk::CommandQueue::RecreateResourcesFor (GraphicsDevice & InGraphicsN
 
 bool apemodevk::CommandQueue::Await ()
 {
-    _Game_engine_Assert(hCmdQueue.IsNotNull(), "Not initialized.");
+    apemode_assert(hCmdQueue.IsNotNull(), "Not initialized.");
 
     ResultHandle eQueueWaitIdleOk = vkQueueWaitIdle (hCmdQueue);
-    _Game_engine_Assert (eQueueWaitIdleOk.Succeeded (), "Failed to wait for queue.");
+    apemode_assert (eQueueWaitIdleOk.Succeeded (), "Failed to wait for queue.");
 
     return eQueueWaitIdleOk.Succeeded ();
 }
@@ -257,7 +257,7 @@ bool apemodevk::CommandQueue::Execute (CommandBuffer & CmdBuffer,
                                   uint32_t      WaitSemaphoreCount,
                                   VkFence       hFence)
 {
-    _Game_engine_Assert (hCmdQueue.IsNotNull (), "Not initialized.");
+    apemode_assert (hCmdQueue.IsNotNull (), "Not initialized.");
     if (apemode_likely (hCmdQueue.IsNotNull ()))
     {
         auto hCmdList = static_cast<VkCommandBuffer> (CmdBuffer);
@@ -276,7 +276,7 @@ bool apemodevk::CommandQueue::Execute (CommandBuffer & CmdBuffer,
 
 bool apemodevk::CommandQueue::Execute (CommandBuffer & CmdBuffer, VkFence Fence)
 {
-    _Game_engine_Assert (hCmdQueue.IsNotNull (), "Not initialized.");
+    apemode_assert (hCmdQueue.IsNotNull (), "Not initialized.");
     if (apemode_likely (hCmdQueue.IsNotNull ()))
     {
         auto hCmdList = static_cast<VkCommandBuffer> (CmdBuffer);
@@ -295,7 +295,7 @@ bool apemodevk::CommandQueue::Execute (CommandBuffer & CmdBuffer, VkFence Fence)
 
 apemodevk::CommandQueue::operator VkQueue () const
 {
-    _Game_engine_Assert (hCmdQueue.IsNotNull (), "Not initialized.");
+    apemode_assert (hCmdQueue.IsNotNull (), "Not initialized.");
     return hCmdQueue;
 }
 
@@ -303,7 +303,7 @@ apemodevk::CommandQueue::operator VkQueue () const
 
 bool apemodevk::CommandQueue::Execute (CommandBuffer * CmdLists, uint32_t CmdListCount, VkFence Fence)
 {
-    _Game_engine_Assert (hCmdQueue.IsNotNull (), "Not initialized.");
+    apemode_assert (hCmdQueue.IsNotNull (), "Not initialized.");
     if (apemode_likely (hCmdQueue.IsNotNull ()))
     {
         std::vector<VkCommandBuffer> CmdListHandles;

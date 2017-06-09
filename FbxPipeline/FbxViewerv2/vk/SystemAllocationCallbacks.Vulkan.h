@@ -9,7 +9,7 @@ namespace TbbAux
     //      Track what objects were created
     //      Track memory leaks
 
-    class _Graphics_ecosystem_dll_api AllocationCallbacks
+    class apemode_dllapi AllocationCallbacks
     {
         static void * VKAPI_PTR AllocationFunction(void * pUserData, size_t size, size_t alignment,
                                                    VkSystemAllocationScope allocationScope);

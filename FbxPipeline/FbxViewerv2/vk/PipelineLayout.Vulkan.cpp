@@ -123,7 +123,7 @@ uint32_t apemodevk::PipelineLayoutDescription::GetParamCount() const
 apemodevk::PipelineLayoutParameter const &
 apemodevk::PipelineLayoutDescription::GetParameter(uint32_t ParameterIndex) const
 {
-    _Game_engine_Assert (Params.size () < ParameterIndex, 
+    apemode_assert (Params.size () < ParameterIndex, 
                          "Index is out of range.");
 
     return Params[ParameterIndex];
@@ -245,7 +245,7 @@ apemodevk::PipelineLayoutBuilder::RecreatePipelineLayout(apemodevk::GraphicsDevi
 
                     apemodevk::TDispatchableHandle< VkDescriptorSetLayout > TempDescSetLayout;
                     if ( !TempDescSetLayout.Recreate( GraphicsNode, DescSetLayoutDesc ) ) {
-                        _Game_engine_Error( "Failed to create descriptor set layout." );
+                        apemode_error( "Failed to create descriptor set layout." );
                         return false;
                     }
 
@@ -330,7 +330,7 @@ VkDescriptorSetLayout apemodevk::PipelineLayoutManager::GetDescSetLayout (uint64
 
 void apemodevk::PipelineLayoutManager::SetDescSetLayout (uint64_t Hash, VkDescriptorSetLayout SetLayout)
 {
-    _Game_engine_Assert (pContent->StoredDescSetLayouts.find (Hash)
+    apemode_assert (pContent->StoredDescSetLayouts.find (Hash)
                              == pContent->StoredDescSetLayouts.end (),
                          "Already stored, try to look-up for it first.");
 
@@ -341,7 +341,7 @@ void apemodevk::PipelineLayoutManager::AddNewPipelineLayoutObject (apemodevk::Pi
 {
     std::lock_guard<std::mutex> LockGuard (pContent->Lock);
 
-    _Game_engine_Assert (pContent->StoredRootSigns.find (RootSign.Hash)
+    apemode_assert (pContent->StoredRootSigns.find (RootSign.Hash)
                              == pContent->StoredRootSigns.end (),
                          "See TryGetPipelineStateObjectByHash(...).");
 

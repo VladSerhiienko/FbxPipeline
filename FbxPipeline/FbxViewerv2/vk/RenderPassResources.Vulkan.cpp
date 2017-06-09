@@ -27,14 +27,14 @@ static bool ExtractSwapchainBuffers (apemodevk::GraphicsDevice &          InGrap
                                      uint32_t                        InFrameCount,
                                      std::vector<VkImage> & OutSwapchainBufferImgs)
 {
-    _Game_engine_Assert (InGraphicsNode.IsValid () && InSwapchain.hSwapchain.IsNotNull (),
+    apemode_assert (InGraphicsNode.IsValid () && InSwapchain.hSwapchain.IsNotNull (),
                          "Not initialized.");
 
     uint32_t OutSwapchainBufferCount = 0;
     if (apemode_likely (apemodevk::ResultHandle::Succeeded (vkGetSwapchainImagesKHR (
             InGraphicsNode, InSwapchain.hSwapchain, &OutSwapchainBufferCount, nullptr))))
     {
-        _Game_engine_Assert (OutSwapchainBufferCount != InFrameCount,
+        apemode_assert (OutSwapchainBufferCount != InFrameCount,
                              "Frame count does not match buffer img count (%u, %u)",
                              OutSwapchainBufferCount,
                              InFrameCount);
@@ -52,13 +52,13 @@ static bool ExtractSwapchainBuffers (apemodevk::GraphicsDevice &          InGrap
         OutSwapchainBufferImgs.resize(0);
     }
 
-    _Game_engine_Halt ("vkGetSwapchainImagesKHR failed.");
+    apemode_halt ("vkGetSwapchainImagesKHR failed.");
     return false;
 }
 
 void apemodevk::RenderPassResources::SetWriteFrame (uint32_t InWriteFrame)
 {
-    _Game_engine_Assert (FrameCount != 1 && InWriteFrame < FrameCount,
+    apemode_assert (FrameCount != 1 && InWriteFrame < FrameCount,
                          "Index is out of range.");
 
     if (FrameCount != 1 && InWriteFrame < FrameCount)
@@ -86,14 +86,14 @@ bool apemodevk::RenderPassResources::RecreateResourcesFor (apemodevk::GraphicsDe
                                                       VkClearValue             InDepthStencilClear,
                                                       bool                     bInReversedZ)
 {
-    if (_Game_engine_Unlikely (InRenderPass.pNode != &InGraphicsNode
+    if (apemode_unlikely (InRenderPass.pNode != &InGraphicsNode
                                || InRenderPass.pDesc == nullptr))
     {
-        _Game_engine_Halt ("Render pass is not initialized, or logical device mismatch.");
+        apemode_halt ("Render pass is not initialized, or logical device mismatch.");
         return false;
     }
 
-    _Game_engine_Assert (InColorWidth > 0 && InColorHeight > 0, "Cannot be zero.");
+    apemode_assert (InColorWidth > 0 && InColorHeight > 0, "Cannot be zero.");
 
     pRenderPass = &InRenderPass;
     RenderArea.offset = { 0, 0 };
@@ -101,7 +101,7 @@ bool apemodevk::RenderPassResources::RecreateResourcesFor (apemodevk::GraphicsDe
 
     auto & RenderPassDesc = *InRenderPass.pDesc;
 
-    _Game_engine_Assert (InFrameCount <= kFrameMaxCount,
+    apemode_assert (InFrameCount <= kFrameMaxCount,
                          "Frame count overlow (%u vs %u)",
                          InFrameCount,
                          kFrameMaxCount);
@@ -115,9 +115,9 @@ bool apemodevk::RenderPassResources::RecreateResourcesFor (apemodevk::GraphicsDe
     uint32_t AttachmentId = 0;
     for (auto & Attachment : RenderPassDesc.Attachments)
     {
-        if (_Game_engine_Unlikely (ResourceReference::IsDepthStencilFormat (Attachment.format)))
+        if (apemode_unlikely (ResourceReference::IsDepthStencilFormat (Attachment.format)))
         {
-            _Game_engine_Assert (InDepthStencilWidth > 0 && InDepthStencilHeight > 0,
+            apemode_assert (InDepthStencilWidth > 0 && InDepthStencilHeight > 0,
                                  "Cannot be zero.");
 
             ClearValues.push_back (InDepthStencilClear);
@@ -126,7 +126,7 @@ bool apemodevk::RenderPassResources::RecreateResourcesFor (apemodevk::GraphicsDe
             {
                 DepthStencilAttachments[ FrameIdx ].push_back (
                     DepthStencilResourceView::MakeNewLinked ());
-                _Game_engine_Assert (DepthStencilAttachments[ FrameIdx ].back (),
+                apemode_assert (DepthStencilAttachments[ FrameIdx ].back (),
                                      "Out of system memory.");
 
                 if (!DepthStencilAttachments[ FrameIdx ].back ()->RecreateResourcesFor (
@@ -138,7 +138,7 @@ bool apemodevk::RenderPassResources::RecreateResourcesFor (apemodevk::GraphicsDe
                         0,
                         VK_IMAGE_LAYOUT_UNDEFINED))
                 {
-                    _Game_engine_Halt ("Failed to create depth-stencil view.");
+                    apemode_halt ("Failed to create depth-stencil view.");
                     return false;
                 }
 
@@ -153,12 +153,12 @@ bool apemodevk::RenderPassResources::RecreateResourcesFor (apemodevk::GraphicsDe
             uint32_t SwapchainId;
             if (RenderPassDesc.GetSwapchainAttachmentInfo (AttachmentId, SwapchainId))
             {
-                _Game_engine_Assert (SwapchainId < InSwapchainCount, "Index is out of range.");
+                apemode_assert (SwapchainId < InSwapchainCount, "Index is out of range.");
 
                 auto & SwapchainBuffers
                     = ppInSwapchains[ SwapchainId ]->hImgs;
 
-                _Game_engine_Assert (SwapchainBuffers.size () == FrameCount,
+                apemode_assert (SwapchainBuffers.size () == FrameCount,
                                      "Swapchain configuration does not match the provided one.");
 
                 ClearValues.push_back (InColorClear);
@@ -173,13 +173,13 @@ bool apemodevk::RenderPassResources::RecreateResourcesFor (apemodevk::GraphicsDe
                 for (uint32_t FrameIdx = 0; FrameIdx < FrameCount; FrameIdx++)
                 {
                     ColorAttachments[ FrameIdx ].push_back (ColorResourceView::MakeNewLinked ());
-                    _Game_engine_Assert (ColorAttachments[ FrameIdx ].back (),
+                    apemode_assert (ColorAttachments[ FrameIdx ].back (),
                                          "Out of system memory.");
 
                     if (!ColorAttachments[ FrameIdx ].back ()->RecreateResourcesFor (
                             InGraphicsNode, Attachment.format, SwapchainBuffers[ FrameIdx ]))
                     {
-                        _Game_engine_Halt ("Failed to create color view.");
+                        apemode_halt ("Failed to create color view.");
                         return false;
                     }
 
@@ -193,7 +193,7 @@ bool apemodevk::RenderPassResources::RecreateResourcesFor (apemodevk::GraphicsDe
             }
             else
             {
-                _Game_engine_Halt ("Not implemented.");
+                apemode_halt ("Not implemented.");
 
                 ClearValues.push_back (InColorClear);
                 for (uint32_t FrameIdx = 0; FrameIdx < FrameCount; FrameIdx++)
@@ -210,7 +210,7 @@ bool apemodevk::RenderPassResources::RecreateResourcesFor (apemodevk::GraphicsDe
     {
         for (auto pTextureView : TextureViews[ FrameIdx ])
         {
-            _Game_engine_Assert (pTextureView != nullptr, "Not initialized.");
+            apemode_assert (pTextureView != nullptr, "Not initialized.");
             FramebufferBuilder.Attach (*pTextureView);
         }
 
@@ -219,14 +219,14 @@ bool apemodevk::RenderPassResources::RecreateResourcesFor (apemodevk::GraphicsDe
 
         if (ppFramebuffers[ FrameIdx ] == nullptr)
         {
-            _Game_engine_Error ("Failed to create framebuffer.");
+            apemode_error ("Failed to create framebuffer.");
             return false;
         }
 
         FramebufferBuilder.Reset ();
     }
 
-    _Game_engine_Assert (ClearValues.size () == RenderPassDesc.Attachments.size (),
+    apemode_assert (ClearValues.size () == RenderPassDesc.Attachments.size (),
                          "Should be equal.");
 
     return true;
@@ -276,9 +276,9 @@ apemodevk::RenderPassResources::BeginEndScope::BeginEndScope (CommandBuffer &   
                                                          RenderPassResources & Resources)
     : AssocCmdList (CmdBuffer), AssocResources (Resources)
 {
-    _Game_engine_Assert (CmdBuffer.bIsInBeginEndScope,
+    apemode_assert (CmdBuffer.bIsInBeginEndScope,
                          "Not started.");
-    _Game_engine_Assert (Resources.GetRenderPass () != nullptr && Resources.GetWriteFramebuffer () != nullptr,
+    apemode_assert (Resources.GetRenderPass () != nullptr && Resources.GetWriteFramebuffer () != nullptr,
                          "Not initialized.");
 
     TInfoStruct<VkRenderPassBeginInfo> RenderPassBeginDesc;

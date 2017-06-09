@@ -22,6 +22,7 @@
     <ClInclude Include="alloca.h" />
     <ClInclude Include="App.h" />
     <ClInclude Include="AppBase.h" />
+    <ClInclude Include="AppSurfaceSdlBase.h" />
     <ClInclude Include="AppSurfaceSdlGL.h" />
     <ClInclude Include="AppSurfaceSdlVk.h" />
     <ClInclude Include="CityHash.h" />
@@ -46,6 +47,7 @@
     <ClInclude Include="vk\GraphicsManager.Vulkan.h" />
     <ClInclude Include="vk\NativeDispatchableHandles.Vulkan.h" />
     <ClInclude Include="vk\PipelineState.Vulkan.h" />
+    <ClInclude Include="vk\Platform.Vulkan.h" />
     <ClInclude Include="vk\RenderPass.Vulkan.h" />
     <ClInclude Include="vk\RenderPassResources.Vulkan.h" />
     <ClInclude Include="vk\RenderTarget.Vulkan.h" />
@@ -64,6 +66,7 @@
     <ClCompile Include="App.cpp" />
     <ClCompile Include="AppBase.cpp" />
     <ClCompile Include="AppMainSdl.cpp" />
+    <ClCompile Include="AppSurfaceSdlBase.cpp" />
     <ClCompile Include="AppSurfaceSdlGL.cpp" />
     <ClCompile Include="AppSurfaceSdlVk.cpp" />
     <ClCompile Include="CityHash.cpp" />

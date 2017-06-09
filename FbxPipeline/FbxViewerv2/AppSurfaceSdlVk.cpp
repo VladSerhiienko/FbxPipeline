@@ -6,32 +6,6 @@
 #include <GraphicsManager.Vulkan.h>
 #include <Swapchain.Vulkan.h>
 
-class apemode::AppSurfaceSettings {
-public:
-    const char* pName;
-    bool        bIsFullscreen;
-    int         Width;
-    int         Height;
-
-public:
-    AppSurfaceSettings( )
-        : pName( "NesquikSdkSurface" )
-#if _WIN32
-        , bIsFullscreen( false )
-        , Width( 1280 )
-        , Height( 800 )
-#endif
-
-#if __ANDROID__
-        , bIsFullscreen( true )
-        , Width( 0 )
-        , Height( 0 )
-#endif
-
-    {
-    }
-};
-
 apemode::AppSurfaceSdlVk::AppSurfaceSdlVk( ) {
     Impl = kAppSurfaceImpl_SdlVk;
 }
@@ -40,55 +14,43 @@ apemode::AppSurfaceSdlVk::~AppSurfaceSdlVk( ) {
     Finalize( );
 }
 
-bool apemode::AppSurfaceSdlVk::Initialize( ) {
+bool apemode::AppSurfaceSdlVk::Initialize( uint32_t width, uint32_t height, const char* name ) {
     SDL_Log( "apemode/AppSurfaceSdlVk/Initialize" );
 
-    if ( !SDL_Init( SDL_INIT_VIDEO ) ) {
-        AppSurfaceSettings defaultSettings;
-        pSdlWindow = SDL_CreateWindow( defaultSettings.pName,
-                                       SDL_WINDOWPOS_CENTERED,
-                                       SDL_WINDOWPOS_CENTERED,
-                                       defaultSettings.Width,
-                                       defaultSettings.Height,
-                                       SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE );
+    if ( AppSurfaceSdlBase::Initialize( width, height, name ) ) {
+        pDeviceManager = std::move( std::make_unique< apemodevk::GraphicsManager >( ) );
 
-        SDL_Log( "apemode/AppSurfaceSdlVk/Initialize: Created window." );
+        if ( pDeviceManager->RecreateGraphicsNodes( ) ) {
+            pNode = pDeviceManager->GetPrimaryGraphicsNode( );
 
-        SDL_SysWMinfo windowInfo{};
-        if ( SDL_TRUE == SDL_GetWindowWMInfo( pSdlWindow, &windowInfo ) ) {
-            hWnd      = windowInfo.info.win.window;
-            hInstance = (HINSTANCE) GetWindowLongPtrA( windowInfo.info.win.window, GWLP_HINSTANCE );
+            uint32_t queueFamilyId    = 0;
+            uint32_t queueFamilyCount = pNode->QueueProps.size( );
+            for ( ; queueFamilyId < queueFamilyCount; ++queueFamilyId ) {
+                pSwapchain = std::move( std::make_unique< apemodevk::Swapchain >( ) );
 
-            pDeviceManager = std::move( std::make_unique< apemodevk::GraphicsManager >( ) );
-            if ( pDeviceManager->RecreateGraphicsNodes( ) ) {
-                pNode = pDeviceManager->GetPrimaryGraphicsNode( );
+                if ( pSwapchain->RecreateResourceFor( *pNode, queueFamilyId, hInstance, hWnd, GetWidth( ), GetHeight( ) ) ) {
+                    SDL_Log( "apemode/AppSurfaceSdlVk/Initialize: Created swapchain." );
+                    LastWidth  = GetWidth( );
+                    LastHeight = GetHeight( );
 
-                uint32_t queueFamilyId    = 0;
-                uint32_t queueFamilyCount = pNode->QueueProps.size( );
-                for ( ; queueFamilyId < queueFamilyCount; ++queueFamilyId ) {
-                    pSwapchain = std::move( std::make_unique< apemodevk::Swapchain >( ) );
+                    if ( pNode->SupportsGraphics( queueFamilyId ) && pNode->SupportsPresenting( queueFamilyId, pSwapchain->hSurface ) ) {
+                        if ( nullptr == pCmdQueue ) {
+                            pCmdQueue = std::move( std::make_unique< apemodevk::CommandQueue >( ) );
+                        }
 
-                    if ( true == pSwapchain->RecreateResourceFor( *pNode, queueFamilyId, hInstance, hWnd, GetWidth( ), GetHeight( ) ) ) {
-                        LastWidth  = GetWidth( );
-                        LastHeight = GetHeight( );
-
-                        if ( pNode->SupportsGraphics( queueFamilyId ) && pNode->SupportsPresenting( queueFamilyId, pSwapchain->hSurface ) ) {
-                            if ( nullptr == pCmdQueue )
-                                pCmdQueue = std::move( std::make_unique< apemodevk::CommandQueue >( ) );
-
-                            if ( pCmdQueue->RecreateResourcesFor( *pNode, queueFamilyId, 0 ) )
-                                break;
+                        if ( nullptr != pCmdQueue && pCmdQueue->RecreateResourcesFor( *pNode, queueFamilyId, 0 ) ) {
+                            SDL_Log( "apemode/AppSurfaceSdlVk/Initialize: Created command queue for presenting." );
+                            break;
                         }
                     }
                 }
+            }
 
-                if ( nullptr == pCmdQueue ) {
-                    return false;
-                }
+            if ( nullptr == pCmdQueue ) {
+                return false;
             }
         }
 
-        SDL_Log( "apemode/AppSurfaceSdlVk/Initialize: Initialized Vk." );
         return true;
     }
 
@@ -96,27 +58,7 @@ bool apemode::AppSurfaceSdlVk::Initialize( ) {
 }
 
 void apemode::AppSurfaceSdlVk::Finalize( ) {
-    if ( pSdlWindow ) {
-        SDL_Log( "apemode/AppSurfaceSdlVk/Finalize: Deleting window." );
-        SDL_DestroyWindow( pSdlWindow );
-        pSdlWindow = nullptr;
-    }
-}
-
-uint32_t apemode::AppSurfaceSdlVk::GetWidth( ) const {
-    assert( pSdlWindow && "Not initialized." );
-
-    int OutWidth;
-    SDL_GetWindowSize( pSdlWindow, &OutWidth, nullptr );
-    return static_cast< uint32_t >( OutWidth );
-}
-
-uint32_t apemode::AppSurfaceSdlVk::GetHeight( ) const {
-    assert( pSdlWindow && "Not initialized." );
-
-    int OutHeight;
-    SDL_GetWindowSize( pSdlWindow, nullptr, &OutHeight );
-    return static_cast< uint32_t >( OutHeight );
+    AppSurfaceSdlBase::Finalize( );
 }
 
 void apemode::AppSurfaceSdlVk::OnFrameMove( ) {
@@ -128,16 +70,11 @@ void apemode::AppSurfaceSdlVk::OnFrameMove( ) {
 
         LastWidth  = width;
         LastHeight = height;
-        pSwapchain->Resize( width, height );
-    }
-}
 
-void apemode::AppSurfaceSdlVk::OnFrameDone( ) {
-    SDL_GL_SwapWindow( pSdlWindow );
-}
-
-void* apemode::AppSurfaceSdlVk::GetWindowHandle( ) {
-    return reinterpret_cast< void* >( pSdlWindow );
+        const bool bResized = pSwapchain->Resize( width, height );
+        SDL_assert( bResized );
+        (void) bResized;
+    } 
 }
 
 void* apemode::AppSurfaceSdlVk::GetGraphicsHandle( ) {

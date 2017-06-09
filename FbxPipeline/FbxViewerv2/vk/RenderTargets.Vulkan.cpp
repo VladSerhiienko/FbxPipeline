@@ -26,7 +26,6 @@ apemodevk::RenderTargets::RenderTargets()
 
 apemodevk::RenderTargets::~RenderTargets()
 {
-    _Aux_DebugTraceFunc;
 }
 
 /// -------------------------------------------------------------------------------------------------------------------
@@ -41,28 +40,28 @@ bool apemodevk::RenderTargets::RecreateResourcesFor (GraphicsDevice & InGraphics
                                                 uint32_t         InDepthStencilHeight,
                                                 bool             InDepthStencilReversed)
 {
-    _Game_engine_Assert (InSwapchainHandle != nullptr, "Swapchain is not initialized.");
+    apemode_assert (InSwapchainHandle != nullptr, "Swapchain is not initialized.");
 
     uint32_t OutSwapchainBufferCount = 0;
     if (ResultHandle::Succeeded (vkGetSwapchainImagesKHR (
             InGraphicsNode, InSwapchainHandle, &OutSwapchainBufferCount, nullptr)))
     {
-        _Game_engine_Assert (OutSwapchainBufferCount != 1,
+        apemode_assert (OutSwapchainBufferCount != 1,
                              "Frame count must be at least 2,"
                              "otherwise this class is redundand");
-        _Game_engine_Assert (OutSwapchainBufferCount <= kFrameMaxCount,
+        apemode_assert (OutSwapchainBufferCount <= kFrameMaxCount,
                              "Frame count overlow (%u vs %u)",
                              OutSwapchainBufferCount,
                              kFrameMaxCount);
 
         std::vector<VkImage> SwapchainBufferImgs (OutSwapchainBufferCount);
-        if (_Game_engine_Unlikely (
+        if (apemode_unlikely (
                 ResultHandle::Failed (vkGetSwapchainImagesKHR (InGraphicsNode,
                                                                InSwapchainHandle,
                                                                &OutSwapchainBufferCount,
                                                                SwapchainBufferImgs.data ()))))
         {
-            _Game_engine_Halt("vkGetSwapchainImagesKHR failed.");
+            apemode_halt("vkGetSwapchainImagesKHR failed.");
             return false;
         }
 
@@ -79,11 +78,11 @@ bool apemodevk::RenderTargets::RecreateResourcesFor (GraphicsDevice & InGraphics
                 ppColorViews[ FrameIdx ][ AttIdx ] = ColorResourceView::MakeNewLinked ();
                 pColorFormats[ AttIdx ]            = InColorFmt;
 
-                if (_Game_engine_Unlikely (
+                if (apemode_unlikely (
                         !ppColorViews[ FrameIdx ][ AttIdx ]->RecreateResourcesFor (
                             InGraphicsNode, InColorFmt, SwapchainBufferImgs[ FrameIdx ])))
                 {
-                    _Game_engine_Error("Failed to create RTV.");
+                    apemode_error("Failed to create RTV.");
                     return false;
                 }
 
@@ -115,7 +114,7 @@ bool apemodevk::RenderTargets::RecreateResourcesFor (GraphicsDevice & InGraphics
 
         if (apemode_likely (InDepthStencilFmt != VK_FORMAT_UNDEFINED))
         {
-            _Game_engine_Assert (InDepthStencilWidth != 0 && InDepthStencilHeight != 0,
+            apemode_assert (InDepthStencilWidth != 0 && InDepthStencilHeight != 0,
                                  "DSV dimensions.");
 
             DepthStencilFormat = InDepthStencilFmt;
@@ -123,7 +122,7 @@ bool apemodevk::RenderTargets::RecreateResourcesFor (GraphicsDevice & InGraphics
             {
                 pDepthStencilViews[ FrameIdx ] = DepthStencilResourceView::MakeNewLinked ();
 
-                if (_Game_engine_Unlikely (!pDepthStencilViews[ FrameIdx ]->RecreateResourcesFor (
+                if (apemode_unlikely (!pDepthStencilViews[ FrameIdx ]->RecreateResourcesFor (
                         InGraphicsNode,
                         InDepthStencilFmt,
                         InDepthStencilWidth,
@@ -132,7 +131,7 @@ bool apemodevk::RenderTargets::RecreateResourcesFor (GraphicsDevice & InGraphics
                         0,
                         VK_IMAGE_LAYOUT_UNDEFINED)))
                 {
-                    _Game_engine_Error ("Failed to create DSV.");
+                    apemode_error ("Failed to create DSV.");
                     return false;
                 }
             }
@@ -185,7 +184,7 @@ bool apemodevk::RenderTargets::RecreateResourcesFor (GraphicsDevice & InGraphics
 
             FramebufferBuilder.SetRenderPass (*pRenderPass);
             ppFramebuffers[ FrameIdx ] = FramebufferBuilder.RecreateFramebuffer (InGraphicsNode);
-            _Game_engine_Assert (ppFramebuffers[ FrameIdx ] != nullptr,
+            apemode_assert (ppFramebuffers[ FrameIdx ] != nullptr,
                                  "Failed to create framebuffer for frame %u",
                                  FrameIdx);
 
@@ -206,7 +205,7 @@ void apemodevk::RenderTargets::SetRenderTargetClearValues (uint32_t             
     const bool bIsRangeOk = (InOffset < (AttachmentCount - 1))
                             && (InClearValueCount <= (AttachmentCount - InOffset));
 
-    _Game_engine_Assert(bIsInputLikelyOk && bIsInputLikelyOk, "Invalid input.");
+    apemode_assert(bIsInputLikelyOk && bIsInputLikelyOk, "Invalid input.");
 
     for (uint32_t CurrentFrame = 0; CurrentFrame < FrameCount; CurrentFrame++)
     {
@@ -275,9 +274,9 @@ apemodevk::RenderTargets::BeginEndScope::BeginEndScope (CommandBuffer &   CmdBuf
     : AssociatedCmdList (CmdBuffer)
     , AssociatedRenderTargets (RenderTargets)
 {
-    _Game_engine_Assert (CmdBuffer.bIsInBeginEndScope,
+    apemode_assert (CmdBuffer.bIsInBeginEndScope,
                          "Command recording was not started.");
-    _Game_engine_Assert (!!RenderTargets.pRenderPass
+    apemode_assert (!!RenderTargets.pRenderPass
                              && !!RenderTargets.ppFramebuffers[ RenderTargets.WriteFrame ],
                          "Render targets was not successfully initialized.");
 
