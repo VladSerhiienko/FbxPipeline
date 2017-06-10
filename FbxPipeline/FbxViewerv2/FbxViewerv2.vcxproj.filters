@@ -167,6 +167,9 @@
     <ClInclude Include="IAppSurface.h">
       <Filter>Sources\Surface</Filter>
     </ClInclude>
+    <ClInclude Include="AppState.h">
+      <Filter>Sources\Aux</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="fbxvpch.cpp">
@@ -267,6 +270,9 @@
     </ClCompile>
     <ClCompile Include="AppSurfaceSdlVk.cpp">
       <Filter>Sources\Surface</Filter>
+    </ClCompile>
+    <ClCompile Include="AppState.cpp">
+      <Filter>Sources</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

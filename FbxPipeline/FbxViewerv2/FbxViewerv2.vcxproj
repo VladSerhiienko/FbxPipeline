@@ -29,6 +29,7 @@
     <ClInclude Include="fbxvpch.h" />
     <ClInclude Include="IAppSurface.h" />
     <ClInclude Include="Input.h" />
+    <ClInclude Include="AppState.h" />
     <ClInclude Include="NuklearSdlBase.h" />
     <ClInclude Include="NuklearSdlGL.h" />
     <ClInclude Include="NuklearSdlVk.h" />
@@ -66,6 +67,7 @@
     <ClCompile Include="App.cpp" />
     <ClCompile Include="AppBase.cpp" />
     <ClCompile Include="AppMainSdl.cpp" />
+    <ClCompile Include="AppState.cpp" />
     <ClCompile Include="AppSurfaceSdlBase.cpp" />
     <ClCompile Include="AppSurfaceSdlGL.cpp" />
     <ClCompile Include="AppSurfaceSdlVk.cpp" />

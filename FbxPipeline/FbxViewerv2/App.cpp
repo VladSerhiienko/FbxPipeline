@@ -6,6 +6,8 @@
 #include <Input.h>
 #include <NuklearSdlVk.h>
 
+#include <AppState.h>
+
 #include <Scene.h>
 
 #include <EmbeddedShaderPreprocessor.h>
@@ -17,8 +19,11 @@ namespace apemode {
 using namespace apemode;
 
 static const uint32_t kMaxFrames = Swapchain::kMaxImgs;
+static apemode::AppContent * gAppContent = nullptr;
 
 struct apemode::AppContent {
+    std::unique_ptr< AppState > appState;
+
     nk_color diffColor;
     nk_color specColor;
     uint32_t width      = 0;
@@ -45,6 +50,9 @@ struct apemode::AppContent {
     TDispatchableHandle< VkFence >         hFences[ kMaxFrames ];
     TDispatchableHandle< VkSemaphore >     hPresentCompleteSemaphores[ kMaxFrames ];
     TDispatchableHandle< VkSemaphore >     hRenderCompleteSemaphores[ kMaxFrames ];
+
+    AppContent() : appState(new AppState()) {
+    }
 };
 
 App::App( ) : content( new AppContent( ) ) {
