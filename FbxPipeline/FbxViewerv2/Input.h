@@ -3,10 +3,8 @@
 #include <stdint.h>
 #include <type_traits>
 
-namespace apemode
-{
-    enum DigitalInput
-    {
+namespace apemode {
+    enum DigitalInput {
         // keyboard
         kDigitalInput_KeyEscape = 0,
         kDigitalInput_Key1,
@@ -122,8 +120,7 @@ namespace apemode
         kDigitalInput_NumInputs = kDigitalInput_Touch0 + kDigitalInput_TouchMaxCount,
     };
 
-    enum AnalogInput
-    {
+    enum AnalogInput {
         // gamepad
         kAnalogInput_LeftTrigger,
         kAnalogInput_RightTrigger,
@@ -142,8 +139,8 @@ namespace apemode
         kAnalogInput_NumInputs = kAnalogInput_Touch0X + 2 * kDigitalInput_TouchMaxCount,
     };
 
-    using DigitalInputUInt = std::underlying_type<DigitalInput>::type;
-    using AnalogInputUInt  = std::underlying_type<AnalogInput>::type;
+    using DigitalInputUInt = std::underlying_type< DigitalInput >::type;
+    using AnalogInputUInt  = std::underlying_type< AnalogInput >::type;
 
     /**
      * Contains input state information. Tracks touches, mouse and keyboard.
@@ -154,8 +151,7 @@ namespace apemode
      * @note Hold duration array still contains last pressed duration after
      *       the key was released. The value will be reset at the next press.
      */
-    class Input
-    {
+    class Input {
     public:
         static uint32_t const sInvalidTouchValue = kDigitalInput_TouchMaxCount;
 
@@ -167,52 +163,51 @@ namespace apemode
         bool     bIsQuitRequested;
         bool     bIsTrackingTouchesOrMousePressed;
         bool     Buttons[ 2 ][ kDigitalInput_NumInputs ];
-        uint8_t  HoldDuration[ kDigitalInput_NumInputs ];
+        float    HoldDuration[ kDigitalInput_NumInputs ];
         float    Analogs[ kAnalogInput_NumInputs ];
         float    AnalogsTimeCorrected[ kAnalogInput_NumInputs ];
         uint32_t TouchIds[ kDigitalInput_TouchMaxCount ];
         uint32_t TouchIdCount;
 
     public:
-        Input ();
-        ~Input ();
+        Input( );
+        ~Input( );
 
     public:
         /**
          * @return True if touches are supported and enabled.
          * @note False value means mouse is currently being tracked.
          */
-        bool     IsTouchEnabled () const;
-        uint32_t GetTouchCount () const;
-        uint32_t GetFirstTouchId () const;
-        uint32_t GetLastTouchId () const;
-        bool IsTouchTracked (uint32_t TouchId) const;
+        bool     IsTouchEnabled( ) const;
+        uint32_t GetTouchCount( ) const;
+        uint32_t GetFirstTouchId( ) const;
+        uint32_t GetLastTouchId( ) const;
+        bool     IsTouchTracked( uint32_t TouchId ) const;
 
-        bool IsAnyPressed () const;
-        bool IsTrackingTouchesOrMousePressed () const;
-        bool IsPressed (DigitalInputUInt InDigitalInput) const;
-        bool IsFirstPressed (DigitalInputUInt InDigitalInput) const;
-        bool IsReleased (DigitalInputUInt InDigitalInput) const;
-        bool IsFirstReleased (DigitalInputUInt InDigitalInput) const;
-        float GetDurationPressed (DigitalInputUInt InDigitalInput) const;
-        float GetAnalogInput (AnalogInputUInt InAnalogInput) const;
-        float GetTimeCorrectedAnalogInput (AnalogInputUInt InAnalogInput) const;
+        bool  IsAnyPressed( ) const;
+        bool  IsTrackingTouchesOrMousePressed( ) const;
+        bool  IsPressed( DigitalInputUInt InDigitalInput ) const;
+        bool  IsFirstPressed( DigitalInputUInt InDigitalInput ) const;
+        bool  IsReleased( DigitalInputUInt InDigitalInput ) const;
+        bool  IsFirstReleased( DigitalInputUInt InDigitalInput ) const;
+        float GetDurationPressed( DigitalInputUInt InDigitalInput ) const;
+        float GetAnalogInput( AnalogInputUInt InAnalogInput ) const;
+        float GetTimeCorrectedAnalogInput( AnalogInputUInt InAnalogInput ) const;
     };
 
     /**
      * Updates input state, adapts it the current platform or framework.
      */
-    class InputManager
-    {
-        uint32_t KeyMapping[kDigitalInput_NumKeys];
+    class InputManager {
+        uint32_t KeyMapping[ kDigitalInput_NumKeys ];
 
     public:
-        InputManager();
-        ~InputManager();
+        InputManager( );
+        ~InputManager( );
 
     public:
-        bool Initialize();
-        void Update(Input & InOutState, float DeltaTime);
-        void Release();
+        bool Initialize( );
+        void Update( Input& InOutState, float DeltaTime );
+        void Release( );
     };
-}
+} // namespace apemode

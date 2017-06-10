@@ -19,7 +19,12 @@
 // Math
 //
 
+#ifndef _MATH_DEFINES_DEFINED
+#define _MATH_DEFINES_DEFINED
+#endif
+
 #include <math.h>
+
 #include <mathfu/constants.h>
 #include <mathfu/matrix.h>
 #include <mathfu/vector.h>

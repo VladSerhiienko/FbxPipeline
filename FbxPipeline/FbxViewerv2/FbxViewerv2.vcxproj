@@ -35,32 +35,17 @@
     <ClInclude Include="NuklearSdlVk.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Stopwatch.h" />
-    <ClInclude Include="vk\Buffer.Vulkan.h" />
-    <ClInclude Include="vk\BufferPools.Vulkan.h" />
     <ClInclude Include="vk\CommandQueue.Vulkan.h" />
-    <ClInclude Include="vk\DepthStencil.Vulkan.h" />
     <ClInclude Include="vk\DescriptorPool.Vulkan.h" />
-    <ClInclude Include="vk\ExecutionSync.Vulkan.h" />
-    <ClInclude Include="vk\Framebuffer.Vulkan.h" />
     <ClInclude Include="vk\GraphicsDevice.Vulkan.h" />
     <ClInclude Include="vk\GraphicsManager.KnownExtensions.Vulkan.h" />
     <ClInclude Include="vk\GraphicsManager.KnownLayers.Vulkan.h" />
     <ClInclude Include="vk\GraphicsManager.Vulkan.h" />
     <ClInclude Include="vk\NativeDispatchableHandles.Vulkan.h" />
-    <ClInclude Include="vk\PipelineState.Vulkan.h" />
     <ClInclude Include="vk\Platform.Vulkan.h" />
-    <ClInclude Include="vk\RenderPass.Vulkan.h" />
-    <ClInclude Include="vk\RenderPassResources.Vulkan.h" />
-    <ClInclude Include="vk\RenderTarget.Vulkan.h" />
-    <ClInclude Include="vk\RenderTargets.Vulkan.h" />
-    <ClInclude Include="vk\Resource.Vulkan.h" />
-    <ClInclude Include="vk\ResourceAssembler.Vulkan.h" />
     <ClInclude Include="vk\ResultHandle.Vulkan.h" />
-    <ClInclude Include="vk\PipelineLayout.Vulkan.h" />
-    <ClInclude Include="vk\Shader.Vulkan.h" />
     <ClInclude Include="vk\Swapchain.Vulkan.h" />
     <ClInclude Include="vk\TDispatchableHandle.Vulkan.h" />
-    <ClInclude Include="vk\Texture.Vulkan.h" />
     <ClInclude Include="vk\TInfoStruct.Vulkan.h" />
   </ItemGroup>
   <ItemGroup>
@@ -78,26 +63,11 @@
     <ClCompile Include="NuklearSdlGL.cpp" />
     <ClCompile Include="NuklearSdlVk.cpp" />
     <ClCompile Include="StopwatchSdl.cpp" />
-    <ClCompile Include="vk\Buffer.Vulkan.cpp" />
-    <ClCompile Include="vk\BufferPools.Vulkan.cpp" />
     <ClCompile Include="vk\CommandQueue.Vulkan.cpp" />
-    <ClCompile Include="vk\DepthStencil.Vulkan.cpp" />
     <ClCompile Include="vk\DescriptorPool.Vulkan.cpp" />
-    <ClCompile Include="vk\ExecutionSync.Vulkan.cpp" />
-    <ClCompile Include="vk\Framebuffer.Vulkan.cpp" />
     <ClCompile Include="vk\GraphicsDevice.Vulkan.cpp" />
     <ClCompile Include="vk\GraphicsManager.Vulkan.cpp" />
-    <ClCompile Include="vk\PipelineState.Vulkan.cpp" />
-    <ClCompile Include="vk\RenderPass.Vulkan.cpp" />
-    <ClCompile Include="vk\RenderPassResources.Vulkan.cpp" />
-    <ClCompile Include="vk\RenderTarget.Vulkan.cpp" />
-    <ClCompile Include="vk\RenderTargets.Vulkan.cpp" />
-    <ClCompile Include="vk\Resource.Vulkan.cpp" />
-    <ClCompile Include="vk\ResourceAssembler.Vulkan.cpp" />
-    <ClCompile Include="vk\PipelineLayout.Vulkan.cpp" />
-    <ClCompile Include="vk\Shader.Vulkan.cpp" />
     <ClCompile Include="vk\Swapchain.Vulkan.cpp" />
-    <ClCompile Include="vk\Texture.Vulkan.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EmbeddedShaderPreprocessor\EmbeddedShaderPreprocessor.vcxproj">

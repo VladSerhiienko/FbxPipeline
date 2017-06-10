@@ -2,7 +2,7 @@
 
 namespace apemode {
     class App : public apemode::AppBase {
-        friend struct AppContent;
+        friend class AppContent;
 
         std::unique_ptr< AppContent > content;
         float                         totalSecs;

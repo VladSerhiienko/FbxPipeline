@@ -21,8 +21,9 @@ using namespace apemode;
 static const uint32_t kMaxFrames = Swapchain::kMaxImgs;
 static apemode::AppContent * gAppContent = nullptr;
 
-struct apemode::AppContent {
-    std::unique_ptr< AppState > appState;
+class apemode::AppContent {
+public:
+    AppState * appState;
 
     nk_color diffColor;
     nk_color specColor;
@@ -52,6 +53,12 @@ struct apemode::AppContent {
     TDispatchableHandle< VkSemaphore >     hRenderCompleteSemaphores[ kMaxFrames ];
 
     AppContent() : appState(new AppState()) {
+    }
+
+    ~AppContent() {
+        if (nullptr != appState)
+            delete appState,
+            appState = nullptr;
     }
 };
 
@@ -371,8 +378,8 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         vkCmdBeginRenderPass( cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE );
 
         NuklearSdlVk::RenderParametersVk renderParams;
-        renderParams.dims[0] = width;
-        renderParams.dims[1] = height;
+        renderParams.dims[0] = (float) width;
+        renderParams.dims[1] = (float)height;
         renderParams.scale[0] = 1;
         renderParams.scale[1] = 1;
         renderParams.aa                 = NK_ANTI_ALIASING_ON;

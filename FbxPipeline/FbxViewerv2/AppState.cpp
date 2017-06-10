@@ -6,7 +6,7 @@ apemode::AppState* apemode::AppState::GetCurrentState( ) {
     return gState;
 }
 
-std::string GetExecutableFileName( ) {
+static std::string GetExecutableFileName( ) {
     char szFileName[ 1024 ];
     GetModuleFileNameA( NULL, szFileName, 1024 );
     return szFileName;

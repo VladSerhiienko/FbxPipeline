@@ -217,7 +217,7 @@ namespace apemode {
                     scene->nodes.resize( nodesFb->size( ) );
                     scene->transforms.resize( nodesFb->size( ) );
 
-                    const float toRadsFactor = M_PI / 180;
+                    const float toRadsFactor = float( M_PI ) / 180.0f;
 
                     for ( auto nodeFb : *nodesFb ) {
                         assert( nodeFb );

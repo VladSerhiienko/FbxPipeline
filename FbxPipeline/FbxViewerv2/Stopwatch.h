@@ -2,17 +2,15 @@
 
 #include <stdint.h>
 
-namespace apemode
-{
-    class Stopwatch
-    {
+namespace apemode {
+    class Stopwatch {
     public:
-        Stopwatch();
-        void Start();
-        void Stop();
-        void Update();
-        double GetElapsedSeconds() const;
-        double GetTotalElapsedSeconds() const;
+        Stopwatch( );
+        void   Start( );
+        void   Stop( );
+        void   Update( );
+        double GetElapsedSeconds( ) const;
+        double GetTotalElapsedSeconds( ) const;
 
     public:
         uint64_t mFrequency;
@@ -20,4 +18,4 @@ namespace apemode
         uint64_t mPrevPoint;
         uint64_t mFinishPoint;
     };
-}
+} // namespace apemode

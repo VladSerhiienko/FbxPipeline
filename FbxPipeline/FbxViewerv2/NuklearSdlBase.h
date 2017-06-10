@@ -41,8 +41,8 @@ namespace apemode {
             float            dims[ 2 ]          = {};
             float            scale[ 2 ]         = {};
             nk_anti_aliasing aa                 = NK_ANTI_ALIASING_ON;
-            int              max_vertex_buffer  = 65536;
-            int              max_element_buffer = 65536;
+            uint32_t         max_vertex_buffer  = 65536;
+            uint32_t         max_element_buffer = 65536;
         };
 
     public:

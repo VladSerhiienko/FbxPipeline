@@ -2,14 +2,6 @@
 #include <GraphicsDevice.Vulkan.h>
 #include <GraphicsManager.Vulkan.h>
 
-#include <Framebuffer.Vulkan.h>
-#include <PipelineLayout.Vulkan.h>
-#include <PipelineState.Vulkan.h>
-#include <RenderPass.Vulkan.h>
-#include <Shader.Vulkan.h>
-
-//#include <TDataHandle.h>
-
 #include <GraphicsManager.KnownExtensions.Vulkan.h>
 #include <NativeDispatchableHandles.Vulkan.h>
 #include <SystemAllocationCallbacks.Vulkan.h>
@@ -229,26 +221,6 @@ bool apemodevk::GraphicsDevice::Await( ) {
 
 apemodevk::GraphicsManager& apemodevk::GraphicsDevice::GetGraphicsEcosystem( ) {
     return *pGraphicsEcosystem;
-}
-
-apemodevk::RenderPassManager& apemodevk::GraphicsDevice::GetDefaultRenderPassManager( ) {
-    return *RenderPassManager;
-}
-
-apemodevk::FramebufferManager& apemodevk::GraphicsDevice::GetDefaultFramebufferManager( ) {
-    return *FramebufferManager;
-}
-
-apemodevk::PipelineLayoutManager& apemodevk::GraphicsDevice::GetDefaultPipelineLayoutManager( ) {
-    return *PipelineLayoutManager;
-}
-
-apemodevk::PipelineStateManager& apemodevk::GraphicsDevice::GetDefaultPipelineStateManager( ) {
-    return *PipelineStateManager;
-}
-
-apemodevk::ShaderManager& apemodevk::GraphicsDevice::GetDefaultShaderManager( ) {
-    return *ShaderManager;
 }
 
 uint32_t apemodevk::GraphicsDevice::GetQueueFamilyCount( ) {

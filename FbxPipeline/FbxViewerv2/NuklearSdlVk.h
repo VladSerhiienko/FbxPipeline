@@ -67,8 +67,8 @@ namespace apemode {
         apemodevk::TDispatchableHandle< VkDeviceMemory > hIndexBufferMemory[ kMaxFrameCount ];
         apemodevk::TDispatchableHandle< VkBuffer >       hUniformBuffer[ kMaxFrameCount ];
         apemodevk::TDispatchableHandle< VkDeviceMemory > hUniformBufferMemory[ kMaxFrameCount ];
-        size_t                                           VertexBufferSize[ kMaxFrameCount ] = {0};
-        size_t                                           IndexBufferSize[ kMaxFrameCount ]  = {0};
+        uint32_t                                         VertexBufferSize[ kMaxFrameCount ] = {0};
+        uint32_t                                         IndexBufferSize[ kMaxFrameCount ]  = {0};
 
     public:
         virtual bool  Render( RenderParametersBase *render_params ) override;

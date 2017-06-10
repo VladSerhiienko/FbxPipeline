@@ -24,7 +24,7 @@ bool apemode::AppSurfaceSdlVk::Initialize( uint32_t width, uint32_t height, cons
             pNode = pDeviceManager->GetPrimaryGraphicsNode( );
 
             uint32_t queueFamilyId    = 0;
-            uint32_t queueFamilyCount = pNode->QueueProps.size( );
+            uint32_t queueFamilyCount = (uint32_t) pNode->QueueProps.size( );
             for ( ; queueFamilyId < queueFamilyCount; ++queueFamilyId ) {
                 pSwapchain = std::move( std::make_unique< apemodevk::Swapchain >( ) );
 

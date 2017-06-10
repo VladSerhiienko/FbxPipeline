@@ -172,15 +172,15 @@ bool apemode::NuklearSdlVk::Render( RenderParametersBase* p ) {
 
         VkRect2D scissor;
 
-        scissor.offset.x      = ( cmd->clip_rect.x * p->scale[ 0 ] );
-        scissor.offset.y      = ( cmd->clip_rect.y * p->scale[ 1 ] );
-        scissor.extent.width  = ( cmd->clip_rect.w * p->scale[ 0 ] );
-        scissor.extent.height = ( cmd->clip_rect.h * p->scale[ 1 ] );
+        scissor.offset.x      = (  int32_t )( cmd->clip_rect.x * p->scale[ 0 ] );
+        scissor.offset.y      = (  int32_t )( cmd->clip_rect.y * p->scale[ 1 ] );
+        scissor.extent.width  = ( uint32_t )( cmd->clip_rect.w * p->scale[ 0 ] );
+        scissor.extent.height = ( uint32_t )( cmd->clip_rect.h * p->scale[ 1 ] );
 
         scissor.offset.x      = std::max< int32_t >( 0, scissor.offset.x );
         scissor.offset.y      = std::max< int32_t >( 0, scissor.offset.y );
-        scissor.extent.width  = std::min< uint32_t >( viewport.width, scissor.extent.width );
-        scissor.extent.height = std::min< uint32_t >( viewport.height, scissor.extent.height );
+        scissor.extent.width  = std::min< uint32_t >( (uint32_t) viewport.width, scissor.extent.width );
+        scissor.extent.height = std::min< uint32_t >( (uint32_t) viewport.height, scissor.extent.height );
 
         vkCmdSetScissor( renderParams->pCmdBuffer, 0, 1, &scissor );
         vkCmdDrawIndexed( renderParams->pCmdBuffer, cmd->elem_count, 1, offset, vtx_offset, 0 );
@@ -189,6 +189,7 @@ bool apemode::NuklearSdlVk::Render( RenderParametersBase* p ) {
     }
 
     nk_clear( &Context );
+    return true;
 }
 
 void apemode::NuklearSdlVk::DeviceDestroy( ) {
@@ -484,12 +485,14 @@ bool apemode::NuklearSdlVk::DeviceCreate( InitParametersBase* init_params ) {
         DebugBreak( );
         return false;
     }
+
+    return true;
 }
 
 void* apemode::NuklearSdlVk::DeviceUploadAtlas( InitParametersBase* init_params, const void* image, int width, int height ) {
     auto           initParametersVk = reinterpret_cast< InitParametersVk* >( init_params );
     const uint8_t* fontImgPixels    = reinterpret_cast< const uint8_t* >( image );
-    size_t         uploadSize       = width * height * 4 * sizeof( uint8_t );
+    uint32_t       uploadSize       = width * height * 4 * sizeof( uint8_t );
 
     // Create the Image:
     {

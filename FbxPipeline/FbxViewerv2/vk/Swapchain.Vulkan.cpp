@@ -5,10 +5,6 @@
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-uint64_t const Uint64Max = std::numeric_limits< uint64_t >::max( );
-
-/// -------------------------------------------------------------------------------------------------------------------
-
 bool apemodevk::Swapchain::ExtractSwapchainBuffers( VkImage * OutBufferImgs) {
     apemode_assert(hSwapchain.IsNotNull(), "Not initialized.");
 
@@ -49,10 +45,7 @@ bool apemodevk::Swapchain::ExtractSwapchainBuffers( std::vector< VkImage >& OutS
 /// Swapchain
 /// -------------------------------------------------------------------------------------------------------------------
 
-uint64_t const                           apemodevk::Swapchain::kMaxTimeout            = Uint64Max;
-uint32_t const                           apemodevk::Swapchain::kExtentMatchFullscreen = -1;
-uint32_t const                           apemodevk::Swapchain::kExtentMatchWindow     = 0;
-apemodevk::Swapchain::ModuleHandle const apemodevk::Swapchain::kCurrentExecutable     = nullptr;
+apemodevk::Swapchain::ModuleHandle const apemodevk::Swapchain::kCurrentExecutable = nullptr;
 
 apemodevk::Swapchain::Swapchain( ) : pNode( nullptr ), pCmdQueue( nullptr ) {
     static uint16_t sSwapchainNextId = 0;
@@ -269,61 +262,4 @@ bool apemodevk::Swapchain::Resize( uint32_t DesiredColorWidth, uint32_t DesiredC
 
 uint32_t apemodevk::Swapchain::GetBufferCount( ) const {
     return ImgCount;
-}
-
-bool apemodevk::Swapchain::OnFrameMove( apemodevk::RenderPassResources& Resources,
-                                        VkSemaphore                     hSemaphore,
-                                        VkFence                         hFence,
-                                        uint64_t                        Timeout ) {
-    apemode_assert( pNode != nullptr, "Not initialized." );
-
-    uint32_t OutSwapchainBufferIdx = 0xffffffff;
-
-    // AdvancePresentSemaphoreIdx ();
-    const auto eImgAcquiredError =
-        vkAcquireNextImageKHR( *pNode, hSwapchain, Timeout, hSemaphore, hFence, &OutSwapchainBufferIdx );
-
-    if ( apemode_likely( eImgAcquiredError == ResultHandle::Success || eImgAcquiredError == ResultHandle::Suboptimal ) ) {
-        apemode_assert( eImgAcquiredError == ResultHandle::Success, "Reconfigure." );
-        apemode_assert( Resources.GetFrameCount( ) == GetBufferCount( ), "Should match." );
-
-        Resources.SetWriteFrame( OutSwapchainBufferIdx );
-        return true;
-    }
-
-    apemode_assert( eImgAcquiredError == ResultHandle::Timeout,
-                         "Failed to acquire swapchain buffer "
-                         "(and it`s not because of timeout)." );
-    return false;
-}
-
-bool apemodevk::Swapchain::OnFramePresent( apemodevk::CommandQueue&        CmdQueue,
-                                           apemodevk::RenderPassResources& Resources,
-                                           VkSemaphore*                    pWaitSemaphores,
-                                           uint32_t                        WaitSemaphoreCount ) {
-    apemode_assert( ( pWaitSemaphores && WaitSemaphoreCount ) || ( !pWaitSemaphores && !WaitSemaphoreCount ),
-                         "Missing info." );
-
-    const uint32_t pImgIndices[] = {Resources.GetWriteFrame( )};
-
-    VkResult eSwapchainResult = VK_SUCCESS;
-
-    TInfoStruct< VkPresentInfoKHR > PresentDesc;
-    PresentDesc->swapchainCount     = 1;
-    PresentDesc->pSwapchains        = hSwapchain;
-    PresentDesc->pImageIndices      = pImgIndices;
-    PresentDesc->pWaitSemaphores    = pWaitSemaphores;
-    PresentDesc->waitSemaphoreCount = WaitSemaphoreCount;
-    PresentDesc->pResults           = &eSwapchainResult;
-
-    VkResult ePresentResult = vkQueuePresentKHR( CmdQueue, PresentDesc );
-    if ( apemode_likely( ResultHandle::Succeeded( ePresentResult ) ) ) {
-        const bool bIsOk = ResultHandle::Succeeded( eSwapchainResult );
-        apemode_assert( bIsOk, "Failed to present to swapchain." );
-
-        return apemode_likely( bIsOk );
-    }
-
-    apemode_halt( "Failed to present." );
-    return false;
 }

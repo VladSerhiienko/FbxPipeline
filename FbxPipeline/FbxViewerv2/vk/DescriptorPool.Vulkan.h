@@ -79,14 +79,8 @@ namespace apemodevk
         }
 
         void BindTo( CommandBuffer& CmdBuffer, VkPipelineBindPoint InBindPoint, const uint32_t ( &DynamicOffsets )[ TCount ] ) {
-
-
-
             for ( uint32_t i = 0; i < TCount; ++i ) {
-                auto l = hLayouts[ i ];
-                auto s = ;
-                auto o = DynamicOffsets[ i ];
-                vkCmdBindDescriptorSets( CmdBuffer, InBindPoint, l, 0, 1, &hSets[ i ], 1, o );
+                vkCmdBindDescriptorSets( CmdBuffer, InBindPoint, hLayouts[ i ], 0, 1, &hSets[ i ], 1, DynamicOffsets[ i ] );
             }
         }
     };
