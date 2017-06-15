@@ -21,6 +21,12 @@ using namespace apemode;
 static const uint32_t kMaxFrames = Swapchain::kMaxImgs;
 static apemode::AppContent * gAppContent = nullptr;
 
+struct Camera {
+    mathfu::mat4 View, Proj;
+};
+
+const VkFormat sDepthFormat = VK_FORMAT_D16_UNORM;
+
 class apemode::AppContent {
 public:
     AppState * appState;
@@ -44,15 +50,21 @@ public:
     uint32_t BackbufferIndices[ kMaxFrames ] = {0};
 
     std::unique_ptr< DescriptorPool >      pDescPool;
-    TDispatchableHandle< VkRenderPass >    hRenderPass;
-    TDispatchableHandle< VkFramebuffer >   hFramebuffers[ kMaxFrames ];
+    TDispatchableHandle< VkRenderPass >    hNkRenderPass;
+    TDispatchableHandle< VkFramebuffer >   hNkFramebuffers[ kMaxFrames ];
     TDispatchableHandle< VkCommandPool >   hCmdPool[ kMaxFrames ];
     TDispatchableHandle< VkCommandBuffer > hCmdBuffers[ kMaxFrames ];
     TDispatchableHandle< VkFence >         hFences[ kMaxFrames ];
     TDispatchableHandle< VkSemaphore >     hPresentCompleteSemaphores[ kMaxFrames ];
     TDispatchableHandle< VkSemaphore >     hRenderCompleteSemaphores[ kMaxFrames ];
 
-    AppContent() : appState(new AppState()) {
+    TDispatchableHandle< VkRenderPass >    hRenderPass;
+    TDispatchableHandle< VkFramebuffer >   hFramebuffers[ kMaxFrames ];
+    TDispatchableHandle< VkImage >         hDepthImgs[ kMaxFrames ];
+    TDispatchableHandle< VkImageView >     hDepthImgViews[ kMaxFrames ];
+    TDispatchableHandle< VkDeviceMemory >  hDepthImgMemory[ kMaxFrames ];
+
+    AppContent() : appState( new AppState( ) ) {
     }
 
     ~AppContent() {
@@ -62,10 +74,12 @@ public:
     }
 };
 
-App::App( ) : content( new AppContent( ) ) {
+App::App( ) {
 }
 
 App::~App( ) {
+    if ( nullptr != content )
+        delete content;
 }
 
 IAppSurface* App::CreateAppSurface( ) {
@@ -74,6 +88,10 @@ IAppSurface* App::CreateAppSurface( ) {
 
 bool App::Initialize( int Args, char* ppArgs[] ) {
     if ( AppBase::Initialize( Args, ppArgs ) ) {
+
+        if ( nullptr == content )
+            content = new AppContent( );
+
         totalSecs = 0.0f;
 
         auto appSurface = GetSurface();
@@ -89,35 +107,38 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
             OnResized();
 
             for (uint32_t i = 0; i < content->FrameCount; ++i) {
+                VkCommandPoolCreateInfo cmdPoolCreateInfo;
+                InitializeStruct( cmdPoolCreateInfo );
+                cmdPoolCreateInfo.flags            = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+                cmdPoolCreateInfo.queueFamilyIndex = appSurfaceVk->pCmdQueue->QueueFamilyId;
 
-                TInfoStruct<VkCommandPoolCreateInfo > cmdPoolCreateInfo;
-                cmdPoolCreateInfo->flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-                cmdPoolCreateInfo->queueFamilyIndex = appSurfaceVk->pCmdQueue->QueueFamilyId;
-
-                if (false == content->hCmdPool[i].Recreate(*appSurfaceVk->pNode, cmdPoolCreateInfo)) {
-                    DebugBreak();
+                if ( false == content->hCmdPool[ i ].Recreate( *appSurfaceVk->pNode, cmdPoolCreateInfo ) ) {
+                    DebugBreak( );
                     return false;
                 }
 
-                TInfoStruct<VkCommandBufferAllocateInfo > cmdBufferAllocInfo;
-                cmdBufferAllocInfo->commandPool = content->hCmdPool[i];
-                cmdBufferAllocInfo->level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-                cmdBufferAllocInfo->commandBufferCount = 1;
+                VkCommandBufferAllocateInfo cmdBufferAllocInfo;
+                InitializeStruct( cmdBufferAllocInfo );
+                cmdBufferAllocInfo.commandPool        = content->hCmdPool[ i ];
+                cmdBufferAllocInfo.level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+                cmdBufferAllocInfo.commandBufferCount = 1;
 
-                if (false == content->hCmdBuffers[i].Recreate(*appSurfaceVk->pNode, cmdBufferAllocInfo)) {
-                    DebugBreak();
+                if ( false == content->hCmdBuffers[ i ].Recreate( *appSurfaceVk->pNode, cmdBufferAllocInfo ) ) {
+                    DebugBreak( );
                     return false;
                 }
 
-                TInfoStruct<VkFenceCreateInfo > fenceCreateInfo;
-                fenceCreateInfo->flags = VK_FENCE_CREATE_SIGNALED_BIT;
+                VkFenceCreateInfo fenceCreateInfo;
+                InitializeStruct( fenceCreateInfo );
+                fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-                if (false == content->hFences[i].Recreate(*appSurfaceVk->pNode, fenceCreateInfo)) {
-                    DebugBreak();
+                if ( false == content->hFences[ i ].Recreate( *appSurfaceVk->pNode, fenceCreateInfo ) ) {
+                    DebugBreak( );
                     return false;
                 }
 
-                TInfoStruct< VkSemaphoreCreateInfo > semaphoreCreateInfo;
+                VkSemaphoreCreateInfo semaphoreCreateInfo;
+                InitializeStruct( semaphoreCreateInfo );
                 if ( false == content->hPresentCompleteSemaphores[ i ].Recreate( *appSurfaceVk->pNode, semaphoreCreateInfo ) ||
                      false == content->hRenderCompleteSemaphores[ i ].Recreate( *appSurfaceVk->pNode, semaphoreCreateInfo ) ) {
                     DebugBreak( );
@@ -138,7 +159,7 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         initParams.pAlloc          = nullptr;
         initParams.pDevice         = *appSurfaceVk->pNode;
         initParams.pPhysicalDevice = *appSurfaceVk->pNode;
-        initParams.pRenderPass     = content->hRenderPass;
+        initParams.pRenderPass     = content->hNkRenderPass;
         initParams.pDescPool       = *content->pDescPool;
         initParams.pQueue          = *appSurfaceVk->pCmdQueue;
         initParams.QueueFamilyId   = appSurfaceVk->pCmdQueue->QueueFamilyId;
@@ -174,44 +195,156 @@ bool apemode::App::OnResized( ) {
             content->width  = appSurfaceVk->GetWidth( );
             content->height = appSurfaceVk->GetHeight( );
 
-            VkAttachmentDescription attachment = {};
-            attachment.format                  = swapchain->eColorFormat;
-            attachment.samples                 = VK_SAMPLE_COUNT_1_BIT;
-            attachment.loadOp                  = VK_ATTACHMENT_LOAD_OP_CLEAR;
-            attachment.storeOp                 = VK_ATTACHMENT_STORE_OP_STORE;
-            attachment.stencilLoadOp           = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-            attachment.stencilStoreOp          = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-            attachment.initialLayout           = VK_IMAGE_LAYOUT_UNDEFINED;
-            attachment.finalLayout             = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+            VkImageCreateInfo depthImgCreateInfo;
+            InitializeStruct( depthImgCreateInfo );
+            depthImgCreateInfo.imageType     = VK_IMAGE_TYPE_2D;
+            depthImgCreateInfo.format        = sDepthFormat;
+            depthImgCreateInfo.extent.width  = swapchain->ColorExtent.width;
+            depthImgCreateInfo.extent.height = swapchain->ColorExtent.height;
+            depthImgCreateInfo.extent.depth  = 1;
+            depthImgCreateInfo.mipLevels     = 1;
+            depthImgCreateInfo.arrayLayers   = 1;
+            depthImgCreateInfo.samples       = VK_SAMPLE_COUNT_1_BIT;
+            depthImgCreateInfo.tiling        = VK_IMAGE_TILING_OPTIMAL;
+            depthImgCreateInfo.usage         = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
 
-            VkAttachmentReference colorAttachment = {};
-            colorAttachment.attachment            = 0;
-            colorAttachment.layout                = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            VkImageViewCreateInfo depthImgViewCreateInfo;
+            InitializeStruct( depthImgViewCreateInfo );
+            depthImgViewCreateInfo.format                          = sDepthFormat;
+            depthImgViewCreateInfo.subresourceRange.aspectMask     = VK_IMAGE_ASPECT_DEPTH_BIT;
+            depthImgViewCreateInfo.subresourceRange.baseMipLevel   = 0;
+            depthImgViewCreateInfo.subresourceRange.levelCount     = 1;
+            depthImgViewCreateInfo.subresourceRange.baseArrayLayer = 0;
+            depthImgViewCreateInfo.subresourceRange.layerCount     = 1;
+            depthImgViewCreateInfo.viewType                        = VK_IMAGE_VIEW_TYPE_2D;
 
-            VkSubpassDescription subpass = {};
-            subpass.pipelineBindPoint    = VK_PIPELINE_BIND_POINT_GRAPHICS;
-            subpass.colorAttachmentCount = 1;
-            subpass.pColorAttachments    = &colorAttachment;
+            for ( uint32_t i = 0; i < content->FrameCount; ++i ) {
+                if ( false == content->hDepthImgs[ i ].Recreate( *appSurfaceVk->pNode, *appSurfaceVk->pNode, depthImgCreateInfo ) ) {
+                    DebugBreak( );
+                    return false;
+                }
+            }
 
-            TInfoStruct< VkRenderPassCreateInfo > renderPassCreateInfo = {};
-            renderPassCreateInfo->attachmentCount                      = 1;
-            renderPassCreateInfo->pAttachments                         = &attachment;
-            renderPassCreateInfo->subpassCount                         = 1;
-            renderPassCreateInfo->pSubpasses                           = &subpass;
+            for ( uint32_t i = 0; i < content->FrameCount; ++i ) {
+                auto memoryAllocInfo = content->hDepthImgs[ i ].GetMemoryAllocateInfo( VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT );
+                if ( false == content->hDepthImgMemory[ i ].Recreate( *appSurfaceVk->pNode, memoryAllocInfo ) ) {
+                    DebugBreak( );
+                    return false;
+                }
+            }
 
-            if ( false == content->hRenderPass.Recreate( *appSurfaceVk->pNode, renderPassCreateInfo ) ) {
+            for ( uint32_t i = 0; i < content->FrameCount; ++i ) {
+                if ( false == content->hDepthImgs[ i ].BindMemory( content->hDepthImgMemory[ i ], 0 ) ) {
+                    DebugBreak( );
+                    return false;
+                }
+            }
+
+            for ( uint32_t i = 0; i < content->FrameCount; ++i ) {
+                depthImgViewCreateInfo.image = content->hDepthImgs[ i ];
+                if ( false == content->hDepthImgViews[ i ].Recreate( *appSurfaceVk->pNode, depthImgViewCreateInfo ) ) {
+                    DebugBreak( );
+                    return false;
+                }
+            }
+
+            VkAttachmentDescription colorDepthAttachments[ 2 ];
+            InitializeStruct( colorDepthAttachments );
+
+            colorDepthAttachments[ 0 ].format         = swapchain->eColorFormat;
+            colorDepthAttachments[ 0 ].samples        = VK_SAMPLE_COUNT_1_BIT;
+            colorDepthAttachments[ 0 ].loadOp         = VK_ATTACHMENT_LOAD_OP_CLEAR;
+            colorDepthAttachments[ 0 ].storeOp        = VK_ATTACHMENT_STORE_OP_STORE;
+            colorDepthAttachments[ 0 ].stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+            colorDepthAttachments[ 0 ].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+            colorDepthAttachments[ 0 ].initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED;
+            colorDepthAttachments[ 0 ].finalLayout    = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+            colorDepthAttachments[ 1 ].format         = sDepthFormat;
+            colorDepthAttachments[ 1 ].samples        = VK_SAMPLE_COUNT_1_BIT;
+            colorDepthAttachments[ 1 ].loadOp         = VK_ATTACHMENT_LOAD_OP_CLEAR;
+            colorDepthAttachments[ 1 ].storeOp        = VK_ATTACHMENT_STORE_OP_DONT_CARE; // ?
+            colorDepthAttachments[ 1 ].stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+            colorDepthAttachments[ 1 ].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+            colorDepthAttachments[ 1 ].initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED;
+            colorDepthAttachments[ 1 ].finalLayout    = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+            VkAttachmentReference colorAttachmentRef;
+            InitializeStruct( colorAttachmentRef );
+            colorAttachmentRef.attachment = 0;
+            colorAttachmentRef.layout     = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+            VkAttachmentReference depthAttachmentRef;
+            InitializeStruct( depthAttachmentRef );
+            depthAttachmentRef.attachment = 1;
+            depthAttachmentRef.layout     = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+            VkSubpassDescription subpassNk;
+            InitializeStruct( subpassNk );
+            subpassNk.pipelineBindPoint    = VK_PIPELINE_BIND_POINT_GRAPHICS;
+            subpassNk.colorAttachmentCount = 1;
+            subpassNk.pColorAttachments    = &colorAttachmentRef;
+
+            VkSubpassDescription subpassDbg;
+            InitializeStruct( subpassDbg );
+            subpassDbg.pipelineBindPoint       = VK_PIPELINE_BIND_POINT_GRAPHICS;
+            subpassDbg.colorAttachmentCount    = 1;
+            subpassDbg.pColorAttachments       = &colorAttachmentRef;
+            subpassDbg.pDepthStencilAttachment = &depthAttachmentRef;
+
+            VkRenderPassCreateInfo renderPassCreateInfoNk;
+            InitializeStruct( renderPassCreateInfoNk );
+            renderPassCreateInfoNk.attachmentCount = 1;
+            renderPassCreateInfoNk.pAttachments    = &colorDepthAttachments[ 0 ];
+            renderPassCreateInfoNk.subpassCount    = 1;
+            renderPassCreateInfoNk.pSubpasses      = &subpassNk;
+
+            VkRenderPassCreateInfo renderPassCreateInfoDbg;
+            InitializeStruct( renderPassCreateInfoDbg );
+            renderPassCreateInfoDbg.attachmentCount = 2;
+            renderPassCreateInfoDbg.pAttachments    = &colorDepthAttachments[ 0 ];
+            renderPassCreateInfoDbg.subpassCount    = 1;
+            renderPassCreateInfoDbg.pSubpasses      = &subpassNk;
+
+            if ( false == content->hNkRenderPass.Recreate( *appSurfaceVk->pNode, renderPassCreateInfoNk ) ) {
                 DebugBreak( );
                 return false;
             }
 
+            if ( false == content->hRenderPass.Recreate( *appSurfaceVk->pNode, renderPassCreateInfoDbg ) ) {
+                DebugBreak( );
+                return false;
+            }
+
+            VkFramebufferCreateInfo framebufferCreateInfoNk;
+            InitializeStruct( framebufferCreateInfoNk );
+            framebufferCreateInfoNk.renderPass      = content->hNkRenderPass;
+            framebufferCreateInfoNk.attachmentCount = 1;
+            framebufferCreateInfoNk.width           = swapchain->ColorExtent.width;
+            framebufferCreateInfoNk.height          = swapchain->ColorExtent.height;
+            framebufferCreateInfoNk.layers          = 1;
+
+            VkFramebufferCreateInfo framebufferCreateInfo;
+            InitializeStruct( framebufferCreateInfo );
+            framebufferCreateInfo.renderPass      = content->hRenderPass;
+            framebufferCreateInfo.attachmentCount = 2;
+            framebufferCreateInfo.width           = swapchain->ColorExtent.width;
+            framebufferCreateInfo.height          = swapchain->ColorExtent.height;
+            framebufferCreateInfo.layers          = 1;
+
             for ( uint32_t i = 0; i < content->FrameCount; ++i ) {
-                TInfoStruct< VkFramebufferCreateInfo > framebufferCreateInfo;
-                framebufferCreateInfo->renderPass      = content->hRenderPass;
-                framebufferCreateInfo->attachmentCount = 1;
-                framebufferCreateInfo->pAttachments    = swapchain->hImgViews[ i ];
-                framebufferCreateInfo->width           = swapchain->ColorExtent.width;
-                framebufferCreateInfo->height          = swapchain->ColorExtent.height;
-                framebufferCreateInfo->layers          = 1;
+                VkImageView attachments[ 1 ] = {swapchain->hImgViews[ i ]};
+                framebufferCreateInfoNk.pAttachments = attachments;
+
+                if ( false == content->hNkFramebuffers[ i ].Recreate( *appSurfaceVk->pNode, framebufferCreateInfoNk ) ) {
+                    DebugBreak( );
+                    return false;
+                }
+            }
+
+            for ( uint32_t i = 0; i < content->FrameCount; ++i ) {
+                VkImageView attachments[ 2 ] = {swapchain->hImgViews[ i ], content->hDepthImgViews[ i ]};
+                framebufferCreateInfo.pAttachments = attachments;
 
                 if ( false == content->hFramebuffers[ i ].Recreate( *appSurfaceVk->pNode, framebufferCreateInfo ) ) {
                     DebugBreak( );
@@ -331,8 +464,8 @@ void App::Update( float deltaSecs, Input const& inputState ) {
 
         }
 
-        VkRenderPass  renderPass  = content->hRenderPass;
-        VkFramebuffer framebuffer = content->hFramebuffers[ content->FrameIndex ];
+        VkRenderPass  renderPass  = content->hNkRenderPass;
+        VkFramebuffer framebuffer = content->hNkFramebuffers[ content->FrameIndex ];
 
         while (true) {
             const auto waitForFencesErrorHandle = vkWaitForFences( device, 1, &fence, VK_TRUE, 100 );

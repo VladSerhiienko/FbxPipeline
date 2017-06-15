@@ -15,7 +15,7 @@
 #include <Input.h>
 #include <Stopwatch.h>
 
-class apemode::AppContent
+class apemode::AppBaseContent
 {
 public:
     IAppSurface * pSurface;
@@ -23,11 +23,11 @@ public:
     Input            InputState;
     InputManager     InputManager;
 
-    AppContent () : pSurface (nullptr)
+    AppBaseContent () : pSurface (nullptr)
     {
     }
 
-    ~AppContent ()
+    ~AppBaseContent ()
     {
     }
 
@@ -81,7 +81,7 @@ apemode::AppBase::~AppBase ()
 
 bool apemode::AppBase::Initialize (int Args, char * ppArgs[])
 {
-    pAppContent = new AppContent ();
+    pAppContent = new AppBaseContent ();
     return pAppContent && pAppContent->Initialize (CreateAppSurface ());
 }
 

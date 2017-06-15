@@ -208,11 +208,6 @@ namespace apemodevk
         return TArraySize;
     }
 
-    template < typename TArray, uint32_t TArraySize >
-    inline uint32_t GetArraySizeU( TArray ( & )[ TArraySize ] ) {
-        return TArraySize;
-    }
-
 #ifdef _Get_array_length
 #undef _Get_array_length
 #endif

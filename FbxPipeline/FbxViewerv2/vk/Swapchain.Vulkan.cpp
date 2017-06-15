@@ -49,11 +49,10 @@ apemodevk::Swapchain::ModuleHandle const apemodevk::Swapchain::kCurrentExecutabl
 
 apemodevk::Swapchain::Swapchain( ) : pNode( nullptr ), pCmdQueue( nullptr ) {
     static uint16_t sSwapchainNextId = 0;
-    Id                               = sSwapchainNextId++;
+    Id = sSwapchainNextId++;
 }
 
 apemodevk::Swapchain::~Swapchain( ) {
-
     if ( pNode ) {
         const bool bOk = pNode->Await( );
         apemode_assert( bOk, "Failed to wait for device prior work done." );
@@ -65,15 +64,6 @@ apemodevk::Swapchain::~Swapchain( ) {
                 hImg.Handle                      = hBuffer;
                 hImg.Destroy( );
             }
-
-        /*for (auto & hPresentSemaphore : hPresentSemaphores)
-            if (hPresentSemaphore)
-            {
-                apemodevk::TDispatchableHandle<VkSemaphore> hSemaphore;
-                hSemaphore.Deleter.LogicalDeviceHandle = *pNode;
-                hSemaphore.Handle = hPresentSemaphore;
-                hSemaphore.Destroy ();
-            }*/
     }
 }
 
@@ -238,7 +228,6 @@ bool apemodevk::Swapchain::Resize( uint32_t DesiredColorWidth, uint32_t DesiredC
     }
 
     TInfoStruct< VkImageViewCreateInfo > imgViewCreateInfo;
-    imgViewCreateInfo->viewType                        = VK_IMAGE_VIEW_TYPE_2D;
     imgViewCreateInfo->viewType                        = VK_IMAGE_VIEW_TYPE_2D;
     imgViewCreateInfo->format                          = eColorFormat;
     imgViewCreateInfo->components.r                    = VK_COMPONENT_SWIZZLE_R;

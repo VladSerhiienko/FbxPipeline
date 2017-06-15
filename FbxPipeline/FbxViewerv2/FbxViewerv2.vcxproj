@@ -26,6 +26,7 @@
     <ClInclude Include="AppSurfaceSdlGL.h" />
     <ClInclude Include="AppSurfaceSdlVk.h" />
     <ClInclude Include="CityHash.h" />
+    <ClInclude Include="DebugRenderer.h" />
     <ClInclude Include="fbxvpch.h" />
     <ClInclude Include="IAppSurface.h" />
     <ClInclude Include="Input.h" />
@@ -57,6 +58,7 @@
     <ClCompile Include="AppSurfaceSdlGL.cpp" />
     <ClCompile Include="AppSurfaceSdlVk.cpp" />
     <ClCompile Include="CityHash.cpp" />
+    <ClCompile Include="DebugRenderer.cpp" />
     <ClCompile Include="fbxvpch.cpp" />
     <ClCompile Include="InputSdl.cpp" />
     <ClCompile Include="NuklearSdlBase.cpp" />

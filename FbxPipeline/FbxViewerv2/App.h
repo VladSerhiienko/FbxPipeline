@@ -4,8 +4,8 @@ namespace apemode {
     class App : public apemode::AppBase {
         friend class AppContent;
 
-        std::unique_ptr< AppContent > content;
-        float                         totalSecs;
+        AppContent * content;
+        float        totalSecs;
 
     public:
         App( );

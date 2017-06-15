@@ -13,12 +13,14 @@ static std::string GetExecutableFileName( ) {
 }
 
 apemode::AppState::AppState( )
-    : msvcLogger( spdlog::create< spdlog::sinks::msvc_sink_st >( "MSVCLogger" ) )
-    , consoleLogger( spdlog::create< spdlog::sinks::stdout_sink_st >( "ConsoleLogger" ) )
+    : msvcLogger( spdlog::create< spdlog::sinks::msvc_sink_st >( "apemode/msvc" ) )
+    , consoleLogger( spdlog::create< spdlog::sinks::stdout_sink_st >( "apemode/stdout" ) )
     , appOptions( new cxxopts::Options( GetExecutableFileName( ) ) ) {
+    assert( nullptr == gState && "Single instance, controlled by AppContent (App)." );
     gState = this;
 }
 
 apemode::AppState::~AppState( ) {
+    assert( nullptr != gState );
     gState = nullptr;
 }

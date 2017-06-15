@@ -20,7 +20,7 @@ bool apemode::AppSurfaceSdlVk::Initialize( uint32_t width, uint32_t height, cons
     if ( AppSurfaceSdlBase::Initialize( width, height, name ) ) {
         pDeviceManager = std::move( std::make_unique< apemodevk::GraphicsManager >( ) );
 
-        if ( pDeviceManager->RecreateGraphicsNodes( ) ) {
+        if ( pDeviceManager->RecreateGraphicsNodes( apemodevk::GraphicsManager::kEnableVkApiDumpLayer ) ) {
             pNode = pDeviceManager->GetPrimaryGraphicsNode( );
 
             uint32_t queueFamilyId    = 0;

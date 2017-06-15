@@ -2,11 +2,11 @@
 
 namespace apemode {
     class Input;
-    class AppContent;
     class IAppSurface;
 
     class AppBase {
-        AppContent* pAppContent;
+        friend class AppBaseContent;
+        AppBaseContent* pAppContent;
 
         void HandleWindowSizeChanged( );
 
