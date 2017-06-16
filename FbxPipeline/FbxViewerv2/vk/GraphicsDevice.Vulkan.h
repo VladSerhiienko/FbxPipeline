@@ -17,8 +17,6 @@ namespace apemodevk {
         typedef TInfoStruct< VkQueueFamilyProperties >::Vector VkQueueFamilyPropertiesVector;
         typedef TInfoStruct< VkDeviceQueueCreateInfo >::Vector VkDeviceQueueCreateInfoVector;
         typedef GraphicsManager::NativeLayerWrapper            NativeLayerWrapper;
-        typedef GraphicsManager::NativeLayerWrapperVector      NativeLayerWrapperVector;
-        typedef GraphicsManager::LpstrVector                   LpstrVector;
         typedef VkFormatProperties                             VkFormatPropertiesArray[ VK_FORMAT_RANGE_SIZE ];
 
         static std::unique_ptr< GraphicsDevice > MakeNewUnique( );
@@ -62,8 +60,8 @@ namespace apemodevk {
         VkPhysicalDeviceFeatures             Features;
         FloatVector                          QueuePrioritiesStorage;
         VkFormatPropertiesArray              FormatProperties;
-        NativeLayerWrapperVector             LayerWrappers;
-        LpstrVector                          PresentLayers;
+        std::vector<NativeLayerWrapper>             LayerWrappers;
+        std::vector<const char *>                           PresentLayers;
         std::vector< VkExtensionProperties > DeviceExtensionProps;
     };
 }

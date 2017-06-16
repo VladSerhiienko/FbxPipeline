@@ -102,16 +102,8 @@ bool apemodevk::GraphicsDevice::ScanDeviceQueues( ) {
 }
 
 bool apemodevk::GraphicsDevice::ScanDeviceLayerProperties( ) {
-    ResultHandle ErrorHandle;
-
-    uint32_t ExtPropCount            = 0;
-    VkBool32 swapchainExtFound       = 0;
-    uint32_t enabled_extension_count = 0;
-
-    char* extension_names[ 64 ];
-    memset( extension_names, 0, sizeof( extension_names ) );
-
-    ErrorHandle = vkEnumerateDeviceExtensionProperties( AdapterHandle, NULL, &ExtPropCount, NULL );
+    uint32_t ExtPropCount = 0;
+    ResultHandle ErrorHandle = vkEnumerateDeviceExtensionProperties( AdapterHandle, NULL, &ExtPropCount, NULL );
     if ( ErrorHandle && ExtPropCount ) {
         DeviceExtensionProps.resize( ExtPropCount );
         ErrorHandle = vkEnumerateDeviceExtensionProperties( AdapterHandle, NULL, &ExtPropCount, DeviceExtensionProps.data( ) );

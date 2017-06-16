@@ -1,5 +1,6 @@
 #include <fbxvpch.h>
 
+#include <AppState.h>
 #include <AppSurfaceSdlVk.h>
 #include <CommandQueue.Vulkan.h>
 #include <GraphicsDevice.Vulkan.h>
@@ -20,7 +21,23 @@ bool apemode::AppSurfaceSdlVk::Initialize( uint32_t width, uint32_t height, cons
     if ( AppSurfaceSdlBase::Initialize( width, height, name ) ) {
         pDeviceManager = std::move( std::make_unique< apemodevk::GraphicsManager >( ) );
 
-        if ( pDeviceManager->RecreateGraphicsNodes( apemodevk::GraphicsManager::kEnableVkApiDumpLayer ) ) {
+        uint32_t graphicsManagerFlags = 0;
+
+        if (auto appState = apemode::AppState::GetCurrentState())
+            if (appState->appOptions) {
+
+                if ((*appState->appOptions)["renderdoc"].count())
+                    graphicsManagerFlags |= apemodevk::GraphicsManager::kEnableRenderDocLayer;
+                if ((*appState->appOptions)["vktrace"].count())
+                    graphicsManagerFlags |= apemodevk::GraphicsManager::kEnableVkTraceLayer;
+                if ((*appState->appOptions)["vkapidump"].count())
+                    graphicsManagerFlags |= apemodevk::GraphicsManager::kEnableVkApiDumpLayer;
+#if _DEBUG
+                graphicsManagerFlags |= apemodevk::GraphicsManager::kEnableLayers;
+#endif
+            }
+
+        if ( pDeviceManager->RecreateGraphicsNodes( graphicsManagerFlags ) ) {
             pNode = pDeviceManager->GetPrimaryGraphicsNode( );
 
             uint32_t queueFamilyId    = 0;

@@ -7,7 +7,7 @@
 
 namespace apemode {
 
-    class AppContent;
+    class App;
 
     /**
      * @class AppState
@@ -28,7 +28,7 @@ namespace apemode {
         static AppState* GetCurrentState( );
 
     private:
-        friend AppContent;
+        friend App;
         AppState( );
         ~AppState( );
     };

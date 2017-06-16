@@ -31,12 +31,6 @@ namespace apemodevk {
             bool IsValidDeviceLayer( ) const;
         };
 
-        typedef std::vector< std::string >               String8Vector;
-        typedef std::vector< NativeLayerWrapper >        NativeLayerWrapperVector;
-        typedef TInfoStruct< VkLayerProperties >::Vector VkLayerPropertiesVector;
-        typedef TInfoStruct< VkPhysicalDevice >::Vector  VkPhysicalDeviceVector;
-        typedef std::vector< const char * >              LpstrVector;
-
         GraphicsManager( );
         ~GraphicsManager( );
 
@@ -71,9 +65,9 @@ namespace apemodevk {
         APIVersion                        Version;
         std::string                       AppName;
         std::string                       EngineName;
-        LpstrVector                       PresentLayers;
-        LpstrVector                       PresentExtensions;
+        std::vector< const char * >                       PresentLayers;
+        std::vector< const char * >                       PresentExtensions;
         TDispatchableHandle< VkInstance > InstanceHandle;
-        NativeLayerWrapperVector          LayerWrappers;
+        std::vector< NativeLayerWrapper >          LayerWrappers;
     };
 }

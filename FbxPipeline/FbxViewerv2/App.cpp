@@ -29,7 +29,6 @@ const VkFormat sDepthFormat = VK_FORMAT_D16_UNORM;
 
 class apemode::AppContent {
 public:
-    AppState * appState;
 
     nk_color diffColor;
     nk_color specColor;
@@ -64,22 +63,27 @@ public:
     TDispatchableHandle< VkImageView >     hDepthImgViews[ kMaxFrames ];
     TDispatchableHandle< VkDeviceMemory >  hDepthImgMemory[ kMaxFrames ];
 
-    AppContent() : appState( new AppState( ) ) {
+    AppContent()  {
     }
 
     ~AppContent() {
-        if (nullptr != appState)
-            delete appState,
-            appState = nullptr;
     }
 };
 
-App::App( ) {
+App::App( ) : appState(new AppState()) {
+    if (nullptr != appState)
+        appState->appOptions->add_options("vk")
+            ("renderdoc", "Adds renderdoc layer to device layers")
+            ("vkapidump", "Adds api dump layer to vk device layers")
+            ("vktrace", "Adds vktrace layer to vk device layers");
 }
 
 App::~App( ) {
-    if ( nullptr != content )
-        delete content;
+    if (nullptr != appState)
+        delete appState;
+
+    if ( nullptr != appContent )
+        delete appContent;
 }
 
 IAppSurface* App::CreateAppSurface( ) {
@@ -87,10 +91,14 @@ IAppSurface* App::CreateAppSurface( ) {
 }
 
 bool App::Initialize( int Args, char* ppArgs[] ) {
+
+    if (appState && appState->appOptions)
+        appState->appOptions->parse(Args, ppArgs);
+
     if ( AppBase::Initialize( Args, ppArgs ) ) {
 
-        if ( nullptr == content )
-            content = new AppContent( );
+        if ( nullptr == appContent )
+            appContent = new AppContent( );
 
         totalSecs = 0.0f;
 
@@ -100,30 +108,30 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
 
         auto appSurfaceVk = (AppSurfaceSdlVk*)appSurface;
         if ( auto swapchain = appSurfaceVk->pSwapchain.get( ) ) {
-            content->FrameCount = swapchain->ImgCount;
-            content->FrameIndex = 0;
-            content->FrameId    = 0;
+            appContent->FrameCount = swapchain->ImgCount;
+            appContent->FrameIndex = 0;
+            appContent->FrameId    = 0;
            
             OnResized();
 
-            for (uint32_t i = 0; i < content->FrameCount; ++i) {
+            for (uint32_t i = 0; i < appContent->FrameCount; ++i) {
                 VkCommandPoolCreateInfo cmdPoolCreateInfo;
                 InitializeStruct( cmdPoolCreateInfo );
                 cmdPoolCreateInfo.flags            = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
                 cmdPoolCreateInfo.queueFamilyIndex = appSurfaceVk->pCmdQueue->QueueFamilyId;
 
-                if ( false == content->hCmdPool[ i ].Recreate( *appSurfaceVk->pNode, cmdPoolCreateInfo ) ) {
+                if ( false == appContent->hCmdPool[ i ].Recreate( *appSurfaceVk->pNode, cmdPoolCreateInfo ) ) {
                     DebugBreak( );
                     return false;
                 }
 
                 VkCommandBufferAllocateInfo cmdBufferAllocInfo;
                 InitializeStruct( cmdBufferAllocInfo );
-                cmdBufferAllocInfo.commandPool        = content->hCmdPool[ i ];
+                cmdBufferAllocInfo.commandPool        = appContent->hCmdPool[ i ];
                 cmdBufferAllocInfo.level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
                 cmdBufferAllocInfo.commandBufferCount = 1;
 
-                if ( false == content->hCmdBuffers[ i ].Recreate( *appSurfaceVk->pNode, cmdBufferAllocInfo ) ) {
+                if ( false == appContent->hCmdBuffers[ i ].Recreate( *appSurfaceVk->pNode, cmdBufferAllocInfo ) ) {
                     DebugBreak( );
                     return false;
                 }
@@ -132,56 +140,56 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
                 InitializeStruct( fenceCreateInfo );
                 fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-                if ( false == content->hFences[ i ].Recreate( *appSurfaceVk->pNode, fenceCreateInfo ) ) {
+                if ( false == appContent->hFences[ i ].Recreate( *appSurfaceVk->pNode, fenceCreateInfo ) ) {
                     DebugBreak( );
                     return false;
                 }
 
                 VkSemaphoreCreateInfo semaphoreCreateInfo;
                 InitializeStruct( semaphoreCreateInfo );
-                if ( false == content->hPresentCompleteSemaphores[ i ].Recreate( *appSurfaceVk->pNode, semaphoreCreateInfo ) ||
-                     false == content->hRenderCompleteSemaphores[ i ].Recreate( *appSurfaceVk->pNode, semaphoreCreateInfo ) ) {
+                if ( false == appContent->hPresentCompleteSemaphores[ i ].Recreate( *appSurfaceVk->pNode, semaphoreCreateInfo ) ||
+                     false == appContent->hRenderCompleteSemaphores[ i ].Recreate( *appSurfaceVk->pNode, semaphoreCreateInfo ) ) {
                     DebugBreak( );
                     return false;
                 }
             }
         }
 
-        content->pDescPool = std::move(std::make_unique< DescriptorPool >());
-        if (false == content->pDescPool->RecreateResourcesFor(*appSurfaceVk->pNode, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256 )) {
+        appContent->pDescPool = std::move(std::make_unique< DescriptorPool >());
+        if (false == appContent->pDescPool->RecreateResourcesFor(*appSurfaceVk->pNode, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256 )) {
             DebugBreak();
             return false;
         }
 
-        content->Nk = new NuklearSdlVk();
+        appContent->Nk = new NuklearSdlVk();
 
         NuklearSdlVk::InitParametersVk initParams;
         initParams.pAlloc          = nullptr;
         initParams.pDevice         = *appSurfaceVk->pNode;
         initParams.pPhysicalDevice = *appSurfaceVk->pNode;
-        initParams.pRenderPass     = content->hNkRenderPass;
-        initParams.pDescPool       = *content->pDescPool;
+        initParams.pRenderPass     = appContent->hNkRenderPass;
+        initParams.pDescPool       = *appContent->pDescPool;
         initParams.pQueue          = *appSurfaceVk->pCmdQueue;
         initParams.QueueFamilyId   = appSurfaceVk->pCmdQueue->QueueFamilyId;
 
-        content->Nk->Init( &initParams );
+        appContent->Nk->Init( &initParams );
 
-        // content->scenes[ 0 ] = LoadSceneFromFile( "../../../assets/iron-man.fbxp" );
-        // content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/kalestra-the-sorceress.fbxp" );
-        // content->scenes[ 0 ] = LoadSceneFromFile( "../../../assets/Mech6kv3ps.fbxp" );
-        // content->scenes[ 0 ] = LoadSceneFromFile( "../../../assets/Mech6k_v2.fbxp" );
-        // content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/P90_v2.fbxp" );
-        // content->scenes[ 0 ] = LoadSceneFromFile( "../../../assets/MercedesBenzA45AMG.fbxp" );
-        // content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/MercedesBenzSLR.fbxp" );
-        // content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/P90.fbxp" );
-        // content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/IronMan.fbxp" );
-        // content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/Cathedral.fbxp" );
-        // content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/Leica1933.fbxp" );
-        // content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/UnrealOrb.fbxp" );
-        // content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/Artorias.fbxp" );
-        // content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/9mm.fbxp" );
-        // content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/Knife.fbxp" );
-        // content->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/mech-m-6k.fbxp" );
+        // appContent->scenes[ 0 ] = LoadSceneFromFile( "../../../assets/iron-man.fbxp" );
+        // appContent->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/kalestra-the-sorceress.fbxp" );
+        // appContent->scenes[ 0 ] = LoadSceneFromFile( "../../../assets/Mech6kv3ps.fbxp" );
+        // appContent->scenes[ 0 ] = LoadSceneFromFile( "../../../assets/Mech6k_v2.fbxp" );
+        // appContent->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/P90_v2.fbxp" );
+        // appContent->scenes[ 0 ] = LoadSceneFromFile( "../../../assets/MercedesBenzA45AMG.fbxp" );
+        // appContent->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/MercedesBenzSLR.fbxp" );
+        // appContent->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/P90.fbxp" );
+        // appContent->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/IronMan.fbxp" );
+        // appContent->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/Cathedral.fbxp" );
+        // appContent->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/Leica1933.fbxp" );
+        // appContent->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/UnrealOrb.fbxp" );
+        // appContent->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/Artorias.fbxp" );
+        // appContent->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/9mm.fbxp" );
+        // appContent->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/Knife.fbxp" );
+        // appContent->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/mech-m-6k.fbxp" );
 
         return true;
     }
@@ -192,8 +200,8 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
 bool apemode::App::OnResized( ) {
     if ( auto appSurfaceVk = (AppSurfaceSdlVk*) GetSurface( ) ) {
         if ( auto swapchain = appSurfaceVk->pSwapchain.get( ) ) {
-            content->width  = appSurfaceVk->GetWidth( );
-            content->height = appSurfaceVk->GetHeight( );
+            appContent->width  = appSurfaceVk->GetWidth( );
+            appContent->height = appSurfaceVk->GetHeight( );
 
             VkImageCreateInfo depthImgCreateInfo;
             InitializeStruct( depthImgCreateInfo );
@@ -218,31 +226,31 @@ bool apemode::App::OnResized( ) {
             depthImgViewCreateInfo.subresourceRange.layerCount     = 1;
             depthImgViewCreateInfo.viewType                        = VK_IMAGE_VIEW_TYPE_2D;
 
-            for ( uint32_t i = 0; i < content->FrameCount; ++i ) {
-                if ( false == content->hDepthImgs[ i ].Recreate( *appSurfaceVk->pNode, *appSurfaceVk->pNode, depthImgCreateInfo ) ) {
+            for ( uint32_t i = 0; i < appContent->FrameCount; ++i ) {
+                if ( false == appContent->hDepthImgs[ i ].Recreate( *appSurfaceVk->pNode, *appSurfaceVk->pNode, depthImgCreateInfo ) ) {
                     DebugBreak( );
                     return false;
                 }
             }
 
-            for ( uint32_t i = 0; i < content->FrameCount; ++i ) {
-                auto memoryAllocInfo = content->hDepthImgs[ i ].GetMemoryAllocateInfo( VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT );
-                if ( false == content->hDepthImgMemory[ i ].Recreate( *appSurfaceVk->pNode, memoryAllocInfo ) ) {
+            for ( uint32_t i = 0; i < appContent->FrameCount; ++i ) {
+                auto memoryAllocInfo = appContent->hDepthImgs[ i ].GetMemoryAllocateInfo( VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT );
+                if ( false == appContent->hDepthImgMemory[ i ].Recreate( *appSurfaceVk->pNode, memoryAllocInfo ) ) {
                     DebugBreak( );
                     return false;
                 }
             }
 
-            for ( uint32_t i = 0; i < content->FrameCount; ++i ) {
-                if ( false == content->hDepthImgs[ i ].BindMemory( content->hDepthImgMemory[ i ], 0 ) ) {
+            for ( uint32_t i = 0; i < appContent->FrameCount; ++i ) {
+                if ( false == appContent->hDepthImgs[ i ].BindMemory( appContent->hDepthImgMemory[ i ], 0 ) ) {
                     DebugBreak( );
                     return false;
                 }
             }
 
-            for ( uint32_t i = 0; i < content->FrameCount; ++i ) {
-                depthImgViewCreateInfo.image = content->hDepthImgs[ i ];
-                if ( false == content->hDepthImgViews[ i ].Recreate( *appSurfaceVk->pNode, depthImgViewCreateInfo ) ) {
+            for ( uint32_t i = 0; i < appContent->FrameCount; ++i ) {
+                depthImgViewCreateInfo.image = appContent->hDepthImgs[ i ];
+                if ( false == appContent->hDepthImgViews[ i ].Recreate( *appSurfaceVk->pNode, depthImgViewCreateInfo ) ) {
                     DebugBreak( );
                     return false;
                 }
@@ -306,19 +314,19 @@ bool apemode::App::OnResized( ) {
             renderPassCreateInfoDbg.subpassCount    = 1;
             renderPassCreateInfoDbg.pSubpasses      = &subpassNk;
 
-            if ( false == content->hNkRenderPass.Recreate( *appSurfaceVk->pNode, renderPassCreateInfoNk ) ) {
+            if ( false == appContent->hNkRenderPass.Recreate( *appSurfaceVk->pNode, renderPassCreateInfoNk ) ) {
                 DebugBreak( );
                 return false;
             }
 
-            if ( false == content->hRenderPass.Recreate( *appSurfaceVk->pNode, renderPassCreateInfoDbg ) ) {
+            if ( false == appContent->hRenderPass.Recreate( *appSurfaceVk->pNode, renderPassCreateInfoDbg ) ) {
                 DebugBreak( );
                 return false;
             }
 
             VkFramebufferCreateInfo framebufferCreateInfoNk;
             InitializeStruct( framebufferCreateInfoNk );
-            framebufferCreateInfoNk.renderPass      = content->hNkRenderPass;
+            framebufferCreateInfoNk.renderPass      = appContent->hNkRenderPass;
             framebufferCreateInfoNk.attachmentCount = 1;
             framebufferCreateInfoNk.width           = swapchain->ColorExtent.width;
             framebufferCreateInfoNk.height          = swapchain->ColorExtent.height;
@@ -326,27 +334,27 @@ bool apemode::App::OnResized( ) {
 
             VkFramebufferCreateInfo framebufferCreateInfo;
             InitializeStruct( framebufferCreateInfo );
-            framebufferCreateInfo.renderPass      = content->hRenderPass;
+            framebufferCreateInfo.renderPass      = appContent->hRenderPass;
             framebufferCreateInfo.attachmentCount = 2;
             framebufferCreateInfo.width           = swapchain->ColorExtent.width;
             framebufferCreateInfo.height          = swapchain->ColorExtent.height;
             framebufferCreateInfo.layers          = 1;
 
-            for ( uint32_t i = 0; i < content->FrameCount; ++i ) {
+            for ( uint32_t i = 0; i < appContent->FrameCount; ++i ) {
                 VkImageView attachments[ 1 ] = {swapchain->hImgViews[ i ]};
                 framebufferCreateInfoNk.pAttachments = attachments;
 
-                if ( false == content->hNkFramebuffers[ i ].Recreate( *appSurfaceVk->pNode, framebufferCreateInfoNk ) ) {
+                if ( false == appContent->hNkFramebuffers[ i ].Recreate( *appSurfaceVk->pNode, framebufferCreateInfoNk ) ) {
                     DebugBreak( );
                     return false;
                 }
             }
 
-            for ( uint32_t i = 0; i < content->FrameCount; ++i ) {
-                VkImageView attachments[ 2 ] = {swapchain->hImgViews[ i ], content->hDepthImgViews[ i ]};
+            for ( uint32_t i = 0; i < appContent->FrameCount; ++i ) {
+                VkImageView attachments[ 2 ] = {swapchain->hImgViews[ i ], appContent->hDepthImgViews[ i ]};
                 framebufferCreateInfo.pAttachments = attachments;
 
-                if ( false == content->hFramebuffers[ i ].Recreate( *appSurfaceVk->pNode, framebufferCreateInfo ) ) {
+                if ( false == appContent->hFramebuffers[ i ].Recreate( *appSurfaceVk->pNode, framebufferCreateInfo ) ) {
                     DebugBreak( );
                     return false;
                 }
@@ -358,17 +366,17 @@ bool apemode::App::OnResized( ) {
 }
 
 void App::OnFrameMove( ) {
-    nk_input_begin( &content->Nk->Context ); {
+    nk_input_begin( &appContent->Nk->Context ); {
         SDL_Event evt;
         while ( SDL_PollEvent( &evt ) )
-            content->Nk->HandleEvent( &evt );
-        nk_input_end( &content->Nk->Context );
+            appContent->Nk->HandleEvent( &evt );
+        nk_input_end( &appContent->Nk->Context );
     }
 
     AppBase::OnFrameMove( );
 
-    ++content->FrameId;
-    content->FrameIndex = content->FrameId % (uint64_t) content->FrameCount;
+    ++appContent->FrameId;
+    appContent->FrameIndex = appContent->FrameId % (uint64_t) appContent->FrameCount;
 }
 
 void App::Update( float deltaSecs, Input const& inputState ) {
@@ -383,7 +391,7 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         | NK_WINDOW_SCALABLE
         | NK_WINDOW_MINIMIZABLE;
 
-    auto ctx = &content->Nk->Context;
+    auto ctx = &appContent->Nk->Context;
     float clearColor[ 4 ] = {0};
 
     if (nk_begin(ctx, "Calculator", nk_rect(10, 10, 180, 250),
@@ -449,23 +457,23 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         VkDevice        device                   = *appSurfaceVk->pNode;
         VkQueue         queue                    = *appSurfaceVk->pCmdQueue;
         VkSwapchainKHR  swapchain                = appSurfaceVk->pSwapchain->hSwapchain;
-        VkFence         fence                    = content->hFences[ content->FrameIndex ];
-        VkSemaphore     presentCompleteSemaphore = content->hPresentCompleteSemaphores[ content->FrameIndex ];
-        VkSemaphore     renderCompleteSemaphore  = content->hRenderCompleteSemaphores[ content->FrameIndex ];
-        VkCommandPool   cmdPool                  = content->hCmdPool[ content->FrameIndex ];
-        VkCommandBuffer cmdBuffer                = content->hCmdBuffers[ content->FrameIndex ];
+        VkFence         fence                    = appContent->hFences[ appContent->FrameIndex ];
+        VkSemaphore     presentCompleteSemaphore = appContent->hPresentCompleteSemaphores[ appContent->FrameIndex ];
+        VkSemaphore     renderCompleteSemaphore  = appContent->hRenderCompleteSemaphores[ appContent->FrameIndex ];
+        VkCommandPool   cmdPool                  = appContent->hCmdPool[ appContent->FrameIndex ];
+        VkCommandBuffer cmdBuffer                = appContent->hCmdBuffers[ appContent->FrameIndex ];
 
         const uint32_t width  = appSurfaceVk->GetWidth( );
         const uint32_t height = appSurfaceVk->GetHeight( );
 
-        if ( width != content->width || height != content->height ) {
+        if ( width != appContent->width || height != appContent->height ) {
             CheckedCall( vkDeviceWaitIdle( device ) );
             OnResized( );
 
         }
 
-        VkRenderPass  renderPass  = content->hNkRenderPass;
-        VkFramebuffer framebuffer = content->hNkFramebuffers[ content->FrameIndex ];
+        VkRenderPass  renderPass  = appContent->hNkRenderPass;
+        VkFramebuffer framebuffer = appContent->hNkFramebuffers[ appContent->FrameIndex ];
 
         while (true) {
             const auto waitForFencesErrorHandle = vkWaitForFences( device, 1, &fence, VK_TRUE, 100 );
@@ -484,7 +492,7 @@ void App::Update( float deltaSecs, Input const& inputState ) {
                                             UINT64_MAX,
                                             presentCompleteSemaphore,
                                             VK_NULL_HANDLE,
-                                            &content->BackbufferIndices[ content->FrameIndex ] ) );
+                                            &appContent->BackbufferIndices[ appContent->FrameIndex ] ) );
 
         CheckedCall( vkResetCommandPool( device, cmdPool, 0 ) );
 
@@ -518,10 +526,10 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         renderParams.aa                 = NK_ANTI_ALIASING_ON;
         renderParams.max_vertex_buffer  = 64 * 1024;
         renderParams.max_element_buffer = 64 * 1024;
-        renderParams.FrameIndex         = content->FrameIndex;
+        renderParams.FrameIndex         = appContent->FrameIndex;
         renderParams.pCmdBuffer         = cmdBuffer;
 
-        content->Nk->Render(&renderParams);
+        appContent->Nk->Render(&renderParams);
 
         vkCmdEndRenderPass( cmdBuffer );
 
@@ -541,9 +549,9 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         CheckedCall( vkResetFences( device, 1, &fence ) );
         CheckedCall( vkQueueSubmit( queue, 1, &submitInfo, fence ) );
 
-        if ( content->FrameId ) {
-            uint32_t    presentIndex    = ( content->FrameIndex + content->FrameCount - 1 ) % content->FrameCount;
-            VkSemaphore renderSemaphore = content->hRenderCompleteSemaphores[ presentIndex ];
+        if ( appContent->FrameId ) {
+            uint32_t    presentIndex    = ( appContent->FrameIndex + appContent->FrameCount - 1 ) % appContent->FrameCount;
+            VkSemaphore renderSemaphore = appContent->hRenderCompleteSemaphores[ presentIndex ];
 
             VkPresentInfoKHR presentInfoKHR;
             InitializeStruct( presentInfoKHR );
@@ -551,7 +559,7 @@ void App::Update( float deltaSecs, Input const& inputState ) {
             presentInfoKHR.pWaitSemaphores    = &renderSemaphore;
             presentInfoKHR.swapchainCount     = 1;
             presentInfoKHR.pSwapchains        = &swapchain;
-            presentInfoKHR.pImageIndices      = &content->BackbufferIndices[ presentIndex ];
+            presentInfoKHR.pImageIndices      = &appContent->BackbufferIndices[ presentIndex ];
 
             CheckedCall( vkQueuePresentKHR( queue, &presentInfoKHR ) );
         }

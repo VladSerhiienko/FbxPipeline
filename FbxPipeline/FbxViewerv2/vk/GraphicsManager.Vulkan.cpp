@@ -20,7 +20,7 @@ apemodevk::GraphicsManager::APIVersion::APIVersion( bool bDump )
 bool apemodevk::GraphicsManager::ScanInstanceLayerProperties( uint32_t flags ) {
     uint32_t                LayerPropertyCount = 0;
     ResultHandle            ErrorHandle;
-    VkLayerPropertiesVector GlobalLayers;
+    std::vector<VkLayerProperties> GlobalLayers;
 
     do {
         ErrorHandle = vkEnumerateInstanceLayerProperties( &LayerPropertyCount, NULL );
@@ -106,7 +106,7 @@ bool apemodevk::GraphicsManager::ScanInstanceLayerProperties( uint32_t flags ) {
 
 bool apemodevk::GraphicsManager::ScanAdapters( ) {
     uint32_t               AdaptersFound = 0;
-    VkPhysicalDeviceVector Adapters;
+    std::vector<VkPhysicalDevice> Adapters;
 
     ResultHandle ErrorHandle;
     ErrorHandle = vkEnumeratePhysicalDevices( InstanceHandle, &AdaptersFound, NULL );

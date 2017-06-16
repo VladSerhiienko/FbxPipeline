@@ -1,10 +1,15 @@
 #include <AppBase.h>
 
 namespace apemode {
-    class App : public apemode::AppBase {
-        friend class AppContent;
+    class AppState;
+    class AppContent;
 
-        AppContent * content;
+    class App : public apemode::AppBase {
+        friend AppState;
+        friend AppContent;
+
+        AppState *   appState;
+        AppContent * appContent;
         float        totalSecs;
 
     public:
