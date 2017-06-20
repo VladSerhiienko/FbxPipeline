@@ -25,7 +25,6 @@
 
 #include <math.h>
 
-#include <mathfu/constants.h>
 #include <mathfu/matrix.h>
 #include <mathfu/vector.h>
 #include <mathfu/glsl_mappings.h>
@@ -40,6 +39,4 @@
 //
 //
 
-#ifndef MALLOC_ALIGNMENT
-#define MALLOC_ALIGNMENT 16
-#endif
+#include <FbxViewerOS.h>

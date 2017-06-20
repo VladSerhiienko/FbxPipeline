@@ -15,8 +15,8 @@
 namespace apemode {
     class NuklearSdlBase {
     public:
-        static void SdlClipbardPaste( nk_handle usr, struct nk_text_edit *edit );
-        static void SdlClipbardCopy( nk_handle usr, const char *text, int len );
+        static void SdlClipboardPaste( nk_handle usr, struct nk_text_edit *edit );
+        static void SdlClipboardCopy( nk_handle usr, const char *text, int len );
 
     public:
         enum Theme { Black, White, Red, Blue, Dark };
@@ -31,18 +31,18 @@ namespace apemode {
         struct InitParametersBase {
             typedef void ( *NkClipbardPasteFn )( nk_handle, struct nk_text_edit * );
             typedef void ( *NkClipbardCopyFn )( nk_handle, const char *, int );
-            NkClipbardPasteFn pClipbardPasteCallback = SdlClipbardPaste;
-            NkClipbardCopyFn  pClipbardCopyCallback  = SdlClipbardCopy;
+            NkClipbardPasteFn pClipboardPasteCallback = SdlClipboardPaste; /* Ok */
+            NkClipbardCopyFn  pClipboardCopyCallback  = SdlClipboardCopy;  /* Ok */
         };
 
         struct UploadFontAtlasParametersBase {};
 
         struct RenderParametersBase {
-            float            dims[ 2 ]          = {};
-            float            scale[ 2 ]         = {};
-            nk_anti_aliasing aa                 = NK_ANTI_ALIASING_ON;
-            uint32_t         max_vertex_buffer  = 65536;
-            uint32_t         max_element_buffer = 65536;
+            float            dims[ 2 ]          = {};                  /* Required */
+            float            scale[ 2 ]         = {};                  /* Required */
+            nk_anti_aliasing aa                 = NK_ANTI_ALIASING_ON; /* Ok */
+            uint32_t         max_vertex_buffer  = 65536;               /* Ok */
+            uint32_t         max_element_buffer = 65536;               /* Ok */
         };
 
     public:

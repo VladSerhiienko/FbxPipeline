@@ -37,7 +37,7 @@ namespace apemode {
 
         struct RenderParametersVk : RenderParametersBase {
             VkCommandBuffer pCmdBuffer = VK_NULL_HANDLE; /* Required */
-            uint32_t        FrameIndex = 0;              /* Zero is ok */
+            uint32_t        FrameIndex = 0;              /* Required */
         };
 
     public:

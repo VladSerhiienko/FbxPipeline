@@ -42,6 +42,9 @@
     <Filter Include="Sources\Graphics\[Vulkan]">
       <UniqueIdentifier>{ce8e9ffc-4093-447a-913e-b075c5754388}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sources\OS">
+      <UniqueIdentifier>{a09abb11-154f-47b5-828a-b560d4b302d6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="alloca.h">
@@ -128,8 +131,14 @@
     <ClInclude Include="vk\TInfoStruct.Vulkan.h">
       <Filter>Sources\Graphics\[Vulkan]</Filter>
     </ClInclude>
-    <ClInclude Include="DebugRenderer.h">
+    <ClInclude Include="DebugRendererVk.h">
       <Filter>Sources\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="FbxViewerOS.h">
+      <Filter>Sources\OS</Filter>
+    </ClInclude>
+    <ClInclude Include="malloc.c.h">
+      <Filter>Sources\OS</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -190,8 +199,19 @@
     <ClCompile Include="AppState.cpp">
       <Filter>Sources\App</Filter>
     </ClCompile>
-    <ClCompile Include="DebugRenderer.cpp">
+    <ClCompile Include="DebugRendererVk.cpp">
       <Filter>Sources\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="FbxViewerOS.cpp">
+      <Filter>Sources\OS</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="vk\TInfoStructHasStructType.Vulkan.inl">
+      <Filter>Sources\Graphics\[Vulkan]</Filter>
+    </None>
+    <None Include="vk\TInfoStructResolveStructType.Vulkan.inl">
+      <Filter>Sources\Graphics\[Vulkan]</Filter>
+    </None>
   </ItemGroup>
 </Project>

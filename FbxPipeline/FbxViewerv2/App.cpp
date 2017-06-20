@@ -5,6 +5,7 @@
 #include <Swapchain.Vulkan.h>
 #include <Input.h>
 #include <NuklearSdlVk.h>
+#include <DebugRendererVk.h>
 
 #include <AppState.h>
 
@@ -41,6 +42,7 @@ public:
     Scene*   scenes[ 2 ];
 
     NuklearSdlBase* Nk = nullptr;
+    DebugRendererVk * Dbg = nullptr;
 
     uint32_t FrameCount = 0;
     uint32_t FrameIndex = 0;
@@ -163,16 +165,28 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
 
         appContent->Nk = new NuklearSdlVk();
 
-        NuklearSdlVk::InitParametersVk initParams;
-        initParams.pAlloc          = nullptr;
-        initParams.pDevice         = *appSurfaceVk->pNode;
-        initParams.pPhysicalDevice = *appSurfaceVk->pNode;
-        initParams.pRenderPass     = appContent->hNkRenderPass;
-        initParams.pDescPool       = *appContent->pDescPool;
-        initParams.pQueue          = *appSurfaceVk->pCmdQueue;
-        initParams.QueueFamilyId   = appSurfaceVk->pCmdQueue->QueueFamilyId;
+        NuklearSdlVk::InitParametersVk initParamsNk;
+        initParamsNk.pAlloc          = nullptr;
+        initParamsNk.pDevice         = *appSurfaceVk->pNode;
+        initParamsNk.pPhysicalDevice = *appSurfaceVk->pNode;
+        initParamsNk.pRenderPass     = appContent->hNkRenderPass;
+        initParamsNk.pDescPool       = *appContent->pDescPool;
+        initParamsNk.pQueue          = *appSurfaceVk->pCmdQueue;
+        initParamsNk.QueueFamilyId   = appSurfaceVk->pCmdQueue->QueueFamilyId;
 
-        appContent->Nk->Init( &initParams );
+        appContent->Nk->Init( &initParamsNk );
+
+        appContent->Dbg = new DebugRendererVk();
+
+        DebugRendererVk::InitParametersVk initParamsDbg;
+        initParamsDbg.pAlloc          = nullptr;
+        initParamsDbg.pDevice         = *appSurfaceVk->pNode;
+        initParamsDbg.pPhysicalDevice = *appSurfaceVk->pNode;
+        initParamsDbg.pRenderPass     = appContent->hNkRenderPass;
+        initParamsDbg.pDescPool       = *appContent->pDescPool;
+        initParamsDbg.FrameCount      = appContent->FrameCount;
+
+        appContent->Dbg->RecreateResources(&initParamsDbg);
 
         // appContent->scenes[ 0 ] = LoadSceneFromFile( "../../../assets/iron-man.fbxp" );
         // appContent->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/kalestra-the-sorceress.fbxp" );
@@ -518,18 +532,46 @@ void App::Update( float deltaSecs, Input const& inputState ) {
 
         vkCmdBeginRenderPass( cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE );
 
-        NuklearSdlVk::RenderParametersVk renderParams;
-        renderParams.dims[0] = (float) width;
-        renderParams.dims[1] = (float)height;
-        renderParams.scale[0] = 1;
-        renderParams.scale[1] = 1;
-        renderParams.aa                 = NK_ANTI_ALIASING_ON;
-        renderParams.max_vertex_buffer  = 64 * 1024;
-        renderParams.max_element_buffer = 64 * 1024;
-        renderParams.FrameIndex         = appContent->FrameIndex;
-        renderParams.pCmdBuffer         = cmdBuffer;
+        DebugRendererVk::FrameUniformBuffer frameData;
 
-        appContent->Nk->Render(&renderParams);
+        static float rotationY = 0.0;
+
+        rotationY += 0.001;
+        if (rotationY >= M_PI) {
+            rotationY -= M_PI;
+        }
+
+        frameData.worldMatrix = mathfu::mat4::FromRotationMatrix(mathfu::mat3::RotationY(rotationY));
+        frameData.projectionMatrix = mathfu::mat4::Perspective(55.0f / 180.0f * M_PI, (float) width / (float)height, 0.1f, 100.0f, 1 );
+        frameData.viewMatrix = mathfu::mat4::LookAt({ 0, 0, 0 }, { 0, 3, 5 }, { 0, 1, 0 }, 1);
+        frameData.color = { 1, 0, 0, 1 };
+
+        // Flip projection matrix from GL to Vulkan orientation.
+        frameData.projectionMatrix.GetColumn(1)[1] *=-1;
+
+        DebugRendererVk::RenderParametersVk renderParamsDbg;
+        renderParamsDbg.dims[0] = (float) width;
+        renderParamsDbg.dims[1] = (float)height;
+        renderParamsDbg.scale[0] = 1;
+        renderParamsDbg.scale[1] = 1;
+        renderParamsDbg.FrameIndex = appContent->FrameIndex;
+        renderParamsDbg.pCmdBuffer = cmdBuffer;
+        renderParamsDbg.pFrameData = &frameData;
+
+        appContent->Dbg->Render(&renderParamsDbg);
+
+        NuklearSdlVk::RenderParametersVk renderParamsNk;
+        renderParamsNk.dims[0] = (float) width;
+        renderParamsNk.dims[1] = (float)height;
+        renderParamsNk.scale[0] = 1;
+        renderParamsNk.scale[1] = 1;
+        renderParamsNk.aa                 = NK_ANTI_ALIASING_ON;
+        renderParamsNk.max_vertex_buffer  = 64 * 1024;
+        renderParamsNk.max_element_buffer = 64 * 1024;
+        renderParamsNk.FrameIndex         = appContent->FrameIndex;
+        renderParamsNk.pCmdBuffer         = cmdBuffer;
+
+        appContent->Nk->Render(&renderParamsNk);
 
         vkCmdEndRenderPass( cmdBuffer );
 

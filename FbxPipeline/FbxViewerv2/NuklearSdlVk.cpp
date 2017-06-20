@@ -107,10 +107,9 @@ bool apemode::NuklearSdlVk::Render( RenderParametersBase* p ) {
         VkMappedMemoryRange ranges[ 2 ];
         InitializeStruct( ranges );
 
-        ranges[ 0 ].sType  = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
         ranges[ 0 ].memory = hVertexBufferMemory[ FrameIndex ];
         ranges[ 0 ].size   = VK_WHOLE_SIZE;
-        ranges[ 1 ].sType  = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
+
         ranges[ 1 ].memory = hIndexBufferMemory[ FrameIndex ];
         ranges[ 1 ].size   = VK_WHOLE_SIZE;
 
@@ -127,8 +126,7 @@ bool apemode::NuklearSdlVk::Render( RenderParametersBase* p ) {
     {
         VkDescriptorSet descSets[ 1 ] = {DescSet.hSets[ 0 ]};
         vkCmdBindPipeline( renderParams->pCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, hPipeline );
-        vkCmdBindDescriptorSets(
-            renderParams->pCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, hPipelineLayout, 0, 1, descSets, 0, NULL );
+        vkCmdBindDescriptorSets( renderParams->pCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, hPipelineLayout, 0, 1, descSets, 0, NULL );
     }
 
     /* Bind Vertex And Index Buffer */

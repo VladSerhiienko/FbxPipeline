@@ -26,11 +26,13 @@
     <ClInclude Include="AppSurfaceSdlGL.h" />
     <ClInclude Include="AppSurfaceSdlVk.h" />
     <ClInclude Include="CityHash.h" />
-    <ClInclude Include="DebugRenderer.h" />
+    <ClInclude Include="DebugRendererVk.h" />
+    <ClInclude Include="FbxViewerOS.h" />
     <ClInclude Include="fbxvpch.h" />
     <ClInclude Include="IAppSurface.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="AppState.h" />
+    <ClInclude Include="malloc.c.h" />
     <ClInclude Include="NuklearSdlBase.h" />
     <ClInclude Include="NuklearSdlGL.h" />
     <ClInclude Include="NuklearSdlVk.h" />
@@ -58,7 +60,8 @@
     <ClCompile Include="AppSurfaceSdlGL.cpp" />
     <ClCompile Include="AppSurfaceSdlVk.cpp" />
     <ClCompile Include="CityHash.cpp" />
-    <ClCompile Include="DebugRenderer.cpp" />
+    <ClCompile Include="DebugRendererVk.cpp" />
+    <ClCompile Include="FbxViewerOS.cpp" />
     <ClCompile Include="fbxvpch.cpp" />
     <ClCompile Include="InputSdl.cpp" />
     <ClCompile Include="NuklearSdlBase.cpp" />
@@ -81,6 +84,10 @@
     <ProjectReference Include="..\sdl2\sdl2.vcxproj">
       <Project>{d319c0fc-c7ea-4643-b962-21f50f77fad2}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="vk\TInfoStructHasStructType.Vulkan.inl" />
+    <None Include="vk\TInfoStructResolveStructType.Vulkan.inl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{57576BAB-8513-40A8-AE4D-5268547AD958}</ProjectGuid>

@@ -2,14 +2,14 @@
 #include <NuklearSdlBase.h>
 #include <memory>
 
-void apemode::NuklearSdlBase::SdlClipbardPaste( nk_handle usr, struct nk_text_edit *edit ) {
+void apemode::NuklearSdlBase::SdlClipboardPaste( nk_handle usr, struct nk_text_edit *edit ) {
     (void) usr;
 
     if ( const char *text = SDL_GetClipboardText( ) )
         nk_textedit_paste( edit, text, nk_strlen( text ) );
 }
 
-void apemode::NuklearSdlBase::SdlClipbardCopy( nk_handle usr, const char *text, int len ) {
+void apemode::NuklearSdlBase::SdlClipboardCopy( nk_handle usr, const char *text, int len ) {
     (void) usr;
 
     if ( !len )
@@ -38,8 +38,8 @@ void *apemode::NuklearSdlBase::DeviceUploadAtlas( InitParametersBase *initParams
 bool apemode::NuklearSdlBase::Init( InitParametersBase *initParamsBase ) {
     nk_init_default( &Context, nullptr /* User font */ );
     nk_buffer_init_default( &RenderCmds );
-    Context.clip.copy     = initParamsBase->pClipbardCopyCallback;
-    Context.clip.paste    = initParamsBase->pClipbardPasteCallback;
+    Context.clip.copy     = initParamsBase->pClipboardCopyCallback;
+    Context.clip.paste    = initParamsBase->pClipboardPasteCallback;
     Context.clip.userdata = nk_handle_ptr( this );
 
     /* Overrided */

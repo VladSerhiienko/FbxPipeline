@@ -4307,7 +4307,7 @@ static void add_segment(mstate m, char* tbase, size_t tsize, flag_t mmapped) {
 /* -------------------------- System allocation -------------------------- */
 
 /* Get memory from system using MORECORE or MMAP */
-static void* sys_alloc(mstate m, size_t nb, unsigned flags = 0) {
+static void* sys_alloc(mstate m, size_t nb, unsigned flags) {
   char* tbase = CMFAIL;
   size_t tsize = 0;
   flag_t mmap_flag = 0;
@@ -4736,7 +4736,7 @@ static void* tmalloc_small(mstate m, size_t nb) {
 /* --------------------------- realloc support --------------------------- */
 static void* internal_memalign(mstate m, size_t alignment, size_t bytes, unsigned flags);
 
-static void* internal_realloc(mstate m, void* oldmem, size_t bytes, size_t alignment, unsigned flags = 0) {
+static void* internal_realloc(mstate m, void* oldmem, size_t bytes, size_t alignment, unsigned flags) {
   if (bytes >= MAX_REQUEST) {
     MALLOC_FAILURE_ACTION;
     return 0;
@@ -4813,7 +4813,7 @@ static void* internal_realloc(mstate m, void* oldmem, size_t bytes, size_t align
 
 /* --------------------------- memalign support -------------------------- */
 
-static void* internal_memalign(mstate m, size_t alignment, size_t bytes, unsigned flags = 0) {
+static void* internal_memalign(mstate m, size_t alignment, size_t bytes, unsigned flags) {
   if (alignment <= MALLOC_ALIGNMENT)    /* Can just use malloc */
     return internal_malloc(m, bytes, flags);
   if (alignment <  MIN_CHUNK_SIZE) /* must be at least a minimum chunk size */
@@ -5312,8 +5312,7 @@ void* dlrealloc(void* oldmem, size_t bytes) {
       return 0;
     }
 #endif /* FOOTERS */
-    return internal_realloc(m, oldmem, bytes, MALLOC_ALIGNMENT);
-    //return internal_realloc(m, oldmem, bytes);
+    return internal_realloc(m, oldmem, bytes);
   }
 }
 
