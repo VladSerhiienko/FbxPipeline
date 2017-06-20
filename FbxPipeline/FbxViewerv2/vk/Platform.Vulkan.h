@@ -234,7 +234,7 @@ namespace apemodevk
         memset(&pObj[0], 0, sizeof(T) * TCount);
     }
 
-    template < typename T, size_t Count >
+    template < typename T >
     inline void ZeroMemory(T *pObj, size_t Count) {
         memset(pObj, 0, sizeof(T) * Count);
     }
