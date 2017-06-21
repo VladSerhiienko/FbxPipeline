@@ -111,8 +111,11 @@ bool apemode::DebugRendererVk::RecreateResources( InitParametersVk* initParams )
     VkDescriptorSetLayoutBinding bindings[ 1 ];
     InitializeStruct( bindings );
 
-    bindings[ 0 ].binding         = 0;
+#if 1
+    bindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+#else
     bindings[ 0 ].descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+#endif
     bindings[ 0 ].descriptorCount = 1;
     bindings[ 0 ].stageFlags      = VK_SHADER_STAGE_VERTEX_BIT;
 
@@ -370,6 +373,12 @@ bool apemode::DebugRendererVk::RecreateResources( InitParametersVk* initParams )
         }
     }
 
+#if 1
+    for (uint32_t i = 0; i < initParams->FrameCount; ++i) {
+        BufferPools[i].Recreate(initParams->pDevice, initParams->pPhysicalDevice, initParams->pDescPool, nullptr, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, false);
+        DescSetPools[i].Recreate(initParams->pDevice, initParams->pDescPool, hDescSetLayout);
+    }
+#else
     for ( uint32_t i = 0; i < initParams->FrameCount; ++i ) {
         VkBufferCreateInfo bufferCreateInfo;
         InitializeStruct( bufferCreateInfo );
@@ -409,14 +418,37 @@ bool apemode::DebugRendererVk::RecreateResources( InitParametersVk* initParams )
         writeDescriptorSet.pBufferInfo     = &descriptorBufferInfo;
         vkUpdateDescriptorSets( initParams->pDevice, 1, &writeDescriptorSet, 0, nullptr );
     }
+#endif
 
     pDevice = initParams->pDevice;
     return true;
 }
 
+void apemode::DebugRendererVk::Reset( uint32_t FrameIndex ) {
+    BufferPools[ FrameIndex ].Reset( );
+}
+
 bool apemode::DebugRendererVk::Render( RenderParametersVk* renderParams ) {
     auto FrameIndex = ( renderParams->FrameIndex ) % kMaxFrameCount;
 
+#if 1
+
+    auto suballocResult = BufferPools[ FrameIndex ].TSuballocate( *renderParams->pFrameData );
+    assert( VK_NULL_HANDLE != suballocResult.descBufferInfo.buffer );
+    suballocResult.descBufferInfo.range = sizeof(FrameUniformBuffer);
+    VkDescriptorSet descriptorSet[1] = { DescSetPools[FrameIndex].GetDescSet(suballocResult.descBufferInfo) };
+
+    vkCmdBindPipeline( renderParams->pCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, hPipeline );
+    vkCmdBindDescriptorSets( renderParams->pCmdBuffer,
+                             VK_PIPELINE_BIND_POINT_GRAPHICS,
+                             hPipelineLayout,
+                             0,
+                             1,
+                             descriptorSet,
+                             1,
+                             &suballocResult.dynamicOffset );
+
+#else
     if ( auto mappedData = hUniformBufferMemory[ FrameIndex ].Map( 0, sizeof( FrameUniformBuffer ), 0 ) ) {
         memcpy( mappedData, renderParams->pFrameData, sizeof( FrameUniformBuffer ) );
 
@@ -437,6 +469,7 @@ bool apemode::DebugRendererVk::Render( RenderParametersVk* renderParams ) {
     VkDescriptorSet descSets[ 1 ] = {DescSets.hSets[ FrameIndex ]};
     vkCmdBindPipeline( renderParams->pCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, hPipeline );
     vkCmdBindDescriptorSets( renderParams->pCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, hPipelineLayout, 0, 1, descSets, 0, NULL );
+#endif
 
     VkBuffer     vertexBuffers[ 1 ] = {hVertexBuffer};
     VkDeviceSize vertexOffsets[ 1 ] = {0};
@@ -464,4 +497,8 @@ bool apemode::DebugRendererVk::Render( RenderParametersVk* renderParams ) {
     vkCmdDraw( renderParams->pCmdBuffer, 12 * 3, 1, 0, 0 );
 
     return true;
+}
+
+void apemode::DebugRendererVk::Flush( uint32_t FrameIndex ) {
+    BufferPools[ FrameIndex ].Flush( );
 }

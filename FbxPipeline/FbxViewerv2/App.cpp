@@ -541,37 +541,43 @@ void App::Update( float deltaSecs, Input const& inputState ) {
             rotationY -= M_PI;
         }
 
-        frameData.worldMatrix = mathfu::mat4::FromRotationMatrix(mathfu::mat3::RotationY(rotationY));
-        frameData.projectionMatrix = mathfu::mat4::Perspective(55.0f / 180.0f * M_PI, (float) width / (float)height, 0.1f, 100.0f, 1 );
-        frameData.viewMatrix = mathfu::mat4::LookAt({ 0, 0, 0 }, { 0, 3, 5 }, { 0, 1, 0 }, 1);
-        frameData.color = { 1, 0, 0, 1 };
+        frameData.worldMatrix = mathfu::mat4::FromRotationMatrix( mathfu::mat3::RotationY( rotationY ) );
+        frameData.projectionMatrix = mathfu::mat4::Perspective( 55.0f / 180.0f * M_PI, (float) width / (float) height, 0.1f, 100.0f, 1 );
+        frameData.viewMatrix = mathfu::mat4::LookAt( {0, 0, 0}, {0, 3, 5}, {0, 1, 0}, 1 );
+        frameData.color = {1, 0, 0, 1};
 
         // Flip projection matrix from GL to Vulkan orientation.
-        frameData.projectionMatrix.GetColumn(1)[1] *=-1;
+        frameData.projectionMatrix.GetColumn( 1 )[ 1 ] *= -1;
+
+        appContent->Dbg->Reset( appContent->FrameIndex );
 
         DebugRendererVk::RenderParametersVk renderParamsDbg;
-        renderParamsDbg.dims[0] = (float) width;
-        renderParamsDbg.dims[1] = (float)height;
-        renderParamsDbg.scale[0] = 1;
-        renderParamsDbg.scale[1] = 1;
+        renderParamsDbg.dims[ 0 ]  = (float) width;
+        renderParamsDbg.dims[ 1 ]  = (float) height;
+        renderParamsDbg.scale[ 0 ] = 1;
+        renderParamsDbg.scale[ 1 ] = 1;
         renderParamsDbg.FrameIndex = appContent->FrameIndex;
         renderParamsDbg.pCmdBuffer = cmdBuffer;
         renderParamsDbg.pFrameData = &frameData;
 
+        appContent->Dbg->Render( &renderParamsDbg );
+
+        frameData.worldMatrix = mathfu::mat4::FromScaleVector({0.1f, 2.0f, 0.1f});
+        frameData.color = { 0, 1, 0, 1 };
         appContent->Dbg->Render(&renderParamsDbg);
 
         NuklearSdlVk::RenderParametersVk renderParamsNk;
-        renderParamsNk.dims[0] = (float) width;
-        renderParamsNk.dims[1] = (float)height;
-        renderParamsNk.scale[0] = 1;
-        renderParamsNk.scale[1] = 1;
+        renderParamsNk.dims[ 0 ]          = (float) width;
+        renderParamsNk.dims[ 1 ]          = (float) height;
+        renderParamsNk.scale[ 0 ]         = 1;
+        renderParamsNk.scale[ 1 ]         = 1;
         renderParamsNk.aa                 = NK_ANTI_ALIASING_ON;
         renderParamsNk.max_vertex_buffer  = 64 * 1024;
         renderParamsNk.max_element_buffer = 64 * 1024;
         renderParamsNk.FrameIndex         = appContent->FrameIndex;
         renderParamsNk.pCmdBuffer         = cmdBuffer;
 
-        appContent->Nk->Render(&renderParamsNk);
+        appContent->Nk->Render( &renderParamsNk );
 
         vkCmdEndRenderPass( cmdBuffer );
 
@@ -586,6 +592,8 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         submitInfo.pWaitDstStageMask    = &waitPipelineStage;
         submitInfo.commandBufferCount   = 1;
         submitInfo.pCommandBuffers      = &cmdBuffer;
+
+        appContent->Dbg->Flush( appContent->FrameIndex );
 
         CheckedCall( vkEndCommandBuffer( cmdBuffer ) );
         CheckedCall( vkResetFences( device, 1, &fence ) );
