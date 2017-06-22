@@ -59,8 +59,8 @@ public:
     TDispatchableHandle< VkSemaphore >     hPresentCompleteSemaphores[ kMaxFrames ];
     TDispatchableHandle< VkSemaphore >     hRenderCompleteSemaphores[ kMaxFrames ];
 
-    TDispatchableHandle< VkRenderPass >    hRenderPass;
-    TDispatchableHandle< VkFramebuffer >   hFramebuffers[ kMaxFrames ];
+    TDispatchableHandle< VkRenderPass >    hDbgRenderPass;
+    TDispatchableHandle< VkFramebuffer >   hDbgFramebuffers[ kMaxFrames ];
     TDispatchableHandle< VkImage >         hDepthImgs[ kMaxFrames ];
     TDispatchableHandle< VkImageView >     hDepthImgViews[ kMaxFrames ];
     TDispatchableHandle< VkDeviceMemory >  hDepthImgMemory[ kMaxFrames ];
@@ -169,7 +169,8 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         initParamsNk.pAlloc          = nullptr;
         initParamsNk.pDevice         = *appSurfaceVk->pNode;
         initParamsNk.pPhysicalDevice = *appSurfaceVk->pNode;
-        initParamsNk.pRenderPass     = appContent->hNkRenderPass;
+        initParamsNk.pRenderPass     = appContent->hDbgRenderPass;
+        //initParamsNk.pRenderPass     = appContent->hNkRenderPass;
         initParamsNk.pDescPool       = *appContent->pDescPool;
         initParamsNk.pQueue          = *appSurfaceVk->pCmdQueue;
         initParamsNk.QueueFamilyId   = appSurfaceVk->pCmdQueue->QueueFamilyId;
@@ -182,7 +183,7 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         initParamsDbg.pAlloc          = nullptr;
         initParamsDbg.pDevice         = *appSurfaceVk->pNode;
         initParamsDbg.pPhysicalDevice = *appSurfaceVk->pNode;
-        initParamsDbg.pRenderPass     = appContent->hNkRenderPass;
+        initParamsDbg.pRenderPass     = appContent->hDbgRenderPass;
         initParamsDbg.pDescPool       = *appContent->pDescPool;
         initParamsDbg.FrameCount      = appContent->FrameCount;
 
@@ -326,14 +327,14 @@ bool apemode::App::OnResized( ) {
             renderPassCreateInfoDbg.attachmentCount = 2;
             renderPassCreateInfoDbg.pAttachments    = &colorDepthAttachments[ 0 ];
             renderPassCreateInfoDbg.subpassCount    = 1;
-            renderPassCreateInfoDbg.pSubpasses      = &subpassNk;
+            renderPassCreateInfoDbg.pSubpasses      = &subpassDbg;
 
             if ( false == appContent->hNkRenderPass.Recreate( *appSurfaceVk->pNode, renderPassCreateInfoNk ) ) {
                 DebugBreak( );
                 return false;
             }
 
-            if ( false == appContent->hRenderPass.Recreate( *appSurfaceVk->pNode, renderPassCreateInfoDbg ) ) {
+            if ( false == appContent->hDbgRenderPass.Recreate( *appSurfaceVk->pNode, renderPassCreateInfoDbg ) ) {
                 DebugBreak( );
                 return false;
             }
@@ -346,13 +347,13 @@ bool apemode::App::OnResized( ) {
             framebufferCreateInfoNk.height          = swapchain->ColorExtent.height;
             framebufferCreateInfoNk.layers          = 1;
 
-            VkFramebufferCreateInfo framebufferCreateInfo;
-            InitializeStruct( framebufferCreateInfo );
-            framebufferCreateInfo.renderPass      = appContent->hRenderPass;
-            framebufferCreateInfo.attachmentCount = 2;
-            framebufferCreateInfo.width           = swapchain->ColorExtent.width;
-            framebufferCreateInfo.height          = swapchain->ColorExtent.height;
-            framebufferCreateInfo.layers          = 1;
+            VkFramebufferCreateInfo framebufferCreateInfoDbg;
+            InitializeStruct( framebufferCreateInfoDbg );
+            framebufferCreateInfoDbg.renderPass      = appContent->hDbgRenderPass;
+            framebufferCreateInfoDbg.attachmentCount = 2;
+            framebufferCreateInfoDbg.width           = swapchain->ColorExtent.width;
+            framebufferCreateInfoDbg.height          = swapchain->ColorExtent.height;
+            framebufferCreateInfoDbg.layers          = 1;
 
             for ( uint32_t i = 0; i < appContent->FrameCount; ++i ) {
                 VkImageView attachments[ 1 ] = {swapchain->hImgViews[ i ]};
@@ -366,9 +367,9 @@ bool apemode::App::OnResized( ) {
 
             for ( uint32_t i = 0; i < appContent->FrameCount; ++i ) {
                 VkImageView attachments[ 2 ] = {swapchain->hImgViews[ i ], appContent->hDepthImgViews[ i ]};
-                framebufferCreateInfo.pAttachments = attachments;
+                framebufferCreateInfoDbg.pAttachments = attachments;
 
-                if ( false == appContent->hFramebuffers[ i ].Recreate( *appSurfaceVk->pNode, framebufferCreateInfo ) ) {
+                if ( false == appContent->hDbgFramebuffers[ i ].Recreate( *appSurfaceVk->pNode, framebufferCreateInfoDbg ) ) {
                     DebugBreak( );
                     return false;
                 }
@@ -486,8 +487,8 @@ void App::Update( float deltaSecs, Input const& inputState ) {
 
         }
 
-        VkRenderPass  renderPass  = appContent->hNkRenderPass;
-        VkFramebuffer framebuffer = appContent->hNkFramebuffers[ appContent->FrameIndex ];
+        VkFramebuffer framebufferNk = appContent->hNkFramebuffers[ appContent->FrameIndex ];
+        VkFramebuffer framebufferDbg = appContent->hDbgFramebuffers[ appContent->FrameIndex ];
 
         while (true) {
             const auto waitForFencesErrorHandle = vkWaitForFences( device, 1, &fence, VK_TRUE, 100 );
@@ -515,20 +516,22 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         commandBufferBeginInfo.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
         CheckedCall( vkBeginCommandBuffer( cmdBuffer, &commandBufferBeginInfo ) );
 
-        VkClearValue clearValue;
-        clearValue.color.float32[ 0 ] = clearColor[ 0 ];
-        clearValue.color.float32[ 1 ] = clearColor[ 1 ];
-        clearValue.color.float32[ 2 ] = clearColor[ 2 ];
-        clearValue.color.float32[ 3 ] = clearColor[ 3 ];
+        VkClearValue clearValue[2];
+        clearValue[0].color.float32[ 0 ] = clearColor[ 0 ];
+        clearValue[0].color.float32[ 1 ] = clearColor[ 1 ];
+        clearValue[0].color.float32[ 2 ] = clearColor[ 2 ];
+        clearValue[0].color.float32[ 3 ] = clearColor[ 3 ];
+        clearValue[1].depthStencil.depth = 1;
+        clearValue[1].depthStencil.stencil = 0;
 
         VkRenderPassBeginInfo renderPassBeginInfo;
         InitializeStruct( renderPassBeginInfo );
-        renderPassBeginInfo.renderPass               = renderPass;
-        renderPassBeginInfo.framebuffer              = framebuffer;
+        renderPassBeginInfo.renderPass               = appContent->hDbgRenderPass;
+        renderPassBeginInfo.framebuffer              = appContent->hDbgFramebuffers[ appContent->FrameIndex ];
         renderPassBeginInfo.renderArea.extent.width  = appSurfaceVk->GetWidth( );
         renderPassBeginInfo.renderArea.extent.height = appSurfaceVk->GetHeight( );
-        renderPassBeginInfo.clearValueCount          = 1;
-        renderPassBeginInfo.pClearValues             = &clearValue;
+        renderPassBeginInfo.clearValueCount          = 2;
+        renderPassBeginInfo.pClearValues             = clearValue;
 
         vkCmdBeginRenderPass( cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE );
 
@@ -537,8 +540,8 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         static float rotationY = 0.0;
 
         rotationY += 0.001;
-        if (rotationY >= M_PI) {
-            rotationY -= M_PI;
+        if (rotationY >= 2 * M_PI) {
+            rotationY -= 2 * M_PI;
         }
 
         frameData.worldMatrix = mathfu::mat4::FromRotationMatrix( mathfu::mat3::RotationY( rotationY ) );
@@ -560,11 +563,45 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         renderParamsDbg.pCmdBuffer = cmdBuffer;
         renderParamsDbg.pFrameData = &frameData;
 
-        appContent->Dbg->Render( &renderParamsDbg );
+        //appContent->Dbg->Render( &renderParamsDbg );
 
-        frameData.worldMatrix = mathfu::mat4::FromScaleVector({0.1f, 2.0f, 0.1f});
+        const float scale = 0.5f;
+
+        frameData.worldMatrix
+            = mathfu::mat4::FromScaleVector({scale, scale, scale})
+            * mathfu::mat4::FromRotationMatrix( mathfu::mat3::RotationY( rotationY ) );
+
         frameData.color = { 0, 1, 0, 1 };
         appContent->Dbg->Render(&renderParamsDbg);
+
+        frameData.worldMatrix
+            = mathfu::mat4::FromScaleVector({scale, scale, scale})
+            * mathfu::mat4::FromRotationMatrix( mathfu::mat3::RotationY( rotationY ) )
+            * mathfu::mat4::FromTranslationVector(mathfu::vec3{0, 0, 2});
+
+        frameData.color = { 0, 0, 1, 1 };
+        appContent->Dbg->Render(&renderParamsDbg);
+
+        frameData.worldMatrix
+            = mathfu::mat4::FromScaleVector({scale, scale, scale})
+            * mathfu::mat4::FromRotationMatrix( mathfu::mat3::RotationY( rotationY ) )
+            * mathfu::mat4::FromTranslationVector(mathfu::vec3{2, 0, 0});
+
+        frameData.color = { 1, 0, 0, 1 };
+        appContent->Dbg->Render(&renderParamsDbg);
+
+        //vkCmdEndRenderPass( cmdBuffer );
+
+        /*VkRenderPassBeginInfo renderPassBeginInfoNk;
+        InitializeStruct( renderPassBeginInfoNk );
+        renderPassBeginInfoNk.renderPass               = appContent->hNkRenderPass;
+        renderPassBeginInfoNk.framebuffer              = framebufferNk;
+        renderPassBeginInfoNk.renderArea.extent.width  = appSurfaceVk->GetWidth( );
+        renderPassBeginInfoNk.renderArea.extent.height = appSurfaceVk->GetHeight( );
+        renderPassBeginInfoNk.clearValueCount          = 1;
+        renderPassBeginInfoNk.pClearValues             = clearValue;
+
+        vkCmdBeginRenderPass( cmdBuffer, &renderPassBeginInfoNk, VK_SUBPASS_CONTENTS_INLINE );*/
 
         NuklearSdlVk::RenderParametersVk renderParamsNk;
         renderParamsNk.dims[ 0 ]          = (float) width;
