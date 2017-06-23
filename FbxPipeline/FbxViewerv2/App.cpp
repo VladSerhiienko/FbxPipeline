@@ -15,197 +15,189 @@
 
 namespace apemode {
     using namespace apemodevk;
+    const uint32_t kMaxFrames = Swapchain::kMaxImgs;
+    apemode::AppContent * gAppContent = nullptr;
 }
 
 using namespace apemode;
 
-static const uint32_t kMaxFrames = Swapchain::kMaxImgs;
-static apemode::AppContent * gAppContent = nullptr;
-
-
-struct BasicCamera {
-    mathfu::mat4 ViewMatrix;
-    mathfu::mat4 ProjMatrix;
-};
-
 namespace mathfu {
+    // Left-handed system.
+    const float kHandness = -1;
 
-    template <typename T>
-    T NormalizedSafe(const T& V, float SafeEps = 1e-5f) {
-        const float length = V.Length();
-        const float invLength = 1.0f / (length + SafeEps);
+    static const float kPi    = M_PI;
+    static const float kInvPi = 1 / M_PI;
 
-        return V * invLength;
+    template < typename T >
+    inline T NormalizedSafe( const T& _unsafeVec, float _safeEps = 1e-5f ) {
+        const float length = _unsafeVec.Length( );
+        const float invLength = 1.0f / ( length + _safeEps );
+
+        return _unsafeVec * invLength;
     }
 
-    template <typename T>
-    T NormalizedSafeAndLength(const T& V, float Length float SafeEps = 1e-5f) {
-        const float length = V.Length();
-        const float invLength = 1.0f / (length + SafeEps);
+    template < typename T >
+    inline T NormalizedSafeAndLength( const T& _unsafeVec, float& _outLength, float _safeEps = 1e-5f ) {
+        const float length = _unsafeVec.Length( );
+        const float invLength = 1.0f / ( length + _safeEps );
 
-        Length = length;
-        return V * invLength;
+        _outLength = length;
+        return _unsafeVec * invLength;
     }
 
+    inline mathfu::vec3 VecFromLatLong( mathfu::vec2 _uv ) {
+        const float phi   = _uv.x * 2.0f * kPi;
+        const float theta = _uv.y * kPi;
+
+        const float st = sin( theta );
+        const float sp = sin( phi );
+        const float ct = cos( theta );
+        const float cp = cos( phi );
+
+        return {-st * sp, ct, -st * cp};
+    }
+
+    inline mathfu::vec2 LatLongFromVec( const mathfu::vec3& _vec ) {
+        const float phi   = atan2f( _vec[ 0 ], _vec[ 2 ] );
+        const float theta = acosf( _vec[ 1 ] );
+
+        return {( kPi + phi ) * kInvPi * 0.5f, theta * kInvPi};
+    }
 }
 
-struct ModelViewCameraController {
+namespace apemode {
 
-    mathfu::vec3 Target;
-    mathfu::vec3 Position;
-    mathfu::vec3 TargetDst;
-    mathfu::vec3 PositionDst;
-    mathfu::vec2 Orbit;
-    float NearPlane;
-    float FarPlane;
+    struct BasicCamera {
+        mathfu::mat4 ViewMatrix;
+        mathfu::mat4 ProjMatrix;
+    };
 
-    ModelViewCameraController() {
-        NearPlane = 0.1f;
-        FarPlane = 1000.0f;
-        Reset();
-    }
+    struct CameraProjectionController {
+
+        mathfu::mat4 ProjMatrix( float _fieldOfViewDegs, float _width, float _height, float _nearZ, float _farZ ) {
+            /* https://matthewwellings.com/blog/the-new-vulkan-coordinate-system/ */
+            const mathfu::mat4 kProjBias{{1.f, 0.0f, 0.0f, 0.0f},
+                                         {0.f, -1.f, 0.0f, 0.0f}, /* Flip y */
+                                         {0.f, 0.0f, 0.5f, 0.5f}, /* Z (-1, 1) to (0, 1) */
+                                         {0.f, 0.0f, 0.0f, 1.0f}};
 
 
-    void Reset() {
-        Target = { 0, 0, 0 };
-        Position = { 0, 0, -300 };
-        TargetDst = { 0, 0, 0 };
-        PositionDst = { 0, 0, -300 };
-        Orbit = { 0, 0 };
-    }
-
-    mathfu::mat4 mtxLookAt() {
-        //bx::mtxLookAtRh( _outViewMtx, Position, Target );
-        //bx::mtxLookAt(_outViewMtx, Position, Target);
-        return mathfu::mat4::LookAt(Target, Position, { 0, 1, 0 }, 1);
-    }
-
-    void orbit(mathfu::vec2 dxdy) {
-        Orbit += dxdy;
-    }
-
-    void dolly(float _dz) {
-        float toTargetLen;
-        const mathfu::vec3 toTarget = TargetDst - PositionDst;
-        const mathfu::vec3 toTargetNorm = mathfu::NormalizedSafeAndLength(toTarget, toTargetLen);
-
-        float delta = toTargetLen * _dz;
-        float newLen = toTargetLen + delta;
-        if ((NearPlane < newLen || _dz < 0.0f) && (newLen < FarPlane || _dz > 0.0f)) {
-            PositionDst += toTargetNorm * delta;
+            const float fovRads = _fieldOfViewDegs / 180.0f * M_PI;
+            const float aspectWOverH = _width / _height;
+            return kProjBias * mathfu::mat4::Perspective( fovRads, aspectWOverH, _nearZ, _farZ, mathfu::kHandness );
         }
-    }
 
-    void consumeOrbit(float _amount) {
-        mathfu::vec2 consume = Orbit * _amount;
-        Orbit -= consume;
+    };
 
-        float toPosLen;
-        const mathfu::vec3 toPos = Position - Target;
-        const mathfu::vec3 toPosNorm = mathfu::NormalizedSafeAndLength(toPos, toPosLen);
+    struct ModelViewCameraController {
+        mathfu::vec3 Target;
+        mathfu::vec3 Position;
+        mathfu::vec3 TargetDst;
+        mathfu::vec3 PositionDst;
+        mathfu::vec2 OrbitCurr;
+        mathfu::vec2 ZRange;
 
-        float ll[2];
-        latLongFromVec(ll[0], ll[1], toPosNorm);
-        ll[0] += consume[0];
-        ll[1] -= consume[1];
-        ll[1] = bx::fclamp(ll[1], 0.02f, 0.98f);
+        ModelViewCameraController( ) {
+            ZRange.x = 0.1f;
+            ZRange.y = 1000.0f;
+            Reset( );
+        }
 
-        float tmp[3];
-        vecFromLatLong(tmp, ll[0], ll[1]);
+        void Reset( ) {
+            Target      = {0, 0, 0};
+            Position    = {0, 0, -5};
+            TargetDst   = {0, 0, 0};
+            PositionDst = {0, 0, -5};
+            OrbitCurr   = {0, 0};
+        }
 
-        float diff[3];
-        diff[0] = (tmp[0] - toPosNorm[0]) * toPosLen;
-        diff[1] = (tmp[1] - toPosNorm[1]) * toPosLen;
-        diff[2] = (tmp[2] - toPosNorm[2]) * toPosLen;
+        mathfu::mat4 ViewMatrix( ) {
+            return mathfu::mat4::LookAt( Target, Position, {0, 1, 0}, mathfu::kHandness );
+        }
 
-        Position[0] += diff[0];
-        Position[1] += diff[1];
-        Position[2] += diff[2];
-        PositionDst[0] += diff[0];
-        PositionDst[1] += diff[1];
-        PositionDst[2] += diff[2];
-    }
+        void Orbit( mathfu::vec2 _dxdy ) {
+            OrbitCurr += _dxdy;
+        }
 
-    void update(float _dt) {
-        const float amount = bx::fmin(_dt / 0.12f, 1.0f);
+        void Dolly( float _dz ) {
+            float toTargetLen;
+            const mathfu::vec3 toTargetNorm = mathfu::NormalizedSafeAndLength( TargetDst - PositionDst, toTargetLen );
 
-        consumeOrbit(amount);
+            float delta  = toTargetLen * _dz;
+            float newLen = toTargetLen + delta;
+            if ( ( ZRange.x < newLen || _dz < 0.0f ) && ( newLen < ZRange.y || _dz > 0.0f ) ) {
+                PositionDst += toTargetNorm * delta;
+            }
+        }
 
-        Target[0] = bx::flerp(Target[0], TargetDst[0], amount);
-        Target[1] = bx::flerp(Target[1], TargetDst[1], amount);
-        Target[2] = bx::flerp(Target[2], TargetDst[2], amount);
-        Position[0] = bx::flerp(Position[0], PositionDst[0], amount);
-        Position[1] = bx::flerp(Position[1], PositionDst[1], amount);
-        Position[2] = bx::flerp(Position[2], PositionDst[2], amount);
-    }
+        void ConsumeOrbit( float _amount ) {
+            mathfu::vec2 consume = OrbitCurr * _amount;
+            OrbitCurr -= consume;
 
-    void envViewMtx(float* _mtx) {
-        const float toTarget[3] = {
-            Target[0] - Position[0],
-            Target[1] - Position[1],
-            Target[2] - Position[2],
-        };
+            float toPosLen;
+            const mathfu::vec3 toPosNorm = mathfu::NormalizedSafeAndLength( Position - Target, toPosLen );
 
-        const float toTargetLen = bx::vec3Length(toTarget);
-        const float invToTargetLen = 1.0f / (toTargetLen + FLT_MIN);
+            mathfu::vec2 ll = mathfu::LatLongFromVec( toPosNorm ) + consume * mathfu::vec2( 1, -1 );
+            ll.y = mathfu::Clamp( ll.y, 0.02f, 0.98f );
 
-        const float toTargetNorm[3] = {
-            toTarget[0] * invToTargetLen,
-            toTarget[1] * invToTargetLen,
-            toTarget[2] * invToTargetLen,
-        };
+            const mathfu::vec3 tmp  = mathfu::VecFromLatLong( ll );
+            const mathfu::vec3 diff = ( tmp - toPosNorm ) * toPosLen;
 
-        float tmp[3];
-        const float fakeUp[3] = { 0.0f, 1.0f, 0.0f };
+            Position += diff;
+            PositionDst += diff;
+        }
 
-        float right[3];
-        bx::vec3Cross(tmp, fakeUp, toTargetNorm);
-        bx::vec3Norm(right, tmp);
+        void Update( float _dt ) {
+            const float amount = std::min( _dt / 0.12f, 1.0f );
 
-        float up[3];
-        bx::vec3Cross(tmp, toTargetNorm, right);
-        bx::vec3Norm(up, tmp);
+            ConsumeOrbit( amount );
 
-        _mtx[0] = right[0];
-        _mtx[1] = right[1];
-        _mtx[2] = right[2];
-        _mtx[3] = 0.0f;
-        _mtx[4] = up[0];
-        _mtx[5] = up[1];
-        _mtx[6] = up[2];
-        _mtx[7] = 0.0f;
-        _mtx[8] = toTargetNorm[0];
-        _mtx[9] = toTargetNorm[1];
-        _mtx[10] = toTargetNorm[2];
-        _mtx[11] = 0.0f;
-        _mtx[12] = 0.0f;
-        _mtx[13] = 0.0f;
-        _mtx[14] = 0.0f;
-        _mtx[15] = 1.0f;
-    }
+            Target   = mathfu::Lerp( Target, TargetDst, amount );
+            Position = mathfu::Lerp( Position, PositionDst, amount );
+        }
 
-    static inline void vecFromLatLong(float _vec[3], float _u, float _v) {
-        const float phi = _u * 2.0f * bx::pi;
-        const float theta = _v * bx::pi;
+        mathfu::mat4 EnvViewMatrix( ) {
+            const mathfu::vec3 forward = mathfu::NormalizedSafe( Target - Position );
+            const mathfu::vec3 right   = mathfu::vec3::CrossProduct( {0.0f, 1.0f, 0.0f}, forward ).Normalized( );
+            const mathfu::vec3 up      = mathfu::vec3::CrossProduct( forward, right ).Normalized( );
 
-        const float st = bx::fsin(theta);
-        const float sp = bx::fsin(phi);
-        const float ct = bx::fcos(theta);
-        const float cp = bx::fcos(phi);
+            return mathfu::mat4( mathfu::vec4{right,   0.0f},
+                                 mathfu::vec4{up,      0.0f},
+                                 mathfu::vec4{forward, 0.0f},
+                                 mathfu::vec4{0.0f, 0.0f, 0.0f, 1.0f} );
+        }
+    };
 
-        _vec[0] = -st * sp;
-        _vec[1] = ct;
-        _vec[2] = -st * cp;
-    }
+    /* Adapts the input for the camera */
+    struct CameraMouseInput {
+        CameraMouseInput( )
+            : Delta( 0.0f )
+            , Scroll( 0.0f )
+            , PrevPosition( std::numeric_limits<float>::max() )
+            , PrevScroll( std::numeric_limits<float>::max() ) {
+        }
 
-    static inline void latLongFromVec(float& _u, float& _v, const float _vec[3]) {
-        const float phi = atan2f(_vec[0], _vec[2]);
-        const float theta = acosf(_vec[1]);
+        void Update( mathfu::vec3 _mxyz, mathfu::vec2 _widthHeight ) {
+            if ( PrevScroll == std::numeric_limits< float >::max( ) ) {
+                PrevScroll = _mxyz.z;
+                PrevPosition = _mxyz.xy( );
+            }
 
-        _u = (bx::pi + phi) * bx::invPi * 0.5f;
-        _v = theta * bx::invPi;
-    }
-};
+            // Delta movement.
+            Delta = ( _mxyz.xy( ) - PrevPosition ) / _widthHeight;
+            PrevPosition = _mxyz.xy( );
+
+            // Scroll.
+            Scroll = _mxyz.z - PrevScroll;
+            PrevScroll = _mxyz.z;
+        }
+
+        mathfu::vec2 Delta;
+        mathfu::vec2 PrevPosition;
+        float Scroll;
+        float PrevScroll;
+    };
+}
 
 const VkFormat sDepthFormat = VK_FORMAT_D16_UNORM;
 
@@ -225,6 +217,11 @@ public:
     NuklearSdlBase* Nk = nullptr;
     DebugRendererVk * Dbg = nullptr;
 
+    ModelViewCameraController CamController;
+    CameraProjectionController CamProjController;
+    CameraMouseInput CamMouseInput;
+
+
     uint32_t FrameCount = 0;
     uint32_t FrameIndex = 0;
     uint64_t FrameId    = 0;
@@ -232,13 +229,14 @@ public:
     uint32_t BackbufferIndices[ kMaxFrames ] = {0};
 
     std::unique_ptr< DescriptorPool >      pDescPool;
-    TDispatchableHandle< VkRenderPass >    hNkRenderPass;
-    TDispatchableHandle< VkFramebuffer >   hNkFramebuffers[ kMaxFrames ];
     TDispatchableHandle< VkCommandPool >   hCmdPool[ kMaxFrames ];
     TDispatchableHandle< VkCommandBuffer > hCmdBuffers[ kMaxFrames ];
     TDispatchableHandle< VkFence >         hFences[ kMaxFrames ];
     TDispatchableHandle< VkSemaphore >     hPresentCompleteSemaphores[ kMaxFrames ];
     TDispatchableHandle< VkSemaphore >     hRenderCompleteSemaphores[ kMaxFrames ];
+
+    TDispatchableHandle< VkRenderPass >    hNkRenderPass;
+    TDispatchableHandle< VkFramebuffer >   hNkFramebuffers[ kMaxFrames ];
 
     TDispatchableHandle< VkRenderPass >    hDbgRenderPass;
     TDispatchableHandle< VkFramebuffer >   hDbgFramebuffers[ kMaxFrames ];
@@ -649,6 +647,20 @@ void App::Update( float deltaSecs, Input const& inputState ) {
     }
     nk_end(ctx);
 
+    appContent->CamMouseInput.Update( {inputState.Analogs[ kAnalogInput_MouseX ],
+                                       inputState.Analogs[ kAnalogInput_MouseY ],
+                                       inputState.Analogs[ kAnalogInput_MouseScroll ]},
+                                      {(float) appContent->width, (float) appContent->height} );
+
+    if ( inputState.Buttons[ 0 ][ kDigitalInput_Mouse0 ] ) {
+        appContent->CamController.Orbit( appContent->CamMouseInput.Delta );
+    } else if ( inputState.Buttons[ 0 ][ kDigitalInput_Mouse1 ] ) {
+        auto scroll = appContent->CamMouseInput.Delta.x + appContent->CamMouseInput.Delta.y;
+        appContent->CamController.Dolly( scroll );
+    }
+
+    appContent->CamController.Update( deltaSecs );
+
     if ( auto appSurfaceVk = (AppSurfaceSdlVk*) GetSurface( ) ) {
         VkDevice        device                   = *appSurfaceVk->pNode;
         VkQueue         queue                    = *appSurfaceVk->pCmdQueue;
@@ -726,12 +738,9 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         }
 
         frameData.worldMatrix = mathfu::mat4::FromRotationMatrix( mathfu::mat3::RotationY( rotationY ) );
-        frameData.projectionMatrix = mathfu::mat4::Perspective( 55.0f / 180.0f * M_PI, (float) width / (float) height, 0.1f, 100.0f, 1 );
-        frameData.viewMatrix = mathfu::mat4::LookAt( {0, 0, 0}, {0, 3, 5}, {0, 1, 0}, 1 );
+        frameData.projectionMatrix = appContent->CamProjController.ProjMatrix(55, width, height, 0.1f, 100.0f);
+        frameData.viewMatrix = appContent->CamController.ViewMatrix();
         frameData.color = {1, 0, 0, 1};
-
-        // Flip projection matrix from GL to Vulkan orientation.
-        frameData.projectionMatrix.GetColumn( 1 )[ 1 ] *= -1;
 
         appContent->Dbg->Reset( appContent->FrameIndex );
 
@@ -749,35 +758,24 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         const float scale = 0.5f;
 
         frameData.worldMatrix
-            = mathfu::mat4::FromRotationMatrix( mathfu::mat3::RotationY( rotationY ) )
-            * mathfu::mat4::FromScaleVector({ scale, scale * 2, scale })
+            = mathfu::mat4::FromScaleVector({ scale, scale * 2, scale })
             * mathfu::mat4::FromTranslationVector(mathfu::vec3{ 0, scale * 3, 0 });
 
         frameData.color = { 0, 1, 0, 1 };
         appContent->Dbg->Render(&renderParamsDbg);
 
         frameData.worldMatrix
-            = mathfu::mat4::FromRotationMatrix( mathfu::mat3::RotationY( rotationY ) )
-            * mathfu::mat4::FromScaleVector({ scale, scale, scale * 2 })
+            = mathfu::mat4::FromScaleVector({ scale, scale, scale * 2 })
             * mathfu::mat4::FromTranslationVector(mathfu::vec3{ 0, 0, scale * 3 });
 
         frameData.color = { 0, 0, 1, 1 };
         appContent->Dbg->Render(&renderParamsDbg);
 
         frameData.worldMatrix
-            = mathfu::mat4::FromRotationMatrix( mathfu::mat3::RotationY( rotationY ) )
-            * mathfu::mat4::FromScaleVector({ scale * 2, scale, scale })
+            = mathfu::mat4::FromScaleVector({ scale * 2, scale, scale })
             * mathfu::mat4::FromTranslationVector(mathfu::vec3{ scale * 3, 0, 0 });
 
         frameData.color = { 1, 0, 0, 1 };
-        appContent->Dbg->Render(&renderParamsDbg);
-
-        frameData.worldMatrix
-            = mathfu::mat4::FromRotationMatrix(mathfu::mat3::RotationY(rotationY))
-            * mathfu::mat4::FromTranslationVector(mathfu::vec3{ 0, 0, 0 })
-            * mathfu::mat4::FromScaleVector({ scale / 2, scale / 2, scale / 2 });
-
-        frameData.color = { 0.5, 0.5, 0.5, 1 };
         appContent->Dbg->Render(&renderParamsDbg);
 
         //vkCmdEndRenderPass( cmdBuffer );

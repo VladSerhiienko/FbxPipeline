@@ -37,8 +37,8 @@ void CalculateTangents( TVertex* vertices, size_t vertexCount ) {
         const mathfu::vec3 sdir( ( t2 * x1 - t1 * x2 ) * r, ( t2 * y1 - t1 * y2 ) * r, ( t2 * z1 - t1 * z2 ) * r );
         const mathfu::vec3 tdir( ( s1 * x2 - s2 * x1 ) * r, ( s1 * y2 - s2 * y1 ) * r, ( s1 * z2 - s2 * z1 ) * r );
 
-        // assert( !isnan( sdir.x( ) ) && !isnan( sdir.y( ) ) && !isnan( sdir.z( ) ) );
-        // assert( !isnan( tdir.x( ) ) && !isnan( tdir.y( ) ) && !isnan( tdir.z( ) ) );
+        // assert( !isnan( sdir.x ) && !isnan( sdir.y ) && !isnan( sdir.z ) );
+        // assert( !isnan( tdir.x ) && !isnan( tdir.y ) && !isnan( tdir.z ) );
 
         tan1[ i + 0 ] += sdir;
         tan1[ i + 1 ] += sdir;
@@ -55,11 +55,11 @@ void CalculateTangents( TVertex* vertices, size_t vertexCount ) {
         const auto t = tan1[ i ];
 
         mathfu::vec3 tt = mathfu::normalize( t - n * mathfu::dot( n, t ) );
-        // assert( !isnan( tt.x( ) ) && !isnan( tt.y( ) ) && !isnan( tt.z( ) ) );
+        // assert( !isnan( tt.x ) && !isnan( tt.y ) && !isnan( tt.z ) );
 
-        v.tangent[ 0 ]  = tt.x( );
-        v.tangent[ 1 ]  = tt.y( );
-        v.tangent[ 2 ]  = tt.z( );
+        v.tangent[ 0 ]  = tt.x;
+        v.tangent[ 1 ]  = tt.y;
+        v.tangent[ 2 ]  = tt.z;
         v.tangent[ 3 ]  = ( mathfu::dot( mathfu::cross( n, t ), tan2[ i ] ) < 0 ) ? -1.0f : 1.0f;
     }
 }
@@ -81,17 +81,17 @@ void CalculateFaceNormals( TVertex* vertices, size_t vertexCount ) {
         const mathfu::vec3 p2( v2.position );
         const mathfu::vec3 n( mathfu::normalize( mathfu::cross( p1 - p0, p2 - p0 ) ) );
 
-        v0.normal[ 0 ] = n.x( );
-        v0.normal[ 1 ] = n.y( );
-        v0.normal[ 2 ] = n.z( );
+        v0.normal[ 0 ] = n.x;
+        v0.normal[ 1 ] = n.y;
+        v0.normal[ 2 ] = n.z;
 
-        v1.normal[ 0 ] = n.x( );
-        v1.normal[ 1 ] = n.y( );
-        v1.normal[ 2 ] = n.z( );
+        v1.normal[ 0 ] = n.x;
+        v1.normal[ 1 ] = n.y;
+        v1.normal[ 2 ] = n.z;
 
-        v2.normal[ 0 ] = n.x( );
-        v2.normal[ 1 ] = n.y( );
-        v2.normal[ 2 ] = n.z( );
+        v2.normal[ 0 ] = n.x;
+        v2.normal[ 1 ] = n.y;
+        v2.normal[ 2 ] = n.z;
     }
 }
 
@@ -450,17 +450,17 @@ void InitializeVertices( FbxMesh*      mesh,
     s.console->info( "Mesh \"{}\" has {} control points.", mesh->GetNode( )->GetName( ), cc );
     s.console->info( "Mesh \"{}\" has {} polygons.", mesh->GetNode( )->GetName( ), pc );
 
-    positionMin.x( ) = std::numeric_limits< float >::max( );
-    positionMin.y( ) = std::numeric_limits< float >::max( );
-    positionMin.z( ) = std::numeric_limits< float >::max( );
-    positionMax.x( ) = std::numeric_limits< float >::min( );
-    positionMax.y( ) = std::numeric_limits< float >::min( );
-    positionMax.z( ) = std::numeric_limits< float >::min( );
+    positionMin.x = std::numeric_limits< float >::max( );
+    positionMin.y = std::numeric_limits< float >::max( );
+    positionMin.z = std::numeric_limits< float >::max( );
+    positionMax.x = std::numeric_limits< float >::min( );
+    positionMax.y = std::numeric_limits< float >::min( );
+    positionMax.z = std::numeric_limits< float >::min( );
 
-    texcoordMin.x( ) = std::numeric_limits< float >::max( );
-    texcoordMin.y( ) = std::numeric_limits< float >::max( );
-    texcoordMax.x( ) = std::numeric_limits< float >::min( );
-    texcoordMax.y( ) = std::numeric_limits< float >::min( );
+    texcoordMin.x = std::numeric_limits< float >::max( );
+    texcoordMin.y = std::numeric_limits< float >::max( );
+    texcoordMax.x = std::numeric_limits< float >::min( );
+    texcoordMax.y = std::numeric_limits< float >::min( );
 
     const auto uve = VerifyElementLayer( mesh->GetElementUV( ) );
     const auto ne  = VerifyElementLayer( mesh->GetElementNormal( ) );
@@ -499,26 +499,26 @@ void InitializeVertices( FbxMesh*      mesh,
             assert( !isnan( (float) t[ 0 ] ) && !isnan( (float) t[ 1 ] ) && !isnan( (float) t[ 2 ] ) && !isnan( (float) t[ 3 ] ) );
             assert( !isnan( (float) uv[ 0 ] ) && !isnan( (float) uv[ 1 ] ) );
 
-            positionMin.x( ) = std::min( positionMin.x( ), (float) cp[ 0 ] );
-            positionMin.y( ) = std::min( positionMin.y( ), (float) cp[ 1 ] );
-            positionMin.z( ) = std::min( positionMin.z( ), (float) cp[ 2 ] );
-            positionMax.x( ) = std::max( positionMax.x( ), (float) cp[ 0 ] );
-            positionMax.y( ) = std::max( positionMax.y( ), (float) cp[ 1 ] );
-            positionMax.z( ) = std::max( positionMax.z( ), (float) cp[ 2 ] );
+            positionMin.x = std::min( positionMin.x, (float) cp[ 0 ] );
+            positionMin.y = std::min( positionMin.y, (float) cp[ 1 ] );
+            positionMin.z = std::min( positionMin.z, (float) cp[ 2 ] );
+            positionMax.x = std::max( positionMax.x, (float) cp[ 0 ] );
+            positionMax.y = std::max( positionMax.y, (float) cp[ 1 ] );
+            positionMax.z = std::max( positionMax.z, (float) cp[ 2 ] );
 
-            texcoordMin.x( ) = std::min( texcoordMin.x( ), (float) uv[ 0 ] );
-            texcoordMin.y( ) = std::min( texcoordMin.y( ), (float) uv[ 1 ] );
-            texcoordMax.x( ) = std::max( texcoordMax.x( ), (float) uv[ 0 ] );
-            texcoordMax.y( ) = std::max( texcoordMax.y( ), (float) uv[ 1 ] );
+            texcoordMin.x = std::min( texcoordMin.x, (float) uv[ 0 ] );
+            texcoordMin.y = std::min( texcoordMin.y, (float) uv[ 1 ] );
+            texcoordMax.x = std::max( texcoordMax.x, (float) uv[ 0 ] );
+            texcoordMax.y = std::max( texcoordMax.y, (float) uv[ 1 ] );
 
             ++vi;
         }
     }
 
-    m.positionMin = fbxp::fb::vec3( positionMin.x( ), positionMin.y( ), positionMin.z( ) );
-    m.positionMax = fbxp::fb::vec3( positionMax.x( ), positionMax.y( ), positionMax.z( ) );
-    m.texcoordMin = fbxp::fb::vec2( texcoordMin.x( ), texcoordMin.y( ) );
-    m.texcoordMax = fbxp::fb::vec2( texcoordMax.x( ), texcoordMax.y( ) );
+    m.positionMin = fbxp::fb::vec3( positionMin.x, positionMin.y, positionMin.z );
+    m.positionMax = fbxp::fb::vec3( positionMax.x, positionMax.y, positionMax.z );
+    m.texcoordMin = fbxp::fb::vec2( texcoordMin.x, texcoordMin.y );
+    m.texcoordMax = fbxp::fb::vec2( texcoordMax.x, texcoordMax.y );
 
     if ( nullptr == uve ) {
         s.console->error( "Mesh \"{}\" does not have texcoords geometry layer.",
@@ -631,16 +631,16 @@ void ExportMesh( FbxNode* node, FbxMesh* mesh, fbxp::Node& n, fbxp::Mesh& m, uin
               texcoordMax );
     }
 
-    fbxp::fb::vec3 bboxMin( positionMin.x( ), positionMin.y( ), positionMin.z( ) );
-    fbxp::fb::vec3 bboxMax( positionMax.x( ), positionMax.y( ), positionMax.z( ) );
-    fbxp::fb::vec2 uvMin( texcoordMin.x( ), texcoordMin.y( ) );
-    fbxp::fb::vec2 uvMax( texcoordMax.x( ), texcoordMax.y( ) );
+    fbxp::fb::vec3 bboxMin( positionMin.x, positionMin.y, positionMin.z );
+    fbxp::fb::vec3 bboxMax( positionMax.x, positionMax.y, positionMax.z );
+    fbxp::fb::vec2 uvMin( texcoordMin.x, texcoordMin.y );
+    fbxp::fb::vec2 uvMax( texcoordMax.x, texcoordMax.y );
 
     if ( pack ) {
         auto const positionScale = positionMax - positionMin;
         auto const texcoordScale = texcoordMax - texcoordMin;
-        fbxp::fb::vec3 bboxScale( positionScale.x( ), positionScale.y( ), positionScale.z( ) );
-        fbxp::fb::vec2 uvScale( texcoordScale.x( ), texcoordScale.y( ) );
+        fbxp::fb::vec3 bboxScale( positionScale.x, positionScale.y, positionScale.z );
+        fbxp::fb::vec2 uvScale( texcoordScale.x, texcoordScale.y );
 
         m.submeshes.emplace_back( bboxMin,                        // bbox min
                                   bboxMax,                        // bbox max

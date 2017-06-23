@@ -291,42 +291,48 @@ bool apemode::DebugRendererVk::RecreateResources( InitParametersVk* initParams )
 
         // clang-format off
         const float g_vertex_buffer_data[] = {
-            -1.0f,-1.0f,-1.0f,  // -X side
+            // -X side
+            -1.0f,-1.0f,-1.0f,  
             -1.0f,-1.0f, 1.0f,
             -1.0f, 1.0f, 1.0f,
             -1.0f, 1.0f, 1.0f,
             -1.0f, 1.0f,-1.0f,
             -1.0f,-1.0f,-1.0f,
 
-            -1.0f,-1.0f,-1.0f,  // -Z side
+            // -Z side
+            -1.0f,-1.0f,-1.0f,
              1.0f, 1.0f,-1.0f,
              1.0f,-1.0f,-1.0f,
             -1.0f,-1.0f,-1.0f,
             -1.0f, 1.0f,-1.0f,
              1.0f, 1.0f,-1.0f,
 
-            -1.0f,-1.0f,-1.0f,  // -Y side
+             // -Y side
+             -1.0f,-1.0f,-1.0f,
              1.0f,-1.0f,-1.0f,
              1.0f,-1.0f, 1.0f,
             -1.0f,-1.0f,-1.0f,
              1.0f,-1.0f, 1.0f,
             -1.0f,-1.0f, 1.0f,
 
-            -1.0f, 1.0f,-1.0f,  // +Y side
+            // +Y side
+            -1.0f, 1.0f,-1.0f,
             -1.0f, 1.0f, 1.0f,
              1.0f, 1.0f, 1.0f,
             -1.0f, 1.0f,-1.0f,
              1.0f, 1.0f, 1.0f,
              1.0f, 1.0f,-1.0f,
 
-            1.0f, 1.0f,-1.0f,  // +X side
+             // +X side
+             1.0f, 1.0f,-1.0f,
             1.0f, 1.0f, 1.0f,
             1.0f,-1.0f, 1.0f,
             1.0f,-1.0f, 1.0f,
             1.0f,-1.0f,-1.0f,
             1.0f, 1.0f,-1.0f,
 
-            -1.0f, 1.0f, 1.0f,  // +Z side
+            // +Z side
+            -1.0f, 1.0f, 1.0f,  
             -1.0f,-1.0f, 1.0f,
              1.0f, 1.0f, 1.0f,
             -1.0f,-1.0f, 1.0f,

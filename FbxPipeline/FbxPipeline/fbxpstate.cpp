@@ -160,7 +160,7 @@ bool fbxp::State::Finish( ) {
             fileBuffer = ReadFile( embedded.c_str( ) );
             if ( !fileBuffer.empty( ) ) {
                 auto bytesOffset = builder.CreateVectorOfStructs( fileBuffer );
-                fileOffsets.push_back( fb::CreateFileFbDirect( builder, fileOffsets.size( ), 0, &fileBuffer ) );
+                fileOffsets.push_back( fb::CreateFileFbDirect( builder, (uint32_t) fileOffsets.size( ), 0, &fileBuffer ) );
             }
         }
     }

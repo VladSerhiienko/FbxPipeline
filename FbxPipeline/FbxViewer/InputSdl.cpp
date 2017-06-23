@@ -156,11 +156,6 @@ bool fbxv::Input::IsPressed (DigitalInputUInt InDigitalInput) const
 
 bool fbxv::Input::IsFirstPressed (DigitalInputUInt InDigitalInput) const
 {
-    /*SDL_LogInfo (SDL_LOG_CATEGORY_APPLICATION,
-                 "Octopus: is first pressed ? [0]=%u [1]=%u",
-                 Buttons[ 0 ][ InDigitalInput ],
-                 Buttons[ 1 ][ InDigitalInput ]);*/
-
     return Buttons[ 0 ][ InDigitalInput ] && !Buttons[ 1 ][ InDigitalInput ];
 }
 
@@ -171,11 +166,6 @@ bool fbxv::Input::IsReleased (DigitalInputUInt InDigitalInput) const
 
 bool fbxv::Input::IsFirstReleased (DigitalInputUInt InDigitalInput) const
 {
-    /*SDL_LogInfo (SDL_LOG_CATEGORY_APPLICATION,
-                 "Octopus: is first released ? [0]=%u [1]=%u",
-                 Buttons[ 0 ][ InDigitalInput ],
-                 Buttons[ 1 ][ InDigitalInput ]);*/
-
     return !Buttons[ 0 ][ InDigitalInput ] && Buttons[ 1 ][ InDigitalInput ];
 }
 
@@ -237,12 +227,6 @@ static void LogTouches (uint32_t stateIndex, bool const * touchButtonsState)
 
 void fbxv::InputManager::Update(Input & InOutState, float const DeltaTime)
 {
-    /*SDL_LogInfo (SDL_LOG_CATEGORY_APPLICATION, "Octopus: < Input Update >");
-    LogTouches (0, InOutState.Buttons[ 0 ] + kDigitalInput_Touch0);
-    LogTouches (1, InOutState.Buttons[ 1 ] + kDigitalInput_Touch0);*/
-
-    //SDL_LogInfo (SDL_LOG_CATEGORY_APPLICATION, "Octopus: Update input started");
-
     SDL_PumpEvents();
 
     static SDL_Event windowEvents[ 16 ];
@@ -279,11 +263,7 @@ void fbxv::InputManager::Update(Input & InOutState, float const DeltaTime)
         }
     }
 
-    //SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Octopus: Pumped events");
-
     InOutState.bIsQuitRequested = SDL_PeepEvents(nullptr, 0, SDL_PEEKEVENT, SDL_QUIT, SDL_QUIT) > 0;
-
-    //SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Octopus: Quit requested");
 
     // Preserve previous values
     memcpy(InOutState.Buttons[1], InOutState.Buttons[0], sizeof(InOutState.Buttons[0]));
@@ -295,8 +275,6 @@ void fbxv::InputManager::Update(Input & InOutState, float const DeltaTime)
     // Clear dynamic per-frame values.
     memset(InOutState.Buttons[0], 0, sizeof(bool) * (kDigitalInput_Touch0));
     memset(InOutState.Analogs, 0, sizeof(bool) * kAnalogInput_Touch0X);
-
-    //SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Octopus: Keys");
 
     if (auto SdlKeybuffer = SDL_GetKeyboardState(nullptr))
     {
@@ -315,10 +293,6 @@ void fbxv::InputManager::Update(Input & InOutState, float const DeltaTime)
         // I made this array static, why allocate it each time.
         static SDL_Event peepedEvents[ kDigitalInput_TouchMaxCount ];
 
-        //int peepedEventCount = 0;
-
-        // do
-        //{
         // Peep only finger events and remove them from event queue.
         int peepedEventCount = SDL_PeepEvents (peepedEvents,
                                                kDigitalInput_TouchMaxCount,
@@ -326,41 +300,21 @@ void fbxv::InputManager::Update(Input & InOutState, float const DeltaTime)
                                                SDL_FINGERDOWN,
                                                SDL_FINGERMOTION);
 
-        //SDL_LogInfo (SDL_LOG_CATEGORY_APPLICATION, "Octopus: Peeped touches %i", peepedEventCount);
-
         if (peepedEventCount > 0)
         {
-            //SDL_LogInfo (SDL_LOG_CATEGORY_APPLICATION, "Octopus: Has touches %i", peepedEventCount);
-
             peepedEventCount = std::min<int> (peepedEventCount, kDigitalInput_TouchMaxCount);
-
-            /*
-            std::sort (peepedEvents,
-                       peepedEvents + peepedEventCount,
-                       [&](SDL_Event const & lhs, SDL_Event const & rhs) {
-                           return lhs.tfinger.timestamp <= rhs.tfinger.timestamp;
-                       });*/
 
             for (int i = 0; i < peepedEventCount; ++i)
             {
-                //SDL_LogInfo (SDL_LOG_CATEGORY_APPLICATION, "Octopus: Processing touch event %i", i);
-
                 SDL_Event & PeepedEvent = peepedEvents[ i ];
 
-                /*SDL_LogInfo (SDL_LOG_CATEGORY_APPLICATION,
-                             "Octopus: FingerId %lld (%llu, %llx)",
-                             PeepedEvent.tfinger.fingerId,
-                             *reinterpret_cast<Uint64 *> (&PeepedEvent.tfinger.fingerId),
-                             *reinterpret_cast<Uint64 *> (&PeepedEvent.tfinger.fingerId));*/
-
-                if (PeepedEvent.tfinger.fingerId < 0
-                    || PeepedEvent.tfinger.fingerId > kDigitalInput_TouchMaxCount)
+                if (PeepedEvent.tfinger.fingerId < 0 || PeepedEvent.tfinger.fingerId > kDigitalInput_TouchMaxCount)
                 {
                     SDL_LogError (SDL_LOG_CATEGORY_APPLICATION, "Octopus: Finger id is invalid.");
                     continue;
                 }
 
-                bool const     bIsFingerTracked = PeepedEvent.type != SDL_FINGERUP;
+                bool const bIsFingerTracked = PeepedEvent.type != SDL_FINGERUP;
                 uint32_t const FinderId = static_cast<uint32_t> (PeepedEvent.tfinger.fingerId);
 
                 InOutState.bIsAnyPressed |= bIsFingerTracked;
@@ -370,35 +324,14 @@ void fbxv::InputManager::Update(Input & InOutState, float const DeltaTime)
                 uint32_t const eTouchX = kAnalogInput_Touch0X + FinderId;
                 uint32_t const eTouchY = kAnalogInput_Touch0Y + FinderId;
 
-                /*SDL_LogInfo (SDL_LOG_CATEGORY_APPLICATION,
-                             "Octopus: finger/touchX/touchY %u %u %u digital/analog max %u %u",
-                             eFinger,
-                             eTouchX,
-                             eTouchY,
-                             sizeof (InOutState.Buttons[ 0 ]) / sizeof (uint8_t),
-                             sizeof (InOutState.Analogs) / sizeof (float));*/
-
                 InOutState.Buttons[ 0 ][ eFinger ] = bIsFingerTracked;
                 InOutState.Analogs[ eTouchX ]      = PeepedEvent.tfinger.x;
                 InOutState.Analogs[ eTouchY ]      = PeepedEvent.tfinger.y;
-
-                /*SDL_LogInfo (SDL_LOG_CATEGORY_APPLICATION,
-                             "Octopus: finger %u %s %.2f %.2f (t=%u)",
-                             FinderId,
-                             PeepedEvent.type == SDL_FINGERUP
-                                 ? "up"
-                                 : PeepedEvent.type == SDL_FINGERDOWN ? "down" : "motion",
-                             PeepedEvent.tfinger.x,
-                             PeepedEvent.tfinger.y,
-                             PeepedEvent.tfinger.timestamp);*/
-
-                //SDL_LogInfo (SDL_LOG_CATEGORY_APPLICATION, "Octopus: Process touch");
 
                 switch (PeepedEvent.type)
                 {
                 case SDL_FINGERDOWN:
                 {
-                    //SDL_LogInfo (SDL_LOG_CATEGORY_APPLICATION, "Octopus: SDL_FINGERDOWN");
                     InOutState.TouchIds[ InOutState.TouchIdCount ] = FinderId;
 
                     auto TouchItEnd = InOutState.TouchIds + InOutState.TouchIdCount + 1;
@@ -406,13 +339,11 @@ void fbxv::InputManager::Update(Input & InOutState, float const DeltaTime)
 
                     auto TouchIt            = std::unique (InOutState.TouchIds, TouchItEnd);
                     InOutState.TouchIdCount = std::distance (InOutState.TouchIds, TouchIt);
-                    //SDL_LogInfo (SDL_LOG_CATEGORY_APPLICATION, "Octopus: SDL_FINGERDOWN ok");
                 }
                 break;
 
                 case SDL_FINGERUP:
                 {
-                    //SDL_LogInfo (SDL_LOG_CATEGORY_APPLICATION, "Octopus: SDL_FINGERUP");
                     auto TouchItEnd = InOutState.TouchIds + InOutState.TouchIdCount;
                     auto TouchIt    = std::find (InOutState.TouchIds, TouchItEnd, FinderId);
                     if (TouchIt != TouchItEnd)
@@ -425,23 +356,17 @@ void fbxv::InputManager::Update(Input & InOutState, float const DeltaTime)
                         InOutState.TouchIdCount = std::distance (InOutState.TouchIds, TouchIt)
                             - ptrdiff_t (TouchItEnd == TouchIt);
                     }
-                    //SDL_LogInfo (SDL_LOG_CATEGORY_APPLICATION, "Octopus: SDL_FINGERUP ok");
                 }
                 break;
 
                 case SDL_FINGERMOTION:
-                    //SDL_LogInfo (SDL_LOG_CATEGORY_APPLICATION, "Octopus: SDL_FINGERMOTION");
                     break;
                 default:
                     SDL_LogError (SDL_LOG_CATEGORY_APPLICATION, "Octopus: Unknown event");
-                    // assert(false && "Unexpected event eType or memory corruption.");
                     break;
                 }
             }
         }
-
-        //} while (peepedEventCount > 0);
-        // SDL_LogInfo (SDL_LOG_CATEGORY_APPLICATION, "Octopus: Processed touches.");
     }
     else
     {
@@ -469,8 +394,6 @@ void fbxv::InputManager::Update(Input & InOutState, float const DeltaTime)
             InOutState.Buttons[0][kDigitalInput_Mouse4] = true;
     }
 
-    //SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Octopus: Update hold durations");
-
     // Update time duration for buttons pressed
     for (uint32_t BtnIdx = 0; BtnIdx < kDigitalInput_NumInputs; ++BtnIdx)
     {
@@ -484,17 +407,10 @@ void fbxv::InputManager::Update(Input & InOutState, float const DeltaTime)
         }
     }
 
-    //SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Octopus: Correct time");
-
     for (uint32_t AngIdx = 0; AngIdx < kAnalogInput_NumInputs; ++AngIdx)
     {
         InOutState.AnalogsTimeCorrected[AngIdx] = InOutState.Analogs[AngIdx] * DeltaTime;
     }
-
-    /*SDL_LogInfo (SDL_LOG_CATEGORY_APPLICATION, "Octopus: \t-------------------------------- ");
-    LogTouches (0, InOutState.Buttons[ 0 ] + kDigitalInput_Touch0);
-    LogTouches (1, InOutState.Buttons[ 1 ] + kDigitalInput_Touch0);
-    SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Octopus: < / Input Updated >");*/
 
     SDL_FlushEvents (SDL_FIRSTEVENT, SDL_LASTEVENT);
 }

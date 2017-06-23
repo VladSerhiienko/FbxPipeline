@@ -82,9 +82,9 @@ uint32_t PackPosition_10_10_10_2( const mathfu::vec3 position,
     AssertInRange( positionScale );
 
     UIntPack_10_10_10_2 packed;
-    packed.q.x = Unorm< 10 >( positionScale.x( ) ).Bits( );
-    packed.q.y = Unorm< 10 >( positionScale.y( ) ).Bits( );
-    packed.q.z = Unorm< 10 >( positionScale.z( ) ).Bits( );
+    packed.q.x = Unorm< 10 >( positionScale.x ).Bits( );
+    packed.q.y = Unorm< 10 >( positionScale.y ).Bits( );
+    packed.q.z = Unorm< 10 >( positionScale.z ).Bits( );
     packed.q.w = 0;
 
     return packed.u;
@@ -98,8 +98,8 @@ uint32_t PackTexcoord_16_16_fixed( const mathfu::vec2 texcoord,
     AssertInRange( texcoordScale );
 
     UIntPack_16_16 packed;
-    packed.q.x = Unorm< 16 >( texcoordScale.x( ) ).Bits( );
-    packed.q.y = Unorm< 16 >( texcoordScale.y( ) ).Bits( );
+    packed.q.x = Unorm< 16 >( texcoordScale.x ).Bits( );
+    packed.q.y = Unorm< 16 >( texcoordScale.y ).Bits( );
 
     return packed.u;
 }
@@ -110,8 +110,8 @@ uint32_t PackTexcoord_16_16_half( const mathfu::vec2 texcoord,
     const bool sOverflowCheck = FBXP_DEBUG;
 
     UIntPack_16_16 packed;
-    packed.q.x = Half< sOverflowCheck >( texcoord.x( ) ).Bits( );
-    packed.q.y = Half< sOverflowCheck >( texcoord.y( ) ).Bits( );
+    packed.q.x = Half< sOverflowCheck >( texcoord.x ).Bits( );
+    packed.q.y = Half< sOverflowCheck >( texcoord.y ).Bits( );
 
     return packed.u;
 }
@@ -123,19 +123,19 @@ uint32_t PackNormal_10_10_10_2( const mathfu::vec3 normal ) {
     AssertInRange( n );
 
     UIntPack_10_10_10_2 packed;
-    packed.q.x = Unorm< 10 >( n.x( ) ).Bits( );
-    packed.q.y = Unorm< 10 >( n.y( ) ).Bits( );
-    packed.q.z = Unorm< 10 >( n.z( ) ).Bits( );
+    packed.q.x = Unorm< 10 >( n.x ).Bits( );
+    packed.q.y = Unorm< 10 >( n.y ).Bits( );
+    packed.q.z = Unorm< 10 >( n.z ).Bits( );
     packed.q.w = 0;
 
     return packed.u;
 }
 
 uint32_t PackTangent_10_10_10_2( const mathfu::vec4 tangent ) {
-    AssertInRange( tangent.w( ), -1.f, +1.f );
+    AssertInRange( tangent.w, -1.f, +1.f );
     UIntPack_10_10_10_2 packed;
-    packed.u = PackNormal_10_10_10_2( mathfu::vec3( tangent.x( ), tangent.y( ), tangent.z( ) ).Normalized( ) );
-    packed.q.w = Unorm< 2 >( tangent.w( ) * 0.5f + 0.5f ).Bits( );
+    packed.u = PackNormal_10_10_10_2( mathfu::vec3( tangent.x, tangent.y, tangent.z ).Normalized( ) );
+    packed.q.w = Unorm< 2 >( tangent.w * 0.5f + 0.5f ).Bits( );
     return packed.u;
 }
 
@@ -146,19 +146,19 @@ uint32_t PackNormal_8_8_8_8( const mathfu::vec3 normal ) {
     AssertInRange( n );
 
     UIntPack_8_8_8_8 packedPosition;
-    packedPosition.q.x = Unorm< 8 >( n.x( ) ).Bits( );
-    packedPosition.q.y = Unorm< 8 >( n.y( ) ).Bits( );
-    packedPosition.q.z = Unorm< 8 >( n.z( ) ).Bits( );
+    packedPosition.q.x = Unorm< 8 >( n.x ).Bits( );
+    packedPosition.q.y = Unorm< 8 >( n.y ).Bits( );
+    packedPosition.q.z = Unorm< 8 >( n.z ).Bits( );
     packedPosition.q.w = 0;
 
     return packedPosition.u;
 }
 
 uint32_t PackTangent_8_8_8_8( const mathfu::vec4 tangent ) {
-    AssertInRange( tangent.w( ), -1.f, +1.f );
+    AssertInRange( tangent.w, -1.f, +1.f );
     UIntPack_8_8_8_8 packed;
-    packed.u = PackNormal_8_8_8_8( mathfu::vec3( tangent.x( ), tangent.y( ), tangent.z( ) ).Normalized( ) );
-    packed.q.w = Unorm< 8 >( tangent.w( ) * 0.5f + 0.5f ).Bits( );
+    packed.u = PackNormal_8_8_8_8( mathfu::vec3( tangent.x, tangent.y, tangent.z ).Normalized( ) );
+    packed.q.w = Unorm< 8 >( tangent.w * 0.5f + 0.5f ).Bits( );
     return packed.u;
 }
 
