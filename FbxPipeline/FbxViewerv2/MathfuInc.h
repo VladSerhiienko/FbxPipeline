@@ -43,7 +43,7 @@ namespace apemodem {
     }
 
     template < typename T >
-    inline T NormalizedSafeAndLength( const T& _unsafeVec, float& _outLength, float _safeEps = 1e-5f ) {
+    inline T NormalizedSafeAndLength( const T& _unsafeVec, float& _outLength, float _safeEps = kSmallNumber ) {
         const float length = _unsafeVec.Length( );
         const float invLength = 1.0f / ( length + _safeEps );
 
@@ -107,8 +107,10 @@ namespace apemodem {
     }
 
     inline mathfu::vec2 SinCos(float Value ) {
-        const float q        = ( kInversePi * 0.5f ) * Value;
-        const float quotient = ( Value >= 0.0f ) ? static_cast< float >( static_cast< int32_t >( q + 0.5f ) )
+        const float q = ( kInversePi * 0.5f ) * Value;
+
+        const float quotient = ( Value >= 0.0f )
+            ? static_cast< float >( static_cast< int32_t >( q + 0.5f ) )
             : static_cast< float >( static_cast< int32_t >( q - 0.5f ) );
 
         float sign;
@@ -230,8 +232,8 @@ namespace apemodem {
         t0 = t0 * t4 + c[ 6 ];
         t3 = t0 * t3;
 
-        t3 = yAbsBigger ? ( 0.5f * mathfu::kPi ) - t3 : t3;
-        t3 = ( X < 0.0f ) ? mathfu::kPi - t3 : t3;
+        t3 = yAbsBigger ? ( 0.5f * apemodem::kPi ) - t3 : t3;
+        t3 = ( X < 0.0f ) ? apemodem::kPi - t3 : t3;
         t3 = ( Y < 0.0f ) ? -t3 : t3;
 
         return t3;

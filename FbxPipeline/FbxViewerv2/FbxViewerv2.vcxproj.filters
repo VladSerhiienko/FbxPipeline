@@ -161,7 +161,13 @@
     <ClInclude Include="CameraControllerProjection.h">
       <Filter>Sources\Camera</Filter>
     </ClInclude>
-    <ClInclude Include="CameraInputMouse.h">
+    <ClInclude Include="CameraControllerBase.h">
+      <Filter>Sources\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraControllerInputBase.h">
+      <Filter>Sources\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraControllerInputMouseKeyboard.h">
       <Filter>Sources\Camera</Filter>
     </ClInclude>
   </ItemGroup>

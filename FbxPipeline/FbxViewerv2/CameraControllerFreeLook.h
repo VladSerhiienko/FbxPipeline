@@ -1,12 +1,10 @@
 #pragma once
 
-#include <MathfuInc.h>
+#include <CameraControllerBase.h>
 
 namespace apemode {
     
-    struct FreeLookCameraController {
-        apemodem::vec3 Target;
-        apemodem::vec3 Position;
+    struct FreeLookCameraController : CameraControllerBase {
         apemodem::vec3 TargetDst;
         apemodem::vec3 PositionDst;
         apemodem::vec2 OrbitCurr;
@@ -26,15 +24,11 @@ namespace apemode {
             OrbitCurr   = {0, 0};
         }
 
-        apemodem::mat4 ViewMatrix( ) {
-            return apemodem::mat4::LookAt( Target, Position, {0, 1, 0}, apemodem::kHandness );
-        }
-
-        void Orbit( apemodem::vec2 _dxdy ) {
+        void Orbit( apemodem::vec2 _dxdy ) override {
             OrbitCurr += _dxdy;
         }
 
-        void Dolly( apemodem::vec3 _dxyz ) {
+        void Dolly( apemodem::vec3 _dxyz ) override {
             float toTargetLen;
             const apemodem::vec3 toTargetNorm = apemodem::NormalizedSafeAndLength( TargetDst - PositionDst, toTargetLen );
             const apemodem::vec3 right = apemodem::vec3::CrossProduct( {0.0f, 1.0f, 0.0f}, toTargetNorm ); /* Already normalized */
@@ -74,7 +68,7 @@ namespace apemode {
             TargetDst = PositionDst + dstDiff * ( ZRange.y - ZRange.x ) * 0.1f;
         }
 
-        void Update( float _dt ) {
+        void Update( float _dt ) override {
             const float amount = std::min( _dt / 0.1f, 1.0f );
 
             ConsumeOrbit( amount );
@@ -83,15 +77,5 @@ namespace apemode {
             Position = apemodem::Lerp( Position, PositionDst, amount );
         }
 
-        apemodem::mat4 EnvViewMatrix( ) {
-            const apemodem::vec3 forward = apemodem::NormalizedSafe( Target - Position );
-            const apemodem::vec3 right   = apemodem::vec3::CrossProduct( {0.0f, 1.0f, 0.0f}, forward ).Normalized( );
-            const apemodem::vec3 up      = apemodem::vec3::CrossProduct( forward, right ).Normalized( );
-
-            return apemodem::mat4( apemodem::vec4{right, 0.0f},
-                                 apemodem::vec4{up, 0.0f},
-                                 apemodem::vec4{forward, 0.0f},
-                                 apemodem::vec4{0.0f, 0.0f, 0.0f, 1.0f} );
-        }
     };
 }

@@ -12,7 +12,7 @@
 #include <Scene.h>
 
 #include <Camera.h>
-#include <CameraInputMouse.h>
+#include <CameraControllerInputMouseKeyboard.h>
 #include <CameraControllerProjection.h>
 #include <CameraControllerModelView.h>
 #include <CameraControllerFreeLook.h>
@@ -43,14 +43,12 @@ public:
     uint32_t maskId     = 0;
     Scene*   scenes[ 2 ];
 
-    NuklearSdlBase* Nk = nullptr;
-    DebugRendererVk * Dbg = nullptr;
+    NuklearSdlBase*  Nk  = nullptr;
+    DebugRendererVk* Dbg = nullptr;
 
-    FreeLookCameraController CamController;
-    //ModelViewCameraController CamController;
+    CameraControllerInputBase* pCamInput      = nullptr;
+    CameraControllerBase*      pCamController = nullptr;
     CameraProjectionController CamProjController;
-    CameraMouseInput CamMouseInput;
-
 
     uint32_t FrameCount = 0;
     uint32_t FrameIndex = 0;
@@ -74,7 +72,9 @@ public:
     TDispatchableHandle< VkImageView >     hDepthImgViews[ kMaxFrames ];
     TDispatchableHandle< VkDeviceMemory >  hDepthImgMemory[ kMaxFrames ];
 
-    AppContent()  {
+    AppContent( ) {
+        pCamController = new FreeLookCameraController( );
+        pCamInput      = new MouseKeyboardCameraControllerInput( );
     }
 
     ~AppContent() {
@@ -477,28 +477,10 @@ void App::Update( float deltaSecs, Input const& inputState ) {
     }
     nk_end(ctx);
 
-    appContent->CamMouseInput.Update( {inputState.Analogs[ kAnalogInput_MouseX ],
-                                       inputState.Analogs[ kAnalogInput_MouseY ],
-                                       inputState.Analogs[ kAnalogInput_MouseScroll ]},
-                                      {(float) appContent->width, (float) appContent->height} );
-
-    if ( inputState.Buttons[ 0 ][ kDigitalInput_Mouse0 ] ) {
-        appContent->CamController.Orbit( appContent->CamMouseInput.Delta );
-    } else if ( inputState.Buttons[ 0 ][ kDigitalInput_Mouse1 ] ) {
-        auto scroll = appContent->CamMouseInput.Delta.x + appContent->CamMouseInput.Delta.y;
-        appContent->CamController.Dolly({ 0, 0, scroll });
-    }
-
-    mathfu::vec3 dzxy = { 0, 0, 0 };
-    dzxy.z += (inputState.Buttons[0][kDigitalInput_KeyW] || inputState.Buttons[0][kDigitalInput_KeyUp]) * deltaSecs;
-    dzxy.z -= (inputState.Buttons[0][kDigitalInput_KeyS] || inputState.Buttons[0][kDigitalInput_KeyDown]) * deltaSecs;
-    dzxy.x += (inputState.Buttons[0][kDigitalInput_KeyD] || inputState.Buttons[0][kDigitalInput_KeyRight]) * deltaSecs;
-    dzxy.x -= (inputState.Buttons[0][kDigitalInput_KeyA] || inputState.Buttons[0][kDigitalInput_KeyLeft]) * deltaSecs;
-    dzxy.y += (inputState.Buttons[0][kDigitalInput_KeyE]) * deltaSecs;
-    dzxy.y -= (inputState.Buttons[0][kDigitalInput_KeyQ]) * deltaSecs;
-
-    appContent->CamController.Dolly( dzxy );
-    appContent->CamController.Update( deltaSecs );
+    appContent->pCamInput->Update( deltaSecs, inputState, {(float) appContent->width, (float) appContent->height} );
+    appContent->pCamController->Orbit( appContent->pCamInput->OrbitDelta );
+    appContent->pCamController->Dolly( appContent->pCamInput->DollyDelta );
+    appContent->pCamController->Update( deltaSecs );
 
     if ( auto appSurfaceVk = (AppSurfaceSdlVk*) GetSurface( ) ) {
         VkDevice        device                   = *appSurfaceVk->pNode;
@@ -568,17 +550,8 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         vkCmdBeginRenderPass( cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE );
 
         DebugRendererVk::FrameUniformBuffer frameData;
-
-        static float rotationY = 0.0;
-
-        rotationY += 0.001;
-        if (rotationY >= 2 * M_PI) {
-            rotationY -= 2 * M_PI;
-        }
-
-        frameData.worldMatrix = mathfu::mat4::FromRotationMatrix( mathfu::mat3::RotationY( rotationY ) );
         frameData.projectionMatrix = appContent->CamProjController.ProjMatrix(55, width, height, 0.1f, 100.0f);
-        frameData.viewMatrix = appContent->CamController.ViewMatrix();
+        frameData.viewMatrix = appContent->pCamController->ViewMatrix();
         frameData.color = {1, 0, 0, 1};
 
         appContent->Dbg->Reset( appContent->FrameIndex );
