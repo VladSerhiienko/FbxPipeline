@@ -186,7 +186,6 @@ bool apemode::NuklearSdlVk::Render( RenderParametersBase* p ) {
         offset += cmd->elem_count;
     }
 
-    nk_clear( &Context );
     return true;
 }
 

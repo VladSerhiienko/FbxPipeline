@@ -15,8 +15,9 @@
 
 namespace apemode {
     using namespace apemodevk;
+
     const uint32_t kMaxFrames = Swapchain::kMaxImgs;
-    apemode::AppContent * gAppContent = nullptr;
+    AppContent * gAppContent = nullptr;
 }
 
 using namespace apemode;
@@ -62,6 +63,52 @@ namespace mathfu {
         const float theta = acosf( _vec[ 1 ] );
 
         return {( kPi + phi ) * kInvPi * 0.5f, theta * kInvPi};
+    }
+    static const float kSmallNumber     = 1.e-8f;
+    static const float kKindSmallNumber = 1.e-4f;
+    static const float kBigNumber       = 3.4e+38f;
+    static const float kEulersNumber    = 2.71828182845904523536f;
+    static const float kMaxFloat        = 3.402823466e+38f;
+    static const float kInversePi       = 0.31830988618f;
+    static const float kPiDiv2          = 1.57079632679f;
+    static const float kSmallDelta      = 0.00001f;
+    static const float k90              = kPiDiv2;
+    static const float k180             = kPi;
+
+    template < class T >
+    inline auto RadiansToDegrees( T const& RadVal ) -> decltype( RadVal * ( 180.f / kPi ) ) {
+        return RadVal * ( 180.f / kPi );
+    }
+
+    template < class T >
+    inline auto DegreesToRadians( T const& DegVal ) -> decltype( DegVal * ( kPi / 180.f ) ) {
+        return DegVal * ( kPi / 180.f );
+    }
+
+    inline bool IsNearlyEqual( float A, float B, float ErrorTolerance = kSmallNumber ) {
+        return fabsf( A - B ) <= ErrorTolerance;
+    }
+
+    inline bool IsNearlyEqual( mathfu::vec2 const A, mathfu::vec2 const B, const float ErrorTolerance = kSmallNumber ) {
+        return fabsf( A.x - B.x ) <= ErrorTolerance && fabsf( A.y - B.y ) <= ErrorTolerance;
+    }
+
+    inline bool IsNearlyEqual( mathfu::vec3 const A, mathfu::vec3 const B, const float ErrorTolerance = kSmallNumber ) {
+        return fabsf( A.x - B.x ) <= ErrorTolerance && fabsf( A.y - B.y ) <= ErrorTolerance &&
+            fabsf( A.z - B.z ) <= ErrorTolerance;
+    }
+
+    inline bool IsNearlyZero( float Value, float ErrorTolerance = kSmallNumber ) {
+        return fabsf( Value ) <= ErrorTolerance;
+    }
+
+    inline bool IsNearlyZero( mathfu::vec2 const Value, float ErrorTolerance = kSmallNumber ) {
+        return fabsf( Value.x ) <= ErrorTolerance && fabsf( Value.y ) <= ErrorTolerance;
+    }
+
+    inline bool IsNearlyZero( mathfu::vec3 const Value, float ErrorTolerance = kSmallNumber ) {
+        return fabsf( Value.x ) <= ErrorTolerance && fabsf( Value.y ) <= ErrorTolerance &&
+            fabsf( Value.z ) <= ErrorTolerance;
     }
 }
 
@@ -119,13 +166,13 @@ namespace apemode {
             OrbitCurr += _dxdy;
         }
 
-        void Dolly( float _dz ) {
+        void Dolly( mathfu::vec3 _dzxy )  {
             float toTargetLen;
             const mathfu::vec3 toTargetNorm = mathfu::NormalizedSafeAndLength( TargetDst - PositionDst, toTargetLen );
 
-            float delta  = toTargetLen * _dz;
+            float delta  = toTargetLen * _dzxy.z;
             float newLen = toTargetLen + delta;
-            if ( ( ZRange.x < newLen || _dz < 0.0f ) && ( newLen < ZRange.y || _dz > 0.0f ) ) {
+            if ( ( ZRange.x < newLen || _dzxy.z < 0.0f ) && ( newLen < ZRange.y || _dzxy.z > 0.0f ) ) {
                 PositionDst += toTargetNorm * delta;
             }
         }
@@ -148,7 +195,99 @@ namespace apemode {
         }
 
         void Update( float _dt ) {
-            const float amount = std::min( _dt / 0.12f, 1.0f );
+            const float amount = std::min( _dt / 0.1f, 1.0f );
+
+            ConsumeOrbit( amount );
+
+            Target   = mathfu::Lerp( Target, TargetDst, amount );
+            Position = mathfu::Lerp( Position, PositionDst, amount );
+        }
+
+        mathfu::mat4 EnvViewMatrix( ) {
+            const mathfu::vec3 forward = mathfu::NormalizedSafe( Target - Position );
+            const mathfu::vec3 right   = mathfu::vec3::CrossProduct( {0.0f, 1.0f, 0.0f}, forward ).Normalized( );
+            const mathfu::vec3 up      = mathfu::vec3::CrossProduct( forward, right ).Normalized( );
+
+            return mathfu::mat4( mathfu::vec4{right,   0.0f},
+                                 mathfu::vec4{up,      0.0f},
+                                 mathfu::vec4{forward, 0.0f},
+                                 mathfu::vec4{0.0f, 0.0f, 0.0f, 1.0f} );
+        }
+    };
+
+    struct FreeLookCameraController {
+        mathfu::vec3 Target;
+        mathfu::vec3 Position;
+        mathfu::vec3 TargetDst;
+        mathfu::vec3 PositionDst;
+        mathfu::vec2 OrbitCurr;
+        mathfu::vec2 ZRange;
+
+        FreeLookCameraController( ) {
+            ZRange.x = 0.1f;
+            ZRange.y = 1000.0f;
+            Reset( );
+        }
+
+        void Reset( ) {
+            Target      = {0, 0, 5};
+            Position    = {0, 0, 0};
+            TargetDst   = {0, 0, 5};
+            PositionDst = {0, 0, 0};
+            OrbitCurr   = {0, 0};
+        }
+
+        mathfu::mat4 ViewMatrix( ) {
+            return mathfu::mat4::LookAt( Target, Position, {0, 1, 0}, mathfu::kHandness );
+        }
+
+        void Orbit( mathfu::vec2 _dxdy ) {
+            OrbitCurr += _dxdy;
+        }
+
+        void Dolly( mathfu::vec3 _dxyz ) {
+            float toTargetLen;
+            const mathfu::vec3 toTargetNorm = mathfu::NormalizedSafeAndLength( TargetDst - PositionDst, toTargetLen );
+            const mathfu::vec3 right = mathfu::vec3::CrossProduct( { 0.0f, 1.0f, 0.0f }, toTargetNorm ); /* Already normalized */
+            const mathfu::vec3 up = mathfu::vec3::CrossProduct( toTargetNorm, right );
+
+            float deltaZ  = toTargetLen * _dxyz.z;
+            TargetDst += toTargetNorm * deltaZ;
+            PositionDst += toTargetNorm * deltaZ;
+
+            float deltaX  = toTargetLen * _dxyz.x;
+            TargetDst += right * deltaX;
+            PositionDst += right * deltaX;
+
+            float deltaY  = toTargetLen * _dxyz.y;
+            TargetDst += up * deltaY;
+            PositionDst += up * deltaY;
+        }
+
+        void ConsumeOrbit(float _amount) {
+
+            float toPosLen;
+            const mathfu::vec3 toPosNorm = mathfu::NormalizedSafeAndLength(Position - Target, toPosLen);
+            mathfu::vec2 ll = mathfu::LatLongFromVec(toPosNorm);
+
+            mathfu::vec2 consume = OrbitCurr * _amount;
+            OrbitCurr -= consume;
+
+            consume.y *= (ll.y < 0.02 && consume.y < 0) || (ll.y > 0.98 && consume.y > 0) ? 0 : -1;
+            ll += consume;
+
+            const mathfu::vec3 tmp = mathfu::VecFromLatLong(ll);
+            mathfu::vec3 diff = (tmp - toPosNorm) * toPosLen;
+
+            Target += diff;
+            TargetDst += diff;
+
+            const mathfu::vec3 dstDiff = mathfu::NormalizedSafe(TargetDst - PositionDst);
+            TargetDst = PositionDst + dstDiff * (ZRange.y - ZRange.x) * 0.1f;
+        }
+
+        void Update( float _dt ) {
+            const float amount = std::min( _dt / 0.1f, 1.0f );
 
             ConsumeOrbit( amount );
 
@@ -217,7 +356,8 @@ public:
     NuklearSdlBase* Nk = nullptr;
     DebugRendererVk * Dbg = nullptr;
 
-    ModelViewCameraController CamController;
+    FreeLookCameraController CamController;
+    //ModelViewCameraController CamController;
     CameraProjectionController CamProjController;
     CameraMouseInput CamMouseInput;
 
@@ -656,9 +796,18 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         appContent->CamController.Orbit( appContent->CamMouseInput.Delta );
     } else if ( inputState.Buttons[ 0 ][ kDigitalInput_Mouse1 ] ) {
         auto scroll = appContent->CamMouseInput.Delta.x + appContent->CamMouseInput.Delta.y;
-        appContent->CamController.Dolly( scroll );
+        appContent->CamController.Dolly({ 0, 0, scroll });
     }
 
+    mathfu::vec3 dzxy = { 0, 0, 0 };
+    dzxy.z += (inputState.Buttons[0][kDigitalInput_KeyW] || inputState.Buttons[0][kDigitalInput_KeyUp]) * deltaSecs;
+    dzxy.z -= (inputState.Buttons[0][kDigitalInput_KeyS] || inputState.Buttons[0][kDigitalInput_KeyDown]) * deltaSecs;
+    dzxy.x += (inputState.Buttons[0][kDigitalInput_KeyD] || inputState.Buttons[0][kDigitalInput_KeyRight]) * deltaSecs;
+    dzxy.x -= (inputState.Buttons[0][kDigitalInput_KeyA] || inputState.Buttons[0][kDigitalInput_KeyLeft]) * deltaSecs;
+    dzxy.y += (inputState.Buttons[0][kDigitalInput_KeyE]) * deltaSecs;
+    dzxy.y -= (inputState.Buttons[0][kDigitalInput_KeyQ]) * deltaSecs;
+
+    appContent->CamController.Dolly( dzxy );
     appContent->CamController.Update( deltaSecs );
 
     if ( auto appSurfaceVk = (AppSurfaceSdlVk*) GetSurface( ) ) {
@@ -753,8 +902,6 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         renderParamsDbg.pCmdBuffer = cmdBuffer;
         renderParamsDbg.pFrameData = &frameData;
 
-        //appContent->Dbg->Render( &renderParamsDbg );
-
         const float scale = 0.5f;
 
         frameData.worldMatrix
@@ -778,19 +925,6 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         frameData.color = { 1, 0, 0, 1 };
         appContent->Dbg->Render(&renderParamsDbg);
 
-        //vkCmdEndRenderPass( cmdBuffer );
-
-        /*VkRenderPassBeginInfo renderPassBeginInfoNk;
-        InitializeStruct( renderPassBeginInfoNk );
-        renderPassBeginInfoNk.renderPass               = appContent->hNkRenderPass;
-        renderPassBeginInfoNk.framebuffer              = framebufferNk;
-        renderPassBeginInfoNk.renderArea.extent.width  = appSurfaceVk->GetWidth( );
-        renderPassBeginInfoNk.renderArea.extent.height = appSurfaceVk->GetHeight( );
-        renderPassBeginInfoNk.clearValueCount          = 1;
-        renderPassBeginInfoNk.pClearValues             = clearValue;
-
-        vkCmdBeginRenderPass( cmdBuffer, &renderPassBeginInfoNk, VK_SUBPASS_CONTENTS_INLINE );*/
-
         NuklearSdlVk::RenderParametersVk renderParamsNk;
         renderParamsNk.dims[ 0 ]          = (float) width;
         renderParamsNk.dims[ 1 ]          = (float) height;
@@ -803,6 +937,7 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         renderParamsNk.pCmdBuffer         = cmdBuffer;
 
         appContent->Nk->Render( &renderParamsNk );
+        nk_clear( &appContent->Nk->Context );
 
         vkCmdEndRenderPass( cmdBuffer );
 
