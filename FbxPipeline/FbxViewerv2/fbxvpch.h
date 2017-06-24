@@ -19,15 +19,7 @@
 // Math
 //
 
-#ifndef _MATH_DEFINES_DEFINED
-#define _MATH_DEFINES_DEFINED
-#endif
-
-#include <math.h>
-
-#include <mathfu/matrix.h>
-#include <mathfu/vector.h>
-#include <mathfu/glsl_mappings.h>
+#include <MathfuInc.h>
 
 //
 // Generated

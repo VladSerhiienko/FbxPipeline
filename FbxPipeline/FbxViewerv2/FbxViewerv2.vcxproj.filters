@@ -45,6 +45,12 @@
     <Filter Include="Sources\OS">
       <UniqueIdentifier>{a09abb11-154f-47b5-828a-b560d4b302d6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sources\Camera">
+      <UniqueIdentifier>{1aa78e9a-8033-4d19-9768-4596f8f582bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Math">
+      <UniqueIdentifier>{8994e8b6-e054-4ff8-b0a5-7c3027bf4abe}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="alloca.h">
@@ -139,6 +145,24 @@
     </ClInclude>
     <ClInclude Include="malloc.c.h">
       <Filter>Sources\OS</Filter>
+    </ClInclude>
+    <ClInclude Include="MathfuInc.h">
+      <Filter>Sources\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Sources\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraControllerFreeLook.h">
+      <Filter>Sources\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraControllerModelView.h">
+      <Filter>Sources\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraControllerProjection.h">
+      <Filter>Sources\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraInputMouse.h">
+      <Filter>Sources\Camera</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
