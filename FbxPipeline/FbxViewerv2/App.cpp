@@ -43,7 +43,7 @@ public:
     uint32_t maskId     = 0;
     Scene*   scenes[ 2 ];
 
-    NuklearSdlBase*  Nk  = nullptr;
+    NuklearRendererSdlBase*  Nk  = nullptr;
     DebugRendererVk* Dbg = nullptr;
 
     CameraControllerInputBase* pCamInput      = nullptr;
@@ -172,9 +172,9 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
             return false;
         }
 
-        appContent->Nk = new NuklearSdlVk();
+        appContent->Nk = new NuklearRendererSdlVk();
 
-        NuklearSdlVk::InitParametersVk initParamsNk;
+        NuklearRendererSdlVk::InitParametersVk initParamsNk;
         initParamsNk.pAlloc          = nullptr;
         initParamsNk.pDevice         = *appSurfaceVk->pNode;
         initParamsNk.pPhysicalDevice = *appSurfaceVk->pNode;
@@ -588,7 +588,7 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         frameData.color = { 1, 0, 0, 1 };
         appContent->Dbg->Render(&renderParamsDbg);
 
-        NuklearSdlVk::RenderParametersVk renderParamsNk;
+        NuklearRendererSdlVk::RenderParametersVk renderParamsNk;
         renderParamsNk.dims[ 0 ]          = (float) width;
         renderParamsNk.dims[ 1 ]          = (float) height;
         renderParamsNk.scale[ 0 ]         = 1;

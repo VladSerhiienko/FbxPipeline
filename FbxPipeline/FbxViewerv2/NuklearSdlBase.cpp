@@ -2,14 +2,14 @@
 #include <NuklearSdlBase.h>
 #include <memory>
 
-void apemode::NuklearSdlBase::SdlClipboardPaste( nk_handle usr, struct nk_text_edit *edit ) {
+void apemode::NuklearRendererSdlBase::SdlClipboardPaste( nk_handle usr, struct nk_text_edit *edit ) {
     (void) usr;
 
     if ( const char *text = SDL_GetClipboardText( ) )
         nk_textedit_paste( edit, text, nk_strlen( text ) );
 }
 
-void apemode::NuklearSdlBase::SdlClipboardCopy( nk_handle usr, const char *text, int len ) {
+void apemode::NuklearRendererSdlBase::SdlClipboardCopy( nk_handle usr, const char *text, int len ) {
     (void) usr;
 
     if ( !len )
@@ -23,10 +23,10 @@ void apemode::NuklearSdlBase::SdlClipboardCopy( nk_handle usr, const char *text,
     }
 }
 
-void *apemode::NuklearSdlBase::DeviceUploadAtlas( InitParametersBase *initParamsBase,
-                                                  const void *        image,
-                                                  int                 width,
-                                                  int                 height ) {
+void *apemode::NuklearRendererSdlBase::DeviceUploadAtlas( InitParametersBase *initParamsBase,
+                                                          const void *        image,
+                                                          int                 width,
+                                                          int                 height ) {
     (void) initParamsBase;
     (void) image;
     (void) width;
@@ -35,7 +35,7 @@ void *apemode::NuklearSdlBase::DeviceUploadAtlas( InitParametersBase *initParams
     return nullptr;
 }
 
-bool apemode::NuklearSdlBase::Init( InitParametersBase *initParamsBase ) {
+bool apemode::NuklearRendererSdlBase::Init( InitParametersBase *initParamsBase ) {
     nk_init_default( &Context, nullptr /* User font */ );
     nk_buffer_init_default( &RenderCmds );
     Context.clip.copy     = initParamsBase->pClipboardCopyCallback;
@@ -62,13 +62,13 @@ bool apemode::NuklearSdlBase::Init( InitParametersBase *initParamsBase ) {
     return true;
 }
 
-void apemode::NuklearSdlBase::FontStashBegin( nk_font_atlas **atlas ) {
+void apemode::NuklearRendererSdlBase::FontStashBegin( nk_font_atlas **atlas ) {
     nk_font_atlas_init_default( &Atlas );
     nk_font_atlas_begin( &Atlas );
     *atlas = &Atlas;
 }
 
-bool apemode::NuklearSdlBase::FontStashEnd( InitParametersBase *initParamsBase ) {
+bool apemode::NuklearRendererSdlBase::FontStashEnd( InitParametersBase *initParamsBase ) {
     int imageWidth  = 0;
     int imageHeight = 0;
 
@@ -89,12 +89,12 @@ bool apemode::NuklearSdlBase::FontStashEnd( InitParametersBase *initParamsBase )
     return false;
 }
 
-bool apemode::NuklearSdlBase::Render( RenderParametersBase *renderParamsBase ) {
+bool apemode::NuklearRendererSdlBase::Render( RenderParametersBase *renderParamsBase ) {
     (void) renderParamsBase;
     return true;
 }
 
-void apemode::NuklearSdlBase::Shutdown( ) {
+void apemode::NuklearRendererSdlBase::Shutdown( ) {
     nk_font_atlas_clear( &Atlas );
     nk_free( &Context );
 
@@ -104,15 +104,15 @@ void apemode::NuklearSdlBase::Shutdown( ) {
     nk_buffer_free( &RenderCmds );
 }
 
-void apemode::NuklearSdlBase::DeviceDestroy( ) {
+void apemode::NuklearRendererSdlBase::DeviceDestroy( ) {
 }
 
-bool apemode::NuklearSdlBase::DeviceCreate( InitParametersBase *initParamsBase ) {
+bool apemode::NuklearRendererSdlBase::DeviceCreate( InitParametersBase *initParamsBase ) {
     (void) initParamsBase;
     return true;
 }
 
-void apemode::NuklearSdlBase::SetStyle( Theme theme ) {
+void apemode::NuklearRendererSdlBase::SetStyle( Theme theme ) {
     auto            ctx = &Context;
     struct nk_color table[ NK_COLOR_COUNT ];
     if ( theme == White ) {
@@ -240,7 +240,7 @@ void apemode::NuklearSdlBase::SetStyle( Theme theme ) {
     }
 }
 
-int apemode::NuklearSdlBase::HandleEvent( SDL_Event *evt ) {
+int apemode::NuklearRendererSdlBase::HandleEvent( SDL_Event *evt ) {
     struct nk_context *ctx = &Context;
     if ( evt->type == SDL_KEYUP || evt->type == SDL_KEYDOWN ) {
         /* key events */

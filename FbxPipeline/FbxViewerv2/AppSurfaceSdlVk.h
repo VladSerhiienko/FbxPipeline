@@ -20,11 +20,12 @@ namespace apemode {
         AppSurfaceSdlVk( );
         virtual ~AppSurfaceSdlVk( );
 
-        virtual bool Initialize( uint32_t width, uint32_t height, const char* name ) override;
-        virtual void Finalize( ) override;
+        bool Initialize( uint32_t width, uint32_t height, const char* name ) override;
+        void Finalize( ) override;
 
-        virtual void OnFrameMove( ) override;
-        virtual void* GetGraphicsHandle( ) override;
+        void OnFrameMove( ) override;
+        void* GetGraphicsHandle( ) override;
+        ISceneRenderer* CreateSceneRenderer( ) override;
 
         uint32_t LastWidth;
         uint32_t LastHeight;

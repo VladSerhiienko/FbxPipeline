@@ -12,7 +12,7 @@
 #define NK_SHADER_VERSION "#version 300 es\n"
 #endif
 
-bool apemode::NuklearSdlGL::Render( RenderParametersBase *p ) {
+bool apemode::NuklearRendererSdlGL::Render( RenderParametersBase *p ) {
     const GLfloat ortho[ 4 ][ 4 ] = {
         {2.0f / (GLfloat) p->dims[ 0 ], 0.0f, 0.0f, 0.0f},
         {0.0f, -2.0f / (GLfloat) p->dims[ 1 ], 0.0f, 0.0f},
@@ -112,7 +112,7 @@ bool apemode::NuklearSdlGL::Render( RenderParametersBase *p ) {
     return true;
 }
 
-void apemode::NuklearSdlGL::DeviceDestroy( ) {
+void apemode::NuklearRendererSdlGL::DeviceDestroy( ) {
     glDetachShader( prog, vert_shdr );
     glDetachShader( prog, frag_shdr );
     glDeleteShader( vert_shdr );
@@ -123,7 +123,7 @@ void apemode::NuklearSdlGL::DeviceDestroy( ) {
     glDeleteBuffers( 1, &ebo );
 }
 
-bool apemode::NuklearSdlGL::DeviceCreate( InitParametersBase *init_params ) {
+bool apemode::NuklearRendererSdlGL::DeviceCreate( InitParametersBase *init_params ) {
     const GLchar *vertex_shader = NK_SHADER_VERSION
         "uniform mat4 ProjMtx;\n"
         "in vec2 Position;\n"
@@ -201,7 +201,7 @@ bool apemode::NuklearSdlGL::DeviceCreate( InitParametersBase *init_params ) {
     return true;
 }
 
-void *apemode::NuklearSdlGL::DeviceUploadAtlas( InitParametersBase *init_params, const void *image, int width, int height ) {
+void *apemode::NuklearRendererSdlGL::DeviceUploadAtlas( InitParametersBase *init_params, const void *image, int width, int height ) {
     glGenTextures( 1, &font_tex );
     glBindTexture( GL_TEXTURE_2D, font_tex );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );

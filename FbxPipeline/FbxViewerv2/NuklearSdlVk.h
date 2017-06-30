@@ -15,7 +15,7 @@
 
 namespace apemode {
 
-    class NuklearSdlVk : public NuklearSdlBase {
+    class NuklearRendererSdlVk : public NuklearRendererSdlBase {
     public:
         struct InitParametersVk : InitParametersBase {
             VkAllocationCallbacks *pAlloc          = nullptr;        /* Null is ok */

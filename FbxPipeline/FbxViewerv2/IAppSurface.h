@@ -10,6 +10,8 @@ namespace apemode {
         kAppSurfaceImpl_SdlVk,
     };
 
+    class ISceneRenderer;
+
     class IAppSurface {
     protected:
         AppSurfaceImpl Impl;
@@ -24,5 +26,6 @@ namespace apemode {
         virtual uint32_t GetHeight() const { return 0; }
         virtual void* GetWindowHandle() { return nullptr; }
         virtual void* GetGraphicsHandle() { return nullptr; }
+        virtual ISceneRenderer * CreateSceneRenderer () { return nullptr; }
     };
 }

@@ -13,7 +13,7 @@
 #include <nuklear.h>
 
 namespace apemode {
-    class NuklearSdlBase {
+    class NuklearRendererSdlBase {
     public:
         static void SdlClipboardPaste( nk_handle usr, struct nk_text_edit *edit );
         static void SdlClipboardCopy( nk_handle usr, const char *text, int len );

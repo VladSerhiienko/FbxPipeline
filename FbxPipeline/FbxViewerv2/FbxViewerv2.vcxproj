@@ -38,6 +38,7 @@
     <ClInclude Include="IAppSurface.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="AppState.h" />
+    <ClInclude Include="ISceneRenderer.h" />
     <ClInclude Include="malloc.c.h" />
     <ClInclude Include="MathfuInc.h" />
     <ClInclude Include="CameraControllerModelView.h" />
@@ -45,6 +46,7 @@
     <ClInclude Include="NuklearSdlGL.h" />
     <ClInclude Include="NuklearSdlVk.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="SceneRendererVk.h" />
     <ClInclude Include="Stopwatch.h" />
     <ClInclude Include="vk\CommandQueue.Vulkan.h" />
     <ClInclude Include="vk\DescriptorPool.Vulkan.h" />
@@ -75,6 +77,7 @@
     <ClCompile Include="NuklearSdlBase.cpp" />
     <ClCompile Include="NuklearSdlGL.cpp" />
     <ClCompile Include="NuklearSdlVk.cpp" />
+    <ClCompile Include="SceneRendererVk.cpp" />
     <ClCompile Include="StopwatchSdl.cpp" />
     <ClCompile Include="vk\CommandQueue.Vulkan.cpp" />
     <ClCompile Include="vk\DescriptorPool.Vulkan.cpp" />

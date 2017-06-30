@@ -12,6 +12,7 @@ namespace apemode {
 
     struct SceneMaterial {
         mathfu::vec4 albedo;
+        void *       deviceAsset;
     };
 
     struct SceneMeshSubset {
@@ -21,8 +22,7 @@ namespace apemode {
     };
 
     struct SceneMesh {
-        //bgfx::VertexBufferHandle       vertexBufferHandle;
-        //bgfx::IndexBufferHandle        indexBufferHandle;
+        void *                         deviceAsset;
         std::vector< SceneMeshSubset > subsets;
         mathfu::vec3                   positionOffset;
         mathfu::vec3                   positionScale;
@@ -103,8 +103,9 @@ namespace apemode {
         }
     };
 
-    struct Scene;
+    class Scene;
     struct SceneNode {
+        void *                  deviceAsset;
         Scene*                  scene    = nullptr;
         uint32_t                id       = -1;
         uint32_t                parentId = -1;
@@ -113,7 +114,8 @@ namespace apemode {
         std::vector< uint32_t > materialIds;
     };
 
-    struct Scene {
+    class Scene {
+    public:
         //
         // Scene components
         //
@@ -131,6 +133,8 @@ namespace apemode {
         std::vector< mathfu::mat4 > localMatrices;
         std::vector< mathfu::mat4 > geometricMatrices;
         std::vector< mathfu::mat4 > hierarchicalMatrices;
+
+        void *deviceAsset;
 
         /**
          * Internal usage only.

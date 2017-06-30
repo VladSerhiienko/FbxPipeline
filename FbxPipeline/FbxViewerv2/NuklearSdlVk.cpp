@@ -6,7 +6,7 @@ namespace apemode {
     using namespace apemodevk;
 }
 
-bool apemode::NuklearSdlVk::Render( RenderParametersBase* p ) {
+bool apemode::NuklearRendererSdlVk::Render( RenderParametersBase* p ) {
     auto renderParams = (RenderParametersVk*) p;
     auto FrameIndex   = ( renderParams->FrameIndex ) % kMaxFrameCount;
 
@@ -189,10 +189,10 @@ bool apemode::NuklearSdlVk::Render( RenderParametersBase* p ) {
     return true;
 }
 
-void apemode::NuklearSdlVk::DeviceDestroy( ) {
+void apemode::NuklearRendererSdlVk::DeviceDestroy( ) {
 }
 
-bool apemode::NuklearSdlVk::DeviceCreate( InitParametersBase* init_params ) {
+bool apemode::NuklearRendererSdlVk::DeviceCreate( InitParametersBase* init_params ) {
     const char* vertex_shader =
         "#version 450\n"
         "#extension GL_ARB_separate_shader_objects : enable\n"
@@ -486,7 +486,7 @@ bool apemode::NuklearSdlVk::DeviceCreate( InitParametersBase* init_params ) {
     return true;
 }
 
-void* apemode::NuklearSdlVk::DeviceUploadAtlas( InitParametersBase* init_params, const void* image, int width, int height ) {
+void* apemode::NuklearRendererSdlVk::DeviceUploadAtlas( InitParametersBase* init_params, const void* image, int width, int height ) {
     auto           initParametersVk = reinterpret_cast< InitParametersVk* >( init_params );
     const uint8_t* fontImgPixels    = reinterpret_cast< const uint8_t* >( image );
     uint32_t       uploadSize       = width * height * 4 * sizeof( uint8_t );

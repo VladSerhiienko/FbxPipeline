@@ -14,17 +14,17 @@ namespace apemodevk {
         static const uint32_t kMaxOffsets = 256;
 
         struct Page {
-            VkDevice                                         pDevice;
-            apemodevk::TDispatchableHandle< VkBuffer >       hBuffer;
-            apemodevk::TDispatchableHandle< VkDeviceMemory > hMemory;
-            uint8_t *                                        pMapped;
-            uint32_t                                         Alignment;
-            uint32_t                                         Range;
-            uint32_t                                         OffsetIndex;
-            uint32_t                                         OffsetCount;
-            uint32_t                                         RangeIndex;
-            VkMappedMemoryRange                              Ranges[ kMaxOffsets ];
-            bool                                             bHostCoherent;
+            VkDevice                              pDevice;
+            TDispatchableHandle< VkBuffer >       hBuffer;
+            TDispatchableHandle< VkDeviceMemory > hMemory;
+            uint8_t *                             pMapped;
+            uint32_t                              Alignment;
+            uint32_t                              Range;
+            uint32_t                              OffsetIndex;
+            uint32_t                              OffsetCount;
+            uint32_t                              RangeIndex;
+            VkMappedMemoryRange                   Ranges[ kMaxOffsets ];
+            bool                                  bHostCoherent;
 
             bool Recreate( VkDevice           pInLogicalDevice,
                            VkPhysicalDevice   pInPhysicalDevice,
@@ -73,10 +73,10 @@ namespace apemodevk {
             /* NOTE: Does not handle space requirements (aborts in debug mode only). */
             template < typename TDataStructure >
             uint32_t TPush( const TDataStructure &dataStructure ) {
-                const uint32_t coveredOffsetCount = sizeof( TDataStructure ) / Alignment + 1;
+                const uint32_t coveredOffsetCount   = sizeof( TDataStructure ) / Alignment + 1;
                 const uint32_t availableOffsetCount = OffsetCount - OffsetIndex + 1;
 
-                assert(nullptr != pMapped);
+                assert( nullptr != pMapped );
                 assert( coveredOffsetCount <= availableOffsetCount );
 
                 const uint32_t currentMappedOffset = OffsetIndex * Alignment;
@@ -97,14 +97,14 @@ namespace apemodevk {
                 return currentMappedOffset;
             }
 
-            bool Reset() {
-                if (nullptr == pMapped) {
-                    RangeIndex = 0;
+            bool Reset( ) {
+                if ( nullptr == pMapped ) {
+                    RangeIndex  = 0;
                     OffsetIndex = 0;
 
-                    pMapped = hMemory.Map(0, Range, 0);
-                    if (nullptr == pMapped) {
-                        DebugBreak();
+                    pMapped = hMemory.Map( 0, Range, 0 );
+                    if ( nullptr == pMapped ) {
+                        DebugBreak( );
                         return false;
                     }
                 }
@@ -133,7 +133,7 @@ namespace apemodevk {
 
         struct SuballocResult {
             VkDescriptorBufferInfo descBufferInfo;
-            uint32_t dynamicOffset;
+            uint32_t               dynamicOffset;
         };
 
         VkDevice              pLogicalDevice    = VK_NULL_HANDLE;
@@ -158,7 +158,7 @@ namespace apemodevk {
                        VkDescriptorPool              pInDescPool,
                        const VkPhysicalDeviceLimits *pInLimits,
                        VkBufferUsageFlags            bufferUsageFlags,
-                       bool                  bInHostCoherent) {
+                       bool                          bInHostCoherent ) {
             Destroy( );
 
             pLogicalDevice  = pInLogicalDevice;
@@ -237,11 +237,11 @@ namespace apemodevk {
             } );
         }
 
-        void Reset() {
-            std::for_each(Pages.begin(), Pages.end(), [&](Page *pPage) {
-                assert(nullptr != pPage);
-                pPage->Reset();
-            });
+        void Reset( ) {
+            std::for_each( Pages.begin( ), Pages.end( ), [&]( Page *pPage ) {
+                assert( nullptr != pPage );
+                pPage->Reset( );
+            } );
         }
 
         void Destroy( ) {
@@ -267,12 +267,12 @@ namespace apemodevk {
             return true;
         }
 
-        VkDescriptorSet GetDescSet(const VkDescriptorBufferInfo & descriptorBufferInfo) {
+        VkDescriptorSet GetDescSet( const VkDescriptorBufferInfo &descriptorBufferInfo ) {
             auto descSetIt = std::find_if( Sets.begin( ), Sets.end( ), [&]( const std::pair< VkBuffer, VkDescriptorSet > &pair ) {
                 return pair.first == descriptorBufferInfo.buffer;
             } );
 
-            if (descSetIt != Sets.end())
+            if ( descSetIt != Sets.end( ) )
                 return descSetIt->second;
 
             VkDescriptorSetAllocateInfo descriptorSetAllocateInfo;
@@ -283,7 +283,7 @@ namespace apemodevk {
 
             VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
             if ( VK_SUCCESS != vkAllocateDescriptorSets( pLogicalDevice, &descriptorSetAllocateInfo, &descriptorSet ) ) {
-                DebugBreak();
+                DebugBreak( );
                 return nullptr;
             }
 

@@ -170,6 +170,12 @@
     <ClInclude Include="CameraControllerInputMouseKeyboard.h">
       <Filter>Sources\Camera</Filter>
     </ClInclude>
+    <ClInclude Include="ISceneRenderer.h">
+      <Filter>Sources\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneRendererVk.h">
+      <Filter>Sources\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="fbxvpch.cpp">
@@ -234,6 +240,9 @@
     </ClCompile>
     <ClCompile Include="FbxViewerOS.cpp">
       <Filter>Sources\OS</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneRendererVk.cpp">
+      <Filter>Sources\Graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

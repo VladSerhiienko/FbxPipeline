@@ -2,6 +2,7 @@
 
 #include <AppState.h>
 #include <AppSurfaceSdlVk.h>
+#include <SceneRendererVk.h>
 #include <CommandQueue.Vulkan.h>
 #include <GraphicsDevice.Vulkan.h>
 #include <GraphicsManager.Vulkan.h>
@@ -96,4 +97,8 @@ void apemode::AppSurfaceSdlVk::OnFrameMove( ) {
 
 void* apemode::AppSurfaceSdlVk::GetGraphicsHandle( ) {
     return reinterpret_cast< void* >( pDeviceManager.get( ) );
+}
+
+apemode::ISceneRenderer* apemode::AppSurfaceSdlVk::CreateSceneRenderer( ) {
+    return new SceneRendererVk( );
 }
