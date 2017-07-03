@@ -208,7 +208,7 @@ namespace apemode {
     Scene * LoadSceneFromFile(const char * filename) {
         std::string fileData;
         if ( flatbuffers::LoadFile( filename, true, &fileData ) ) {
-            if ( auto sceneFb = fbxp::fb::GetSceneFb( fileData.c_str( ) ) ) {
+            if ( auto sceneFb = apemodefb::GetSceneFb( fileData.c_str( ) ) ) {
                 std::unique_ptr< Scene > scene( new Scene( ) );
 
                 //
@@ -323,11 +323,11 @@ namespace apemode {
                             mesh.indexBufferHandle = bgfx::createIndexBuffer(
                                 bgfxUtils::makeReleasableCopy( meshFb->subset_indices( )->Data( ),
                                                                meshFb->subset_indices( )->size( ) ),
-                                meshFb->subset_index_type( ) == fbxp::fb::EIndexTypeFb_UInt32 ? BGFX_BUFFER_INDEX32 : 0 );
+                                meshFb->subset_index_type( ) == apemodefb::EIndexTypeFb_UInt32 ? BGFX_BUFFER_INDEX32 : 0 );
                         }*/
 
                         if ( auto submeshesFb = meshFb->submeshes( ) ) {
-                            auto submeshFb = (const fbxp::fb::SubmeshFb *) submeshesFb->Data( );
+                            auto submeshFb = (const apemodefb::SubmeshFb *) submeshesFb->Data( );
 
                             mesh.positionOffset.x = submeshFb->position_offset( ).x( );
                             mesh.positionOffset.y = submeshFb->position_offset( ).y( );
@@ -343,12 +343,12 @@ namespace apemode {
 
                         mesh.subsets.reserve( meshFb->subsets( )->size( ) );
 
-                        auto subsetIt    = (const fbxp::fb::SubsetFb *) meshFb->subsets( )->Data( );
+                        auto subsetIt    = (const apemodefb::SubsetFb *) meshFb->subsets( )->Data( );
                         auto subsetEndIt = subsetIt + meshFb->subsets( )->size( );
                         std::transform( subsetIt,
                                         subsetEndIt,
                                         std::back_inserter( mesh.subsets ),
-                                        [&]( const fbxp::fb::SubsetFb &subsetFb ) {
+                                        [&]( const apemodefb::SubsetFb &subsetFb ) {
                                             assert( subsetFb.index_count( ) );
 
                                             SceneMeshSubset subset;

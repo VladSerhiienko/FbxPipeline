@@ -110,12 +110,12 @@ void CalculateFaceNormals( TVertex* vertices, size_t vertexCount ) {
  **/
 template < typename TIndex >
 bool GetSubsets( FbxMesh*                           mesh,
-                 fbxp::Mesh&                        m,
+                 apemode::Mesh&                        m,
                  std::vector< TIndex >&             indices,
-                 std::vector< fbxp::fb::SubsetFb >& subsets,
-                 std::vector< fbxp::fb::SubsetFb >& subsetPolies,
+                 std::vector< apemodefb::SubsetFb >& subsets,
+                 std::vector< apemodefb::SubsetFb >& subsetPolies,
                  std::vector< std::tuple< TIndex, TIndex > >& items ) {
-    auto& s = fbxp::Get( );
+    auto& s = apemode::Get( );
 
     s.console->info("Mesh \"{}\" has {} material(s) assigned.", mesh->GetNode( )->GetName( ), mesh->GetNode( )->GetMaterialCount( ) );
 
@@ -330,7 +330,7 @@ TElementValue GetElementValue( const TElementLayer* elementLayer, uint32_t i ) {
         }
 
         default:
-            fbxp::Get( ).console->error(
+            apemode::Get( ).console->error(
                 "Reference mode {} of layer \"{}\" "
                 "is not supported.",
                 referenceMode,
@@ -361,7 +361,7 @@ TElementValue GetElementValue( const TElementLayer* elementLayer,
             return GetElementValue< TElementLayer, TElementValue >( elementLayer, vertexIndex );
 
         default:
-            fbxp::Get( ).console->error(
+            apemode::Get( ).console->error(
                 "Mapping mode {} of layer \"{}\" "
                 "is not supported.",
                 mappingMode,
@@ -378,7 +378,7 @@ TElementValue GetElementValue( const TElementLayer* elementLayer,
 template < typename TElementLayer >
 const TElementLayer* VerifyElementLayer( const TElementLayer* elementLayer ) {
     if ( nullptr == elementLayer ) {
-        fbxp::Get( ).console->error( "Missing element layer." );
+        apemode::Get( ).console->error( "Missing element layer." );
         return nullptr;
     }
 
@@ -388,7 +388,7 @@ const TElementLayer* VerifyElementLayer( const TElementLayer* elementLayer ) {
         case FbxLayerElement::EMappingMode::eByPolygonVertex:
             break;
         default:
-            fbxp::Get( ).console->error(
+            apemode::Get( ).console->error(
                 "Mapping mode {} of layer \"{}\" "
                 "is not supported.",
                 mappingMode,
@@ -402,7 +402,7 @@ const TElementLayer* VerifyElementLayer( const TElementLayer* elementLayer ) {
         case FbxLayerElement::EReferenceMode::eIndexToDirect:
             break;
         default:
-            fbxp::Get( ).console->error(
+            apemode::Get( ).console->error(
                 "Reference mode {} of layer \"{}\" "
                 "is not supported.",
                 referenceMode,
@@ -427,8 +427,8 @@ struct StaticVertex {
 // Flatbuffers takes care about correct platform-independent alignment.
 //
 
-static_assert( sizeof( StaticVertex ) == sizeof( fbxp::fb::StaticVertexFb ), "Must match" );
-static_assert( sizeof( fbxp::fb::PackedVertexFb ) == sizeof( fbxp::fb::PackedVertexFb ), "Must match" );
+static_assert( sizeof( StaticVertex ) == sizeof( apemodefb::StaticVertexFb ), "Must match" );
+static_assert( sizeof( apemodefb::PackedVertexFb ) == sizeof( apemodefb::PackedVertexFb ), "Must match" );
 
 /**
  * Initialize vertices with very basic properties like 'position', 'normal', 'tangent', 'texCoords'.
@@ -436,14 +436,14 @@ static_assert( sizeof( fbxp::fb::PackedVertexFb ) == sizeof( fbxp::fb::PackedVer
  **/
 template < typename TVertex >
 void InitializeVertices( FbxMesh*      mesh,
-                         fbxp::Mesh&   m,
+                         apemode::Mesh&   m,
                          TVertex*      vertices,
                          size_t        vertexCount,
                          mathfu::vec3& positionMin,
                          mathfu::vec3& positionMax,
                          mathfu::vec2& texcoordMin,
                          mathfu::vec2& texcoordMax ) {
-    auto& s = fbxp::Get( );
+    auto& s = apemode::Get( );
     const uint32_t cc = (uint32_t) mesh->GetControlPointsCount( );
     const uint32_t pc = (uint32_t) mesh->GetPolygonCount( );
 
@@ -515,10 +515,10 @@ void InitializeVertices( FbxMesh*      mesh,
         }
     }
 
-    m.positionMin = fbxp::fb::vec3( positionMin.x, positionMin.y, positionMin.z );
-    m.positionMax = fbxp::fb::vec3( positionMax.x, positionMax.y, positionMax.z );
-    m.texcoordMin = fbxp::fb::vec2( texcoordMin.x, texcoordMin.y );
-    m.texcoordMax = fbxp::fb::vec2( texcoordMax.x, texcoordMax.y );
+    m.positionMin = apemodefb::vec3( positionMin.x, positionMin.y, positionMin.z );
+    m.positionMax = apemodefb::vec3( positionMax.x, positionMax.y, positionMax.z );
+    m.texcoordMin = apemodefb::vec2( texcoordMin.x, texcoordMin.y );
+    m.texcoordMax = apemodefb::vec2( texcoordMax.x, texcoordMax.y );
 
     if ( nullptr == uve ) {
         s.console->error( "Mesh \"{}\" does not have texcoords geometry layer.",
@@ -547,15 +547,15 @@ void InitializeVertices( FbxMesh*      mesh,
 // See implementation in fbxpmeshopt.cpp.
 //
 
-void Optimize32( fbxp::Mesh& mesh, fbxp::fb::StaticVertexFb const* vertices, uint32_t & vertexCount, uint32_t vertexStride );
-void Optimize16( fbxp::Mesh& mesh, fbxp::fb::StaticVertexFb const* vertices, uint32_t & vertexCount, uint32_t vertexStride );
+void Optimize32( apemode::Mesh& mesh, apemodefb::StaticVertexFb const* vertices, uint32_t & vertexCount, uint32_t vertexStride );
+void Optimize16( apemode::Mesh& mesh, apemodefb::StaticVertexFb const* vertices, uint32_t & vertexCount, uint32_t vertexStride );
 
 //
 // See implementation in fbxpmeshpacking.cpp.
 //
 
-void Pack( const fbxp::fb::StaticVertexFb* vertices,
-           fbxp::fb::PackedVertexFb*       packed,
+void Pack( const apemodefb::StaticVertexFb* vertices,
+           apemodefb::PackedVertexFb*       packed,
            const uint32_t                  vertexCount,
            const mathfu::vec3              positionMin,
            const mathfu::vec3              positionMax,
@@ -563,12 +563,12 @@ void Pack( const fbxp::fb::StaticVertexFb* vertices,
            const mathfu::vec2              texcoordsMax );
 
 template < typename TIndex >
-void ExportMesh( FbxNode* node, FbxMesh* mesh, fbxp::Node& n, fbxp::Mesh& m, uint32_t vertexCount, bool pack, bool optimize ) {
-    auto& s = fbxp::Get( );
+void ExportMesh( FbxNode* node, FbxMesh* mesh, apemode::Node& n, apemode::Mesh& m, uint32_t vertexCount, bool pack, bool optimize ) {
+    auto& s = apemode::Get( );
 
-    const uint16_t vertexStride           = (uint16_t) sizeof( fbxp::fb::StaticVertexFb );
+    const uint16_t vertexStride           = (uint16_t) sizeof( apemodefb::StaticVertexFb );
     const uint32_t vertexBufferSize       = vertexCount * vertexStride;
-    const uint16_t packedVertexStride     = (uint16_t) sizeof( fbxp::fb::PackedVertexFb );
+    const uint16_t packedVertexStride     = (uint16_t) sizeof( apemodefb::PackedVertexFb );
     const uint32_t packedVertexBufferSize = vertexCount * packedVertexStride;
 
     m.vertices.resize( vertexBufferSize );
@@ -598,32 +598,32 @@ void ExportMesh( FbxNode* node, FbxMesh* mesh, fbxp::Node& n, fbxp::Mesh& m, uin
     }
 
     if ( std::is_same< TIndex, uint16_t >::value ) {
-        m.subsetIndexType = fbxp::fb::EIndexTypeFb_UInt16;
+        m.subsetIndexType = apemodefb::EIndexTypeFb_UInt16;
     } else if ( std::is_same< TIndex, uint32_t >::value ) {
-        m.subsetIndexType = fbxp::fb::EIndexTypeFb_UInt32;
+        m.subsetIndexType = apemodefb::EIndexTypeFb_UInt32;
     } else {
         assert( false );
     }
 
     if ( optimize ) {
-        auto initializedVertices = reinterpret_cast< const fbxp::fb::StaticVertexFb* >( m.vertices.data( ) );
+        auto initializedVertices = reinterpret_cast< const apemodefb::StaticVertexFb* >( m.vertices.data( ) );
 
         if ( std::is_same< TIndex, uint16_t >::value ) {
             Optimize16( m, initializedVertices, vertexCount, vertexStride );
         } else if ( std::is_same< TIndex, uint32_t >::value ) {
-            m.subsetIndexType = fbxp::fb::EIndexTypeFb_UInt32;
+            m.subsetIndexType = apemodefb::EIndexTypeFb_UInt32;
             Optimize32( m, initializedVertices, vertexCount, vertexStride );
         }
     }
 
     if ( pack ) {
-        std::vector< fbxp::fb::StaticVertexFb > tempBuffer;
+        std::vector< apemodefb::StaticVertexFb > tempBuffer;
         tempBuffer.resize( vertexCount );
         memcpy( tempBuffer.data( ), m.vertices.data( ), m.vertices.size( ) );
 
         m.vertices.resize( packedVertexBufferSize );
-        Pack( reinterpret_cast< fbxp::fb::StaticVertexFb* >( tempBuffer.data( ) ),
-              reinterpret_cast< fbxp::fb::PackedVertexFb* >( m.vertices.data( ) ),
+        Pack( reinterpret_cast< apemodefb::StaticVertexFb* >( tempBuffer.data( ) ),
+              reinterpret_cast< apemodefb::PackedVertexFb* >( m.vertices.data( ) ),
               vertexCount,
               positionMin,
               positionMax,
@@ -631,16 +631,16 @@ void ExportMesh( FbxNode* node, FbxMesh* mesh, fbxp::Node& n, fbxp::Mesh& m, uin
               texcoordMax );
     }
 
-    fbxp::fb::vec3 bboxMin( positionMin.x, positionMin.y, positionMin.z );
-    fbxp::fb::vec3 bboxMax( positionMax.x, positionMax.y, positionMax.z );
-    fbxp::fb::vec2 uvMin( texcoordMin.x, texcoordMin.y );
-    fbxp::fb::vec2 uvMax( texcoordMax.x, texcoordMax.y );
+    apemodefb::vec3 bboxMin( positionMin.x, positionMin.y, positionMin.z );
+    apemodefb::vec3 bboxMax( positionMax.x, positionMax.y, positionMax.z );
+    apemodefb::vec2 uvMin( texcoordMin.x, texcoordMin.y );
+    apemodefb::vec2 uvMax( texcoordMax.x, texcoordMax.y );
 
     if ( pack ) {
         auto const positionScale = positionMax - positionMin;
         auto const texcoordScale = texcoordMax - texcoordMin;
-        fbxp::fb::vec3 bboxScale( positionScale.x, positionScale.y, positionScale.z );
-        fbxp::fb::vec2 uvScale( texcoordScale.x, texcoordScale.y );
+        apemodefb::vec3 bboxScale( positionScale.x, positionScale.y, positionScale.z );
+        apemodefb::vec2 uvScale( texcoordScale.x, texcoordScale.y );
 
         m.submeshes.emplace_back( bboxMin,                        // bbox min
                                   bboxMax,                        // bbox max
@@ -654,30 +654,30 @@ void ExportMesh( FbxNode* node, FbxMesh* mesh, fbxp::Node& n, fbxp::Mesh& m, uin
                                   0,                              // index count
                                   0,                              // base subset
                                   (uint32_t) m.subsets.size( ),   // subset count
-                                  fbxp::fb::EVertexFormat_Packed, // vertex format
+                                  apemodefb::EVertexFormat_Packed, // vertex format
                                   packedVertexStride              // vertex stride
                                   );
     } else {
         m.submeshes.emplace_back( bboxMin,                            // bbox min
                                   bboxMax,                            // bbox max
-                                  fbxp::fb::vec3( 0.0f, 0.0f, 0.0f ), // position offset
-                                  fbxp::fb::vec3( 1.0f, 1.0f, 1.0f ), // position scale
-                                  fbxp::fb::vec2( 0.0f, 0.0f ),       // uv offset
-                                  fbxp::fb::vec2( 1.0f, 1.0f ),       // uv scale
+                                  apemodefb::vec3( 0.0f, 0.0f, 0.0f ), // position offset
+                                  apemodefb::vec3( 1.0f, 1.0f, 1.0f ), // position scale
+                                  apemodefb::vec2( 0.0f, 0.0f ),       // uv offset
+                                  apemodefb::vec2( 1.0f, 1.0f ),       // uv scale
                                   0,                                  // base vertex
                                   vertexCount,                        // vertex count
                                   0,                                  // base index
                                   0,                                  // index count
                                   0,                                  // base subset
                                   (uint32_t) m.subsets.size( ),       // subset count
-                                  fbxp::fb::EVertexFormat_Static,     // vertex format
+                                  apemodefb::EVertexFormat_Static,     // vertex format
                                   vertexStride                        // vertex stride
                                   );
     }
 }
 
-void ExportMesh( FbxNode* node, fbxp::Node& n, bool pack, bool optimize ) {
-    auto& s = fbxp::Get( );
+void ExportMesh( FbxNode* node, apemode::Node& n, bool pack, bool optimize ) {
+    auto& s = apemode::Get( );
     if ( auto mesh = node->GetMesh( ) ) {
         s.console->info( "Node \"{}\" has mesh.", node->GetName( ) );
         if ( !mesh->IsTriangleMesh( ) ) {
@@ -699,7 +699,7 @@ void ExportMesh( FbxNode* node, fbxp::Node& n, bool pack, bool optimize ) {
 
         n.meshId = (uint32_t) s.meshes.size( );
         s.meshes.emplace_back( );
-        fbxp::Mesh& m = s.meshes.back( );
+        apemode::Mesh& m = s.meshes.back( );
 
         const uint32_t vertexCount = mesh->GetPolygonCount( ) * 3;
 

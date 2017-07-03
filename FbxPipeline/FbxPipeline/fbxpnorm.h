@@ -5,7 +5,7 @@
  * Packing utilities.
  **/
 
-namespace fbxp {
+namespace apemode {
 
     template < int BitCount >
     struct ChooseUint {

@@ -198,6 +198,8 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
 
         appContent->Dbg->RecreateResources(&initParamsDbg);
 
+        auto renderer = appSurfaceVk->CreateSceneRenderer();
+
         // appContent->scenes[ 0 ] = LoadSceneFromFile( "../../../assets/iron-man.fbxp" );
         // appContent->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/kalestra-the-sorceress.fbxp" );
         // appContent->scenes[ 0 ] = LoadSceneFromFile( "../../../assets/Mech6kv3ps.fbxp" );
@@ -550,7 +552,7 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         vkCmdBeginRenderPass( cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE );
 
         DebugRendererVk::FrameUniformBuffer frameData;
-        frameData.projectionMatrix = appContent->CamProjController.ProjMatrix(55, width, height, 0.1f, 100.0f);
+        frameData.projectionMatrix = appContent->CamProjController.ProjMatrix(55.0f, width, height, 0.1f, 100.0f);
         frameData.viewMatrix = appContent->pCamController->ViewMatrix();
         frameData.color = {1, 0, 0, 1};
 

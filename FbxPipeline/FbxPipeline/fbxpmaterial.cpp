@@ -7,59 +7,59 @@ std::string GetFileName( const char* filePath );
 void SplitFilename( const std::string& filePath, std::string& parentFolderName, std::string& fileName );
 
 template < typename TFbxMaterial >
-void ExportMaterial( FbxSurfaceMaterial* material, fbxp::Material& m ) {
+void ExportMaterial( FbxSurfaceMaterial* material, apemode::Material& m ) {
     (void) material;
     (void) m;
 }
 
 template <>
-void ExportMaterial< FbxSurfaceLambert >( FbxSurfaceMaterial* material, fbxp::Material& m ) {
-    auto& s  = fbxp::Get( );
+void ExportMaterial< FbxSurfaceLambert >( FbxSurfaceMaterial* material, apemode::Material& m ) {
+    auto& s  = apemode::Get( );
     auto  mm = static_cast< FbxSurfaceLambert* >( material );
 
     m.props.reserve( 12 );
 
     for ( auto& p : {mm->AmbientFactor, mm->DiffuseFactor, mm->DisplacementFactor, mm->BumpFactor, mm->EmissiveFactor, mm->TransparencyFactor} ) {
         m.props.emplace_back( s.PushName( p.GetName( ).Buffer( ) ),
-                              fbxp::fb::EMaterialPropTypeFb_Scalar,
-                              fbxp::fb::vec3( static_cast< float >( p.Get( ) ), 0, 0 ) );
+                              apemodefb::EMaterialPropTypeFb_Scalar,
+                              apemodefb::vec3( static_cast< float >( p.Get( ) ), 0, 0 ) );
     }
 
     for ( auto& p : {mm->Ambient, mm->Diffuse, mm->DisplacementColor, mm->Bump, mm->Emissive, mm->TransparentColor} ) {
         m.props.emplace_back( s.PushName( p.GetName( ).Buffer( ) ),
-                              fbxp::fb::EMaterialPropTypeFb_Color,
-                              fbxp::fb::vec3( static_cast< float >( p.Get( )[ 0 ] ),
+                              apemodefb::EMaterialPropTypeFb_Color,
+                              apemodefb::vec3( static_cast< float >( p.Get( )[ 0 ] ),
                                               static_cast< float >( p.Get( )[ 1 ] ),
                                               static_cast< float >( p.Get( )[ 2 ] ) ) );
     }
 }
 
 template <>
-void ExportMaterial< FbxSurfacePhong >( FbxSurfaceMaterial* material, fbxp::Material& m ) {
+void ExportMaterial< FbxSurfacePhong >( FbxSurfaceMaterial* material, apemode::Material& m ) {
     m.props.reserve( 16 );
 
     ExportMaterial< FbxSurfaceLambert >( material, m );
 
-    auto& s  = fbxp::Get( );
+    auto& s  = apemode::Get( );
     auto  mm = static_cast< FbxSurfacePhong* >( material );
 
     for ( auto& p : {mm->SpecularFactor, mm->ReflectionFactor} ) {
         m.props.emplace_back( s.PushName( p.GetName( ).Buffer( ) ),
-                              fbxp::fb::EMaterialPropTypeFb_Scalar,
-                              fbxp::fb::vec3( static_cast< float >( p.Get( ) ), 0, 0 ) );
+                              apemodefb::EMaterialPropTypeFb_Scalar,
+                              apemodefb::vec3( static_cast< float >( p.Get( ) ), 0, 0 ) );
     }
 
     for ( auto& p : {mm->Specular, mm->Reflection} ) {
         m.props.emplace_back( s.PushName( p.GetName( ).Buffer( ) ),
-                              fbxp::fb::EMaterialPropTypeFb_Color,
-                              fbxp::fb::vec3( static_cast< float >( p.Get( )[ 0 ] ),
+                              apemodefb::EMaterialPropTypeFb_Color,
+                              apemodefb::vec3( static_cast< float >( p.Get( )[ 0 ] ),
                                               static_cast< float >( p.Get( )[ 1 ] ),
                                               static_cast< float >( p.Get( )[ 2 ] ) ) );
     }
 }
 
-void ExportVideo( std::string const& pn, fbxp::Material& m, FbxProperty& pp, FbxVideo* v ) {
-    auto& s = fbxp::Get( );
+void ExportVideo( std::string const& pn, apemode::Material& m, FbxProperty& pp, FbxVideo* v ) {
+    auto& s = apemode::Get( );
 
     std::string url = v->GetFileName( );
     if ( url.empty( ) ) {
@@ -71,17 +71,17 @@ void ExportVideo( std::string const& pn, fbxp::Material& m, FbxProperty& pp, Fbx
         s.textures.emplace_back( (uint32_t) s.textures.size( ),
                                  s.PushName( v->GetName( ) ),
                                  s.PushName( GetFileName( url.c_str( ) ) ),
-                                 fbxp::fb::EBlendMode::EBlendMode_Over,
-                                 fbxp::fb::EWrapMode::EWrapMode_Clamp,
-                                 fbxp::fb::EWrapMode::EWrapMode_Clamp,
+                                 apemodefb::EBlendMode::EBlendMode_Over,
+                                 apemodefb::EWrapMode::EWrapMode_Clamp,
+                                 apemodefb::EWrapMode::EWrapMode_Clamp,
                                  (float) 0,
                                  (float) 0,
                                  (float) 1,
                                  (float) 1 );
 
         m.props.emplace_back( s.PushName( pp.GetName( ).Buffer( ) ),
-                              fbxp::fb::EMaterialPropTypeFb_Video,
-                              fbxp::fb::vec3( static_cast< float >( s.textures.back( ).id( ) ), 0, 0 ) );
+                              apemodefb::EMaterialPropTypeFb_Video,
+                              apemodefb::vec3( static_cast< float >( s.textures.back( ).id( ) ), 0, 0 ) );
 
         s.console->info( "Found video \"{}\" (\"{}\") (\"{}\")",
                          v->GetName( ),
@@ -90,8 +90,8 @@ void ExportVideo( std::string const& pn, fbxp::Material& m, FbxProperty& pp, Fbx
     }
 }
 
-void ExportTexture( std::string const& pn, fbxp::Material& m, FbxProperty& pp, FbxTexture* t ) {
-    auto& s = fbxp::Get( );
+void ExportTexture( std::string const& pn, apemode::Material& m, FbxProperty& pp, FbxTexture* t ) {
+    auto& s = apemode::Get( );
     std::string url = t->GetUrl( );
 
     if ( url.empty( ) ) {
@@ -105,17 +105,17 @@ void ExportTexture( std::string const& pn, fbxp::Material& m, FbxProperty& pp, F
         s.textures.emplace_back( (uint32_t) s.textures.size( ),
                                  s.PushName( t->GetName( ) ),
                                  s.PushName( GetFileName( url.c_str( ) ) ),
-                                 (fbxp::fb::EBlendMode) t->GetBlendMode( ),
-                                 (fbxp::fb::EWrapMode) t->GetWrapModeU( ),
-                                 (fbxp::fb::EWrapMode) t->GetWrapModeV( ),
+                                 (apemodefb::EBlendMode) t->GetBlendMode( ),
+                                 (apemodefb::EWrapMode) t->GetWrapModeU( ),
+                                 (apemodefb::EWrapMode) t->GetWrapModeV( ),
                                  (float) t->GetTranslationU( ),
                                  (float) t->GetTranslationV( ),
                                  (float) t->GetScaleU( ),
                                  (float) t->GetScaleV( ) );
 
         m.props.emplace_back( s.PushName( pp.GetName( ).Buffer( ) ),
-                              fbxp::fb::EMaterialPropTypeFb_Texture,
-                              fbxp::fb::vec3( static_cast< float >( s.textures.back( ).id( ) ), 0, 0 ) );
+                              apemodefb::EMaterialPropTypeFb_Texture,
+                              apemodefb::vec3( static_cast< float >( s.textures.back( ).id( ) ), 0, 0 ) );
 
         s.console->info( "Found texture \"{}\" (\"{}\") (\"{}\")",
                          t->GetName( ),
@@ -124,7 +124,7 @@ void ExportTexture( std::string const& pn, fbxp::Material& m, FbxProperty& pp, F
     }
 }
 
-void ExportTextures( std::string const& pn, fbxp::Material& m, FbxProperty& pp ) {
+void ExportTextures( std::string const& pn, apemode::Material& m, FbxProperty& pp ) {
     if ( const int ltc = pp.GetSrcObjectCount< FbxLayeredTexture >( ) ) {
         for ( int j = 0; j < ltc; j++ )
             if ( FbxLayeredTexture* lt = pp.GetSrcObject< FbxLayeredTexture >( j ) ) {
@@ -147,7 +147,7 @@ void ExportTextures( std::string const& pn, fbxp::Material& m, FbxProperty& pp )
 }
 
 void ExportMaterials( FbxScene* scene ) {
-    auto& s = fbxp::Get( );
+    auto& s = apemode::Get( );
 
     if ( auto c = scene->GetMaterialCount( ) ) {
         s.materials.reserve( c );
@@ -197,8 +197,8 @@ void ExportMaterials( FbxScene* scene ) {
     }
 }
 
-void ExportMaterials( FbxNode* node, fbxp::Node& n ) {
-    auto& s = fbxp::Get( );
+void ExportMaterials( FbxNode* node, apemode::Node& n ) {
+    auto& s = apemode::Get( );
     if ( const auto c = node->GetMaterialCount( ) ) {
         n.materialIds.reserve( c );
         for ( auto i = 0; i < c; ++i ) {

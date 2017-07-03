@@ -1,5 +1,5 @@
 
-namespace fbxp.fb;
+namespace apemodefb;
 
 enum EVersion : uint {
     Value = 3
@@ -159,5 +159,5 @@ table SceneFb {
 }
 
 root_type SceneFb;
-file_extension "fbxp";
+file_extension "apemode";
 file_identifier "FBXP";

@@ -8,8 +8,8 @@
 
 #include <meshoptimizer.hpp>
 
-using namespace fbxp;
-using namespace fb;
+using namespace apemode;
+using namespace apemodefb;
 
 template < typename TIndex >
 struct VcacheTriangle {
@@ -30,11 +30,11 @@ struct VcacheTriangle {
     }
 };
 
-using Vertex = fbxp::fb::StaticVertexFb;
+using Vertex = apemodefb::StaticVertexFb;
 
 template < typename TIndex >
 struct VcacheMesh {
-    fbxp::Mesh* m = nullptr;
+    apemode::Mesh* m = nullptr;
 };
 
 namespace vcache_optimizer {
@@ -142,7 +142,7 @@ void set_vertex( VcacheMesh< uint32_t >& m, uint32_t const& sm, uint32_t& index,
 const bool bUseVcacheOptimizer = false;
 
 template < typename TIndex >
-void GenerateSubset( fbxp::Mesh& m, uint32_t& vertexCount, uint32_t vertexStride ) {
+void GenerateSubset( apemode::Mesh& m, uint32_t& vertexCount, uint32_t vertexStride ) {
     if ( false == m.subsets.empty( ) )
         return;
 
@@ -168,7 +168,7 @@ void GenerateSubset( fbxp::Mesh& m, uint32_t& vertexCount, uint32_t vertexStride
 }
 
 template < typename TIndex >
-void OptimizeSubsetVcache( fbxp::Mesh& mesh, uint32_t subsetIndex ) {
+void OptimizeSubsetVcache( apemode::Mesh& mesh, uint32_t subsetIndex ) {
     VcacheMesh< TIndex > meshWrapper;
     meshWrapper.m = &mesh;
 
@@ -177,7 +177,7 @@ void OptimizeSubsetVcache( fbxp::Mesh& mesh, uint32_t subsetIndex ) {
 }
 
 template < typename TIndex >
-void OptimizeSubset(fbxp::Mesh& m, const Vertex * vertices, uint32_t& vertexCount, uint32_t vertexStride, uint32_t ss ) {
+void OptimizeSubset(apemode::Mesh& m, const Vertex * vertices, uint32_t& vertexCount, uint32_t vertexStride, uint32_t ss ) {
     const uint32_t kCacheSize = 16;
 
     std::vector< uint8_t > indexBuffer;
@@ -223,9 +223,9 @@ void OptimizeSubset(fbxp::Mesh& m, const Vertex * vertices, uint32_t& vertexCoun
 }
 
 template < typename TIndex >
-void Optimize( fbxp::Mesh& m, const Vertex * vertices, uint32_t& vertexCount, uint32_t vertexStride ) {
+void Optimize( apemode::Mesh& m, const Vertex * vertices, uint32_t& vertexCount, uint32_t vertexStride ) {
 
-    auto& s = fbxp::Get( );
+    auto& s = apemode::Get( );
 
     VcacheMesh< TIndex > mm;
     mm.m = &m;
@@ -246,10 +246,10 @@ void Optimize( fbxp::Mesh& m, const Vertex * vertices, uint32_t& vertexCount, ui
 // E:\Media\Models\m4a1-sopmod-overkill\source\M4A1 SOPMOD Overkill HIGH POLY.obj
 // E:\Media\Models\mech-m-6k\source\93d43cf18ad5406ba0176c9fae7d4927.fbx
 
-void Optimize32( fbxp::Mesh& mesh, const Vertex* vertices, uint32_t& vertexCount, uint32_t vertexStride ) {
+void Optimize32( apemode::Mesh& mesh, const Vertex* vertices, uint32_t& vertexCount, uint32_t vertexStride ) {
     Optimize< uint32_t >( mesh, vertices, vertexCount, vertexStride );
 }
 
-void Optimize16( fbxp::Mesh& mesh, const Vertex* vertices, uint32_t& vertexCount, uint32_t vertexStride ) {
+void Optimize16( apemode::Mesh& mesh, const Vertex* vertices, uint32_t& vertexCount, uint32_t vertexStride ) {
     Optimize< uint16_t >( mesh, vertices, vertexCount, vertexStride );
 }

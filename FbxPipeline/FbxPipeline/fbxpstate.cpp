@@ -12,12 +12,12 @@ void DestroySdkObjects( FbxManager* pManager );
 bool LoadScene( FbxManager* pManager, FbxDocument* pScene, const char* pFilename );
 void InitializeSeachLocations( );
 
-fbxp::State  s;
-fbxp::State& fbxp::Get( ) {
+apemode::State  s;
+apemode::State& apemode::Get( ) {
     return s;
 }
 
-fbxp::State::State( ) : console( spdlog::stdout_color_mt( "fbxp" ) ), options( GetExecutable( ) ) {
+apemode::State::State( ) : console( spdlog::stdout_color_mt( "apemode" ) ), options( GetExecutable( ) ) {
     options.add_options( "input" )( "i,input-file", "Input", cxxopts::value< std::string >( ) );
     options.add_options( "input" )( "o,output-file", "Output", cxxopts::value< std::string >( ) );
     options.add_options( "input" )( "k,convert", "Convert", cxxopts::value< bool >( ) );
@@ -29,11 +29,11 @@ fbxp::State::State( ) : console( spdlog::stdout_color_mt( "fbxp" ) ), options( G
     options.add_options( "input" )( "m,embed-file", "Embed file", cxxopts::value< std::vector< std::string > >( ) );
 }
 
-fbxp::State::~State( ) {
+apemode::State::~State( ) {
     Release( );
 }
 
-bool fbxp::State::Initialize( ) {
+bool apemode::State::Initialize( ) {
     if (!manager || !scene) {
         InitializeSdkObjects( manager, scene );
         InitializeSeachLocations( );
@@ -42,14 +42,14 @@ bool fbxp::State::Initialize( ) {
     return manager && scene;
 }
 
-void fbxp::State::Release( ) {
+void apemode::State::Release( ) {
     if ( manager ) {
         DestroySdkObjects( manager );
         manager = nullptr;
     }
 }
 
-bool fbxp::State::Load( ) {
+bool apemode::State::Load( ) {
     const std::string inputFile = options[ "i" ].as< std::string >( );
     // SplitFilename( inputFile.c_str( ), folderPath, fileName );
     // console->info( "File name  : \"{}\"", fileName );
@@ -59,18 +59,18 @@ bool fbxp::State::Load( ) {
 
 std::vector< uint8_t > ReadFile( const char* filepath );
 
-bool fbxp::State::Finish( ) {
+bool apemode::State::Finish( ) {
 
     //
     // Finalize names
     //
 
-    std::vector< flatbuffers::Offset< fb::NameFb > > nameOffsets; {
+    std::vector< flatbuffers::Offset<apemodefb::NameFb > > nameOffsets; {
         nameOffsets.reserve( names.size( ) );
         for ( auto& namePair : names ) {
             const auto valueOffset = builder.CreateString( namePair.second );
 
-            fb::NameFbBuilder nameBuilder( builder );
+           apemodefb::NameFbBuilder nameBuilder( builder );
             nameBuilder.add_h( namePair.first );
             nameBuilder.add_v( valueOffset );
             nameOffsets.push_back( nameBuilder.Finish( ) );
@@ -89,13 +89,13 @@ bool fbxp::State::Finish( ) {
     // Finalize nodes
     //
 
-    std::vector< flatbuffers::Offset< fb::NodeFb > > nodeOffsets; {
+    std::vector< flatbuffers::Offset<apemodefb::NodeFb > > nodeOffsets; {
         nodeOffsets.reserve( nodes.size( ) );
         for ( auto& node : nodes ) {
             const auto childIdsOffset = builder.CreateVector( node.childIds );
             const auto materialIdsOffset = builder.CreateVector( node.materialIds );
 
-            fb::NodeFbBuilder nodeBuilder( builder );
+           apemodefb::NodeFbBuilder nodeBuilder( builder );
             nodeBuilder.add_id( node.id );
             nodeBuilder.add_name_id( node.nameId );
             nodeBuilder.add_culling_type( node.cullingType );
@@ -112,12 +112,12 @@ bool fbxp::State::Finish( ) {
     // Finalize materials
     // 
 
-    std::vector< flatbuffers::Offset< fb::MaterialFb > > materialOffsets; {
+    std::vector< flatbuffers::Offset<apemodefb::MaterialFb > > materialOffsets; {
         materialOffsets.reserve( materials.size( ) );
         for (auto& material : materials) {
             auto propsOffset = builder.CreateVectorOfStructs( material.props );
 
-            fb::MaterialFbBuilder materialBuilder( builder );
+           apemodefb::MaterialFbBuilder materialBuilder( builder );
             materialBuilder.add_id( material.id );
             materialBuilder.add_name_id( material.nameId );
             materialBuilder.add_props( propsOffset );
@@ -129,7 +129,7 @@ bool fbxp::State::Finish( ) {
     // Finalize meshes
     //
 
-    std::vector< flatbuffers::Offset< fb::MeshFb > > meshOffsets; {
+    std::vector< flatbuffers::Offset<apemodefb::MeshFb > > meshOffsets; {
         materialOffsets.reserve( meshes.size( ) );
         for ( auto& mesh : meshes ) {
             auto vsOffset = builder.CreateVector( mesh.vertices );
@@ -137,7 +137,7 @@ bool fbxp::State::Finish( ) {
             auto ssOffset = builder.CreateVectorOfStructs( mesh.subsets );
             auto siOffset = builder.CreateVector( mesh.subsetIndices );
 
-            fb::MeshFbBuilder meshBuilder( builder );
+           apemodefb::MeshFbBuilder meshBuilder( builder );
             meshBuilder.add_vertices( vsOffset );
             meshBuilder.add_submeshes( smOffset );
             meshBuilder.add_subsets( ssOffset );
@@ -151,7 +151,7 @@ bool fbxp::State::Finish( ) {
     // Finalize files
     //
 
-    std::vector< flatbuffers::Offset< fb::FileFb > > fileOffsets; {
+    std::vector< flatbuffers::Offset<apemodefb::FileFb > > fileOffsets; {
         fileOffsets.reserve( embedQueue.size( ) );
 
         std::vector< uint8_t > fileBuffer;
@@ -160,7 +160,7 @@ bool fbxp::State::Finish( ) {
             fileBuffer = ReadFile( embedded.c_str( ) );
             if ( !fileBuffer.empty( ) ) {
                 auto bytesOffset = builder.CreateVectorOfStructs( fileBuffer );
-                fileOffsets.push_back( fb::CreateFileFbDirect( builder, (uint32_t) fileOffsets.size( ), 0, &fileBuffer ) );
+                fileOffsets.push_back(apemodefb::CreateFileFbDirect( builder, (uint32_t) fileOffsets.size( ), 0, &fileBuffer ) );
             }
         }
     }
@@ -189,7 +189,7 @@ bool fbxp::State::Finish( ) {
     // Finalize scene
     //
 
-    fbxp::fb::SceneFbBuilder sceneBuilder( builder );
+    apemodefb::SceneFbBuilder sceneBuilder( builder );
     sceneBuilder.add_transforms( transformsOffset );
     sceneBuilder.add_names( namesOffset );
     sceneBuilder.add_nodes( nodesOffset );
@@ -198,18 +198,18 @@ bool fbxp::State::Finish( ) {
     sceneBuilder.add_materials( materialsOffset );
     sceneBuilder.add_files( filesOffset );
 
-    fbxp::fb::FinishSceneFbBuffer( builder, sceneBuilder.Finish( ) );
+    apemodefb::FinishSceneFbBuffer( builder, sceneBuilder.Finish( ) );
 
     //
     // Write the file
     //
 
     flatbuffers::Verifier v( builder.GetBufferPointer( ), builder.GetSize( ) );
-    assert( fbxp::fb::VerifySceneFbBuffer( v ) );
+    assert( apemodefb::VerifySceneFbBuffer( v ) );
 
     std::string output = options[ "o" ].as< std::string >( );
     if ( output.empty( ) ) {
-        output = folderPath + fileName + "." + fb::SceneFbExtension( );
+        output = folderPath + fileName + "." +apemodefb::SceneFbExtension( );
     } else {
         std::string outputFolder, outputFileName;
         SplitFilename( output, outputFolder, outputFileName );
@@ -226,7 +226,7 @@ bool fbxp::State::Finish( ) {
     return false;
 }
 
-uint64_t fbxp::State::PushName( std::string const& name ) {
+uint64_t apemode::State::PushName( std::string const& name ) {
     const uint64_t hash = CityHash64( name.data( ), name.size( ) );
     names.insert( std::make_pair( hash, name ) );
     return hash;

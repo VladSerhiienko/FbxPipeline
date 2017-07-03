@@ -496,8 +496,8 @@ bool apemode::DebugRendererVk::Render( RenderParametersVk* renderParams ) {
     InitializeStruct( scissor );
     scissor.offset.x      = 0;
     scissor.offset.y      = 0;
-    scissor.extent.width  = renderParams->dims[ 0 ] * renderParams->scale[ 0 ];
-    scissor.extent.height = renderParams->dims[ 1 ] * renderParams->scale[ 1 ];
+    scissor.extent.width  = (uint32_t)(renderParams->dims[ 0 ] * renderParams->scale[ 0 ]);
+    scissor.extent.height = (uint32_t)(renderParams->dims[ 1 ] * renderParams->scale[ 1 ]);
 
     vkCmdSetScissor( renderParams->pCmdBuffer, 0, 1, &scissor );
     vkCmdDraw( renderParams->pCmdBuffer, 12 * 3, 1, 0, 0 );

@@ -2,8 +2,8 @@
 #include <fbxpstate.h>
 #include <fbxpnorm.h>
 
-using namespace fbxp;
-using namespace fb;
+using namespace apemode;
+using namespace apemodefb;
 
 template < typename TMathFu, typename TFb >
 inline TMathFu Cast( const TFb v ) {

@@ -2,16 +2,16 @@
 #include <fbxpstate.h>
 #include <queue>
 
-void ExportMesh( FbxNode* node, fbxp::Node& n, bool pack, bool optimize );
+void ExportMesh( FbxNode* node, apemode::Node& n, bool pack, bool optimize );
 void ExportMaterials( FbxScene* scene );
-void ExportMaterials( FbxNode* node, fbxp::Node& n );
-void ExportTransform( FbxNode* node, fbxp::Node& n );
-void ExportAnimation( FbxNode* node, fbxp::Node& n );
+void ExportMaterials( FbxNode* node, apemode::Node& n );
+void ExportTransform( FbxNode* node, apemode::Node& n );
+void ExportAnimation( FbxNode* node, apemode::Node& n );
 
-void ExportNodeAttributes( FbxNode* node, fbxp::Node& n ) {
-    auto& s = fbxp::Get( );
+void ExportNodeAttributes( FbxNode* node, apemode::Node& n ) {
+    auto& s = apemode::Get( );
 
-    n.cullingType = (fbxp::fb::ECullingType) node->mCullingType;
+    n.cullingType = (apemodefb::ECullingType) node->mCullingType;
     s.console->info( "Node \"{}\" has {} culling type.", node->GetName(), n.cullingType );
 
     ExportTransform( node, n );
@@ -21,7 +21,7 @@ void ExportNodeAttributes( FbxNode* node, fbxp::Node& n ) {
 }
 
 uint32_t ExportNode( FbxNode* node ) {
-    auto& s = fbxp::Get( );
+    auto& s = apemode::Get( );
 
     const uint32_t nodeId = static_cast< uint32_t >( s.nodes.size( ) );
     s.nodes.emplace_back( );
@@ -49,7 +49,7 @@ uint32_t ExportNode( FbxNode* node ) {
  *                      > Split meshes per material
  **/
 void PreprocessMeshes( FbxScene* scene ) {
-    auto& s = fbxp::Get( );
+    auto& s = apemode::Get( );
 
     FbxGeometryConverter geometryConverter( s.manager );
 
@@ -86,14 +86,14 @@ void PreprocessMeshes( FbxScene* scene ) {
 }
 
 void PreprocessAnimation( FbxScene* scene ) {
-    auto& s = fbxp::Get( );
+    auto& s = apemode::Get( );
     FbxAnimCurveFilterConstantKeyReducer;
     FbxAnimCurveFilterResample;
 
 }
 
 void ExportScene( FbxScene* scene ) {
-    auto& s = fbxp::Get( );
+    auto& s = apemode::Get( );
 
     PreprocessMeshes( scene );
     PreprocessAnimation( scene );

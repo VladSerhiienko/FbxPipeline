@@ -1,9 +1,9 @@
 #pragma once
 
-#include <ISceneRenderer.h>
+#include <SceneRendererBase.h>
 
 namespace apemode {
-    class SceneRendererVk : public ISceneRenderer {
+    class SceneRendererVk : public SceneRendererBase {
     public:
         struct SceneUpdateParametersVk : SceneUpdateParametersBase {};
         struct SceneRenderParametersVk : SceneRenderParametersBase {};

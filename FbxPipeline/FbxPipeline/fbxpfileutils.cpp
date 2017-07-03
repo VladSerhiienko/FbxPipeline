@@ -50,7 +50,7 @@ std::string ResolveFullPath( const char* path ) {
 }
 
 std::string FindFile( const char* filepath ) {
-    auto& s = fbxp::Get( );
+    auto& s = apemode::Get( );
 
     assert( filepath && strlen( filepath ) );
     const std::string filename = GetFileName( filepath );
@@ -83,7 +83,7 @@ std::vector< uint8_t > ReadFile( const char* filepath ) {
 }
 
 void InitializeSeachLocations( ) {
-    auto& s = fbxp::Get( );
+    auto& s = apemode::Get( );
     auto& sl = s.options[ "e" ].as< std::vector< std::string > >( );
 
     std::set< std::string > searchDirectories;

@@ -3,29 +3,29 @@
 #include <fbxppch.h>
 #include <scene_generated.h>
 
-namespace fbxp {
+namespace apemode {
 
     struct Mesh {
         bool                               hasTexcoords = false;
-        fbxp::fb::vec3                     positionMin;
-        fbxp::fb::vec3                     positionMax;
-        fbxp::fb::vec3                     positionOffset;
-        fbxp::fb::vec3                     positionScale;
-        fbxp::fb::vec2                     texcoordMin;
-        fbxp::fb::vec2                     texcoordMax;
-        fbxp::fb::vec2                     texcoordOffset;
-        fbxp::fb::vec2                     texcoordScale;
-        std::vector< fbxp::fb::SubmeshFb > submeshes;
-        std::vector< fbxp::fb::SubsetFb >  subsets;
-        std::vector< fbxp::fb::SubsetFb >  subsetsPolies;
+        apemodefb::vec3                     positionMin;
+        apemodefb::vec3                     positionMax;
+        apemodefb::vec3                     positionOffset;
+        apemodefb::vec3                     positionScale;
+        apemodefb::vec2                     texcoordMin;
+        apemodefb::vec2                     texcoordMax;
+        apemodefb::vec2                     texcoordOffset;
+        apemodefb::vec2                     texcoordScale;
+        std::vector< apemodefb::SubmeshFb > submeshes;
+        std::vector< apemodefb::SubsetFb >  subsets;
+        std::vector< apemodefb::SubsetFb >  subsetsPolies;
         std::vector< uint8_t >             subsetIndices;
         std::vector< uint8_t >             vertices;
         std::vector< uint8_t >             indices;
-        fbxp::fb::EIndexTypeFb             subsetIndexType;
+        apemodefb::EIndexTypeFb             subsetIndexType;
     };
 
     struct Node {
-        fbxp::fb::ECullingType  cullingType = fbxp::fb::ECullingType_CullingOff;
+        apemodefb::ECullingType  cullingType = apemodefb::ECullingType_CullingOff;
         uint32_t                id          = (uint32_t) -1;
         uint64_t                nameId      = (uint64_t) 0;
         uint32_t                meshId      = (uint32_t) -1;
@@ -36,7 +36,7 @@ namespace fbxp {
     struct Material {
         uint32_t                          id;
         uint64_t                          nameId;
-        std::vector< fb::MaterialPropFb > props;
+        std::vector<apemodefb::MaterialPropFb > props;
     };
 
     using TupleUintUint = std::tuple< uint32_t, uint32_t >;
@@ -55,8 +55,8 @@ namespace fbxp {
         std::map< uint64_t, uint32_t >    textureDict;
         std::map< uint64_t, uint32_t >    materialDict;
         std::map< uint64_t, std::string > names;
-        std::vector< fb::TransformFb >    transforms;
-        std::vector< fb::TextureFb >      textures;
+        std::vector<apemodefb::TransformFb >    transforms;
+        std::vector<apemodefb::TextureFb >      textures;
         std::vector< Mesh >               meshes;
         std::vector< std::string >        searchLocations;
         std::set< std::string >        embedQueue;

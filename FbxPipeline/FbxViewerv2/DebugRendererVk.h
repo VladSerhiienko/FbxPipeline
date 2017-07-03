@@ -174,7 +174,7 @@ namespace apemodevk {
             /* Use defaults otherwise. */
             if ( nullptr != pInLimits ) {
                 MaxPageRange = pInLimits->maxUniformBufferRange;
-                MinAlignment = pInLimits->minUniformBufferOffsetAlignment;
+                MinAlignment = (uint32_t) pInLimits->minUniformBufferOffsetAlignment;
 
                 /* Catch incorrectly initialized device limits. */
                 assert( 0 != MaxPageRange );
