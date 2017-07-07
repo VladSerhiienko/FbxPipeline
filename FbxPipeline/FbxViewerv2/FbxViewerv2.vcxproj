@@ -35,7 +35,7 @@
     <ClInclude Include="FbxViewerOS.h" />
     <ClInclude Include="fbxvpch.h" />
     <ClInclude Include="CameraControllerFreeLook.h" />
-    <ClInclude Include="IAppSurface.h" />
+    <ClInclude Include="AppSurfaceBase.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="AppState.h" />
     <ClInclude Include="ISceneRenderer.h" />
@@ -56,6 +56,7 @@
     <ClInclude Include="vk\GraphicsManager.Vulkan.h" />
     <ClInclude Include="vk\NativeDispatchableHandles.Vulkan.h" />
     <ClInclude Include="vk\Platform.Vulkan.h" />
+    <ClInclude Include="vk\QueuePools.Vulkan.h" />
     <ClInclude Include="vk\ResultHandle.Vulkan.h" />
     <ClInclude Include="vk\Swapchain.Vulkan.h" />
     <ClInclude Include="vk\TDispatchableHandle.Vulkan.h" />
@@ -83,6 +84,7 @@
     <ClCompile Include="vk\DescriptorPool.Vulkan.cpp" />
     <ClCompile Include="vk\GraphicsDevice.Vulkan.cpp" />
     <ClCompile Include="vk\GraphicsManager.Vulkan.cpp" />
+    <ClCompile Include="vk\QueuePools.Vulkan.cpp" />
     <ClCompile Include="vk\Swapchain.Vulkan.cpp" />
   </ItemGroup>
   <ItemGroup>

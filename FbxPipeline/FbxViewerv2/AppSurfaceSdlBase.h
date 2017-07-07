@@ -1,6 +1,6 @@
 #pragma once
 
-#include <IAppSurface.h>
+#include <AppSurfaceBase.h>
 
 #include <SDL.h>
 #include <SDL_syswm.h>
@@ -9,9 +9,9 @@ namespace apemode {
     class AppSurfaceSettings;
 
     /**
-    * Contains handle to window and graphics context.
-    **/
-    class AppSurfaceSdlBase : public IAppSurface {
+     * Contains handle to window and graphics context.
+     **/
+    class AppSurfaceSdlBase : public AppSurfaceBase {
     public:
         AppSurfaceSdlBase( );
         virtual ~AppSurfaceSdlBase( );

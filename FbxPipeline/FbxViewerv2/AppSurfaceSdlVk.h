@@ -25,7 +25,7 @@ namespace apemode {
 
         void OnFrameMove( ) override;
         void* GetGraphicsHandle( ) override;
-        ISceneRenderer* CreateSceneRenderer( ) override;
+        SceneRendererBase* CreateSceneRenderer( ) override;
 
         uint32_t LastWidth;
         uint32_t LastHeight;

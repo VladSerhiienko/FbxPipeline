@@ -1,6 +1,6 @@
 #pragma once
 
-#include <IAppSurface.h>
+#include <AppSurfaceBase.h>
 #include <SDL.h>
 
 #define NK_INCLUDE_FIXED_TYPES

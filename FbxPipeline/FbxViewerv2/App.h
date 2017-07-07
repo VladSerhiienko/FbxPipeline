@@ -18,7 +18,7 @@ namespace apemode {
 
     public:
         virtual bool Initialize( int Args, char* ppArgs[] ) override;
-        virtual apemode::IAppSurface* CreateAppSurface( ) override;
+        virtual apemode::AppSurfaceBase* CreateAppSurface( ) override;
 
     public:
         bool         OnResized( );

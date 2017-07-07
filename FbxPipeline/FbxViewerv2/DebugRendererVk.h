@@ -268,9 +268,10 @@ namespace apemodevk {
         }
 
         VkDescriptorSet GetDescSet( const VkDescriptorBufferInfo &descriptorBufferInfo ) {
-            auto descSetIt = std::find_if( Sets.begin( ), Sets.end( ), [&]( const std::pair< VkBuffer, VkDescriptorSet > &pair ) {
-                return pair.first == descriptorBufferInfo.buffer;
-            } );
+            auto descSetIt = std::find_if( Sets.begin( ), Sets.end( ),
+                [&]( const std::pair< VkBuffer, VkDescriptorSet > &pair ) {
+                    return pair.first == descriptorBufferInfo.buffer;
+                } );
 
             if ( descSetIt != Sets.end( ) )
                 return descSetIt->second;

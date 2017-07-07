@@ -99,6 +99,6 @@ void* apemode::AppSurfaceSdlVk::GetGraphicsHandle( ) {
     return reinterpret_cast< void* >( pDeviceManager.get( ) );
 }
 
-apemode::ISceneRenderer* apemode::AppSurfaceSdlVk::CreateSceneRenderer( ) {
+apemode::SceneRendererBase* apemode::AppSurfaceSdlVk::CreateSceneRenderer( ) {
     return new SceneRendererVk( );
 }

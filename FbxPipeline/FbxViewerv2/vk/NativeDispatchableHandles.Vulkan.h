@@ -450,16 +450,17 @@ namespace apemodevk
     };
 
     template <>
-    struct TDispatchableHandle<VkQueue> : public TDispatchableHandleBase<VkQueue>
-    {
-        void Recreate(VkDevice InLogicalDeviceHandle, uint32_t QueueFamilyId, uint32_t QueueId)
-        {
-            apemode_assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Device must be valid");
+    struct TDispatchableHandle< VkQueue > : public TDispatchableHandleBase< VkQueue > {
+        void Recreate( VkDevice InLogicalDeviceHandle, uint32_t QueueFamilyId, uint32_t QueueId ) {
+            apemode_assert( InLogicalDeviceHandle != VK_NULL_HANDLE, "Device must be valid" );
 
-            if (InLogicalDeviceHandle != nullptr)
-            {
-                vkGetDeviceQueue(InLogicalDeviceHandle, QueueFamilyId, QueueId, *this);
+            if ( InLogicalDeviceHandle != nullptr ) {
+                vkGetDeviceQueue( InLogicalDeviceHandle, QueueFamilyId, QueueId, *this );
             }
+        }
+
+        void WaitIdle( ) {
+            vkQueueWaitIdle( *this );
         }
     };
 
@@ -598,8 +599,7 @@ namespace apemodevk
             return false;
         }
 
-       bool Await() const
-        {
+        bool Wait( ) const {
             const ResultHandle ErrorHandle = vkWaitForFences(Deleter.LogicalDeviceHandle, 1, &Handle, true, UINT64_MAX);
             apemode_assert(ErrorHandle, "vkWaitForFences failed.");
             return ErrorHandle.Succeeded();

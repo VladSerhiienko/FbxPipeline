@@ -5,7 +5,7 @@
 namespace apemode {
     /**
      * Contains handle to window and graphics context.
-     */
+     **/
     class AppSurfaceSdlGL : public AppSurfaceSdlBase {
     public:
         AppSurfaceSdlGL( );

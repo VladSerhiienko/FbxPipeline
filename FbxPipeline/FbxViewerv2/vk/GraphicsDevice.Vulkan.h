@@ -60,8 +60,8 @@ namespace apemodevk {
         VkPhysicalDeviceFeatures             Features;
         FloatVector                          QueuePrioritiesStorage;
         VkFormatPropertiesArray              FormatProperties;
-        std::vector<NativeLayerWrapper>             LayerWrappers;
-        std::vector<const char *>                           PresentLayers;
+        std::vector< NativeLayerWrapper >    LayerWrappers;
+        std::vector< const char * >          PresentLayers;
         std::vector< VkExtensionProperties > DeviceExtensionProps;
     };
 }

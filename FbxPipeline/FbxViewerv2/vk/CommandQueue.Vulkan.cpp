@@ -154,39 +154,33 @@ void apemodevk::CommandBuffer::FlushStagedBarriers()
     };
 
     StagedBarrier::ItRange StagedBarrierItRange;
-    StagedBarrier::It      StagedBarrierIt = StagedBarriers.begin ();
-    for (; StagedBarrierIt != StagedBarriers.cend (); StagedBarrierIt = StagedBarrierItRange.second)
-    {
-        StagedBarrierItRange = StagedBarriers.equal_range(StagedBarrierIt->first);
-        std::for_each(StagedBarrierItRange.first, StagedBarrierItRange.second, FillBarriersFn);
+    StagedBarrier::It      StagedBarrierIt = StagedBarriers.begin( );
+    for ( ; StagedBarrierIt != StagedBarriers.cend( ); StagedBarrierIt = StagedBarrierItRange.second ) {
+        StagedBarrierItRange = StagedBarriers.equal_range( StagedBarrierIt->first );
+        std::for_each( StagedBarrierItRange.first, StagedBarrierItRange.second, FillBarriersFn );
 
-        apemode_assert (!Barriers.empty ()
-                             || !ImgBarriers.empty ()
-                             || !BufferBarriers.empty (),
-                             "Nothing to submit to the command list.");
+        apemode_assert( !Barriers.empty( ) || !ImgBarriers.empty( ) || !BufferBarriers.empty( ),
+                        "Nothing to submit to the command list." );
 
-        if (apemode_likely (!Barriers.empty ()
-                                 || !ImgBarriers.empty ()
-                                 || !BufferBarriers.empty ()))
-        {
-            vkCmdPipelineBarrier (hCmdList,
+        if ( apemode_likely( !Barriers.empty( ) || !ImgBarriers.empty( ) || !BufferBarriers.empty( ) ) ) {
+            vkCmdPipelineBarrier( hCmdList,
                                   StagedBarrierItRange.first->second.SrcStage,
                                   StagedBarrierItRange.first->second.DstStage,
-                                  static_cast<VkDependencyFlags> (0),
-                                  _Get_collection_length_u (Barriers),
-                                  Barriers.data (),
-                                  _Get_collection_length_u (BufferBarriers),
-                                  BufferBarriers.data (),
-                                  _Get_collection_length_u (ImgBarriers),
-                                  ImgBarriers.data ());
+                                  static_cast< VkDependencyFlags >( 0 ),
+                                  _Get_collection_length_u( Barriers ),
+                                  Barriers.data( ),
+                                  _Get_collection_length_u( BufferBarriers ),
+                                  BufferBarriers.data( ),
+                                  _Get_collection_length_u( ImgBarriers ),
+                                  ImgBarriers.data( ) );
         }
 
-        Barriers.clear ();
-        ImgBarriers.clear ();
-        BufferBarriers.clear ();
+        Barriers.clear( );
+        ImgBarriers.clear( );
+        BufferBarriers.clear( );
     }
 
-    StagedBarriers.clear ();
+    StagedBarriers.clear( );
 }
 
 apemodevk::CommandBuffer::operator VkCommandBuffer () const
@@ -219,44 +213,40 @@ apemodevk::CommandQueue::~CommandQueue ()
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-bool apemodevk::CommandQueue::RecreateResourcesFor (GraphicsDevice & InGraphicsNode,
-                                               uint32_t         InQueueFamilyId,
-                                               uint32_t         InQueueId)
-{
-    if (CommandQueueReserver::Get ().TryReserve (InGraphicsNode, InQueueFamilyId, InQueueId))
-    {
-        pNode = &InGraphicsNode;
+bool apemodevk::CommandQueue::RecreateResourcesFor( GraphicsDevice& InGraphicsNode,
+                                                    uint32_t        InQueueFamilyId,
+                                                    uint32_t        InQueueId ) {
+    if ( CommandQueueReserver::Get( ).TryReserve( InGraphicsNode, InQueueFamilyId, InQueueId ) ) {
+        pNode         = &InGraphicsNode;
         QueueFamilyId = InQueueFamilyId;
         QueueId       = InQueueId;
 
-        hCmdQueue.Recreate (InGraphicsNode, InQueueFamilyId, InQueueId);
-        return hCmdQueue.IsNotNull ();
+        hCmdQueue.Recreate( InGraphicsNode, InQueueFamilyId, InQueueId );
+        return hCmdQueue.IsNotNull( );
     }
 
-    apemode_halt ("Such queue is already resolved: Device = %#p, Family = %u Id = %u",
-                       static_cast<VkDevice> (InGraphicsNode),
-                       InQueueFamilyId,
-                       InQueueId);
+    apemode_halt( "Such queue is already resolved: Device = %#p, Family = %u Id = %u",
+                  static_cast< VkDevice >( InGraphicsNode ),
+                  InQueueFamilyId,
+                  InQueueId );
     return false;
 }
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-bool apemodevk::CommandQueue::Await ()
-{
-    apemode_assert(hCmdQueue.IsNotNull(), "Not initialized.");
+bool apemodevk::CommandQueue::Await( ) {
+    apemode_assert( hCmdQueue.IsNotNull( ), "Not initialized." );
 
-    ResultHandle eQueueWaitIdleOk = vkQueueWaitIdle (hCmdQueue);
-    apemode_assert (eQueueWaitIdleOk.Succeeded (), "Failed to wait for queue.");
+    ResultHandle eQueueWaitIdleOk = vkQueueWaitIdle( hCmdQueue );
+    apemode_assert( eQueueWaitIdleOk.Succeeded( ), "Failed to wait for queue." );
 
-    return eQueueWaitIdleOk.Succeeded ();
+    return eQueueWaitIdleOk.Succeeded( );
 }
 
-bool apemodevk::CommandQueue::Execute (CommandBuffer & CmdBuffer,
-                                  VkSemaphore * hWaitSemaphores,
-                                  uint32_t      WaitSemaphoreCount,
-                                  VkFence       hFence)
-{
+bool apemodevk::CommandQueue::Execute( CommandBuffer& CmdBuffer,
+                                       VkSemaphore*   hWaitSemaphores,
+                                       uint32_t       WaitSemaphoreCount,
+                                       VkFence        hFence ) {
     apemode_assert (hCmdQueue.IsNotNull (), "Not initialized.");
     if (apemode_likely (hCmdQueue.IsNotNull ()))
     {
@@ -265,6 +255,9 @@ bool apemodevk::CommandQueue::Execute (CommandBuffer & CmdBuffer,
         TInfoStruct<VkSubmitInfo> SubmitDesc;
         SubmitDesc->commandBufferCount = 1;
         SubmitDesc->pCommandBuffers    = &hCmdList;
+
+
+
         /*SubmitDesc->pWaitSemaphores    = hWaitSemaphores;
         SubmitDesc->waitSemaphoreCount = WaitSemaphoreCount;*/
 
@@ -338,11 +331,11 @@ apemodevk::CommandQueueReserver::Key::Key() : GraphicsNodeHash(0), QueueHash(0)
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-apemodevk::CommandQueueReserver::Key apemodevk::CommandQueueReserver::Key::NewKeyFor(
-    GraphicsDevice const & GraphicsNode, uint32_t InQueueFamilyId, uint32_t InQueueId)
-{
+apemodevk::CommandQueueReserver::Key apemodevk::CommandQueueReserver::Key::NewKeyFor( GraphicsDevice const& GraphicsNode,
+                                                                                      uint32_t              InQueueFamilyId,
+                                                                                      uint32_t              InQueueId ) {
     Key NewKey;
-    NewKey.GraphicsNodeHash = reinterpret_cast<uint64_t>(&GraphicsNode);
+    NewKey.GraphicsNodeHash = reinterpret_cast< uint64_t >( &GraphicsNode );
     NewKey.QueueFamilyId    = InQueueFamilyId;
     NewKey.QueueId          = InQueueId;
     return NewKey;
@@ -352,47 +345,39 @@ apemodevk::CommandQueueReserver::Key apemodevk::CommandQueueReserver::Key::NewKe
 /// CommandQueueReserver Key Hasher & Equal
 /// -------------------------------------------------------------------------------------------------------------------
 
-template <size_t SizeTSize = sizeof(size_t)> struct UInt64Hasher
-{
-    static_assert (sizeof (size_t) == 8 || sizeof (size_t) == 4,
-                   "Unsupported system settings.");
+template < size_t SizeTSize = sizeof( size_t ) >
+struct UInt64Hasher {
+    static_assert( sizeof( size_t ) == 8 || sizeof( size_t ) == 4, "Unsupported system settings." );
 };
 
 template <>
-struct UInt64Hasher<8>
-{
-    static size_t Hash (uint64_t H)
-    {
+struct UInt64Hasher< 8 > {
+    static size_t Hash( uint64_t H ) {
         return H;
     }
 };
 
 template <>
-struct UInt64Hasher<4>
-{
-    static size_t Hash (uint64_t H)
-    {
+struct UInt64Hasher< 4 > {
+    static size_t Hash( uint64_t H ) {
         static const uint64_t HBits         = 4;
         static const uint64_t HShift64      = 64 - HBits;
         static const uint64_t HNearestPrime = 11400714819323198549ull;
 
-        return static_cast<size_t> ((H * HNearestPrime) >> HShift64);
+        return static_cast< size_t >( ( H * HNearestPrime ) >> HShift64 );
     }
 };
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-size_t apemodevk::CommandQueueReserver::Key::Hasher::operator() (Key const & Key) const
-{
-    const auto KeyHash = apemode::CityHash128to64 (Key.QueueHash, Key.GraphicsNodeHash);
-    return UInt64Hasher<>::Hash (KeyHash);
+size_t apemodevk::CommandQueueReserver::Key::Hasher::operator( )( Key const& Key ) const {
+    const auto KeyHash = apemode::CityHash128to64( Key.QueueHash, Key.GraphicsNodeHash );
+    return UInt64Hasher<>::Hash( KeyHash );
 }
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-bool apemodevk::CommandQueueReserver::Key::CmpOpEqual::operator() (Key const & Key0,
-                                                              Key const & Key1) const
-{
+bool apemodevk::CommandQueueReserver::Key::CmpOpEqual::operator( )( Key const& Key0, Key const& Key1 ) const {
     return Key0.QueueHash == Key1.QueueHash && Key0.GraphicsNodeHash == Key1.GraphicsNodeHash;
 }
 
@@ -445,25 +430,23 @@ apemodevk::CommandQueueReserver & apemodevk::CommandQueueReserver::Get ()
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-bool apemodevk::CommandQueueReserver::TryReserve (GraphicsDevice const & GraphicsNode,
-                                             uint32_t               QueueFamilyId,
-                                             uint32_t               QueueId)
-{
-    const auto   Key         = Key::NewKeyFor (GraphicsNode, QueueFamilyId, QueueId);
-    const auto & Reservation = ReservationStorage[Key];
+bool apemodevk::CommandQueueReserver::TryReserve( GraphicsDevice const& GraphicsNode,
+                                                  uint32_t              QueueFamilyId,
+                                                  uint32_t              QueueId ) {
+    const auto  Key = Key::NewKeyFor( GraphicsNode, QueueFamilyId, QueueId );
+    const auto& Reservation = ReservationStorage[ Key ];
 
     // Valid reservation is active reservation (contains created command queue).
-    return Reservation.IsValid () == false;
+    return Reservation.IsValid( ) == false;
 }
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-void apemodevk::CommandQueueReserver::Unreserve (GraphicsDevice const & GraphicsNode,
-                                            uint32_t               QueueFamilyId,
-                                            uint32_t               QueueId)
-{
-    const auto Key = Key::NewKeyFor (GraphicsNode, QueueFamilyId, QueueId);
-    ReservationStorage[Key].Release ();
+void apemodevk::CommandQueueReserver::Unreserve( GraphicsDevice const& GraphicsNode,
+                                                 uint32_t              QueueFamilyId,
+                                                 uint32_t              QueueId ) {
+    const auto Key = Key::NewKeyFor( GraphicsNode, QueueFamilyId, QueueId );
+    ReservationStorage[ Key ].Release( );
 }
 
 /// -------------------------------------------------------------------------------------------------------------------

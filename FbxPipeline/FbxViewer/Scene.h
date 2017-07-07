@@ -102,21 +102,21 @@ namespace fbxv {
          * @return True if valid, false otherwise.
          **/
         bool Validate() const {
-            return false == ( isnan( translation.x( ) ) || isnan( translation.y( ) ) || isnan( translation.z( ) ) ||
-                              isnan( rotationOffset.x( ) ) || isnan( rotationOffset.y( ) ) || isnan( rotationOffset.z( ) ) ||
-                              isnan( rotationPivot.x( ) ) || isnan( rotationPivot.y( ) ) || isnan( rotationPivot.z( ) ) ||
-                              isnan( preRotation.x( ) ) || isnan( preRotation.y( ) ) || isnan( preRotation.z( ) ) ||
-                              isnan( postRotation.x( ) ) || isnan( postRotation.y( ) ) || isnan( postRotation.z( ) ) ||
-                              isnan( rotation.x( ) ) || isnan( rotation.y( ) ) || isnan( rotation.z( ) ) ||
-                              isnan( scalingOffset.x( ) ) || isnan( scalingOffset.y( ) ) || isnan( scalingOffset.z( ) ) ||
-                              isnan( scalingPivot.x( ) ) || isnan( scalingPivot.y( ) ) || isnan( scalingPivot.z( ) ) ||
-                              isnan( scaling.x( ) ) || isnan( scaling.y( ) ) || isnan( scaling.z( ) ) ||
-                              isnan( geometricTranslation.x( ) ) || isnan( geometricTranslation.y( ) ) ||
-                              isnan( geometricTranslation.z( ) ) || isnan( geometricRotation.x( ) ) ||
-                              isnan( geometricRotation.y( ) ) || isnan( geometricRotation.z( ) ) ||
-                              isnan( geometricScaling.x( ) ) || isnan( geometricScaling.y( ) ) ||
-                              isnan( geometricScaling.z( ) ) || scaling.x( ) == 0 || scaling.y( ) == 0 || scaling.z( ) == 0 ||
-                              geometricScaling.x( ) == 0 || geometricScaling.y( ) == 0 || geometricScaling.z( ) == 0 );
+            return false == ( isnan( translation.x ) || isnan( translation.y ) || isnan( translation.z ) ||
+                              isnan( rotationOffset.x ) || isnan( rotationOffset.y ) || isnan( rotationOffset.z ) ||
+                              isnan( rotationPivot.x ) || isnan( rotationPivot.y ) || isnan( rotationPivot.z ) ||
+                              isnan( preRotation.x ) || isnan( preRotation.y ) || isnan( preRotation.z ) ||
+                              isnan( postRotation.x ) || isnan( postRotation.y ) || isnan( postRotation.z ) ||
+                              isnan( rotation.x ) || isnan( rotation.y ) || isnan( rotation.z ) ||
+                              isnan( scalingOffset.x ) || isnan( scalingOffset.y ) || isnan( scalingOffset.z ) ||
+                              isnan( scalingPivot.x ) || isnan( scalingPivot.y ) || isnan( scalingPivot.z ) ||
+                              isnan( scaling.x ) || isnan( scaling.y ) || isnan( scaling.z ) ||
+                              isnan( geometricTranslation.x ) || isnan( geometricTranslation.y ) ||
+                              isnan( geometricTranslation.z ) || isnan( geometricRotation.x ) ||
+                              isnan( geometricRotation.y ) || isnan( geometricRotation.z ) ||
+                              isnan( geometricScaling.x ) || isnan( geometricScaling.y ) ||
+                              isnan( geometricScaling.z ) || scaling.x == 0 || scaling.y == 0 || scaling.z == 0 ||
+                              geometricScaling.x == 0 || geometricScaling.y == 0 || geometricScaling.z == 0 );
         }
 
         /**
@@ -250,10 +250,10 @@ namespace fbxv {
         }
     };
 
-    Scene * LoadSceneFromFile(const char * filename) {
+    inline Scene * LoadSceneFromFile(const char * filename) {
         std::string fileData;
         if ( flatbuffers::LoadFile( filename, true, &fileData ) ) {
-            if ( auto sceneFb = fbxp::fb::GetSceneFb( fileData.c_str( ) ) ) {
+            if ( auto sceneFb = apemodefb::GetSceneFb( fileData.c_str( ) ) ) {
                 std::unique_ptr< Scene > scene( new Scene( ) );
 
                 //
@@ -305,42 +305,42 @@ namespace fbxv {
                         auto& transform   = scene->transforms[ nodeFb->id( ) ];
                         auto  transformFb = ( *sceneFb->transforms( ) )[ nodeFb->id( ) ];
 
-                        transform.translation.x( )          = transformFb->translation( ).x( );
-                        transform.translation.y( )          = transformFb->translation( ).y( );
-                        transform.translation.z( )          = transformFb->translation( ).z( );
-                        transform.rotationOffset.x( )       = transformFb->rotation_offset( ).x( );
-                        transform.rotationOffset.y( )       = transformFb->rotation_offset( ).y( );
-                        transform.rotationOffset.z( )       = transformFb->rotation_offset( ).z( );
-                        transform.rotationPivot.x( )        = transformFb->rotation_pivot( ).x( );
-                        transform.rotationPivot.y( )        = transformFb->rotation_pivot( ).y( );
-                        transform.rotationPivot.z( )        = transformFb->rotation_pivot( ).z( );
-                        transform.preRotation.x( )          = transformFb->pre_rotation( ).x( ) * toRadsFactor;
-                        transform.preRotation.y( )          = transformFb->pre_rotation( ).y( ) * toRadsFactor;
-                        transform.preRotation.z( )          = transformFb->pre_rotation( ).z( ) * toRadsFactor;
-                        transform.rotation.x( )             = transformFb->rotation( ).x( ) * toRadsFactor;
-                        transform.rotation.y( )             = transformFb->rotation( ).y( ) * toRadsFactor;
-                        transform.rotation.z( )             = transformFb->rotation( ).z( ) * toRadsFactor;
-                        transform.postRotation.x( )         = transformFb->post_rotation( ).x( ) * toRadsFactor;
-                        transform.postRotation.y( )         = transformFb->post_rotation( ).y( ) * toRadsFactor;
-                        transform.postRotation.z( )         = transformFb->post_rotation( ).z( ) * toRadsFactor;
-                        transform.scalingOffset.x( )        = transformFb->scaling_offset( ).x( );
-                        transform.scalingOffset.y( )        = transformFb->scaling_offset( ).y( );
-                        transform.scalingOffset.z( )        = transformFb->scaling_offset( ).z( );
-                        transform.scalingPivot.x( )         = transformFb->scaling_pivot( ).x( );
-                        transform.scalingPivot.y( )         = transformFb->scaling_pivot( ).y( );
-                        transform.scalingPivot.z( )         = transformFb->scaling_pivot( ).z( );
-                        transform.scaling.x( )              = transformFb->scaling( ).x( );
-                        transform.scaling.y( )              = transformFb->scaling( ).y( );
-                        transform.scaling.z( )              = transformFb->scaling( ).z( );
-                        transform.geometricTranslation.x( ) = transformFb->geometric_translation( ).x( );
-                        transform.geometricTranslation.y( ) = transformFb->geometric_translation( ).y( );
-                        transform.geometricTranslation.z( ) = transformFb->geometric_translation( ).z( );
-                        transform.geometricRotation.x( )    = transformFb->geometric_rotation( ).x( ) * toRadsFactor;
-                        transform.geometricRotation.y( )    = transformFb->geometric_rotation( ).y( ) * toRadsFactor;
-                        transform.geometricRotation.z( )    = transformFb->geometric_rotation( ).z( ) * toRadsFactor;
-                        transform.geometricScaling.x( )     = transformFb->geometric_scaling( ).x( );
-                        transform.geometricScaling.y( )     = transformFb->geometric_scaling( ).y( );
-                        transform.geometricScaling.z( )     = transformFb->geometric_scaling( ).z( );
+                        transform.translation.x          = transformFb->translation( ).x;
+                        transform.translation.y          = transformFb->translation( ).y;
+                        transform.translation.z          = transformFb->translation( ).z;
+                        transform.rotationOffset.x       = transformFb->rotation_offset( ).x;
+                        transform.rotationOffset.y       = transformFb->rotation_offset( ).y;
+                        transform.rotationOffset.z       = transformFb->rotation_offset( ).z;
+                        transform.rotationPivot.x        = transformFb->rotation_pivot( ).x;
+                        transform.rotationPivot.y        = transformFb->rotation_pivot( ).y;
+                        transform.rotationPivot.z        = transformFb->rotation_pivot( ).z;
+                        transform.preRotation.x          = transformFb->pre_rotation( ).x * toRadsFactor;
+                        transform.preRotation.y          = transformFb->pre_rotation( ).y * toRadsFactor;
+                        transform.preRotation.z          = transformFb->pre_rotation( ).z * toRadsFactor;
+                        transform.rotation.x             = transformFb->rotation( ).x * toRadsFactor;
+                        transform.rotation.y             = transformFb->rotation( ).y * toRadsFactor;
+                        transform.rotation.z             = transformFb->rotation( ).z * toRadsFactor;
+                        transform.postRotation.x         = transformFb->post_rotation( ).x * toRadsFactor;
+                        transform.postRotation.y         = transformFb->post_rotation( ).y * toRadsFactor;
+                        transform.postRotation.z         = transformFb->post_rotation( ).z * toRadsFactor;
+                        transform.scalingOffset.x        = transformFb->scaling_offset( ).x;
+                        transform.scalingOffset.y        = transformFb->scaling_offset( ).y;
+                        transform.scalingOffset.z        = transformFb->scaling_offset( ).z;
+                        transform.scalingPivot.x         = transformFb->scaling_pivot( ).x;
+                        transform.scalingPivot.y         = transformFb->scaling_pivot( ).y;
+                        transform.scalingPivot.z         = transformFb->scaling_pivot( ).z;
+                        transform.scaling.x              = transformFb->scaling( ).x;
+                        transform.scaling.y              = transformFb->scaling( ).y;
+                        transform.scaling.z              = transformFb->scaling( ).z;
+                        transform.geometricTranslation.x = transformFb->geometric_translation( ).x;
+                        transform.geometricTranslation.y = transformFb->geometric_translation( ).y;
+                        transform.geometricTranslation.z = transformFb->geometric_translation( ).z;
+                        transform.geometricRotation.x    = transformFb->geometric_rotation( ).x * toRadsFactor;
+                        transform.geometricRotation.y    = transformFb->geometric_rotation( ).y * toRadsFactor;
+                        transform.geometricRotation.z    = transformFb->geometric_rotation( ).z * toRadsFactor;
+                        transform.geometricScaling.x     = transformFb->geometric_scaling( ).x;
+                        transform.geometricScaling.y     = transformFb->geometric_scaling( ).y;
+                        transform.geometricScaling.z     = transformFb->geometric_scaling( ).z;
 
                         assert( transform.Validate( ) );
                     }
@@ -368,32 +368,32 @@ namespace fbxv {
                             mesh.indexBufferHandle = bgfx::createIndexBuffer(
                                 bgfxUtils::makeReleasableCopy( meshFb->subset_indices( )->Data( ),
                                                                meshFb->subset_indices( )->size( ) ),
-                                meshFb->subset_index_type( ) == fbxp::fb::EIndexTypeFb_UInt32 ? BGFX_BUFFER_INDEX32 : 0 );
+                                meshFb->subset_index_type( ) == apemodefb::EIndexTypeFb_UInt32 ? BGFX_BUFFER_INDEX32 : 0 );
                         }
 
                         if ( auto submeshesFb = meshFb->submeshes( ) ) {
-                            auto submeshFb = (const fbxp::fb::SubmeshFb *) submeshesFb->Data( );
+                            auto submeshFb = (const apemodefb::SubmeshFb *) submeshesFb->Data( );
 
-                            mesh.positionOffset.x( ) = submeshFb->position_offset( ).x( );
-                            mesh.positionOffset.y( ) = submeshFb->position_offset( ).y( );
-                            mesh.positionOffset.z( ) = submeshFb->position_offset( ).z( );
-                            mesh.positionScale.x( )  = submeshFb->position_scale( ).x( );
-                            mesh.positionScale.y( )  = submeshFb->position_scale( ).y( );
-                            mesh.positionScale.z( )  = submeshFb->position_scale( ).z( );
-                            mesh.texcoordOffset.x( ) = submeshFb->uv_offset( ).x( );
-                            mesh.texcoordOffset.y( ) = submeshFb->uv_offset( ).y( );
-                            mesh.texcoordScale.x( )  = submeshFb->uv_scale( ).x( );
-                            mesh.texcoordScale.y( )  = submeshFb->uv_scale( ).y( );
+                            mesh.positionOffset.x = submeshFb->position_offset( ).x;
+                            mesh.positionOffset.y = submeshFb->position_offset( ).y;
+                            mesh.positionOffset.z = submeshFb->position_offset( ).z;
+                            mesh.positionScale.x  = submeshFb->position_scale( ).x;
+                            mesh.positionScale.y  = submeshFb->position_scale( ).y;
+                            mesh.positionScale.z  = submeshFb->position_scale( ).z;
+                            mesh.texcoordOffset.x = submeshFb->uv_offset( ).x;
+                            mesh.texcoordOffset.y = submeshFb->uv_offset( ).y;
+                            mesh.texcoordScale.x  = submeshFb->uv_scale( ).x;
+                            mesh.texcoordScale.y  = submeshFb->uv_scale( ).y;
                         }
 
                         mesh.subsets.reserve( meshFb->subsets( )->size( ) );
 
-                        auto subsetIt    = (const fbxp::fb::SubsetFb *) meshFb->subsets( )->Data( );
+                        auto subsetIt    = (const apemodefb::SubsetFb *) meshFb->subsets( )->Data( );
                         auto subsetEndIt = subsetIt + meshFb->subsets( )->size( );
                         std::transform( subsetIt,
                                         subsetEndIt,
                                         std::back_inserter( mesh.subsets ),
-                                        [&]( const fbxp::fb::SubsetFb &subsetFb ) {
+                                        [&]( const apemodefb::SubsetFb &subsetFb ) {
                                             assert( subsetFb.index_count( ) );
 
                                             SceneMeshSubset subset;
@@ -413,10 +413,10 @@ namespace fbxv {
                         scene->materials.emplace_back( );
                         auto &material = scene->materials.back( );
 
-                        material.albedo.x( ) = mathfu::RandomInRange< float >( 0, 1 );
-                        material.albedo.y( ) = mathfu::RandomInRange< float >( 0, 1 );
-                        material.albedo.z( ) = mathfu::RandomInRange< float >( 0, 1 );
-                        material.albedo.w( ) = 1;
+                        material.albedo.x = mathfu::RandomInRange< float >( 0, 1 );
+                        material.albedo.y = mathfu::RandomInRange< float >( 0, 1 );
+                        material.albedo.z = mathfu::RandomInRange< float >( 0, 1 );
+                        material.albedo.w = 1;
                     }
                 }
 

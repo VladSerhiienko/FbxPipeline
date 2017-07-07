@@ -11,14 +11,14 @@
 //
 
 #include <AppBase.h>
-#include <IAppSurface.h>
+#include <AppSurfaceBase.h>
 #include <Input.h>
 #include <Stopwatch.h>
 
 class apemode::AppBaseContent
 {
 public:
-    IAppSurface * pSurface;
+    AppSurfaceBase * pSurface;
     Stopwatch        Stopwatch;
     Input            InputState;
     InputManager     InputManager;
@@ -31,7 +31,7 @@ public:
     {
     }
 
-    bool Initialize (apemode::IAppSurface * pInSurface)
+    bool Initialize (apemode::AppSurfaceBase * pInSurface)
     {
         SDL_LogVerbose (SDL_LOG_CATEGORY_APPLICATION, "AppContent/Initialize.");
 
@@ -85,12 +85,12 @@ bool apemode::AppBase::Initialize (int Args, char * ppArgs[])
     return pAppContent && pAppContent->Initialize (CreateAppSurface ());
 }
 
-apemode::IAppSurface * apemode::AppBase::CreateAppSurface ()
+apemode::AppSurfaceBase * apemode::AppBase::CreateAppSurface ()
 {
-    return new IAppSurface ();
+    return new AppSurfaceBase ();
 }
 
-apemode::IAppSurface * apemode::AppBase::GetSurface()
+apemode::AppSurfaceBase * apemode::AppBase::GetSurface()
 {
     return pAppContent ? pAppContent->pSurface : nullptr;
 }

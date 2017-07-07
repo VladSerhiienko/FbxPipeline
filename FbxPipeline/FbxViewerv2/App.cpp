@@ -97,7 +97,7 @@ App::~App( ) {
         delete appContent;
 }
 
-IAppSurface* App::CreateAppSurface( ) {
+AppSurfaceBase* App::CreateAppSurface( ) {
     return new AppSurfaceSdlVk( );
 }
 

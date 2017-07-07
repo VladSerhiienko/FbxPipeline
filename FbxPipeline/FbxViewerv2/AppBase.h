@@ -2,7 +2,7 @@
 
 namespace apemode {
     class Input;
-    class IAppSurface;
+    class AppSurfaceBase;
 
     class AppBase {
         friend class AppBaseContent;
@@ -15,8 +15,8 @@ namespace apemode {
         virtual ~AppBase( );
 
         virtual bool Initialize( int Args, char* ppArgs[] );
-        virtual IAppSurface* CreateAppSurface( );
-        IAppSurface*         GetSurface( );
+        virtual AppSurfaceBase* CreateAppSurface( );
+        AppSurfaceBase*         GetSurface( );
 
         virtual void OnFrameMove( );
         virtual void Update( float DeltaSecs, Input const& InputState );

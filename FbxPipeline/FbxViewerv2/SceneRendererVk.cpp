@@ -1,12 +1,16 @@
-#include <scene_generated.h>
+#include <fbxvpch.h>
 
 #include <SceneRendererVk.h>
 #include <Scene.h>
 
-struct SceneDeviceAsset {
-};
-struct SceneMeshDeviceAsset {
-};
+namespace apemodevk {
+    struct SceneDeviceAsset {
+    };
+    struct SceneMeshDeviceAsset {
+        apemodevk::TDispatchableHandle<VkBuffer> VertexBuffer, IndexBuffer;
+        apemodevk::TDispatchableHandle<VkDeviceMemory> VertexBufferMemory, IndexBufferMemory;
+    };
+}
 
 void apemode::SceneRendererVk::UpdateScene( Scene* pScene, const SceneUpdateParametersBase* pParams ) {
 
@@ -16,7 +20,7 @@ void apemode::SceneRendererVk::UpdateScene( Scene* pScene, const SceneUpdatePara
 
     // TODO: Recreate scene resources
     if ( nullptr == pScene->deviceAsset && nullptr != pParams->pSceneSrc ) {
-        pScene->deviceAsset = new SceneDeviceAsset( );
+        pScene->deviceAsset = new apemodevk::SceneDeviceAsset( );
     }
      
 

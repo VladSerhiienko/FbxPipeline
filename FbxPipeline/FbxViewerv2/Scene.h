@@ -205,7 +205,7 @@ namespace apemode {
         }
     };
 
-    Scene * LoadSceneFromFile(const char * filename) {
+    inline Scene * LoadSceneFromFile(const char * filename) {
         std::string fileData;
         if ( flatbuffers::LoadFile( filename, true, &fileData ) ) {
             if ( auto sceneFb = apemodefb::GetSceneFb( fileData.c_str( ) ) ) {

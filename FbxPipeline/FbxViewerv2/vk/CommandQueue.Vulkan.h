@@ -186,66 +186,56 @@ namespace apemodevk
             static Key NewKeyFor (GraphicsDevice const & GraphicsNode, uint32_t QueueFamilyId, uint32_t QueueId);
         };
 
-        struct Reservation
-        {
-            CommandQueue * pQueue;
-            uint32_t       QueueId;
-            uint32_t       QueueFamilyId;
+        struct Reservation {
+            CommandQueue *pQueue;
+            uint32_t      QueueId;
+            uint32_t      QueueFamilyId;
 
-            Reservation();
-            bool IsValid() const;
-            void Release();
+            Reservation( );
+            bool IsValid( ) const;
+            void Release( );
 
             using CmpOpLess       = Key::CmpOpLess;
-            using LookupContainer = std::map<Key, Reservation, CmpOpLess>;
+            using LookupContainer = std::map< Key, Reservation, CmpOpLess >;
         };
 
         Reservation::LookupContainer ReservationStorage;
 
-        CommandQueueReserver ();
+        CommandQueueReserver( );
         /** Returns True if this queue was not created previously, otherwise false. */
-        bool TryReserve (GraphicsDevice const & GraphicsNode, uint32_t QueueFamilyId, uint32_t QueueId);
+        bool TryReserve( GraphicsDevice const &GraphicsNode, uint32_t QueueFamilyId, uint32_t QueueId );
         /** Must be called when the queue gets destructed to avoid resources leaks. */
-        void Unreserve (GraphicsDevice const & GraphicsNode, uint32_t QueueFamilyId, uint32_t QueueId);
+        void Unreserve( GraphicsDevice const &GraphicsNode, uint32_t QueueFamilyId, uint32_t QueueId );
         /** Returns queue reserver instance. */
-        static CommandQueueReserver & Get ();
+        static CommandQueueReserver &Get( );
     };
 
-    class CommandQueue : public apemodevk::ScalableAllocPolicy,
-                                                     public apemodevk::NoCopyAssignPolicy
-    {
+    class CommandQueue : public apemodevk::ScalableAllocPolicy, public apemodevk::NoCopyAssignPolicy {
     public:
-        CommandQueue ();
-        ~CommandQueue ();
+        CommandQueue( );
+        ~CommandQueue( );
 
     public:
-        bool RecreateResourcesFor (GraphicsDevice & GraphicsNode,
-                                   uint32_t         QueueFamilyId,
-                                   uint32_t         QueueId);
+        bool RecreateResourcesFor( GraphicsDevice &GraphicsNode, uint32_t QueueFamilyId, uint32_t QueueId );
 
-        bool Execute (CommandBuffer & CmdBuffer,
-                      VkSemaphore * hWaitSemaphore,
-                      uint32_t      WaitSemaphoreCount,
-                      VkFence       hFence);
-
-        bool Execute (CommandBuffer & CmdBuffer, VkFence hFence);
-        bool Execute (CommandBuffer * pCmdLists, uint32_t CmdListCount, VkFence Fence);
+        bool Execute( CommandBuffer &CmdBuffer, VkSemaphore *hWaitSemaphore, uint32_t WaitSemaphoreCount, VkFence hFence );
+        bool Execute( CommandBuffer &CmdBuffer, VkFence hFence );
+        bool Execute( CommandBuffer *pCmdLists, uint32_t CmdListCount, VkFence Fence );
 
         /** 
          * Waits on the completion of all work within a single queue.
          * It will block until all command buffers and sparse binding 
          * operations in the queue have completed.
          */
-        bool Await ();
+        bool Await( );
 
     public:
-        operator VkQueue () const;
+        operator VkQueue( ) const;
 
     public:
-        GraphicsDevice *             pNode;
-        TDispatchableHandle<VkQueue> hCmdQueue;
-        uint32_t                     QueueFamilyId;
-        uint32_t                     QueueId;
+        GraphicsDevice *               pNode;
+        TDispatchableHandle< VkQueue > hCmdQueue;
+        uint32_t                       QueueFamilyId;
+        uint32_t                       QueueId;
     };
-
 }
