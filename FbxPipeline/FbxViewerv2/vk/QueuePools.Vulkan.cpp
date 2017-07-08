@@ -44,69 +44,60 @@ apemodevk::AcquiredQueue apemodevk::QueuePool::Acquire( bool         bIgnoreFenc
     /* First, try to find the exact match. */
     /* This can be crucial for only trasfer or only compute queues. */
     for ( auto& pool : Pools )
-        if ( pool.FamilyProps.queueFlags == queueFlags )
-            if ( QueueInPool* queueInPool = pool.Acquire( bIgnoreFenceStatus ) )
-                return {queueInPool->hQueue, queueInPool->hFence, pool.FamilyId};
+        if (pool.QueueFamilyProps.queueFlags == queueFlags) {
+            auto acquiredQueue = pool.Acquire( bIgnoreFenceStatus );
+            if ( VK_NULL_HANDLE != acquiredQueue.pQueue )
+                return acquiredQueue;
+        }
 
     /* Try to find something usable. */
     if ( false == bExactMatchByFlags )
         for ( auto& pool : Pools )
-            if ( queueFlags == ( pool.FamilyProps.queueFlags & queueFlags ) )
-                if ( QueueInPool* queueInPool = pool.Acquire( bIgnoreFenceStatus ) )
-                    return {queueInPool->hQueue, queueInPool->hFence, pool.FamilyId};
+            if ( queueFlags == ( pool.QueueFamilyProps.queueFlags & queueFlags ) ) {
+                auto acquiredQueue = pool.Acquire( bIgnoreFenceStatus );
+                if ( VK_NULL_HANDLE != acquiredQueue.pQueue )
+                    return acquiredQueue;
+            }
 
     /* Nothing available for immediate usage */
     return {};
 }
 
-void apemodevk::QueuePool::Release( AcquiredQueue acquiredQueue ) {
-    Pools[ acquiredQueue.QueueFamilyId ].Release( acquiredQueue.pQueue );
+void apemodevk::QueuePool::Release( const apemodevk::AcquiredQueue& acquiredQueue ) {
+    Pools[ acquiredQueue.QueueFamilyId ].Release( acquiredQueue );
 }
 
 apemodevk::QueueFamilyPool::QueueFamilyPool( VkDevice                       pInDevice,
                                              VkPhysicalDevice               pInPhysicalDevice,
                                              uint32_t                       InQueueFamilyIndex,
                                              VkQueueFamilyProperties const& InQueueFamilyProps )
-    : FamilyProps( InQueueFamilyProps )
-    , FamilyId( InQueueFamilyIndex )
-    , AvailableCount( InQueueFamilyProps.queueCount )
+    : QueueFamilyProps( InQueueFamilyProps )
+    , QueueFamilyId( InQueueFamilyIndex )
     , pDevice( pInDevice )
     , pPhysicalDevice( pInPhysicalDevice ) {
     Queues.resize( InQueueFamilyProps.queueCount );
-
-    VkFenceCreateInfo fenceCreateInfo;
-    InitializeStruct( fenceCreateInfo );
-    /* Since the queue is free to use after creation. */
-    fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-
-    uint32_t queueIndex = FamilyProps.queueCount;
-    while ( queueIndex-- ) {
-        /* Queues are created with device, no need for lazy initialization. */
-        Queues[ queueIndex ].hQueue.Recreate( pInDevice, InQueueFamilyIndex, queueIndex );
-        Queues[ queueIndex ].hFence.Recreate( pInDevice, fenceCreateInfo );
-    }
 }
 
 apemodevk::QueueFamilyPool::~QueueFamilyPool( ) {
-    uint32_t queueIndex = FamilyProps.queueCount;
-    while ( queueIndex-- ) {
-        Queues[ queueIndex ].hQueue.WaitIdle( );
-        Queues[ queueIndex ].hQueue.Destroy( );
-        Queues[ queueIndex ].hFence.Wait( );
-        Queues[ queueIndex ].hFence.Destroy( );
+    if ( false == Queues.empty( ) ) {
+        uint32_t queueIndex = QueueFamilyProps.queueCount;
+        while ( queueIndex-- ) {
+            if ( VK_NULL_HANDLE != Queues[ queueIndex ].hFence ) {
+                vkWaitForFences( pDevice, 1, &Queues[ queueIndex ].hFence, true, UINT64_MAX );
+                vkDestroyFence( pDevice, Queues[ queueIndex ].hFence, nullptr );
+            }
+        }
     }
-
-    Queues.clear( );
 }
 
-VkQueueFamilyProperties const& apemodevk::QueueFamilyPool::GetQueueFamilyProps( ) {
-    return FamilyProps;
+const VkQueueFamilyProperties& apemodevk::QueueFamilyPool::GetQueueFamilyProps( ) const {
+    return QueueFamilyProps;
 }
 
 bool apemodevk::QueueFamilyPool::SupportsPresenting( VkSurfaceKHR pSurface ) const {
     VkBool32 supported = false;
 
-    switch ( vkGetPhysicalDeviceSurfaceSupportKHR( pPhysicalDevice, FamilyId, pSurface, &supported ) ) {
+    switch ( vkGetPhysicalDeviceSurfaceSupportKHR( pPhysicalDevice, QueueFamilyId, pSurface, &supported ) ) {
         case VK_SUCCESS:
             /* Function succeeded, see the assigned pSucceeded value. */
             return supported;
@@ -122,38 +113,84 @@ bool apemodevk::QueueFamilyPool::SupportsPresenting( VkSurfaceKHR pSurface ) con
     return false;
 }
 
-apemodevk::QueueInPool* apemodevk::QueueFamilyPool::Acquire( bool bIgnoreFence ) {
+bool apemodevk::QueueFamilyPool::SupportsGraphics( ) const {
+    return apemodevk::HasFlagEql( QueueFamilyProps.queueFlags, VK_QUEUE_GRAPHICS_BIT );
+}
+
+bool apemodevk::QueueFamilyPool::SupportsCompute( ) const {
+    return apemodevk::HasFlagEql( QueueFamilyProps.queueFlags, VK_QUEUE_COMPUTE_BIT );
+}
+
+bool apemodevk::QueueFamilyPool::SupportsSparseBinding( ) const {
+    return apemodevk::HasFlagEql( QueueFamilyProps.queueFlags, VK_QUEUE_SPARSE_BINDING_BIT );
+}
+
+bool apemodevk::QueueFamilyPool::SupportsTransfer( ) const {
+    return apemodevk::HasFlagEql( QueueFamilyProps.queueFlags, VK_QUEUE_TRANSFER_BIT );
+}
+
+apemodevk::AcquiredQueue apemodevk::QueueFamilyPool::Acquire( bool bIgnoreFence ) {
+    uint32_t queueIndex = 0;
+
     /* Loop through queues */
-    for ( auto& queue : Queues )
+    for (auto& queue : Queues) {
         /* If the queue is not used by other thread and it is not executing cmd lists, it will be returned */
-        /* Note that the used can suspend the execution of the commands, or discard for "one time" buffers. */
+        /* Note that queue can suspend the execution of the commands, or discard "one time" buffers. */
         if ( false == queue.bInUse.exchange( true, std::memory_order_acquire ) ) {
-            if ( bIgnoreFence || queue.hFence.IsSignalled( ) )
-                return &queue;
+            if ( bIgnoreFence || VK_NULL_HANDLE == queue.hQueue || VK_SUCCESS == vkGetFenceStatus( pDevice, queue.hFence ) ) {
+                if ( VK_NULL_HANDLE == queue.hQueue ) {
+                    VkFenceCreateInfo fenceCreateInfo;
+                    InitializeStruct( fenceCreateInfo );
+                    /* Since the queue is free to use after creation. */
+                    fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+                    vkGetDeviceQueue( pDevice, QueueFamilyId, queueIndex, &queue.hQueue );
+                    vkCreateFence( pDevice, &fenceCreateInfo, nullptr, &queue.hFence );
+
+                    assert( queue.hQueue );
+                    assert( queue.hFence );
+                }
+
+                AcquiredQueue acquiredQueue;
+                acquiredQueue.pQueue        = queue.hQueue;
+                acquiredQueue.pFence        = queue.hFence;
+                acquiredQueue.QueueFamilyId = QueueFamilyId;
+                acquiredQueue.QueueId       = queueIndex;
+                return acquiredQueue;
+            }
 
             /* Move back to unused state */
             queue.bInUse.exchange( false, std::memory_order_release );
         }
 
+        ++queueIndex;
+    }
+
     /* If no free queue found, null is returned */
-    return nullptr;
+    return {};
 }
 
-bool apemodevk::QueueFamilyPool::Release( VkQueue pUnneededQueue ) {
-    /* Loop through queues */
-    for ( auto& queue : Queues )
-        /* Check if the queue is in the pool */
-        if ( pUnneededQueue == queue.hQueue.Handle ) {
-            /* No longer used, ok */
-            const bool previouslyUsed = queue.bInUse.exchange( false, std::memory_order_release );
+bool apemodevk::QueueFamilyPool::Release( const apemodevk::AcquiredQueue& acquiredQueue ) {
+    /* Check if the queue was acquired */
+    if ( VK_NULL_HANDLE != acquiredQueue.pQueue ) {
+        /* No longer used, ok */
+        const bool previouslyUsed = Queues[ acquiredQueue.QueueId ].bInUse.exchange( false, std::memory_order_release );
+        /* Try to track incorrect usage or atomic mess. */
+        if ( false == previouslyUsed )
+            DebugBreak( );
 
-            /* Try to track ncorrect usage or atomic mess. */
-            if ( false == previouslyUsed )
-                DebugBreak( );
-
-            return true;
-        }
+        return true;
+    }
 
     DebugBreak( );
     return false;
+}
+
+apemodevk::QueueInPool::QueueInPool( ) {
+}
+
+apemodevk::QueueInPool::QueueInPool( const QueueInPool& other )
+    : hQueue( other.hQueue )
+    , hFence( other.hFence )
+    , bInUse( other.bInUse.load( std::memory_order_relaxed ) ) {
 }

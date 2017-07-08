@@ -2,6 +2,8 @@
 #include <GraphicsDevice.Vulkan.h>
 #include <GraphicsManager.Vulkan.h>
 
+#include <QueuePools.Vulkan.h>
+
 #include <GraphicsManager.KnownExtensions.Vulkan.h>
 #include <NativeDispatchableHandles.Vulkan.h>
 #include <SystemAllocationCallbacks.Vulkan.h>
@@ -14,32 +16,6 @@
 apemodevk::GraphicsDevice::NativeLayerWrapper& apemodevk::GraphicsDevice::GetUnnamedLayer( ) {
     apemode_assert( LayerWrappers.front( ).IsUnnamedLayer( ), "vkEnumerateInstanceExtensionProperties failed." );
     return LayerWrappers.front( );
-}
-
-bool apemodevk::GraphicsDevice::SupportsGraphics( uint32_t QueueFamilyId ) const {
-    apemode_assert( QueueFamilyId < QueueProps.size( ), "Out of range." );
-    return apemodevk::HasFlagEql( QueueProps[ QueueFamilyId ]->queueFlags, VK_QUEUE_GRAPHICS_BIT );
-}
-
-bool apemodevk::GraphicsDevice::SupportsCompute( uint32_t QueueFamilyId ) const {
-    apemode_assert( QueueFamilyId < QueueProps.size( ), "Out of range." );
-    return apemodevk::HasFlagEql( QueueProps[ QueueFamilyId ]->queueFlags, VK_QUEUE_COMPUTE_BIT );
-}
-
-bool apemodevk::GraphicsDevice::SupportsSparseBinding( uint32_t QueueFamilyId ) const {
-    apemode_assert( QueueFamilyId < QueueProps.size( ), "Out of range." );
-    return apemodevk::HasFlagEql( QueueProps[ QueueFamilyId ]->queueFlags, VK_QUEUE_SPARSE_BINDING_BIT );
-}
-
-bool apemodevk::GraphicsDevice::SupportsTransfer( uint32_t QueueFamilyId ) const {
-    apemode_assert( QueueFamilyId < QueueProps.size( ), "Out of range." );
-    return apemodevk::HasFlagEql( QueueProps[ QueueFamilyId ]->queueFlags, VK_QUEUE_TRANSFER_BIT );
-}
-
-bool apemodevk::GraphicsDevice::SupportsPresenting( uint32_t QueueFamilyId, VkSurfaceKHR hSurface ) const {
-    VkBool32 bIsSupported = false;
-    const auto eSupport = vkGetPhysicalDeviceSurfaceSupportKHR( *this, QueueFamilyId, hSurface, &bIsSupported );
-    return ResultHandle::Succeeded( eSupport ) && ResultHandle::Succeeded( bIsSupported );
 }
 
 bool apemodevk::GraphicsManager::NativeLayerWrapper::IsValidDeviceLayer( ) const {
@@ -70,15 +46,17 @@ bool apemodevk::GraphicsManager::NativeLayerWrapper::IsValidDeviceLayer( ) const
     return true;
 }
 
-bool apemodevk::GraphicsDevice::ScanDeviceQueues( ) {
+bool apemodevk::GraphicsDevice::ScanDeviceQueues( VkQueueFamilyPropertiesVector& QueueProps,
+                                                  VkDeviceQueueCreateInfoVector& QueueReqs,
+                                                  FloatVector&                   QueuePriorities ) {
     uint32_t QueuesFound = 0;
-    vkGetPhysicalDeviceQueueFamilyProperties( AdapterHandle, &QueuesFound, NULL );
+    vkGetPhysicalDeviceQueueFamilyProperties( pPhysicalDevice, &QueuesFound, NULL );
 
     if ( QueuesFound != 0 ) {
         QueueProps.resize( QueuesFound );
         QueueReqs.reserve( QueuesFound );
 
-        vkGetPhysicalDeviceQueueFamilyProperties( AdapterHandle, &QueuesFound, QueueProps.data( ) );
+        vkGetPhysicalDeviceQueueFamilyProperties( pPhysicalDevice, &QueuesFound, QueueProps.data( ) );
 
         uint32_t TotalQueuePrioritiesCount = 0;
         std::for_each( QueueProps.begin( ), QueueProps.end( ), [&]( VkQueueFamilyProperties& QueueProp ) {
@@ -86,13 +64,13 @@ bool apemodevk::GraphicsDevice::ScanDeviceQueues( ) {
         } );
 
         uint32_t QueuePrioritiesAssigned = 0;
-        QueuePrioritiesStorage.resize( TotalQueuePrioritiesCount );
+        QueuePriorities.resize( TotalQueuePrioritiesCount );
         std::for_each( QueueProps.begin( ), QueueProps.end( ), [&]( VkQueueFamilyProperties& QueueProp ) {
             auto& QueueReq             = apemodevk::PushBackAndGet( QueueReqs );
             QueueReq->pNext            = NULL;
             QueueReq->queueFamilyIndex = static_cast< uint32_t >( std::distance( QueueProps.data( ), &QueueProp ) );
             QueueReq->queueCount       = QueueProp.queueCount;
-            QueueReq->pQueuePriorities = QueuePrioritiesStorage.data( ) + QueuePrioritiesAssigned;
+            QueueReq->pQueuePriorities = QueuePriorities.data( ) + QueuePrioritiesAssigned;
 
             QueuePrioritiesAssigned += QueueProp.queueCount;
         } );
@@ -103,10 +81,10 @@ bool apemodevk::GraphicsDevice::ScanDeviceQueues( ) {
 
 bool apemodevk::GraphicsDevice::ScanDeviceLayerProperties( ) {
     uint32_t ExtPropCount = 0;
-    ResultHandle ErrorHandle = vkEnumerateDeviceExtensionProperties( AdapterHandle, NULL, &ExtPropCount, NULL );
+    ResultHandle ErrorHandle = vkEnumerateDeviceExtensionProperties( pPhysicalDevice, NULL, &ExtPropCount, NULL );
     if ( ErrorHandle && ExtPropCount ) {
         DeviceExtensionProps.resize( ExtPropCount );
-        ErrorHandle = vkEnumerateDeviceExtensionProperties( AdapterHandle, NULL, &ExtPropCount, DeviceExtensionProps.data( ) );
+        ErrorHandle = vkEnumerateDeviceExtensionProperties( pPhysicalDevice, NULL, &ExtPropCount, DeviceExtensionProps.data( ) );
 
         return ErrorHandle;
     }
@@ -118,7 +96,7 @@ bool apemodevk::GraphicsDevice::ScanFormatProperties( ) {
     VkFormat NativeFormatIt = VK_FORMAT_UNDEFINED;
     for ( ; NativeFormatIt < VK_FORMAT_RANGE_SIZE; ) {
         const VkFormat NativeFormat = NativeFormatIt;
-        vkGetPhysicalDeviceFormatProperties( AdapterHandle, NativeFormat, &FormatProperties[ NativeFormat ] );
+        vkGetPhysicalDeviceFormatProperties( pPhysicalDevice, NativeFormat, &FormatProperties[ NativeFormat ] );
         NativeFormatIt = static_cast< VkFormat >( NativeFormatIt + 1 );
     }
 
@@ -129,16 +107,20 @@ bool apemodevk::GraphicsDevice::RecreateResourcesFor( VkPhysicalDevice InAdapter
     pGraphicsEcosystem = &GraphicsEcosystem;
     apemode_assert( Args != nullptr, "Ecosystem is required in case of Vulkan." );
 
-    AdapterHandle = InAdapterHandle;
+    pPhysicalDevice = InAdapterHandle;
 
     // Physical device is required to create a related logical device.
     // Likewise, vulkan instance is required for physical device.
-    if ( VK_NULL_HANDLE != AdapterHandle ) {
-        vkGetPhysicalDeviceProperties( AdapterHandle, &AdapterProps );
-        vkGetPhysicalDeviceMemoryProperties( AdapterHandle, &MemoryProps );
-        vkGetPhysicalDeviceFeatures( AdapterHandle, &Features );
+    if ( VK_NULL_HANDLE != pPhysicalDevice ) {
+        vkGetPhysicalDeviceProperties( pPhysicalDevice, &AdapterProps );
+        vkGetPhysicalDeviceMemoryProperties( pPhysicalDevice, &MemoryProps );
+        vkGetPhysicalDeviceFeatures( pPhysicalDevice, &Features );
 
-        if ( ScanDeviceQueues( ) && ScanFormatProperties( ) && ScanDeviceLayerProperties( ) ) {
+        VkQueueFamilyPropertiesVector QueueProps;
+        VkDeviceQueueCreateInfoVector QueueReqs;
+        FloatVector                   QueuePriorities;
+
+        if ( ScanDeviceQueues( QueueProps, QueueReqs, QueuePriorities ) && ScanFormatProperties( ) && ScanDeviceLayerProperties( ) ) {
             std::vector< const char* > DeviceExtNames;
             DeviceExtNames.reserve( DeviceExtensionProps.size( ) );
             std::transform( DeviceExtensionProps.begin( ),
@@ -147,7 +129,7 @@ bool apemodevk::GraphicsDevice::RecreateResourcesFor( VkPhysicalDevice InAdapter
                             [&]( VkExtensionProperties const& ExtProp ) { return ExtProp.extensionName; } );
 
             VkPhysicalDeviceFeatures Features;
-            vkGetPhysicalDeviceFeatures( AdapterHandle, &Features );
+            vkGetPhysicalDeviceFeatures( pPhysicalDevice, &Features );
 
             TInfoStruct< VkDeviceCreateInfo > DeviceDesc;
             DeviceDesc->pEnabledFeatures        = &Features;
@@ -158,8 +140,15 @@ bool apemodevk::GraphicsDevice::RecreateResourcesFor( VkPhysicalDevice InAdapter
             DeviceDesc->enabledExtensionCount   = _Get_collection_length_u( DeviceExtNames );
             DeviceDesc->ppEnabledExtensionNames = DeviceExtNames.data( );
 
-            const auto bOk = LogicalDeviceHandle.Recreate( AdapterHandle, DeviceDesc );
+            const auto bOk = hLogicalDevice.Recreate( pPhysicalDevice, DeviceDesc );
             apemode_assert( bOk, "vkCreateDevice failed." );
+
+            pQueuePool.reset( new QueuePool( hLogicalDevice,
+                                             pPhysicalDevice,
+                                             QueueProps.data( ),
+                                             QueueProps.data( ) + QueueProps.size( ),
+                                             QueuePriorities.data( ),
+                                             QueuePriorities.data( ) + QueuePriorities.size( ) ) );
 
             return bOk;
         }
@@ -187,19 +176,19 @@ apemodevk::GraphicsDevice::~GraphicsDevice( ) {
 }
 
 apemodevk::GraphicsDevice::operator VkDevice( ) const {
-    return LogicalDeviceHandle;
+    return hLogicalDevice;
 }
 
 apemodevk::GraphicsDevice::operator VkPhysicalDevice( ) const {
-    return AdapterHandle;
+    return pPhysicalDevice;
 }
 
 apemodevk::GraphicsDevice::operator VkInstance( ) const {
-    return pGraphicsEcosystem->InstanceHandle;
+    return pGraphicsEcosystem->hInstance;
 }
 
 bool apemodevk::GraphicsDevice::IsValid( ) const {
-    return LogicalDeviceHandle.IsNotNull( );
+    return hLogicalDevice.IsNotNull( );
 }
 
 bool apemodevk::GraphicsDevice::Await( ) {
@@ -211,15 +200,14 @@ bool apemodevk::GraphicsDevice::Await( ) {
     return eDeviceWaitIdleOk.Succeeded( );
 }
 
+apemodevk::QueuePool* apemodevk::GraphicsDevice::GetQueuePool( ) {
+    return pQueuePool.get( );
+}
+
+const apemodevk::QueuePool* apemodevk::GraphicsDevice::GetQueuePool( ) const {
+    return pQueuePool.get( );
+}
+
 apemodevk::GraphicsManager& apemodevk::GraphicsDevice::GetGraphicsEcosystem( ) {
     return *pGraphicsEcosystem;
-}
-
-uint32_t apemodevk::GraphicsDevice::GetQueueFamilyCount( ) {
-    return _Get_collection_length_u( QueueReqs );
-}
-
-uint32_t apemodevk::GraphicsDevice::GetQueueCountInQueueFamily( uint32_t QueueFamilyId ) {
-    apemode_assert( QueueFamilyId < GetQueueFamilyCount( ), "Out of range." );
-    return QueueReqs[ QueueFamilyId ]->queueCount;
 }

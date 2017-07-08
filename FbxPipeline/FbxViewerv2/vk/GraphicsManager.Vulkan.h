@@ -65,9 +65,9 @@ namespace apemodevk {
         APIVersion                        Version;
         std::string                       AppName;
         std::string                       EngineName;
-        std::vector< const char * >                       PresentLayers;
-        std::vector< const char * >                       PresentExtensions;
-        TDispatchableHandle< VkInstance > InstanceHandle;
-        std::vector< NativeLayerWrapper >          LayerWrappers;
+        std::vector< const char * >       PresentLayers;
+        std::vector< const char * >       PresentExtensions;
+        TDispatchableHandle< VkInstance > hInstance;
+        std::vector< NativeLayerWrapper > LayerWrappers;
     };
 }

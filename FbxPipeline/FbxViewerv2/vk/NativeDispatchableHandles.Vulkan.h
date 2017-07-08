@@ -41,15 +41,15 @@ namespace apemodevk
     template <>
     struct TDispatchableHandleDeleter<VkSurfaceKHR> : public TDispatchableHandleHandleTypeResolver<VkSurfaceKHR>
     {
-        VkInstance InstanceHandle;
+        VkInstance hInstance;
 
-        TDispatchableHandleDeleter() : InstanceHandle(VK_NULL_HANDLE) {}
+        TDispatchableHandleDeleter() : hInstance(VK_NULL_HANDLE) {}
 
         void operator()(VkSurfaceKHR & Handle)
         {
             if (Handle == nullptr) return;
-            apemode_assert(InstanceHandle != nullptr, "Instance is required.");
-            vkDestroySurfaceKHR(InstanceHandle, Handle, *this);
+            apemode_assert(hInstance != nullptr, "Instance is required.");
+            vkDestroySurfaceKHR(hInstance, Handle, *this);
             Handle = VK_NULL_HANDLE;
         }
     };
@@ -57,15 +57,15 @@ namespace apemodevk
     template <>
     struct TDispatchableHandleDeleter<VkSwapchainKHR> : public TDispatchableHandleHandleTypeResolver<VkSwapchainKHR>
     {
-        VkDevice LogicalDeviceHandle;
+        VkDevice hLogicalDevice;
 
-        TDispatchableHandleDeleter() : LogicalDeviceHandle(VK_NULL_HANDLE) {}
+        TDispatchableHandleDeleter() : hLogicalDevice(VK_NULL_HANDLE) {}
 
         void operator()(VkSwapchainKHR & Handle)
         {
             if (Handle == nullptr) return;
-            apemode_assert(LogicalDeviceHandle != nullptr, "Device is required.");
-            vkDestroySwapchainKHR(LogicalDeviceHandle, Handle, *this);
+            apemode_assert(hLogicalDevice != nullptr, "Device is required.");
+            vkDestroySwapchainKHR(hLogicalDevice, Handle, *this);
             Handle = VK_NULL_HANDLE;
         }
     };
@@ -73,15 +73,15 @@ namespace apemodevk
     template <>
     struct TDispatchableHandleDeleter<VkCommandPool> : public TDispatchableHandleHandleTypeResolver<VkCommandPool>
     {
-        VkDevice LogicalDeviceHandle;
+        VkDevice hLogicalDevice;
 
-        TDispatchableHandleDeleter() : LogicalDeviceHandle(VK_NULL_HANDLE) {}
+        TDispatchableHandleDeleter() : hLogicalDevice(VK_NULL_HANDLE) {}
 
         void operator()(VkCommandPool & Handle)
         {
             if (Handle == nullptr) return;
-            apemode_assert(LogicalDeviceHandle != nullptr, "Device is required.");
-            vkDestroyCommandPool(LogicalDeviceHandle, Handle, *this);
+            apemode_assert(hLogicalDevice != nullptr, "Device is required.");
+            vkDestroyCommandPool(hLogicalDevice, Handle, *this);
             Handle = VK_NULL_HANDLE;
         }
     };
@@ -89,16 +89,16 @@ namespace apemodevk
     template <>
     struct TDispatchableHandleDeleter<VkCommandBuffer> : public TDispatchableHandleHandleTypeResolver<VkCommandBuffer>
     {
-        VkDevice LogicalDeviceHandle;
+        VkDevice hLogicalDevice;
         VkCommandPool CmdPool;
 
-        TDispatchableHandleDeleter() : LogicalDeviceHandle(VK_NULL_HANDLE), CmdPool(VK_NULL_HANDLE) {}
+        TDispatchableHandleDeleter() : hLogicalDevice(VK_NULL_HANDLE), CmdPool(VK_NULL_HANDLE) {}
 
         void operator()(VkCommandBuffer & Handle)
         {
             if (Handle == nullptr) return;
-            apemode_assert(LogicalDeviceHandle != nullptr, "Device is required.");
-            vkFreeCommandBuffers(LogicalDeviceHandle, CmdPool, 1, &Handle);
+            apemode_assert(hLogicalDevice != nullptr, "Device is required.");
+            vkFreeCommandBuffers(hLogicalDevice, CmdPool, 1, &Handle);
             Handle = VK_NULL_HANDLE;
         }
     };
@@ -106,15 +106,15 @@ namespace apemodevk
     template <>
     struct TDispatchableHandleDeleter<VkFence> : public TDispatchableHandleHandleTypeResolver<VkFence>
     {
-        VkDevice LogicalDeviceHandle;
+        VkDevice hLogicalDevice;
 
-        TDispatchableHandleDeleter() : LogicalDeviceHandle(VK_NULL_HANDLE) {}
+        TDispatchableHandleDeleter() : hLogicalDevice(VK_NULL_HANDLE) {}
 
         void operator()(VkFence & Handle)
         {
             if (Handle == nullptr) return;
-            apemode_assert(LogicalDeviceHandle != nullptr, "Device is required.");
-            vkDestroyFence(LogicalDeviceHandle, Handle, *this);
+            apemode_assert(hLogicalDevice != nullptr, "Device is required.");
+            vkDestroyFence(hLogicalDevice, Handle, *this);
             Handle = VK_NULL_HANDLE;
         }
     };
@@ -122,15 +122,15 @@ namespace apemodevk
     template <>
     struct TDispatchableHandleDeleter<VkEvent> : public TDispatchableHandleHandleTypeResolver<VkEvent>
     {
-        VkDevice LogicalDeviceHandle;
+        VkDevice hLogicalDevice;
 
-        TDispatchableHandleDeleter() : LogicalDeviceHandle(VK_NULL_HANDLE) {}
+        TDispatchableHandleDeleter() : hLogicalDevice(VK_NULL_HANDLE) {}
 
         void operator()(VkEvent & Handle)
         {
             if (Handle == nullptr) return;
-            apemode_assert(LogicalDeviceHandle != nullptr, "Device is required.");
-            vkDestroyEvent(LogicalDeviceHandle, Handle, *this);
+            apemode_assert(hLogicalDevice != nullptr, "Device is required.");
+            vkDestroyEvent(hLogicalDevice, Handle, *this);
             Handle = VK_NULL_HANDLE;
         }
     };
@@ -138,21 +138,21 @@ namespace apemodevk
     template <>
     struct TDispatchableHandleDeleter<VkImage> : public TDispatchableHandleHandleTypeResolver<VkImage>
     {
-        VkDevice LogicalDeviceHandle;
+        VkDevice hLogicalDevice;
         VkPhysicalDevice PhysicalDeviceHandle;
 
-        TDispatchableHandleDeleter() : LogicalDeviceHandle(VK_NULL_HANDLE)
+        TDispatchableHandleDeleter() : hLogicalDevice(VK_NULL_HANDLE)
                                      , PhysicalDeviceHandle(VK_NULL_HANDLE) {}
 
         void operator()(VkImage & Handle)
         {
             if (Handle == nullptr ||
-                LogicalDeviceHandle == nullptr) 
+                hLogicalDevice == nullptr) 
                 return;
 
             // Image can be assigned without ownership (by swapchain, for example).
-            //apemode_assert(LogicalDeviceHandle != nullptr, "Device is required.");
-            vkDestroyImage(LogicalDeviceHandle, Handle, *this);
+            //apemode_assert(hLogicalDevice != nullptr, "Device is required.");
+            vkDestroyImage(hLogicalDevice, Handle, *this);
             Handle = VK_NULL_HANDLE;
         }
     };
@@ -160,16 +160,16 @@ namespace apemodevk
     template <>
     struct TDispatchableHandleDeleter<VkImageView> : public TDispatchableHandleHandleTypeResolver<VkImageView>
     {
-        VkDevice LogicalDeviceHandle;
+        VkDevice hLogicalDevice;
 
-        TDispatchableHandleDeleter() : LogicalDeviceHandle(VK_NULL_HANDLE) {}
+        TDispatchableHandleDeleter() : hLogicalDevice(VK_NULL_HANDLE) {}
 
         void operator()(VkImageView & Handle)
         {
             if (Handle == nullptr) return;
 
-            apemode_assert(LogicalDeviceHandle != nullptr, "Device is required.");
-            vkDestroyImageView(LogicalDeviceHandle, Handle, *this);
+            apemode_assert(hLogicalDevice != nullptr, "Device is required.");
+            vkDestroyImageView(hLogicalDevice, Handle, *this);
             Handle = VK_NULL_HANDLE;
         }
     };
@@ -177,16 +177,16 @@ namespace apemodevk
     template <>
     struct TDispatchableHandleDeleter<VkDeviceMemory> : public TDispatchableHandleHandleTypeResolver<VkDeviceMemory>
     {
-        VkDevice LogicalDeviceHandle;
+        VkDevice hLogicalDevice;
 
-        TDispatchableHandleDeleter() : LogicalDeviceHandle(VK_NULL_HANDLE) {}
+        TDispatchableHandleDeleter() : hLogicalDevice(VK_NULL_HANDLE) {}
 
         void operator()(VkDeviceMemory & Handle)
         {
             if (Handle == nullptr) return;
 
-            apemode_assert(LogicalDeviceHandle != nullptr, "Device is required.");
-            vkFreeMemory(LogicalDeviceHandle, Handle, *this);
+            apemode_assert(hLogicalDevice != nullptr, "Device is required.");
+            vkFreeMemory(hLogicalDevice, Handle, *this);
             Handle = VK_NULL_HANDLE;
         }
     };
@@ -194,18 +194,18 @@ namespace apemodevk
     template <>
     struct TDispatchableHandleDeleter<VkBuffer> : public TDispatchableHandleHandleTypeResolver<VkBuffer>
     {
-        VkDevice LogicalDeviceHandle;
+        VkDevice hLogicalDevice;
         VkPhysicalDevice PhysicalDeviceHandle;
 
-        TDispatchableHandleDeleter() : LogicalDeviceHandle(VK_NULL_HANDLE)
+        TDispatchableHandleDeleter() : hLogicalDevice(VK_NULL_HANDLE)
                                      , PhysicalDeviceHandle(VK_NULL_HANDLE){}
 
         void operator()(VkBuffer & Handle)
         {
             if (Handle == nullptr) return;
 
-            apemode_assert(LogicalDeviceHandle != nullptr, "Device is required.");
-            vkDestroyBuffer(LogicalDeviceHandle, Handle, *this);
+            apemode_assert(hLogicalDevice != nullptr, "Device is required.");
+            vkDestroyBuffer(hLogicalDevice, Handle, *this);
             Handle = VK_NULL_HANDLE;
         }
     };
@@ -213,16 +213,16 @@ namespace apemodevk
     template <>
     struct TDispatchableHandleDeleter<VkBufferView> : public TDispatchableHandleHandleTypeResolver<VkBuffer>
     {
-        VkDevice LogicalDeviceHandle;
+        VkDevice hLogicalDevice;
 
-        TDispatchableHandleDeleter() : LogicalDeviceHandle(VK_NULL_HANDLE) {}
+        TDispatchableHandleDeleter() : hLogicalDevice(VK_NULL_HANDLE) {}
 
         void operator()(VkBufferView & Handle)
         {
             if (Handle == nullptr) return;
 
-            apemode_assert(LogicalDeviceHandle != nullptr, "Device is required.");
-            vkDestroyBufferView(LogicalDeviceHandle, Handle, *this);
+            apemode_assert(hLogicalDevice != nullptr, "Device is required.");
+            vkDestroyBufferView(hLogicalDevice, Handle, *this);
             Handle = VK_NULL_HANDLE;
         }
     };
@@ -230,16 +230,16 @@ namespace apemodevk
     template <>
     struct TDispatchableHandleDeleter<VkFramebuffer> : public TDispatchableHandleHandleTypeResolver<VkFramebuffer>
     {
-        VkDevice LogicalDeviceHandle;
+        VkDevice hLogicalDevice;
 
-        TDispatchableHandleDeleter() : LogicalDeviceHandle(VK_NULL_HANDLE) {}
+        TDispatchableHandleDeleter() : hLogicalDevice(VK_NULL_HANDLE) {}
 
         void operator()(VkFramebuffer & Handle)
         {
             if (Handle == nullptr) return;
 
-            apemode_assert(LogicalDeviceHandle != nullptr, "Device is required.");
-            vkDestroyFramebuffer(LogicalDeviceHandle, Handle, *this);
+            apemode_assert(hLogicalDevice != nullptr, "Device is required.");
+            vkDestroyFramebuffer(hLogicalDevice, Handle, *this);
             Handle = VK_NULL_HANDLE;
         }
     };
@@ -247,16 +247,16 @@ namespace apemodevk
     template <>
     struct TDispatchableHandleDeleter<VkRenderPass> : public TDispatchableHandleHandleTypeResolver<VkRenderPass>
     {
-        VkDevice LogicalDeviceHandle;
+        VkDevice hLogicalDevice;
 
-        TDispatchableHandleDeleter() : LogicalDeviceHandle(VK_NULL_HANDLE) {}
+        TDispatchableHandleDeleter() : hLogicalDevice(VK_NULL_HANDLE) {}
 
         void operator()(VkRenderPass & Handle)
         {
             if (Handle == nullptr) return;
 
-            apemode_assert(LogicalDeviceHandle != nullptr, "Device is required.");
-            vkDestroyRenderPass(LogicalDeviceHandle, Handle, *this);
+            apemode_assert(hLogicalDevice != nullptr, "Device is required.");
+            vkDestroyRenderPass(hLogicalDevice, Handle, *this);
             Handle = VK_NULL_HANDLE;
         }
     };
@@ -264,16 +264,16 @@ namespace apemodevk
     template <>
     struct TDispatchableHandleDeleter<VkPipelineCache> : public TDispatchableHandleHandleTypeResolver<VkPipelineCache>
     {
-        VkDevice LogicalDeviceHandle;
+        VkDevice hLogicalDevice;
 
-        TDispatchableHandleDeleter() : LogicalDeviceHandle(VK_NULL_HANDLE) {}
+        TDispatchableHandleDeleter() : hLogicalDevice(VK_NULL_HANDLE) {}
 
         void operator()(VkPipelineCache & Handle)
         {
             if (Handle == nullptr) return;
 
-            apemode_assert(LogicalDeviceHandle != nullptr, "Device is required.");
-            vkDestroyPipelineCache(LogicalDeviceHandle, Handle, *this);
+            apemode_assert(hLogicalDevice != nullptr, "Device is required.");
+            vkDestroyPipelineCache(hLogicalDevice, Handle, *this);
             Handle = VK_NULL_HANDLE;
         }
     };
@@ -281,16 +281,16 @@ namespace apemodevk
     template <>
     struct TDispatchableHandleDeleter<VkPipeline> : public TDispatchableHandleHandleTypeResolver<VkPipeline>
     {
-        VkDevice LogicalDeviceHandle;
+        VkDevice hLogicalDevice;
 
-        TDispatchableHandleDeleter() : LogicalDeviceHandle(VK_NULL_HANDLE) {}
+        TDispatchableHandleDeleter() : hLogicalDevice(VK_NULL_HANDLE) {}
 
         void operator()(VkPipeline & Handle)
         {
             if (Handle == nullptr) return;
 
-            apemode_assert(LogicalDeviceHandle != nullptr, "Device is required.");
-            vkDestroyPipeline(LogicalDeviceHandle, Handle, *this);
+            apemode_assert(hLogicalDevice != nullptr, "Device is required.");
+            vkDestroyPipeline(hLogicalDevice, Handle, *this);
             Handle = VK_NULL_HANDLE;
         }
     };
@@ -298,16 +298,16 @@ namespace apemodevk
     template <>
     struct TDispatchableHandleDeleter<VkDescriptorSetLayout> : public TDispatchableHandleHandleTypeResolver<VkDescriptorSetLayout>
     {
-        VkDevice LogicalDeviceHandle;
+        VkDevice hLogicalDevice;
 
-        TDispatchableHandleDeleter() : LogicalDeviceHandle(VK_NULL_HANDLE) {}
+        TDispatchableHandleDeleter() : hLogicalDevice(VK_NULL_HANDLE) {}
 
         void operator()(VkDescriptorSetLayout & Handle)
         {
             if (Handle == nullptr) return;
 
-            apemode_assert(LogicalDeviceHandle != nullptr, "Device is required.");
-            vkDestroyDescriptorSetLayout(LogicalDeviceHandle, Handle, *this);
+            apemode_assert(hLogicalDevice != nullptr, "Device is required.");
+            vkDestroyDescriptorSetLayout(hLogicalDevice, Handle, *this);
             Handle = VK_NULL_HANDLE;
         }
     };
@@ -315,11 +315,11 @@ namespace apemodevk
     template <>
     struct TDispatchableHandleDeleter<VkDescriptorSet> : public TDispatchableHandleHandleTypeResolver<VkDescriptorSet>
     {
-        VkDevice LogicalDeviceHandle;
+        VkDevice hLogicalDevice;
         VkDescriptorPool hDescPool;
 
         TDispatchableHandleDeleter() 
-            : LogicalDeviceHandle(VK_NULL_HANDLE)
+            : hLogicalDevice(VK_NULL_HANDLE)
             , hDescPool(VK_NULL_HANDLE)
         {
         }
@@ -328,11 +328,11 @@ namespace apemodevk
         {
             if (Handle == nullptr) return;
 
-            apemode_assert(LogicalDeviceHandle != nullptr, 
+            apemode_assert(hLogicalDevice != nullptr, 
                                 "Device is required.");
 
             const ResultHandle eIsFreed
-                = vkFreeDescriptorSets(LogicalDeviceHandle, hDescPool, 1, &Handle);
+                = vkFreeDescriptorSets(hLogicalDevice, hDescPool, 1, &Handle);
 
             apemode_assert(eIsFreed.Succeeded(),
                                 "Failed to free descriptor set (vkFreeDescriptorSets).");
@@ -344,10 +344,10 @@ namespace apemodevk
     template <>
     struct TDispatchableHandleDeleter<VkDescriptorPool> : public TDispatchableHandleHandleTypeResolver<VkDescriptorPool>
     {
-        VkDevice LogicalDeviceHandle;
+        VkDevice hLogicalDevice;
 
         TDispatchableHandleDeleter() 
-            : LogicalDeviceHandle(VK_NULL_HANDLE)
+            : hLogicalDevice(VK_NULL_HANDLE)
         {
         }
 
@@ -355,8 +355,8 @@ namespace apemodevk
         {
             if (Handle == nullptr) return;
 
-            apemode_assert(LogicalDeviceHandle != nullptr, "Device is required.");
-            vkDestroyDescriptorPool(LogicalDeviceHandle, Handle, *this);
+            apemode_assert(hLogicalDevice != nullptr, "Device is required.");
+            vkDestroyDescriptorPool(hLogicalDevice, Handle, *this);
             Handle = VK_NULL_HANDLE;
         }
     };
@@ -364,16 +364,16 @@ namespace apemodevk
     template <>
     struct TDispatchableHandleDeleter<VkPipelineLayout> : public TDispatchableHandleHandleTypeResolver<VkPipelineLayout>
     {
-        VkDevice LogicalDeviceHandle;
+        VkDevice hLogicalDevice;
 
-        TDispatchableHandleDeleter() : LogicalDeviceHandle(VK_NULL_HANDLE) {}
+        TDispatchableHandleDeleter() : hLogicalDevice(VK_NULL_HANDLE) {}
 
         void operator()(VkPipelineLayout & Handle)
         {
             if (Handle == nullptr) return;
 
-            apemode_assert(LogicalDeviceHandle != nullptr, "Device is required.");
-            vkDestroyPipelineLayout(LogicalDeviceHandle, Handle, *this);
+            apemode_assert(hLogicalDevice != nullptr, "Device is required.");
+            vkDestroyPipelineLayout(hLogicalDevice, Handle, *this);
             Handle = VK_NULL_HANDLE;
         }
     };
@@ -381,16 +381,16 @@ namespace apemodevk
     template <>
     struct TDispatchableHandleDeleter<VkShaderModule> : public TDispatchableHandleHandleTypeResolver<VkShaderModule>
     {
-        VkDevice LogicalDeviceHandle;
+        VkDevice hLogicalDevice;
 
-        TDispatchableHandleDeleter() : LogicalDeviceHandle(VK_NULL_HANDLE) {}
+        TDispatchableHandleDeleter() : hLogicalDevice(VK_NULL_HANDLE) {}
 
         void operator()(VkShaderModule & Handle)
         {
             if (Handle == nullptr) return;
 
-            apemode_assert(LogicalDeviceHandle != nullptr, "Device is required.");
-            vkDestroyShaderModule(LogicalDeviceHandle, Handle, *this);
+            apemode_assert(hLogicalDevice != nullptr, "Device is required.");
+            vkDestroyShaderModule(hLogicalDevice, Handle, *this);
             Handle = VK_NULL_HANDLE;
         }
     };
@@ -398,16 +398,16 @@ namespace apemodevk
     template <>
     struct TDispatchableHandleDeleter<VkSemaphore> : public TDispatchableHandleHandleTypeResolver<VkSemaphore>
     {
-        VkDevice LogicalDeviceHandle;
+        VkDevice hLogicalDevice;
 
-        TDispatchableHandleDeleter() : LogicalDeviceHandle(VK_NULL_HANDLE) {}
+        TDispatchableHandleDeleter() : hLogicalDevice(VK_NULL_HANDLE) {}
 
         void operator()(VkSemaphore & Handle)
         {
             if (Handle == nullptr) return;
 
-            apemode_assert(LogicalDeviceHandle != nullptr, "Device is required.");
-            vkDestroySemaphore(LogicalDeviceHandle, Handle, *this);
+            apemode_assert(hLogicalDevice != nullptr, "Device is required.");
+            vkDestroySemaphore(hLogicalDevice, Handle, *this);
             Handle = VK_NULL_HANDLE;
         }
     };
@@ -433,14 +433,14 @@ namespace apemodevk
     template <>
     struct TDispatchableHandle<VkDevice> : public TDispatchableHandleBase<VkDevice>
     {
-       bool Recreate(VkPhysicalDevice AdapterHandle, VkDeviceCreateInfo const & CreateInfo)
+       bool Recreate(VkPhysicalDevice pPhysicalDevice, VkDeviceCreateInfo const & CreateInfo)
         {
-            apemode_assert(AdapterHandle != VK_NULL_HANDLE, "Adapter must be valid");
+            apemode_assert(pPhysicalDevice != VK_NULL_HANDLE, "Adapter must be valid");
 
             Deleter(Handle);
-            if (AdapterHandle != nullptr)
+            if (pPhysicalDevice != nullptr)
             {
-                const ResultHandle ErrorHandle = vkCreateDevice(AdapterHandle, &CreateInfo, *this, *this);
+                const ResultHandle ErrorHandle = vkCreateDevice(pPhysicalDevice, &CreateInfo, *this, *this);
                 apemode_assert(ErrorHandle, "vkCreateDevice failed.");
                 return ErrorHandle.Succeeded();
             }
@@ -474,7 +474,7 @@ namespace apemodevk
             Deleter(Handle);
             if (InInstanceHandle)
             {
-                Deleter.InstanceHandle = InInstanceHandle;
+                Deleter.hInstance = InInstanceHandle;
                 ResultHandle ErrorHandle = vkCreateWin32SurfaceKHR(InInstanceHandle, &CreateInfo, *this, *this);
                 apemode_assert(ErrorHandle, "vkCreateWin32SurfaceKHR failed.");
                 return ErrorHandle.Succeeded();
@@ -500,7 +500,7 @@ namespace apemodevk
 
             if (InLogicalDeviceHandle != nullptr)
             {
-                Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
+                Deleter.hLogicalDevice = InLogicalDeviceHandle;
 
                 const ResultHandle ErrorHandle = vkCreateSwapchainKHR(InLogicalDeviceHandle, &CreateInfo, *this, *this);
                 apemode_assert(ErrorHandle, "vkCreateSwapchainKHR failed.");
@@ -523,32 +523,27 @@ namespace apemodevk
     };
 
     template <>
-    struct TDispatchableHandle<VkCommandPool> : public TDispatchableHandleBase<VkCommandPool>
-    {
-       bool Recreate(VkDevice InLogicalDeviceHandle, VkCommandPoolCreateInfo const &CreateInfo)
-        {
-            apemode_assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required.");
+    struct TDispatchableHandle< VkCommandPool > : public TDispatchableHandleBase< VkCommandPool > {
+        bool Recreate( VkDevice InLogicalDeviceHandle, VkCommandPoolCreateInfo const &CreateInfo ) {
+            apemode_assert( InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required." );
 
-            Deleter(Handle);
-            if (InLogicalDeviceHandle != nullptr)
-            {
-                Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
-                ResultHandle ErrorHandle = vkCreateCommandPool(InLogicalDeviceHandle, &CreateInfo, *this, *this);
-                apemode_assert(ErrorHandle, "vkCreateCommandPool failed.");
-                return ErrorHandle.Succeeded();
+            Deleter( Handle );
+            if ( InLogicalDeviceHandle != nullptr ) {
+                Deleter.hLogicalDevice = InLogicalDeviceHandle;
+                ResultHandle ErrorHandle    = vkCreateCommandPool( InLogicalDeviceHandle, &CreateInfo, *this, *this );
+                apemode_assert( ErrorHandle, "vkCreateCommandPool failed." );
+                return ErrorHandle.Succeeded( );
             }
 
             return false;
         }
 
-       bool Reset(bool bRecycleResources)
-        {
-            if (IsNotNull())
-            {
-                const auto ResetFlags = bRecycleResources ? VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT : 0u;
-                const ResultHandle ErrorHandle = vkResetCommandPool(Deleter.LogicalDeviceHandle, *this, ResetFlags);
-                apemode_assert(ErrorHandle, "vkResetCommandPool failed.");
-                return ErrorHandle.Succeeded();
+        bool Reset( bool bRecycleResources ) {
+            if ( IsNotNull( ) ) {
+                const auto         ResetFlags  = bRecycleResources ? VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT : 0u;
+                const ResultHandle ErrorHandle = vkResetCommandPool( Deleter.hLogicalDevice, *this, ResetFlags );
+                apemode_assert( ErrorHandle, "vkResetCommandPool failed." );
+                return ErrorHandle.Succeeded( );
             }
 
             return false;
@@ -568,7 +563,7 @@ namespace apemodevk
             if (InLogicalDeviceHandle != nullptr)
             {
                 Deleter.CmdPool = AllocInfo.commandPool;
-                Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
+                Deleter.hLogicalDevice = InLogicalDeviceHandle;
 
                 const ResultHandle ErrorHandle = vkAllocateCommandBuffers(InLogicalDeviceHandle, &AllocInfo, *this);
                 apemode_assert(ErrorHandle, "vkAllocateCommandBuffers failed.");
@@ -580,87 +575,79 @@ namespace apemodevk
     };
 
     template <>
-    struct TDispatchableHandle<VkFence> : public TDispatchableHandleBase<VkFence>
-    {
-       bool Recreate(VkDevice InLogicalDeviceHandle, VkFenceCreateInfo const & CreateInfo)
-        {
-            apemode_assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required.");
+    struct TDispatchableHandle< VkFence > : public TDispatchableHandleBase< VkFence > {
+        bool Recreate( VkDevice InLogicalDeviceHandle, VkFenceCreateInfo const &CreateInfo ) {
+            apemode_assert( InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required." );
 
-            Deleter(Handle);
-            if (InLogicalDeviceHandle != nullptr)
-            {
-                Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
+            Deleter( Handle );
+            if ( InLogicalDeviceHandle != nullptr ) {
+                Deleter.hLogicalDevice = InLogicalDeviceHandle;
 
-                const ResultHandle ErrorHandle = vkCreateFence(InLogicalDeviceHandle, &CreateInfo, *this, *this);
-                apemode_assert(ErrorHandle, "vkCreateFence failed.");
-                return ErrorHandle.Succeeded();
+                const ResultHandle ErrorHandle = vkCreateFence( InLogicalDeviceHandle, &CreateInfo, *this, *this );
+                apemode_assert( ErrorHandle, "vkCreateFence failed." );
+                return ErrorHandle.Succeeded( );
             }
 
             return false;
         }
 
         bool Wait( ) const {
-            const ResultHandle ErrorHandle = vkWaitForFences(Deleter.LogicalDeviceHandle, 1, &Handle, true, UINT64_MAX);
-            apemode_assert(ErrorHandle, "vkWaitForFences failed.");
-            return ErrorHandle.Succeeded();
+            const ResultHandle ErrorHandle = vkWaitForFences( Deleter.hLogicalDevice, 1, &Handle, true, UINT64_MAX );
+            apemode_assert( ErrorHandle, "vkWaitForFences failed." );
+            return ErrorHandle.Succeeded( );
         }
 
-        inline VkResult Status() const { return vkGetFenceStatus(Deleter.LogicalDeviceHandle, Handle); }
-        inline bool     IsSignalled() const { return Status() == ResultHandle::Success; }
-        inline bool     IsInProgress() const { return Status() == ResultHandle::NotReady; }
-        inline bool     Failed() const { return ResultHandle(Status()).Failed(); }
+        inline VkResult Status() const       { return vkGetFenceStatus( Deleter.hLogicalDevice, Handle ); }
+        inline bool     IsSignalled() const  { return Status( ) == ResultHandle::Success; }
+        inline bool     IsInProgress() const { return Status( ) == ResultHandle::NotReady; }
+        inline bool     Failed() const       { return ResultHandle(Status()).Failed(); }
     };
 
     template <>
-    struct TDispatchableHandle<VkEvent> : public TDispatchableHandleBase<VkEvent>
-    {
-       bool Recreate(VkDevice InLogicalDeviceHandle, VkEventCreateInfo const & CreateInfo)
-        {
-            apemode_assert(InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required.");
+    struct TDispatchableHandle< VkEvent > : public TDispatchableHandleBase< VkEvent > {
+        bool Recreate( VkDevice InLogicalDeviceHandle, VkEventCreateInfo const &CreateInfo ) {
+            apemode_assert( InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required." );
 
-            Deleter(Handle);
-            if (InLogicalDeviceHandle != nullptr)
-            {
-                Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
+            Deleter( Handle );
+            if ( InLogicalDeviceHandle != nullptr ) {
+                Deleter.hLogicalDevice = InLogicalDeviceHandle;
 
-                const ResultHandle ErrorHandle = vkCreateEvent(InLogicalDeviceHandle, &CreateInfo, *this, *this);
-                apemode_assert(ErrorHandle, "vkCreateFence failed.");
-                return ErrorHandle.Succeeded();
+                const ResultHandle ErrorHandle = vkCreateEvent( InLogicalDeviceHandle, &CreateInfo, *this, *this );
+                apemode_assert( ErrorHandle, "vkCreateFence failed." );
+                return ErrorHandle.Succeeded( );
             }
 
             return false;
         }
 
-       bool Set() const
-        {
-            const ResultHandle ErrorHandle = vkSetEvent(Deleter.LogicalDeviceHandle, Handle);
-            apemode_assert(ErrorHandle, "vkSetEvent failed.");
-            return ErrorHandle.Succeeded();
+        bool Set( ) const {
+            const ResultHandle ErrorHandle = vkSetEvent( Deleter.hLogicalDevice, Handle );
+            apemode_assert( ErrorHandle, "vkSetEvent failed." );
+            return ErrorHandle.Succeeded( );
         }
 
-       bool Reset() const
-        {
-            const ResultHandle ErrorHandle = vkResetEvent(Deleter.LogicalDeviceHandle, Handle);
-            apemode_assert(ErrorHandle, "vkResetEvent failed.");
-            return ErrorHandle.Succeeded();
+        bool Reset( ) const {
+            const ResultHandle ErrorHandle = vkResetEvent( Deleter.hLogicalDevice, Handle );
+            apemode_assert( ErrorHandle, "vkResetEvent failed." );
+            return ErrorHandle.Succeeded( );
         }
 
-        inline VkResult Status() const { return vkGetEventStatus(Deleter.LogicalDeviceHandle, Handle); }
-        inline bool     IsSet() const { return Status() == ResultHandle::EventSet; }
-        inline bool     IsReset() const { return Status() == ResultHandle::EventReset; }
-        inline bool     Failed() const { return ResultHandle(Status()).Failed(); }
+        inline VkResult Status() const  { return vkGetEventStatus( Deleter.hLogicalDevice, Handle ); }
+        inline bool     IsSet() const   { return Status( ) == ResultHandle::EventSet; }
+        inline bool     IsReset() const { return Status( ) == ResultHandle::EventReset; }
+        inline bool     Failed() const  { return ResultHandle( Status( ) ).Failed( ); }
     };
 
-    inline uint32_t ResolveMemoryType(VkPhysicalDevice gpu, VkMemoryPropertyFlags properties, uint32_t type_bits)
-    {
+    inline uint32_t ResolveMemoryType( VkPhysicalDevice gpu, VkMemoryPropertyFlags properties, uint32_t type_bits ) {
         VkPhysicalDeviceMemoryProperties physicalDeviceMemoryProperties;
-        vkGetPhysicalDeviceMemoryProperties(gpu, &physicalDeviceMemoryProperties);
-        for (uint32_t i = 0; i < physicalDeviceMemoryProperties.memoryTypeCount; i++)
-            if ((physicalDeviceMemoryProperties.memoryTypes[i].propertyFlags & properties) == properties && type_bits & (1 << i))
+        vkGetPhysicalDeviceMemoryProperties( gpu, &physicalDeviceMemoryProperties );
+        for ( uint32_t i = 0; i < physicalDeviceMemoryProperties.memoryTypeCount; i++ )
+            if ( ( physicalDeviceMemoryProperties.memoryTypes[ i ].propertyFlags & properties ) == properties && type_bits & ( 1 << i ) )
                 return i;
 
         // Unable to find memoryType
-        return uint32_t(-1);
+        DebugBreak( );
+        return uint32_t( -1 );
     }
 
     template <>
@@ -678,7 +665,7 @@ namespace apemodevk
             {
                 Handle = Img;
                 Deleter.PhysicalDeviceHandle = InPhysicalDeviceHandle;
-                Deleter.LogicalDeviceHandle = bTakeOwnership 
+                Deleter.hLogicalDevice = bTakeOwnership 
                     ? InLogicalDeviceHandle 
                     : nullptr;
                 return true;
@@ -694,7 +681,7 @@ namespace apemodevk
             Deleter(Handle);
             if (InLogicalDeviceHandle != nullptr)
             {
-                Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
+                Deleter.hLogicalDevice = InLogicalDeviceHandle;
                 Deleter.PhysicalDeviceHandle = InPhysicalDeviceHandle;
 
                 const ResultHandle ErrorHandle = vkCreateImage(InLogicalDeviceHandle, &CreateInfo, *this, *this);
@@ -709,7 +696,7 @@ namespace apemodevk
             apemode_assert(IsNotNull(), "Null.");
 
             VkMemoryRequirements memoryRequirements;
-            vkGetImageMemoryRequirements(Deleter.LogicalDeviceHandle, *this, &memoryRequirements);
+            vkGetImageMemoryRequirements(Deleter.hLogicalDevice, *this, &memoryRequirements);
             return memoryRequirements;
         }
 
@@ -727,7 +714,7 @@ namespace apemodevk
         }
 
         bool BindMemory(VkDeviceMemory hMemory, uint32_t Offset = 0) {
-            const ResultHandle ErrorHandle = vkBindImageMemory(Deleter.LogicalDeviceHandle, *this, hMemory, Offset);
+            const ResultHandle ErrorHandle = vkBindImageMemory(Deleter.hLogicalDevice, *this, hMemory, Offset);
             return ErrorHandle.Succeeded();
         }
     };
@@ -742,7 +729,7 @@ namespace apemodevk
             Deleter(Handle);
             if (InLogicalDeviceHandle != nullptr)
             {
-                Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
+                Deleter.hLogicalDevice = InLogicalDeviceHandle;
 
                 const ResultHandle ErrorHandle = vkCreateImageView(InLogicalDeviceHandle, &CreateInfo, *this, *this);
                 apemode_assert(ErrorHandle, "vkCreateImageView failed.");
@@ -761,7 +748,7 @@ namespace apemodevk
 
             Deleter( Handle );
             if ( InLogicalDeviceHandle != nullptr ) {
-                Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
+                Deleter.hLogicalDevice = InLogicalDeviceHandle;
 
                 const ResultHandle ErrorHandle = vkAllocateMemory( InLogicalDeviceHandle, &AllocInfo, *this, *this );
                 apemode_assert( ErrorHandle, "vkAllocateMemory failed." );
@@ -772,10 +759,10 @@ namespace apemodevk
         }
 
         uint8_t *Map( uint32_t mappedMemoryOffset, uint32_t mappedMemorySize, VkMemoryHeapFlags mapFlags ) {
-            apemode_assert( Deleter.LogicalDeviceHandle != VK_NULL_HANDLE, "Device is required." );
+            apemode_assert( Deleter.hLogicalDevice != VK_NULL_HANDLE, "Device is required." );
 
             uint8_t *mappedData = nullptr;
-            if ( ResultHandle::Failed( vkMapMemory( Deleter.LogicalDeviceHandle,
+            if ( ResultHandle::Failed( vkMapMemory( Deleter.hLogicalDevice,
                                                     *this,
                                                     mappedMemoryOffset,
                                                     mappedMemorySize,
@@ -787,8 +774,8 @@ namespace apemodevk
         }
 
         void Unmap( ) {
-            apemode_assert( Deleter.LogicalDeviceHandle != VK_NULL_HANDLE, "Device is required." );
-            vkUnmapMemory( Deleter.LogicalDeviceHandle, *this );
+            apemode_assert( Deleter.hLogicalDevice != VK_NULL_HANDLE, "Device is required." );
+            vkUnmapMemory( Deleter.hLogicalDevice, *this );
         }
     };
 
@@ -802,7 +789,7 @@ namespace apemodevk
 
             Deleter( Handle );
             if ( InLogicalDeviceHandle != nullptr ) {
-                Deleter.LogicalDeviceHandle  = InLogicalDeviceHandle;
+                Deleter.hLogicalDevice  = InLogicalDeviceHandle;
                 Deleter.PhysicalDeviceHandle = InPhysicalDeviceHandle;
 
                 const ResultHandle ErrorHandle = vkCreateBuffer( InLogicalDeviceHandle, &CreateInfo, *this, *this );
@@ -817,7 +804,7 @@ namespace apemodevk
             apemode_assert( IsNotNull( ), "Null." );
 
             VkMemoryRequirements memoryRequirements;
-            vkGetBufferMemoryRequirements( Deleter.LogicalDeviceHandle, *this, &memoryRequirements );
+            vkGetBufferMemoryRequirements( Deleter.hLogicalDevice, *this, &memoryRequirements );
             return memoryRequirements;
         }
 
@@ -834,7 +821,7 @@ namespace apemodevk
         }
 
         bool BindMemory( VkDeviceMemory hMemory, uint32_t Offset = 0 ) {
-            const ResultHandle ErrorHandle = vkBindBufferMemory( Deleter.LogicalDeviceHandle, *this, hMemory, Offset );
+            const ResultHandle ErrorHandle = vkBindBufferMemory( Deleter.hLogicalDevice, *this, hMemory, Offset );
             return ErrorHandle.Succeeded( );
         }
     };
@@ -849,7 +836,7 @@ namespace apemodevk
             Deleter(Handle);
             if (InLogicalDeviceHandle != nullptr)
             {
-                Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
+                Deleter.hLogicalDevice = InLogicalDeviceHandle;
 
                 const ResultHandle ErrorHandle = vkCreateBufferView(InLogicalDeviceHandle, &CreateInfo, *this, *this);
                 apemode_assert(ErrorHandle, "vkCreateBufferView failed.");
@@ -870,7 +857,7 @@ namespace apemodevk
             Deleter(Handle);
             if (InLogicalDeviceHandle != nullptr)
             {
-                Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
+                Deleter.hLogicalDevice = InLogicalDeviceHandle;
 
                 const ResultHandle ErrorHandle = vkCreateFramebuffer(InLogicalDeviceHandle, &CreateInfo, *this, *this);
                 apemode_assert(ErrorHandle, "vkCreateFramebuffer failed.");
@@ -891,7 +878,7 @@ namespace apemodevk
             Deleter(Handle);
             if (InLogicalDeviceHandle != nullptr)
             {
-                Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
+                Deleter.hLogicalDevice = InLogicalDeviceHandle;
 
                 const ResultHandle ErrorHandle = vkCreateRenderPass(InLogicalDeviceHandle, &CreateInfo, *this, *this);
                 apemode_assert(ErrorHandle, "vkCreateRenderPass failed.");
@@ -912,7 +899,7 @@ namespace apemodevk
             Deleter(Handle);
             if (InLogicalDeviceHandle != nullptr)
             {
-                Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
+                Deleter.hLogicalDevice = InLogicalDeviceHandle;
 
                 const ResultHandle ErrorHandle = vkCreatePipelineCache(InLogicalDeviceHandle, &CreateInfo, *this, *this);
                 apemode_assert(ErrorHandle, "vkCreatePipelineCache failed.");
@@ -933,7 +920,7 @@ namespace apemodevk
             Deleter(Handle);
             if (InLogicalDeviceHandle != nullptr)
             {
-                Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
+                Deleter.hLogicalDevice = InLogicalDeviceHandle;
 
                 const ResultHandle ErrorHandle = vkCreatePipelineLayout(InLogicalDeviceHandle, &CreateInfo, *this, *this);
                 apemode_assert(ErrorHandle, "vkCreatePipelineLayout failed.");
@@ -953,19 +940,19 @@ namespace apemodevk
         TDispatchableHandle()
         {
             Handle                      = VK_NULL_HANDLE;
-            Deleter.LogicalDeviceHandle = VK_NULL_HANDLE;
+            Deleter.hLogicalDevice = VK_NULL_HANDLE;
         }
 
         TDispatchableHandle(TDispatchableHandle<VkDescriptorSetLayout> && Other)
         {
             Handle = Other.Release();
-            Deleter.LogicalDeviceHandle = Other.Deleter.LogicalDeviceHandle;
+            Deleter.hLogicalDevice = Other.Deleter.hLogicalDevice;
         }
 
         TDispatchableHandle(VkDevice InLogicalDeviceHandle, VkDescriptorSetLayout SetLayoutHandle)
         {
             Handle                      = SetLayoutHandle;
-            Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
+            Deleter.hLogicalDevice = InLogicalDeviceHandle;
         }
 
         bool Recreate(VkDevice InLogicalDeviceHandle, VkDescriptorSetLayoutCreateInfo const & CreateInfo)
@@ -975,7 +962,7 @@ namespace apemodevk
             Deleter(Handle);
             if (InLogicalDeviceHandle != nullptr)
             {
-                Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
+                Deleter.hLogicalDevice = InLogicalDeviceHandle;
 
                 const ResultHandle ErrorHandle = vkCreateDescriptorSetLayout(InLogicalDeviceHandle, &CreateInfo, *this, *this);
                 apemode_assert(ErrorHandle, "vkCreateDescriptorSetLayout failed.");
@@ -995,7 +982,7 @@ namespace apemodevk
 
             Deleter( Handle );
             if ( InLogicalDeviceHandle != nullptr ) {
-                Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
+                Deleter.hLogicalDevice = InLogicalDeviceHandle;
 
                 const ResultHandle ErrorHandle = vkAllocateDescriptorSets( InLogicalDeviceHandle, &AllocInfo, *this );
                 apemode_assert( ErrorHandle, "vkAllocateDescriptorSets failed." );
@@ -1013,7 +1000,7 @@ namespace apemodevk
 
             Deleter( Handle );
             if ( InLogicalDeviceHandle != nullptr ) {
-                Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
+                Deleter.hLogicalDevice = InLogicalDeviceHandle;
 
                 const ResultHandle ErrorHandle = vkCreateDescriptorPool( InLogicalDeviceHandle, &CreateInfo, *this, *this );
                 apemode_assert( ErrorHandle, "vkCreateDescriptorSetLayout failed." );
@@ -1033,7 +1020,7 @@ namespace apemodevk
 
             Deleter( Handle );
             if ( InLogicalDeviceHandle != nullptr ) {
-                Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
+                Deleter.hLogicalDevice = InLogicalDeviceHandle;
 
                 const ResultHandle ErrorHandle = vkCreateGraphicsPipelines( InLogicalDeviceHandle, pCache, 1, &CreateInfo, *this, *this );
                 apemode_assert( ErrorHandle, "vkCreateGraphicsPipelines failed." );
@@ -1048,7 +1035,7 @@ namespace apemodevk
 
             Deleter( Handle );
             if ( InLogicalDeviceHandle != nullptr ) {
-                Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
+                Deleter.hLogicalDevice = InLogicalDeviceHandle;
 
                 const ResultHandle ErrorHandle =
                     vkCreateComputePipelines( InLogicalDeviceHandle, pCache, 1, &CreateInfo, *this, *this );
@@ -1067,7 +1054,7 @@ namespace apemodevk
 
             Deleter( Handle );
             if ( InLogicalDeviceHandle != nullptr ) {
-                Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
+                Deleter.hLogicalDevice = InLogicalDeviceHandle;
 
                 const ResultHandle ErrorHandle = vkCreateShaderModule( InLogicalDeviceHandle, &CreateInfo, *this, *this );
                 apemode_assert( ErrorHandle, "vkCreateShaderModule failed." );
@@ -1085,7 +1072,7 @@ namespace apemodevk
 
             Deleter( Handle );
             if ( InLogicalDeviceHandle != nullptr ) {
-                Deleter.LogicalDeviceHandle = InLogicalDeviceHandle;
+                Deleter.hLogicalDevice = InLogicalDeviceHandle;
 
                 const ResultHandle ErrorHandle = vkCreateSemaphore( InLogicalDeviceHandle, &CreateInfo, *this, *this );
                 apemode_assert( ErrorHandle, "vkCreateSemaphore failed." );

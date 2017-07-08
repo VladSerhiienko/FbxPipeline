@@ -315,17 +315,6 @@ namespace apemode {
                         scene->meshes.emplace_back( );
                         auto &mesh = scene->meshes.back( );
 
-                        /*mesh.vertexBufferHandle = bgfx::createVertexBuffer(
-                            bgfxUtils::makeReleasableCopy( meshFb->vertices( )->Data( ), meshFb->vertices( )->size( ) ),
-                            PackedVertex::vertexDecl );
-
-                        if ( meshFb->subsets( ) && meshFb->subsets( )->size( ) && meshFb->subset_indices( ) ) {
-                            mesh.indexBufferHandle = bgfx::createIndexBuffer(
-                                bgfxUtils::makeReleasableCopy( meshFb->subset_indices( )->Data( ),
-                                                               meshFb->subset_indices( )->size( ) ),
-                                meshFb->subset_index_type( ) == apemodefb::EIndexTypeFb_UInt32 ? BGFX_BUFFER_INDEX32 : 0 );
-                        }*/
-
                         if ( auto submeshesFb = meshFb->submeshes( ) ) {
                             auto submeshFb = (const apemodefb::SubmeshFb *) submeshesFb->Data( );
 

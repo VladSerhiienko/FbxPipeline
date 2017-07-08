@@ -1,13 +1,10 @@
 #pragma once
 
 #include <AppSurfaceSdlBase.h>
-
-namespace apemodevk {
-    class GraphicsManager;
-    class GraphicsDevice;
-    class CommandQueue;
-    class Swapchain;
-}
+#include <GraphicsDevice.Vulkan.h>
+#include <GraphicsManager.Vulkan.h>
+#include <QueuePools.Vulkan.h>
+#include <Swapchain.Vulkan.h>
 
 namespace apemode {
     class AppSurfaceSettings;
@@ -27,11 +24,12 @@ namespace apemode {
         void* GetGraphicsHandle( ) override;
         SceneRendererBase* CreateSceneRenderer( ) override;
 
-        uint32_t LastWidth;
-        uint32_t LastHeight;
-        std::unique_ptr< apemodevk::GraphicsManager > pDeviceManager;
-        std::unique_ptr< apemodevk::Swapchain >       pSwapchain;
-        std::unique_ptr< apemodevk::CommandQueue >    pCmdQueue;
-        apemodevk::GraphicsDevice*                    pNode;
+        uint32_t                   LastWidth;
+        uint32_t                   LastHeight;
+        apemodevk::GraphicsManager DeviceManager;
+        apemodevk::Surface         Surface;
+        apemodevk::Swapchain       Swapchain;
+        apemodevk::AcquiredQueue   PresentQueue;
+        apemodevk::GraphicsDevice* pNode;
     };
 }

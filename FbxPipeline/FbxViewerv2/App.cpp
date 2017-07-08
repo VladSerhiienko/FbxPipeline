@@ -118,7 +118,7 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
             return false;
 
         auto appSurfaceVk = (AppSurfaceSdlVk*)appSurface;
-        if ( auto swapchain = appSurfaceVk->pSwapchain.get( ) ) {
+        if ( auto swapchain = &appSurfaceVk->Swapchain ) {
             appContent->FrameCount = swapchain->ImgCount;
             appContent->FrameIndex = 0;
             appContent->FrameId    = 0;
@@ -129,7 +129,7 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
                 VkCommandPoolCreateInfo cmdPoolCreateInfo;
                 InitializeStruct( cmdPoolCreateInfo );
                 cmdPoolCreateInfo.flags            = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-                cmdPoolCreateInfo.queueFamilyIndex = appSurfaceVk->pCmdQueue->QueueFamilyId;
+                cmdPoolCreateInfo.queueFamilyIndex = appSurfaceVk->PresentQueue.QueueFamilyId;
 
                 if ( false == appContent->hCmdPool[ i ].Recreate( *appSurfaceVk->pNode, cmdPoolCreateInfo ) ) {
                     DebugBreak( );
@@ -181,8 +181,8 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         initParamsNk.pRenderPass     = appContent->hDbgRenderPass;
         //initParamsNk.pRenderPass     = appContent->hNkRenderPass;
         initParamsNk.pDescPool       = *appContent->pDescPool;
-        initParamsNk.pQueue          = *appSurfaceVk->pCmdQueue;
-        initParamsNk.QueueFamilyId   = appSurfaceVk->pCmdQueue->QueueFamilyId;
+        initParamsNk.pQueue          = appSurfaceVk->PresentQueue.pQueue;
+        initParamsNk.QueueFamilyId   = appSurfaceVk->PresentQueue.QueueFamilyId;
 
         appContent->Nk->Init( &initParamsNk );
 
@@ -225,7 +225,7 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
 
 bool apemode::App::OnResized( ) {
     if ( auto appSurfaceVk = (AppSurfaceSdlVk*) GetSurface( ) ) {
-        if ( auto swapchain = appSurfaceVk->pSwapchain.get( ) ) {
+        if ( auto swapchain = &appSurfaceVk->Swapchain ) {
             appContent->width  = appSurfaceVk->GetWidth( );
             appContent->height = appSurfaceVk->GetHeight( );
 
@@ -233,8 +233,8 @@ bool apemode::App::OnResized( ) {
             InitializeStruct( depthImgCreateInfo );
             depthImgCreateInfo.imageType     = VK_IMAGE_TYPE_2D;
             depthImgCreateInfo.format        = sDepthFormat;
-            depthImgCreateInfo.extent.width  = swapchain->ColorExtent.width;
-            depthImgCreateInfo.extent.height = swapchain->ColorExtent.height;
+            depthImgCreateInfo.extent.width  = swapchain->ImgExtent.width;
+            depthImgCreateInfo.extent.height = swapchain->ImgExtent.height;
             depthImgCreateInfo.extent.depth  = 1;
             depthImgCreateInfo.mipLevels     = 1;
             depthImgCreateInfo.arrayLayers   = 1;
@@ -285,7 +285,7 @@ bool apemode::App::OnResized( ) {
             VkAttachmentDescription colorDepthAttachments[ 2 ];
             InitializeStruct( colorDepthAttachments );
 
-            colorDepthAttachments[ 0 ].format         = swapchain->eColorFormat;
+            colorDepthAttachments[ 0 ].format         = appSurfaceVk->Surface.eColorFormat;
             colorDepthAttachments[ 0 ].samples        = VK_SAMPLE_COUNT_1_BIT;
             colorDepthAttachments[ 0 ].loadOp         = VK_ATTACHMENT_LOAD_OP_CLEAR;
             colorDepthAttachments[ 0 ].storeOp        = VK_ATTACHMENT_STORE_OP_STORE;
@@ -354,16 +354,16 @@ bool apemode::App::OnResized( ) {
             InitializeStruct( framebufferCreateInfoNk );
             framebufferCreateInfoNk.renderPass      = appContent->hNkRenderPass;
             framebufferCreateInfoNk.attachmentCount = 1;
-            framebufferCreateInfoNk.width           = swapchain->ColorExtent.width;
-            framebufferCreateInfoNk.height          = swapchain->ColorExtent.height;
+            framebufferCreateInfoNk.width           = swapchain->ImgExtent.width;
+            framebufferCreateInfoNk.height          = swapchain->ImgExtent.height;
             framebufferCreateInfoNk.layers          = 1;
 
             VkFramebufferCreateInfo framebufferCreateInfoDbg;
             InitializeStruct( framebufferCreateInfoDbg );
             framebufferCreateInfoDbg.renderPass      = appContent->hDbgRenderPass;
             framebufferCreateInfoDbg.attachmentCount = 2;
-            framebufferCreateInfoDbg.width           = swapchain->ColorExtent.width;
-            framebufferCreateInfoDbg.height          = swapchain->ColorExtent.height;
+            framebufferCreateInfoDbg.width           = swapchain->ImgExtent.width;
+            framebufferCreateInfoDbg.height          = swapchain->ImgExtent.height;
             framebufferCreateInfoDbg.layers          = 1;
 
             for ( uint32_t i = 0; i < appContent->FrameCount; ++i ) {
@@ -486,8 +486,8 @@ void App::Update( float deltaSecs, Input const& inputState ) {
 
     if ( auto appSurfaceVk = (AppSurfaceSdlVk*) GetSurface( ) ) {
         VkDevice        device                   = *appSurfaceVk->pNode;
-        VkQueue         queue                    = *appSurfaceVk->pCmdQueue;
-        VkSwapchainKHR  swapchain                = appSurfaceVk->pSwapchain->hSwapchain;
+        VkQueue         queue                    = appSurfaceVk->PresentQueue.pQueue;
+        VkSwapchainKHR  swapchain                = appSurfaceVk->Swapchain.hSwapchain;
         VkFence         fence                    = appContent->hFences[ appContent->FrameIndex ];
         VkSemaphore     presentCompleteSemaphore = appContent->hPresentCompleteSemaphores[ appContent->FrameIndex ];
         VkSemaphore     renderCompleteSemaphore  = appContent->hRenderCompleteSemaphores[ appContent->FrameIndex ];
@@ -552,7 +552,7 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         vkCmdBeginRenderPass( cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE );
 
         DebugRendererVk::FrameUniformBuffer frameData;
-        frameData.projectionMatrix = appContent->CamProjController.ProjMatrix(55.0f, width, height, 0.1f, 100.0f);
+        frameData.projectionMatrix = appContent->CamProjController.ProjMatrix(55.0f, (float)width, (float)height, 0.1f, 100.0f);
         frameData.viewMatrix = appContent->pCamController->ViewMatrix();
         frameData.color = {1, 0, 0, 1};
 

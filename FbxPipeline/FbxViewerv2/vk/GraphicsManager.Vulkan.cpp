@@ -109,11 +109,11 @@ bool apemodevk::GraphicsManager::ScanAdapters( ) {
     std::vector<VkPhysicalDevice> Adapters;
 
     ResultHandle ErrorHandle;
-    ErrorHandle = vkEnumeratePhysicalDevices( InstanceHandle, &AdaptersFound, NULL );
+    ErrorHandle = vkEnumeratePhysicalDevices( hInstance, &AdaptersFound, NULL );
     apemode_assert( ErrorHandle, "vkEnumeratePhysicalDevices failed." );
 
     Adapters.resize( AdaptersFound );
-    ErrorHandle = vkEnumeratePhysicalDevices( InstanceHandle, &AdaptersFound, Adapters.data( ) );
+    ErrorHandle = vkEnumeratePhysicalDevices( hInstance, &AdaptersFound, Adapters.data( ) );
     apemode_assert( ErrorHandle, "vkEnumeratePhysicalDevices failed." );
 
     // TODO:
@@ -193,7 +193,7 @@ bool apemodevk::GraphicsManager::InitializeInstance( uint32_t flags ) {
     -----------------------------------------------------------------
     */
 
-    bool bIsOk = InstanceHandle.Recreate( InstanceDesc );
+    bool bIsOk = hInstance.Recreate( InstanceDesc );
     apemode_assert( bIsOk, "vkCreateInstance failed." );
 
     if ( !ScanAdapters( ) )
@@ -234,7 +234,9 @@ VKAPI_ATTR VkBool32 VKAPI_CALL apemodevk::GraphicsManager::DebugCallback( VkFlag
                                                                           const char *               pMsg,
                                                                           void *                     pUserData ) {
     if ( msgFlags & VK_DEBUG_REPORT_ERROR_BIT_EXT ) {
+        platform::DebugBreak( );
     } else if ( msgFlags & VK_DEBUG_REPORT_WARNING_BIT_EXT ) {
+        platform::DebugBreak( );
     } else if ( msgFlags & VK_DEBUG_REPORT_INFORMATION_BIT_EXT ) {
     } else if ( msgFlags & VK_DEBUG_REPORT_DEBUG_BIT_EXT ) {
     }

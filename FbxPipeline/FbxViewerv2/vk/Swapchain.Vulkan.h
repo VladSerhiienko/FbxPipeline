@@ -10,7 +10,30 @@ namespace apemodevk {
     class ColorResourceView;
     class RenderPassResources;
 
-    class Swapchain : public apemodevk::ScalableAllocPolicy, public apemodevk::NoCopyAssignPolicy {
+    class Surface : public apemodevk::NoCopyAssignPolicy {
+    public:
+#ifdef _WIN32
+        typedef HWND      WindowHandle;
+        typedef HINSTANCE ModuleHandle;
+#else
+        typedef void* WindowHandle;
+        typedef void* ModuleHandle;
+#endif
+        bool Recreate( VkPhysicalDevice pInPhysicalDevice, VkInstance pInInstance, ModuleHandle InInst, WindowHandle InWnd );
+
+        VkPhysicalDevice                    pPhysicalDevice;
+        VkInstance                          pInstance;
+        ModuleHandle                        Inst;
+        WindowHandle                        Wnd;
+        VkSurfaceCapabilitiesKHR            SurfaceCaps;
+        VkSurfaceTransformFlagsKHR          eSurfaceTransform;
+        VkFormat                            eColorFormat;
+        VkColorSpaceKHR                     eColorSpace;
+        VkPresentModeKHR                    ePresentMode;
+        TDispatchableHandle< VkSurfaceKHR > hSurface;
+    };
+
+    class Swapchain : public apemodevk::NoCopyAssignPolicy {
     public:
 #ifdef _WIN32
         typedef HWND      WindowHandle;
@@ -24,8 +47,6 @@ namespace apemodevk {
         static uint64_t const     kMaxTimeout            = uint64_t( -1 );
         static uint32_t const     kMaxImgs               = 3;
 
-        static ModuleHandle const kCurrentExecutable;
-
         Swapchain( );
         ~Swapchain( );
 
@@ -33,35 +54,29 @@ namespace apemodevk {
          * Initialized surface, render targets` and depth stencils` views.
          * @return True if initialization went ok, false otherwise.
          */
-        bool RecreateResourceFor( apemodevk::GraphicsDevice& InGraphicsNode,
-                                  uint32_t                   CmdQueueFamilyId,
-#ifdef _WIN32
-                                  ModuleHandle InInst,
-                                  WindowHandle InWnd,
-#endif
-                                  uint32_t InDesiredColorWidth,
-                                  uint32_t InDesiredColorHeight );
+        bool Recreate( VkDevice                   pInDevice,
+                       VkPhysicalDevice           pInPhysicalDevice,
+                       VkSurfaceKHR               pInSurface,
+                       uint32_t                   InImgCount,
+                       uint32_t                   InDesiredColorWidth,
+                       uint32_t                   InDesiredColorHeight,
+                       VkFormat                   eColorFormat,
+                       VkColorSpaceKHR            eColorSpace,
+                       VkSurfaceTransformFlagsKHR eSurfaceTransform,
+                       VkPresentModeKHR           ePresentMode );
 
-        bool Resize( uint32_t InDesiredColorWidth, uint32_t InDesiredColorHeight );
-        bool ExtractSwapchainBuffers( std::vector< VkImage >& OutSwapchainBufferImgs );
         bool ExtractSwapchainBuffers( VkImage* OutSwapchainBufferImgs );
 
         uint32_t GetBufferCount( ) const;
 
     public:
-        GraphicsDevice*                       pNode;
-        CommandQueue*                         pCmdQueue;
-        uint16_t                              Id;
-        VkExtent2D                            ColorExtent;
-        VkFormat                              eColorFormat;
-        VkColorSpaceKHR                       eColorSpace;
-        VkPresentModeKHR                      ePresentMode;
-        VkSurfaceTransformFlagsKHR            eSurfaceTransform;
-        VkSurfaceCapabilitiesKHR              SurfaceCaps;
-        TDispatchableHandle< VkSwapchainKHR > hSwapchain;
-        TDispatchableHandle< VkSurfaceKHR >   hSurface;
+        VkDevice                              pDevice;
+        VkPhysicalDevice                      pPhysicalDevice;
+        VkSurfaceKHR                          pSurface;
+        uint32_t                              ImgCount;
+        VkExtent2D                            ImgExtent;
         VkImage                               hImgs[ kMaxImgs ];
         TDispatchableHandle< VkImageView >    hImgViews[ kMaxImgs ];
-        uint32_t                              ImgCount;
+        TDispatchableHandle< VkSwapchainKHR > hSwapchain;
     };
 }

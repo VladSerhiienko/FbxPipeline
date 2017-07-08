@@ -7,6 +7,8 @@ namespace apemodevk {
     class CommandQueue;
     class GraphicsManager;
 
+    class QueuePool;
+
     class GraphicsDevice : public apemodevk::ScalableAllocPolicy, public apemodevk::NoCopyAssignPolicy {
     public:
         friend Swapchain;
@@ -25,24 +27,21 @@ namespace apemodevk {
         GraphicsDevice( );
         ~GraphicsDevice( );
 
-        bool RecreateResourcesFor( VkPhysicalDevice AdapterHandle, GraphicsManager &GraphicsEcosystem );
+        bool RecreateResourcesFor( VkPhysicalDevice pPhysicalDevice, GraphicsManager &GraphicsEcosystem );
 
         bool IsValid( ) const;
         bool Await( );
 
-        uint32_t GetQueueFamilyCount( );
-        uint32_t GetQueueCountInQueueFamily( uint32_t QueueFamilyId );
+        QueuePool *      GetQueuePool( );
+        const QueuePool *GetQueuePool( ) const;
 
         GraphicsManager &      GetGraphicsEcosystem( );
         NativeLayerWrapper &   GetUnnamedLayer( );
 
-        bool SupportsGraphics( uint32_t QueueFamilyId ) const;
-        bool SupportsCompute( uint32_t QueueFamilyId ) const;
-        bool SupportsSparseBinding( uint32_t QueueFamilyId ) const;
-        bool SupportsTransfer( uint32_t QueueFamilyId ) const;
-        bool SupportsPresenting( uint32_t QueueFamilyId, VkSurfaceKHR hSurface ) const;
+        bool ScanDeviceQueues( VkQueueFamilyPropertiesVector &QueueProps,
+                               VkDeviceQueueCreateInfoVector &QueueReqs,
+                               FloatVector &                  QueuePriorities );
 
-        bool ScanDeviceQueues( );
         bool ScanDeviceLayerProperties( );
         bool ScanFormatProperties( );
 
@@ -51,17 +50,15 @@ namespace apemodevk {
         operator VkInstance( ) const;
 
         GraphicsManager *                    pGraphicsEcosystem;
-        TDispatchableHandle< VkDevice >      LogicalDeviceHandle;
-        VkPhysicalDevice                     AdapterHandle;
+        TDispatchableHandle< VkDevice >      hLogicalDevice;
+        VkPhysicalDevice                     pPhysicalDevice;
         VkPhysicalDeviceProperties           AdapterProps;
-        VkQueueFamilyPropertiesVector        QueueProps;
-        VkDeviceQueueCreateInfoVector        QueueReqs;
         VkPhysicalDeviceMemoryProperties     MemoryProps;
         VkPhysicalDeviceFeatures             Features;
-        FloatVector                          QueuePrioritiesStorage;
         VkFormatPropertiesArray              FormatProperties;
         std::vector< NativeLayerWrapper >    LayerWrappers;
         std::vector< const char * >          PresentLayers;
         std::vector< VkExtensionProperties > DeviceExtensionProps;
+        std::unique_ptr< QueuePool >         pQueuePool;
     };
 }
