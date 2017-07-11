@@ -1,16 +1,15 @@
 #include <fbxvpch.h>
 
+#include <QueuePools.Vulkan.h>
 #include <SceneRendererVk.h>
 #include <Scene.h>
 
 namespace apemodevk {
     struct SceneDeviceAssetVk {
-        VkDevice         pDevice         = VK_NULL_HANDLE;
-        VkPhysicalDevice pPhysicalDevice = VK_NULL_HANDLE;
+        apemodevk::GraphicsDevice* pNode = nullptr;
     };
     struct SceneMeshDeviceAssetVk {
-        VkDevice                                         pDevice         = VK_NULL_HANDLE;
-        VkPhysicalDevice                                 pPhysicalDevice = VK_NULL_HANDLE;
+        apemodevk::GraphicsDevice*                       pNode = nullptr;
         apemodevk::TDispatchableHandle< VkBuffer >       VertexBuffer;
         apemodevk::TDispatchableHandle< VkBuffer >       IndexBuffer;
         apemodevk::TDispatchableHandle< VkDeviceMemory > VertexBufferMemory;
@@ -27,43 +26,55 @@ void apemode::SceneRendererVk::UpdateScene( Scene* pScene, const SceneUpdatePara
     auto pParams       = (SceneUpdateParametersVk*) pParamsBase;
     auto deviceAsset   = (apemodevk::SceneDeviceAssetVk*) pScene->deviceAsset;
 
-    /* First call. */
-    if ( nullptr == pScene->deviceAsset && nullptr != pParams->pSceneSrc ) {
-        deviceChanged |= true;
-
-        deviceAsset                  = new apemodevk::SceneDeviceAssetVk( );
-        deviceAsset->pDevice         = pParams->pDevice;
-        deviceAsset->pPhysicalDevice = pParams->pPhysicalDevice;
-    }
-
-    /* Device lost / changed. */
-    if ( nullptr != deviceAsset && pParams->pDevice != deviceAsset->pDevice ) {
+    if ( ( nullptr == pScene->deviceAsset && nullptr != pParams->pSceneSrc ) /* First call. */ ||
+         ( nullptr != deviceAsset && pParams->pNode != deviceAsset->pNode ) /* Device lost / changed. */ ) {
         deviceChanged |= true;
 
         delete deviceAsset;
-        deviceAsset = new apemodevk::SceneDeviceAssetVk( );
-        deviceAsset->pDevice = pParams->pDevice;
-        deviceAsset->pPhysicalDevice = pParams->pPhysicalDevice;
-    }
+        deviceAsset = new apemodevk::SceneDeviceAssetVk();
+        deviceAsset->pNode = pParams->pNode;
 
-    auto meshesFb = pParamsBase->pSceneSrc->meshes( );
-    for ( int32_t i = 0; i < pScene->meshes.size( ); ++i ) {
-        auto meshFb = (const apemodefb::MeshFb*) meshesFb->Data( );
-        
+        auto pQueuePool    = pParams->pNode->GetQueuePool( );
+        auto acquiredQueue = pQueuePool->Acquire( false, VK_QUEUE_TRANSFER_BIT, true );
 
-        /*mesh.vertexBufferHandle = bgfx::createVertexBuffer(
-            bgfxUtils::makeReleasableCopy( meshFb->vertices( )->Data( ), meshFb->vertices( )->size( ) ),
-            PackedVertex::vertexDecl );
+        auto pCmdBufferPool    = pParams->pNode->GetCommandBufferPool( );
+        auto acquiredCmdBuffer = pCmdBufferPool->Acquire( false, VK_QUEUE_TRANSFER_BIT, true );
 
-        if ( meshFb->subsets( ) && meshFb->subsets( )->size( ) && meshFb->subset_indices( ) ) {
-            mesh.indexBufferHandle = bgfx::createIndexBuffer(
-                bgfxUtils::makeReleasableCopy( meshFb->subset_indices( )->Data( ),
-                                                meshFb->subset_indices( )->size( ) ),
-                meshFb->subset_index_type( ) == apemodefb::EIndexTypeFb_UInt32 ? BGFX_BUFFER_INDEX32 : 0 );
-        }*/
+        auto meshesFb = pParamsBase->pSceneSrc->meshes( );
+        for ( int32_t i = 0; i < pScene->meshes.size( ); ++i ) {
+            auto meshFb = ( (const apemodefb::MeshFb*) meshesFb->Data( ) ) + i;
 
+            /* Create device resources ... */
+            /* Create host resources ... */
+            /* Populate host resources ... */
+            /* Barriers ... */
+            /* Copy host resources to device resources ... */
+            /* Barriers ... */
+
+            /*
+            mesh.vertexBufferHandle = bgfx::createVertexBuffer(
+                bgfxUtils::makeReleasableCopy( meshFb->vertices( )->Data( ), meshFb->vertices( )->size( ) ),
+                PackedVertex::vertexDecl );
+
+            if ( meshFb->subsets( ) && meshFb->subsets( )->size( ) && meshFb->subset_indices( ) ) {
+                mesh.indexBufferHandle = bgfx::createIndexBuffer(
+                    bgfxUtils::makeReleasableCopy( meshFb->subset_indices( )->Data( ),
+                                                   meshFb->subset_indices( )->size( ) ),
+                    meshFb->subset_index_type( ) == apemodefb::EIndexTypeFb_UInt32 ? BGFX_BUFFER_INDEX32 : 0 );
+            }
+            */
+
+        }
+
+        /* Submit ... */
+
+        pCmdBufferPool->Release( acquiredCmdBuffer );
+        pQueuePool->Release( acquiredQueue );
     }
 }
 
 void apemode::SceneRendererVk::RenderScene( const Scene* pScene, const SceneRenderParametersBase* pParams ) {
+    if ( nullptr == pScene ) {
+        return;
+    }
 }

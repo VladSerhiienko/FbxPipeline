@@ -5,7 +5,7 @@
 
 namespace apemodevk {
     class GraphicsDevice;
-    class GraphicsManager : public apemodevk::ScalableAllocPolicy, public apemodevk::NoCopyAssignPolicy {
+    class GraphicsManager : public apemodevk::NoCopyAssignPolicy {
     public:
         friend GraphicsDevice;
 

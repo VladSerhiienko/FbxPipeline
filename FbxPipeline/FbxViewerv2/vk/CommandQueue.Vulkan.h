@@ -210,7 +210,7 @@ namespace apemodevk
         static CommandQueueReserver &Get( );
     };
 
-    class CommandQueue : public apemodevk::ScalableAllocPolicy, public apemodevk::NoCopyAssignPolicy {
+    class CommandQueue : public apemodevk::NoCopyAssignPolicy {
     public:
         CommandQueue( );
         ~CommandQueue( );

@@ -248,7 +248,7 @@
       <Filter>Sources\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="vk\QueuePools.Vulkan.cpp">
-      <Filter>Sources</Filter>
+      <Filter>Sources\Graphics\[Vulkan]</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

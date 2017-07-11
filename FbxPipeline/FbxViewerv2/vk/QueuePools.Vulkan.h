@@ -7,6 +7,97 @@ namespace apemodevk {
 
     class GraphicsDevice;
 
+    class CommandBufferPool;
+    class CommandBufferFamilyPool;
+
+    static const VkQueueFlags sQueueAllBits = VK_QUEUE_COMPUTE_BIT | VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_TRANSFER_BIT;
+
+    struct QueueFamilyBased {
+        uint32_t                QueueFamilyId    = 0;
+        VkQueueFamilyProperties QueueFamilyProps = {};
+
+        QueueFamilyBased( ) = default;
+        QueueFamilyBased( uint32_t queueFamilyId, VkQueueFamilyProperties queueFamilyProps )
+            : QueueFamilyId( queueFamilyId ), QueueFamilyProps( queueFamilyProps ) {
+        }
+
+        bool SupportsGraphics( ) const;
+        bool SupportsCompute( ) const;
+        bool SupportsSparseBinding( ) const;
+        bool SupportsTransfer( ) const;
+    };
+
+    /**
+     * Currently command buffer "in pool" can be submitted to only one queue at a time (no concurrent executions).
+     * Each command pool has only one associated buffer (so external no synchoronization needed).
+     * Ensure to release the allocated buffer for reusing.
+     **/
+    struct CommandBufferInPool {
+        VkCommandBuffer  pCmdBuffer = VK_NULL_HANDLE; /* Handle */
+        VkCommandPool    pCmdPool   = VK_NULL_HANDLE; /* Command pool handle (associated with the Handle) */
+        VkFence          pFence     = VK_NULL_HANDLE; /* Last queue fence */
+        std::atomic_bool bInUse     = false;          /* Indicates it is used by other thread */
+
+        CommandBufferInPool( );
+        CommandBufferInPool( const CommandBufferInPool& other );
+    };
+
+    struct AcquiredCommandBuffer {
+        VkCommandBuffer pCmdBuffer    = VK_NULL_HANDLE;
+        VkCommandPool   pCmdPool      = VK_NULL_HANDLE;
+        uint32_t        QueueFamilyId = 0;
+        uint32_t        CmdBufferId   = 0;
+    };
+
+    class CommandBufferFamilyPool : public QueueFamilyBased {
+        friend class CommandBufferPool;
+
+        VkDevice                           pDevice         = VK_NULL_HANDLE;
+        VkPhysicalDevice                   pPhysicalDevice = VK_NULL_HANDLE;
+        std::vector< CommandBufferInPool > CmdBuffers;
+
+        CommandBufferFamilyPool( VkDevice                       pInDevice,
+                                 VkPhysicalDevice               pInPhysicalDevice,
+                                 uint32_t                       InQueueFamilyIndex,
+                                 VkQueueFamilyProperties const& InQueueFamilyProps );
+
+    public:
+        CommandBufferFamilyPool( CommandBufferFamilyPool&& other ) = default;
+        ~CommandBufferFamilyPool( );
+
+        AcquiredCommandBuffer Acquire( bool bIgnoreFenceStatus );
+        bool                  Release( const AcquiredCommandBuffer& acquireCmdBuffer );
+    };
+
+    class CommandBufferPool {
+        VkDevice                               pDevice         = VK_NULL_HANDLE;
+        VkPhysicalDevice                       pPhysicalDevice = VK_NULL_HANDLE;
+        uint32_t                               QueueFamilyId   = 0;
+        std::vector< CommandBufferFamilyPool > Pools;
+
+        friend class GraphicsDevice;
+        CommandBufferPool( VkDevice                       pInDevice,
+                           VkPhysicalDevice               pInPhysicalDevice,
+                           const VkQueueFamilyProperties* pQueuePropsIt,
+                           const VkQueueFamilyProperties* pQueuePropsEnd );
+
+        ~CommandBufferPool( );
+
+    public:
+        uint32_t                       GetPoolCount( ) const;
+        CommandBufferFamilyPool*       GetPool( uint32_t queueFamilyIndex );
+        const CommandBufferFamilyPool* GetPool( uint32_t queueFamilyIndex ) const;
+        CommandBufferFamilyPool*       GetPool( VkQueueFlags eRequiredQueueFlags, bool bExactMatchByFlags );
+        const CommandBufferFamilyPool* GetPool( VkQueueFlags eRequiredQueueFlags, bool bExactMatchByFlags ) const;
+
+        AcquiredCommandBuffer Acquire( bool         bIgnoreFenceStatus,
+                                       VkQueueFlags eRequiredQueueFlags = sQueueAllBits,
+                                       bool         bExactMatchByFlags  = false );
+        AcquiredCommandBuffer Acquire( bool bIgnoreFenceStatus, uint32_t queueFamilyIndex );
+
+        void                  Release( const AcquiredCommandBuffer& acquireCmdBuffer );
+    };
+
     class QueuePool;
     class QueueFamilyPool;
 
@@ -22,17 +113,15 @@ namespace apemodevk {
     struct AcquiredQueue {
         VkQueue  pQueue        = VK_NULL_HANDLE; /* Free to use queue. */
         VkFence  pFence        = VK_NULL_HANDLE; /* Acquire() can optionally ignore fence status, so the user can await. */
-        uint32_t QueueFamilyId = 0; /* Queue family index */
-        uint32_t QueueId       = 0; /* Queue index in family pool */
+        uint32_t QueueFamilyId = 0;              /* Queue family index */
+        uint32_t QueueId       = 0;              /* Queue index in family pool */
     };
 
-    class QueueFamilyPool {
+    class QueueFamilyPool : public QueueFamilyBased {
         friend class QueuePool;
 
         VkDevice                   pDevice         = VK_NULL_HANDLE;
         VkPhysicalDevice           pPhysicalDevice = VK_NULL_HANDLE;
-        uint32_t                   QueueFamilyId   = 0;
-        VkQueueFamilyProperties    QueueFamilyProps;
         std::vector< QueueInPool > Queues;
 
         QueueFamilyPool( VkDevice                       pInDevice,
@@ -46,12 +135,7 @@ namespace apemodevk {
         ~QueueFamilyPool( );
 
         const VkQueueFamilyProperties& GetQueueFamilyProps( ) const;
-
         bool SupportsPresenting( VkSurfaceKHR pSurface ) const;
-        bool SupportsGraphics( ) const;
-        bool SupportsCompute( ) const;
-        bool SupportsSparseBinding( ) const;
-        bool SupportsTransfer( ) const;
 
         /**
          * @param bIgnoreFenceStatus If any command buffer submitted to this queue is in the executable state,
@@ -87,11 +171,12 @@ namespace apemodevk {
     public:
         ~QueuePool( );
 
-        QueueFamilyPool*       GetPool( uint32_t poolIndex );
-        const QueueFamilyPool* GetPool( uint32_t poolIndex ) const;
-        uint32_t               GetPoolCount( ) const;
 
-        static const VkQueueFlags sQueueAllBits = VK_QUEUE_COMPUTE_BIT | VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_TRANSFER_BIT;
+        uint32_t               GetPoolCount( ) const;
+        QueueFamilyPool*       GetPool( uint32_t queueFamilyIndex );
+        const QueueFamilyPool* GetPool( uint32_t queueFamilyIndex ) const;
+        QueueFamilyPool*       GetPool( VkQueueFlags eRequiredQueueFlags, bool bExactMatchByFlags );
+        const QueueFamilyPool* GetPool( VkQueueFlags eRequiredQueueFlags, bool bExactMatchByFlags ) const;
 
         /**
          * @param bIgnoreFenceStatus If any command buffer submitted to this queue is in the executable state,
@@ -103,9 +188,10 @@ namespace apemodevk {
          * @note Release for reusing, @see Release().
          */
         AcquiredQueue Acquire( bool         bIgnoreFenceStatus,
-                               VkQueueFlags RequiredQueueFlags = sQueueAllBits,
+                               VkQueueFlags eRequiredQueueFlags = sQueueAllBits,
                                bool         bExactMatchByFlags = false );
-        
+        AcquiredQueue Acquire( bool bIgnoreFenceStatus, uint32_t queueFamilyIndex );
+
         /**
          * Allows the queue to be reused.
          */

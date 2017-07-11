@@ -14,7 +14,7 @@ namespace apemode {
     public:
         /* Base structure that will contain common for all platforms scene update params */
         struct SceneUpdateParametersBase {
-            apemodefb::SceneFb * pSceneSrc = nullptr;
+            const apemodefb::SceneFb* pSceneSrc = nullptr;
         };
 
         /* Base update function that will perform common for all platforms scene update actions */

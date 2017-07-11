@@ -11,6 +11,10 @@ namespace apemode {
 
     /**
      * Contains handle to window and graphics context.
+     * For Vulkan it contains all the core things like VkInstance, VkDevice, VkSurfaceKHR, VkSwapchainKHR
+     * since it does not make much sense to move them outside this class.
+     * It tries also to handle resizing in OnFrameMove, but there is an error with image state.
+     * The barriors in case of resizing must be managed explicitely.
      **/
     class AppSurfaceSdlVk : public AppSurfaceSdlBase {
     public:

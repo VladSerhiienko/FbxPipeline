@@ -150,6 +150,11 @@ bool apemodevk::GraphicsDevice::RecreateResourcesFor( VkPhysicalDevice InAdapter
                                              QueuePriorities.data( ),
                                              QueuePriorities.data( ) + QueuePriorities.size( ) ) );
 
+            pCmdBufferPool.reset( new CommandBufferPool( hLogicalDevice,
+                                                         pPhysicalDevice,
+                                                         QueueProps.data( ),
+                                                         QueueProps.data( ) + QueueProps.size( ) ) );
+
             return bOk;
         }
     }
@@ -208,6 +213,15 @@ const apemodevk::QueuePool* apemodevk::GraphicsDevice::GetQueuePool( ) const {
     return pQueuePool.get( );
 }
 
-apemodevk::GraphicsManager& apemodevk::GraphicsDevice::GetGraphicsEcosystem( ) {
+apemodevk::CommandBufferPool * apemodevk::GraphicsDevice::GetCommandBufferPool()
+{
+    return pCmdBufferPool.get( );
+}
+
+const apemodevk::CommandBufferPool* apemodevk::GraphicsDevice::GetCommandBufferPool( ) const {
+    return pCmdBufferPool.get( );
+}
+
+apemodevk::GraphicsManager& apemodevk::GraphicsDevice::GetGraphicsManager( ) {
     return *pGraphicsEcosystem;
 }

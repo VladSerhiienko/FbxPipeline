@@ -7,8 +7,7 @@ namespace apemode {
     class SceneRendererVk : public SceneRendererBase {
     public:
         struct SceneUpdateParametersVk : SceneUpdateParametersBase {
-            VkDevice         pDevice         = VK_NULL_HANDLE;
-            VkPhysicalDevice pPhysicalDevice = VK_NULL_HANDLE;
+            apemodevk::GraphicsDevice* pNode = nullptr;
         };
 
         void UpdateScene( Scene* pScene, const SceneUpdateParametersBase* pParams ) override;

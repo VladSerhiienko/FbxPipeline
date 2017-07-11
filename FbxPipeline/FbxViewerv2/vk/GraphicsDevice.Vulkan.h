@@ -8,8 +8,9 @@ namespace apemodevk {
     class GraphicsManager;
 
     class QueuePool;
+    class CommandBufferPool;
 
-    class GraphicsDevice : public apemodevk::ScalableAllocPolicy, public apemodevk::NoCopyAssignPolicy {
+    class GraphicsDevice : public apemodevk::NoCopyAssignPolicy {
     public:
         friend Swapchain;
         friend GraphicsManager;
@@ -32,10 +33,12 @@ namespace apemodevk {
         bool IsValid( ) const;
         bool Await( );
 
-        QueuePool *      GetQueuePool( );
-        const QueuePool *GetQueuePool( ) const;
+        QueuePool *              GetQueuePool( );
+        const QueuePool *        GetQueuePool( ) const;
+        CommandBufferPool *      GetCmdBufferPool( );
+        const CommandBufferPool *GetCmdBufferPool( ) const;
 
-        GraphicsManager &      GetGraphicsEcosystem( );
+        GraphicsManager &      GetGraphicsManager( );
         NativeLayerWrapper &   GetUnnamedLayer( );
 
         bool ScanDeviceQueues( VkQueueFamilyPropertiesVector &QueueProps,
@@ -60,5 +63,6 @@ namespace apemodevk {
         std::vector< const char * >          PresentLayers;
         std::vector< VkExtensionProperties > DeviceExtensionProps;
         std::unique_ptr< QueuePool >         pQueuePool;
+        std::unique_ptr< CommandBufferPool > pCmdBufferPool;
     };
 }

@@ -500,7 +500,6 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         if ( width != appContent->width || height != appContent->height ) {
             CheckedCall( vkDeviceWaitIdle( device ) );
             OnResized( );
-
         }
 
         VkFramebuffer framebufferNk = appContent->hNkFramebuffers[ appContent->FrameIndex ];

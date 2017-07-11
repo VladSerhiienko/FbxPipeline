@@ -95,30 +95,28 @@ apemode::AppSurfaceBase * apemode::AppBase::GetSurface()
     return pAppContent ? pAppContent->pSurface : nullptr;
 }
 
-void apemode::AppBase::OnFrameMove ()
-{
+void apemode::AppBase::OnFrameMove( ) {
     using namespace apemode;
 
-    assert (pAppContent && "Not initialized.");
+    assert( pAppContent && "Not initialized." );
 
-    auto & Surface      = *pAppContent->pSurface;
-    auto & Stopwatch    =  pAppContent->Stopwatch;
-    auto & InputState   =  pAppContent->InputState;
-    auto & InputManager =  pAppContent->InputManager;
+    auto& Surface      = *pAppContent->pSurface;
+    auto& Stopwatch    = pAppContent->Stopwatch;
+    auto& InputState   = pAppContent->InputState;
+    auto& InputManager = pAppContent->InputManager;
 
-    Stopwatch.Update ();
+    Stopwatch.Update( );
 
-    float const ElapsedSecs = static_cast<float> (Stopwatch.GetElapsedSeconds ());
+    float const ElapsedSecs = static_cast< float >( Stopwatch.GetElapsedSeconds( ) );
 
-    InputManager.Update (InputState, ElapsedSecs);
+    InputManager.Update( InputState, ElapsedSecs );
 
-    Surface.OnFrameMove ();
-    Update (ElapsedSecs, InputState);
-    Surface.OnFrameDone ();
+    Surface.OnFrameMove( );
+    Update( ElapsedSecs, InputState );
+    Surface.OnFrameDone( );
 }
 
-void apemode::AppBase::Update (float /*DeltaSecs*/, Input const & /*InputState*/)
-{
+void apemode::AppBase::Update( float /*DeltaSecs*/, Input const& /*InputState*/ ) {
 }
 
 bool apemode::AppBase::IsRunning ()
