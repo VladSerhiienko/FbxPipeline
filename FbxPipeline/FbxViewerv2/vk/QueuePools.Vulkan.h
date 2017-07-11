@@ -10,21 +10,29 @@ namespace apemodevk {
     class CommandBufferPool;
     class CommandBufferFamilyPool;
 
-    static const VkQueueFlags sQueueAllBits = VK_QUEUE_COMPUTE_BIT | VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_TRANSFER_BIT;
+    static const VkQueueFlags sQueueAllBits
+        = VK_QUEUE_COMPUTE_BIT
+        | VK_QUEUE_GRAPHICS_BIT
+        | VK_QUEUE_TRANSFER_BIT;
 
+    /* Basic properties for the objects that depend on queue family id */
     struct QueueFamilyBased {
+        /* Queue properties: */
+
         uint32_t                QueueFamilyId    = 0;
         VkQueueFamilyProperties QueueFamilyProps = {};
 
         QueueFamilyBased( ) = default;
-        QueueFamilyBased( uint32_t queueFamilyId, VkQueueFamilyProperties queueFamilyProps )
-            : QueueFamilyId( queueFamilyId ), QueueFamilyProps( queueFamilyProps ) {
-        }
+        QueueFamilyBased( uint32_t QueueFamilyId, VkQueueFamilyProperties QueueFamilyProps );
 
-        bool SupportsGraphics( ) const;
-        bool SupportsCompute( ) const;
+        /* Queue features: */
+
         bool SupportsSparseBinding( ) const;
         bool SupportsTransfer( ) const;
+        bool SupportsGraphics( ) const;
+        bool SupportsCompute( ) const;
+
+        /* NOTE: Surface support can be checked with QueueFamilyPool. */
     };
 
     /**
@@ -90,12 +98,22 @@ namespace apemodevk {
         CommandBufferFamilyPool*       GetPool( VkQueueFlags eRequiredQueueFlags, bool bExactMatchByFlags );
         const CommandBufferFamilyPool* GetPool( VkQueueFlags eRequiredQueueFlags, bool bExactMatchByFlags ) const;
 
-        AcquiredCommandBuffer Acquire( bool         bIgnoreFenceStatus,
-                                       VkQueueFlags eRequiredQueueFlags = sQueueAllBits,
-                                       bool         bExactMatchByFlags  = false );
+        /**
+         * @param bIgnoreFenceStatus If any command buffer submitted to this queue is in the executable state,
+         *                           it is moved to the pending state. Note, that VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT
+         *                           command buffers will be invalidated (unless explicit vkWaitForFences).
+         * @param eRequiredQueueFlags Flags that must be enabled (try to pick only the needed bits).
+         * @param bExactMatchByFlags Only the flags in eRequiredQueueFlags must be present (for copy queues is important).
+         * @return Unused command buffer, or null if none was found.
+         * @note Release for reusing, @see Release().
+         **/
+        AcquiredCommandBuffer Acquire( bool bIgnoreFenceStatus, VkQueueFlags eRequiredQueueFlags, bool bExactMatchByFlags );
         AcquiredCommandBuffer Acquire( bool bIgnoreFenceStatus, uint32_t queueFamilyIndex );
 
-        void                  Release( const AcquiredCommandBuffer& acquireCmdBuffer );
+        /**
+         * Allows the command buffer to be reused.
+         **/
+        void Release( const AcquiredCommandBuffer& acquireCmdBuffer );
     };
 
     class QueuePool;
@@ -187,14 +205,12 @@ namespace apemodevk {
          * @return Unused queue, or null if none was found.
          * @note Release for reusing, @see Release().
          */
-        AcquiredQueue Acquire( bool         bIgnoreFenceStatus,
-                               VkQueueFlags eRequiredQueueFlags = sQueueAllBits,
-                               bool         bExactMatchByFlags = false );
+        AcquiredQueue Acquire( bool bIgnoreFenceStatus, VkQueueFlags eRequiredQueueFlags, bool bExactMatchByFlags );
         AcquiredQueue Acquire( bool bIgnoreFenceStatus, uint32_t queueFamilyIndex );
 
         /**
          * Allows the queue to be reused.
-         */
+         **/
         void Release( const AcquiredQueue& acquiredQueue );
     };
 

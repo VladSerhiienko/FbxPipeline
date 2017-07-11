@@ -27,18 +27,20 @@ void apemode::SceneRendererVk::UpdateScene( Scene* pScene, const SceneUpdatePara
     auto deviceAsset   = (apemodevk::SceneDeviceAssetVk*) pScene->deviceAsset;
 
     if ( ( nullptr == pScene->deviceAsset && nullptr != pParams->pSceneSrc ) /* First call. */ ||
-         ( nullptr != deviceAsset && pParams->pNode != deviceAsset->pNode ) /* Device lost / changed. */ ) {
+         ( nullptr != deviceAsset && pParams->pNode != deviceAsset->pNode ) /* Device changed. */ ) {
         deviceChanged |= true;
 
-        delete deviceAsset;
-        deviceAsset = new apemodevk::SceneDeviceAssetVk();
+        delete deviceAsset; /* Safe for nullptr */
+        deviceAsset        = new apemodevk::SceneDeviceAssetVk( );
         deviceAsset->pNode = pParams->pNode;
 
-        auto pQueuePool    = pParams->pNode->GetQueuePool( );
+        /* Get queue from pool (only copying) */
+        auto pQueuePool = pParams->pNode->GetQueuePool( );
         auto acquiredQueue = pQueuePool->Acquire( false, VK_QUEUE_TRANSFER_BIT, true );
 
-        auto pCmdBufferPool    = pParams->pNode->GetCommandBufferPool( );
-        auto acquiredCmdBuffer = pCmdBufferPool->Acquire( false, VK_QUEUE_TRANSFER_BIT, true );
+        /* Get command buffer from pool (only copying) */
+        auto pCmdBufferPool = pParams->pNode->GetCommandBufferPool( );
+        auto acquiredCmdBuffer = pCmdBufferPool->Acquire( false, acquiredQueue.QueueFamilyId );
 
         auto meshesFb = pParamsBase->pSceneSrc->meshes( );
         for ( int32_t i = 0; i < pScene->meshes.size( ); ++i ) {

@@ -143,6 +143,15 @@ bool apemodevk::QueueFamilyPool::SupportsPresenting( VkSurfaceKHR pSurface ) con
     return false;
 }
 
+apemodevk::QueueFamilyBased::QueueFamilyBased( uint32_t queueFamilyId, VkQueueFamilyProperties queueFamilyProps )
+    : QueueFamilyId( queueFamilyId ), QueueFamilyProps( queueFamilyProps ) {
+    /* From the docs: VK_QUEUE_TRANSFER_BIT is enabled if either GRAPHICS or COMPUTE or both are enabled. */
+    /* Since we search queues / command buffers according to those flags, we set them here. */
+    if ( ( QueueFamilyProps.queueFlags & VK_QUEUE_GRAPHICS_BIT ) == VK_QUEUE_GRAPHICS_BIT ||
+         ( QueueFamilyProps.queueFlags & VK_QUEUE_COMPUTE_BIT ) == VK_QUEUE_COMPUTE_BIT )
+        QueueFamilyProps.queueFlags |= VK_QUEUE_TRANSFER_BIT;
+}
+
 bool apemodevk::QueueFamilyBased::SupportsGraphics( ) const {
     return apemodevk::HasFlagEql( QueueFamilyProps.queueFlags, VK_QUEUE_GRAPHICS_BIT );
 }
