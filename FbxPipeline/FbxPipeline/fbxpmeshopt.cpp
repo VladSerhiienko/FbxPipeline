@@ -63,32 +63,32 @@ std::size_t get_num_vertices( VcacheMesh< uint16_t > const& m, uint32_t const& s
 }
 
 VcacheTriangle< uint16_t > get_triangle( VcacheMesh< uint16_t > const& m, uint32_t const& sm, uint16_t& index ) {
-    uint16_t* subsetIndices = reinterpret_cast< uint16_t* >( m.m->subsetIndices.data( ) );
-    const uint32_t i1 = subsetIndices[ m.m->subsets[ sm ].base_index( ) + index * 3 + 0 ];
-    const uint32_t i2 = subsetIndices[ m.m->subsets[ sm ].base_index( ) + index * 3 + 1 ];
-    const uint32_t i3 = subsetIndices[ m.m->subsets[ sm ].base_index( ) + index * 3 + 2 ];
+    uint16_t* indices = reinterpret_cast< uint16_t* >( m.m->indices.data( ) );
+    const uint32_t i1 = indices[ m.m->subsets[ sm ].base_index( ) + index * 3 + 0 ];
+    const uint32_t i2 = indices[ m.m->subsets[ sm ].base_index( ) + index * 3 + 1 ];
+    const uint32_t i3 = indices[ m.m->subsets[ sm ].base_index( ) + index * 3 + 2 ];
     return VcacheTriangle< uint16_t >( i1, i2, i3 );
 }
 
 Vertex get_vertex( VcacheMesh< uint16_t > const& m, uint32_t const& sm, uint16_t& index ) {
-    // uint16_t* subsetIndices = reinterpret_cast< uint16_t* >( m.m->subsetIndices.data( ) );
-    // const uint16_t i = subsetIndices[ index ];
-    // const uint16_t i = subsetIndices[ m.m->subsets[ sm ].base_index( ) + index ];
+    // uint16_t* indices = reinterpret_cast< uint16_t* >( m.m->indices.data( ) );
+    // const uint16_t i = indices[ index ];
+    // const uint16_t i = indices[ m.m->subsets[ sm ].base_index( ) + index ];
     // return *(Vertex*) ( m.m->vertices.data( ) + i * sizeof( Vertex ) );
     return *(Vertex*) ( m.m->vertices.data( ) + index * sizeof( Vertex ) );
 }
 
 void set_triangle( VcacheMesh< uint16_t >& m, uint32_t const& sm, uint16_t& index, VcacheTriangle< uint16_t > const& new_triangle ) {
-    uint16_t* subsetIndices = reinterpret_cast< uint16_t* >( m.m->subsetIndices.data( ) );
-    subsetIndices[ m.m->subsets[ sm ].base_index( ) + index * 3 + 0 ] = new_triangle[ 0 ];
-    subsetIndices[ m.m->subsets[ sm ].base_index( ) + index * 3 + 1 ] = new_triangle[ 1 ];
-    subsetIndices[ m.m->subsets[ sm ].base_index( ) + index * 3 + 2 ] = new_triangle[ 2 ];
+    uint16_t* indices = reinterpret_cast< uint16_t* >( m.m->indices.data( ) );
+    indices[ m.m->subsets[ sm ].base_index( ) + index * 3 + 0 ] = new_triangle[ 0 ];
+    indices[ m.m->subsets[ sm ].base_index( ) + index * 3 + 1 ] = new_triangle[ 1 ];
+    indices[ m.m->subsets[ sm ].base_index( ) + index * 3 + 2 ] = new_triangle[ 2 ];
 }
 
 void set_vertex( VcacheMesh< uint16_t >& m, uint32_t const& sm, uint16_t& index, Vertex const& new_vertex ) {
-    // uint16_t* subsetIndices = reinterpret_cast< uint16_t* >( m.m->subsetIndices.data( ) );
-    // const uint16_t i = subsetIndices[ index ];
-    // const uint16_t i = subsetIndices[ m.m->subsets[ sm ].base_index( ) + index ];
+    // uint16_t* indices = reinterpret_cast< uint16_t* >( m.m->indices.data( ) );
+    // const uint16_t i = indices[ index ];
+    // const uint16_t i = indices[ m.m->subsets[ sm ].base_index( ) + index ];
     // *(Vertex*) ( m.m->vertices.data( ) + i * sizeof( Vertex ) ) = new_vertex;
     *(Vertex*) ( m.m->vertices.data( ) + index * sizeof( Vertex ) ) = new_vertex;
 }
@@ -107,32 +107,32 @@ std::size_t get_num_vertices( VcacheMesh< uint32_t > const& m, uint32_t const& s
 }
 
 VcacheTriangle< uint32_t > get_triangle( VcacheMesh< uint32_t > const& m, uint32_t const& sm, uint32_t& index ) {
-    uint32_t* subsetIndices = reinterpret_cast< uint32_t* >( m.m->subsetIndices.data( ) );
-    const uint32_t i1 = subsetIndices[ m.m->subsets[ sm ].base_index( ) + index * 3 + 0 ];
-    const uint32_t i2 = subsetIndices[ m.m->subsets[ sm ].base_index( ) + index * 3 + 1 ];
-    const uint32_t i3 = subsetIndices[ m.m->subsets[ sm ].base_index( ) + index * 3 + 2 ];
+    uint32_t* indices = reinterpret_cast< uint32_t* >( m.m->indices.data( ) );
+    const uint32_t i1 = indices[ m.m->subsets[ sm ].base_index( ) + index * 3 + 0 ];
+    const uint32_t i2 = indices[ m.m->subsets[ sm ].base_index( ) + index * 3 + 1 ];
+    const uint32_t i3 = indices[ m.m->subsets[ sm ].base_index( ) + index * 3 + 2 ];
     return VcacheTriangle< uint32_t >( i1, i2, i3 );
 }
 
 Vertex get_vertex( VcacheMesh< uint32_t > const& m, uint32_t const& sm, uint32_t& index ) {
-    // uint32_t* subsetIndices = reinterpret_cast< uint32_t* >( m.m->subsetIndices.data( ) );
-    // const uint32_t i = subsetIndices[ index ];
-    // const uint32_t i = subsetIndices[ m.m->subsets[ sm ].base_index( ) + index ];
+    // uint32_t* indices = reinterpret_cast< uint32_t* >( m.m->indices.data( ) );
+    // const uint32_t i = indices[ index ];
+    // const uint32_t i = indices[ m.m->subsets[ sm ].base_index( ) + index ];
     // return *(Vertex*) ( m.m->vertices.data( ) + i * sizeof( Vertex ) );
     return *(Vertex*) ( m.m->vertices.data( ) + index * sizeof( Vertex ) );
 }
 
 void set_triangle( VcacheMesh< uint32_t >& m, uint32_t const& sm, uint32_t& index, VcacheTriangle< uint32_t > const& new_triangle ) {
-    uint32_t* subsetIndices = reinterpret_cast< uint32_t* >( m.m->subsetIndices.data( ) );
-    subsetIndices[ m.m->subsets[ sm ].base_index( ) + index * 3 + 0 ] = new_triangle[ 0 ];
-    subsetIndices[ m.m->subsets[ sm ].base_index( ) + index * 3 + 1 ] = new_triangle[ 1 ];
-    subsetIndices[ m.m->subsets[ sm ].base_index( ) + index * 3 + 2 ] = new_triangle[ 2 ];
+    uint32_t* indices = reinterpret_cast< uint32_t* >( m.m->indices.data( ) );
+    indices[ m.m->subsets[ sm ].base_index( ) + index * 3 + 0 ] = new_triangle[ 0 ];
+    indices[ m.m->subsets[ sm ].base_index( ) + index * 3 + 1 ] = new_triangle[ 1 ];
+    indices[ m.m->subsets[ sm ].base_index( ) + index * 3 + 2 ] = new_triangle[ 2 ];
 }
 
 void set_vertex( VcacheMesh< uint32_t >& m, uint32_t const& sm, uint32_t& index, Vertex const& new_vertex ) {
-    // uint32_t* subsetIndices = reinterpret_cast< uint32_t* >( m.m->subsetIndices.data( ) );
-    // const uint32_t i = m.m->subsetIndices[ index ];
-    // const uint32_t i = m.m->subsetIndices[ m.m->subsets[ sm ].base_index( ) + index ];
+    // uint32_t* indices = reinterpret_cast< uint32_t* >( m.m->indices.data( ) );
+    // const uint32_t i = m.m->indices[ index ];
+    // const uint32_t i = m.m->indices[ m.m->subsets[ sm ].base_index( ) + index ];
     // *(Vertex*) ( m.m->vertices.data( ) + i * sizeof( Vertex ) ) = new_vertex;
     *(Vertex*) ( m.m->vertices.data( ) + index * sizeof( Vertex ) ) = new_vertex;
 }
@@ -158,8 +158,8 @@ void GenerateSubset( apemode::Mesh& m, uint32_t& vertexCount, uint32_t vertexStr
     m.vertices.swap( vertexBuffer );
     vertexCount = vc;
 
-    m.subsetIndices.resize( sizeof( TIndex ) * vertexCount );
-    auto indices = reinterpret_cast< TIndex* >( m.subsetIndices.data( ) );
+    m.indices.resize( sizeof( TIndex ) * vertexCount );
+    auto indices = reinterpret_cast< TIndex* >( m.indices.data( ) );
     for ( uint32_t i = 0; i < vc; ++i ) {
         indices[ i ] = (TIndex) indexBuffer[ i ];
     }
@@ -187,18 +187,18 @@ void OptimizeSubset(apemode::Mesh& m, const Vertex * vertices, uint32_t& vertexC
 
     std::vector< uint32_t > clusters;
     optimizePostTransform( reinterpret_cast< TIndex* >( indexBuffer.data( ) ),
-                           reinterpret_cast< TIndex* >( m.subsetIndices.data( ) ) + m.subsets[ ss ].base_index( ),
+                           reinterpret_cast< TIndex* >( m.indices.data( ) ) + m.subsets[ ss ].base_index( ),
                            m.subsets[ ss ].index_count( ),
                            vertexCount,
                            kCacheSize,
                            &clusters );
 
-    memcpy( reinterpret_cast< TIndex* >( m.subsetIndices.data( ) ) + m.subsets[ ss ].base_index( ),
+    memcpy( reinterpret_cast< TIndex* >( m.indices.data( ) ) + m.subsets[ ss ].base_index( ),
             indexBuffer.data( ),
             m.subsets[ ss ].index_count( ) * sizeof( TIndex ) );
 
     optimizeOverdraw( reinterpret_cast< TIndex* >( indexBuffer.data( ) ),
-                      reinterpret_cast< TIndex* >( m.subsetIndices.data( ) ) + m.subsets[ ss ].base_index( ),
+                      reinterpret_cast< TIndex* >( m.indices.data( ) ) + m.subsets[ ss ].base_index( ),
                       m.subsets[ ss ].index_count( ),
                       vertices,
                       vertexStride,
@@ -207,14 +207,14 @@ void OptimizeSubset(apemode::Mesh& m, const Vertex * vertices, uint32_t& vertexC
                       kCacheSize,
                       1.05f );
 
-    memcpy( reinterpret_cast< TIndex* >( m.subsetIndices.data( ) ) + m.subsets[ ss ].base_index( ),
+    memcpy( reinterpret_cast< TIndex* >( m.indices.data( ) ) + m.subsets[ ss ].base_index( ),
             indexBuffer.data( ),
             m.subsets[ ss ].index_count( ) * sizeof( TIndex ) );
 
 #else
 
     optimizePostTransform( reinterpret_cast< TIndex* >( indexBuffer.data( ) ),
-                           reinterpret_cast< TIndex* >( m.subsetIndices.data( ) ) + m.subsets[ ss ].base_index( ),
+                           reinterpret_cast< TIndex* >( m.indices.data( ) ) + m.subsets[ ss ].base_index( ),
                            m.subsets[ ss ].index_count( ),
                            vertexCount,
                            kCacheSize );

@@ -182,7 +182,7 @@ bool apemodevk::Surface::Recreate( VkPhysicalDevice pInPhysicalDevice,
             return false;
         }
 
-        const bool bSurfaceSupportsIdentity = apemodevk::HasFlagEql( SurfaceCaps.supportedTransforms, VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR );
+        const bool bSurfaceSupportsIdentity = apemodevk::HasFlagEq( SurfaceCaps.supportedTransforms, VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR );
         eSurfaceTransform = bSurfaceSupportsIdentity ? VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR : SurfaceCaps.currentTransform;
 
         return true;

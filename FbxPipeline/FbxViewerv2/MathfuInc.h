@@ -242,4 +242,8 @@ namespace apemodem {
     inline float CalcHeading( mathfu::vec2 v ) {
         return Atan2( v.x, v.y );
     }
+
+    inline uint32_t AlignedOffset( uint32_t offset, uint32_t alignment ) {
+        return alignment * ( offset / alignment + ( uint32_t ) !!( offset % alignment ) );
+    }
 }

@@ -120,6 +120,9 @@ namespace apemode {
         // Scene components
         //
 
+        std::string sourceData;
+        const apemodefb::SceneFb *sourceScene;
+
         std::vector< SceneNode >          nodes;
         std::vector< SceneNodeTransform > transforms;
         std::vector< SceneMesh >          meshes;
@@ -206,10 +209,10 @@ namespace apemode {
     };
 
     inline Scene * LoadSceneFromFile(const char * filename) {
-        std::string fileData;
-        if ( flatbuffers::LoadFile( filename, true, &fileData ) ) {
-            if ( auto sceneFb = apemodefb::GetSceneFb( fileData.c_str( ) ) ) {
-                std::unique_ptr< Scene > scene( new Scene( ) );
+        std::unique_ptr< Scene > scene( new Scene( ) );
+        if ( flatbuffers::LoadFile( filename, true, &scene->sourceData ) ) {
+            if ( scene->sourceScene = apemodefb::GetSceneFb( scene->sourceData.c_str( ) ) ) {
+
 
                 //
                 // Since the format is not final, I do not rely much on a
@@ -217,7 +220,7 @@ namespace apemode {
                 // the viewer stable to scene generated header changes.
                 //
 
-                if ( auto nodesFb = sceneFb->nodes( ) ) {
+                if ( auto nodesFb = scene->sourceScene->nodes( ) ) {
                     scene->nodes.resize( nodesFb->size( ) );
                     scene->transforms.resize( nodesFb->size( ) );
 
@@ -258,7 +261,7 @@ namespace apemode {
                         }
 
                         auto& transform   = scene->transforms[ nodeFb->id( ) ];
-                        auto  transformFb = ( *sceneFb->transforms( ) )[ nodeFb->id( ) ];
+                        auto  transformFb = ( *scene->sourceScene->transforms( ) )[ nodeFb->id( ) ];
 
                         transform.translation.x          = transformFb->translation( ).x( );
                         transform.translation.y          = transformFb->translation( ).y( );
@@ -303,7 +306,7 @@ namespace apemode {
                     scene->UpdateMatrices( );
                 }
 
-                if ( auto meshesFb = sceneFb->meshes( ) ) {
+                if ( auto meshesFb = scene->sourceScene->meshes( ) ) {
                     //PackedVertex::InitializeOnce( );
                     scene->meshes.reserve( meshesFb->size( ) );
 
@@ -350,7 +353,7 @@ namespace apemode {
                     }
                 }
 
-                if (auto materialsFb = sceneFb->materials()) {
+                if (auto materialsFb = scene->sourceScene->materials()) {
                     scene->materials.reserve( materialsFb->size( ) );
 
                     for ( auto materialFb : *materialsFb ) {

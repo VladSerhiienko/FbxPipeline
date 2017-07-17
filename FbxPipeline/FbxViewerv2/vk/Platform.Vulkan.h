@@ -302,7 +302,7 @@ namespace apemodevk {
     }
     /** Returns true, if exactly 'b' bits are present in 'a'. */
     template < typename U, typename V >
-    inline static bool HasFlagEql( _In_ U a, _In_ V b ) {
+    inline static bool HasFlagEq( _In_ U a, _In_ V b ) {
         return V( static_cast< V >( a ) & b ) == b;
     }
     /** Returns true, if some of 'b' bits are present in 'a'. */

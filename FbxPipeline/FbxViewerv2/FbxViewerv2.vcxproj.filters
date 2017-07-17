@@ -179,6 +179,9 @@
     <ClInclude Include="vk\QueuePools.Vulkan.h">
       <Filter>Sources\Graphics\[Vulkan]</Filter>
     </ClInclude>
+    <ClInclude Include="vk\BufferPools.Vulkan.h">
+      <Filter>Sources\Graphics\[Vulkan]</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="fbxvpch.cpp">
@@ -248,6 +251,9 @@
       <Filter>Sources\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="vk\QueuePools.Vulkan.cpp">
+      <Filter>Sources\Graphics\[Vulkan]</Filter>
+    </ClCompile>
+    <ClCompile Include="vk\BufferPools.Vulkan.cpp">
       <Filter>Sources\Graphics\[Vulkan]</Filter>
     </ClCompile>
   </ItemGroup>

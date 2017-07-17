@@ -48,6 +48,7 @@
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneRendererVk.h" />
     <ClInclude Include="Stopwatch.h" />
+    <ClInclude Include="vk\BufferPools.Vulkan.h" />
     <ClInclude Include="vk\CommandQueue.Vulkan.h" />
     <ClInclude Include="vk\DescriptorPool.Vulkan.h" />
     <ClInclude Include="vk\GraphicsDevice.Vulkan.h" />
@@ -80,6 +81,7 @@
     <ClCompile Include="NuklearSdlVk.cpp" />
     <ClCompile Include="SceneRendererVk.cpp" />
     <ClCompile Include="StopwatchSdl.cpp" />
+    <ClCompile Include="vk\BufferPools.Vulkan.cpp" />
     <ClCompile Include="vk\CommandQueue.Vulkan.cpp" />
     <ClCompile Include="vk\DescriptorPool.Vulkan.cpp" />
     <ClCompile Include="vk\GraphicsDevice.Vulkan.cpp" />

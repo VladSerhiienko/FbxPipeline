@@ -112,7 +112,7 @@ bool apemode::DebugRendererVk::RecreateResources( InitParametersVk* initParams )
     InitializeStruct( bindings );
 
 #if 1
-    bindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+    bindings[ 0 ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 #else
     bindings[ 0 ].descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 #endif
@@ -380,9 +380,13 @@ bool apemode::DebugRendererVk::RecreateResources( InitParametersVk* initParams )
     }
 
 #if 1
+
+    VkPhysicalDeviceProperties adapterProps;
+    vkGetPhysicalDeviceProperties( initParams->pPhysicalDevice, &adapterProps );
+
     for (uint32_t i = 0; i < initParams->FrameCount; ++i) {
-        BufferPools[i].Recreate(initParams->pDevice, initParams->pPhysicalDevice, initParams->pDescPool, nullptr, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, false);
-        DescSetPools[i].Recreate(initParams->pDevice, initParams->pDescPool, hDescSetLayout);
+        BufferPools[ i ].Recreate( initParams->pDevice, initParams->pPhysicalDevice, &adapterProps.limits, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, false );
+        DescSetPools[ i ].Recreate( initParams->pDevice, initParams->pDescPool, hDescSetLayout );
     }
 #else
     for ( uint32_t i = 0; i < initParams->FrameCount; ++i ) {

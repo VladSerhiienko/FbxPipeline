@@ -192,7 +192,7 @@ bool apemodevk::DescriptorSetUpdater::SetGraphicsNode (GraphicsDevice const & Gr
 bool apemodevk::DescriptorSetUpdater::WriteUniformBuffer (DescriptorSet const & DescSet,
                                                      VkBuffer              Buffer,
                                                      uint32_t              Offset,
-                                                     uint32_t              Range,
+                                                     uint32_t              TotalSize,
                                                      uint32_t              Binding,
                                                      uint32_t              Count)
 {
@@ -213,7 +213,7 @@ bool apemodevk::DescriptorSetUpdater::WriteUniformBuffer (DescriptorSet const & 
 
     BufferInfo.buffer = Buffer;
     BufferInfo.offset = Offset;
-    BufferInfo.range  = Range;
+    BufferInfo.range  = TotalSize;
 
     Write                 = TInfoStruct<VkWriteDescriptorSet> ();
     Write.descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;

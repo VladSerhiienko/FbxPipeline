@@ -1,123 +1,90 @@
 #pragma once
 
+#include <math.h>
+#include <mathfu/matrix.h>
+#include <mathfu/vector.h>
+#include <mathfu/glsl_mappings.h>
+
 #include <GraphicsDevice.Vulkan.h>
-#include <Resource.Vulkan.h>
-//#include <M128CacheAlignedBuffer.h>
+#include <DescriptorPool.Vulkan.h>
 
-#define _Core_BufferPool_UseIntermediateSystemBuffer 1
+namespace apemodevk {
 
-namespace apemodevk
-{
-    class CommandBuffer;
+    struct HostBufferPool {
+        struct Page {
+            TDispatchableHandle< VkBuffer >       hBuffer;
+            TDispatchableHandle< VkDeviceMemory > hMemory;
+            std::vector< VkMappedMemoryRange >    Ranges;
+            VkDevice                              pDevice              = VK_NULL_HANDLE;
+            uint8_t *                             pMapped              = nullptr;
+            uint32_t                              Alignment            = 0;
+            uint32_t                              TotalSize            = 0;
+            uint32_t                              CurrentOffsetIndex   = 0;
+            uint32_t                              TotalOffsetCount     = 0;
+            VkMemoryPropertyFlags                 eMemoryPropertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
 
-    enum BufferPoolType
-    {
-        kBufferPoolType_CPU = 0x00,
-        kBufferPoolType_GPU = 0x01,
-        kBufferPoolTypeCount = 2,
-    };
+            bool Recreate( VkDevice              pInLogicalDevice,
+                           VkPhysicalDevice      pInPhysicalDevice,
+                           uint32_t              alignment,
+                           uint32_t              bufferRange,
+                           VkBufferUsageFlags    bufferUsageFlags,
+                           VkMemoryPropertyFlags eMemoryPropertyFlags );
 
-    enum BufferPoolStandardPageSize : size_t
-    {
-        kBufferPoolStandardPageSize_Unknown = 0,
-        kBufferPoolStandardPageSize_CPU = 0x00010000,
-        kBufferPoolStandardPageSize_GPU = 0x00200000,
-        kBufferPoolStandardPageSize_Invalid = SIZE_MAX,
-    };
+            bool Reset( );
 
-    class BufferPool
-        : public apemodevk::ScalableAllocPolicy
-        , public apemodevk::NoCopyAssignPolicy
-    {
-    public:
-        struct Page;
-        struct Range;
+            /* NOTE: Called from pool. */
+            bool Flush( );
 
-    public:
-        struct Range : public apemodevk::ScalableAllocPolicy
-        {
-            Page *                              PageRef;
-            VkDeviceSize                        Offset;
-            void *                              Address;
-            TInfoStruct<VkDescriptorBufferInfo> DescriptorInfo;
+            /* NOTE: Does not handle space requirements (aborts in debug mode only). */
+            uint32_t Push( const void *pDataStructure, uint32_t ByteSize );
 
-            Range ()
-            {
+            /* NOTE: Does not handle space requirements (aborts in debug mode only). */
+            template < typename TDataStructure >
+            uint32_t TPush( const TDataStructure &dataStructure ) {
+                return Push( &dataStructure, sizeof( TDataStructure ) );
             }
         };
 
-    public:
-        struct Page : public apemodevk::ScalableAllocPolicy,
-                                                  public apemodevk::NoCopyAssignPolicy
-        {
-            friend BufferPool;
-
-            BufferPool *                      PoolRef;
-            BufferPoolType                    PoolType;
-            //std::mutex                         Lock;
-            TDispatchableHandle<VkDeviceMemory>          Memory;
-            TDispatchableHandle<VkBuffer>                BufferHandle;
-            TDispatchableHandle<VkBuffer>                BufferViewHandle;
-            //TbbAux::M128CacheAlignedBuffer    SupplyMemory;
-            TInfoStruct<VkMemoryRequirements> MemoryReqs;
-            TInfoStruct<VkMemoryAllocateInfo> MemoryAllocInfo;
-            bool                              bIsHostVisible;
-            bool                              bIsCacheCoherent;
-
-        public:
-            static Page *                MakeNew ();
-            static std::shared_ptr<Page> MakeNewShared ();
-            static std::unique_ptr<Page> MakeNewUnique ();
-
-        public:
-            Page ();
-            ~Page ();
+        struct SuballocResult {
+            VkDescriptorBufferInfo descBufferInfo;
+            uint32_t               dynamicOffset;
         };
 
-    public:
-        explicit BufferPool(BufferPoolType PoolType);
-        ~BufferPool();
+        VkDevice              pLogicalDevice       = VK_NULL_HANDLE;
+        VkPhysicalDevice      pPhysicalDevice      = VK_NULL_HANDLE;
+        VkBufferUsageFlags    eBufferUsageFlags    = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+        VkMemoryPropertyFlags eMemoryPropertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
+        uint32_t              MinAlignment         = 256;
+        uint32_t              MaxPageRange         = 65536; /* 256 * 256 */
+        std::vector< Page * > Pages;
 
-        bool RecreateResourcesFor (GraphicsDevice & GraphicsNode);
-        void OnResourcesEvicted (GraphicsDevice & GraphicsNode);
-        void OnCommandListReset (CommandBuffer & CmdBuffer);
-        void OnCommandListExecutePreview (CommandBuffer & CmdBuffer);
-        bool Suballocate (CommandBuffer & CmdBuffer, uint32_t Size, Range & OutRange);
-        Range Suballocate (CommandBuffer & CmdBuffer, uint32_t Size);
+        /**
+         * @param pInLogicalDevice Logical device.
+         * @param pInPhysicalDevice Physical device.
+         * @param pInDescPool Descriptor pool.
+         * @param pInLimits Device limits (null is ok).
+         * @param usageFlags Usually UNIFORM.
+         **/
+        void Recreate( VkDevice                      pInLogicalDevice,
+                       VkPhysicalDevice              pInPhysicalDevice,
+                       const VkPhysicalDeviceLimits *pInLimits,
+                       VkBufferUsageFlags            bufferUsageFlags,
+                       bool                          bInHostCoherent );
 
-    public:
-        bool           IsOutOfMemory () const;
-        BufferPoolType GetBufferPoolType () const;
+        Page *FindPage( uint32_t dataStructureSize );
 
-    private:
-        GraphicsDevice * pNode;
-        BufferPoolType   ePoolType;
+        /* On command buffer submission */
+        void Flush( );
 
-        std::vector<Page *> Pages;
-        std::vector<Page *> StalePages;
-        Page **                      ppCurrentPage;
-        Page **                      ppLastPage;
-        bool                         bIsOutOfMemory;
+        void Reset( );
+
+        void Destroy( );
+
+        SuballocResult Suballocate(const void *pDataStructure, uint32_t ByteSize);
+
+        template < typename TDataStructure >
+        SuballocResult TSuballocate( const TDataStructure &dataStructure ) {
+            return Suballocate( &dataStructure, sizeof( TDataStructure ) );
+        }
     };
-
-    template <typename TSrc> class TDynamicConstantBufferView
-        //: public TbbAux::TbbScalableAlignedAllocPolicy<TDynamicConstantBufferView<TSrc>>
-        //, public apemodevk::NoCopyAssignPolicy
-    {
-        TSrc              Src;
-        bool              bIsSrcStale;
-        BufferPool::Range ConstBufferRange;
-
-    public:
-        TDynamicConstantBufferView() : bIsSrcStale(false) { }
-        inline TSrc &GetSrc() { bIsSrcStale = true; return Src; }
-        inline TSrc const &GetSrc() const { return Src; }
-        inline TSrc const &GetSrcReadOnly() const { return Src; }
-
-    public:
-
-
-
-    };
-
 }

@@ -109,78 +109,142 @@ void CalculateFaceNormals( TVertex* vertices, size_t vertexCount ) {
  * @return True on success.
  **/
 template < typename TIndex >
-bool GetSubsets( FbxMesh*                           mesh,
-                 apemode::Mesh&                        m,
-                 std::vector< TIndex >&             indices,
-                 std::vector< apemodefb::SubsetFb >& subsets,
-                 std::vector< apemodefb::SubsetFb >& subsetPolies,
-                 std::vector< std::tuple< TIndex, TIndex > >& items ) {
+bool GetSubsets( FbxMesh* mesh, apemode::Mesh& m, std::vector< apemodefb::SubsetFb >& subsets ) {
     auto& s = apemode::Get( );
-
     s.console->info("Mesh \"{}\" has {} material(s) assigned.", mesh->GetNode( )->GetName( ), mesh->GetNode( )->GetMaterialCount( ) );
 
-    // No submeshes for a node that has only 1 or no materials.
-    if (mesh->GetNode()->GetMaterialCount() < 2) {
+    subsets.clear( );
+
+    /* No submeshes */
+    if ( mesh->GetNode( )->GetMaterialCount( ) == 0 ) {
         return false;
     }
 
-    //
-    // Print materials attached to a node.
-    //
+    /* Single submesh */
+    if ( mesh->GetNode( )->GetMaterialCount( ) == 1 ) {
+        subsets.emplace_back( 0, 0, mesh->GetPolygonCount( ) * 3 );
+        return true;
+    }
 
+    /* Print materials attached to a node. */
     for ( auto k = 0; k < mesh->GetNode( )->GetMaterialCount( ); ++k ) {
         s.console->info( "\t#{} - \"{}\".", k, mesh->GetNode( )->GetMaterial( k )->GetName( ) );
     }
 
-    items.clear( );
-    indices.clear( );
-    subsets.clear( );
-    subsetPolies.clear( );
+    // std::vector< TIndex > indices;
+    // indices.clear( );
+    // indices.reserve( mesh->GetPolygonCount( ) * 3 );
 
-    items.reserve( mesh->GetPolygonCount( ) );
-    indices.reserve( mesh->GetPolygonCount( ) * 3 );
+    std::vector< std::tuple< TIndex, TIndex > > items;
+    std::vector< apemodefb::SubsetFb > subsetPolies;
+
     subsets.reserve( mesh->GetNode( )->GetMaterialCount( ) );
     subsetPolies.reserve( mesh->GetNode( )->GetMaterialCount( ) );
 
-    // Go though all the material elements and map them.
+    /* Go though all the material elements and map them. */
     if ( const uint32_t mc = (uint32_t) mesh->GetElementMaterialCount( ) ) {
         s.console->info( "Mesh \"{}\" has {} material elements.", mesh->GetNode( )->GetName( ), mc );
 
         for ( uint32_t m = 0; m < mc; ++m ) {
             if ( const auto materialElement = mesh->GetElementMaterial( m ) ) {
-                // The only mapping mode for materials that makes sense is polygon mapping.
-                const auto materialMappingMode = materialElement->GetMappingMode( );
+                switch ( const auto mappingMode = materialElement->GetMappingMode( ) ) {
+                    /* Case when there is a single entry in the material element arrays. */
+                    case fbxsdk::FbxLayerElement::eAllSame: {
+                        switch ( const auto referenceMode = materialElement->GetReferenceMode( ) ) {
+                            case fbxsdk::FbxLayerElement::EReferenceMode::eDirect: {
+                                const auto directArray = materialElement->mDirectArray;
+                                /* There must be at least 1 material. */
+                                if ( directArray && directArray->GetCount( ) < 1 ) {
+                                    s.console->error( "Material element {} has no indices, skipped.", m );
+                                    DebugBreak( );
+                                    break;
+                                }
 
-                // Handle the case with splitted meshes.
-                if (materialMappingMode == FbxLayerElement::eAllSame)
-                    continue;
+                                for ( auto k = 0; k < mesh->GetNode( )->GetMaterialCount( ); ++k ) {
+                                    if ( mesh->GetNode( )->GetMaterial( k ) == directArray->GetAt( 0 ) ) {
+                                        /* Since the mapping mode is eAllSame, return here. */
+                                        subsets.emplace_back( k, 0, mesh->GetPolygonCount( ) * 3 );
+                                        return true;
+                                    }
+                                }
 
-                if ( materialMappingMode != FbxLayerElement::eByPolygon ) {
-                    s.console->error( "Material element #{} has {} mapping mode (not supported).", m, materialMappingMode );
-                    DebugBreak( );
-                    continue;
+                                /* All went wrong, try to get corrent mappings in the next material element. */
+                                s.console->error( "Failed to find mapping material in material element {}.", m );
+                            } break;
+
+                            case fbxsdk::FbxLayerElement::EReferenceMode::eIndex:
+                            case fbxsdk::FbxLayerElement::EReferenceMode::eIndexToDirect: {
+                                const auto indexArray = materialElement->mIndexArray;
+                                /* There must be at least 1 material index. */
+                                if ( indexArray && indexArray->GetCount( ) < 1 ) {
+                                    s.console->error( "Material element {} has no indices, skipped.", m );
+                                    DebugBreak( );
+                                    break;
+                                }
+
+                                /* Since the mapping mode is eAllSame, return here. */
+                                subsets.emplace_back( indexArray->GetAt( 0 ), 0, mesh->GetPolygonCount( ) * 3 );
+                                return true;
+                            } break;
+
+                            default:
+                                s.console->error( "Material element #{} has unsupported {} reference mode.", m, referenceMode );
+                                break;
+                        }
+                    } break;
+
+                    case fbxsdk::FbxLayerElement::eByPolygon: {
+                        switch ( const auto referenceMode = materialElement->GetReferenceMode( ) ) {
+                            case fbxsdk::FbxLayerElement::EReferenceMode::eDirect: {
+                                const auto directArray = materialElement->mDirectArray;
+                                if ( directArray && directArray->GetCount( ) < 1 ) {
+                                    s.console->error( "Material element {} has no indices, skipped.", m );
+                                    DebugBreak( );
+                                    break;
+                                }
+
+                                std::map< const FbxSurfaceMaterial*, TIndex > mappingDirectToIndex;
+                                for ( auto k = 0; k < mesh->GetNode( )->GetMaterialCount( ); ++k ) {
+                                    mappingDirectToIndex[ mesh->GetNode( )->GetMaterial( k ) ] = (TIndex) k;
+                                }
+
+                                items.reserve( mesh->GetPolygonCount( ) );
+                                for ( uint32_t i = 0; i < (uint32_t) mesh->GetPolygonCount( ); ++i )
+                                    items.emplace_back( mappingDirectToIndex[ directArray->GetAt( i ) ], i );
+
+                            } break;
+
+                            case fbxsdk::FbxLayerElement::EReferenceMode::eIndex:
+                            case fbxsdk::FbxLayerElement::EReferenceMode::eIndexToDirect: {
+                                const auto indexArray = materialElement->mIndexArray;
+                                if ( indexArray && indexArray->GetCount( ) < 2 ) {
+                                    s.console->error( "Material element {} has no indices, skipped.", m );
+                                    break;
+                                }
+
+                                items.reserve( mesh->GetPolygonCount( ) );
+                                for ( uint32_t i = 0; i < (uint32_t) mesh->GetPolygonCount( ); ++i )
+                                    items.emplace_back( (TIndex) indexArray->GetAt( i ), i );
+
+                            } break;
+
+                            default:
+                                s.console->error( "Material element #{} has unsupported {} reference mode.", m, referenceMode );
+                                break;
+                        }
+                    } break;
+
+                    default:
+                        s.console->error( "Material element #{} has {} unsupported mapping mode.", m, mappingMode );
+                        break;
                 }
-
-                // Mapping is done though the polygon indices.
-                // For each polygon we have assigned material index.
-                const auto& materialIndices = materialElement->GetIndexArray( );
-                if (materialIndices.GetCount() < 1) {
-                    s.console->error( "Material element {} has no indices, skipped.", m );
-                    DebugBreak( );
-                    continue;
-                }
-
-                const uint32_t pc = (uint32_t) mesh->GetPolygonCount( );
-                for ( uint32_t i = 0; i < pc; ++i )
-                    items.emplace_back( (TIndex) materialIndices.GetAt( i ), i );
             }
         }
     }
 
     if ( items.empty( ) ) {
         s.console->error( "Mesh \"{}\" has no correctly mapped materials (fallback to first one).", mesh->GetNode( )->GetName( ) );
-        // Splitted meshes per material case, do not issues a debug break.
-        // DebugBreak( );
+        // Splitted meshes per material case, do not issue a debug break.
         return false;
     }
 
@@ -259,6 +323,7 @@ bool GetSubsets( FbxMesh*                           mesh,
     extractSubsetsFromRange( mii, ii, i );
 
     TIndex subsetStartIndex = 0;
+    TIndex subsetIndexCount = 0;
     uint32_t materialIndex = (uint32_t) -1;
 
     if ( !subsetPolies.empty( ) ) {
@@ -267,7 +332,7 @@ bool GetSubsets( FbxMesh*                           mesh,
 
     for ( auto& sp : subsetPolies ) {
         if ( materialIndex != sp.material_id( ) ) {
-            const TIndex indexCount = (TIndex) indices.size( );
+            const TIndex indexCount = subsetIndexCount; // (TIndex)indices.size();
 
             if ( materialIndex != (uint32_t) -1 ) {
                 const auto subsetLength = indexCount - subsetStartIndex;
@@ -284,16 +349,17 @@ bool GetSubsets( FbxMesh*                           mesh,
             subsetStartIndex = indexCount;
         }
 
-        for ( uint32_t pp = 0; pp < sp.index_count( ); ++pp ) {
+        subsetIndexCount += sp.index_count( );
+        /*for ( uint32_t pp = 0; pp < sp.index_count( ); ++pp ) {
             const TIndex pii = ( TIndex )( sp.base_index( ) + pp );
             indices.push_back( pii * 3 + 0 );
             indices.push_back( pii * 3 + 1 );
             indices.push_back( pii * 3 + 2 );
-        }
+        }*/
     }
 
     if ( !subsetPolies.empty( ) ) {
-        const TIndex indexCount   = (TIndex) indices.size( );
+        const TIndex indexCount = subsetIndexCount; // (TIndex)indices.size();
         const auto subsetLength = indexCount - subsetStartIndex;
         subsets.emplace_back( materialIndex, subsetStartIndex, subsetLength );
 
@@ -304,8 +370,13 @@ bool GetSubsets( FbxMesh*                           mesh,
                          subsetLength );
     }
 
-    assert( indices.size( ) == ( size_t )( mesh->GetPolygonCount( ) * 3 ) );
+    // assert( indices.size( ) == ( size_t )( mesh->GetPolygonCount( ) * 3 ) );
+
     assert( subsets.size( ) <= ( size_t )( mesh->GetNode( )->GetMaterialCount( ) ) );
+    std::sort( subsets.begin( ), subsets.end( ), [&]( apemodefb::SubsetFb const& a, apemodefb::SubsetFb const& b ) {
+        return a.base_index( ) < b.base_index( );
+    } );
+
     return true;
 }
 
@@ -417,10 +488,10 @@ const TElementLayer* VerifyElementLayer( const TElementLayer* elementLayer ) {
  * Helper structure to assign vertex property values
  **/
 struct StaticVertex {
-    float position[ 3 ];
-    float normal[ 3 ];
-    float tangent[ 4 ];
-    float texCoords[ 2 ];
+    float position  [ 3 ];
+    float normal    [ 3 ];
+    float tangent   [ 4 ];
+    float texCoords [ 2 ];
 };
 
 //
@@ -435,14 +506,14 @@ static_assert( sizeof( apemodefb::PackedVertexFb ) == sizeof( apemodefb::PackedV
  * Calculate mesh position and texcoord min max values.
  **/
 template < typename TVertex >
-void InitializeVertices( FbxMesh*      mesh,
-                         apemode::Mesh&   m,
-                         TVertex*      vertices,
-                         size_t        vertexCount,
-                         mathfu::vec3& positionMin,
-                         mathfu::vec3& positionMax,
-                         mathfu::vec2& texcoordMin,
-                         mathfu::vec2& texcoordMax ) {
+void InitializeVertices( FbxMesh*       mesh,
+                         apemode::Mesh& m,
+                         TVertex*       vertices,
+                         size_t         vertexCount,
+                         mathfu::vec3&  positionMin,
+                         mathfu::vec3&  positionMax,
+                         mathfu::vec2&  texcoordMin,
+                         mathfu::vec2&  texcoordMax ) {
     auto& s = apemode::Get( );
     const uint32_t cc = (uint32_t) mesh->GetControlPointsCount( );
     const uint32_t pc = (uint32_t) mesh->GetPolygonCount( );
@@ -556,11 +627,11 @@ void Optimize16( apemode::Mesh& mesh, apemodefb::StaticVertexFb const* vertices,
 
 void Pack( const apemodefb::StaticVertexFb* vertices,
            apemodefb::PackedVertexFb*       packed,
-           const uint32_t                  vertexCount,
-           const mathfu::vec3              positionMin,
-           const mathfu::vec3              positionMax,
-           const mathfu::vec2              texcoordsMin,
-           const mathfu::vec2              texcoordsMax );
+           const uint32_t                   vertexCount,
+           const mathfu::vec3               positionMin,
+           const mathfu::vec3               positionMax,
+           const mathfu::vec2               texcoordsMin,
+           const mathfu::vec2               texcoordsMax );
 
 template < typename TIndex >
 void ExportMesh( FbxNode* node, FbxMesh* mesh, apemode::Node& n, apemode::Mesh& m, uint32_t vertexCount, bool pack, bool optimize ) {
@@ -590,21 +661,22 @@ void ExportMesh( FbxNode* node, FbxMesh* mesh, apemode::Node& n, apemode::Mesh& 
                         texcoordMin,
                         texcoordMax );
 
-    GetSubsets( mesh, m, tempSubsetIndices, m.subsets, m.subsetsPolies, tempItems );
+    GetSubsets< TIndex >( mesh, m, m.subsets );
 
-    if ( const size_t subsetIndexBufferSize = sizeof( TIndex ) * tempSubsetIndices.size( ) ) {
-        m.subsetIndices.resize( subsetIndexBufferSize );
-        std::memcpy( m.subsetIndices.data( ), tempSubsetIndices.data( ), subsetIndexBufferSize );
-    }
+    m.indices.reserve( vertexCount );
+    uint32_t index = 0;
+    while ( index < vertexCount )
+        m.indices.emplace_back( index++ );
 
     if ( std::is_same< TIndex, uint16_t >::value ) {
-        m.subsetIndexType = apemodefb::EIndexTypeFb_UInt16;
+        m.indexType = apemodefb::EIndexTypeFb_UInt16;
     } else if ( std::is_same< TIndex, uint32_t >::value ) {
-        m.subsetIndexType = apemodefb::EIndexTypeFb_UInt32;
+        m.indexType = apemodefb::EIndexTypeFb_UInt32;
     } else {
         assert( false );
     }
 
+    /*
     if ( optimize ) {
         auto initializedVertices = reinterpret_cast< const apemodefb::StaticVertexFb* >( m.vertices.data( ) );
 
@@ -615,6 +687,7 @@ void ExportMesh( FbxNode* node, FbxMesh* mesh, apemode::Node& n, apemode::Mesh& 
             Optimize32( m, initializedVertices, vertexCount, vertexStride );
         }
     }
+    */
 
     if ( pack ) {
         std::vector< apemodefb::StaticVertexFb > tempBuffer;
@@ -642,37 +715,37 @@ void ExportMesh( FbxNode* node, FbxMesh* mesh, apemode::Node& n, apemode::Mesh& 
         apemodefb::vec3 bboxScale( positionScale.x, positionScale.y, positionScale.z );
         apemodefb::vec2 uvScale( texcoordScale.x, texcoordScale.y );
 
-        m.submeshes.emplace_back( bboxMin,                        // bbox min
-                                  bboxMax,                        // bbox max
-                                  bboxMin,                        // position offset
-                                  bboxScale,                      // position scale
-                                  uvMin,                          // uv offset
-                                  uvScale,                        // uv scale
-                                  0,                              // base vertex
-                                  vertexCount,                    // vertex count
-                                  0,                              // base index
-                                  0,                              // index count
-                                  0,                              // base subset
-                                  (uint32_t) m.subsets.size( ),   // subset count
+        m.submeshes.emplace_back( bboxMin,                         // bbox min
+                                  bboxMax,                         // bbox max
+                                  bboxMin,                         // position offset
+                                  bboxScale,                       // position scale
+                                  uvMin,                           // uv offset
+                                  uvScale,                         // uv scale
+                                  0,                               // base vertex
+                                  vertexCount,                     // vertex count
+                                  0,                               // base index
+                                  0,                               // index count
+                                  0,                               // base subset
+                                  (uint32_t) m.subsets.size( ),    // subset count
                                   apemodefb::EVertexFormat_Packed, // vertex format
-                                  packedVertexStride              // vertex stride
-                                  );
+                                  packedVertexStride               // vertex stride
+        );
     } else {
-        m.submeshes.emplace_back( bboxMin,                            // bbox min
-                                  bboxMax,                            // bbox max
+        m.submeshes.emplace_back( bboxMin,                             // bbox min
+                                  bboxMax,                             // bbox max
                                   apemodefb::vec3( 0.0f, 0.0f, 0.0f ), // position offset
                                   apemodefb::vec3( 1.0f, 1.0f, 1.0f ), // position scale
                                   apemodefb::vec2( 0.0f, 0.0f ),       // uv offset
                                   apemodefb::vec2( 1.0f, 1.0f ),       // uv scale
-                                  0,                                  // base vertex
-                                  vertexCount,                        // vertex count
-                                  0,                                  // base index
-                                  0,                                  // index count
-                                  0,                                  // base subset
-                                  (uint32_t) m.subsets.size( ),       // subset count
+                                  0,                                   // base vertex
+                                  vertexCount,                         // vertex count
+                                  0,                                   // base index
+                                  0,                                   // index count
+                                  0,                                   // base subset
+                                  (uint32_t) m.subsets.size( ),        // subset count
                                   apemodefb::EVertexFormat_Static,     // vertex format
-                                  vertexStride                        // vertex stride
-                                  );
+                                  vertexStride                         // vertex stride
+        );
     }
 }
 
@@ -703,7 +776,7 @@ void ExportMesh( FbxNode* node, apemode::Node& n, bool pack, bool optimize ) {
 
         const uint32_t vertexCount = mesh->GetPolygonCount( ) * 3;
 
-        if ( vertexCount < 0xffff )
+        if ( vertexCount < std::numeric_limits< uint16_t >::max( ) )
             ExportMesh< uint16_t >( node, mesh, n, m, vertexCount, pack, optimize );
         else
             ExportMesh< uint32_t >( node, mesh, n, m, vertexCount, pack, optimize );

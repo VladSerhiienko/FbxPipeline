@@ -6,7 +6,7 @@
 namespace apemode {
 
     struct Mesh {
-        bool                               hasTexcoords = false;
+        bool                                hasTexcoords = false;
         apemodefb::vec3                     positionMin;
         apemodefb::vec3                     positionMax;
         apemodefb::vec3                     positionOffset;
@@ -17,11 +17,9 @@ namespace apemode {
         apemodefb::vec2                     texcoordScale;
         std::vector< apemodefb::SubmeshFb > submeshes;
         std::vector< apemodefb::SubsetFb >  subsets;
-        std::vector< apemodefb::SubsetFb >  subsetsPolies;
-        std::vector< uint8_t >             subsetIndices;
-        std::vector< uint8_t >             vertices;
-        std::vector< uint8_t >             indices;
-        apemodefb::EIndexTypeFb             subsetIndexType;
+        std::vector< uint8_t >              indices;
+        std::vector< uint8_t >              vertices;
+        apemodefb::EIndexTypeFb             indexType;
     };
 
     struct Node {

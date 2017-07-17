@@ -122,8 +122,8 @@ table MeshFb {
     vertices : [ubyte];
     submeshes : [SubmeshFb];
     subsets : [SubsetFb];
-    subset_indices : [ubyte];
-    subset_index_type : EIndexTypeFb;
+    indices : [ubyte];
+    index_type : EIndexTypeFb;
 }
 struct MaterialPropFb {
     name_id : ulong( key );

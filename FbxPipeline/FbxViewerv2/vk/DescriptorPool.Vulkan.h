@@ -122,7 +122,7 @@ namespace apemodevk
         bool WriteUniformBuffer( apemodevk::DescriptorSet const& DescSet,
                                  VkBuffer                      Buffer,
                                  uint32_t                      Offset,
-                                 uint32_t                      Range,
+                                 uint32_t                      TotalSize,
                                  uint32_t                      Binding,
                                  uint32_t                      Count );
 

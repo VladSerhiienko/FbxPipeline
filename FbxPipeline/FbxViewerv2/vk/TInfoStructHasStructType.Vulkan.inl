@@ -13,6 +13,7 @@
 
 _Define_has_struct_type(VkCommandBufferBeginInfo);
 _Define_has_struct_type(VkRenderPassBeginInfo);
+_Define_has_struct_type(VkBufferMemoryBarrier);
 _Define_has_struct_type(VkImageMemoryBarrier);
 _Define_has_struct_type(VkFenceCreateInfo);
 _Define_has_struct_type(VkSemaphoreCreateInfo);

@@ -136,7 +136,7 @@ bool apemodevk::QueueFamilyPool::SupportsPresenting( VkSurfaceKHR pSurface ) con
         case VK_ERROR_OUT_OF_DEVICE_MEMORY:
         case VK_ERROR_SURFACE_LOST_KHR:
             /* TODO: Cases we expect to happen, need to handle */
-            DebugBreak( );
+            apemodevk::platform::DebugBreak( );
             break;
     }
 
@@ -153,19 +153,19 @@ apemodevk::QueueFamilyBased::QueueFamilyBased( uint32_t queueFamilyId, VkQueueFa
 }
 
 bool apemodevk::QueueFamilyBased::SupportsGraphics( ) const {
-    return apemodevk::HasFlagEql( QueueFamilyProps.queueFlags, VK_QUEUE_GRAPHICS_BIT );
+    return apemodevk::HasFlagEq( QueueFamilyProps.queueFlags, VK_QUEUE_GRAPHICS_BIT );
 }
 
 bool apemodevk::QueueFamilyBased::SupportsCompute( ) const {
-    return apemodevk::HasFlagEql( QueueFamilyProps.queueFlags, VK_QUEUE_COMPUTE_BIT );
+    return apemodevk::HasFlagEq( QueueFamilyProps.queueFlags, VK_QUEUE_COMPUTE_BIT );
 }
 
 bool apemodevk::QueueFamilyBased::SupportsSparseBinding( ) const {
-    return apemodevk::HasFlagEql( QueueFamilyProps.queueFlags, VK_QUEUE_SPARSE_BINDING_BIT );
+    return apemodevk::HasFlagEq( QueueFamilyProps.queueFlags, VK_QUEUE_SPARSE_BINDING_BIT );
 }
 
 bool apemodevk::QueueFamilyBased::SupportsTransfer( ) const {
-    return apemodevk::HasFlagEql( QueueFamilyProps.queueFlags, VK_QUEUE_TRANSFER_BIT );
+    return apemodevk::HasFlagEq( QueueFamilyProps.queueFlags, VK_QUEUE_TRANSFER_BIT );
 }
 
 apemodevk::AcquiredQueue apemodevk::QueueFamilyPool::Acquire( bool bIgnoreFence ) {
@@ -216,12 +216,12 @@ bool apemodevk::QueueFamilyPool::Release( const apemodevk::AcquiredQueue& acquir
         const bool previouslyUsed = Queues[ acquiredQueue.QueueId ].bInUse.exchange( false, std::memory_order_release );
         /* Try to track incorrect usage or atomic mess. */
         if ( false == previouslyUsed )
-            DebugBreak( );
+            apemodevk::platform::DebugBreak( );
 
         return true;
     }
 
-    DebugBreak( );
+    apemodevk::platform::DebugBreak( );
     return false;
 }
 
@@ -381,16 +381,20 @@ apemodevk::AcquiredCommandBuffer apemodevk::CommandBufferFamilyPool::Acquire( bo
 bool apemodevk::CommandBufferFamilyPool::Release( const AcquiredCommandBuffer& acquiredCmdBuffer ) {
     /* Check if the command buffer was acquired */
     if ( VK_NULL_HANDLE != acquiredCmdBuffer.pCmdBuffer ) {
-        /* No longer used, ok */
-        const bool previouslyUsed = CmdBuffers[ acquiredCmdBuffer.CmdBufferId ].bInUse.exchange( false, std::memory_order_release );
+        auto& cmdBufferInPool  = CmdBuffers[ acquiredCmdBuffer.CmdBufferId ];
+
+        /* Set queue fence */
+        cmdBufferInPool.pFence = acquiredCmdBuffer.pFence;
+        /* No longer in use */
+        const bool previouslyUsed = cmdBufferInPool.bInUse.exchange( false, std::memory_order_release );
         /* Try to track incorrect usage or atomic mess. */
         if ( false == previouslyUsed )
-            DebugBreak( );
+            apemodevk::platform::DebugBreak( );
 
         return true;
     }
 
-    DebugBreak( );
+    apemodevk::platform::DebugBreak( );
     return false;
 }
 

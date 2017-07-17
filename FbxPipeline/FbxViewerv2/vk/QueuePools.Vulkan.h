@@ -51,8 +51,9 @@ namespace apemodevk {
     };
 
     struct AcquiredCommandBuffer {
-        VkCommandBuffer pCmdBuffer    = VK_NULL_HANDLE;
-        VkCommandPool   pCmdPool      = VK_NULL_HANDLE;
+        VkCommandBuffer pCmdBuffer    = VK_NULL_HANDLE; /* Handle */
+        VkCommandPool   pCmdPool      = VK_NULL_HANDLE; /* Command pool handle (associated with the Handle) */
+        VkFence         pFence        = VK_NULL_HANDLE; /* Last queue fence */
         uint32_t        QueueFamilyId = 0;
         uint32_t        CmdBufferId   = 0;
     };
@@ -89,12 +90,13 @@ namespace apemodevk {
                            const VkQueueFamilyProperties* pQueuePropsIt,
                            const VkQueueFamilyProperties* pQueuePropsEnd );
 
-        ~CommandBufferPool( );
 
     public:
+        ~CommandBufferPool( );
+
         uint32_t                       GetPoolCount( ) const;
-        CommandBufferFamilyPool*       GetPool( uint32_t queueFamilyIndex );
-        const CommandBufferFamilyPool* GetPool( uint32_t queueFamilyIndex ) const;
+        CommandBufferFamilyPool*       GetPool( uint32_t QueueFamilyIndex );
+        const CommandBufferFamilyPool* GetPool( uint32_t QueueFamilyIndex ) const;
         CommandBufferFamilyPool*       GetPool( VkQueueFlags eRequiredQueueFlags, bool bExactMatchByFlags );
         const CommandBufferFamilyPool* GetPool( VkQueueFlags eRequiredQueueFlags, bool bExactMatchByFlags ) const;
 
@@ -108,7 +110,7 @@ namespace apemodevk {
          * @note Release for reusing, @see Release().
          **/
         AcquiredCommandBuffer Acquire( bool bIgnoreFenceStatus, VkQueueFlags eRequiredQueueFlags, bool bExactMatchByFlags );
-        AcquiredCommandBuffer Acquire( bool bIgnoreFenceStatus, uint32_t queueFamilyIndex );
+        AcquiredCommandBuffer Acquire( bool bIgnoreFenceStatus, uint32_t QueueFamilyIndex );
 
         /**
          * Allows the command buffer to be reused.
@@ -191,8 +193,8 @@ namespace apemodevk {
 
 
         uint32_t               GetPoolCount( ) const;
-        QueueFamilyPool*       GetPool( uint32_t queueFamilyIndex );
-        const QueueFamilyPool* GetPool( uint32_t queueFamilyIndex ) const;
+        QueueFamilyPool*       GetPool( uint32_t QueueFamilyIndex );
+        const QueueFamilyPool* GetPool( uint32_t QueueFamilyIndex ) const;
         QueueFamilyPool*       GetPool( VkQueueFlags eRequiredQueueFlags, bool bExactMatchByFlags );
         const QueueFamilyPool* GetPool( VkQueueFlags eRequiredQueueFlags, bool bExactMatchByFlags ) const;
 
@@ -206,7 +208,7 @@ namespace apemodevk {
          * @note Release for reusing, @see Release().
          */
         AcquiredQueue Acquire( bool bIgnoreFenceStatus, VkQueueFlags eRequiredQueueFlags, bool bExactMatchByFlags );
-        AcquiredQueue Acquire( bool bIgnoreFenceStatus, uint32_t queueFamilyIndex );
+        AcquiredQueue Acquire( bool bIgnoreFenceStatus, uint32_t QueueFamilyIndex );
 
         /**
          * Allows the queue to be reused.

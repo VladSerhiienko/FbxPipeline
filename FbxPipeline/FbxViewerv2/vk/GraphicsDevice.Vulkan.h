@@ -35,8 +35,8 @@ namespace apemodevk {
 
         QueuePool *              GetQueuePool( );
         const QueuePool *        GetQueuePool( ) const;
-        CommandBufferPool *      GetCmdBufferPool( );
-        const CommandBufferPool *GetCmdBufferPool( ) const;
+        CommandBufferPool *      GetCommandBufferPool( );
+        const CommandBufferPool *GetCommandBufferPool( ) const;
 
         GraphicsManager &      GetGraphicsManager( );
         NativeLayerWrapper &   GetUnnamedLayer( );

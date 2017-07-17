@@ -10,6 +10,7 @@
 #include <AppState.h>
 
 #include <Scene.h>
+#include <SceneRendererVk.h>
 
 #include <Camera.h>
 #include <CameraControllerInputMouseKeyboard.h>
@@ -41,10 +42,12 @@ public:
     uint32_t envId      = 0;
     uint32_t sceneId    = 0;
     uint32_t maskId     = 0;
-    Scene*   scenes[ 2 ];
 
-    NuklearRendererSdlBase*  Nk  = nullptr;
-    DebugRendererVk* Dbg = nullptr;
+    std::vector<Scene*> Scenes;
+
+    NuklearRendererSdlBase*  pNkRenderer = nullptr;
+    DebugRendererVk* pDebugRenderer = nullptr;
+    SceneRendererBase * pSceneRendererBase = nullptr;
 
     CameraControllerInputBase* pCamInput      = nullptr;
     CameraControllerBase*      pCamController = nullptr;
@@ -172,7 +175,7 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
             return false;
         }
 
-        appContent->Nk = new NuklearRendererSdlVk();
+        appContent->pNkRenderer = new NuklearRendererSdlVk();
 
         NuklearRendererSdlVk::InitParametersVk initParamsNk;
         initParamsNk.pAlloc          = nullptr;
@@ -184,9 +187,9 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         initParamsNk.pQueue          = appSurfaceVk->PresentQueue.pQueue;
         initParamsNk.QueueFamilyId   = appSurfaceVk->PresentQueue.QueueFamilyId;
 
-        appContent->Nk->Init( &initParamsNk );
+        appContent->pNkRenderer->Init( &initParamsNk );
 
-        appContent->Dbg = new DebugRendererVk();
+        appContent->pDebugRenderer = new DebugRendererVk();
 
         DebugRendererVk::InitParametersVk initParamsDbg;
         initParamsDbg.pAlloc          = nullptr;
@@ -196,9 +199,16 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         initParamsDbg.pDescPool       = *appContent->pDescPool;
         initParamsDbg.FrameCount      = appContent->FrameCount;
 
-        appContent->Dbg->RecreateResources(&initParamsDbg);
+        appContent->pDebugRenderer->RecreateResources(&initParamsDbg);
+        appContent->pSceneRendererBase = appSurfaceVk->CreateSceneRenderer();
 
-        auto renderer = appSurfaceVk->CreateSceneRenderer();
+        SceneRendererVk::SceneUpdateParametersVk updateParams;
+        updateParams.pNode = appSurfaceVk->pNode;
+
+        appContent->Scenes.push_back(LoadSceneFromFile("../../../assets/Mech6k4p.fbxp"));
+        updateParams.pSceneSrc = appContent->Scenes.back()->sourceScene;
+
+        appContent->pSceneRendererBase->UpdateScene(appContent->Scenes.back(), &updateParams);
 
         // appContent->scenes[ 0 ] = LoadSceneFromFile( "../../../assets/iron-man.fbxp" );
         // appContent->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/kalestra-the-sorceress.fbxp" );
@@ -392,11 +402,11 @@ bool apemode::App::OnResized( ) {
 }
 
 void App::OnFrameMove( ) {
-    nk_input_begin( &appContent->Nk->Context ); {
+    nk_input_begin( &appContent->pNkRenderer->Context ); {
         SDL_Event evt;
         while ( SDL_PollEvent( &evt ) )
-            appContent->Nk->HandleEvent( &evt );
-        nk_input_end( &appContent->Nk->Context );
+            appContent->pNkRenderer->HandleEvent( &evt );
+        nk_input_end( &appContent->pNkRenderer->Context );
     }
 
     AppBase::OnFrameMove( );
@@ -417,7 +427,7 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         | NK_WINDOW_SCALABLE
         | NK_WINDOW_MINIMIZABLE;
 
-    auto ctx = &appContent->Nk->Context;
+    auto ctx = &appContent->pNkRenderer->Context;
     float clearColor[ 4 ] = {0};
 
     if (nk_begin(ctx, "Calculator", nk_rect(10, 10, 180, 250),
@@ -555,7 +565,7 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         frameData.viewMatrix = appContent->pCamController->ViewMatrix();
         frameData.color = {1, 0, 0, 1};
 
-        appContent->Dbg->Reset( appContent->FrameIndex );
+        appContent->pDebugRenderer->Reset( appContent->FrameIndex );
 
         DebugRendererVk::RenderParametersVk renderParamsDbg;
         renderParamsDbg.dims[ 0 ]  = (float) width;
@@ -573,21 +583,21 @@ void App::Update( float deltaSecs, Input const& inputState ) {
             * mathfu::mat4::FromTranslationVector(mathfu::vec3{ 0, scale * 3, 0 });
 
         frameData.color = { 0, 1, 0, 1 };
-        appContent->Dbg->Render(&renderParamsDbg);
+        appContent->pDebugRenderer->Render(&renderParamsDbg);
 
         frameData.worldMatrix
             = mathfu::mat4::FromScaleVector({ scale, scale, scale * 2 })
             * mathfu::mat4::FromTranslationVector(mathfu::vec3{ 0, 0, scale * 3 });
 
         frameData.color = { 0, 0, 1, 1 };
-        appContent->Dbg->Render(&renderParamsDbg);
+        appContent->pDebugRenderer->Render(&renderParamsDbg);
 
         frameData.worldMatrix
             = mathfu::mat4::FromScaleVector({ scale * 2, scale, scale })
             * mathfu::mat4::FromTranslationVector(mathfu::vec3{ scale * 3, 0, 0 });
 
         frameData.color = { 1, 0, 0, 1 };
-        appContent->Dbg->Render(&renderParamsDbg);
+        appContent->pDebugRenderer->Render(&renderParamsDbg);
 
         NuklearRendererSdlVk::RenderParametersVk renderParamsNk;
         renderParamsNk.dims[ 0 ]          = (float) width;
@@ -600,8 +610,8 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         renderParamsNk.FrameIndex         = appContent->FrameIndex;
         renderParamsNk.pCmdBuffer         = cmdBuffer;
 
-        appContent->Nk->Render( &renderParamsNk );
-        nk_clear( &appContent->Nk->Context );
+        appContent->pNkRenderer->Render( &renderParamsNk );
+        nk_clear( &appContent->pNkRenderer->Context );
 
         vkCmdEndRenderPass( cmdBuffer );
 
@@ -617,7 +627,7 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         submitInfo.commandBufferCount   = 1;
         submitInfo.pCommandBuffers      = &cmdBuffer;
 
-        appContent->Dbg->Flush( appContent->FrameIndex );
+        appContent->pDebugRenderer->Flush( appContent->FrameIndex );
 
         CheckedCall( vkEndCommandBuffer( cmdBuffer ) );
         CheckedCall( vkResetFences( device, 1, &fence ) );

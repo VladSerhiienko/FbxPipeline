@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Nesquik
+namespace apemode
 {
 #ifdef ARRAYSIZE
 #undef ARRAYSIZE
@@ -17,15 +17,10 @@ namespace Nesquik
         static const size_t ArrayLength = N;
     };
 
-#ifdef _Get_array_length
-#undef _Get_array_length
-#endif
+    template < typename TArray, uint32_t N >
+    uint32_t GetArraySize( TArray ( & )[ N ] ) {
+        return N;
+    }
 
-#ifdef _Get_array_length_u
-#undef _Get_array_length_u
-#endif
-
-#define _Get_array_length(Array) Nesquik::TArrayTraits<decltype (Array)>::ArrayLength
-#define _Get_array_length_u(Array) static_cast<unsigned int> (_Get_array_length (Array))
-#define ARRAYSIZE _Get_array_length_u
+#define ARRAYSIZE apemode::GetArraySize
 }

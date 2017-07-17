@@ -135,14 +135,14 @@ bool apemode::State::Finish( ) {
             auto vsOffset = builder.CreateVector( mesh.vertices );
             auto smOffset = builder.CreateVectorOfStructs( mesh.submeshes );
             auto ssOffset = builder.CreateVectorOfStructs( mesh.subsets );
-            auto siOffset = builder.CreateVector( mesh.subsetIndices );
+            auto siOffset = builder.CreateVector( mesh.indices );
 
-           apemodefb::MeshFbBuilder meshBuilder( builder );
+            apemodefb::MeshFbBuilder meshBuilder( builder );
             meshBuilder.add_vertices( vsOffset );
             meshBuilder.add_submeshes( smOffset );
             meshBuilder.add_subsets( ssOffset );
-            meshBuilder.add_subset_indices( siOffset );
-            meshBuilder.add_subset_index_type( mesh.subsetIndexType );
+            meshBuilder.add_indices( siOffset );
+            meshBuilder.add_index_type( mesh.indexType );
             meshOffsets.push_back( meshBuilder.Finish( ) );
         }
     }
