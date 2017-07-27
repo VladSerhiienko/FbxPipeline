@@ -1,64 +1,9 @@
 #pragma once
 
-#include <math.h>
-#include <mathfu/matrix.h>
-#include <mathfu/vector.h>
-#include <mathfu/glsl_mappings.h>
-
+#include <MathfuInc.h>
 #include <GraphicsDevice.Vulkan.h>
 #include <DescriptorPool.Vulkan.h>
 #include <BufferPools.Vulkan.h>
-
-namespace apemodevk {
-
-    struct DescriptorSetPool {
-        VkDevice                                            pLogicalDevice;
-        VkDescriptorPool                                    pDescPool;
-        VkDescriptorSetLayout                               pLayout;
-        std::vector< std::pair<VkBuffer, VkDescriptorSet> > Sets;
-
-        bool Recreate( VkDevice pInLogicalDevice, VkDescriptorPool pInDescPool, VkDescriptorSetLayout pInLayout ) {
-            pLogicalDevice = pInLogicalDevice;
-            pDescPool      = pInDescPool;
-            pLayout        = pInLayout;
-            return true;
-        }
-
-        VkDescriptorSet GetDescSet( const VkDescriptorBufferInfo &descriptorBufferInfo ) {
-            auto descSetIt = std::find_if( Sets.begin( ), Sets.end( ),
-                [&]( const std::pair< VkBuffer, VkDescriptorSet > &pair ) {
-                    return pair.first == descriptorBufferInfo.buffer;
-                } );
-
-            if ( descSetIt != Sets.end( ) )
-                return descSetIt->second;
-
-            VkDescriptorSetAllocateInfo descriptorSetAllocateInfo;
-            InitializeStruct( descriptorSetAllocateInfo );
-            descriptorSetAllocateInfo.descriptorPool     = pDescPool;
-            descriptorSetAllocateInfo.pSetLayouts        = &pLayout;
-            descriptorSetAllocateInfo.descriptorSetCount = 1;
-
-            VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
-            if ( VK_SUCCESS != vkAllocateDescriptorSets( pLogicalDevice, &descriptorSetAllocateInfo, &descriptorSet ) ) {
-                DebugBreak( );
-                return nullptr;
-            }
-
-            Sets.emplace_back( descriptorBufferInfo.buffer, descriptorSet );
-
-            VkWriteDescriptorSet writeDescriptorSet;
-            InitializeStruct( writeDescriptorSet );
-            writeDescriptorSet.descriptorCount = 1;
-            writeDescriptorSet.descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-            writeDescriptorSet.pBufferInfo     = &descriptorBufferInfo;
-            writeDescriptorSet.dstSet          = descriptorSet;
-            vkUpdateDescriptorSets( pLogicalDevice, 1, &writeDescriptorSet, 0, nullptr );
-
-            return descriptorSet;
-        }
-    };
-}
 
 namespace apemode {
 
@@ -68,10 +13,10 @@ namespace apemode {
         };
 
         struct FrameUniformBuffer {
-            mathfu::mat4 worldMatrix;
-            mathfu::mat4 viewMatrix;
-            mathfu::mat4 projectionMatrix;
-            mathfu::vec4 color;
+            apemodem::mat4 worldMatrix;
+            apemodem::mat4 viewMatrix;
+            apemodem::mat4 projectionMatrix;
+            apemodem::vec4 color;
         };
 
         struct InitParametersVk {
@@ -104,7 +49,7 @@ namespace apemode {
 
 #if 1
         apemodevk::HostBufferPool                               BufferPools[ kMaxFrameCount ];
-        apemodevk::DescriptorSetPool                            DescSetPools[kMaxFrameCount];
+        apemodevk::DescriptorSetPool                            DescSetPools[ kMaxFrameCount ];
 #else
         apemodevk::TDispatchableHandle< VkBuffer >              hUniformBuffers[ kMaxFrameCount ];
         apemodevk::TDispatchableHandle< VkDeviceMemory >        hUniformBufferMemory[ kMaxFrameCount ];

@@ -59,7 +59,7 @@ public:
 
     uint32_t BackbufferIndices[ kMaxFrames ] = {0};
 
-    std::unique_ptr< DescriptorPool >      pDescPool;
+    DescriptorPool                         DescPool;
     TDispatchableHandle< VkCommandPool >   hCmdPool[ kMaxFrames ];
     TDispatchableHandle< VkCommandBuffer > hCmdBuffers[ kMaxFrames ];
     TDispatchableHandle< VkFence >         hFences[ kMaxFrames ];
@@ -169,8 +169,7 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
             }
         }
 
-        appContent->pDescPool = std::move(std::make_unique< DescriptorPool >());
-        if (false == appContent->pDescPool->RecreateResourcesFor(*appSurfaceVk->pNode, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256 )) {
+        if (false == appContent->DescPool.RecreateResourcesFor(*appSurfaceVk->pNode, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256 )) {
             DebugBreak();
             return false;
         }
@@ -183,7 +182,7 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         initParamsNk.pPhysicalDevice = *appSurfaceVk->pNode;
         initParamsNk.pRenderPass     = appContent->hDbgRenderPass;
         //initParamsNk.pRenderPass     = appContent->hNkRenderPass;
-        initParamsNk.pDescPool       = *appContent->pDescPool;
+        initParamsNk.pDescPool       = appContent->DescPool;
         initParamsNk.pQueue          = appSurfaceVk->PresentQueue.pQueue;
         initParamsNk.QueueFamilyId   = appSurfaceVk->PresentQueue.QueueFamilyId;
 
@@ -196,7 +195,7 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         initParamsDbg.pDevice         = *appSurfaceVk->pNode;
         initParamsDbg.pPhysicalDevice = *appSurfaceVk->pNode;
         initParamsDbg.pRenderPass     = appContent->hDbgRenderPass;
-        initParamsDbg.pDescPool       = *appContent->pDescPool;
+        initParamsDbg.pDescPool       = appContent->DescPool;
         initParamsDbg.FrameCount      = appContent->FrameCount;
 
         appContent->pDebugRenderer->RecreateResources(&initParamsDbg);
@@ -204,6 +203,9 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
 
         SceneRendererVk::SceneUpdateParametersVk updateParams;
         updateParams.pNode = appSurfaceVk->pNode;
+        updateParams.pRenderPass = appContent->hDbgRenderPass;
+        updateParams.pDescPool = appContent->DescPool;
+        updateParams.FrameCount = appContent->FrameCount;
 
         appContent->Scenes.push_back(LoadSceneFromFile("../../../assets/Mech6k4p.fbxp"));
         updateParams.pSceneSrc = appContent->Scenes.back()->sourceScene;

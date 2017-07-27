@@ -43,3 +43,6 @@
 [submodule "ThirdParty/amd-tootle"]
 	path = ThirdParty/amd-tootle
 	url = git@github.com:GPUOpen-Tools/amd-tootle.git
+[submodule "ThirdParty/microprofile"]
+	path = ThirdParty/microprofile
+	url = git@github.com:jonasmr/microprofile.git

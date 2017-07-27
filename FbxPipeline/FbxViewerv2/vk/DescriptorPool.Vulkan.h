@@ -106,7 +106,7 @@ namespace apemodevk
         apemodevk::GraphicsDevice const*                  pNode;
         apemodevk::DescriptorPool const*                  pDescPool;
         apemodevk::TDispatchableHandle< VkDescriptorSet > hDescSet;
-        VkDescriptorSetLayout                           hDescSetLayout;
+        VkDescriptorSetLayout                             hDescSetLayout;
     };
 
     class DescriptorSetUpdater : public apemodevk::NoCopyAssignPolicy {
@@ -137,7 +137,7 @@ namespace apemodevk
         void Flush( );
 
     public:
-        apemodevk::GraphicsDevice const*        pNode;
+        apemodevk::GraphicsDevice const*      pNode;
         std::vector< VkDescriptorBufferInfo > BufferInfos;
         std::vector< VkDescriptorImageInfo >  ImgInfos;
         std::vector< VkWriteDescriptorSet >   Writes;
@@ -209,7 +209,26 @@ namespace apemodevk
         operator VkDescriptorSetLayoutBinding( ) const;
     };
 
-    class DescriptorSetLayout {
+    struct DescriptorSetPool {
 
+        /* VkDescriptorBufferInfo with uint32_t + VkDescriptorSet */
+        struct DescriptorBufferInfo {
+            VkDescriptorSet  pDescriptorSet = VK_NULL_HANDLE;
+            VkBuffer         pBuffer        = VK_NULL_HANDLE;
+            uint32_t         offset         = 0;
+            uint32_t         range          = 0;
+            VkDescriptorType eType          = VK_DESCRIPTOR_TYPE_MAX_ENUM;
+
+            DescriptorBufferInfo( );
+            DescriptorBufferInfo( VkDescriptorSet pDescriptorSet, VkBuffer pBuffer, uint32_t offset, uint32_t range, VkDescriptorType eType );
+        };
+
+        VkDevice                            pLogicalDevice       = VK_NULL_HANDLE;
+        VkDescriptorPool                    pDescriptorPool      = VK_NULL_HANDLE;
+        VkDescriptorSetLayout               pDescriptorSetLayout = VK_NULL_HANDLE;
+        std::vector< DescriptorBufferInfo > BufferSets;
+
+        bool            Recreate( VkDevice pInLogicalDevice, VkDescriptorPool pInDescPool, VkDescriptorSetLayout pInLayout );
+        VkDescriptorSet GetDescSet( const VkDescriptorBufferInfo& InDescriptorBufferInfo, VkDescriptorType eInType );
     };
 }

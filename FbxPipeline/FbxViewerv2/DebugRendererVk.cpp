@@ -341,10 +341,12 @@ bool apemode::DebugRendererVk::RecreateResources( InitParametersVk* initParams )
         };
         // clang-format on
 
+        const uint32_t vertexBufferSize = sizeof( g_vertex_buffer_data );
+
         VkBufferCreateInfo bufferCreateInfo;
         InitializeStruct( bufferCreateInfo );
         bufferCreateInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-        bufferCreateInfo.size  = sizeof( g_vertex_buffer_data );
+        bufferCreateInfo.size  = vertexBufferSize;
 
         if ( false == hVertexBuffer.Recreate( initParams->pDevice, initParams->pPhysicalDevice, bufferCreateInfo ) ) {
             DebugBreak( );
@@ -362,8 +364,8 @@ bool apemode::DebugRendererVk::RecreateResources( InitParametersVk* initParams )
             return false;
         }
 
-        if ( auto mappedData = hVertexBufferMemory.Map( 0, bufferCreateInfo.size, 0 ) ) {
-            memcpy( mappedData, g_vertex_buffer_data, sizeof( g_vertex_buffer_data ) );
+        if ( auto mappedData = hVertexBufferMemory.Map( 0, vertexBufferSize, 0 ) ) {
+            memcpy( mappedData, g_vertex_buffer_data, vertexBufferSize );
 
             VkMappedMemoryRange range;
             InitializeStruct( range );
@@ -446,7 +448,7 @@ bool apemode::DebugRendererVk::Render( RenderParametersVk* renderParams ) {
     auto suballocResult = BufferPools[ FrameIndex ].TSuballocate( *renderParams->pFrameData );
     assert( VK_NULL_HANDLE != suballocResult.descBufferInfo.buffer );
     suballocResult.descBufferInfo.range = sizeof(FrameUniformBuffer);
-    VkDescriptorSet descriptorSet[1] = { DescSetPools[FrameIndex].GetDescSet(suballocResult.descBufferInfo) };
+    VkDescriptorSet descriptorSet[ 1 ]  = { DescSetPools[ FrameIndex ].GetDescSet( suballocResult.descBufferInfo, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC )};
 
     vkCmdBindPipeline( renderParams->pCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, hPipeline );
     vkCmdBindDescriptorSets( renderParams->pCmdBuffer,

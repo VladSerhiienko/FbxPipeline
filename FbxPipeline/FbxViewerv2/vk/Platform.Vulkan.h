@@ -129,9 +129,9 @@ namespace apemodevk {
 
     namespace platform {
 
-        inline bool IsDebuggerPresent() {
+        inline bool IsDebuggerPresent( ) {
 #ifdef _WINDOWS_
-            return !!::IsDebuggerPresent();
+            return TRUE == ::IsDebuggerPresent( );
 #elif _DEBUG
             return true;
 #else
@@ -139,53 +139,51 @@ namespace apemodevk {
 #endif
         }
 
-        inline void DebugBreak() {
-            if (IsDebuggerPresent()) {
+        inline void DebugBreak( ) {
+            if ( IsDebuggerPresent( ) ) {
 #ifdef _WINDOWS_
                 // Does not require symbols
-                __debugbreak();
+                __debugbreak( );
 #endif
             }
         }
 
-        template <bool bNewLine = true, unsigned uBufferSize = 1024u>
-        static void DebugTrace(char const* fmt, ...) {
+        template < bool bNewLine = true, unsigned uBufferSize = 1024u >
+        static void DebugTrace( char const *fmt, ... ) {
             static const int s_length = uBufferSize - 2;
-            char buffer[uBufferSize];
+            char buffer[ uBufferSize ];
 
             va_list ap;
-            va_start(ap, fmt);
-            auto n = _vsnprintf_s(buffer, s_length, fmt, ap);
+            va_start( ap, fmt );
+            auto n = _vsnprintf_s( buffer, s_length, fmt, ap );
 
-            if (n > uBufferSize - 2)
+            if ( n > uBufferSize - 2 )
                 n = uBufferSize - 2;
 
-            if (bNewLine)
-            {
-                buffer[n] = L'\n';
-                buffer[n + 1] = L'\0';
-            }
-            else
-                buffer[n] = L'\0';
+            if ( bNewLine ) {
+                buffer[ n ] = L'\n';
+                buffer[ n + 1 ] = L'\0';
+            } else
+                buffer[ n ] = L'\0';
 
-            OutputDebugStringA(buffer);
-            va_end(ap);
+            OutputDebugStringA( buffer );
+            va_end( ap );
         }
-    }
+    } // namespace platform
 }
 
 #define apemode_dllapi
-#define apemode_assert(...) //assert(__VA_ARGS__)
-#define apemode_likely(...) __VA_ARGS__
-#define apemode_unlikely(...) __VA_ARGS__
-#define apemode_error(...)
-#define apemode_halt(...)
-#define _Get_collection_length_u(c) ((uint32_t) c.size())
+#define apemode_assert( ... ) // assert(__VA_ARGS__)
+#define apemode_likely( ... ) __VA_ARGS__
+#define apemode_unlikely( ... ) __VA_ARGS__
+#define apemode_error( ... )
+#define apemode_halt( ... )
+#define _Get_collection_length_u( c ) ( (uint32_t) c.size( ) )
 
 namespace apemodevk {
     struct ScalableAllocPolicy {};
     struct NoCopyAssignPolicy {};
-}
+} // namespace apemodevk
 
 #ifdef ARRAYSIZE
 #undef ARRAYSIZE
@@ -193,18 +191,17 @@ namespace apemodevk {
 
 #define _Aux_TArrayTraits_Has_array_traits 1
 
-namespace apemodevk
-{
-    template <typename TArray>
+namespace apemodevk {
+    template < typename TArray >
     struct TArrayTraits;
 
-    template <typename TArray, size_t N>
-    struct TArrayTraits<TArray[N]> {
+    template < typename TArray, size_t N >
+    struct TArrayTraits< TArray[ N ] > {
         static const size_t ArrayLength = N;
     };
 
-    template <typename TArray, uint32_t TArraySize>
-    inline uint32_t GetArraySizeU(TArray(&)[TArraySize]) {
+    template < typename TArray, uint32_t TArraySize >
+    inline uint32_t GetArraySizeU( TArray ( & )[ TArraySize ] ) {
         return TArraySize;
     }
 
@@ -216,8 +213,8 @@ namespace apemodevk
 #undef _Get_array_length_u
 #endif
 
-#define _Get_array_length(Array) apemodevk::TArrayTraits<decltype (Array)>::ArrayLength
-#define _Get_array_length_u(Array) static_cast<unsigned int> (_Get_array_length (Array))
+#define _Get_array_length( Array ) apemodevk::TArrayTraits< decltype( Array ) >::ArrayLength
+#define _Get_array_length_u( Array ) static_cast< unsigned int >( _Get_array_length( Array ) )
 #define ARRAYSIZE _Get_array_length_u
 
 #ifdef ZeroMemory
@@ -247,15 +244,15 @@ namespace apemodevk
 } // namespace apemodevk
 
 namespace apemodevk {
-    namespace Details {
+    namespace details {
         using FlagsType = unsigned int;
         using VoidPtr   = void *;
         using IdType    = unsigned long long;
     } // namespace Details
 
-    template < typename TDataFlags  = Details::FlagsType,
-               typename TDataSrcPtr = Details::VoidPtr,
-               typename TDataId     = Details::IdType >
+    template < typename TDataFlags  = details::FlagsType,
+               typename TDataSrcPtr = details::VoidPtr,
+               typename TDataId     = details::IdType >
     struct TDataHandle {
         TDataId     DataId;
         TDataFlags  DataFlags;

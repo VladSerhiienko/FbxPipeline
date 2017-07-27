@@ -234,7 +234,10 @@ VKAPI_ATTR VkBool32 VKAPI_CALL apemodevk::GraphicsManager::DebugCallback( VkFlag
                                                                           const char *               pMsg,
                                                                           void *                     pUserData ) {
     if ( msgFlags & VK_DEBUG_REPORT_ERROR_BIT_EXT ) {
-        platform::DebugBreak( );
+
+        if ( nullptr == strstr( pMsg, "Nvda.Graphics.Interception" ) )
+            platform::DebugBreak( );
+
     } else if ( msgFlags & VK_DEBUG_REPORT_WARNING_BIT_EXT ) {
         platform::DebugBreak( );
     } else if ( msgFlags & VK_DEBUG_REPORT_INFORMATION_BIT_EXT ) {

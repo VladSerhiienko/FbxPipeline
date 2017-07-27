@@ -1,7 +1,6 @@
 #pragma once
 
 #include <GraphicsDevice.Vulkan.h>
-#include <RenderPassResources.Vulkan.h>
 
 namespace apemodevk {
     class CommandBuffer;

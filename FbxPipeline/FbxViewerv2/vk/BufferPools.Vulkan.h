@@ -8,13 +8,14 @@
 #include <GraphicsDevice.Vulkan.h>
 #include <DescriptorPool.Vulkan.h>
 
+#define _apemodevk_HostBufferPool_Page_InvalidateOrFlushAllRanges 0
+
 namespace apemodevk {
 
     struct HostBufferPool {
         struct Page {
             TDispatchableHandle< VkBuffer >       hBuffer;
             TDispatchableHandle< VkDeviceMemory > hMemory;
-            std::vector< VkMappedMemoryRange >    Ranges;
             VkDevice                              pDevice              = VK_NULL_HANDLE;
             uint8_t *                             pMapped              = nullptr;
             uint32_t                              Alignment            = 0;
@@ -22,6 +23,12 @@ namespace apemodevk {
             uint32_t                              CurrentOffsetIndex   = 0;
             uint32_t                              TotalOffsetCount     = 0;
             VkMemoryPropertyFlags                 eMemoryPropertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
+
+#if _apemodevk_HostBufferPool_Page_InvalidateOrFlushAllRanges
+            std::vector< VkMappedMemoryRange > Ranges;
+#else
+            VkMappedMemoryRange Range;
+#endif
 
             bool Recreate( VkDevice              pInLogicalDevice,
                            VkPhysicalDevice      pInPhysicalDevice,

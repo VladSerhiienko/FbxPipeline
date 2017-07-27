@@ -289,3 +289,61 @@ void apemodevk::DescriptorSetUpdater::Flush()
                                 Copies.empty () ? nullptr : Copies.data ());
     }
 }
+
+bool apemodevk::DescriptorSetPool::Recreate( VkDevice              pInLogicalDevice,
+                                             VkDescriptorPool      pInDescPool,
+                                             VkDescriptorSetLayout pInLayout ) {
+    pLogicalDevice = pInLogicalDevice;
+    pDescriptorPool = pInDescPool;
+    pDescriptorSetLayout = pInLayout;
+    return true;
+}
+
+VkDescriptorSet apemodevk::DescriptorSetPool::GetDescSet( const VkDescriptorBufferInfo& InDescriptorBufferInfo,
+                                                          VkDescriptorType              eInType ) {
+    auto descSetIt = std::find_if( BufferSets.begin( ), BufferSets.end( ), [&]( const auto& allocatedSet ) {
+        return allocatedSet.pBuffer == InDescriptorBufferInfo.buffer &&           /* Buffer handles must match */
+               allocatedSet.eType == eInType &&                                   /* Descriptor type must match */
+               allocatedSet.offset == (uint32_t) InDescriptorBufferInfo.offset && /* Offsets must match */
+               allocatedSet.range >= (uint32_t) InDescriptorBufferInfo.range;     /* Range can be greater */
+    } );
+
+    if ( descSetIt != BufferSets.end( ) )
+        return descSetIt->pDescriptorSet;
+
+    VkDescriptorSetAllocateInfo descriptorSetAllocateInfo;
+    InitializeStruct( descriptorSetAllocateInfo );
+    descriptorSetAllocateInfo.descriptorSetCount = 1;
+    descriptorSetAllocateInfo.descriptorPool = pDescriptorPool;
+    descriptorSetAllocateInfo.pSetLayouts = &pDescriptorSetLayout;
+
+    VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
+    if ( VK_SUCCESS != vkAllocateDescriptorSets( pLogicalDevice, &descriptorSetAllocateInfo, &descriptorSet ) ) {
+        DebugBreak( );
+        return nullptr;
+    }
+
+    BufferSets.emplace_back( DescriptorBufferInfo{descriptorSet,
+                                                  InDescriptorBufferInfo.buffer,
+                                                  (uint32_t) InDescriptorBufferInfo.offset,
+                                                  (uint32_t) InDescriptorBufferInfo.range,
+                                                  eInType} );
+
+    VkWriteDescriptorSet writeDescriptorSet;
+    InitializeStruct( writeDescriptorSet );
+    writeDescriptorSet.descriptorCount = 1;
+    writeDescriptorSet.descriptorType  = eInType;
+    writeDescriptorSet.pBufferInfo = &InDescriptorBufferInfo;
+    writeDescriptorSet.dstSet = descriptorSet;
+    vkUpdateDescriptorSets( pLogicalDevice, 1, &writeDescriptorSet, 0, nullptr );
+
+    return descriptorSet;
+}
+
+apemodevk::DescriptorSetPool::DescriptorBufferInfo::DescriptorBufferInfo( ) {
+}
+
+apemodevk::DescriptorSetPool::DescriptorBufferInfo::DescriptorBufferInfo(
+    VkDescriptorSet pDescriptorSet, VkBuffer pBuffer, uint32_t offset, uint32_t range, VkDescriptorType eType )
+    : pDescriptorSet( pDescriptorSet ), pBuffer( pBuffer ), offset( offset ), range( range ), eType( eType ) {
+}

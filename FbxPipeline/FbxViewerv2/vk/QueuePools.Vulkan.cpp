@@ -32,6 +32,7 @@ apemodevk::QueuePool::QueuePool( VkDevice                       pInDevice,
                                  const float*                   pQueuePrioritiesItEnd )
     : pDevice( pInDevice )
     , pPhysicalDevice( pInPhysicalDevice ) {
+
     (void) pQueuePrioritiesIt;
     (void) pQueuePrioritiesItEnd;
 
@@ -367,8 +368,10 @@ apemodevk::AcquiredCommandBuffer apemodevk::CommandBufferFamilyPool::Acquire( bo
 
     /* Create new command buffer */
 
-    auto& cmdBuffer = apemodevk::PushBackAndGet( CmdBuffers );
+    CommandBufferInPool cmdBuffer;
+    cmdBuffer.bInUse.exchange( true, std::memory_order_relaxed );
     InitializeCommandBufferInPool( pDevice, QueueFamilyId, cmdBuffer );
+    CmdBuffers.emplace_back( cmdBuffer );
 
     acquiredCommandBuffer.QueueFamilyId = QueueFamilyId;
     acquiredCommandBuffer.pCmdBuffer    = cmdBuffer.pCmdBuffer;

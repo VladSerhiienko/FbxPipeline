@@ -191,10 +191,9 @@ namespace apemodevk {
     public:
         ~QueuePool( );
 
-
-        uint32_t               GetPoolCount( ) const;
-        QueueFamilyPool*       GetPool( uint32_t QueueFamilyIndex );
-        const QueueFamilyPool* GetPool( uint32_t QueueFamilyIndex ) const;
+        uint32_t               GetPoolCount( ) const;                      /* @note Returns the number of queue families */
+        QueueFamilyPool*       GetPool( uint32_t QueueFamilyIndex );       /* @see GetPool( VkQueueFlags , bool ) */
+        const QueueFamilyPool* GetPool( uint32_t QueueFamilyIndex ) const; /* @see GetPool( VkQueueFlags , bool ) */
         QueueFamilyPool*       GetPool( VkQueueFlags eRequiredQueueFlags, bool bExactMatchByFlags );
         const QueueFamilyPool* GetPool( VkQueueFlags eRequiredQueueFlags, bool bExactMatchByFlags ) const;
 
@@ -206,6 +205,7 @@ namespace apemodevk {
          * @param bExactMatchByFlags Only the flags in RequiredQueueFlags must be present (for copy queues is important).
          * @return Unused queue, or null if none was found.
          * @note Release for reusing, @see Release().
+         * @see GetPool().
          */
         AcquiredQueue Acquire( bool bIgnoreFenceStatus, VkQueueFlags eRequiredQueueFlags, bool bExactMatchByFlags );
         AcquiredQueue Acquire( bool bIgnoreFenceStatus, uint32_t QueueFamilyIndex );
