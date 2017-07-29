@@ -18,103 +18,143 @@ apemodevk::GraphicsManager::APIVersion::APIVersion( bool bDump )
 }
 
 bool apemodevk::GraphicsManager::ScanInstanceLayerProperties( uint32_t flags ) {
-    uint32_t                LayerPropertyCount = 0;
-    ResultHandle            ErrorHandle;
-    std::vector<VkLayerProperties> GlobalLayers;
+    struct SpecialLayerOrExtension {
+        uint32_t    eFlag;
+        const char* pName;
+    };
 
-    do {
-        ErrorHandle = vkEnumerateInstanceLayerProperties( &LayerPropertyCount, NULL );
-        apemode_assert( ErrorHandle, "vkEnumerateInstanceLayerProperties failed." );
+    InstanceLayers.clear( );
+    InstanceLayerProps.clear( );
+    InstanceExtensions.clear( );
+    InstanceExtensionProps.clear( );
 
-        if ( ErrorHandle.Succeeded( ) && LayerPropertyCount ) {
-            GlobalLayers.resize( LayerPropertyCount );
-            ErrorHandle = vkEnumerateInstanceLayerProperties( &LayerPropertyCount, GlobalLayers.data( ) );
+    uint32_t PropCount = 0;
+    uint32_t LayerCount = 0;
+
+    switch ( CheckedCall( vkEnumerateInstanceLayerProperties( &LayerCount, NULL ) ) ) {
+        case VK_SUCCESS:
+            InstanceLayerProps.resize( LayerCount );
+            CheckedCall( vkEnumerateInstanceLayerProperties( &LayerCount, InstanceLayerProps.data( ) ) );
+            break;
+
+        default:
+            return false;
+    }
+
+    InstanceLayers.reserve( LayerCount + 1 );
+    InstanceLayers.push_back( nullptr );
+    std::transform( InstanceLayerProps.begin( ),
+                    InstanceLayerProps.end( ),
+                    std::back_inserter( InstanceLayers ),
+                    [&]( VkLayerProperties const& ExtProp ) { return ExtProp.layerName; } );
+
+    for ( SpecialLayerOrExtension specialLayer : {
+              SpecialLayerOrExtension{kEnable_LUNARG_vktrace, "VK_LAYER_LUNARG_vktrace"},
+              SpecialLayerOrExtension{kEnable_LUNARG_api_dump, "VK_LAYER_LUNARG_api_dump"},
+              SpecialLayerOrExtension{kEnable_RENDERDOC_Capture, "VK_LAYER_RENDERDOC_Capture"},
+              /*SpecialLayerOrExtension{kEnable_RENDERDOC_Capture, "VK_LAYER_LUNARG_core_validation"},
+              SpecialLayerOrExtension{kEnable_RENDERDOC_Capture, "VK_LAYER_LUNARG_monitor"},
+              SpecialLayerOrExtension{kEnable_RENDERDOC_Capture, "VK_LAYER_LUNARG_object_tracker"},
+              SpecialLayerOrExtension{kEnable_RENDERDOC_Capture, "VK_LAYER_LUNARG_parameter_validation"},
+              SpecialLayerOrExtension{kEnable_RENDERDOC_Capture, "VK_LAYER_LUNARG_screenshot"},
+              SpecialLayerOrExtension{kEnable_RENDERDOC_Capture, "VK_LAYER_LUNARG_standard_validation"},*/
+              SpecialLayerOrExtension{8, "VK_LAYER_GOOGLE_threading"},
+              SpecialLayerOrExtension{8, "VK_LAYER_GOOGLE_unique_objects"},
+              SpecialLayerOrExtension{8, "VK_LAYER_NV_optimus"},
+              SpecialLayerOrExtension{8, "VK_LAYER_NV_nsight"},
+          } ) {
+        if ( false == HasFlagEq( flags, specialLayer.eFlag ) ) {
+            auto specialLayerIt = std::find_if( ++InstanceLayers.begin( ), InstanceLayers.end( ), [&]( const char* pName ) {
+                return 0 == strcmp( pName, specialLayer.pName );
+            } );
+
+            if ( specialLayerIt != InstanceLayers.end( ) )
+                InstanceLayers.erase( specialLayerIt );
         }
+    }
 
-    } while ( ErrorHandle == ResultHandle::Incomplete );
+    for ( auto pInstanceLayer : InstanceLayers ) {
+        switch ( CheckedCall( vkEnumerateInstanceExtensionProperties( pInstanceLayer, &PropCount, NULL ) ) ) {
+            case VK_SUCCESS: {
+                uint32_t FirstInstanceExtension = InstanceExtensionProps.size( );
+                InstanceExtensionProps.resize( InstanceExtensionProps.size( ) + PropCount );
+                CheckedCall( vkEnumerateInstanceExtensionProperties( pInstanceLayer, &PropCount, InstanceExtensionProps.data( ) + FirstInstanceExtension ) );
+            } break;
 
-    apemode_assert( ErrorHandle, "vkEnumerateInstanceLayerProperties failed." );
-    LayerWrappers.reserve( LayerPropertyCount + 1 );
-
-    auto ResolveLayerExtensions = [this]( VkLayerProperties const *Layer ) {
-        ResultHandle ErrorHandle;
-        uint32_t     LayerExtensionCount = 0;
-
-        const bool  bIsUnnamed   = !Layer;
-        auto &      LayerWrapper = apemodevk::PushBackAndGet( LayerWrappers );
-        char const *LayerName    = bIsUnnamed ? LayerWrapper.Layer->layerName : nullptr;
-
-        LayerWrapper.Layer      = !bIsUnnamed ? *Layer : VkLayerProperties( );
-        LayerWrapper.bIsUnnamed = bIsUnnamed;
-
-        do {
-            ErrorHandle = vkEnumerateInstanceExtensionProperties( LayerName, &LayerExtensionCount, NULL );
-            apemode_assert( ErrorHandle, "vkEnumerateInstanceExtensionProperties failed." );
-
-            if ( ErrorHandle.Succeeded( ) && LayerExtensionCount ) {
-                LayerWrapper.Extensions.resize( LayerExtensionCount );
-                ErrorHandle =
-                    vkEnumerateInstanceExtensionProperties( LayerName, &LayerExtensionCount, LayerWrapper.Extensions.data( ) );
-            }
-
-        } while ( ErrorHandle == ResultHandle::Incomplete );
-
-        apemode_assert( ErrorHandle, "vkEnumerateInstanceExtensionProperties failed." );
-        apemode_assert( LayerWrapper.IsValidInstanceLayer( ), "Layer is invalid" );
-    };
-
-    auto ResolveLayerExtensionsRef = [this, &ResolveLayerExtensions]( VkLayerProperties const &Layer ) {
-        ResolveLayerExtensions( &Layer );
-    };
-
-    ResolveLayerExtensions( nullptr );
-    std::for_each( GlobalLayers.begin( ), GlobalLayers.end( ), ResolveLayerExtensionsRef );
-
-    PresentLayers.reserve( GlobalLayers.size( ) );
-
-    auto       LayerWrapperIt    = LayerWrappers.begin( );
-    auto const LayerWrapperEndIt = LayerWrappers.end( );
-    std::advance( LayerWrapperIt, 1 );
-
-    auto ResolveLayerName = [&]( NativeLayerWrapper const &LayerWrapper ) {
-
-        if ( !strcmp( LayerWrapper.Layer->layerName, "VK_LAYER_LUNARG_vktrace" ) && ( flags & kEnableVkTraceLayer ) ) {
-            PresentLayers.push_back( LayerWrapper.Layer->layerName );
-        } else if ( !strcmp( LayerWrapper.Layer->layerName, "VK_LAYER_LUNARG_api_dump" ) && ( flags & kEnableVkApiDumpLayer ) ) {
-            PresentLayers.push_back( LayerWrapper.Layer->layerName );
-        } else if ( !strcmp( LayerWrapper.Layer->layerName, "VK_LAYER_RENDERDOC_Capture" ) && ( flags & kEnableRenderDocLayer ) ) {
-            PresentLayers.push_back( LayerWrapper.Layer->layerName );
-        } else if ( strcmp( LayerWrapper.Layer->layerName, "VK_LAYER_LUNARG_vktrace" ) &&
-                    strcmp( LayerWrapper.Layer->layerName, "VK_LAYER_LUNARG_api_dump" ) &&
-                    strcmp( LayerWrapper.Layer->layerName, "VK_LAYER_RENDERDOC_Capture" ) && ( flags & kEnableLayers ) ) {
-            PresentLayers.push_back( LayerWrapper.Layer->layerName );
-        } else {
+            default:
+                return false;
         }
-    };
+    }
 
-    std::for_each( LayerWrapperIt, LayerWrapperEndIt, ResolveLayerName );
+    std::sort( InstanceExtensionProps.begin( ),
+               InstanceExtensionProps.end( ),
+               [&]( VkExtensionProperties const& a, VkExtensionProperties const& b ) {
+                   return 0 > strcmp( a.extensionName, b.extensionName );
+               } );
+    InstanceExtensionProps.erase( std::unique( InstanceExtensionProps.begin( ),
+                                               InstanceExtensionProps.end( ),
+                                               [&]( VkExtensionProperties const& a, VkExtensionProperties const& b ) {
+                                                   return 0 == strcmp( a.extensionName, b.extensionName );
+                                               } ),
+                                  InstanceExtensionProps.end( ) );
 
-    PresentExtensions.reserve( GetUnnamedLayer( ).Extensions.size( ) );
+    InstanceLayers.erase( InstanceLayers.begin( ) );
 
-    auto const ExtensionIt    = GetUnnamedLayer( ).Extensions.begin( );
-    auto const ExtensionEndIt = GetUnnamedLayer( ).Extensions.end( );
-    auto ResolveExtensionName = [&]( VkExtensionProperties const &Extension ) { return Extension.extensionName; };
-    std::transform( ExtensionIt, ExtensionEndIt, std::back_inserter( PresentExtensions ), ResolveExtensionName );
+    platform::DebugTrace( "Instance Layers (%u):", InstanceLayers.size( ) );
+    std::for_each( InstanceLayers.begin( ), InstanceLayers.end( ), [&]( const char* pName ) {
+        platform::DebugTrace( "> %s", pName );
+    } );
 
-    return ErrorHandle.Succeeded( );
+    InstanceExtensions.reserve( InstanceExtensionProps.size( ) );
+    std::transform( InstanceExtensionProps.begin( ),
+                    InstanceExtensionProps.end( ),
+                    std::back_inserter( InstanceExtensions ),
+                    [&]( VkExtensionProperties const& ExtProp ) { return ExtProp.extensionName; } );
+
+    /*
+        APEMODE VK: > VK_EXT_debug_report
+        APEMODE VK: > VK_EXT_display_surface_counter
+        APEMODE VK: > VK_KHR_get_physical_device_properties2
+        APEMODE VK: > VK_KHR_get_surface_capabilities2
+        APEMODE VK: > VK_KHR_surface
+        APEMODE VK: > VK_KHR_win32_surface
+        APEMODE VK: > VK_KHX_device_group_creation
+        APEMODE VK: > VK_NV_external_memory_capabilities
+    */
+
+    for ( SpecialLayerOrExtension specialLayer : {SpecialLayerOrExtension{8, "VK_NV_external_memory_capabilities"},
+                                                  SpecialLayerOrExtension{8, "VK_KHX_device_group_creation"},
+                                                  //SpecialLayerOrExtension{8, "VK_KHR_win32_surface"},
+                                                  //SpecialLayerOrExtension{8, "VK_KHR_surface"},
+                                                  SpecialLayerOrExtension{8, "VK_KHR_get_surface_capabilities2"},
+                                                  SpecialLayerOrExtension{8, "VK_KHR_get_physical_device_properties2"},
+                                                  SpecialLayerOrExtension{8, "VK_EXT_display_surface_counter"}} ) {
+        if ( false == HasFlagEq( flags, specialLayer.eFlag ) ) {
+            auto specialLayerIt = std::find_if( InstanceExtensions.begin( ),
+                                                InstanceExtensions.end( ),
+                                                [&]( const char* pName ) { return 0 == strcmp( pName, specialLayer.pName ); } );
+
+            if ( specialLayerIt != InstanceExtensions.end( ) )
+                InstanceExtensions.erase( specialLayerIt );
+        }
+    }
+
+    platform::DebugTrace( "Instance Extensions (%u):", InstanceExtensions.size( ) );
+    std::for_each( InstanceExtensions.begin( ), InstanceExtensions.end( ), [&]( const char* pName ) {
+        platform::DebugTrace( "> %s", pName );
+    } );
+
+    return true;
 }
 
-bool apemodevk::GraphicsManager::ScanAdapters( ) {
-    uint32_t               AdaptersFound = 0;
+bool apemodevk::GraphicsManager::ScanAdapters( uint32_t flags) {
     std::vector<VkPhysicalDevice> Adapters;
 
-    ResultHandle ErrorHandle;
-    ErrorHandle = vkEnumeratePhysicalDevices( hInstance, &AdaptersFound, NULL );
-    apemode_assert( ErrorHandle, "vkEnumeratePhysicalDevices failed." );
+    uint32_t AdaptersFound = 0;
+    CheckedCall( vkEnumeratePhysicalDevices( hInstance, &AdaptersFound, NULL ) );
 
     Adapters.resize( AdaptersFound );
-    ErrorHandle = vkEnumeratePhysicalDevices( hInstance, &AdaptersFound, Adapters.data( ) );
-    apemode_assert( ErrorHandle, "vkEnumeratePhysicalDevices failed." );
+    CheckedCall( vkEnumeratePhysicalDevices( hInstance, &AdaptersFound, Adapters.data( ) ) );
 
     // TODO:
     //      Choose the best 2 nodes here.
@@ -132,7 +172,7 @@ bool apemodevk::GraphicsManager::ScanAdapters( ) {
         }
 
         if ( CurrentNode != nullptr ) {
-            CurrentNode->RecreateResourcesFor( Adapter, *this );
+            CurrentNode->RecreateResourcesFor( Adapter, *this, flags );
         }
     } );
 
@@ -173,10 +213,10 @@ bool apemodevk::GraphicsManager::InitializeInstance( uint32_t flags ) {
     TInfoStruct< VkInstanceCreateInfo > InstanceDesc;
     InstanceDesc->pNext                   = DebugDesc;
     InstanceDesc->pApplicationInfo        = AppDesc;
-    InstanceDesc->enabledLayerCount       = _Get_collection_length_u( PresentLayers );
-    InstanceDesc->ppEnabledLayerNames     = PresentLayers.data( );
-    InstanceDesc->enabledExtensionCount   = _Get_collection_length_u( PresentExtensions );
-    InstanceDesc->ppEnabledExtensionNames = PresentExtensions.data( );
+    InstanceDesc->enabledLayerCount       = _Get_collection_length_u( InstanceLayers );
+    InstanceDesc->ppEnabledLayerNames     = InstanceLayers.data( );
+    InstanceDesc->enabledExtensionCount   = _Get_collection_length_u( InstanceExtensions );
+    InstanceDesc->ppEnabledExtensionNames = InstanceExtensions.data( );
 
     /*
     Those layers cannot be used as standalone layers (please, see vktrace, renderdoc docs)
@@ -196,7 +236,7 @@ bool apemodevk::GraphicsManager::InitializeInstance( uint32_t flags ) {
     bool bIsOk = hInstance.Recreate( InstanceDesc );
     apemode_assert( bIsOk, "vkCreateInstance failed." );
 
-    if ( !ScanAdapters( ) )
+    if ( !ScanAdapters( flags ) )
         return false;
 
     return true;

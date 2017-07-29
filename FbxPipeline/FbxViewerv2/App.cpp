@@ -207,7 +207,15 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         updateParams.pDescPool = appContent->DescPool;
         updateParams.FrameCount = appContent->FrameCount;
 
-        appContent->Scenes.push_back(LoadSceneFromFile("../../../assets/Mech6k4p.fbxp"));
+        appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/A45p.fbxp"));
+        //appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/A45.fbxp"));
+        //appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Mech6kv4.fbxp"));
+        //appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Mech6kv4p.fbxp"));
+        //appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Mech6kv4.fbxp"));
+        //appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Cube10p.fbxp"));
+        //appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Knifep.fbxp"));
+        //appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/pontiacp.fbxp"));
+            //appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Mech6kv4p.fbxp"));
         updateParams.pSceneSrc = appContent->Scenes.back()->sourceScene;
 
         appContent->pSceneRendererBase->UpdateScene(appContent->Scenes.back(), &updateParams);
@@ -568,6 +576,7 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         frameData.color = {1, 0, 0, 1};
 
         appContent->pDebugRenderer->Reset( appContent->FrameIndex );
+        appContent->pSceneRendererBase->Reset( appContent->Scenes[0], appContent->FrameIndex );
 
         DebugRendererVk::RenderParametersVk renderParamsDbg;
         renderParamsDbg.dims[ 0 ]  = (float) width;
@@ -601,6 +610,19 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         frameData.color = { 1, 0, 0, 1 };
         appContent->pDebugRenderer->Render(&renderParamsDbg);
 
+        apemode::SceneRendererVk::SceneRenderParametersVk sceneRenderParameters;
+        sceneRenderParameters.dims[ 0 ]  = (float) width;
+        sceneRenderParameters.dims[ 1 ]  = (float) height;
+        sceneRenderParameters.scale[ 0 ] = 1;
+        sceneRenderParameters.scale[ 1 ] = 1;
+        sceneRenderParameters.FrameIndex = appContent->FrameIndex;
+        sceneRenderParameters.pCmdBuffer = cmdBuffer;
+        sceneRenderParameters.pNode = appSurfaceVk->pNode;
+        sceneRenderParameters.ViewMatrix = frameData.viewMatrix;
+        sceneRenderParameters.ProjMatrix = frameData.projectionMatrix;
+
+        appContent->pSceneRendererBase->RenderScene(appContent->Scenes[0], &sceneRenderParameters);
+
         NuklearRendererSdlVk::RenderParametersVk renderParamsNk;
         renderParamsNk.dims[ 0 ]          = (float) width;
         renderParamsNk.dims[ 1 ]          = (float) height;
@@ -617,6 +639,9 @@ void App::Update( float deltaSecs, Input const& inputState ) {
 
         vkCmdEndRenderPass( cmdBuffer );
 
+        appContent->pDebugRenderer->Flush( appContent->FrameIndex );
+        appContent->pSceneRendererBase->Flush( appContent->Scenes[0], appContent->FrameIndex );
+
         VkPipelineStageFlags waitPipelineStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 
         VkSubmitInfo submitInfo;
@@ -628,8 +653,6 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         submitInfo.pWaitDstStageMask    = &waitPipelineStage;
         submitInfo.commandBufferCount   = 1;
         submitInfo.pCommandBuffers      = &cmdBuffer;
-
-        appContent->pDebugRenderer->Flush( appContent->FrameIndex );
 
         CheckedCall( vkEndCommandBuffer( cmdBuffer ) );
         CheckedCall( vkResetFences( device, 1, &fence ) );

@@ -142,13 +142,12 @@ namespace apemodevk {
         inline void DebugBreak( ) {
             if ( IsDebuggerPresent( ) ) {
 #ifdef _WINDOWS_
-                // Does not require symbols
-                __debugbreak( );
+                __debugbreak( ); /* Does not require symbols */
 #endif
             }
         }
 
-        template < bool bNewLine = true, unsigned uBufferSize = 1024u >
+        template < bool bNewLine = true, bool bConsole = true, unsigned uBufferSize = 1024u >
         static void DebugTrace( char const *fmt, ... ) {
             static const int s_length = uBufferSize - 2;
             char buffer[ uBufferSize ];
@@ -166,7 +165,14 @@ namespace apemodevk {
             } else
                 buffer[ n ] = L'\0';
 
+            OutputDebugStringA( "APEMODE VK: " );
             OutputDebugStringA( buffer );
+
+            if ( bConsole ) {
+                printf_s( "APEMODE VK: " );
+                printf_s( buffer );
+            }
+
             va_end( ap );
         }
     } // namespace platform

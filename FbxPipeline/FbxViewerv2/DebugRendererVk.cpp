@@ -372,7 +372,7 @@ bool apemode::DebugRendererVk::RecreateResources( InitParametersVk* initParams )
             range.memory = hVertexBufferMemory;
             range.size   = VK_WHOLE_SIZE;
 
-            if ( ResultHandle::Failed( vkFlushMappedMemoryRanges( initParams->pDevice, 1, &range ) ) ) {
+            if ( VK_SUCCESS != CheckedCall( vkFlushMappedMemoryRanges( initParams->pDevice, 1, &range ) ) ) {
                 DebugBreak( );
                 return false;
             }

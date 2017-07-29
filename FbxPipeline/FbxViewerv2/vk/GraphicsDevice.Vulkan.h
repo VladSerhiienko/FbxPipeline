@@ -28,7 +28,7 @@ namespace apemodevk {
         GraphicsDevice( );
         ~GraphicsDevice( );
 
-        bool RecreateResourcesFor( VkPhysicalDevice pPhysicalDevice, GraphicsManager &GraphicsEcosystem );
+        bool RecreateResourcesFor( VkPhysicalDevice pPhysicalDevice, GraphicsManager &GraphicsEcosystem, uint32_t flags );
 
         bool IsValid( ) const;
         bool Await( );
@@ -37,30 +37,30 @@ namespace apemodevk {
         const QueuePool *        GetQueuePool( ) const;
         CommandBufferPool *      GetCommandBufferPool( );
         const CommandBufferPool *GetCommandBufferPool( ) const;
-
-        GraphicsManager &      GetGraphicsManager( );
-        NativeLayerWrapper &   GetUnnamedLayer( );
+        GraphicsManager &        GetGraphicsManager( );
+        const GraphicsManager &  GetGraphicsManager( ) const;
 
         bool ScanDeviceQueues( VkQueueFamilyPropertiesVector &QueueProps,
                                VkDeviceQueueCreateInfoVector &QueueReqs,
                                FloatVector &                  QueuePriorities );
 
-        bool ScanDeviceLayerProperties( );
+        bool ScanDeviceLayerProperties( uint32_t flags );
         bool ScanFormatProperties( );
 
         operator VkDevice( ) const;
         operator VkPhysicalDevice( ) const;
         operator VkInstance( ) const;
 
-        GraphicsManager *                    pGraphicsEcosystem;
+        GraphicsManager *                    pManager;
         TDispatchableHandle< VkDevice >      hLogicalDevice;
         VkPhysicalDevice                     pPhysicalDevice;
         VkPhysicalDeviceProperties           AdapterProps;
         VkPhysicalDeviceMemoryProperties     MemoryProps;
         VkPhysicalDeviceFeatures             Features;
         VkFormatPropertiesArray              FormatProperties;
-        std::vector< NativeLayerWrapper >    LayerWrappers;
-        std::vector< const char * >          PresentLayers;
+        std::vector< const char * >          DeviceLayers;
+        std::vector< const char * >          DeviceExtensions;
+        std::vector< VkLayerProperties >     DeviceLayerProps;
         std::vector< VkExtensionProperties > DeviceExtensionProps;
         std::unique_ptr< QueuePool >         pQueuePool;
         std::unique_ptr< CommandBufferPool > pCmdBufferPool;

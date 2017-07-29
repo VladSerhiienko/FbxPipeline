@@ -336,7 +336,8 @@ bool GetSubsets( FbxMesh* mesh, apemode::Mesh& m, std::vector< apemodefb::Subset
 
             if ( materialIndex != (uint32_t) -1 ) {
                 const auto subsetLength = indexCount - subsetStartIndex;
-                subsets.emplace_back( materialIndex, (uint32_t)subsetStartIndex, (uint32_t)subsetLength );
+                subsets.emplace_back( materialIndex, (uint32_t)subsetStartIndex * 3, (uint32_t)subsetLength * 3 );
+                // subsets.emplace_back( materialIndex, (uint32_t)subsetStartIndex, (uint32_t)subsetLength );
 
                 s.console->info( "\tMesh subset #{} for material #{} index range: [{}; {}].",
                                  subsets.size( ) - 1,
@@ -361,7 +362,8 @@ bool GetSubsets( FbxMesh* mesh, apemode::Mesh& m, std::vector< apemodefb::Subset
     if ( !subsetPolies.empty( ) ) {
         const TIndex indexCount = subsetIndexCount; // (TIndex)indices.size();
         const auto subsetLength = indexCount - subsetStartIndex;
-        subsets.emplace_back( materialIndex, subsetStartIndex, subsetLength );
+        //subsets.emplace_back( materialIndex, subsetStartIndex, subsetLength );
+        subsets.emplace_back( materialIndex, (uint32_t) subsetStartIndex * 3, (uint32_t) subsetLength * 3 );
 
         s.console->info( "\tMesh subset #{} for material #{} index range: [{}; {}].",
                          subsets.size( ) - 1,
@@ -644,9 +646,6 @@ void ExportMesh( FbxNode* node, FbxMesh* mesh, apemode::Node& n, apemode::Mesh& 
 
     m.vertices.resize( vertexBufferSize );
 
-    std::vector< TIndex > tempSubsetIndices;
-    std::vector< std::tuple< TIndex, TIndex > > tempItems;
-
     mathfu::vec3 positionMin;
     mathfu::vec3 positionMax;
     mathfu::vec2 texcoordMin;
@@ -663,10 +662,17 @@ void ExportMesh( FbxNode* node, FbxMesh* mesh, apemode::Node& n, apemode::Mesh& 
 
     GetSubsets< TIndex >( mesh, m, m.subsets );
 
-    m.indices.reserve( vertexCount );
-    uint32_t index = 0;
-    while ( index < vertexCount )
-        m.indices.emplace_back( index++ );
+    if ( m.subsets.empty( ) ) {
+        m.subsets.push_back( apemodefb::SubsetFb( 0, 0, vertexCount ) );
+    }
+
+    m.indices.resize( vertexCount * sizeof( TIndex ) );
+    auto indices = (TIndex*) m.indices.data( );
+
+    TIndex index = 0;
+    while ( index < vertexCount ) {
+        *indices++ = index++;
+    }
 
     if ( std::is_same< TIndex, uint16_t >::value ) {
         m.indexType = apemodefb::EIndexTypeFb_UInt16;

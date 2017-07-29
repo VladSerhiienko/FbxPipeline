@@ -2,132 +2,51 @@
 
 #include <Platform.Vulkan.h>
 
-namespace apemodevk
-{
-    struct ResultHandle
-    {
-        enum EValues
-        {
-            bTrue  = VK_TRUE,
-            bFalse = VK_FALSE,
-
-            Success              = VK_SUCCESS,
-            NotReady             = VK_NOT_READY,
-            Timeout              = VK_TIMEOUT,
-            EventSet             = VK_EVENT_SET,
-            EventReset           = VK_EVENT_RESET,
-            Incomplete           = VK_INCOMPLETE,
-            Suboptimal           = VK_SUBOPTIMAL_KHR,
-            OutOfSystemMemory    = VK_ERROR_OUT_OF_HOST_MEMORY,
-            OutOfDeviceMemory    = VK_ERROR_OUT_OF_DEVICE_MEMORY,
-            InitializationFailed = VK_ERROR_INITIALIZATION_FAILED,
-            DeviceLost           = VK_ERROR_DEVICE_LOST,
-            MemoryMapFailed      = VK_ERROR_MEMORY_MAP_FAILED,
-            LayerNotPresent      = VK_ERROR_LAYER_NOT_PRESENT,
-            ExtensionNotPresent  = VK_ERROR_EXTENSION_NOT_PRESENT,
-            FeatureNotPresent    = VK_ERROR_FEATURE_NOT_PRESENT,
-            IncompatibleDriver   = VK_ERROR_INCOMPATIBLE_DRIVER,
-            TooManyObjects       = VK_ERROR_TOO_MANY_OBJECTS,
-            FormatNotSupproted   = VK_ERROR_FORMAT_NOT_SUPPORTED,
-            SurfaceLost          = VK_ERROR_SURFACE_LOST_KHR,
-            NativeWindowInUse    = VK_ERROR_NATIVE_WINDOW_IN_USE_KHR,
-            OutOfDate            = VK_ERROR_OUT_OF_DATE_KHR,
-            IncompatibleDisplay  = VK_ERROR_INCOMPATIBLE_DISPLAY_KHR,
-            ValidationFailed     = VK_ERROR_VALIDATION_FAILED_EXT,
-            BeginRange           = VK_RESULT_BEGIN_RANGE,
-            EndRange             = VK_RESULT_END_RANGE,
-            RangeSize            = VK_RESULT_RANGE_SIZE,
-        };
-
-        EValues eError;
-
-        inline ResultHandle () : eError (Success)
-        {
+namespace apemodevk {
+    inline const char *ToString( VkResult eResult ) {
+        switch ( eResult ) {
+            case VK_SUCCESS: return "VK_SUCCESS";
+            case VK_NOT_READY: return "VK_NOT_READY";
+            case VK_TIMEOUT: return "VK_TIMEOUT";
+            case VK_EVENT_SET: return "VK_EVENT_SET";
+            case VK_EVENT_RESET: return "VK_EVENT_RESET";
+            case VK_INCOMPLETE: return "VK_INCOMPLETE";
+            case VK_ERROR_OUT_OF_HOST_MEMORY: return "VK_ERROR_OUT_OF_HOST_MEMORY";
+            case VK_ERROR_OUT_OF_DEVICE_MEMORY: return "VK_ERROR_OUT_OF_DEVICE_MEMORY";
+            case VK_ERROR_INITIALIZATION_FAILED: return "VK_ERROR_INITIALIZATION_FAILED";
+            case VK_ERROR_DEVICE_LOST: return "VK_ERROR_DEVICE_LOST";
+            case VK_ERROR_MEMORY_MAP_FAILED: return "VK_ERROR_MEMORY_MAP_FAILED";
+            case VK_ERROR_LAYER_NOT_PRESENT: return "VK_ERROR_LAYER_NOT_PRESENT";
+            case VK_ERROR_EXTENSION_NOT_PRESENT: return "VK_ERROR_EXTENSION_NOT_PRESENT";
+            case VK_ERROR_FEATURE_NOT_PRESENT: return "VK_ERROR_FEATURE_NOT_PRESENT";
+            case VK_ERROR_INCOMPATIBLE_DRIVER: return "VK_ERROR_INCOMPATIBLE_DRIVER";
+            case VK_ERROR_TOO_MANY_OBJECTS: return "VK_ERROR_TOO_MANY_OBJECTS";
+            case VK_ERROR_FORMAT_NOT_SUPPORTED: return "VK_ERROR_FORMAT_NOT_SUPPORTED";
+            case VK_ERROR_FRAGMENTED_POOL: return "VK_ERROR_FRAGMENTED_POOL";
+            case VK_ERROR_SURFACE_LOST_KHR: return "VK_ERROR_SURFACE_LOST_KHR";
+            case VK_ERROR_NATIVE_WINDOW_IN_USE_KHR: return "VK_ERROR_NATIVE_WINDOW_IN_USE_KHR";
+            case VK_SUBOPTIMAL_KHR: return "VK_SUBOPTIMAL_KHR";
+            case VK_ERROR_OUT_OF_DATE_KHR: return "VK_ERROR_OUT_OF_DATE_KHR";
+            case VK_ERROR_INCOMPATIBLE_DISPLAY_KHR: return "VK_ERROR_INCOMPATIBLE_DISPLAY_KHR";
+            case VK_ERROR_VALIDATION_FAILED_EXT: return "VK_ERROR_VALIDATION_FAILED_EXT";
+            case VK_ERROR_INVALID_SHADER_NV: return "VK_ERROR_INVALID_SHADER_NV";
+            case VK_ERROR_OUT_OF_POOL_MEMORY_KHR: return "VK_ERROR_OUT_OF_POOL_MEMORY_KHR";
+            // case VK_ERROR_INVALID_EXTERNAL_HANDLE_KHX: return "VK_ERROR_INVALID_EXTERNAL_HANDLE_KHX";
+            default: return "UNKNOWN";
         }
+    }
 
-        inline ResultHandle (VkResult NativeHandle) : eError (static_cast<EValues> (NativeHandle))
-        {
-        }
-
-        ResultHandle & operator= (ResultHandle const & Other)
-        {
-            eError = Other.eError;
-            return *this;
-        }
-
-        inline operator bool () const
-        {
-            return eError == Success;
-        }
-
-        template <typename TEnum>
-        inline bool operator== (TEnum Other) const
-        {
-            return eError == Other;
-        }
-
-        template <typename TEnum>
-        inline bool operator!= (TEnum Other) const
-        {
-            return eError != Other;
-        }
-
-        template <>
-        inline bool operator==<ResultHandle> (ResultHandle Other) const
-        {
-            return eError == Other.eError;
-        }
-
-        template <>
-        inline bool operator!=<ResultHandle> (ResultHandle Other) const
-        {
-            return eError != Other.eError;
-        }
-
-        inline bool Succeeded () const
-        {
-            return eError == Success;
-        }
-
-        inline bool Failed () const
-        {
-            return eError < Success;
-        }
-
-        inline VkResult GetNativeObj () const
-        {
-            return static_cast<VkResult> (eError);
-        }
-
-        inline static bool Succeeded (VkResult NativeObj)
-        {
-            return NativeObj == Success;
-        }
-
-        inline static bool Failed (VkResult NativeObj)
-        {
-            return NativeObj < Success;
-        }
-
-        inline static bool Succeeded (VkBool32 NativeObj)
-        {
-            return NativeObj != bFalse;
-        }
-
-        inline static bool Failed (VkBool32 NativeObj)
-        {
-            return NativeObj == bFalse;
-        }
-    };
-
-    /* Breaks on failures */
-    inline void CheckedCall( const ResultHandle &returnValue ) {
+    /* Breaks on failures in debug and prints the error */
+    inline VkResult CheckedCall( VkResult eResult ) {
 #ifdef _DEBUG
-        if ( false == returnValue.Succeeded( ) ) {
+        if ( VK_SUCCESS != eResult ) {
+            platform::DebugTrace( " (ERROR) %u %s.", eResult, ToString( eResult ) );
             platform::DebugBreak( );
         }
 #endif
+
+        return eResult;
     }
-}
+} // namespace apemodevk
 
 #include <CityHash.h>

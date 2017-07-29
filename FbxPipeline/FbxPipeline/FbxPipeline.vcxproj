@@ -201,7 +201,7 @@ exit 0</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="fbxpacking.cpp" />
+    <ClCompile Include="fbxppacking.cpp" />
     <ClCompile Include="fbxpanimation.cpp" />
     <ClCompile Include="fbxpfileutils.cpp" />
     <ClCompile Include="fbxpmem.cpp" />

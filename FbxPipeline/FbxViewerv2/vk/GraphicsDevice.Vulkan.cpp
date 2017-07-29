@@ -13,11 +13,6 @@
 /// GraphicsDevice PrivateContent
 /// -------------------------------------------------------------------------------------------------------------------
 
-apemodevk::GraphicsDevice::NativeLayerWrapper& apemodevk::GraphicsDevice::GetUnnamedLayer( ) {
-    apemode_assert( LayerWrappers.front( ).IsUnnamedLayer( ), "vkEnumerateInstanceExtensionProperties failed." );
-    return LayerWrappers.front( );
-}
-
 bool apemodevk::GraphicsManager::NativeLayerWrapper::IsValidDeviceLayer( ) const {
     if ( IsUnnamedLayer( ) ) {
         auto const KnownExtensionBeginIt = Vulkan::KnownDeviceExtensions;
@@ -57,9 +52,11 @@ bool apemodevk::GraphicsDevice::ScanDeviceQueues( VkQueueFamilyPropertiesVector&
         QueueReqs.reserve( QueuesFound );
 
         vkGetPhysicalDeviceQueueFamilyProperties( pPhysicalDevice, &QueuesFound, QueueProps.data( ) );
+        platform::DebugTrace( "Queue Families: %u", QueuesFound );
 
         uint32_t TotalQueuePrioritiesCount = 0;
         std::for_each( QueueProps.begin( ), QueueProps.end( ), [&]( VkQueueFamilyProperties& QueueProp ) {
+            platform::DebugTrace( "> Flags: %x, Count: %u", QueueProp.queueFlags, QueueProp.queueCount );
             TotalQueuePrioritiesCount += QueueProp.queueCount;
         } );
 
@@ -79,17 +76,101 @@ bool apemodevk::GraphicsDevice::ScanDeviceQueues( VkQueueFamilyPropertiesVector&
     return true;
 }
 
-bool apemodevk::GraphicsDevice::ScanDeviceLayerProperties( ) {
-    uint32_t ExtPropCount = 0;
-    ResultHandle ErrorHandle = vkEnumerateDeviceExtensionProperties( pPhysicalDevice, NULL, &ExtPropCount, NULL );
-    if ( ErrorHandle && ExtPropCount ) {
-        DeviceExtensionProps.resize( ExtPropCount );
-        ErrorHandle = vkEnumerateDeviceExtensionProperties( pPhysicalDevice, NULL, &ExtPropCount, DeviceExtensionProps.data( ) );
+bool apemodevk::GraphicsDevice::ScanDeviceLayerProperties( uint32_t flags ) {
 
-        return ErrorHandle;
+    struct SpecialLayerOrExtension {
+        uint32_t    eFlag;
+        const char* pName;
+    };
+
+    DeviceLayers.clear( );
+    DeviceLayerProps.clear( );
+    DeviceExtensions.clear( );
+    DeviceExtensionProps.clear( );
+
+    VkResult eResult;
+
+    uint32_t LayerCount = 0;
+    eResult = vkEnumerateDeviceLayerProperties( pPhysicalDevice, &LayerCount, NULL );
+    if (  VK_SUCCESS == eResult && LayerCount ) {
+        DeviceLayerProps.resize( LayerCount );
+        eResult = vkEnumerateDeviceLayerProperties( pPhysicalDevice, &LayerCount, DeviceLayerProps.data( ) );
     }
 
-    return false;
+    if ( VK_SUCCESS != eResult )
+        return false;
+
+    DeviceLayers.reserve( LayerCount + 1 );
+    DeviceLayers.push_back( nullptr );
+    std::transform( DeviceLayerProps.begin( ),
+                    DeviceLayerProps.end( ),
+                    std::back_inserter( DeviceLayers ),
+                    [&]( VkLayerProperties const& ExtProp ) { return ExtProp.layerName; } );
+
+    for ( auto layerName : DeviceLayers ) {
+        uint32_t ExtPropCount = 0;
+        eResult = vkEnumerateDeviceExtensionProperties( pPhysicalDevice, layerName, &ExtPropCount, NULL );
+        if ( VK_SUCCESS == eResult && ExtPropCount ) {
+            uint32_t firstExt = DeviceExtensionProps.size( );
+            DeviceExtensionProps.resize( DeviceExtensionProps.size( ) + ExtPropCount );
+            eResult = vkEnumerateDeviceExtensionProperties( pPhysicalDevice, layerName, &ExtPropCount, DeviceExtensionProps.data( ) + firstExt );
+        }
+    }
+
+    std::sort( DeviceExtensionProps.begin( ),
+               DeviceExtensionProps.end( ),
+               [&]( VkExtensionProperties const& a, VkExtensionProperties const& b ) {
+                   return 0 > strcmp( a.extensionName, b.extensionName );
+               } );
+    DeviceExtensionProps.erase( std::unique( DeviceExtensionProps.begin( ),
+                                             DeviceExtensionProps.end( ),
+                                             [&]( VkExtensionProperties const& a, VkExtensionProperties const& b ) {
+                                                 return 0 == strcmp( a.extensionName, b.extensionName );
+                                             } ),
+                                DeviceExtensionProps.end( ) );
+
+    DeviceLayers.erase( DeviceLayers.begin( ) );
+
+    for ( SpecialLayerOrExtension specialLayer : {
+              SpecialLayerOrExtension{GraphicsManager::kEnable_LUNARG_vktrace, "VK_LAYER_LUNARG_vktrace"},
+              SpecialLayerOrExtension{GraphicsManager::kEnable_LUNARG_api_dump, "VK_LAYER_LUNARG_api_dump"},
+              SpecialLayerOrExtension{GraphicsManager::kEnable_RENDERDOC_Capture, "VK_LAYER_RENDERDOC_Capture"},
+              /*
+              SpecialLayerOrExtension{kEnable_RENDERDOC_Capture, "VK_LAYER_LUNARG_core_validation"},
+              SpecialLayerOrExtension{kEnable_RENDERDOC_Capture, "VK_LAYER_LUNARG_monitor"},
+              SpecialLayerOrExtension{kEnable_RENDERDOC_Capture, "VK_LAYER_LUNARG_object_tracker"},
+              SpecialLayerOrExtension{kEnable_RENDERDOC_Capture, "VK_LAYER_LUNARG_parameter_validation"},
+              SpecialLayerOrExtension{kEnable_RENDERDOC_Capture, "VK_LAYER_LUNARG_screenshot"},
+              SpecialLayerOrExtension{kEnable_RENDERDOC_Capture, "VK_LAYER_LUNARG_standard_validation"},
+              */
+              SpecialLayerOrExtension{8, "VK_LAYER_GOOGLE_threading"},
+              SpecialLayerOrExtension{8, "VK_LAYER_GOOGLE_unique_objects"},
+              SpecialLayerOrExtension{8, "VK_LAYER_NV_optimus"},
+              SpecialLayerOrExtension{8, "VK_LAYER_NV_nsight"},
+          } ) {
+        if ( false == HasFlagEq( flags, specialLayer.eFlag ) ) {
+            auto specialLayerIt = std::find_if( DeviceLayers.begin( ), DeviceLayers.end( ), [&]( const char* pName ) {
+                return 0 == strcmp( pName, specialLayer.pName );
+            } );
+
+            if ( specialLayerIt != DeviceLayers.end( ) )
+                DeviceLayers.erase( specialLayerIt );
+        }
+    }
+
+    platform::DebugTrace( "Device Layers (%u):", DeviceLayers.size( ) );
+    std::for_each( DeviceLayers.begin( ), DeviceLayers.end( ), [&]( const char* pName ) { platform::DebugTrace( "> %s", pName ); } );
+
+    DeviceExtensions.reserve( DeviceExtensionProps.size( ) );
+    std::transform( DeviceExtensionProps.begin( ),
+                    DeviceExtensionProps.end( ),
+                    std::back_inserter( DeviceExtensions ),
+                    [&]( VkExtensionProperties const& ExtProp ) { return ExtProp.extensionName; } );
+
+    platform::DebugTrace( "Device Extensions (%u):", DeviceExtensions.size( ) );
+    std::for_each( DeviceExtensions.begin( ), DeviceExtensions.end( ), [&]( const char* pName ) { platform::DebugTrace( "> %s", pName ); } );
+
+    return VK_SUCCESS == eResult;
 }
 
 bool apemodevk::GraphicsDevice::ScanFormatProperties( ) {
@@ -103,8 +184,8 @@ bool apemodevk::GraphicsDevice::ScanFormatProperties( ) {
     return true;
 }
 
-bool apemodevk::GraphicsDevice::RecreateResourcesFor( VkPhysicalDevice InAdapterHandle, GraphicsManager& GraphicsEcosystem ) {
-    pGraphicsEcosystem = &GraphicsEcosystem;
+bool apemodevk::GraphicsDevice::RecreateResourcesFor( VkPhysicalDevice InAdapterHandle, GraphicsManager& GraphicsEcosystem, uint32_t flags ) {
+    pManager = &GraphicsEcosystem;
     apemode_assert( Args != nullptr, "Ecosystem is required in case of Vulkan." );
 
     pPhysicalDevice = InAdapterHandle;
@@ -116,11 +197,14 @@ bool apemodevk::GraphicsDevice::RecreateResourcesFor( VkPhysicalDevice InAdapter
         vkGetPhysicalDeviceMemoryProperties( pPhysicalDevice, &MemoryProps );
         vkGetPhysicalDeviceFeatures( pPhysicalDevice, &Features );
 
+        platform::DebugTrace( "Device Name: %s", AdapterProps.deviceName );
+        platform::DebugTrace( "Device Type: %u", AdapterProps.deviceType );
+
         VkQueueFamilyPropertiesVector QueueProps;
         VkDeviceQueueCreateInfoVector QueueReqs;
         FloatVector                   QueuePriorities;
 
-        if ( ScanDeviceQueues( QueueProps, QueueReqs, QueuePriorities ) && ScanFormatProperties( ) && ScanDeviceLayerProperties( ) ) {
+        if ( ScanDeviceQueues( QueueProps, QueueReqs, QueuePriorities ) && ScanFormatProperties( ) && ScanDeviceLayerProperties( flags ) ) {
             std::vector< const char* > DeviceExtNames;
             DeviceExtNames.reserve( DeviceExtensionProps.size( ) );
             std::transform( DeviceExtensionProps.begin( ),
@@ -135,10 +219,10 @@ bool apemodevk::GraphicsDevice::RecreateResourcesFor( VkPhysicalDevice InAdapter
             DeviceDesc->pEnabledFeatures        = &Features;
             DeviceDesc->queueCreateInfoCount    = _Get_collection_length_u( QueueReqs );
             DeviceDesc->pQueueCreateInfos       = QueueReqs.data( );
-            DeviceDesc->enabledLayerCount       = _Get_collection_length_u( PresentLayers );
-            DeviceDesc->ppEnabledLayerNames     = PresentLayers.data( );
-            DeviceDesc->enabledExtensionCount   = _Get_collection_length_u( DeviceExtNames );
-            DeviceDesc->ppEnabledExtensionNames = DeviceExtNames.data( );
+            DeviceDesc->enabledLayerCount       = (uint32_t)DeviceLayers.size();
+            DeviceDesc->ppEnabledLayerNames     = DeviceLayers.data( );
+            DeviceDesc->enabledExtensionCount   = (uint32_t)DeviceExtensions.size();
+            DeviceDesc->ppEnabledExtensionNames = DeviceExtensions.data( );
 
             const auto bOk = hLogicalDevice.Recreate( pPhysicalDevice, DeviceDesc );
             apemode_assert( bOk, "vkCreateDevice failed." );
@@ -174,7 +258,7 @@ std::unique_ptr< apemodevk::GraphicsDevice > apemodevk::GraphicsDevice::MakeNull
     return std::unique_ptr< GraphicsDevice >( nullptr );
 }
 
-apemodevk::GraphicsDevice::GraphicsDevice( ) : pGraphicsEcosystem( nullptr ) {
+apemodevk::GraphicsDevice::GraphicsDevice( ) : pManager( nullptr ) {
 }
 
 apemodevk::GraphicsDevice::~GraphicsDevice( ) {
@@ -189,7 +273,7 @@ apemodevk::GraphicsDevice::operator VkPhysicalDevice( ) const {
 }
 
 apemodevk::GraphicsDevice::operator VkInstance( ) const {
-    return pGraphicsEcosystem->hInstance;
+    return pManager->hInstance;
 }
 
 bool apemodevk::GraphicsDevice::IsValid( ) const {
@@ -198,11 +282,7 @@ bool apemodevk::GraphicsDevice::IsValid( ) const {
 
 bool apemodevk::GraphicsDevice::Await( ) {
     apemode_assert( IsValid( ), "Must be valid." );
-
-    ResultHandle eDeviceWaitIdleOk = vkDeviceWaitIdle( *this );
-    apemode_assert( eDeviceWaitIdleOk.Succeeded( ), "Failed to wait for device." );
-
-    return eDeviceWaitIdleOk.Succeeded( );
+    return VK_SUCCESS == CheckedCall( vkDeviceWaitIdle( *this ) );
 }
 
 apemodevk::QueuePool* apemodevk::GraphicsDevice::GetQueuePool( ) {
@@ -223,5 +303,9 @@ const apemodevk::CommandBufferPool* apemodevk::GraphicsDevice::GetCommandBufferP
 }
 
 apemodevk::GraphicsManager& apemodevk::GraphicsDevice::GetGraphicsManager( ) {
-    return *pGraphicsEcosystem;
+    return *pManager;
+}
+
+const apemodevk::GraphicsManager& apemodevk::GraphicsDevice::GetGraphicsManager( ) const {
+    return *pManager;
 }

@@ -1,4 +1,5 @@
 #pragma once
+#include <stdint.h>
 
 namespace apemodefb
 {
@@ -30,6 +31,16 @@ namespace apemode {
         virtual void RenderScene( const Scene* pScene, const SceneRenderParametersBase* pParams ) {
             (void) pScene;
             (void) pParams;
+        }
+
+        virtual void Reset( const Scene* pScene, uint32_t FrameIndex ) {
+            (void) pScene;
+            (void) FrameIndex;
+        }
+
+        virtual void Flush( const Scene* pScene, uint32_t FrameIndex ) {
+            (void) pScene;
+            (void) FrameIndex;
         }
     };
 

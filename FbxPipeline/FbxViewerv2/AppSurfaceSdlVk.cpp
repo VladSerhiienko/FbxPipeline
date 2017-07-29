@@ -21,15 +21,14 @@ bool apemode::AppSurfaceSdlVk::Initialize( uint32_t width, uint32_t height, cons
 
         if (auto appState = apemode::AppState::GetCurrentState())
             if (appState->appOptions) {
-
-                if ((*appState->appOptions)["renderdoc"].count())
-                    graphicsManagerFlags |= apemodevk::GraphicsManager::kEnableRenderDocLayer;
-                if ((*appState->appOptions)["vktrace"].count())
-                    graphicsManagerFlags |= apemodevk::GraphicsManager::kEnableVkTraceLayer;
-                if ((*appState->appOptions)["vkapidump"].count())
-                    graphicsManagerFlags |= apemodevk::GraphicsManager::kEnableVkApiDumpLayer;
+                if ( ( *appState->appOptions )[ "renderdoc" ].count( ) )
+                    graphicsManagerFlags |= apemodevk::GraphicsManager::kEnable_RENDERDOC_Capture;
+                if ( ( *appState->appOptions )[ "vktrace" ].count( ) )
+                    graphicsManagerFlags |= apemodevk::GraphicsManager::kEnable_LUNARG_vktrace;
+                if ( ( *appState->appOptions )[ "vkapidump" ].count( ) )
+                    graphicsManagerFlags |= apemodevk::GraphicsManager::kEnable_LUNARG_api_dump;
 #if _DEBUG
-                graphicsManagerFlags |= apemodevk::GraphicsManager::kEnableLayers;
+                //graphicsManagerFlags |= apemodevk::GraphicsManager::kEnableLayers;
                 //graphicsManagerFlags |= apemodevk::GraphicsManager::kEnableVkApiDumpLayer;
 #endif
             }

@@ -37,13 +37,13 @@
     <ClCompile Include="fbxpmem.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
-    <ClCompile Include="fbxpacking.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
     <ClCompile Include="fbxpmeshopt.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
     <ClCompile Include="fbxpfileutils.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="fbxppacking.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
   </ItemGroup>

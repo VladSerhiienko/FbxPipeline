@@ -151,7 +151,7 @@ bool apemode::State::Finish( ) {
     // Finalize files
     //
 
-    std::vector< flatbuffers::Offset<apemodefb::FileFb > > fileOffsets; {
+    /*std::vector< flatbuffers::Offset<apemodefb::FileFb > > fileOffsets; {
         fileOffsets.reserve( embedQueue.size( ) );
 
         std::vector< uint8_t > fileBuffer;
@@ -163,7 +163,7 @@ bool apemode::State::Finish( ) {
                 fileOffsets.push_back(apemodefb::CreateFileFbDirect( builder, (uint32_t) fileOffsets.size( ), 0, &fileBuffer ) );
             }
         }
-    }
+    }*/
 
     const auto meshesOffset = builder.CreateVector( meshOffsets );
 
@@ -183,7 +183,7 @@ bool apemode::State::Finish( ) {
     // Finalize files
     //
 
-    const auto filesOffset = builder.CreateVector( fileOffsets );
+    //const auto filesOffset = builder.CreateVector( fileOffsets );
 
     //
     // Finalize scene
@@ -196,7 +196,7 @@ bool apemode::State::Finish( ) {
     sceneBuilder.add_meshes( meshesOffset );
     sceneBuilder.add_textures( texturesOffset );
     sceneBuilder.add_materials( materialsOffset );
-    sceneBuilder.add_files( filesOffset );
+    //sceneBuilder.add_files( filesOffset );
 
     apemodefb::FinishSceneFbBuffer( builder, sceneBuilder.Finish( ) );
 

@@ -113,8 +113,7 @@ bool apemode::NuklearRendererSdlVk::Render( RenderParametersBase* p ) {
         ranges[ 1 ].memory = hIndexBufferMemory[ FrameIndex ];
         ranges[ 1 ].size   = VK_WHOLE_SIZE;
 
-        if ( ResultHandle::Failed( vkFlushMappedMemoryRanges( pDevice, GetArraySizeU( ranges ), ranges ) ) ) {
-            DebugBreak( );
+        if ( VK_SUCCESS != CheckedCall( vkFlushMappedMemoryRanges( pDevice, GetArraySizeU( ranges ), ranges ) ) ) {
             return false;
         }
 
@@ -592,9 +591,8 @@ void* apemode::NuklearRendererSdlVk::DeviceUploadAtlas( InitParametersBase* init
         InitializeStruct( range );
         range.memory = hUploadBufferMemory;
         range.size   = uploadSize;
-        if ( ResultHandle::Failed( vkFlushMappedMemoryRanges( pDevice, 1, &range ) ) ) {
+        if ( VK_SUCCESS != CheckedCall( vkFlushMappedMemoryRanges( pDevice, 1, &range ) ) ) {
             hUploadBufferMemory.Unmap( );
-            DebugBreak( );
             return nullptr;
         }
 
@@ -635,8 +633,7 @@ void* apemode::NuklearRendererSdlVk::DeviceUploadAtlas( InitParametersBase* init
         VkCommandBufferBeginInfo cmdBufferBeginInfo;
         InitializeStruct( cmdBufferBeginInfo );
         cmdBufferBeginInfo.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-        if ( ResultHandle::Failed( vkBeginCommandBuffer( cmdBuffer, &cmdBufferBeginInfo ) ) ) {
-            DebugBreak( );
+        if ( VK_SUCCESS != CheckedCall( vkBeginCommandBuffer( cmdBuffer, &cmdBufferBeginInfo ) ) ) {
             return nullptr;
         }
     }
@@ -699,18 +696,15 @@ void* apemode::NuklearRendererSdlVk::DeviceUploadAtlas( InitParametersBase* init
         submitInfo.commandBufferCount = 1;
         submitInfo.pCommandBuffers    = cmdBuffer;
 
-        if ( ResultHandle::Failed( vkEndCommandBuffer( cmdBuffer ) ) ) {
-            DebugBreak( );
+        if ( VK_SUCCESS != CheckedCall( vkEndCommandBuffer( cmdBuffer ) ) ) {
             return nullptr;
         }
 
-        if ( ResultHandle::Failed( vkQueueSubmit( initParametersVk->pQueue, 1, &submitInfo, VK_NULL_HANDLE ) ) ) {
-            DebugBreak( );
+        if ( VK_SUCCESS != CheckedCall( vkQueueSubmit( initParametersVk->pQueue, 1, &submitInfo, VK_NULL_HANDLE ) ) ) {
             return nullptr;
         }
 
-        if ( ResultHandle::Failed( vkDeviceWaitIdle( initParametersVk->pDevice ) ) ) {
-            DebugBreak( );
+        if ( VK_SUCCESS != CheckedCall( vkDeviceWaitIdle( initParametersVk->pDevice ) ) ) {
             return nullptr;
         }
     }

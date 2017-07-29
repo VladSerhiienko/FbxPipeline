@@ -79,14 +79,9 @@ bool apemodevk::CommandBuffer::RecreateResourcesFor (GraphicsDevice & GraphicsNo
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-bool apemodevk::CommandBuffer::Reset (bool bReleaseResources)
-{
-    const VkCommandBufferResetFlags ResetFlags = bReleaseResources 
-        ? VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT 
-        : 0u;
-
-    const ResultHandle ErrorHandle = vkResetCommandBuffer (hCmdList, ResetFlags);
-    return ErrorHandle.Succeeded ();
+bool apemodevk::CommandBuffer::Reset( bool bReleaseResources ) {
+    const VkCommandBufferResetFlags ResetFlags = bReleaseResources ? VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT : 0u;
+    return VK_SUCCESS == CheckedCall( vkResetCommandBuffer( hCmdList, ResetFlags ) );
 }
 
 static uint64_t ComposeKey (VkPipelineStageFlags SrcFlags, VkPipelineStageFlags DstFlags)
@@ -236,11 +231,7 @@ bool apemodevk::CommandQueue::RecreateResourcesFor( GraphicsDevice& InGraphicsNo
 
 bool apemodevk::CommandQueue::Await( ) {
     apemode_assert( hCmdQueue.IsNotNull( ), "Not initialized." );
-
-    ResultHandle eQueueWaitIdleOk = vkQueueWaitIdle( hCmdQueue );
-    apemode_assert( eQueueWaitIdleOk.Succeeded( ), "Failed to wait for queue." );
-
-    return eQueueWaitIdleOk.Succeeded( );
+    return VK_SUCCESS == CheckedCall( vkQueueWaitIdle( hCmdQueue ) );
 }
 
 bool apemodevk::CommandQueue::Execute( CommandBuffer& CmdBuffer,
@@ -261,7 +252,7 @@ bool apemodevk::CommandQueue::Execute( CommandBuffer& CmdBuffer,
         /*SubmitDesc->pWaitSemaphores    = hWaitSemaphores;
         SubmitDesc->waitSemaphoreCount = WaitSemaphoreCount;*/
 
-        return ResultHandle::Succeeded (vkQueueSubmit (hCmdQueue, 1, SubmitDesc, hFence));
+        return VK_SUCCESS == CheckedCall( vkQueueSubmit( hCmdQueue, 1, SubmitDesc, hFence ) );
     }
 
     return false;
@@ -278,7 +269,7 @@ bool apemodevk::CommandQueue::Execute (CommandBuffer & CmdBuffer, VkFence Fence)
         SubmitDesc->pCommandBuffers    = &hCmdList;
         SubmitDesc->commandBufferCount = 1;
 
-        return ResultHandle::Succeeded (vkQueueSubmit (hCmdQueue, 1, SubmitDesc, Fence));
+        return VK_SUCCESS == CheckedCall( vkQueueSubmit( hCmdQueue, 1, SubmitDesc, Fence ) );
     }
 
     return false;
@@ -294,28 +285,20 @@ apemodevk::CommandQueue::operator VkQueue () const
 
 /// -------------------------------------------------------------------------------------------------------------------
 
-bool apemodevk::CommandQueue::Execute (CommandBuffer * CmdLists, uint32_t CmdListCount, VkFence Fence)
-{
-    apemode_assert (hCmdQueue.IsNotNull (), "Not initialized.");
-    if (apemode_likely (hCmdQueue.IsNotNull ()))
-    {
-        std::vector<VkCommandBuffer> CmdListHandles;
-        CmdListHandles.reserve (CmdListCount);
+bool apemodevk::CommandQueue::Execute( CommandBuffer* CmdLists, uint32_t CmdListCount, VkFence Fence ) {
+    apemode_assert( hCmdQueue.IsNotNull( ), "Not initialized." );
+    if ( apemode_likely( hCmdQueue.IsNotNull( ) ) ) {
+        std::vector< VkCommandBuffer > CmdListHandles;
+        CmdListHandles.reserve( CmdListCount );
 
-        std::transform (
-            CmdLists,
-            CmdLists + CmdListCount,
-            std::back_inserter (CmdListHandles),
-            [&](CommandBuffer const & CmdBuffer) { return static_cast<VkCommandBuffer> (CmdBuffer); });
+        std::transform( CmdLists, CmdLists + CmdListCount, std::back_inserter( CmdListHandles ), [&]( CommandBuffer const& CmdBuffer ) {
+            return static_cast< VkCommandBuffer >( CmdBuffer );
+        } );
 
-        TInfoStruct<VkSubmitInfo> SubmitDesc;
-        apemodevk::AliasStructs (CmdListHandles,
-                           SubmitDesc->pCommandBuffers,
-                           SubmitDesc->commandBufferCount);
+        TInfoStruct< VkSubmitInfo > SubmitDesc;
+        apemodevk::AliasStructs( CmdListHandles, SubmitDesc->pCommandBuffers, SubmitDesc->commandBufferCount );
 
-        return apemode_likely(ResultHandle::Succeeded(vkQueueSubmit(
-            hCmdQueue, 1, SubmitDesc, Fence
-            )));
+        return apemode_likely( VK_SUCCESS == CheckedCall( vkQueueSubmit( hCmdQueue, 1, SubmitDesc, Fence ) ) );
     }
 
     return false;
@@ -458,22 +441,18 @@ apemodevk::CommandBuffer::BeginEndScope::BeginEndScope (CommandBuffer & CmdBuffe
 {
 }
 
-apemodevk::CommandBuffer::BeginEndScope::BeginEndScope (CommandBuffer &                          CmdBuffer,
-                                                 VkCommandBufferInheritanceInfo const & CmdInherit,
-                                                 bool bOneTimeSubmit)
-    : AssociatedCmdList (CmdBuffer)
-{
-    TInfoStruct<VkCommandBufferInheritanceInfo> CmdInheritanceDesc;
+apemodevk::CommandBuffer::BeginEndScope::BeginEndScope( CommandBuffer&                        CmdBuffer,
+                                                        VkCommandBufferInheritanceInfo const& CmdInherit,
+                                                        bool                                  bOneTimeSubmit )
+    : AssociatedCmdList( CmdBuffer ) {
+    TInfoStruct< VkCommandBufferInheritanceInfo > CmdInheritanceDesc;
     CmdInheritanceDesc = CmdInherit;
 
-    TInfoStruct<VkCommandBufferBeginInfo> CmdBeginDesc;
+    TInfoStruct< VkCommandBufferBeginInfo > CmdBeginDesc;
     CmdBeginDesc->pInheritanceInfo = CmdInheritanceDesc;
     CmdBeginDesc->flags |= bOneTimeSubmit ? VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT : 0;
-
-    const ResultHandle eOk = vkBeginCommandBuffer (CmdBuffer, CmdBeginDesc);
-    CmdBuffer.bIsInBeginEndScope = eOk.Succeeded ();
+    CmdBuffer.bIsInBeginEndScope = VK_SUCCESS == CheckedCall( vkBeginCommandBuffer( CmdBuffer, CmdBeginDesc ) );
 }
-
 
 apemodevk::CommandBuffer::BeginEndScope::~BeginEndScope ()
 {

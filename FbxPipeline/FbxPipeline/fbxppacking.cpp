@@ -82,9 +82,9 @@ uint32_t PackPosition_10_10_10_2( const mathfu::vec3 position,
     AssertInRange( positionScale );
 
     UIntPack_10_10_10_2 packed;
-    packed.q.x = Unorm< 10 >( positionScale.x ).Bits( );
+    packed.q.z = Unorm< 10 >( positionScale.x ).Bits( );
     packed.q.y = Unorm< 10 >( positionScale.y ).Bits( );
-    packed.q.z = Unorm< 10 >( positionScale.z ).Bits( );
+    packed.q.x = Unorm< 10 >( positionScale.z ).Bits( );
     packed.q.w = 0;
 
     return packed.u;
