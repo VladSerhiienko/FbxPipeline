@@ -30,9 +30,6 @@
     <Filter Include="Sources\Aux">
       <UniqueIdentifier>{53bf7ff3-4153-4137-9091-19652b5519a6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Sources\Surface">
-      <UniqueIdentifier>{68fc7745-d109-4b56-ad09-81ba15df01cf}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Sources\Graphics">
       <UniqueIdentifier>{925bf837-34ce-4197-97e0-cb94a2e788ad}</UniqueIdentifier>
     </Filter>
@@ -73,15 +70,6 @@
     </ClInclude>
     <ClInclude Include="CityHash.h">
       <Filter>Sources\Aux</Filter>
-    </ClInclude>
-    <ClInclude Include="AppSurfaceSdlBase.h">
-      <Filter>Sources\Surface</Filter>
-    </ClInclude>
-    <ClInclude Include="AppSurfaceSdlGL.h">
-      <Filter>Sources\Surface</Filter>
-    </ClInclude>
-    <ClInclude Include="AppSurfaceSdlVk.h">
-      <Filter>Sources\Surface</Filter>
     </ClInclude>
     <ClInclude Include="AppState.h">
       <Filter>Sources\Aux</Filter>
@@ -158,9 +146,6 @@
     <ClInclude Include="SceneRendererVk.h">
       <Filter>Sources\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="AppSurfaceBase.h">
-      <Filter>Sources\Surface</Filter>
-    </ClInclude>
     <ClInclude Include="vk\QueuePools.Vulkan.h">
       <Filter>Sources\Graphics\[Vulkan]</Filter>
     </ClInclude>
@@ -177,6 +162,21 @@
       <Filter>Sources\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="SceneRendererBase.h">
+      <Filter>Sources\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="FileTracker.h">
+      <Filter>Sources\OS</Filter>
+    </ClInclude>
+    <ClInclude Include="AppSurfaceBase.h">
+      <Filter>Sources\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="AppSurfaceSdlBase.h">
+      <Filter>Sources\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="AppSurfaceSdlGL.h">
+      <Filter>Sources\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="AppSurfaceSdlVk.h">
       <Filter>Sources\Graphics</Filter>
     </ClInclude>
   </ItemGroup>
@@ -201,15 +201,6 @@
     </ClCompile>
     <ClCompile Include="CityHash.cpp">
       <Filter>Sources\Aux</Filter>
-    </ClCompile>
-    <ClCompile Include="AppSurfaceSdlBase.cpp">
-      <Filter>Sources\Surface</Filter>
-    </ClCompile>
-    <ClCompile Include="AppSurfaceSdlGL.cpp">
-      <Filter>Sources\Surface</Filter>
-    </ClCompile>
-    <ClCompile Include="AppSurfaceSdlVk.cpp">
-      <Filter>Sources\Surface</Filter>
     </ClCompile>
     <ClCompile Include="vk\CommandQueue.Vulkan.cpp">
       <Filter>Sources\Graphics\[Vulkan]</Filter>
@@ -251,6 +242,15 @@
       <Filter>Sources\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="NuklearSdlVk.cpp">
+      <Filter>Sources\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="AppSurfaceSdlBase.cpp">
+      <Filter>Sources\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="AppSurfaceSdlGL.cpp">
+      <Filter>Sources\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="AppSurfaceSdlVk.cpp">
       <Filter>Sources\Graphics</Filter>
     </ClCompile>
   </ItemGroup>

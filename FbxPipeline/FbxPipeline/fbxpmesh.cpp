@@ -131,10 +131,6 @@ bool GetSubsets( FbxMesh* mesh, apemode::Mesh& m, std::vector< apemodefb::Subset
         s.console->info( "\t#{} - \"{}\".", k, mesh->GetNode( )->GetMaterial( k )->GetName( ) );
     }
 
-    // std::vector< TIndex > indices;
-    // indices.clear( );
-    // indices.reserve( mesh->GetPolygonCount( ) * 3 );
-
     std::vector< std::tuple< TIndex, TIndex > > items;
     std::vector< apemodefb::SubsetFb > subsetPolies;
 
@@ -271,20 +267,14 @@ bool GetSubsets( FbxMesh* mesh, apemode::Mesh& m, std::vector< apemodefb::Subset
 
         uint32_t j = ii;
         for ( ; j < i; ++j ) {
-            //indices.push_back( j * 3 + 0 );
-            //indices.push_back( j * 3 + 0 );
-            //indices.push_back( j * 3 + 2 );
 
             const TIndex kk  = std::get< 1 >( items[ j ] );
             if ((kk - k) > 1) {
                 // s.console->info( "Break in {} - {} vs {}", j, k, kk );
+
                 // Process a case where there is a break in polygon indices.
                 s.console->info( "\tAdding subset: material #{}, polygon #{}, count {} ({} - {}).", mii, k, j - ki, ki, j - 1 );
-
-                // subsetPolies.emplace_back( mii, k, j - ki );
                 subsetPolies.emplace_back( mii, ki, j - ki );
-                // subsets.emplace_back( mii, ki, j - ki );
-                // subsets.emplace_back( mii, ki * 3, ( j - ki ) * 3 );
                 ki = j;
                 k  = kk;
             }
@@ -293,11 +283,7 @@ bool GetSubsets( FbxMesh* mesh, apemode::Mesh& m, std::vector< apemodefb::Subset
         }
 
         s.console->info( "\tAdding subset: material #{}, polygon #{}, count {} ({} - {}).", mii, k, j - ki, ki, j - 1 );
-
-        // subsetPolies.emplace_back( mii, k, j - ki );
         subsetPolies.emplace_back( mii, ki, j - ki );
-        // subsets.emplace_back( mii, ki, j - ki );
-        // subsets.emplace_back( mii, ki * 3, ( j - ki ) * 3 );
     };
 
     uint32_t ii = 0;
@@ -337,7 +323,6 @@ bool GetSubsets( FbxMesh* mesh, apemode::Mesh& m, std::vector< apemodefb::Subset
             if ( materialIndex != (uint32_t) -1 ) {
                 const auto subsetLength = indexCount - subsetStartIndex;
                 subsets.emplace_back( materialIndex, (uint32_t)subsetStartIndex * 3, (uint32_t)subsetLength * 3 );
-                // subsets.emplace_back( materialIndex, (uint32_t)subsetStartIndex, (uint32_t)subsetLength );
 
                 s.console->info( "\tMesh subset #{} for material #{} index range: [{}; {}].",
                                  subsets.size( ) - 1,
@@ -351,18 +336,11 @@ bool GetSubsets( FbxMesh* mesh, apemode::Mesh& m, std::vector< apemodefb::Subset
         }
 
         subsetIndexCount += sp.index_count( );
-        /*for ( uint32_t pp = 0; pp < sp.index_count( ); ++pp ) {
-            const TIndex pii = ( TIndex )( sp.base_index( ) + pp );
-            indices.push_back( pii * 3 + 0 );
-            indices.push_back( pii * 3 + 1 );
-            indices.push_back( pii * 3 + 2 );
-        }*/
     }
 
     if ( !subsetPolies.empty( ) ) {
-        const TIndex indexCount = subsetIndexCount; // (TIndex)indices.size();
+        const TIndex indexCount = subsetIndexCount; 
         const auto subsetLength = indexCount - subsetStartIndex;
-        //subsets.emplace_back( materialIndex, subsetStartIndex, subsetLength );
         subsets.emplace_back( materialIndex, (uint32_t) subsetStartIndex * 3, (uint32_t) subsetLength * 3 );
 
         s.console->info( "\tMesh subset #{} for material #{} index range: [{}; {}].",
@@ -371,8 +349,6 @@ bool GetSubsets( FbxMesh* mesh, apemode::Mesh& m, std::vector< apemodefb::Subset
                          subsetStartIndex,
                          subsetLength );
     }
-
-    // assert( indices.size( ) == ( size_t )( mesh->GetPolygonCount( ) * 3 ) );
 
     assert( subsets.size( ) <= ( size_t )( mesh->GetNode( )->GetMaterialCount( ) ) );
     std::sort( subsets.begin( ), subsets.end( ), [&]( apemodefb::SubsetFb const& a, apemodefb::SubsetFb const& b ) {
@@ -545,7 +521,7 @@ void InitializeVertices( FbxMesh*       mesh,
 
         // Having this array we can easily control polygon winding order.
         // Since mesh is triangular we can make it static [3] at compile-time.
-        for ( const uint32_t pvi : {0, 1, 2} ) {
+        for ( const uint32_t pvi : {0, 2, 1} ) {
             const uint32_t ci = (uint32_t) mesh->GetPolygonVertex( (int) pi, (int) pvi );
 
             const auto cp = mesh->GetControlPointAt( ci );

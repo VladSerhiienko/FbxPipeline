@@ -36,6 +36,7 @@
     <ClInclude Include="fbxvpch.h" />
     <ClInclude Include="CameraControllerFreeLook.h" />
     <ClInclude Include="AppSurfaceBase.h" />
+    <ClInclude Include="FileTracker.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="AppState.h" />
     <ClInclude Include="malloc.c.h" />

@@ -33,7 +33,8 @@ namespace apemode {
         apemodevk::GraphicsManager DeviceManager;
         apemodevk::Surface         Surface;
         apemodevk::Swapchain       Swapchain;
-        apemodevk::AcquiredQueue   PresentQueue;
+        std::vector< uint32_t >    PresentQueueFamilyIds;
+        // apemodevk::AcquiredQueue PresentQueue;
         apemodevk::GraphicsDevice* pNode;
     };
 }

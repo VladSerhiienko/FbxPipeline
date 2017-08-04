@@ -82,10 +82,39 @@ uint32_t PackPosition_10_10_10_2( const mathfu::vec3 position,
     AssertInRange( positionScale );
 
     UIntPack_10_10_10_2 packed;
+    packed.q.w = 0;
+
+    /*
+
+    Matches GL_UNSIGNED_INT_2_10_10_10_REV format + GL_RGBA token (OpenGL):
+    10-bit R component in bits   0..9
+    10-bit G component in bits 10..19
+    10-bit B component in bits 20..29
+    2-bit  A component in bits 30..31
+
+    https://stackoverflow.com/questions/17726676/what-does-rev-suffix-mean-in-opengl
+
+    */
+
+    packed.q.x = Unorm< 10 >( positionScale.x ).Bits( );
+    packed.q.y = Unorm< 10 >( positionScale.y ).Bits( );
+    packed.q.z = Unorm< 10 >( positionScale.z ).Bits( );
+
+    /*
+
+    Matches VK_FORMAT_A2R10G10B10_UNORM_PACK32 format (Vulkan):
+    10-bit B component in bits   0..9
+    10-bit G component in bits 10..19
+    10-bit R component in bits 20..29
+    2-bit  A component in bits 30..31
+
+    https://www.khronos.org/registry/vulkan/specs/1.0/man/html/VkFormat.html
+
     packed.q.z = Unorm< 10 >( positionScale.x ).Bits( );
     packed.q.y = Unorm< 10 >( positionScale.y ).Bits( );
     packed.q.x = Unorm< 10 >( positionScale.z ).Bits( );
-    packed.q.w = 0;
+
+    */
 
     return packed.u;
 }

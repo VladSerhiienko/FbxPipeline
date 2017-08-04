@@ -81,8 +81,9 @@ namespace apemodevk {
                 "void main( ) {\n"
                 "outColor    = frameInfo.color;\n"
                 "gl_Position = frameInfo.projectionMatrix * frameInfo.viewMatrix * frameInfo.worldMatrix * \n"
+                "              vec4( inPosition.zyx * frameInfo.positionScale.xyz + frameInfo.positionOffset.xyz, 1.0 );\n"
                 //"              vec4( inPosition.xyz, 1.0 );\n"
-                "              vec4( inPosition.xyz * frameInfo.positionScale.xyz + frameInfo.positionOffset.xyz, 1.0 );\n"
+                //"              vec4( inPosition.xyz * frameInfo.positionScale.xyz + frameInfo.positionOffset.xyz, 1.0 );\n"
                 "}";
 
             const char* fragmentShader =
@@ -327,11 +328,12 @@ namespace apemodevk {
 
             //
 
+            // rasterizationStateCreateInfo.cullMode                = VK_CULL_MODE_NONE;
+            // rasterizationStateCreateInfo.frontFace               = VK_FRONT_FACE_CLOCKWISE; /* CW */
             rasterizationStateCreateInfo.sType                   = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
             rasterizationStateCreateInfo.polygonMode             = VK_POLYGON_MODE_FILL;
-            rasterizationStateCreateInfo.cullMode                = VK_CULL_MODE_NONE;
-            //rasterizationStateCreateInfo.cullMode                = VK_CULL_MODE_BACK_BIT;
-            rasterizationStateCreateInfo.frontFace               = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+            rasterizationStateCreateInfo.cullMode                = VK_CULL_MODE_BACK_BIT;
+            rasterizationStateCreateInfo.frontFace               = VK_FRONT_FACE_COUNTER_CLOCKWISE; /* CCW */
             rasterizationStateCreateInfo.depthClampEnable        = VK_FALSE;
             rasterizationStateCreateInfo.rasterizerDiscardEnable = VK_FALSE;
             rasterizationStateCreateInfo.depthBiasEnable         = VK_FALSE;
@@ -352,10 +354,10 @@ namespace apemodevk {
             depthStencilStateCreateInfo.depthWriteEnable      = VK_TRUE;
             depthStencilStateCreateInfo.depthCompareOp        = VK_COMPARE_OP_LESS_OR_EQUAL;
             depthStencilStateCreateInfo.depthBoundsTestEnable = VK_FALSE;
+            depthStencilStateCreateInfo.stencilTestEnable     = VK_FALSE;
             depthStencilStateCreateInfo.back.failOp           = VK_STENCIL_OP_KEEP;
             depthStencilStateCreateInfo.back.passOp           = VK_STENCIL_OP_KEEP;
             depthStencilStateCreateInfo.back.compareOp        = VK_COMPARE_OP_ALWAYS;
-            depthStencilStateCreateInfo.stencilTestEnable     = VK_FALSE;
             depthStencilStateCreateInfo.front                 = depthStencilStateCreateInfo.back;
             graphicsPipelineCreateInfo.pDepthStencilState     = &depthStencilStateCreateInfo;
 
@@ -430,8 +432,13 @@ void apemode::SceneRendererVk::UpdateScene( Scene* pScene, const SceneUpdatePara
     if ( deviceChanged ) {
 
         /* Get queue from pool (only copying) */
-        auto pQueuePool = pParams->pNode->GetQueuePool( );
+        auto pQueuePool    = pParams->pNode->GetQueuePool( );
         auto acquiredQueue = pQueuePool->Acquire( false, VK_QUEUE_TRANSFER_BIT, true );
+        if ( acquiredQueue.pQueue == nullptr ) {
+            while ( acquiredQueue.pQueue == nullptr ) {
+                acquiredQueue = pQueuePool->Acquire( false, VK_QUEUE_TRANSFER_BIT, false );
+            }
+        }
 
         /* Get command buffer from pool (only copying) */
         auto pCmdBufferPool = pParams->pNode->GetCommandBufferPool( );
@@ -482,12 +489,12 @@ void apemode::SceneRendererVk::UpdateScene( Scene* pScene, const SceneUpdatePara
                 pMeshDeviceAsset->IndexType = VK_INDEX_TYPE_UINT32;
             }
 
-            auto offset = meshFb->submeshes( )->begin( )->position_offset( );
+            auto & offset = meshFb->submeshes( )->begin( )->position_offset( );
             pMeshDeviceAsset->positionOffset.x = offset.x();
             pMeshDeviceAsset->positionOffset.y = offset.y();
             pMeshDeviceAsset->positionOffset.z = offset.z();
 
-            auto scale = meshFb->submeshes( )->begin( )->position_scale( );
+            auto & scale = meshFb->submeshes( )->begin( )->position_scale( );
             pMeshDeviceAsset->positionScale.x = scale.x();
             pMeshDeviceAsset->positionScale.y = scale.y();
             pMeshDeviceAsset->positionScale.z = scale.z();
@@ -627,6 +634,8 @@ void apemode::SceneRendererVk::RenderScene( const Scene* pScene, const SceneRend
         return;
     }
 
+    vkCmdBindPipeline( pParams->pCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pDeviceAsset->hPipeline );
+
     VkViewport viewport;
     apemodevk::InitializeStruct( viewport );
     viewport.x        = 0;
@@ -674,7 +683,6 @@ void apemode::SceneRendererVk::RenderScene( const Scene* pScene, const SceneRend
                 VkDescriptorSet descriptorSet[ 1 ]  = {pDeviceAsset->DescSetPools[ FrameIndex ].GetDescSet(
                     suballocResult.descBufferInfo, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC )};
 
-                vkCmdBindPipeline( pParams->pCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pDeviceAsset->hPipeline );
                 vkCmdBindDescriptorSets( pParams->pCmdBuffer,
                                          VK_PIPELINE_BIND_POINT_GRAPHICS,
                                          pDeviceAsset->hPipelineLayout,
@@ -688,12 +696,6 @@ void apemode::SceneRendererVk::RenderScene( const Scene* pScene, const SceneRend
                 VkDeviceSize vertexOffsets[ 1 ] = {0};
                 vkCmdBindVertexBuffers( pParams->pCmdBuffer, 0, 1, vertexBuffers, vertexOffsets );
 
-#if 0
-                vkCmdDraw( pParams->pCmdBuffer, pMeshDeviceAsset->VertexCount, 1, 0, 0 );
-#elif 0
-                vkCmdDraw( pParams->pCmdBuffer, subset.indexCount, 1, subset.baseIndex, 0 );
-#else
-
                 vkCmdBindIndexBuffer( pParams->pCmdBuffer,
                                       pMeshDeviceAsset->hBuffer,
                                       pMeshDeviceAsset->IndexOffset,
@@ -705,7 +707,6 @@ void apemode::SceneRendererVk::RenderScene( const Scene* pScene, const SceneRend
                                   subset.baseIndex,  /* FirstIndex */
                                   0,                 /* VertexOffset */
                                   0 );               /* FirstInstance */
-#endif
             }
         }
     }

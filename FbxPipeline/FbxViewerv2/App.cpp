@@ -62,7 +62,7 @@ public:
     DescriptorPool                         DescPool;
     TDispatchableHandle< VkCommandPool >   hCmdPool[ kMaxFrames ];
     TDispatchableHandle< VkCommandBuffer > hCmdBuffers[ kMaxFrames ];
-    TDispatchableHandle< VkFence >         hFences[ kMaxFrames ];
+    //TDispatchableHandle< VkFence >         hFences[ kMaxFrames ];
     TDispatchableHandle< VkSemaphore >     hPresentCompleteSemaphores[ kMaxFrames ];
     TDispatchableHandle< VkSemaphore >     hRenderCompleteSemaphores[ kMaxFrames ];
 
@@ -128,11 +128,13 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
            
             OnResized();
 
+
+
             for (uint32_t i = 0; i < appContent->FrameCount; ++i) {
                 VkCommandPoolCreateInfo cmdPoolCreateInfo;
                 InitializeStruct( cmdPoolCreateInfo );
                 cmdPoolCreateInfo.flags            = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-                cmdPoolCreateInfo.queueFamilyIndex = appSurfaceVk->PresentQueue.QueueFamilyId;
+                cmdPoolCreateInfo.queueFamilyIndex = appSurfaceVk->PresentQueueFamilyIds[0];
 
                 if ( false == appContent->hCmdPool[ i ].Recreate( *appSurfaceVk->pNode, cmdPoolCreateInfo ) ) {
                     DebugBreak( );
@@ -150,14 +152,14 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
                     return false;
                 }
 
-                VkFenceCreateInfo fenceCreateInfo;
+                /*VkFenceCreateInfo fenceCreateInfo;
                 InitializeStruct( fenceCreateInfo );
                 fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
                 if ( false == appContent->hFences[ i ].Recreate( *appSurfaceVk->pNode, fenceCreateInfo ) ) {
                     DebugBreak( );
                     return false;
-                }
+                }*/
 
                 VkSemaphoreCreateInfo semaphoreCreateInfo;
                 InitializeStruct( semaphoreCreateInfo );
@@ -176,6 +178,13 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
 
         appContent->pNkRenderer = new NuklearRendererSdlVk();
 
+        auto queueFamilyPool = appSurfaceVk->pNode->GetQueuePool()->GetPool(appSurfaceVk->PresentQueueFamilyIds[0]);
+        apemodevk::AcquiredQueue acquiredQueue;
+
+        while (acquiredQueue.pQueue == nullptr) {
+            acquiredQueue = queueFamilyPool->Acquire(false);
+        }
+
         NuklearRendererSdlVk::InitParametersVk initParamsNk;
         initParamsNk.pAlloc          = nullptr;
         initParamsNk.pDevice         = *appSurfaceVk->pNode;
@@ -183,10 +192,12 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         initParamsNk.pRenderPass     = appContent->hDbgRenderPass;
         //initParamsNk.pRenderPass     = appContent->hNkRenderPass;
         initParamsNk.pDescPool       = appContent->DescPool;
-        initParamsNk.pQueue          = appSurfaceVk->PresentQueue.pQueue;
-        initParamsNk.QueueFamilyId   = appSurfaceVk->PresentQueue.QueueFamilyId;
+        initParamsNk.pQueue          = acquiredQueue.pQueue;
+        initParamsNk.QueueFamilyId   = acquiredQueue.QueueFamilyId;
 
         appContent->pNkRenderer->Init( &initParamsNk );
+
+        queueFamilyPool->Release(acquiredQueue);
 
         appContent->pDebugRenderer = new DebugRendererVk();
 
@@ -207,10 +218,10 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         updateParams.pDescPool = appContent->DescPool;
         updateParams.FrameCount = appContent->FrameCount;
 
-        appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/A45p.fbxp"));
+        //appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/A45p.fbxp"));
         //appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/A45.fbxp"));
         //appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Mech6kv4.fbxp"));
-        //appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Mech6kv4p.fbxp"));
+        appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Mech6kv4p.fbxp"));
         //appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Mech6kv4.fbxp"));
         //appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Cube10p.fbxp"));
         //appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Knifep.fbxp"));
@@ -505,10 +516,18 @@ void App::Update( float deltaSecs, Input const& inputState ) {
     appContent->pCamController->Update( deltaSecs );
 
     if ( auto appSurfaceVk = (AppSurfaceSdlVk*) GetSurface( ) ) {
+
+        auto queueFamilyPool = appSurfaceVk->pNode->GetQueuePool()->GetPool(appSurfaceVk->PresentQueueFamilyIds[0]);
+        apemodevk::AcquiredQueue acquiredQueue;
+
+        while (acquiredQueue.pQueue == nullptr) {
+            acquiredQueue = queueFamilyPool->Acquire(true);
+        }
+
         VkDevice        device                   = *appSurfaceVk->pNode;
-        VkQueue         queue                    = appSurfaceVk->PresentQueue.pQueue;
+        VkQueue         queue                    = acquiredQueue.pQueue;
         VkSwapchainKHR  swapchain                = appSurfaceVk->Swapchain.hSwapchain;
-        VkFence         fence                    = appContent->hFences[ appContent->FrameIndex ];
+        VkFence         fence                    = acquiredQueue.pFence;
         VkSemaphore     presentCompleteSemaphore = appContent->hPresentCompleteSemaphores[ appContent->FrameIndex ];
         VkSemaphore     renderCompleteSemaphore  = appContent->hRenderCompleteSemaphores[ appContent->FrameIndex ];
         VkCommandPool   cmdPool                  = appContent->hCmdPool[ appContent->FrameIndex ];
@@ -571,7 +590,7 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         vkCmdBeginRenderPass( cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE );
 
         DebugRendererVk::FrameUniformBuffer frameData;
-        frameData.projectionMatrix = appContent->CamProjController.ProjMatrix(55.0f, (float)width, (float)height, 0.1f, 100.0f);
+        frameData.projectionMatrix = appContent->CamProjController.ProjMatrix(55.0f, (float)width, (float)height, 0.1f, 1000.0f);
         frameData.viewMatrix = appContent->pCamController->ViewMatrix();
         frameData.color = {1, 0, 0, 1};
 
@@ -672,6 +691,9 @@ void App::Update( float deltaSecs, Input const& inputState ) {
 
             CheckedCall( vkQueuePresentKHR( queue, &presentInfoKHR ) );
         }
+
+        queueFamilyPool->Release(acquiredQueue);
+
     }
 }
 

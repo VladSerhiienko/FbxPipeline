@@ -158,7 +158,7 @@ bool apemodevk::GraphicsManager::ScanAdapters( uint32_t flags) {
 
     // TODO:
     //      Choose the best 2 nodes here.
-    //      Ensure the integrate GPU is always the secondary one.
+    //      Ensure the integrated GPU is always the secondary one.
 
     std::for_each( Adapters.begin( ), Adapters.end( ), [&]( VkPhysicalDevice const &Adapter ) {
         GraphicsDevice *CurrentNode = nullptr;

@@ -42,16 +42,16 @@ bool apemode::AppSurfaceSdlVk::Initialize( uint32_t width, uint32_t height, cons
             apemodevk::QueueFamilyPool* queueFamilyPool  = nullptr;
             while ( auto currentQueueFamilyPool = pNode->GetQueuePool( )->GetPool( queueFamilyIndex++ ) ) {
                 if ( currentQueueFamilyPool->SupportsPresenting( Surface.hSurface ) ) {
-                    PresentQueue = currentQueueFamilyPool->Acquire( true );
+                    PresentQueueFamilyIds.push_back( queueFamilyIndex - 1 );
+                    // PresentQueue = currentQueueFamilyPool->Acquire( true );
                     break;
                 }
             }
 
-            if ( nullptr == PresentQueue.pQueue ) {
+            /*if ( nullptr == PresentQueue.pQueue ) {
                 apemodevk::platform::DebugBreak( );
                 return false;
-            }
-
+            }*/
 
             // Determine the number of VkImage's to use in the swap chain.
             // We desire to own only 1 image at a time, besides the
