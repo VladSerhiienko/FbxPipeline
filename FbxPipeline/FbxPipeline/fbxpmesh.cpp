@@ -521,6 +521,7 @@ void InitializeVertices( FbxMesh*       mesh,
 
         // Having this array we can easily control polygon winding order.
         // Since mesh is triangular we can make it static [3] at compile-time.
+        // for ( const uint32_t pvi : {0, 1, 2} ) {
         for ( const uint32_t pvi : {0, 2, 1} ) {
             const uint32_t ci = (uint32_t) mesh->GetPolygonVertex( (int) pi, (int) pvi );
 

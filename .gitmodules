@@ -46,3 +46,6 @@
 [submodule "ThirdParty/microprofile"]
 	path = ThirdParty/microprofile
 	url = git@github.com:jonasmr/microprofile.git
+[submodule "ThirdParty/tbb"]
+	path = ThirdParty/tbb
+	url = git@github.com:01org/tbb.git

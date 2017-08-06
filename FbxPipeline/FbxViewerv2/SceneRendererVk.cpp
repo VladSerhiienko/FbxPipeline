@@ -2,6 +2,8 @@
 
 #include <QueuePools.Vulkan.h>
 #include <BufferPools.Vulkan.h>
+#include <ShaderCompiler.Vulkan.h>
+
 #include <SceneRendererVk.h>
 #include <Scene.h>
 #include <ArrayUtils.h>
@@ -62,99 +64,32 @@ namespace apemodevk {
             if ( nullptr == pParams->pNode )
                 return false;
 
-            const char* vertexShader =
-                "#version 450\n"
-                "#extension GL_ARB_separate_shader_objects : enable\n"
-                "layout(std140, binding = 0) uniform FrameUniformBuffer {\n"
-                "    mat4 worldMatrix;\n"
-                "    mat4 viewMatrix;\n"
-                "    mat4 projectionMatrix;\n"
-                "    vec4 color;\n"
-                "    vec4 positionOffset;\n"
-                "    vec4 positionScale;\n"
-                "} frameInfo;\n"
-                "layout (location = 0) in vec3 inPosition;\n"
-                "layout (location = 1) in vec3 inNormal;\n"
-                "layout (location = 2) in vec4 inTangent;\n"
-                "layout (location = 3) in vec2 inTexcoords;\n"
-                "layout (location = 0) out vec4 outColor;\n"
-                "void main( ) {\n"
-                "outColor    = frameInfo.color;\n"
-                "gl_Position = frameInfo.projectionMatrix * frameInfo.viewMatrix * frameInfo.worldMatrix * \n"
-                "              vec4( inPosition.zyx * frameInfo.positionScale.xyz + frameInfo.positionOffset.xyz, 1.0 );\n"
-                //"              vec4( inPosition.xyz, 1.0 );\n"
-                //"              vec4( inPosition.xyz * frameInfo.positionScale.xyz + frameInfo.positionOffset.xyz, 1.0 );\n"
-                "}";
+            std::set<std::string> includedFiles;
+            std::vector<uint8_t> compiledShaders[2];
 
-            const char* fragmentShader =
-                "#version 450\n"
-                "#extension GL_ARB_separate_shader_objects : enable\n"
-                "layout (location = 0) in vec4 inColor;\n"
-                "layout (location = 0) out vec4 outColor;\n"
-                "void main() {\n"
-                "    outColor = inColor;\n"
-                "}\n";
-
-            shaderc::Compiler compiler;
-
-            shaderc::CompileOptions options;
-            options.SetSourceLanguage( shaderc_source_language_glsl );
-            options.SetOptimizationLevel( shaderc_optimization_level_size );
-            options.SetTargetEnvironment( shaderc_target_env_vulkan, 0 );
-
-            shaderc::PreprocessedSourceCompilationResult cube_preprocessed[] = {
-                compiler.PreprocessGlsl( vertexShader, shaderc_glsl_vertex_shader, "scene.vert", options ),
-                compiler.PreprocessGlsl( fragmentShader, shaderc_glsl_fragment_shader, "scene.frag", options )};
-
-            if ( shaderc_compilation_status_success != cube_preprocessed[ 0 ].GetCompilationStatus( ) ||
-                shaderc_compilation_status_success != cube_preprocessed[ 1 ].GetCompilationStatus( ) ) {
-                OutputDebugStringA( cube_preprocessed[ 0 ].GetErrorMessage( ).c_str( ) );
-                OutputDebugStringA( cube_preprocessed[ 1 ].GetErrorMessage( ).c_str( ) );
-                DebugBreak( );
-                return false;
-            }
-
-#if 1
-            shaderc::AssemblyCompilationResult cube_compiled_assembly[] = {
-                compiler.CompileGlslToSpvAssembly(cube_preprocessed[0].begin(), shaderc_glsl_vertex_shader, "nuklear.vert.spv", options),
-                compiler.CompileGlslToSpvAssembly(cube_preprocessed[1].begin(), shaderc_glsl_fragment_shader, "nuklear.frag.spv", options) };
-
-            OutputDebugStringA("-------------------------------------------\n");
-            OutputDebugStringA(cube_compiled_assembly[0].begin());
-            OutputDebugStringA("-------------------------------------------\n");
-            OutputDebugStringA(cube_compiled_assembly[1].begin());
-            OutputDebugStringA("-------------------------------------------\n");
-
-            if (shaderc_compilation_status_success != cube_compiled_assembly[0].GetCompilationStatus() ||
-                shaderc_compilation_status_success != cube_compiled_assembly[1].GetCompilationStatus()) {
-
-                OutputDebugStringA(cube_compiled_assembly[0].GetErrorMessage().c_str());
-                OutputDebugStringA(cube_compiled_assembly[1].GetErrorMessage().c_str());
-
-                DebugBreak();
-                return false;
-            }
-#endif
-
-            shaderc::SpvCompilationResult cube_compiled[] = {
-                compiler.CompileGlslToSpv( cube_preprocessed[ 0 ].begin( ), shaderc_glsl_default_vertex_shader, "nuklear.vert.spv", options ),
-                compiler.CompileGlslToSpv( cube_preprocessed[ 1 ].begin( ), shaderc_glsl_default_fragment_shader, "nuklear.frag.spv", options )};
-
-            if ( shaderc_compilation_status_success != cube_compiled[ 0 ].GetCompilationStatus( ) ||
-                shaderc_compilation_status_success != cube_compiled[ 1 ].GetCompilationStatus( ) ) {
+            if ( false == pParams->pShaderCompiler->Compile( "shaders/apemode/Scene.vert",
+                                                             {},
+                                                             apemodevk::ShaderCompiler::eShaderType_GLSL_VertexShader,
+                                                             includedFiles,
+                                                             compiledShaders[ 0 ] ) ||
+                 false == pParams->pShaderCompiler->Compile( "shaders/apemode/Scene.frag",
+                                                             {},
+                                                             apemodevk::ShaderCompiler::eShaderType_GLSL_FragmentShader,
+                                                             includedFiles,
+                                                             compiledShaders[ 1 ] ) ) {
                 DebugBreak( );
                 return false;
             }
 
             VkShaderModuleCreateInfo vertexShaderCreateInfo;
             InitializeStruct( vertexShaderCreateInfo );
-            vertexShaderCreateInfo.pCode    = (const uint32_t*)       cube_compiled[ 0 ].begin( );
-            vertexShaderCreateInfo.codeSize = (size_t) std::distance( cube_compiled[ 0 ].begin( ), cube_compiled[ 0 ].end( ) ) * sizeof( uint32_t );
+            vertexShaderCreateInfo.pCode    = (const uint32_t*) compiledShaders[ 0 ].data( );
+            vertexShaderCreateInfo.codeSize = compiledShaders[ 0 ].size( );
 
             VkShaderModuleCreateInfo fragmentShaderCreateInfo;
             InitializeStruct( fragmentShaderCreateInfo );
-            fragmentShaderCreateInfo.pCode    = (const uint32_t*)       cube_compiled[ 1 ].begin( );
-            fragmentShaderCreateInfo.codeSize = (size_t) std::distance( cube_compiled[ 1 ].begin( ), cube_compiled[ 1 ].end( ) ) * sizeof( uint32_t );
+            fragmentShaderCreateInfo.pCode    = (const uint32_t*) compiledShaders[ 1 ].data( );
+            fragmentShaderCreateInfo.codeSize = compiledShaders[ 1 ].size( );
 
             TDispatchableHandle< VkShaderModule > hVertexShaderModule;
             TDispatchableHandle< VkShaderModule > hFragmentShaderModule;
@@ -432,12 +367,11 @@ void apemode::SceneRendererVk::UpdateScene( Scene* pScene, const SceneUpdatePara
     if ( deviceChanged ) {
 
         /* Get queue from pool (only copying) */
-        auto pQueuePool    = pParams->pNode->GetQueuePool( );
+        auto pQueuePool = pParams->pNode->GetQueuePool( );
+
         auto acquiredQueue = pQueuePool->Acquire( false, VK_QUEUE_TRANSFER_BIT, true );
-        if ( acquiredQueue.pQueue == nullptr ) {
-            while ( acquiredQueue.pQueue == nullptr ) {
-                acquiredQueue = pQueuePool->Acquire( false, VK_QUEUE_TRANSFER_BIT, false );
-            }
+        while ( acquiredQueue.pQueue == nullptr ) {
+            acquiredQueue = pQueuePool->Acquire( false, VK_QUEUE_TRANSFER_BIT, false );
         }
 
         /* Get command buffer from pool (only copying) */
@@ -613,13 +547,6 @@ void apemode::SceneRendererVk::UpdateScene( Scene* pScene, const SceneUpdatePara
         }
     }
 }
-
-// -i "F:\Dev\AutodeskMaya\Mercedes+Benz+A45+AMG+Centered.FBX" -o "$(SolutionDir)assets\A45p.fbxp" -p
-// -i "F:\Dev\AutodeskMaya\Mercedes+Benz+A45+AMG+Centered.FBX" -o "$(SolutionDir)assets\A45.fbxp"
-// -i "E:\Media\Models\mech-m-6k\source\93d43cf18ad5406ba0176c9fae7d4927.fbx" -o "$(SolutionDir)assets\Mech6kv4p.fbxp" -p
-// -i "E:\Media\Models\mech-m-6k\source\93d43cf18ad5406ba0176c9fae7d4927.fbx" -o "$(SolutionDir)assets\Mech6kv4.fbxp"
-// -i "E:\Media\Models\carambit\source\Knife.fbx" -o "$(SolutionDir)assets\Knifep.fbxp" -p
-// -i "E:\Media\Models\pontiac-firebird-formula-1974\source\carz.obj 2.zip\carz.obj\mesh.obj" -o "$(SolutionDir)assets\pontiacp.fbxp" -p
 
 void apemode::SceneRendererVk::RenderScene( const Scene* pScene, const SceneRenderParametersBase* pParamsBase ) {
     if ( nullptr == pScene || nullptr == pParamsBase ) {

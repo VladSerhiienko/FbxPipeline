@@ -60,6 +60,7 @@
     <ClInclude Include="vk\Platform.Vulkan.h" />
     <ClInclude Include="vk\QueuePools.Vulkan.h" />
     <ClInclude Include="vk\ResultHandle.Vulkan.h" />
+    <ClInclude Include="vk\ShaderCompiler.Vulkan.h" />
     <ClInclude Include="vk\Swapchain.Vulkan.h" />
     <ClInclude Include="vk\TDispatchableHandle.Vulkan.h" />
     <ClInclude Include="vk\TInfoStruct.Vulkan.h" />
@@ -76,6 +77,7 @@
     <ClCompile Include="DebugRendererVk.cpp" />
     <ClCompile Include="FbxViewerOS.cpp" />
     <ClCompile Include="fbxvpch.cpp" />
+    <ClCompile Include="FileTracker.cpp" />
     <ClCompile Include="InputSdl.cpp" />
     <ClCompile Include="NuklearSdlBase.cpp" />
     <ClCompile Include="NuklearSdlGL.cpp" />
@@ -88,17 +90,18 @@
     <ClCompile Include="vk\GraphicsDevice.Vulkan.cpp" />
     <ClCompile Include="vk\GraphicsManager.Vulkan.cpp" />
     <ClCompile Include="vk\QueuePools.Vulkan.cpp" />
+    <ClCompile Include="vk\ShaderCompiler.Vulkan.cpp" />
     <ClCompile Include="vk\Swapchain.Vulkan.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\EmbeddedShaderPreprocessor\EmbeddedShaderPreprocessor.vcxproj">
-      <Project>{832afa17-4776-4a0f-942f-64db2f005d55}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\flatbuffers\flatbuffers.vcxproj">
       <Project>{f55e3be0-18fb-4ce7-8bbf-ee631cc2fe7f}</Project>
     </ProjectReference>
     <ProjectReference Include="..\sdl2\sdl2.vcxproj">
       <Project>{d319c0fc-c7ea-4643-b962-21f50f77fad2}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\tbb\tbb.vcxproj">
+      <Project>{f813ab87-e9cd-445d-abf7-cab13cb974ff}</Project>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -184,6 +187,12 @@
       <AdditionalDependencies>vulkan-1.lib;shaderc_combined.lib;glfw3.lib;glew32s.lib;opengl32.lib;winmm.lib;imm32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
+    <PostBuildEvent>
+      <Command>echo FBXViewerv2 Copying shaders
+md $(OutDir)shaders
+robocopy $(SolutionDir)shaders $(OutDir)shaders /s /e /xo
+exit 0</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -198,6 +207,12 @@
       <AdditionalDependencies>vulkan-1.lib;shaderc_combined.lib;glfw3.lib;glew32s.lib;opengl32.lib;winmm.lib;imm32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
+    <PostBuildEvent>
+      <Command>echo FBXViewerv2 Copying shaders
+md $(OutDir)shaders
+robocopy $(SolutionDir)shaders $(OutDir)shaders /s /e /xo
+exit 0</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -216,6 +231,12 @@
       <AdditionalDependencies>vulkan-1.lib;shaderc_combined.lib;glfw3.lib;glew32s.lib;opengl32.lib;winmm.lib;imm32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
+    <PostBuildEvent>
+      <Command>echo FBXViewerv2 Copying shaders
+md $(OutDir)shaders
+robocopy $(SolutionDir)shaders $(OutDir)shaders /s /e /xo
+exit 0</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -234,6 +255,12 @@
       <AdditionalDependencies>vulkan-1.lib;shaderc_combined.lib;glfw3.lib;glew32s.lib;opengl32.lib;winmm.lib;imm32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
+    <PostBuildEvent>
+      <Command>echo FBXViewerv2 Copying shaders
+md $(OutDir)shaders
+robocopy $(SolutionDir)shaders $(OutDir)shaders /s /e /xo
+exit 0</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

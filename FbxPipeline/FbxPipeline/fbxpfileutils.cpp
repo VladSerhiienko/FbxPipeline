@@ -92,8 +92,8 @@ void InitializeSeachLocations( ) {
 
         if ( d.size( ) > 4 ) {
             const size_t ds = d.size( );
-            addSubDirectories |= d.compare( ds - 3, 3, "\\**" );
-            addSubDirectories |= d.compare( ds - 3, 3, "/**" );
+            addSubDirectories |= d.compare( ds - 3, 3, "\\**" ) == 0;
+            addSubDirectories |= d.compare( ds - 3, 3, "/**" ) == 0;
 
             if ( addSubDirectories )
                 d = d.substr( 0, d.size( ) - 2 );

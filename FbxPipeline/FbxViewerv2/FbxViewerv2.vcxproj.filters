@@ -179,6 +179,9 @@
     <ClInclude Include="AppSurfaceSdlVk.h">
       <Filter>Sources\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="vk\ShaderCompiler.Vulkan.h">
+      <Filter>Sources\Graphics\[Vulkan]</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="fbxvpch.cpp">
@@ -252,6 +255,12 @@
     </ClCompile>
     <ClCompile Include="AppSurfaceSdlVk.cpp">
       <Filter>Sources\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="FileTracker.cpp">
+      <Filter>Sources\OS</Filter>
+    </ClCompile>
+    <ClCompile Include="vk\ShaderCompiler.Vulkan.cpp">
+      <Filter>Sources\Graphics\[Vulkan]</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

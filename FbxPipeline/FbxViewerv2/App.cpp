@@ -18,22 +18,41 @@
 #include <CameraControllerModelView.h>
 #include <CameraControllerFreeLook.h>
 
+#include <FileTracker.h>
+#include <ShaderCompiler.Vulkan.h>
+
 #include <EmbeddedShaderPreprocessor.h>
 
 namespace apemode {
     using namespace apemodevk;
 
-    const uint32_t kMaxFrames = Swapchain::kMaxImgs;
-    AppContent * gAppContent = nullptr;
+    const uint32_t kMaxFrames  = Swapchain::kMaxImgs;
+    AppContent*    gAppContent = nullptr;
+}
+
+namespace apemodevk {
+
+    class ShaderFileReader : public ShaderCompiler::IShaderFileReader {
+    public:
+        apemodeos::FileManager* pFileManager;
+
+        bool ReadShaderTxtFile( const std::string& FilePath,
+                                std::string&       OutFileFullPath,
+                                std::string&       OutFileContent ) const override {
+            OutFileFullPath = apemodeos::ResolveFullPath( FilePath );
+            OutFileContent  = pFileManager->ReadTxtFile( FilePath );
+            return false == OutFileContent.empty( );
+        }
+    };
 }
 
 using namespace apemode;
 
-const VkFormat sDepthFormat = VK_FORMAT_D16_UNORM;
+const VkFormat sDepthFormat = VK_FORMAT_D32_SFLOAT_S8_UINT;
+//const VkFormat sDepthFormat = VK_FORMAT_D16_UNORM;
 
 class apemode::AppContent {
 public:
-
     nk_color diffColor;
     nk_color specColor;
     uint32_t width      = 0;
@@ -43,15 +62,16 @@ public:
     uint32_t sceneId    = 0;
     uint32_t maskId     = 0;
 
-    std::vector<Scene*> Scenes;
-
-    NuklearRendererSdlBase*  pNkRenderer = nullptr;
-    DebugRendererVk* pDebugRenderer = nullptr;
-    SceneRendererBase * pSceneRendererBase = nullptr;
-
-    CameraControllerInputBase* pCamInput      = nullptr;
-    CameraControllerBase*      pCamController = nullptr;
-    CameraProjectionController CamProjController;
+    std::vector< Scene* >       Scenes;
+    apemodeos::FileManager      FileManager;
+    apemodevk::ShaderCompiler*  pShaderCompiler;
+    apemodevk::ShaderFileReader ShaderFileReader;
+    CameraProjectionController  CamProjController;
+    CameraControllerInputBase*  pCamInput          = nullptr;
+    CameraControllerBase*       pCamController     = nullptr;
+    NuklearRendererSdlBase*     pNkRenderer        = nullptr;
+    DebugRendererVk*            pDebugRenderer     = nullptr;
+    SceneRendererBase*          pSceneRendererBase = nullptr;
 
     uint32_t FrameCount = 0;
     uint32_t FrameIndex = 0;
@@ -85,11 +105,11 @@ public:
 };
 
 App::App( ) : appState(new AppState()) {
-    if (nullptr != appState)
-        appState->appOptions->add_options("vk")
-            ("renderdoc", "Adds renderdoc layer to device layers")
-            ("vkapidump", "Adds api dump layer to vk device layers")
-            ("vktrace", "Adds vktrace layer to vk device layers");
+    if ( nullptr != appState )
+        appState->appOptions->add_options( "vk" )
+            ( "renderdoc", "Adds renderdoc layer to device layers" )
+            ( "vkapidump", "Adds api dump layer to vk device layers" )
+            ( "vktrace", "Adds vktrace layer to vk device layers" );
 }
 
 App::~App( ) {
@@ -114,21 +134,25 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         if ( nullptr == appContent )
             appContent = new AppContent( );
 
+        appContent->FileManager.FilePatterns.push_back( ".*\\.(vert|frag|comp|geom|tesc|tese|h|hpp|inl|inc|fx)$" );
+        appContent->FileManager.ScanDirectory( "./shaders/**", true );
+        appContent->ShaderFileReader.pFileManager = &appContent->FileManager;
+        appContent->pShaderCompiler = new apemodevk::ShaderCompiler( );
+        appContent->pShaderCompiler->SetShaderFileReader( &appContent->ShaderFileReader );
+
         totalSecs = 0.0f;
 
         auto appSurface = GetSurface();
         if (appSurface->GetImpl() != kAppSurfaceImpl_SdlVk)
             return false;
 
-        auto appSurfaceVk = (AppSurfaceSdlVk*)appSurface;
+        auto appSurfaceVk = (AppSurfaceSdlVk*) appSurface;
         if ( auto swapchain = &appSurfaceVk->Swapchain ) {
             appContent->FrameCount = swapchain->ImgCount;
             appContent->FrameIndex = 0;
             appContent->FrameId    = 0;
-           
+
             OnResized();
-
-
 
             for (uint32_t i = 0; i < appContent->FrameCount; ++i) {
                 VkCommandPoolCreateInfo cmdPoolCreateInfo;
@@ -143,8 +167,8 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
 
                 VkCommandBufferAllocateInfo cmdBufferAllocInfo;
                 InitializeStruct( cmdBufferAllocInfo );
-                cmdBufferAllocInfo.commandPool        = appContent->hCmdPool[ i ];
-                cmdBufferAllocInfo.level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+                cmdBufferAllocInfo.commandPool = appContent->hCmdPool[ i ];
+                cmdBufferAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
                 cmdBufferAllocInfo.commandBufferCount = 1;
 
                 if ( false == appContent->hCmdBuffers[ i ].Recreate( *appSurfaceVk->pNode, cmdBufferAllocInfo ) ) {
@@ -197,9 +221,9 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
 
         appContent->pNkRenderer->Init( &initParamsNk );
 
-        queueFamilyPool->Release(acquiredQueue);
+        queueFamilyPool->Release( acquiredQueue );
 
-        appContent->pDebugRenderer = new DebugRendererVk();
+        appContent->pDebugRenderer = new DebugRendererVk( );
 
         DebugRendererVk::InitParametersVk initParamsDbg;
         initParamsDbg.pAlloc          = nullptr;
@@ -209,27 +233,35 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         initParamsDbg.pDescPool       = appContent->DescPool;
         initParamsDbg.FrameCount      = appContent->FrameCount;
 
-        appContent->pDebugRenderer->RecreateResources(&initParamsDbg);
-        appContent->pSceneRendererBase = appSurfaceVk->CreateSceneRenderer();
+        appContent->pDebugRenderer->RecreateResources( &initParamsDbg );
+        appContent->pSceneRendererBase = appSurfaceVk->CreateSceneRenderer( );
 
         SceneRendererVk::SceneUpdateParametersVk updateParams;
-        updateParams.pNode = appSurfaceVk->pNode;
-        updateParams.pRenderPass = appContent->hDbgRenderPass;
-        updateParams.pDescPool = appContent->DescPool;
-        updateParams.FrameCount = appContent->FrameCount;
+        updateParams.pNode           = appSurfaceVk->pNode;
+        updateParams.pShaderCompiler = appContent->pShaderCompiler;
+        updateParams.pRenderPass     = appContent->hDbgRenderPass;
+        updateParams.pDescPool       = appContent->DescPool;
+        updateParams.FrameCount      = appContent->FrameCount;
 
-        //appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/A45p.fbxp"));
-        //appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/A45.fbxp"));
-        //appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Mech6kv4.fbxp"));
-        appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Mech6kv4p.fbxp"));
-        //appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Mech6kv4.fbxp"));
-        //appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Cube10p.fbxp"));
-        //appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Knifep.fbxp"));
-        //appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/pontiacp.fbxp"));
-            //appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Mech6kv4p.fbxp"));
-        updateParams.pSceneSrc = appContent->Scenes.back()->sourceScene;
+        // -i "F:\Dev\AutodeskMaya\Mercedes+Benz+A45+AMG+Centered.FBX" -o "$(SolutionDir)assets\A45p.fbxp" -p
+        // -i "F:\Dev\AutodeskMaya\Mercedes+Benz+A45+AMG+Centered.FBX" -o "$(SolutionDir)assets\A45.fbxp"
+        // -i "E:\Media\Models\mech-m-6k\source\93d43cf18ad5406ba0176c9fae7d4927.fbx" -o "$(SolutionDir)assets\Mech6kv4p.fbxp" -p
+        // -i "E:\Media\Models\mech-m-6k\source\93d43cf18ad5406ba0176c9fae7d4927.fbx" -o "$(SolutionDir)assets\Mech6kv4.fbxp"
+        // -i "E:\Media\Models\carambit\source\Knife.fbx" -o "$(SolutionDir)assets\Knifep.fbxp" -p
+        // -i "E:\Media\Models\pontiac-firebird-formula-1974\source\carz.obj 2.zip\carz.obj\mesh.obj" -o "$(SolutionDir)assets\pontiacp.fbxp" -p
 
-        appContent->pSceneRendererBase->UpdateScene(appContent->Scenes.back(), &updateParams);
+         //appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/A45p.fbxp"));
+        // appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/A45.fbxp"));
+        // appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Mech6kv4.fbxp"));
+        appContent->Scenes.push_back( LoadSceneFromFile( "F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Mech6kv4p.fbxp" ) );
+        // appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Mech6kv4.fbxp"));
+        // appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Cube10p.fbxp"));
+        // appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Knifep.fbxp"));
+        // appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/pontiacp.fbxp"));
+        // appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Mech6kv4p.fbxp"));
+        updateParams.pSceneSrc = appContent->Scenes.back( )->sourceScene;
+
+        appContent->pSceneRendererBase->UpdateScene( appContent->Scenes.back( ), &updateParams );
 
         // appContent->scenes[ 0 ] = LoadSceneFromFile( "../../../assets/iron-man.fbxp" );
         // appContent->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/kalestra-the-sorceress.fbxp" );
@@ -518,8 +550,7 @@ void App::Update( float deltaSecs, Input const& inputState ) {
     if ( auto appSurfaceVk = (AppSurfaceSdlVk*) GetSurface( ) ) {
 
         auto queueFamilyPool = appSurfaceVk->pNode->GetQueuePool()->GetPool(appSurfaceVk->PresentQueueFamilyIds[0]);
-        apemodevk::AcquiredQueue acquiredQueue;
-
+        auto acquiredQueue = queueFamilyPool->Acquire(true);
         while (acquiredQueue.pQueue == nullptr) {
             acquiredQueue = queueFamilyPool->Acquire(true);
         }
@@ -636,7 +667,7 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         sceneRenderParameters.scale[ 1 ] = 1;
         sceneRenderParameters.FrameIndex = appContent->FrameIndex;
         sceneRenderParameters.pCmdBuffer = cmdBuffer;
-        sceneRenderParameters.pNode = appSurfaceVk->pNode;
+        sceneRenderParameters.pNode      = appSurfaceVk->pNode;
         sceneRenderParameters.ViewMatrix = frameData.viewMatrix;
         sceneRenderParameters.ProjMatrix = frameData.projectionMatrix;
 

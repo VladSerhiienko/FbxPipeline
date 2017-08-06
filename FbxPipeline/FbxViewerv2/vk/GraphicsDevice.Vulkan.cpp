@@ -3,6 +3,7 @@
 #include <GraphicsManager.Vulkan.h>
 
 #include <QueuePools.Vulkan.h>
+#include <ShaderCompiler.Vulkan.h>
 
 #include <GraphicsManager.KnownExtensions.Vulkan.h>
 #include <NativeDispatchableHandles.Vulkan.h>

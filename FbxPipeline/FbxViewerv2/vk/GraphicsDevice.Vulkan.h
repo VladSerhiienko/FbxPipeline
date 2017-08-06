@@ -9,6 +9,7 @@ namespace apemodevk {
 
     class QueuePool;
     class CommandBufferPool;
+    class ShaderCompiler;
 
     class GraphicsDevice : public apemodevk::NoCopyAssignPolicy {
     public:
