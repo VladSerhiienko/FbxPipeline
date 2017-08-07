@@ -1,7 +1,7 @@
 
 #include <fbxppch.h>
 #include <fbxpstate.h>
-#include <city.h>
+#include <CityHash.h>
 #include <fstream>
 #include <flatbuffers/util.h>
 

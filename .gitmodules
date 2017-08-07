@@ -1,9 +1,6 @@
 [submodule "ThirdParty/flatbuffers"]
 	path = ThirdParty/flatbuffers
 	url = git@github.com:google/flatbuffers.git
-[submodule "ThirdParty/draco"]
-	path = ThirdParty/draco
-	url = git@github.com:google/draco.git
 [submodule "ThirdParty/lua"]
 	path = ThirdParty/lua
 	url = git@github.com:lua/lua.git
@@ -13,21 +10,9 @@
 [submodule "ThirdParty/spdlog"]
 	path = ThirdParty/spdlog
 	url = git@github.com:gabime/spdlog.git
-[submodule "ThirdParty/selene"]
-	path = ThirdParty/selene
-	url = git@github.com:jeremyong/Selene.git
-[submodule "ThirdParty/cityhash"]
-	path = ThirdParty/cityhash
-	url = git@github.com:google/cityhash.git
 [submodule "ThirdParty/mathfu"]
 	path = ThirdParty/mathfu
 	url = git@github.com:google/mathfu.git
-[submodule "ThirdParty/bx"]
-	path = ThirdParty/bx
-	url = git://github.com/bkaradzic/bx.git
-[submodule "ThirdParty/bgfx"]
-	path = ThirdParty/bgfx
-	url = git://github.com/bkaradzic/bgfx.git
 [submodule "ThirdParty/sdl2"]
 	path = ThirdParty/sdl2
 	url = git@github.com:davidsiaw/SDL2.git
@@ -49,3 +34,9 @@
 [submodule "ThirdParty/tbb"]
 	path = ThirdParty/tbb
 	url = git@github.com:01org/tbb.git
+[submodule "ThirdParty/gli"]
+	path = ThirdParty/gli
+	url = git@github.com:g-truc/gli.git
+[submodule "ThirdParty/glm"]
+	path = ThirdParty/glm
+	url = git@github.com:g-truc/glm.git

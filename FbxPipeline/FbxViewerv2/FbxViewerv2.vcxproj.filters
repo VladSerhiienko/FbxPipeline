@@ -182,6 +182,9 @@
     <ClInclude Include="vk\ShaderCompiler.Vulkan.h">
       <Filter>Sources\Graphics\[Vulkan]</Filter>
     </ClInclude>
+    <ClInclude Include="ImageLoaderVk.h">
+      <Filter>Sources\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="fbxvpch.cpp">
@@ -261,6 +264,9 @@
     </ClCompile>
     <ClCompile Include="vk\ShaderCompiler.Vulkan.cpp">
       <Filter>Sources\Graphics\[Vulkan]</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageLoaderVk.cpp">
+      <Filter>Sources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

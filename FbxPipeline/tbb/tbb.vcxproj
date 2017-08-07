@@ -1,17 +1,33 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="Debug|Win32">
-      <Configuration>Debug</Configuration>
+    <ProjectConfiguration Include="Debug-MT|Win32">
+      <Configuration>Debug-MT</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|Win32">
-      <Configuration>Release</Configuration>
+    <ProjectConfiguration Include="Debug-MT|x64">
+      <Configuration>Debug-MT</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release-MT|Win32">
+      <Configuration>Release-MT</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release-MT|x64">
+      <Configuration>Release-MT</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release|x64">
       <Configuration>Release</Configuration>
@@ -19,167 +35,561 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{F813AB87-E9CD-445D-ABF7-CAB13CB974FF}</ProjectGuid>
+    <ProjectGuid>{F62787DD-1327-448B-9818-030062BCFAA5}</ProjectGuid>
     <RootNamespace>tbb</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-MT|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-MT|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-MT|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-MT|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.props" />
   </ImportGroup>
-  <ImportGroup Label="Shared">
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release-MT|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug-MT|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release-MT|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug-MT|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(SolutionDir)lib\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</IntDir>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(SolutionDir)lib\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</IntDir>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)lib\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</IntDir>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)lib\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</IntDir>
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)lib\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)lib\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)lib\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)lib\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug-MT|Win32'">$(SolutionDir)lib\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug-MT|Win32'">$(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug-MT|Win32'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug-MT|x64'">$(SolutionDir)lib\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug-MT|x64'">$(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug-MT|x64'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release-MT|Win32'">$(SolutionDir)lib\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release-MT|Win32'">$(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release-MT|Win32'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release-MT|x64'">$(SolutionDir)lib\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release-MT|x64'">$(SolutionDir)obj\$(ProjectName)\$(PlatformToolset)$(Platform)$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release-MT|x64'">false</LinkIncremental>
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Debug-MT|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Debug-MT|Win32'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Debug-MT|Win32'" />
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Debug-MT|x64'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Debug-MT|x64'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Debug-MT|x64'" />
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Release-MT|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release-MT|Win32'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release-MT|Win32'" />
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Release-MT|x64'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release-MT|x64'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release-MT|x64'" />
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <AdditionalOptions>  /c /MDd /Od /Ob0 /Zi /EHsc /GR /Zc:forScope /Zc:wchar_t /DTBB_USE_DEBUG /D__TBB_LIB_NAME=tbb_debug.lib /DDO_ITT_NOTIFY /GS /DUSE_WINTHREAD /D_CRT_SECURE_NO_DEPRECATE /D_WIN32_WINNT=0x0502 /D__TBB_BUILD=1 /W4 /I../../src /I../../ThirdParty/tbb/src/rml/include /I../../include</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)..\ThirdParty\tbb\include\;$(SolutionDir)..\ThirdParty\tbb\src\;$(SolutionDir)..\ThirdParty\tbb\src\rml\include\;$(SolutionDir)..\ThirdParty\tbb\build\vs2012\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>__TBB_BUILD=1;_CRT_SECURE_NO_WARNINGS=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
+    <Link>
+      <AdditionalOptions>/DLL /MAP /DEBUG /fixed:no /INCREMENTAL:NO  /DEF:"$(IntDir)tbb.def" %(AdditionalOptions)</AdditionalOptions>
+      <OutputFile>$(OutDir)tbb_debug.dll</OutputFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <AdditionalOptions>  /c /MDd /Od /Ob0 /Zi /EHsc /GR /Zc:forScope /Zc:wchar_t /DTBB_USE_DEBUG /D__TBB_LIB_NAME=tbb_debug.lib /DDO_ITT_NOTIFY /GS /DUSE_WINTHREAD /D_CRT_SECURE_NO_DEPRECATE /D_WIN32_WINNT=0x0502 /D__TBB_BUILD=1 /W4 /I../../src /I../../ThirdParty/tbb/src/rml/include /I../../include</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)..\ThirdParty\tbb\include\;$(SolutionDir)..\ThirdParty\tbb\src\;$(SolutionDir)..\ThirdParty\tbb\src\rml\include\;$(SolutionDir)..\ThirdParty\tbb\build\vs2012\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>__TBB_BUILD=1;_CRT_SECURE_NO_WARNINGS=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ShowIncludes>false</ShowIncludes>
     </ClCompile>
+    <Link>
+      <AdditionalOptions>/nologo /DLL /MAP /DEBUG /fixed:no /INCREMENTAL:NO  /DEF:"$(IntDir)tbb.def" %(AdditionalOptions)</AdditionalOptions>
+      <OutputFile>$(OutDir)tbb_debug.dll</OutputFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX64</TargetMachine>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <Optimization>MaxSpeed</Optimization>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
+      <AdditionalOptions>  /c /MD /O2 /Zi /EHsc /GR /Zc:forScope /Zc:wchar_t /D__TBB_LIB_NAME=tbb.lib /DDO_ITT_NOTIFY /GS /DUSE_WINTHREAD /D_CRT_SECURE_NO_DEPRECATE /D_WIN32_WINNT=0x0502 /D__TBB_BUILD=1 /W4 /I../../src /I../../ThirdParty/tbb/src/rml/include /I../../include</AdditionalOptions>
       <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)..\ThirdParty\tbb\include\;$(SolutionDir)..\ThirdParty\tbb\src\;$(SolutionDir)..\ThirdParty\tbb\src\rml\include\;$(SolutionDir)..\ThirdParty\tbb\build\vs2012\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>__TBB_BUILD=1;_CRT_SECURE_NO_WARNINGS=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <AdditionalOptions>/nologo /DLL /MAP /DEBUG /fixed:no /INCREMENTAL:NO  /DEF:"$(IntDir)tbb.def" %(AdditionalOptions)</AdditionalOptions>
+      <OutputFile>$(OutDir)tbb.dll</OutputFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX86</TargetMachine>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <Optimization>MaxSpeed</Optimization>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
+      <AdditionalOptions>  /c /MD /O2 /Zi /EHsc /GR /Zc:forScope /Zc:wchar_t /D__TBB_LIB_NAME=tbb.lib /DDO_ITT_NOTIFY /GS /DUSE_WINTHREAD /D_CRT_SECURE_NO_DEPRECATE /D_WIN32_WINNT=0x0502 /D__TBB_BUILD=1 /W4 /I../../src /I../../ThirdParty/tbb/src/rml/include /I../../include</AdditionalOptions>
       <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)..\ThirdParty\tbb\include\;$(SolutionDir)..\ThirdParty\tbb\src\;$(SolutionDir)..\ThirdParty\tbb\src\rml\include\;$(SolutionDir)..\ThirdParty\tbb\build\vs2012\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>__TBB_BUILD=1;_CRT_SECURE_NO_WARNINGS=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <AdditionalOptions>/nologo /DLL /MAP /DEBUG /fixed:no /INCREMENTAL:NO /DEF:"$(IntDir)tbb.def" %(AdditionalOptions)</AdditionalOptions>
+      <OutputFile>$(OutDir)tbb.dll</OutputFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX64</TargetMachine>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug-MT|Win32'">
+    <ClCompile>
+      <AdditionalOptions>  /c /MTd /Od /Ob0 /Zi /EHsc /GR /Zc:forScope /Zc:wchar_t /DTBB_USE_DEBUG /D__TBB_LIB_NAME=tbb_debug.lib /DDO_ITT_NOTIFY /GS /DUSE_WINTHREAD /D_CRT_SECURE_NO_DEPRECATE /D_WIN32_WINNT=0x0502 /D__TBB_BUILD=1 /W4 /I../../src /I../../ThirdParty/tbb/src/rml/include /I../../include</AdditionalOptions>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)..\ThirdParty\tbb\include\;$(SolutionDir)..\ThirdParty\tbb\src\;$(SolutionDir)..\ThirdParty\tbb\src\rml\include\;$(SolutionDir)..\ThirdParty\tbb\build\vs2012\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalOptions>/DLL /MAP /DEBUG /fixed:no /INCREMENTAL:NO  /DEF:"$(IntDir)tbb.def" %(AdditionalOptions)</AdditionalOptions>
+      <OutputFile>$(OutDir)tbb_debug.dll</OutputFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug-MT|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>  /c /MTd /Od /Ob0 /Zi /EHsc /GR /Zc:forScope /Zc:wchar_t /DTBB_USE_DEBUG /D__TBB_LIB_NAME=tbb_debug.lib /DDO_ITT_NOTIFY /GS /DUSE_WINTHREAD /D_CRT_SECURE_NO_DEPRECATE /D_WIN32_WINNT=0x0502 /D__TBB_BUILD=1 /W4 /I../../src /I../../ThirdParty/tbb/src/rml/include /I../../include</AdditionalOptions>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)..\ThirdParty\tbb\include\;$(SolutionDir)..\ThirdParty\tbb\src\;$(SolutionDir)..\ThirdParty\tbb\src\rml\include\;$(SolutionDir)..\ThirdParty\tbb\build\vs2012\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ShowIncludes>false</ShowIncludes>
+    </ClCompile>
+    <Link>
+      <AdditionalOptions>/nologo /DLL /MAP /DEBUG /fixed:no /INCREMENTAL:NO  /DEF:"$(IntDir)tbb.def" %(AdditionalOptions)</AdditionalOptions>
+      <OutputFile>$(OutDir)tbb_debug.dll</OutputFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX64</TargetMachine>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-MT|Win32'">
+    <ClCompile>
+      <AdditionalOptions>  /c /MT /O2 /Zi /EHsc /GR /Zc:forScope /Zc:wchar_t /D__TBB_LIB_NAME=tbb.lib /DDO_ITT_NOTIFY /GS /DUSE_WINTHREAD /D_CRT_SECURE_NO_DEPRECATE /D_WIN32_WINNT=0x0502 /D__TBB_BUILD=1 /W4 /I../../src /I../../ThirdParty/tbb/src/rml/include /I../../include</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)..\ThirdParty\tbb\include\;$(SolutionDir)..\ThirdParty\tbb\src\;$(SolutionDir)..\ThirdParty\tbb\src\rml\include\;$(SolutionDir)..\ThirdParty\tbb\build\vs2012\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalOptions>/nologo /DLL /MAP /DEBUG /fixed:no /INCREMENTAL:NO  /DEF:"$(IntDir)tbb.def" %(AdditionalOptions)</AdditionalOptions>
+      <OutputFile>$(OutDir)tbb.dll</OutputFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-MT|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>  /c /MT /O2 /Zi /EHsc /GR /Zc:forScope /Zc:wchar_t /D__TBB_LIB_NAME=tbb.lib /DDO_ITT_NOTIFY /GS /DUSE_WINTHREAD /D_CRT_SECURE_NO_DEPRECATE /D_WIN32_WINNT=0x0502 /D__TBB_BUILD=1 /W4 /I../../src /I../../ThirdParty/tbb/src/rml/include /I../../include</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)..\ThirdParty\tbb\include\;$(SolutionDir)..\ThirdParty\tbb\src\;$(SolutionDir)..\ThirdParty\tbb\src\rml\include\;$(SolutionDir)..\ThirdParty\tbb\build\vs2012\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalOptions>/nologo /DLL /MAP /DEBUG /fixed:no /INCREMENTAL:NO /DEF:"$(IntDir)tbb.def" %(AdditionalOptions)</AdditionalOptions>
+      <OutputFile>$(OutDir)tbb.dll</OutputFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX64</TargetMachine>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\arena.cpp" />
-    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\cache_aligned_allocator.cpp" />
+    <MASM Include="..\..\ThirdParty\tbb\src\tbb\ia32-masm\atomic_support.asm">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug-MT|Win32'">/coff /Zi</AdditionalOptions>
+      <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Debug-MT|Win32'">true</UseSafeExceptionHandlers>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-MT|x64'">true</ExcludedFromBuild>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/coff /Zi</AdditionalOptions>
+      <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</UseSafeExceptionHandlers>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release-MT|Win32'">/coff</AdditionalOptions>
+      <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Release-MT|Win32'">true</UseSafeExceptionHandlers>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-MT|x64'">true</ExcludedFromBuild>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/coff</AdditionalOptions>
+      <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</UseSafeExceptionHandlers>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </MASM>
+    <CustomBuild Include="..\..\ThirdParty\tbb\src\tbb\intel64-masm\atomic_support.asm">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-MT|Win32'">true</ExcludedFromBuild>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug-MT|x64'">building atomic_support.obj</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug-MT|x64'">ml64 /Fo"$(IntDir)%(FileName).obj" /DUSE_FRAME_POINTER /DEM64T=1 /c /Zi ../../ThirdParty/tbb/src/tbb/intel64-masm/atomic_support.asm</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug-MT|x64'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">building atomic_support.obj</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ml64 /Fo"$(IntDir)%(FileName).obj" /DUSE_FRAME_POINTER /DEM64T=1 /c /Zi ../../ThirdParty/tbb/src/tbb/intel64-masm/atomic_support.asm</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-MT|Win32'">true</ExcludedFromBuild>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release-MT|x64'">building atomic_support.obj</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release-MT|x64'">ml64 /Fo"$(IntDir)%(FileName).obj"  /DEM64T=1 /c /Zi ../../ThirdParty/tbb/src/tbb/intel64-masm/atomic_support.asm</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release-MT|x64'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">building atomic_support.obj</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">ml64 /Fo"$(IntDir)%(FileName).obj"  /DEM64T=1 /c /Zi ../../ThirdParty/tbb/src/tbb/intel64-masm/atomic_support.asm</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\..\ThirdParty\tbb\src\tbb\intel64-masm\intel64_misc.asm">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-MT|Win32'">true</ExcludedFromBuild>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug-MT|x64'">building intel64_misc.obj</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug-MT|x64'">ml64 /Fo"$(IntDir)%(FileName).obj" /DUSE_FRAME_POINTER /DEM64T=1 /c /Zi ../../ThirdParty/tbb/src/tbb/intel64-masm/intel64_misc.asm</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug-MT|x64'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">building intel64_misc.obj</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ml64 /Fo"$(IntDir)%(FileName).obj" /DUSE_FRAME_POINTER /DEM64T=1 /c /Zi ../../ThirdParty/tbb/src/tbb/intel64-masm/intel64_misc.asm</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-MT|Win32'">true</ExcludedFromBuild>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release-MT|x64'">building intel64_misc.obj</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release-MT|x64'">ml64 /Fo"$(IntDir)%(FileName).obj"  /DEM64T=1 /c /Zi ../../ThirdParty/tbb/src/tbb/intel64-masm/intel64_misc.asm</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release-MT|x64'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">building intel64_misc.obj</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">ml64 /Fo"$(IntDir)%(FileName).obj"  /DEM64T=1 /c /Zi ../../ThirdParty/tbb/src/tbb/intel64-masm/intel64_misc.asm</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
+    </CustomBuild>
+    <MASM Include="..\..\ThirdParty\tbb\src\tbb\ia32-masm\itsx.asm">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug-MT|Win32'">/coff /Zi</AdditionalOptions>
+      <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Debug-MT|Win32'">true</UseSafeExceptionHandlers>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-MT|x64'">true</ExcludedFromBuild>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/coff /Zi</AdditionalOptions>
+      <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</UseSafeExceptionHandlers>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release-MT|Win32'">/coff</AdditionalOptions>
+      <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Release-MT|Win32'">true</UseSafeExceptionHandlers>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-MT|x64'">true</ExcludedFromBuild>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/coff</AdditionalOptions>
+      <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</UseSafeExceptionHandlers>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </MASM>
+    <CustomBuild Include="..\..\ThirdParty\tbb\src\tbb\intel64-masm\itsx.asm">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-MT|Win32'">true</ExcludedFromBuild>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug-MT|x64'">building itsx.obj</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug-MT|x64'">ml64 /Fo"$(IntDir)%(FileName).obj" /DUSE_FRAME_POINTER /DEM64T=1 /c /Zi ../../ThirdParty/tbb/src/tbb/intel64-masm/itsx.asm</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug-MT|x64'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">building itsx.obj</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ml64 /Fo"$(IntDir)%(FileName).obj" /DUSE_FRAME_POINTER /DEM64T=1 /c /Zi ../../ThirdParty/tbb/src/tbb/intel64-masm/itsx.asm</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-MT|Win32'">true</ExcludedFromBuild>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release-MT|x64'">building itsx.obj</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release-MT|x64'">ml64 /Fo"$(IntDir)%(FileName).obj"  /DEM64T=1 /c /Zi ../../ThirdParty/tbb/src/tbb/intel64-masm/itsx.asm</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release-MT|x64'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">building itsx.obj</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">ml64 /Fo"$(IntDir)%(FileName).obj"  /DEM64T=1 /c /Zi ../../ThirdParty/tbb/src/tbb/intel64-masm/itsx.asm</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
+    </CustomBuild>
+    <MASM Include="..\..\ThirdParty\tbb\src\tbb\ia32-masm\lock_byte.asm">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug-MT|Win32'">/coff /Zi</AdditionalOptions>
+      <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Debug-MT|Win32'">true</UseSafeExceptionHandlers>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-MT|x64'">true</ExcludedFromBuild>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug-MT|x64'">/coff /Zi</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/coff /Zi</AdditionalOptions>
+      <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</UseSafeExceptionHandlers>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/coff /Zi</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release-MT|Win32'">/coff</AdditionalOptions>
+      <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Release-MT|Win32'">true</UseSafeExceptionHandlers>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-MT|x64'">true</ExcludedFromBuild>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/coff</AdditionalOptions>
+      <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</UseSafeExceptionHandlers>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </MASM>
+  </ItemGroup>
+  <ItemGroup>
     <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\concurrent_hash_map.cpp" />
-    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\concurrent_monitor.cpp" />
     <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\concurrent_queue.cpp" />
     <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\concurrent_vector.cpp" />
-    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\condition_variable.cpp" />
-    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\critical_section.cpp" />
     <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\dynamic_link.cpp" />
-    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\governor.cpp" />
     <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\itt_notify.cpp" />
-    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\market.cpp" />
-    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\mutex.cpp" />
-    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\observer_proxy.cpp" />
+    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\cache_aligned_allocator.cpp" />
     <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\pipeline.cpp" />
-    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\recursive_mutex.cpp" />
-    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\scheduler.cpp" />
-    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\semaphore.cpp" />
-    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\spin_mutex.cpp" />
+    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\queuing_mutex.cpp" />
+    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\queuing_rw_mutex.cpp" />
+    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\reader_writer_lock.cpp" />
     <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\spin_rw_mutex.cpp" />
-    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\task.cpp" />
-    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\task_group_context.cpp" />
-    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\tbb_main.cpp" />
+    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\x86_rtm_rw_mutex.cpp" />
+    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\spin_mutex.cpp" />
+    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\critical_section.cpp" />
+    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\mutex.cpp" />
+    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\recursive_mutex.cpp" />
+    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\condition_variable.cpp" />
+    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\tbb_thread.cpp" />
+    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\concurrent_monitor.cpp" />
+    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\semaphore.cpp" />
+    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\private_server.cpp" />
+    <ClCompile Include="..\..\ThirdParty\tbb\src\rml\client\rml_tbb.cpp" />
     <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\tbb_misc.cpp" />
     <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\tbb_misc_ex.cpp" />
+    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\task.cpp" />
+    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\task_group_context.cpp" />
+    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\governor.cpp" />
+    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\market.cpp" />
+    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\arena.cpp" />
+    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\scheduler.cpp" />
+    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\observer_proxy.cpp" />
     <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\tbb_statistics.cpp" />
-    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\tbb_thread.cpp" />
-    <ClCompile Include="..\..\ThirdParty\tbb\src\rml\client\rml_tbb.cpp" />
+    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\tbb_main.cpp" />
+    <ClCompile Include="..\..\ThirdParty\tbb\src\old\concurrent_vector_v2.cpp" />
+    <ClCompile Include="..\..\ThirdParty\tbb\src\old\concurrent_queue_v2.cpp" />
+    <ClCompile Include="..\..\ThirdParty\tbb\src\old\spin_rw_mutex_v2.cpp" />
+    <ClCompile Include="..\..\ThirdParty\tbb\src\old\task_v2.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="..\..\ThirdParty\tbb\src\tbb\intel64-masm\atomic_support.asm">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <FileType>Document</FileType>
-    </CustomBuild>
-  </ItemGroup>
-  <ItemGroup>
-    <CustomBuild Include="..\..\ThirdParty\tbb\src\tbb\intel64-masm\intel64_misc.asm">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <FileType>Document</FileType>
-    </CustomBuild>
-  </ItemGroup>
-  <ItemGroup>
-    <CustomBuild Include="..\..\ThirdParty\tbb\src\tbb\intel64-masm\itsx.asm">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <FileType>Document</FileType>
-    </CustomBuild>
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\internal\_concurrent_queue_impl.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\_tbb_windef.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\aligned_space.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\atomic.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\blocked_range.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\blocked_range2d.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\blocked_range3d.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\cache_aligned_allocator.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\combinable.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\concurrent_hash_map.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\src\tbb\concurrent_monitor.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\concurrent_priority_queue.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\concurrent_queue.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\src\old\concurrent_queue_v2.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\concurrent_vector.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\src\old\concurrent_vector_v2.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\critical_section.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\src\tbb\dynamic_link.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\enumerable_thread_specific.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\src\tbb\gate.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\src\test\harness.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\src\test\harness_allocator.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\src\test\harness_assert.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\src\test\harness_bad_expr.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\src\test\harness_barrier.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\src\test\harness_concurrency_tracker.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\src\test\harness_cpu.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\src\test\harness_eh.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\src\test\harness_iterator.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\src\test\harness_m128.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\src\test\harness_memory.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\src\test\harness_report.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\machine\ibm_aix51.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\src\tbb\itt_notify.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\machine\linux_common.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\machine\linux_ia32.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\machine\linux_ia64.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\machine\linux_intel64.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\machine\mac_ppc.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\mutex.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\null_mutex.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\null_rw_mutex.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\parallel_do.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\parallel_for.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\parallel_for_each.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\parallel_invoke.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\parallel_reduce.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\parallel_scan.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\parallel_sort.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\parallel_while.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\partitioner.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\pipeline.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\compat\ppl.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\queuing_mutex.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\queuing_rw_mutex.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\reader_writer_lock.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\recursive_mutex.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\scalable_allocator.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\src\tbb\semaphore.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\spin_mutex.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\spin_rw_mutex.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\src\old\spin_rw_mutex_v2.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\task.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\task_group.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\task_scheduler_init.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\task_scheduler_observer.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\tbb.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\tbb_allocator.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\src\tbb\tbb_assert_impl.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\tbb_config.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\tbb_exception.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\tbb_machine.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\src\tbb\tbb_misc.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\tbb_profiling.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\tbb_stddef.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\tbb_thread.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\src\tbb\tbb_version.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\tbbmalloc_proxy.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\src\test\test_allocator.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\src\test\test_allocator_STL.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\tick_count.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\src\tbb\tls.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\machine\windows_ia32.h" />
+    <ClInclude Include="..\..\ThirdParty\tbb\include\tbb\machine\windows_intel64.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.targets" />
   </ImportGroup>
 </Project>

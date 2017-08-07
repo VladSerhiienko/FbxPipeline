@@ -46,6 +46,9 @@
     <ClCompile Include="fbxppacking.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
+    <ClCompile Include="CityHash.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\schemes\scene.fbs">
