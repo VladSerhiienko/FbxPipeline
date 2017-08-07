@@ -152,6 +152,21 @@ bool apemodeos::FileManager::ScanDirectory( std::string storageDirectory, bool b
     return false;
 }
 
+void apemodeos::FileManager::CollectChangedFiles( std::vector< std::string >& OutChangedFiles ) {
+    uint32_t changedFileCount = 0;
+
+    for ( auto& file : Files )
+        changedFileCount += ( uint32_t )( file.second.Changed( ) || file.second.New( ) );
+
+    if ( changedFileCount ) {
+        OutChangedFiles.reserve( changedFileCount );
+
+        for ( auto& file : Files )
+            if ( file.second.Changed( ) || file.second.New( ) )
+                OutChangedFiles.push_back( file.first );
+    }
+}
+
 std::vector< uint8_t > apemodeos::FileManager::ReadBinFile( const std::string& filePath ) {
     const std::string filePathFull = ResolveFullPath( filePath );
 

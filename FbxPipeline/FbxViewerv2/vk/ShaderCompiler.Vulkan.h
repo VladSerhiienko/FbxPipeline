@@ -49,6 +49,7 @@ namespace apemodevk {
             eShaderType_GLSL_Default_GeometryShader,
             eShaderType_GLSL_Default_TessControlShader,
             eShaderType_GLSL_Default_TessEvaluationShader,
+
             eShaderType_SPIRV_assembly,
         };
 

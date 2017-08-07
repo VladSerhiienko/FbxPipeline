@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\ia32-masm">
+      <UniqueIdentifier>{20edab4d-a23d-44e4-8dc3-44a1f6bb88af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\intel64-masm">
+      <UniqueIdentifier>{5ba1cdf7-8ef8-43d8-b0e7-0d61cd75f7bd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\arena.cpp">
@@ -96,5 +102,19 @@
     <ClCompile Include="..\..\ThirdParty\tbb\src\rml\client\rml_tbb.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\dynamic_link.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\intel64-masm\intel64_misc.asm">
+      <Filter>Source Files\intel64-masm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\tbb\src\tbb\intel64-masm\itsx.asm">
+      <Filter>Source Files\intel64-masm</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\..\ThirdParty\tbb\src\tbb\intel64-masm\atomic_support.asm">
+      <Filter>Source Files\intel64-masm</Filter>
+    </CustomBuild>
   </ItemGroup>
 </Project>

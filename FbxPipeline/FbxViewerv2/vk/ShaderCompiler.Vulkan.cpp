@@ -2,7 +2,7 @@
 #include <shaderc/shaderc.hpp>
 
 struct apemodevk::ShaderCompiler::Impl {
-    shaderc::Compiler                                   Compiler;
+    shaderc::Compiler Compiler;
     const apemodevk::ShaderCompiler::IShaderFileReader* pShaderFileReader;
 };
 
@@ -26,7 +26,7 @@ public:
                                         const char*          requesting_source,
                                         size_t               include_depth ) {
         auto userData = std::make_unique< UserData >( );
-        if ( false == FileReader.ReadShaderTxtFile( requested_source, userData->Path, userData->Content ) ) {
+        if ( FileReader.ReadShaderTxtFile( requested_source, userData->Path, userData->Content ) ) {
             IncludedFiles.insert( userData->Path );
 
             auto includeResult = std::make_unique< shaderc_include_result >( );
@@ -157,20 +157,26 @@ bool apemodevk::ShaderCompiler::Compile( const std::string&                InFil
         }
 
 #if 1
+        OutputDebugStringA( "ShaderCompiler: -------------------------------------------\n" );
+        OutputDebugStringA( "ShaderCompiler: PreprocessedSourceCompilationResult: " );
+        OutputDebugStringA( fullPath.c_str( ) );
+        OutputDebugStringA( "\n" );
+        OutputDebugStringA( "ShaderCompiler: -------------------------------------------\n" );
+        OutputDebugStringA( preprocessedSourceCompilationResult.begin( ) );
+        OutputDebugStringA( "ShaderCompiler: -------------------------------------------\n" );
+
         shaderc::AssemblyCompilationResult assemblyCompilationResult = pImpl->Compiler.CompileGlslToSpvAssembly(
             preprocessedSourceCompilationResult.begin( ), (shaderc_shader_kind) eShaderKind, fullPath.c_str( ), options );
 
-        OutputDebugStringA( "ShaderCompiler: -------------------------------------------\n" );
-        OutputDebugStringA( "ShaderCompiler: " );
+        OutputDebugStringA( "ShaderCompiler: AssemblyCompilationResult: " ); 
         OutputDebugStringA( fullPath.c_str( ) );
-        OutputDebugStringA( "\n" );
+        OutputDebugStringA( "\n" ); 
         OutputDebugStringA( "ShaderCompiler: -------------------------------------------\n" );
         OutputDebugStringA( assemblyCompilationResult.begin( ) );
         OutputDebugStringA( "ShaderCompiler: -------------------------------------------\n" );
 
         if ( shaderc_compilation_status_success != assemblyCompilationResult.GetCompilationStatus( ) ) {
-            platform::DebugTrace( "ShaderCompiler: CompileGlslToSpvAssembly: %s: %s",
-                                  InFilePath.c_str( ),
+            platform::DebugTrace( "ShaderCompiler: CompileGlslToSpvAssembly: %s",
                                   assemblyCompilationResult.GetErrorMessage( ).c_str( ) );
             platform::DebugBreak( );
             return false;

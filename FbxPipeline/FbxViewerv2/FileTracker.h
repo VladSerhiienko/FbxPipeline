@@ -52,6 +52,12 @@ namespace apemodeos {
          **/
         bool ScanDirectory( std::string InPath, bool bRemoveDeletedFiles );
 
+        /**
+         * Populates OutChangedFiles with the file paths, that were changed since the previous ScanDirectory().
+         * @param OutChangedFiles Full file paths, that were changed.
+         **/
+        void CollectChangedFiles( std::vector< std::string >& OutChangedFiles );
+
         std::vector< uint8_t > ReadBinFile( const std::string& InPath ); /* Returns the content of the file. */
         std::string            ReadTxtFile( const std::string& InPath ); /* Returns the content of the file. */
     };

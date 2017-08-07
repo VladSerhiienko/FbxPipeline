@@ -1,27 +1,25 @@
 #include <fbxvpch.h>
 
 #include <App.h>
-#include <AppSurfaceSdlVk.h>
-#include <Swapchain.Vulkan.h>
-#include <Input.h>
-#include <NuklearSdlVk.h>
-#include <DebugRendererVk.h>
-
 #include <AppState.h>
-
+#include <Input.h>
 #include <Scene.h>
-#include <SceneRendererVk.h>
-
 #include <Camera.h>
+#include <FileTracker.h>
 #include <CameraControllerInputMouseKeyboard.h>
 #include <CameraControllerProjection.h>
 #include <CameraControllerModelView.h>
 #include <CameraControllerFreeLook.h>
 
-#include <FileTracker.h>
+#include <Swapchain.Vulkan.h>
 #include <ShaderCompiler.Vulkan.h>
 
-#include <EmbeddedShaderPreprocessor.h>
+#include <AppSurfaceSdlVk.h>
+#include <NuklearSdlVk.h>
+#include <DebugRendererVk.h>
+#include <SceneRendererVk.h>
+
+#include <tbb/tbb.h>
 
 namespace apemode {
     using namespace apemodevk;
@@ -243,6 +241,8 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         updateParams.pDescPool       = appContent->DescPool;
         updateParams.FrameCount      = appContent->FrameCount;
 
+        // -i "E:\Media\Models\vanille-flirty-animation\source\happy.fbx" -o "$(SolutionDir)assets\vanille-flirty-animation.fbxp" -p
+        // -i "E:\Media\Models\special-sniper-rifle-vss-vintorez\source\vintorez.FBX" -o "$(SolutionDir)assets\vintorez.fbxp" -p
         // -i "F:\Dev\AutodeskMaya\Mercedes+Benz+A45+AMG+Centered.FBX" -o "$(SolutionDir)assets\A45p.fbxp" -p
         // -i "F:\Dev\AutodeskMaya\Mercedes+Benz+A45+AMG+Centered.FBX" -o "$(SolutionDir)assets\A45.fbxp"
         // -i "E:\Media\Models\mech-m-6k\source\93d43cf18ad5406ba0176c9fae7d4927.fbx" -o "$(SolutionDir)assets\Mech6kv4p.fbxp" -p
@@ -250,16 +250,18 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         // -i "E:\Media\Models\carambit\source\Knife.fbx" -o "$(SolutionDir)assets\Knifep.fbxp" -p
         // -i "E:\Media\Models\pontiac-firebird-formula-1974\source\carz.obj 2.zip\carz.obj\mesh.obj" -o "$(SolutionDir)assets\pontiacp.fbxp" -p
 
-         //appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/A45p.fbxp"));
+        appContent->Scenes.push_back( LoadSceneFromFile( "F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/vanille-flirty-animation.fbxp" ) );
+        //appContent->Scenes.push_back( LoadSceneFromFile( "F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/vintorez.fbxp" ) );
+        //appContent->Scenes.push_back( LoadSceneFromFile( "F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Mech6kv4p.fbxp" ) );
+        // appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/A45p.fbxp"));
         // appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/A45.fbxp"));
         // appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Mech6kv4.fbxp"));
-        appContent->Scenes.push_back( LoadSceneFromFile( "F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Mech6kv4p.fbxp" ) );
         // appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Mech6kv4.fbxp"));
         // appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Cube10p.fbxp"));
         // appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Knifep.fbxp"));
         // appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/pontiacp.fbxp"));
         // appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Mech6kv4p.fbxp"));
-        updateParams.pSceneSrc = appContent->Scenes.back( )->sourceScene;
+        updateParams.pSceneSrc = appContent->Scenes.back( )->sourceScene; 
 
         appContent->pSceneRendererBase->UpdateScene( appContent->Scenes.back( ), &updateParams );
 
