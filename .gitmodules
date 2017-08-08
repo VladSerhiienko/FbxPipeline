@@ -40,3 +40,6 @@
 [submodule "ThirdParty/glm"]
 	path = ThirdParty/glm
 	url = git@github.com:g-truc/glm.git
+[submodule "ThirdParty/lodepng"]
+	path = ThirdParty/lodepng
+	url = git@github.com:lvandeve/lodepng.git

@@ -170,11 +170,6 @@ void apemodeos::FileManager::CollectChangedFiles( std::vector< std::string >& Ou
 std::vector< uint8_t > apemodeos::FileManager::ReadBinFile( const std::string& filePath ) {
     const std::string filePathFull = ResolveFullPath( filePath );
 
-    /* Check if file exists */
-    auto& fileIt = Files.find( filePathFull );
-    if ( fileIt == Files.end( ) )
-        return {};
-
     /* Read file and return */
     std::ifstream fileStream( filePathFull, std::ios::binary | std::ios::ate );
     std::streamsize fileWholeSize = fileStream.tellg( );
@@ -184,18 +179,11 @@ std::vector< uint8_t > apemodeos::FileManager::ReadBinFile( const std::string& f
         return fileBuffer;
     }
 
-    /* Set to error state */
-    fileIt->second.CurrTime = 0;
     return {};
 }
 
 std::string apemodeos::FileManager::ReadTxtFile( const std::string& filePath ) {
     const std::string filePathFull = ResolveFullPath( filePath );
-
-    /* Check if file exists */
-    auto& fileIt = Files.find( filePathFull );
-    if ( fileIt == Files.end( ) )
-        return "";
 
     /* Read file and return */
     std::ifstream fileStream( filePathFull );
@@ -204,7 +192,5 @@ std::string apemodeos::FileManager::ReadTxtFile( const std::string& filePath ) {
                             std::istreambuf_iterator< char >( ) );
     }
 
-    /* Set to error state */
-    fileIt->second.CurrTime = 0;
     return "";
 }

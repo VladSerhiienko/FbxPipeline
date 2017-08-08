@@ -18,6 +18,7 @@
 #include <NuklearSdlVk.h>
 #include <DebugRendererVk.h>
 #include <SceneRendererVk.h>
+#include <ImageLoaderVk.h>
 
 #include <tbb/tbb.h>
 
@@ -241,6 +242,7 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         updateParams.pDescPool       = appContent->DescPool;
         updateParams.FrameCount      = appContent->FrameCount;
 
+		// -i "C:\Users\vladyslav.serhiienko\Downloads\blood-and-fire\source\DragonMain.fbx" -o "$(SolutionDir)assets\DragonMainp.fbxp" -p
         // -i "E:\Media\Models\knight-artorias\source\Artorias.fbx.fbx" -o "$(SolutionDir)assets\Artoriasp.fbxp" -p
         // -i "E:\Media\Models\vanille-flirty-animation\source\happy.fbx" -o "$(SolutionDir)assets\vanille-flirty-animation.fbxp" -p
         // -i "E:\Media\Models\special-sniper-rifle-vss-vintorez\source\vintorez.FBX" -o "$(SolutionDir)assets\vintorez.fbxp" -p
@@ -251,7 +253,8 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         // -i "E:\Media\Models\carambit\source\Knife.fbx" -o "$(SolutionDir)assets\Knifep.fbxp" -p
         // -i "E:\Media\Models\pontiac-firebird-formula-1974\source\carz.obj 2.zip\carz.obj\mesh.obj" -o "$(SolutionDir)assets\pontiacp.fbxp" -p
 
-        appContent->Scenes.push_back( LoadSceneFromFile( "F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Artoriasp.fbxp" ) );
+		appContent->Scenes.push_back(LoadSceneFromFile("../../../assets/DragonMainp.fbxp"));
+		//appContent->Scenes.push_back( LoadSceneFromFile( "F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Artoriasp.fbxp" ) );
         //appContent->Scenes.push_back( LoadSceneFromFile( "F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/vanille-flirty-animation.fbxp" ) );
         //appContent->Scenes.push_back( LoadSceneFromFile( "F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/vintorez.fbxp" ) );
         //appContent->Scenes.push_back( LoadSceneFromFile( "F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Mech6kv4p.fbxp" ) );
@@ -266,6 +269,12 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         updateParams.pSceneSrc = appContent->Scenes.back( )->sourceScene; 
 
         appContent->pSceneRendererBase->UpdateScene( appContent->Scenes.back( ), &updateParams );
+
+        apemodeos::FileManager imgFileManager;
+        auto pngContent = imgFileManager.ReadBinFile("C:/Users/vladyslav.serhiienko/Downloads/blood-and-fire/textures/DragonMain_Diff.png");
+
+        apemodevk::ImageLoader imgLoader;
+        auto pLoadedImg = imgLoader.LoadImageFromData(appSurfaceVk->pNode, pngContent, apemodevk::ImageLoader::eImageFileFormat_PNG);
 
         // appContent->scenes[ 0 ] = LoadSceneFromFile( "../../../assets/iron-man.fbxp" );
         // appContent->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/kalestra-the-sorceress.fbxp" );
