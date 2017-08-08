@@ -4,10 +4,15 @@
 
 namespace apemodevk {
 
-    class ImageLoader {
-    public:
-        bool LoadImageFromData(apemodevk::GraphicsDevice* pNode, const std::vector< uint8_t >& InFileContent);
-
+    struct LoadedImage {
+        VkImage           pImage;
+        VkDeviceMemory    pMemory;
+        VkImageCreateInfo imageCreateInfo;
     };
 
+    class ImageLoader {
+    public:
+        std::unique_ptr< LoadedImage > LoadImageFromData( apemodevk::GraphicsDevice*    pNode,
+                                                          const std::vector< uint8_t >& InFileContent );
+    };
 }

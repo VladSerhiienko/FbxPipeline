@@ -266,7 +266,7 @@
       <Filter>Sources\Graphics\[Vulkan]</Filter>
     </ClCompile>
     <ClCompile Include="ImageLoaderVk.cpp">
-      <Filter>Sources</Filter>
+      <Filter>Sources\Graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
