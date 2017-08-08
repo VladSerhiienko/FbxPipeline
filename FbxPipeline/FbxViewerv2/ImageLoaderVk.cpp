@@ -33,26 +33,35 @@ std::unique_ptr< apemodevk::LoadedImage > apemodevk::ImageLoader::LoadImageFromD
             }
         } break;
         case apemodevk::ImageLoader::eImageFileFormat_PNG: {
-            LodePNGState state;
-            lodepng_state_init( &state );
+
+            /* Ensure no leaks */
+            struct LodePNGStateWrapper {
+                LodePNGState state;
+                LodePNGStateWrapper( ) { lodepng_state_init( &state ); }
+                ~LodePNGStateWrapper( ) { lodepng_state_cleanup( &state ); }
+            } stateWrapper;
 
             uint8_t* pImageBytes = nullptr;
             uint32_t imageHeight = 0;
             uint32_t imageWidth  = 0;
 
-            if ( 0 == lodepng_decode( &pImageBytes, &imageWidth, &imageHeight, &state, InFileContent.data( ), InFileContent.size( ) ) ) {
+            /* Load png file here from memory buffer */
+            if ( 0 == lodepng_decode( &pImageBytes,
+                                      &imageWidth,
+                                      &imageHeight,
+                                      &stateWrapper.state,
+                                      InFileContent.data( ),
+                                      InFileContent.size( ) ) ) {
                 auto loadedImage = std::make_unique< LoadedImage >( );
 
                 apemodevk::TDispatchableHandle<VkImage> hImg;
                 VkImageCreateInfo imageCreateInfo;
                 apemodevk::InitializeStruct(imageCreateInfo);
 
+                /* Clean-up allocated memory, lodepng wont handle it */
                 lodepng_free( pImageBytes );
-                lodepng_state_cleanup(&state);
                 return std::move( loadedImage );
             }
-
-            lodepng_state_cleanup( &state );
         } break;
     }
 
