@@ -141,12 +141,12 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
 
         totalSecs = 0.0f;
 
-        auto appSurface = GetSurface();
-        if (appSurface->GetImpl() != kAppSurfaceImpl_SdlVk)
+        auto appSurfaceBase = GetSurface();
+        if (appSurfaceBase->GetImpl() != kAppSurfaceImpl_SdlVk)
             return false;
 
-        auto appSurfaceVk = (AppSurfaceSdlVk*) appSurface;
-        if ( auto swapchain = &appSurfaceVk->Swapchain ) {
+        auto appSurface = (AppSurfaceSdlVk*) appSurfaceBase;
+        if ( auto swapchain = &appSurface->Swapchain ) {
             appContent->FrameCount = swapchain->ImgCount;
             appContent->FrameIndex = 0;
             appContent->FrameId    = 0;
@@ -157,9 +157,9 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
                 VkCommandPoolCreateInfo cmdPoolCreateInfo;
                 InitializeStruct( cmdPoolCreateInfo );
                 cmdPoolCreateInfo.flags            = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-                cmdPoolCreateInfo.queueFamilyIndex = appSurfaceVk->PresentQueueFamilyIds[0];
+                cmdPoolCreateInfo.queueFamilyIndex = appSurface->PresentQueueFamilyIds[0];
 
-                if ( false == appContent->hCmdPool[ i ].Recreate( *appSurfaceVk->pNode, cmdPoolCreateInfo ) ) {
+                if ( false == appContent->hCmdPool[ i ].Recreate( *appSurface->pNode, cmdPoolCreateInfo ) ) {
                     DebugBreak( );
                     return false;
                 }
@@ -170,7 +170,7 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
                 cmdBufferAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
                 cmdBufferAllocInfo.commandBufferCount = 1;
 
-                if ( false == appContent->hCmdBuffers[ i ].Recreate( *appSurfaceVk->pNode, cmdBufferAllocInfo ) ) {
+                if ( false == appContent->hCmdBuffers[ i ].Recreate( *appSurface->pNode, cmdBufferAllocInfo ) ) {
                     DebugBreak( );
                     return false;
                 }
@@ -186,22 +186,22 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
 
                 VkSemaphoreCreateInfo semaphoreCreateInfo;
                 InitializeStruct( semaphoreCreateInfo );
-                if ( false == appContent->hPresentCompleteSemaphores[ i ].Recreate( *appSurfaceVk->pNode, semaphoreCreateInfo ) ||
-                     false == appContent->hRenderCompleteSemaphores[ i ].Recreate( *appSurfaceVk->pNode, semaphoreCreateInfo ) ) {
+                if ( false == appContent->hPresentCompleteSemaphores[ i ].Recreate( *appSurface->pNode, semaphoreCreateInfo ) ||
+                     false == appContent->hRenderCompleteSemaphores[ i ].Recreate( *appSurface->pNode, semaphoreCreateInfo ) ) {
                     DebugBreak( );
                     return false;
                 }
             }
         }
 
-        if (false == appContent->DescPool.RecreateResourcesFor(*appSurfaceVk->pNode, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256 )) {
+        if (false == appContent->DescPool.RecreateResourcesFor(*appSurface->pNode, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256 )) {
             DebugBreak();
             return false;
         }
 
         appContent->pNkRenderer = new NuklearRendererSdlVk();
 
-        auto queueFamilyPool = appSurfaceVk->pNode->GetQueuePool()->GetPool(appSurfaceVk->PresentQueueFamilyIds[0]);
+        auto queueFamilyPool = appSurface->pNode->GetQueuePool()->GetPool(appSurface->PresentQueueFamilyIds[0]);
         apemodevk::AcquiredQueue acquiredQueue;
 
         while (acquiredQueue.pQueue == nullptr) {
@@ -210,8 +210,8 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
 
         NuklearRendererSdlVk::InitParametersVk initParamsNk;
         initParamsNk.pAlloc          = nullptr;
-        initParamsNk.pDevice         = *appSurfaceVk->pNode;
-        initParamsNk.pPhysicalDevice = *appSurfaceVk->pNode;
+        initParamsNk.pDevice         = *appSurface->pNode;
+        initParamsNk.pPhysicalDevice = *appSurface->pNode;
         initParamsNk.pRenderPass     = appContent->hDbgRenderPass;
         //initParamsNk.pRenderPass     = appContent->hNkRenderPass;
         initParamsNk.pDescPool       = appContent->DescPool;
@@ -226,23 +226,23 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
 
         DebugRendererVk::InitParametersVk initParamsDbg;
         initParamsDbg.pAlloc          = nullptr;
-        initParamsDbg.pDevice         = *appSurfaceVk->pNode;
-        initParamsDbg.pPhysicalDevice = *appSurfaceVk->pNode;
+        initParamsDbg.pDevice         = *appSurface->pNode;
+        initParamsDbg.pPhysicalDevice = *appSurface->pNode;
         initParamsDbg.pRenderPass     = appContent->hDbgRenderPass;
         initParamsDbg.pDescPool       = appContent->DescPool;
         initParamsDbg.FrameCount      = appContent->FrameCount;
 
         appContent->pDebugRenderer->RecreateResources( &initParamsDbg );
-        appContent->pSceneRendererBase = appSurfaceVk->CreateSceneRenderer( );
+        appContent->pSceneRendererBase = appSurface->CreateSceneRenderer( );
 
         SceneRendererVk::SceneUpdateParametersVk updateParams;
-        updateParams.pNode           = appSurfaceVk->pNode;
+        updateParams.pNode           = appSurface->pNode;
         updateParams.pShaderCompiler = appContent->pShaderCompiler;
         updateParams.pRenderPass     = appContent->hDbgRenderPass;
         updateParams.pDescPool       = appContent->DescPool;
         updateParams.FrameCount      = appContent->FrameCount;
 
-		// -i "C:\Users\vladyslav.serhiienko\Downloads\blood-and-fire\source\DragonMain.fbx" -o "$(SolutionDir)assets\DragonMainp.fbxp" -p
+        // -i "C:\Users\vladyslav.serhiienko\Downloads\blood-and-fire\source\DragonMain.fbx" -o "$(SolutionDir)assets\DragonMainp.fbxp" -p
         // -i "E:\Media\Models\knight-artorias\source\Artorias.fbx.fbx" -o "$(SolutionDir)assets\Artoriasp.fbxp" -p
         // -i "E:\Media\Models\vanille-flirty-animation\source\happy.fbx" -o "$(SolutionDir)assets\vanille-flirty-animation.fbxp" -p
         // -i "E:\Media\Models\special-sniper-rifle-vss-vintorez\source\vintorez.FBX" -o "$(SolutionDir)assets\vintorez.fbxp" -p
@@ -253,46 +253,31 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         // -i "E:\Media\Models\carambit\source\Knife.fbx" -o "$(SolutionDir)assets\Knifep.fbxp" -p
         // -i "E:\Media\Models\pontiac-firebird-formula-1974\source\carz.obj 2.zip\carz.obj\mesh.obj" -o "$(SolutionDir)assets\pontiacp.fbxp" -p
 
-		appContent->Scenes.push_back(LoadSceneFromFile("../../../assets/DragonMainp.fbxp"));
-		//appContent->Scenes.push_back( LoadSceneFromFile( "F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Artoriasp.fbxp" ) );
-        //appContent->Scenes.push_back( LoadSceneFromFile( "F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/vanille-flirty-animation.fbxp" ) );
-        //appContent->Scenes.push_back( LoadSceneFromFile( "F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/vintorez.fbxp" ) );
-        //appContent->Scenes.push_back( LoadSceneFromFile( "F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Mech6kv4p.fbxp" ) );
-        // appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/A45p.fbxp"));
-        // appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/A45.fbxp"));
-        // appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Mech6kv4.fbxp"));
-        // appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Mech6kv4.fbxp"));
-        // appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Cube10p.fbxp"));
-        // appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Knifep.fbxp"));
-        // appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/pontiacp.fbxp"));
-        // appContent->Scenes.push_back(LoadSceneFromFile("F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Mech6kv4p.fbxp"));
-        updateParams.pSceneSrc = appContent->Scenes.back( )->sourceScene; 
+        appContent->Scenes.push_back( LoadSceneFromFile( "../../../assets/DragonMainp.fbxp" ) );
+        // appContent->Scenes.push_back( LoadSceneFromFile( "F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Artoriasp.fbxp" ) );
+        // appContent->Scenes.push_back( LoadSceneFromFile( "F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/vanille-flirty-animation.fbxp" ) );
+        // appContent->Scenes.push_back( LoadSceneFromFile( "F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/vintorez.fbxp" ) );
+        // appContent->Scenes.push_back( LoadSceneFromFile( "F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Mech6kv4p.fbxp" ) );
+        // appContent->Scenes.push_back( LoadSceneFromFile( "F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/A45p.fbxp" ));
+        // appContent->Scenes.push_back( LoadSceneFromFile( "F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/A45.fbxp" ));
+        // appContent->Scenes.push_back( LoadSceneFromFile( "F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Mech6kv4.fbxp" ));
+        // appContent->Scenes.push_back( LoadSceneFromFile( "F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Mech6kv4.fbxp" ));
+        // appContent->Scenes.push_back( LoadSceneFromFile( "F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Cube10p.fbxp" ));
+        // appContent->Scenes.push_back( LoadSceneFromFile( "F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Knifep.fbxp" ));
+        // appContent->Scenes.push_back( LoadSceneFromFile( "F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/pontiacp.fbxp" ));
+        // appContent->Scenes.push_back( LoadSceneFromFile( "F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Mech6kv4p.fbxp" ));
+        updateParams.pSceneSrc = appContent->Scenes.back( )->sourceScene;
 
         appContent->pSceneRendererBase->UpdateScene( appContent->Scenes.back( ), &updateParams );
 
         apemodeos::FileManager imgFileManager;
-        auto pngContent = imgFileManager.ReadBinFile("C:/Users/vladyslav.serhiienko/Downloads/blood-and-fire/textures/DragonMain_Diff.png");
-
         apemodevk::ImageLoader imgLoader;
-        imgLoader.Recreate(appSurfaceVk->pNode, nullptr);
-        auto pLoadedImg = imgLoader.LoadImageFromData( pngContent, apemodevk::ImageLoader::eImageFileFormat_PNG, true, true );
+        imgLoader.Recreate( appSurface->pNode, nullptr );
 
-        // appContent->scenes[ 0 ] = LoadSceneFromFile( "../../../assets/iron-man.fbxp" );
-        // appContent->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/kalestra-the-sorceress.fbxp" );
-        // appContent->scenes[ 0 ] = LoadSceneFromFile( "../../../assets/Mech6kv3ps.fbxp" );
-        // appContent->scenes[ 0 ] = LoadSceneFromFile( "../../../assets/Mech6k_v2.fbxp" );
-        // appContent->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/P90_v2.fbxp" );
-        // appContent->scenes[ 0 ] = LoadSceneFromFile( "../../../assets/MercedesBenzA45AMG.fbxp" );
-        // appContent->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/MercedesBenzSLR.fbxp" );
-        // appContent->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/P90.fbxp" );
-        // appContent->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/IronMan.fbxp" );
-        // appContent->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/Cathedral.fbxp" );
-        // appContent->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/Leica1933.fbxp" );
-        // appContent->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/UnrealOrb.fbxp" );
-        // appContent->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/Artorias.fbxp" );
-        // appContent->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/9mm.fbxp" );
-        // appContent->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/Knife.fbxp" );
-        // appContent->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/mech-m-6k.fbxp" );
+        auto pngContent = imgFileManager.ReadBinFile( "C:/Users/vladyslav.serhiienko/Downloads/blood-and-fire/textures/DragonMain_Diff.png" );
+        auto ddsContent = imgFileManager.ReadBinFile( "C:/Users/vladyslav.serhiienko/Downloads/Unfiltered_HDR.dds" );
+        auto loadedPNG  = imgLoader.LoadImageFromData( pngContent, apemodevk::ImageLoader::eImageFileFormat_PNG, true, true );
+        auto loadedDDS  = imgLoader.LoadImageFromData( ddsContent, apemodevk::ImageLoader::eImageFileFormat_DDS, true, true );
 
         return true;
     }

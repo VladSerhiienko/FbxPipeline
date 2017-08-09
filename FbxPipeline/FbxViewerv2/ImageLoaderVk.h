@@ -4,7 +4,7 @@
 
 namespace apemodevk {
     class GraphicsDevice;
-    class HostBufferPool;
+    struct HostBufferPool;
 
     struct LoadedImage {
         uint32_t                                         queueId       = 0;

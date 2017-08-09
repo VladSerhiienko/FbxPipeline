@@ -99,18 +99,22 @@ std::unique_ptr< apemodevk::LoadedImage > apemodevk::ImageLoader::LoadImageFromD
     auto loadedImage = std::make_unique< LoadedImage >( );
 
     VkBufferImageCopy              bufferImageCopy;
-    VkImageMemoryBarrier           imageMemoryBarrierWrite;
-    VkImageMemoryBarrier           imageMemoryBarrierRead;
+    VkImageMemoryBarrier           writeImageMemoryBarrier;
+    VkImageMemoryBarrier           readImgMemoryBarrier;
     HostBufferPool::SuballocResult imageBufferSuballocResult;
 
     InitializeStruct( loadedImage->imageCreateInfo );
     InitializeStruct( loadedImage->imageViewCreateInfo );
     InitializeStruct( bufferImageCopy );
-    InitializeStruct( imageMemoryBarrierWrite );
-    InitializeStruct( imageMemoryBarrierRead );
+    InitializeStruct( writeImageMemoryBarrier );
+    InitializeStruct( readImgMemoryBarrier );
+
+    pHostBufferPool->Reset( );
 
     /**
-     * @note All the data will
+     * @note All the data will be uploaded in switch cases,
+     *       all the structures that depend on image type and dimensions
+     *       will be filled in switch cases.
      **/
     switch ( eFileFormat ) {
         case apemodevk::ImageLoader::eImageFileFormat_DDS:
@@ -118,13 +122,16 @@ std::unique_ptr< apemodevk::LoadedImage > apemodevk::ImageLoader::LoadImageFromD
             auto texture = gli::load( (const char*) InFileContent.data( ), InFileContent.size( ) );
 
             if ( false == texture.empty( ) ) {
+
+                uint32_t layerCount = (uint32_t)( texture.faces( ) * texture.layers( ) );
+
                 loadedImage->imageCreateInfo.format        = ToImgFormat( texture.format( ) );
                 loadedImage->imageCreateInfo.imageType     = ToImgType( texture.target( ) );
                 loadedImage->imageCreateInfo.extent.width  = (uint32_t) texture.extent( ).x;
                 loadedImage->imageCreateInfo.extent.height = (uint32_t) texture.extent( ).y;
                 loadedImage->imageCreateInfo.extent.depth  = (uint32_t) texture.extent( ).z;
                 loadedImage->imageCreateInfo.mipLevels     = (uint32_t) texture.levels( );
-                loadedImage->imageCreateInfo.arrayLayers   = (uint32_t) texture.faces( ) * texture.layers( );
+                loadedImage->imageCreateInfo.arrayLayers   = layerCount;
                 loadedImage->imageCreateInfo.samples       = VK_SAMPLE_COUNT_1_BIT;
                 loadedImage->imageCreateInfo.tiling        = VK_IMAGE_TILING_OPTIMAL;
                 loadedImage->imageCreateInfo.usage         = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
@@ -136,16 +143,14 @@ std::unique_ptr< apemodevk::LoadedImage > apemodevk::ImageLoader::LoadImageFromD
                 loadedImage->imageViewCreateInfo.viewType                    = ToImgViewType( texture.target( ) );
                 loadedImage->imageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
                 loadedImage->imageViewCreateInfo.subresourceRange.levelCount = (uint32_t) texture.levels( );
-                loadedImage->imageViewCreateInfo.subresourceRange.layerCount = (uint32_t) texture.faces( ) * texture.layers( );
+                loadedImage->imageViewCreateInfo.subresourceRange.layerCount = layerCount;
                 loadedImage->imageViewCreateInfo.subresourceRange.baseMipLevel   = 0;
                 loadedImage->imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
 
-                pHostBufferPool->Reset( );
                 imageBufferSuballocResult = pHostBufferPool->Suballocate( texture.data( ), (uint32_t) texture.size( ) );
-                pHostBufferPool->Flush( ); /* Unmap buffers and flush all memory ranges */
 
                 bufferImageCopy.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-                bufferImageCopy.imageSubresource.layerCount = (uint32_t) texture.faces( ) * texture.layers( );
+                bufferImageCopy.imageSubresource.layerCount = layerCount;
                 bufferImageCopy.imageExtent.width           = (uint32_t) texture.extent( ).x;
                 bufferImageCopy.imageExtent.height          = (uint32_t) texture.extent( ).y;
                 bufferImageCopy.imageExtent.depth           = (uint32_t) texture.extent( ).z;
@@ -153,20 +158,20 @@ std::unique_ptr< apemodevk::LoadedImage > apemodevk::ImageLoader::LoadImageFromD
                 bufferImageCopy.bufferImageHeight           = 0; /* Tightly packed according to the imageExtent */
                 bufferImageCopy.bufferRowLength             = 0; /* Tightly packed according to the imageExtent */
 
-                imageMemoryBarrierWrite.dstAccessMask               = VK_ACCESS_TRANSFER_WRITE_BIT;
-                imageMemoryBarrierWrite.oldLayout                   = VK_IMAGE_LAYOUT_UNDEFINED;
-                imageMemoryBarrierWrite.newLayout                   = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-                imageMemoryBarrierWrite.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-                imageMemoryBarrierWrite.subresourceRange.levelCount = (uint32_t) texture.levels( );
-                imageMemoryBarrierWrite.subresourceRange.layerCount = (uint32_t) texture.faces( ) * texture.layers( );
+                writeImageMemoryBarrier.dstAccessMask               = VK_ACCESS_TRANSFER_WRITE_BIT;
+                writeImageMemoryBarrier.oldLayout                   = VK_IMAGE_LAYOUT_UNDEFINED;
+                writeImageMemoryBarrier.newLayout                   = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+                writeImageMemoryBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+                writeImageMemoryBarrier.subresourceRange.levelCount = (uint32_t) texture.levels( );
+                writeImageMemoryBarrier.subresourceRange.layerCount = layerCount;
 
-                imageMemoryBarrierRead.srcAccessMask               = VK_ACCESS_TRANSFER_WRITE_BIT;
-                imageMemoryBarrierRead.dstAccessMask               = VK_ACCESS_SHADER_READ_BIT;
-                imageMemoryBarrierRead.oldLayout                   = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-                imageMemoryBarrierRead.newLayout                   = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-                imageMemoryBarrierRead.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-                imageMemoryBarrierRead.subresourceRange.levelCount = (uint32_t)texture.levels();
-                imageMemoryBarrierRead.subresourceRange.layerCount = (uint32_t)texture.faces() * texture.layers();
+                readImgMemoryBarrier.srcAccessMask               = VK_ACCESS_TRANSFER_WRITE_BIT;
+                readImgMemoryBarrier.dstAccessMask               = VK_ACCESS_SHADER_READ_BIT;
+                readImgMemoryBarrier.oldLayout                   = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+                readImgMemoryBarrier.newLayout                   = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                readImgMemoryBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+                readImgMemoryBarrier.subresourceRange.levelCount = (uint32_t)texture.levels();
+                readImgMemoryBarrier.subresourceRange.layerCount = layerCount;
             }
         } break;
         case apemodevk::ImageLoader::eImageFileFormat_PNG: {
@@ -174,12 +179,8 @@ std::unique_ptr< apemodevk::LoadedImage > apemodevk::ImageLoader::LoadImageFromD
             /* Ensure no leaks */
             struct LodePNGStateWrapper {
                 LodePNGState state;
-                LodePNGStateWrapper( ) {
-                    lodepng_state_init( &state );
-                }
-                ~LodePNGStateWrapper( ) {
-                    lodepng_state_cleanup( &state );
-                }
+                LodePNGStateWrapper( ) { lodepng_state_init( &state ); }
+                ~LodePNGStateWrapper( ) { lodepng_state_cleanup( &state ); }
             } stateWrapper;
 
             /* Load png file here from memory buffer */
@@ -213,10 +214,7 @@ std::unique_ptr< apemodevk::LoadedImage > apemodevk::ImageLoader::LoadImageFromD
                 loadedImage->imageViewCreateInfo.subresourceRange.levelCount = 1;
                 loadedImage->imageViewCreateInfo.subresourceRange.layerCount = 1;
 
-                pHostBufferPool->Reset( );
                 imageBufferSuballocResult = pHostBufferPool->Suballocate( pImageBytes, imageWidth * imageHeight * 4 );
-                pHostBufferPool->Flush( );   /* Unmap buffers and flush all memory ranges */
-
                 lodepng_free( pImageBytes ); /* Free decoded PNG since it is no longer needed */
 
                 bufferImageCopy.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -228,44 +226,42 @@ std::unique_ptr< apemodevk::LoadedImage > apemodevk::ImageLoader::LoadImageFromD
                 bufferImageCopy.bufferImageHeight           = 0; /* Tightly packed according to the imageExtent */
                 bufferImageCopy.bufferRowLength             = 0; /* Tightly packed according to the imageExtent */
 
-                imageMemoryBarrierWrite.srcAccessMask               = 0;
-                imageMemoryBarrierWrite.dstAccessMask               = VK_ACCESS_TRANSFER_WRITE_BIT;
-                imageMemoryBarrierWrite.oldLayout                   = VK_IMAGE_LAYOUT_UNDEFINED;
-                imageMemoryBarrierWrite.newLayout                   = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-                imageMemoryBarrierWrite.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-                imageMemoryBarrierWrite.subresourceRange.levelCount = 1;
-                imageMemoryBarrierWrite.subresourceRange.layerCount = 1;
+                writeImageMemoryBarrier.srcAccessMask               = 0;
+                writeImageMemoryBarrier.dstAccessMask               = VK_ACCESS_TRANSFER_WRITE_BIT;
+                writeImageMemoryBarrier.oldLayout                   = VK_IMAGE_LAYOUT_UNDEFINED;
+                writeImageMemoryBarrier.newLayout                   = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+                writeImageMemoryBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+                writeImageMemoryBarrier.subresourceRange.levelCount = 1;
+                writeImageMemoryBarrier.subresourceRange.layerCount = 1;
 
-                imageMemoryBarrierRead.srcAccessMask               = VK_ACCESS_TRANSFER_WRITE_BIT;
-                imageMemoryBarrierRead.dstAccessMask               = VK_ACCESS_SHADER_READ_BIT;
-                imageMemoryBarrierRead.oldLayout                   = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-                imageMemoryBarrierRead.newLayout                   = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-                imageMemoryBarrierRead.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-                imageMemoryBarrierRead.subresourceRange.levelCount = 1;
-                imageMemoryBarrierRead.subresourceRange.layerCount = 1;
+                readImgMemoryBarrier.srcAccessMask               = VK_ACCESS_TRANSFER_WRITE_BIT;
+                readImgMemoryBarrier.dstAccessMask               = VK_ACCESS_SHADER_READ_BIT;
+                readImgMemoryBarrier.oldLayout                   = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+                readImgMemoryBarrier.newLayout                   = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                readImgMemoryBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+                readImgMemoryBarrier.subresourceRange.levelCount = 1;
+                readImgMemoryBarrier.subresourceRange.layerCount = 1;
             }
         } break;
     }
 
+    pHostBufferPool->Flush( ); /* Unmap buffers and flush all memory ranges */
+
     if ( false == loadedImage->hImg.Recreate( *pNode, *pNode, loadedImage->imageCreateInfo ) ) {
-        DebugBreak( );
         return nullptr;
     }
 
     auto fontImgAllocInfo = loadedImage->hImg.GetMemoryAllocateInfo( VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT );
     if ( false == loadedImage->hImgMemory.Recreate( *pNode, fontImgAllocInfo ) ) {
-        DebugBreak( );
         return nullptr;
     }
 
     if ( false == loadedImage->hImg.BindMemory( loadedImage->hImgMemory, 0 ) ) {
-        DebugBreak( );
         return nullptr;
     }
 
     loadedImage->imageViewCreateInfo.image = loadedImage->hImg;
     if ( false == loadedImage->hImgView.Recreate( *pNode, loadedImage->imageViewCreateInfo ) ) {
-        DebugBreak( );
         return nullptr;
     }
 
@@ -290,9 +286,9 @@ std::unique_ptr< apemodevk::LoadedImage > apemodevk::ImageLoader::LoadImageFromD
         return nullptr;
     }
 
-    imageMemoryBarrierWrite.image               = loadedImage->hImg;
-    imageMemoryBarrierWrite.srcQueueFamilyIndex = acquiredQueue.QueueFamilyId;
-    imageMemoryBarrierWrite.dstQueueFamilyIndex = acquiredQueue.QueueFamilyId;
+    writeImageMemoryBarrier.image               = loadedImage->hImg;
+    writeImageMemoryBarrier.srcQueueFamilyIndex = acquiredQueue.QueueFamilyId;
+    writeImageMemoryBarrier.dstQueueFamilyIndex = acquiredQueue.QueueFamilyId;
 
     vkCmdPipelineBarrier( acquiredCmdBuffer.pCmdBuffer,
                           VK_PIPELINE_STAGE_HOST_BIT,
@@ -303,7 +299,7 @@ std::unique_ptr< apemodevk::LoadedImage > apemodevk::ImageLoader::LoadImageFromD
                           0,
                           NULL,
                           1,
-                          &imageMemoryBarrierWrite);
+                          &writeImageMemoryBarrier);
 
     vkCmdCopyBufferToImage( acquiredCmdBuffer.pCmdBuffer,
                             imageBufferSuballocResult.descBufferInfo.buffer,
@@ -312,9 +308,9 @@ std::unique_ptr< apemodevk::LoadedImage > apemodevk::ImageLoader::LoadImageFromD
                             1,
                             &bufferImageCopy );
 
-    imageMemoryBarrierRead.image = loadedImage->hImg;
-    imageMemoryBarrierRead.srcQueueFamilyIndex = acquiredQueue.QueueFamilyId;
-    imageMemoryBarrierRead.dstQueueFamilyIndex = acquiredQueue.QueueFamilyId;
+    readImgMemoryBarrier.image               = loadedImage->hImg;
+    readImgMemoryBarrier.srcQueueFamilyIndex = acquiredQueue.QueueFamilyId;
+    readImgMemoryBarrier.dstQueueFamilyIndex = acquiredQueue.QueueFamilyId;
 
     vkCmdPipelineBarrier( acquiredCmdBuffer.pCmdBuffer,
                           VK_PIPELINE_STAGE_TRANSFER_BIT,
@@ -325,7 +321,7 @@ std::unique_ptr< apemodevk::LoadedImage > apemodevk::ImageLoader::LoadImageFromD
                           0,
                           NULL,
                           1,
-                          &imageMemoryBarrierRead);
+                          &readImgMemoryBarrier);
 
     vkEndCommandBuffer( acquiredCmdBuffer.pCmdBuffer );
 

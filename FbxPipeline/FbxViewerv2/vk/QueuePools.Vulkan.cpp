@@ -181,7 +181,9 @@ apemodevk::AcquiredQueue apemodevk::QueueFamilyPool::Acquire( bool bIgnoreFence 
                 if ( VK_NULL_HANDLE == queue.hQueue ) {
                     VkFenceCreateInfo fenceCreateInfo;
                     InitializeStruct( fenceCreateInfo );
+
                     /* Since the queue is free to use after creation. */
+                    /* @note Must be reset before usage. */
                     fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
                     vkGetDeviceQueue( pDevice, QueueFamilyId, queueIndex, &queue.hQueue );
@@ -346,7 +348,9 @@ apemodevk::AcquiredCommandBuffer apemodevk::CommandBufferFamilyPool::Acquire( bo
     for (auto& cmdBuffer : CmdBuffers) {
         /* If the command buffer is not used by other thread and it is not being executed, it will be returned */
         if ( false == cmdBuffer.bInUse.exchange( true, std::memory_order_acquire ) ) {
-            if ( bIgnoreFence || VK_NULL_HANDLE == cmdBuffer.pCmdBuffer || VK_SUCCESS == vkGetFenceStatus( pDevice, cmdBuffer.pFence ) ) {
+            if ( bIgnoreFence ||                       /* Fence won't be checked */
+                 VK_NULL_HANDLE == cmdBuffer.pFence || /* Fence is not passed when releasing (synchronized) */
+                 VK_SUCCESS == vkGetFenceStatus( pDevice, cmdBuffer.pFence ) ) {
                 if ( VK_NULL_HANDLE == cmdBuffer.pCmdBuffer ) {
                     InitializeCommandBufferInPool( pDevice, QueueFamilyId, cmdBuffer );
                 }
