@@ -5,12 +5,11 @@
 namespace apemodevk {
 
     struct LoadedImage {
-        VkImage               pImage;
-        VkImageView           pImageView;
-        VkImageView           pImageView;
-        VkDeviceMemory        pMemory;
-        VkImageCreateInfo     imageCreateInfo;
-        VkImageViewCreateInfo imageViewCreateInfo;
+        apemodevk::TDispatchableHandle< VkImage >        hImg;
+        apemodevk::TDispatchableHandle< VkImageView >    hImgView;
+        apemodevk::TDispatchableHandle< VkDeviceMemory > hImgMemory;
+        VkImageCreateInfo                                imageCreateInfo;
+        VkImageViewCreateInfo                            imageViewCreateInfo;
     };
 
     class ImageLoader {

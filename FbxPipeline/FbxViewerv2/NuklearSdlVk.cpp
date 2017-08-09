@@ -652,8 +652,7 @@ void* apemode::NuklearRendererSdlVk::DeviceUploadAtlas( InitParametersBase* init
         copyBarrier.subresourceRange.levelCount = 1;
         copyBarrier.subresourceRange.layerCount = 1;
 
-        vkCmdPipelineBarrier(
-            finalCmdBuffer, VK_PIPELINE_STAGE_HOST_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, NULL, 0, NULL, 1, &copyBarrier );
+        vkCmdPipelineBarrier( finalCmdBuffer, VK_PIPELINE_STAGE_HOST_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, NULL, 0, NULL, 1, &copyBarrier );
 
         VkBufferImageCopy region;
         InitializeStruct( region );
