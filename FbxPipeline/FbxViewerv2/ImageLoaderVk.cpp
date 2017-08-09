@@ -1,5 +1,6 @@
-#include <BufferPools.Vulkan.h>
 #include <ImageLoaderVk.h>
+
+#include <BufferPools.Vulkan.h>
 #include <QueuePools.Vulkan.h>
 
 #ifndef LODEPNG_COMPILE_ALLOCATORS
@@ -82,12 +83,12 @@ std::unique_ptr< apemodevk::LoadedImage > apemodevk::ImageLoader::LoadImageFromD
     VkImageMemoryBarrier           writeImageMemoryBarrier;
     VkImageMemoryBarrier           readImgMemoryBarrier;
     HostBufferPool::SuballocResult imageBufferSuballocResult;
-
-    InitializeStruct( loadedImage->imageCreateInfo );
-    InitializeStruct( loadedImage->imageViewCreateInfo );
+    
     InitializeStruct( bufferImageCopy );
     InitializeStruct( writeImageMemoryBarrier );
     InitializeStruct( readImgMemoryBarrier );
+    InitializeStruct( loadedImage->imageCreateInfo );
+    InitializeStruct( loadedImage->imageViewCreateInfo );
 
     pHostBufferPool->Reset( );
 
@@ -206,7 +207,6 @@ std::unique_ptr< apemodevk::LoadedImage > apemodevk::ImageLoader::LoadImageFromD
                 bufferImageCopy.bufferImageHeight           = 0; /* Tightly packed according to the imageExtent */
                 bufferImageCopy.bufferRowLength             = 0; /* Tightly packed according to the imageExtent */
 
-                writeImageMemoryBarrier.srcAccessMask               = 0;
                 writeImageMemoryBarrier.dstAccessMask               = VK_ACCESS_TRANSFER_WRITE_BIT;
                 writeImageMemoryBarrier.oldLayout                   = VK_IMAGE_LAYOUT_UNDEFINED;
                 writeImageMemoryBarrier.newLayout                   = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
@@ -240,9 +240,11 @@ std::unique_ptr< apemodevk::LoadedImage > apemodevk::ImageLoader::LoadImageFromD
         return nullptr;
     }
 
-    loadedImage->imageViewCreateInfo.image = loadedImage->hImg;
-    if ( false == loadedImage->hImgView.Recreate( *pNode, loadedImage->imageViewCreateInfo ) ) {
-        return nullptr;
+    if ( bImgView ) {
+        loadedImage->imageViewCreateInfo.image = loadedImage->hImg;
+        if ( false == loadedImage->hImgView.Recreate( *pNode, loadedImage->imageViewCreateInfo ) ) {
+            return nullptr;
+        }
     }
 
     auto acquiredQueue = pNode->GetQueuePool( )->Acquire( false, VK_QUEUE_TRANSFER_BIT, true );
@@ -322,13 +324,21 @@ std::unique_ptr< apemodevk::LoadedImage > apemodevk::ImageLoader::LoadImageFromD
 
     if ( bAwaitLoading ) {
         /* No need to pass fence to command buffer pool */
+        acquiredCmdBuffer.pFence = nullptr;
+
+        /* No need to pass queue info with the texture result */
+        loadedImage->queueId = UINT_ERROR;
+        loadedImage->queueFamilyId = UINT_ERROR;
+
         /* Ensure the image can be used right away */
         CheckedCall( vkWaitForFences( *pNode, 1, &acquiredQueue.pFence, true, UINT64_MAX ) );
     } else {
-        /* Ensure the image memory transfer can be synchronized */
         /* Ensure the command buffer is synchronized */
-        loadedImage->pLoadedFence = acquiredQueue.pFence;
-        acquiredCmdBuffer.pFence  = acquiredQueue.pFence;
+        acquiredCmdBuffer.pFence = acquiredQueue.pFence;
+
+        /* Ensure the image memory transfer can be synchronized */
+        loadedImage->queueId = acquiredQueue.QueueId;
+        loadedImage->queueFamilyId = acquiredQueue.QueueFamilyId;
     }
 
     pNode->GetCommandBufferPool( )->Release( acquiredCmdBuffer );
