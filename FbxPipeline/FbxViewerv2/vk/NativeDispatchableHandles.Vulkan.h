@@ -437,11 +437,11 @@ namespace apemodevk
 
     template <>
     struct TDispatchableHandle< VkQueue > : public TDispatchableHandleBase< VkQueue > {
-        void Recreate( VkDevice InLogicalDeviceHandle, uint32_t QueueFamilyId, uint32_t QueueId ) {
+        void Recreate( VkDevice InLogicalDeviceHandle, uint32_t queueFamilyId, uint32_t queueId ) {
             apemode_assert( InLogicalDeviceHandle != VK_NULL_HANDLE, "Device is required." );
 
             if ( InLogicalDeviceHandle != nullptr ) {
-                vkGetDeviceQueue( InLogicalDeviceHandle, QueueFamilyId, QueueId, *this );
+                vkGetDeviceQueue( InLogicalDeviceHandle, queueFamilyId, queueId, *this );
             }
         }
 

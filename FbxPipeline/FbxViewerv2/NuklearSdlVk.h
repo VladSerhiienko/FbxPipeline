@@ -31,7 +31,7 @@ namespace apemode {
 
             VkCommandBuffer pCmdBuffer    = VK_NULL_HANDLE; /* Optional (for uploading font img) */
             VkQueue         pQueue        = VK_NULL_HANDLE; /* Optional (for uploading font img) */
-            uint32_t        QueueFamilyId = 0;              /* Optional (for uploading font img) */
+            uint32_t        queueFamilyId = 0;              /* Optional (for uploading font img) */
             uint32_t        FrameCount    = 0;              /* Required, swapchain img count typically */
         };
 

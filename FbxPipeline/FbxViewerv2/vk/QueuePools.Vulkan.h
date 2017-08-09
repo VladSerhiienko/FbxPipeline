@@ -19,11 +19,11 @@ namespace apemodevk {
     struct QueueFamilyBased {
         /* Queue properties: */
 
-        uint32_t                QueueFamilyId    = 0;
+        uint32_t                queueFamilyId    = 0;
         VkQueueFamilyProperties QueueFamilyProps = {};
 
         QueueFamilyBased( ) = default;
-        QueueFamilyBased( uint32_t QueueFamilyId, VkQueueFamilyProperties QueueFamilyProps );
+        QueueFamilyBased( uint32_t queueFamilyId, VkQueueFamilyProperties QueueFamilyProps );
 
         /* Queue features: */
 
@@ -54,7 +54,7 @@ namespace apemodevk {
         VkCommandBuffer pCmdBuffer    = VK_NULL_HANDLE; /* Handle */
         VkCommandPool   pCmdPool      = VK_NULL_HANDLE; /* Command pool handle (associated with the Handle) */
         VkFence         pFence        = VK_NULL_HANDLE; /* Last queue fence */
-        uint32_t        QueueFamilyId = 0;
+        uint32_t        queueFamilyId = 0;
         uint32_t        CmdBufferId   = 0;
     };
 
@@ -81,7 +81,7 @@ namespace apemodevk {
     class CommandBufferPool {
         VkDevice                               pDevice         = VK_NULL_HANDLE;
         VkPhysicalDevice                       pPhysicalDevice = VK_NULL_HANDLE;
-        uint32_t                               QueueFamilyId   = 0;
+        uint32_t                               queueFamilyId   = 0;
         std::vector< CommandBufferFamilyPool > Pools;
 
         friend class GraphicsDevice;
@@ -133,8 +133,8 @@ namespace apemodevk {
     struct AcquiredQueue {
         VkQueue  pQueue        = VK_NULL_HANDLE; /* Free to use queue. */
         VkFence  pFence        = VK_NULL_HANDLE; /* Acquire() can optionally ignore fence status, so the user can await. */
-        uint32_t QueueFamilyId = 0;              /* Queue family index */
-        uint32_t QueueId       = 0;              /* Queue index in family pool */
+        uint32_t queueFamilyId = 0;              /* Queue family index */
+        uint32_t queueId       = 0;              /* Queue index in family pool */
     };
 
     class QueueFamilyPool : public QueueFamilyBased {

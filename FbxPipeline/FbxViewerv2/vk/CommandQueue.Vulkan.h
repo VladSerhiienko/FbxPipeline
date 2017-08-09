@@ -56,7 +56,7 @@ namespace apemodevk
          * @returns True if succeeded, false otherwise.
          */
         bool RecreateResourcesFor(GraphicsDevice & GraphicsNode,
-                                  uint32_t         QueueFamilyId,
+                                  uint32_t         queueFamilyId,
                                   bool             bIsDirect,
                                   bool             bIsTransient);
 
@@ -172,8 +172,8 @@ namespace apemodevk
             {
                 struct
                 {
-                    uint32_t QueueId;
-                    uint32_t QueueFamilyId;
+                    uint32_t queueId;
+                    uint32_t queueFamilyId;
                 };
 
                 uint64_t QueueHash;
@@ -183,13 +183,13 @@ namespace apemodevk
             struct Hasher { size_t operator () (Key const &) const; };
             struct CmpOpLess { bool operator () (Key const &, Key const &) const; };
             struct CmpOpEqual { bool operator () (Key const &, Key const &) const; };
-            static Key NewKeyFor (GraphicsDevice const & GraphicsNode, uint32_t QueueFamilyId, uint32_t QueueId);
+            static Key NewKeyFor (GraphicsDevice const & GraphicsNode, uint32_t queueFamilyId, uint32_t queueId);
         };
 
         struct Reservation {
             CommandQueue *pQueue;
-            uint32_t      QueueId;
-            uint32_t      QueueFamilyId;
+            uint32_t      queueId;
+            uint32_t      queueFamilyId;
 
             Reservation( );
             bool IsValid( ) const;
@@ -203,9 +203,9 @@ namespace apemodevk
 
         CommandQueueReserver( );
         /** Returns True if this queue was not created previously, otherwise false. */
-        bool TryReserve( GraphicsDevice const &GraphicsNode, uint32_t QueueFamilyId, uint32_t QueueId );
+        bool TryReserve( GraphicsDevice const &GraphicsNode, uint32_t queueFamilyId, uint32_t queueId );
         /** Must be called when the queue gets destructed to avoid resources leaks. */
-        void Unreserve( GraphicsDevice const &GraphicsNode, uint32_t QueueFamilyId, uint32_t QueueId );
+        void Unreserve( GraphicsDevice const &GraphicsNode, uint32_t queueFamilyId, uint32_t queueId );
         /** Returns queue reserver instance. */
         static CommandQueueReserver &Get( );
     };
@@ -216,7 +216,7 @@ namespace apemodevk
         ~CommandQueue( );
 
     public:
-        bool RecreateResourcesFor( GraphicsDevice &GraphicsNode, uint32_t QueueFamilyId, uint32_t QueueId );
+        bool RecreateResourcesFor( GraphicsDevice &GraphicsNode, uint32_t queueFamilyId, uint32_t queueId );
 
         bool Execute( CommandBuffer &CmdBuffer, VkSemaphore *hWaitSemaphore, uint32_t WaitSemaphoreCount, VkFence hFence );
         bool Execute( CommandBuffer &CmdBuffer, VkFence hFence );
@@ -235,7 +235,7 @@ namespace apemodevk
     public:
         GraphicsDevice *               pNode;
         TDispatchableHandle< VkQueue > hCmdQueue;
-        uint32_t                       QueueFamilyId;
-        uint32_t                       QueueId;
+        uint32_t                       queueFamilyId;
+        uint32_t                       queueId;
     };
 }

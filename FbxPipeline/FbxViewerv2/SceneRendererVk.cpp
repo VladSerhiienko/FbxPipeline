@@ -376,7 +376,7 @@ void apemode::SceneRendererVk::UpdateScene( Scene* pScene, const SceneUpdatePara
 
         /* Get command buffer from pool (only copying) */
         auto pCmdBufferPool = pParams->pNode->GetCommandBufferPool( );
-        auto acquiredCmdBuffer = pCmdBufferPool->Acquire( false, acquiredQueue.QueueFamilyId );
+        auto acquiredCmdBuffer = pCmdBufferPool->Acquire( false, acquiredQueue.queueFamilyId );
 
         apemodevk::HostBufferPool bufferPool;
         bufferPool.Recreate( *pParams->pNode,

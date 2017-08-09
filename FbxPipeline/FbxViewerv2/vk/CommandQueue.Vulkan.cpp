@@ -33,7 +33,7 @@ apemodevk::CommandBuffer::CommandBuffer ()
 /// -------------------------------------------------------------------------------------------------------------------
 
 bool apemodevk::CommandBuffer::RecreateResourcesFor (GraphicsDevice & GraphicsNode,
-                                              uint32_t         QueueFamilyId,
+                                              uint32_t         queueFamilyId,
                                               bool             bIsDirect,
                                               bool             bIsTransient)
 {
@@ -54,7 +54,7 @@ bool apemodevk::CommandBuffer::RecreateResourcesFor (GraphicsDevice & GraphicsNo
 
     TInfoStruct<VkCommandPoolCreateInfo> CmdAllocDesc;
     CmdAllocDesc->flags            = CmdAllocType;
-    CmdAllocDesc->queueFamilyIndex = QueueFamilyId;
+    CmdAllocDesc->queueFamilyIndex = queueFamilyId;
 
     if (!hCmdAlloc.Recreate (GraphicsNode, CmdAllocDesc))
     {
@@ -192,7 +192,7 @@ bool apemodevk::CommandBuffer::IsDirect () const
 /// CommandQueue
 /// -------------------------------------------------------------------------------------------------------------------
 
-apemodevk::CommandQueue::CommandQueue () : pNode (nullptr), QueueFamilyId (0), QueueId (0)
+apemodevk::CommandQueue::CommandQueue () : pNode (nullptr), queueFamilyId (0), queueId (0)
 {
 }
 
@@ -202,7 +202,7 @@ apemodevk::CommandQueue::~CommandQueue ()
 {
     if (pNode != nullptr)
     {
-        CommandQueueReserver::Get ().Unreserve (*pNode, QueueFamilyId, QueueId);
+        CommandQueueReserver::Get ().Unreserve (*pNode, queueFamilyId, queueId);
     }
 }
 
@@ -213,8 +213,8 @@ bool apemodevk::CommandQueue::RecreateResourcesFor( GraphicsDevice& InGraphicsNo
                                                     uint32_t        InQueueId ) {
     if ( CommandQueueReserver::Get( ).TryReserve( InGraphicsNode, InQueueFamilyId, InQueueId ) ) {
         pNode         = &InGraphicsNode;
-        QueueFamilyId = InQueueFamilyId;
-        QueueId       = InQueueId;
+        queueFamilyId = InQueueFamilyId;
+        queueId       = InQueueId;
 
         hCmdQueue.Recreate( InGraphicsNode, InQueueFamilyId, InQueueId );
         return hCmdQueue.IsNotNull( );
@@ -319,8 +319,8 @@ apemodevk::CommandQueueReserver::Key apemodevk::CommandQueueReserver::Key::NewKe
                                                                                       uint32_t              InQueueId ) {
     Key NewKey;
     NewKey.GraphicsNodeHash = reinterpret_cast< uint64_t >( &GraphicsNode );
-    NewKey.QueueFamilyId    = InQueueFamilyId;
-    NewKey.QueueId          = InQueueId;
+    NewKey.queueFamilyId    = InQueueFamilyId;
+    NewKey.queueId          = InQueueId;
     return NewKey;
 }
 
@@ -377,7 +377,7 @@ bool apemodevk::CommandQueueReserver::Key::CmpOpLess::operator() (Key const & Ke
 /// -------------------------------------------------------------------------------------------------------------------
 
 apemodevk::CommandQueueReserver::Reservation::Reservation ()
-    : pQueue (nullptr), QueueId (0), QueueFamilyId (0)
+    : pQueue (nullptr), queueId (0), queueFamilyId (0)
 {
 }
 
@@ -414,9 +414,9 @@ apemodevk::CommandQueueReserver & apemodevk::CommandQueueReserver::Get ()
 /// -------------------------------------------------------------------------------------------------------------------
 
 bool apemodevk::CommandQueueReserver::TryReserve( GraphicsDevice const& GraphicsNode,
-                                                  uint32_t              QueueFamilyId,
-                                                  uint32_t              QueueId ) {
-    const auto  Key = Key::NewKeyFor( GraphicsNode, QueueFamilyId, QueueId );
+                                                  uint32_t              queueFamilyId,
+                                                  uint32_t              queueId ) {
+    const auto  Key = Key::NewKeyFor( GraphicsNode, queueFamilyId, queueId );
     const auto& Reservation = ReservationStorage[ Key ];
 
     // Valid reservation is active reservation (contains created command queue).
@@ -426,9 +426,9 @@ bool apemodevk::CommandQueueReserver::TryReserve( GraphicsDevice const& Graphics
 /// -------------------------------------------------------------------------------------------------------------------
 
 void apemodevk::CommandQueueReserver::Unreserve( GraphicsDevice const& GraphicsNode,
-                                                 uint32_t              QueueFamilyId,
-                                                 uint32_t              QueueId ) {
-    const auto Key = Key::NewKeyFor( GraphicsNode, QueueFamilyId, QueueId );
+                                                 uint32_t              queueFamilyId,
+                                                 uint32_t              queueId ) {
+    const auto Key = Key::NewKeyFor( GraphicsNode, queueFamilyId, queueId );
     ReservationStorage[ Key ].Release( );
 }
 

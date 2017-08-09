@@ -209,7 +209,7 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         //initParamsNk.pRenderPass     = appContent->hNkRenderPass;
         initParamsNk.pDescPool       = appContent->DescPool;
         initParamsNk.pQueue          = acquiredQueue.pQueue;
-        initParamsNk.QueueFamilyId   = acquiredQueue.QueueFamilyId;
+        initParamsNk.queueFamilyId   = acquiredQueue.queueFamilyId;
 
         appContent->pNkRenderer->Init( &initParamsNk );
 

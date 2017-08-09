@@ -607,7 +607,7 @@ void* apemode::NuklearRendererSdlVk::DeviceUploadAtlas( InitParametersBase* init
         VkCommandPoolCreateInfo cmdPoolCreateInfo;
         InitializeStruct( cmdPoolCreateInfo );
         cmdPoolCreateInfo.flags            = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-        cmdPoolCreateInfo.queueFamilyIndex = initParametersVk->QueueFamilyId;
+        cmdPoolCreateInfo.queueFamilyIndex = initParametersVk->queueFamilyId;
         if ( false == cmdPool.Recreate( initParametersVk->pDevice, cmdPoolCreateInfo ) ) {
             DebugBreak( );
             return nullptr;

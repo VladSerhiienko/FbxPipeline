@@ -254,7 +254,7 @@ std::unique_ptr< apemodevk::LoadedImage > apemodevk::ImageLoader::LoadImageFromD
         }
     }
 
-    auto acquiredCmdBuffer = pNode->GetCommandBufferPool( )->Acquire( false, acquiredQueue.QueueFamilyId );
+    auto acquiredCmdBuffer = pNode->GetCommandBufferPool( )->Acquire( false, acquiredQueue.queueFamilyId );
     assert( acquiredCmdBuffer.pCmdBuffer != nullptr );
 
     if ( VK_SUCCESS != CheckedCall( vkResetCommandPool( *pNode, acquiredCmdBuffer.pCmdPool, 0 ) ) ) {
@@ -269,8 +269,8 @@ std::unique_ptr< apemodevk::LoadedImage > apemodevk::ImageLoader::LoadImageFromD
     }
 
     writeImageMemoryBarrier.image               = loadedImage->hImg;
-    writeImageMemoryBarrier.srcQueueFamilyIndex = acquiredQueue.QueueFamilyId;
-    writeImageMemoryBarrier.dstQueueFamilyIndex = acquiredQueue.QueueFamilyId;
+    writeImageMemoryBarrier.srcQueueFamilyIndex = acquiredQueue.queueFamilyId;
+    writeImageMemoryBarrier.dstQueueFamilyIndex = acquiredQueue.queueFamilyId;
 
     vkCmdPipelineBarrier( acquiredCmdBuffer.pCmdBuffer,
                           VK_PIPELINE_STAGE_HOST_BIT,
@@ -291,8 +291,8 @@ std::unique_ptr< apemodevk::LoadedImage > apemodevk::ImageLoader::LoadImageFromD
                             &bufferImageCopy );
 
     readImgMemoryBarrier.image               = loadedImage->hImg;
-    readImgMemoryBarrier.srcQueueFamilyIndex = acquiredQueue.QueueFamilyId;
-    readImgMemoryBarrier.dstQueueFamilyIndex = acquiredQueue.QueueFamilyId;
+    readImgMemoryBarrier.srcQueueFamilyIndex = acquiredQueue.queueFamilyId;
+    readImgMemoryBarrier.dstQueueFamilyIndex = acquiredQueue.queueFamilyId;
 
     vkCmdPipelineBarrier( acquiredCmdBuffer.pCmdBuffer,
                           VK_PIPELINE_STAGE_TRANSFER_BIT,
@@ -337,8 +337,8 @@ std::unique_ptr< apemodevk::LoadedImage > apemodevk::ImageLoader::LoadImageFromD
         acquiredCmdBuffer.pFence = acquiredQueue.pFence;
 
         /* Ensure the image memory transfer can be synchronized */
-        loadedImage->queueId = acquiredQueue.QueueId;
-        loadedImage->queueFamilyId = acquiredQueue.QueueFamilyId;
+        loadedImage->queueId = acquiredQueue.queueId;
+        loadedImage->queueFamilyId = acquiredQueue.queueFamilyId;
     }
 
     pNode->GetCommandBufferPool( )->Release( acquiredCmdBuffer );
