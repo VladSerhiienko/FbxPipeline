@@ -274,7 +274,8 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         auto pngContent = imgFileManager.ReadBinFile("C:/Users/vladyslav.serhiienko/Downloads/blood-and-fire/textures/DragonMain_Diff.png");
 
         apemodevk::ImageLoader imgLoader;
-        auto pLoadedImg = imgLoader.LoadImageFromData(appSurfaceVk->pNode, pngContent, apemodevk::ImageLoader::eImageFileFormat_PNG);
+        imgLoader.Recreate(appSurfaceVk->pNode, nullptr);
+        auto pLoadedImg = imgLoader.LoadImageFromData( pngContent, apemodevk::ImageLoader::eImageFileFormat_PNG, true, true );
 
         // appContent->scenes[ 0 ] = LoadSceneFromFile( "../../../assets/iron-man.fbxp" );
         // appContent->scenes[ 1 ] = LoadSceneFromFile( "../../../assets/kalestra-the-sorceress.fbxp" );
