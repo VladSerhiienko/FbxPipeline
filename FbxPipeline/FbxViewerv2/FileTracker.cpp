@@ -54,7 +54,7 @@ std::string apemodeos::ResolveFullPath( const std::string& path ) {
     return ReplaceSlashes( RealPath( std::filesystem::absolute( path ).string( ) ) );
 }
 
-bool apemodeos::FileManager::ScanDirectory( std::string storageDirectory, bool bRemoveDeletedFiles ) {
+bool apemodeos::FileTracker::ScanDirectory( std::string storageDirectory, bool bRemoveDeletedFiles ) {
     auto appState = apemode::AppState::GetCurrentState( );
 
     if ( storageDirectory.empty( ) )
@@ -152,7 +152,7 @@ bool apemodeos::FileManager::ScanDirectory( std::string storageDirectory, bool b
     return false;
 }
 
-void apemodeos::FileManager::CollectChangedFiles( std::vector< std::string >& OutChangedFiles ) {
+void apemodeos::FileTracker::CollectChangedFiles( std::vector< std::string >& OutChangedFiles ) {
     uint32_t changedFileCount = 0;
 
     for ( auto& file : Files )

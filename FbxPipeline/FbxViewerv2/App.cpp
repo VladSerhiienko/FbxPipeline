@@ -62,6 +62,7 @@ public:
     uint32_t maskId     = 0;
 
     std::vector< Scene* >       Scenes;
+    apemodeos::FileTracker      FileTracker;
     apemodeos::FileManager      FileManager;
     apemodevk::ShaderCompiler*  pShaderCompiler;
     apemodevk::ShaderFileReader ShaderFileReader;
@@ -133,8 +134,9 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         if ( nullptr == appContent )
             appContent = new AppContent( );
 
-        appContent->FileManager.FilePatterns.push_back( ".*\\.(vert|frag|comp|geom|tesc|tese|h|hpp|inl|inc|fx)$" );
-        appContent->FileManager.ScanDirectory( "./shaders/**", true );
+        appContent->FileTracker.FilePatterns.push_back( ".*\\.(vert|frag|comp|geom|tesc|tese|h|hpp|inl|inc|fx)$" );
+        appContent->FileTracker.ScanDirectory( "./shaders/**", true );
+
         appContent->ShaderFileReader.pFileManager = &appContent->FileManager;
         appContent->pShaderCompiler = new apemodevk::ShaderCompiler( );
         appContent->pShaderCompiler->SetShaderFileReader( &appContent->ShaderFileReader );
@@ -147,9 +149,9 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
 
         auto appSurface = (AppSurfaceSdlVk*) appSurfaceBase;
         if ( auto swapchain = &appSurface->Swapchain ) {
-            appContent->FrameCount = swapchain->ImgCount;
-            appContent->FrameIndex = 0;
             appContent->FrameId    = 0;
+            appContent->FrameIndex = 0;
+            appContent->FrameCount = swapchain->ImgCount;
 
             OnResized();
 
@@ -174,15 +176,6 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
                     DebugBreak( );
                     return false;
                 }
-
-                /*VkFenceCreateInfo fenceCreateInfo;
-                InitializeStruct( fenceCreateInfo );
-                fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-
-                if ( false == appContent->hFences[ i ].Recreate( *appSurfaceVk->pNode, fenceCreateInfo ) ) {
-                    DebugBreak( );
-                    return false;
-                }*/
 
                 VkSemaphoreCreateInfo semaphoreCreateInfo;
                 InitializeStruct( semaphoreCreateInfo );

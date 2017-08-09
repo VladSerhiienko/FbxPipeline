@@ -21,24 +21,21 @@ namespace apemodeos {
      **/
     class FileManager {
     public:
+        std::vector< uint8_t > ReadBinFile( const std::string& InPath ); /* Returns the content of the file. */
+        std::string            ReadTxtFile( const std::string& InPath ); /* Returns the content of the file. */
+    };
+
+    class FileTracker {
+    public:
         struct ScannedFile {
             uint64_t PrevTime = 0; /* Previous update time */
             uint64_t CurrTime = 0; /* Last update time */
-
-            /* File has been changed since last frame (or was deleted). */
-            bool Unchanged( ) const { return 0 == ( CurrTime - PrevTime ); }
-
-            /* File has been deleted. */
-            bool Deleted( ) const { return 0 == CurrTime && 0 == PrevTime; }
-
-            /* File has not been changed since last frame. */
-            bool Changed( ) const { return 0 != ( CurrTime - PrevTime ); }
-
-            /* Failed to read the file info. */
-            bool Error( ) const { return  0 == CurrTime && 0 != PrevTime; }
-
-            /* File has been just created. */
-            bool New( ) const { return 0 != CurrTime && 0 == PrevTime; }
+            
+            inline bool Unchanged( ) const { return 0 == ( CurrTime - PrevTime ); } /* File has been changed since last frame (or was deleted). */
+            inline bool Deleted( ) const { return 0 == CurrTime && 0 == PrevTime; } /* File has been deleted. */
+            inline bool Changed( ) const { return 0 != ( CurrTime - PrevTime ); }   /* File has not been changed since last frame. */
+            inline bool Error( ) const { return  0 == CurrTime && 0 != PrevTime; }  /* Failed to read the file info. */
+            inline bool New( ) const { return 0 != CurrTime && 0 == PrevTime; }     /* File has been just created. */
         };
 
         std::map< std::string, ScannedFile > Files;        /* Scanned files */
@@ -57,14 +54,5 @@ namespace apemodeos {
          * @param OutChangedFiles Full file paths, that were changed.
          **/
         void CollectChangedFiles( std::vector< std::string >& OutChangedFiles );
-
-        std::vector< uint8_t > ReadBinFile( const std::string& InPath ); /* Returns the content of the file. */
-        std::string            ReadTxtFile( const std::string& InPath ); /* Returns the content of the file. */
-    };
-
-    class FileTracker {
-
-
-    
     };
 }

@@ -32,51 +32,31 @@ VkFormat ToImgFormat( gli::format textureFormat ) {
 
 VkImageType ToImgType( gli::target textureTarget ) {
     switch ( textureTarget ) {
-        case gli::TARGET_1D:
-            return VK_IMAGE_TYPE_1D;
-        case gli::TARGET_1D_ARRAY:
-            return VK_IMAGE_TYPE_1D;
-        case gli::TARGET_2D:
-            return VK_IMAGE_TYPE_2D;
-        case gli::TARGET_2D_ARRAY:
-            return VK_IMAGE_TYPE_2D;
-        case gli::TARGET_3D:
-            return VK_IMAGE_TYPE_3D;
-        case gli::TARGET_RECT:
-            return VK_IMAGE_TYPE_2D;
-        case gli::TARGET_RECT_ARRAY:
-            return VK_IMAGE_TYPE_2D;
-        case gli::TARGET_CUBE:
-            return VK_IMAGE_TYPE_2D;
-        case gli::TARGET_CUBE_ARRAY:
-            return VK_IMAGE_TYPE_2D;
-        default:
-            return VK_IMAGE_TYPE_MAX_ENUM;
+        case gli::TARGET_1D:            return VK_IMAGE_TYPE_1D;
+        case gli::TARGET_1D_ARRAY:      return VK_IMAGE_TYPE_1D;
+        case gli::TARGET_2D:            return VK_IMAGE_TYPE_2D;
+        case gli::TARGET_2D_ARRAY:      return VK_IMAGE_TYPE_2D;
+        case gli::TARGET_3D:            return VK_IMAGE_TYPE_3D;
+        case gli::TARGET_RECT:          return VK_IMAGE_TYPE_2D;
+        case gli::TARGET_RECT_ARRAY:    return VK_IMAGE_TYPE_2D;
+        case gli::TARGET_CUBE:          return VK_IMAGE_TYPE_2D;
+        case gli::TARGET_CUBE_ARRAY:    return VK_IMAGE_TYPE_2D;
+        default:                        return VK_IMAGE_TYPE_MAX_ENUM;
     }
 }
 
 VkImageViewType ToImgViewType( gli::target textureTarget ) {
     switch ( textureTarget ) {
-        case gli::TARGET_1D:
-            return VK_IMAGE_VIEW_TYPE_1D;
-        case gli::TARGET_1D_ARRAY:
-            return VK_IMAGE_VIEW_TYPE_1D_ARRAY;
-        case gli::TARGET_2D:
-            return VK_IMAGE_VIEW_TYPE_2D;
-        case gli::TARGET_2D_ARRAY:
-            return VK_IMAGE_VIEW_TYPE_2D_ARRAY;
-        case gli::TARGET_3D:
-            return VK_IMAGE_VIEW_TYPE_3D;
-        case gli::TARGET_RECT:
-            return VK_IMAGE_VIEW_TYPE_2D;
-        case gli::TARGET_RECT_ARRAY:
-            return VK_IMAGE_VIEW_TYPE_2D_ARRAY;
-        case gli::TARGET_CUBE:
-            return VK_IMAGE_VIEW_TYPE_CUBE;
-        case gli::TARGET_CUBE_ARRAY:
-            return VK_IMAGE_VIEW_TYPE_CUBE_ARRAY;
-        default:
-            return VK_IMAGE_VIEW_TYPE_MAX_ENUM;
+        case gli::TARGET_1D:            return VK_IMAGE_VIEW_TYPE_1D;
+        case gli::TARGET_1D_ARRAY:      return VK_IMAGE_VIEW_TYPE_1D_ARRAY;
+        case gli::TARGET_2D:            return VK_IMAGE_VIEW_TYPE_2D;
+        case gli::TARGET_2D_ARRAY:      return VK_IMAGE_VIEW_TYPE_2D_ARRAY;
+        case gli::TARGET_3D:            return VK_IMAGE_VIEW_TYPE_3D;
+        case gli::TARGET_RECT:          return VK_IMAGE_VIEW_TYPE_2D;
+        case gli::TARGET_RECT_ARRAY:    return VK_IMAGE_VIEW_TYPE_2D_ARRAY;
+        case gli::TARGET_CUBE:          return VK_IMAGE_VIEW_TYPE_CUBE;
+        case gli::TARGET_CUBE_ARRAY:    return VK_IMAGE_VIEW_TYPE_CUBE_ARRAY;
+        default:                        return VK_IMAGE_VIEW_TYPE_MAX_ENUM;
     }
 }
 

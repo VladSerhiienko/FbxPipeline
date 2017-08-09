@@ -33,9 +33,6 @@
     <Filter Include="Sources\Graphics">
       <UniqueIdentifier>{925bf837-34ce-4197-97e0-cb94a2e788ad}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Sources\Graphics\[Vulkan]">
-      <UniqueIdentifier>{ce8e9ffc-4093-447a-913e-b075c5754388}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Sources\OS">
       <UniqueIdentifier>{a09abb11-154f-47b5-828a-b560d4b302d6}</UniqueIdentifier>
     </Filter>
@@ -44,6 +41,15 @@
     </Filter>
     <Filter Include="Sources\Math">
       <UniqueIdentifier>{8994e8b6-e054-4ff8-b0a5-7c3027bf4abe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Graphics\[Vulkan]">
+      <UniqueIdentifier>{fd25d473-68af-41b8-a55f-0c0e57fe5ce0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Graphics\[OpenGL]">
+      <UniqueIdentifier>{ca0e5d70-11a0-4d0b-872d-5efa6e266bef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Graphics\[Vulkan]\[VulkanCore]">
+      <UniqueIdentifier>{ce8e9ffc-4093-447a-913e-b075c5754388}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -75,43 +81,40 @@
       <Filter>Sources\Aux</Filter>
     </ClInclude>
     <ClInclude Include="vk\CommandQueue.Vulkan.h">
-      <Filter>Sources\Graphics\[Vulkan]</Filter>
+      <Filter>Sources\Graphics\[Vulkan]\[VulkanCore]</Filter>
     </ClInclude>
     <ClInclude Include="vk\DescriptorPool.Vulkan.h">
-      <Filter>Sources\Graphics\[Vulkan]</Filter>
+      <Filter>Sources\Graphics\[Vulkan]\[VulkanCore]</Filter>
     </ClInclude>
     <ClInclude Include="vk\GraphicsDevice.Vulkan.h">
-      <Filter>Sources\Graphics\[Vulkan]</Filter>
+      <Filter>Sources\Graphics\[Vulkan]\[VulkanCore]</Filter>
     </ClInclude>
     <ClInclude Include="vk\GraphicsManager.Vulkan.h">
-      <Filter>Sources\Graphics\[Vulkan]</Filter>
+      <Filter>Sources\Graphics\[Vulkan]\[VulkanCore]</Filter>
     </ClInclude>
     <ClInclude Include="vk\GraphicsManager.KnownLayers.Vulkan.h">
-      <Filter>Sources\Graphics\[Vulkan]</Filter>
+      <Filter>Sources\Graphics\[Vulkan]\[VulkanCore]</Filter>
     </ClInclude>
     <ClInclude Include="vk\GraphicsManager.KnownExtensions.Vulkan.h">
-      <Filter>Sources\Graphics\[Vulkan]</Filter>
+      <Filter>Sources\Graphics\[Vulkan]\[VulkanCore]</Filter>
     </ClInclude>
     <ClInclude Include="vk\NativeDispatchableHandles.Vulkan.h">
-      <Filter>Sources\Graphics\[Vulkan]</Filter>
+      <Filter>Sources\Graphics\[Vulkan]\[VulkanCore]</Filter>
     </ClInclude>
     <ClInclude Include="vk\Platform.Vulkan.h">
-      <Filter>Sources\Graphics\[Vulkan]</Filter>
+      <Filter>Sources\Graphics\[Vulkan]\[VulkanCore]</Filter>
     </ClInclude>
     <ClInclude Include="vk\ResultHandle.Vulkan.h">
-      <Filter>Sources\Graphics\[Vulkan]</Filter>
+      <Filter>Sources\Graphics\[Vulkan]\[VulkanCore]</Filter>
     </ClInclude>
     <ClInclude Include="vk\Swapchain.Vulkan.h">
-      <Filter>Sources\Graphics\[Vulkan]</Filter>
+      <Filter>Sources\Graphics\[Vulkan]\[VulkanCore]</Filter>
     </ClInclude>
     <ClInclude Include="vk\TDispatchableHandle.Vulkan.h">
-      <Filter>Sources\Graphics\[Vulkan]</Filter>
+      <Filter>Sources\Graphics\[Vulkan]\[VulkanCore]</Filter>
     </ClInclude>
     <ClInclude Include="vk\TInfoStruct.Vulkan.h">
-      <Filter>Sources\Graphics\[Vulkan]</Filter>
-    </ClInclude>
-    <ClInclude Include="DebugRendererVk.h">
-      <Filter>Sources\Graphics</Filter>
+      <Filter>Sources\Graphics\[Vulkan]\[VulkanCore]</Filter>
     </ClInclude>
     <ClInclude Include="FbxViewerOS.h">
       <Filter>Sources\OS</Filter>
@@ -143,22 +146,13 @@
     <ClInclude Include="CameraControllerInputMouseKeyboard.h">
       <Filter>Sources\Camera</Filter>
     </ClInclude>
-    <ClInclude Include="SceneRendererVk.h">
-      <Filter>Sources\Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="vk\QueuePools.Vulkan.h">
-      <Filter>Sources\Graphics\[Vulkan]</Filter>
+      <Filter>Sources\Graphics\[Vulkan]\[VulkanCore]</Filter>
     </ClInclude>
     <ClInclude Include="vk\BufferPools.Vulkan.h">
-      <Filter>Sources\Graphics\[Vulkan]</Filter>
+      <Filter>Sources\Graphics\[Vulkan]\[VulkanCore]</Filter>
     </ClInclude>
     <ClInclude Include="NuklearSdlBase.h">
-      <Filter>Sources\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="NuklearSdlGL.h">
-      <Filter>Sources\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="NuklearSdlVk.h">
       <Filter>Sources\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="SceneRendererBase.h">
@@ -173,17 +167,29 @@
     <ClInclude Include="AppSurfaceSdlBase.h">
       <Filter>Sources\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="AppSurfaceSdlGL.h">
-      <Filter>Sources\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="AppSurfaceSdlVk.h">
-      <Filter>Sources\Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="vk\ShaderCompiler.Vulkan.h">
+      <Filter>Sources\Graphics\[Vulkan]\[VulkanCore]</Filter>
+    </ClInclude>
+    <ClInclude Include="AppSurfaceSdlGL.h">
+      <Filter>Sources\Graphics\[OpenGL]</Filter>
+    </ClInclude>
+    <ClInclude Include="NuklearSdlGL.h">
+      <Filter>Sources\Graphics\[OpenGL]</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneRendererVk.h">
+      <Filter>Sources\Graphics\[Vulkan]</Filter>
+    </ClInclude>
+    <ClInclude Include="NuklearSdlVk.h">
       <Filter>Sources\Graphics\[Vulkan]</Filter>
     </ClInclude>
     <ClInclude Include="ImageLoaderVk.h">
-      <Filter>Sources\Graphics</Filter>
+      <Filter>Sources\Graphics\[Vulkan]</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugRendererVk.h">
+      <Filter>Sources\Graphics\[Vulkan]</Filter>
+    </ClInclude>
+    <ClInclude Include="AppSurfaceSdlVk.h">
+      <Filter>Sources\Graphics\[Vulkan]</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -209,72 +215,72 @@
       <Filter>Sources\Aux</Filter>
     </ClCompile>
     <ClCompile Include="vk\CommandQueue.Vulkan.cpp">
-      <Filter>Sources\Graphics\[Vulkan]</Filter>
+      <Filter>Sources\Graphics\[Vulkan]\[VulkanCore]</Filter>
     </ClCompile>
     <ClCompile Include="vk\DescriptorPool.Vulkan.cpp">
-      <Filter>Sources\Graphics\[Vulkan]</Filter>
+      <Filter>Sources\Graphics\[Vulkan]\[VulkanCore]</Filter>
     </ClCompile>
     <ClCompile Include="vk\GraphicsDevice.Vulkan.cpp">
-      <Filter>Sources\Graphics\[Vulkan]</Filter>
+      <Filter>Sources\Graphics\[Vulkan]\[VulkanCore]</Filter>
     </ClCompile>
     <ClCompile Include="vk\GraphicsManager.Vulkan.cpp">
-      <Filter>Sources\Graphics\[Vulkan]</Filter>
+      <Filter>Sources\Graphics\[Vulkan]\[VulkanCore]</Filter>
     </ClCompile>
     <ClCompile Include="vk\Swapchain.Vulkan.cpp">
-      <Filter>Sources\Graphics\[Vulkan]</Filter>
+      <Filter>Sources\Graphics\[Vulkan]\[VulkanCore]</Filter>
     </ClCompile>
     <ClCompile Include="AppState.cpp">
       <Filter>Sources\App</Filter>
     </ClCompile>
-    <ClCompile Include="DebugRendererVk.cpp">
-      <Filter>Sources\Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="FbxViewerOS.cpp">
       <Filter>Sources\OS</Filter>
     </ClCompile>
-    <ClCompile Include="SceneRendererVk.cpp">
-      <Filter>Sources\Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="vk\QueuePools.Vulkan.cpp">
-      <Filter>Sources\Graphics\[Vulkan]</Filter>
+      <Filter>Sources\Graphics\[Vulkan]\[VulkanCore]</Filter>
     </ClCompile>
     <ClCompile Include="vk\BufferPools.Vulkan.cpp">
-      <Filter>Sources\Graphics\[Vulkan]</Filter>
+      <Filter>Sources\Graphics\[Vulkan]\[VulkanCore]</Filter>
     </ClCompile>
     <ClCompile Include="NuklearSdlBase.cpp">
       <Filter>Sources\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="NuklearSdlGL.cpp">
-      <Filter>Sources\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="NuklearSdlVk.cpp">
-      <Filter>Sources\Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="AppSurfaceSdlBase.cpp">
-      <Filter>Sources\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="AppSurfaceSdlGL.cpp">
-      <Filter>Sources\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="AppSurfaceSdlVk.cpp">
       <Filter>Sources\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="FileTracker.cpp">
       <Filter>Sources\OS</Filter>
     </ClCompile>
     <ClCompile Include="vk\ShaderCompiler.Vulkan.cpp">
+      <Filter>Sources\Graphics\[Vulkan]\[VulkanCore]</Filter>
+    </ClCompile>
+    <ClCompile Include="AppSurfaceSdlGL.cpp">
+      <Filter>Sources\Graphics\[OpenGL]</Filter>
+    </ClCompile>
+    <ClCompile Include="NuklearSdlGL.cpp">
+      <Filter>Sources\Graphics\[OpenGL]</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneRendererVk.cpp">
+      <Filter>Sources\Graphics\[Vulkan]</Filter>
+    </ClCompile>
+    <ClCompile Include="NuklearSdlVk.cpp">
       <Filter>Sources\Graphics\[Vulkan]</Filter>
     </ClCompile>
     <ClCompile Include="ImageLoaderVk.cpp">
-      <Filter>Sources\Graphics</Filter>
+      <Filter>Sources\Graphics\[Vulkan]</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugRendererVk.cpp">
+      <Filter>Sources\Graphics\[Vulkan]</Filter>
+    </ClCompile>
+    <ClCompile Include="AppSurfaceSdlVk.cpp">
+      <Filter>Sources\Graphics\[Vulkan]</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vk\TInfoStructHasStructType.Vulkan.inl">
-      <Filter>Sources\Graphics\[Vulkan]</Filter>
+      <Filter>Sources\Graphics\[Vulkan]\[VulkanCore]</Filter>
     </None>
     <None Include="vk\TInfoStructResolveStructType.Vulkan.inl">
-      <Filter>Sources\Graphics\[Vulkan]</Filter>
+      <Filter>Sources\Graphics\[Vulkan]\[VulkanCore]</Filter>
     </None>
   </ItemGroup>
 </Project>
