@@ -191,6 +191,9 @@
     <ClInclude Include="AppSurfaceSdlVk.h">
       <Filter>Sources\Graphics\[Vulkan]</Filter>
     </ClInclude>
+    <ClInclude Include="SkyboxRendererVk.h">
+      <Filter>Sources\Graphics\[Vulkan]</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="fbxvpch.cpp">
@@ -272,6 +275,9 @@
       <Filter>Sources\Graphics\[Vulkan]</Filter>
     </ClCompile>
     <ClCompile Include="AppSurfaceSdlVk.cpp">
+      <Filter>Sources\Graphics\[Vulkan]</Filter>
+    </ClCompile>
+    <ClCompile Include="SkyboxRendererVk.cpp">
       <Filter>Sources\Graphics\[Vulkan]</Filter>
     </ClCompile>
   </ItemGroup>
