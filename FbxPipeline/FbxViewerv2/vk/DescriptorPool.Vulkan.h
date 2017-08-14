@@ -210,24 +210,32 @@ namespace apemodevk
 
     struct DescriptorSetPool {
 
-        /* VkDescriptorBufferInfo with uint32_t + VkDescriptorSet */
         struct DescriptorBufferInfo {
-            VkDescriptorSet  pDescriptorSet = VK_NULL_HANDLE;
-            VkBuffer         pBuffer        = VK_NULL_HANDLE;
-            uint32_t         offset         = 0;
-            uint32_t         range          = 0;
-            VkDescriptorType eType          = VK_DESCRIPTOR_TYPE_MAX_ENUM;
+            VkDescriptorBufferInfo BufferInfo;
+            VkDescriptorSet        pDescriptorSet = VK_NULL_HANDLE;
+            VkDescriptorType       eType = VK_DESCRIPTOR_TYPE_MAX_ENUM;
 
             DescriptorBufferInfo( );
-            DescriptorBufferInfo( VkDescriptorSet pDescriptorSet, VkBuffer pBuffer, uint32_t offset, uint32_t range, VkDescriptorType eType );
+            DescriptorBufferInfo( VkDescriptorSet pDescriptorSet, VkDescriptorBufferInfo bufferInfo, VkDescriptorType eType );
+        };
+
+        struct DescriptorImageInfo {
+            VkDescriptorImageInfo ImageInfo;
+            VkDescriptorSet       pDescriptorSet = VK_NULL_HANDLE;
+            VkDescriptorType      eType = VK_DESCRIPTOR_TYPE_MAX_ENUM;
+
+            DescriptorImageInfo( );
+            DescriptorImageInfo( VkDescriptorSet pDescriptorSet, VkDescriptorImageInfo imageInfo, VkDescriptorType eType );
         };
 
         VkDevice                            pLogicalDevice       = VK_NULL_HANDLE;
         VkDescriptorPool                    pDescriptorPool      = VK_NULL_HANDLE;
         VkDescriptorSetLayout               pDescriptorSetLayout = VK_NULL_HANDLE;
         std::vector< DescriptorBufferInfo > BufferSets;
+        std::vector< DescriptorImageInfo >  ImgSets;
 
-        bool            Recreate( VkDevice pInLogicalDevice, VkDescriptorPool pInDescPool, VkDescriptorSetLayout pInLayout );
+        bool Recreate( VkDevice pInLogicalDevice, VkDescriptorPool pInDescPool, VkDescriptorSetLayout pInLayout );
         VkDescriptorSet GetDescSet( const VkDescriptorBufferInfo& InDescriptorBufferInfo, VkDescriptorType eInType );
+        VkDescriptorSet GetDescSet( const VkDescriptorImageInfo& InDescriptorImageInfo, VkDescriptorType eInType );
     };
 }

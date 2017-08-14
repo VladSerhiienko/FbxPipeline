@@ -46,6 +46,7 @@
     <ClInclude Include="NuklearSdlBase.h" />
     <ClInclude Include="NuklearSdlGL.h" />
     <ClInclude Include="NuklearSdlVk.h" />
+    <ClInclude Include="SamplerManagerVk.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneRendererBase.h" />
     <ClInclude Include="SceneRendererVk.h" />
@@ -85,6 +86,7 @@
     <ClCompile Include="NuklearSdlBase.cpp" />
     <ClCompile Include="NuklearSdlGL.cpp" />
     <ClCompile Include="NuklearSdlVk.cpp" />
+    <ClCompile Include="SamplerManagerVk.cpp" />
     <ClCompile Include="SceneRendererVk.cpp" />
     <ClCompile Include="SkyboxRendererVk.cpp" />
     <ClCompile Include="StopwatchSdl.cpp" />

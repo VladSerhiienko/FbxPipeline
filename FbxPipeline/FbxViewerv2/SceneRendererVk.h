@@ -7,11 +7,11 @@ namespace apemode {
     class SceneRendererVk : public SceneRendererBase {
     public:
         struct SceneUpdateParametersVk : SceneUpdateParametersBase {
-            apemodevk::GraphicsDevice* pNode       = nullptr;        /* Required */
-            apemodevk::ShaderCompiler * pShaderCompiler = nullptr; /* Required */
-            VkDescriptorPool           pDescPool   = VK_NULL_HANDLE; /* Required */
-            VkRenderPass               pRenderPass = VK_NULL_HANDLE; /* Required */
-            uint32_t                   FrameCount  = 0;              /* Required */
+            apemodevk::GraphicsDevice* pNode           = nullptr;        /* Required */
+            apemodevk::ShaderCompiler* pShaderCompiler = nullptr;        /* Required */
+            VkDescriptorPool           pDescPool       = VK_NULL_HANDLE; /* Required */
+            VkRenderPass               pRenderPass     = VK_NULL_HANDLE; /* Required */
+            uint32_t                   FrameCount      = 0;              /* Required */
         };
 
         void UpdateScene( Scene* pScene, const SceneUpdateParametersBase* pParams ) override;
