@@ -94,7 +94,7 @@ bool apemodevk::SkyboxRenderer::Recreate( RecreateParameters* pParams ) {
     std::set< std::string > includedFiles;
     std::vector< uint8_t >  compiledShaders[ 2 ];
 
-    if ( false == pParams->pShaderCompiler->Compile( "shaders/apemode/Skybox.vert",
+    if ( false == pParams->pShaderCompiler->Compile( "shaders/apemode/Skyboxv2.vert",
                                                      {},
                                                      apemodevk::ShaderCompiler::eShaderType_GLSL_VertexShader,
                                                      includedFiles,
@@ -420,9 +420,11 @@ bool apemodevk::SkyboxRenderer::Render( Skybox* pSkybox, RenderParameters* pPara
                              GetArraySizeU( dynamicOffsets ),
                              dynamicOffsets );
 
+#if 1
     VkBuffer     vertexBuffers[ 1 ] = {hVertexBuffer};
     VkDeviceSize vertexOffsets[ 1 ] = {0};
     vkCmdBindVertexBuffers( pParams->pCmdBuffer, 0, 1, vertexBuffers, vertexOffsets );
+#endif
 
     VkViewport viewport;
     InitializeStruct( viewport );

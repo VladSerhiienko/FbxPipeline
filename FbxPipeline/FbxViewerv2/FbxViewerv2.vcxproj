@@ -196,12 +196,7 @@
       <AdditionalDependencies>vulkan-1.lib;shaderc_combined.lib;glfw3.lib;glew32s.lib;opengl32.lib;winmm.lib;imm32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
-    <PostBuildEvent>
-      <Command>echo FBXViewerv2 Copying shaders
-md $(OutDir)shaders
-robocopy $(SolutionDir)shaders $(OutDir)shaders /s /e /xo
-exit 0</Command>
-    </PostBuildEvent>
+    <PostBuildEvent />
     <PreBuildEvent>
       <Command>echo FBXViewerv2 Copying shaders
 md $(OutDir)shaders
@@ -222,12 +217,7 @@ exit 0</Command>
       <AdditionalDependencies>vulkan-1.lib;shaderc_combined.lib;glfw3.lib;glew32s.lib;opengl32.lib;winmm.lib;imm32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
-    <PostBuildEvent>
-      <Command>echo FBXViewerv2 Copying shaders
-md $(OutDir)shaders
-robocopy $(SolutionDir)shaders $(OutDir)shaders /s /e /xo
-exit 0</Command>
-    </PostBuildEvent>
+    <PostBuildEvent />
     <PreBuildEvent>
       <Command>echo FBXViewerv2 Copying shaders
 md $(OutDir)shaders
@@ -252,12 +242,7 @@ exit 0</Command>
       <AdditionalDependencies>vulkan-1.lib;shaderc_combined.lib;glfw3.lib;glew32s.lib;opengl32.lib;winmm.lib;imm32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
-    <PostBuildEvent>
-      <Command>echo FBXViewerv2 Copying shaders
-md $(OutDir)shaders
-robocopy $(SolutionDir)shaders $(OutDir)shaders /s /e /xo
-exit 0</Command>
-    </PostBuildEvent>
+    <PostBuildEvent />
     <PreBuildEvent>
       <Command>echo FBXViewerv2 Copying shaders
 md $(OutDir)shaders
@@ -282,12 +267,7 @@ exit 0</Command>
       <AdditionalDependencies>vulkan-1.lib;shaderc_combined.lib;glfw3.lib;glew32s.lib;opengl32.lib;winmm.lib;imm32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
-    <PostBuildEvent>
-      <Command>echo FBXViewerv2 Copying shaders
-md $(OutDir)shaders
-robocopy $(SolutionDir)shaders $(OutDir)shaders /s /e /xo
-exit 0</Command>
-    </PostBuildEvent>
+    <PostBuildEvent />
     <PreBuildEvent>
       <Command>echo FBXViewerv2 Copying shaders
 md $(OutDir)shaders

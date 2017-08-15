@@ -27,7 +27,7 @@ void main( ) {
 #else // !APEMODE_FIX_CUBE_LOOKUP_FOR_LOD
     vec4 textureColor0 = toLinear( texture( u_samplerCube0, v_dir ) );
 #endif // APEMODE_FIX_CUBE_LOOKUP_FOR_LOD
-    textureColor0 *= exp2( u_exposure0 );
+    // textureColor0 *= exp2( u_exposure0 );
 
 #ifdef APEMODE_LERP
 #ifdef APEMODE_FIX_CUBE_LOOKUP_FOR_LOD
@@ -42,6 +42,6 @@ void main( ) {
     o_color = toFilmic( textureColor0 );
 #endif // APEMODE_LERP
 
-
-    o_color = vec4(1.0, 1.0, 0.5, 1.0);
+    o_color = textureColor0;
+    //o_color = vec4(1.0, 1.0, 0.5, 1.0);
 }

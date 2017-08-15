@@ -79,12 +79,11 @@ std::unique_ptr< apemodevk::LoadedImage > apemodevk::ImageLoader::LoadImageFromD
 
     auto loadedImage = std::make_unique< LoadedImage >( );
 
-    VkBufferImageCopy              bufferImageCopy;
-    VkImageMemoryBarrier           writeImageMemoryBarrier;
-    VkImageMemoryBarrier           readImgMemoryBarrier;
-    HostBufferPool::SuballocResult imageBufferSuballocResult;
+    std::vector< VkBufferImageCopy > bufferImageCopies;
+    VkImageMemoryBarrier             writeImageMemoryBarrier;
+    VkImageMemoryBarrier             readImgMemoryBarrier;
+    HostBufferPool::SuballocResult   imageBufferSuballocResult;
     
-    InitializeStruct( bufferImageCopy );
     InitializeStruct( writeImageMemoryBarrier );
     InitializeStruct( readImgMemoryBarrier );
     InitializeStruct( loadedImage->imageCreateInfo );
@@ -103,7 +102,6 @@ std::unique_ptr< apemodevk::LoadedImage > apemodevk::ImageLoader::LoadImageFromD
             auto texture = gli::load( (const char*) InFileContent.data( ), InFileContent.size( ) );
 
             if ( false == texture.empty( ) ) {
-                uint32_t layerCount = ( uint32_t )( texture.faces( ) * texture.layers( ) );
 
                 loadedImage->imageCreateInfo.format        = ToImgFormat( texture.format( ) );
                 loadedImage->imageCreateInfo.imageType     = ToImgType( texture.target( ) );
@@ -111,47 +109,70 @@ std::unique_ptr< apemodevk::LoadedImage > apemodevk::ImageLoader::LoadImageFromD
                 loadedImage->imageCreateInfo.extent.height = (uint32_t) texture.extent( ).y;
                 loadedImage->imageCreateInfo.extent.depth  = (uint32_t) texture.extent( ).z;
                 loadedImage->imageCreateInfo.mipLevels     = (uint32_t) texture.levels( );
-                loadedImage->imageCreateInfo.arrayLayers   = layerCount;
+                loadedImage->imageCreateInfo.arrayLayers   = (uint32_t) texture.faces( );
                 loadedImage->imageCreateInfo.samples       = VK_SAMPLE_COUNT_1_BIT;
                 loadedImage->imageCreateInfo.tiling        = VK_IMAGE_TILING_OPTIMAL;
                 loadedImage->imageCreateInfo.usage         = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
                 loadedImage->imageCreateInfo.sharingMode   = VK_SHARING_MODE_EXCLUSIVE;
-                loadedImage->imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+                loadedImage->imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_PREINITIALIZED;
 
                 loadedImage->imageViewCreateInfo.flags                           = 0;
                 loadedImage->imageViewCreateInfo.format                          = ToImgFormat( texture.format( ) );
                 loadedImage->imageViewCreateInfo.viewType                        = ToImgViewType( texture.target( ) );
                 loadedImage->imageViewCreateInfo.subresourceRange.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
                 loadedImage->imageViewCreateInfo.subresourceRange.levelCount     = (uint32_t) texture.levels( );
-                loadedImage->imageViewCreateInfo.subresourceRange.layerCount     = layerCount;
+                loadedImage->imageViewCreateInfo.subresourceRange.layerCount     = (uint32_t) texture.faces( );
                 loadedImage->imageViewCreateInfo.subresourceRange.baseMipLevel   = 0;
                 loadedImage->imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
 
                 imageBufferSuballocResult = pHostBufferPool->Suballocate( texture.data( ), (uint32_t) texture.size( ) );
-                 
-                bufferImageCopy.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-                bufferImageCopy.imageSubresource.layerCount = layerCount;
-                bufferImageCopy.imageExtent.width           = (uint32_t) texture.extent( ).x;
-                bufferImageCopy.imageExtent.height          = (uint32_t) texture.extent( ).y;
-                bufferImageCopy.imageExtent.depth           = (uint32_t) texture.extent( ).z;
-                bufferImageCopy.bufferOffset                = imageBufferSuballocResult.dynamicOffset;
-                bufferImageCopy.bufferImageHeight           = 0; /* Tightly packed according to the imageExtent */
-                bufferImageCopy.bufferRowLength             = 0; /* Tightly packed according to the imageExtent */
+
+                uint32_t bufferImageCopyIndex = 0;
+                bufferImageCopies.resize( ( uint32_t )( texture.levels( ) * texture.faces( ) ) );
+
+                for ( size_t mipLevel = 0; mipLevel < texture.levels( ); ++mipLevel ) {
+                    for ( size_t face = 0; face < texture.faces( ); ++face ) {
+                        auto& bufferImageCopy = bufferImageCopies[ bufferImageCopyIndex++ ];
+                        InitializeStruct( bufferImageCopy );
+
+                        /**
+                         * Note, that the texture will be destructed at the end of the 'case' scope.
+                         * All the memory was copied to the pHostBufferPool.
+                         **/
+
+                        uintptr_t    imgAddress    = (uintptr_t) texture.data( );
+                        uintptr_t    subImgAddress = (uintptr_t) texture.data( 0, face, mipLevel );
+                        VkDeviceSize imageOffset   = subImgAddress - imgAddress;
+                        VkDeviceSize bufferOffset  = imageBufferSuballocResult.dynamicOffset + imageOffset;
+
+                        bufferImageCopy.imageSubresource.baseArrayLayer = 0;
+                        bufferImageCopy.imageSubresource.mipLevel       = (uint32_t) mipLevel;
+                        bufferImageCopy.imageSubresource.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
+                        bufferImageCopy.imageSubresource.baseArrayLayer = (uint32_t) face;
+                        bufferImageCopy.imageSubresource.layerCount     = 1;
+                        bufferImageCopy.imageExtent.width               = (uint32_t) texture.extent( mipLevel ).x;
+                        bufferImageCopy.imageExtent.height              = (uint32_t) texture.extent( mipLevel ).y;
+                        bufferImageCopy.imageExtent.depth               = (uint32_t) texture.extent( mipLevel ).z;
+                        bufferImageCopy.bufferOffset                    = bufferOffset;
+                        bufferImageCopy.bufferImageHeight               = 0; /* Tightly packed according to the imageExtent */
+                        bufferImageCopy.bufferRowLength                 = 0; /* Tightly packed according to the imageExtent */
+                    }
+                }
 
                 writeImageMemoryBarrier.dstAccessMask               = VK_ACCESS_TRANSFER_WRITE_BIT;
                 writeImageMemoryBarrier.oldLayout                   = VK_IMAGE_LAYOUT_UNDEFINED;
                 writeImageMemoryBarrier.newLayout                   = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
                 writeImageMemoryBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
                 writeImageMemoryBarrier.subresourceRange.levelCount = (uint32_t) texture.levels( );
-                writeImageMemoryBarrier.subresourceRange.layerCount = layerCount;
+                writeImageMemoryBarrier.subresourceRange.layerCount = (uint32_t) texture.faces( );
 
                 readImgMemoryBarrier.srcAccessMask               = VK_ACCESS_TRANSFER_WRITE_BIT;
                 readImgMemoryBarrier.dstAccessMask               = VK_ACCESS_SHADER_READ_BIT;
                 readImgMemoryBarrier.oldLayout                   = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
                 readImgMemoryBarrier.newLayout                   = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
                 readImgMemoryBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-                readImgMemoryBarrier.subresourceRange.levelCount = (uint32_t)texture.levels();
-                readImgMemoryBarrier.subresourceRange.layerCount = layerCount;
+                readImgMemoryBarrier.subresourceRange.levelCount = (uint32_t) texture.levels();
+                readImgMemoryBarrier.subresourceRange.layerCount = (uint32_t) texture.faces( );
 
                 loadedImage->eImgLayout = readImgMemoryBarrier.newLayout;
             }
@@ -199,14 +220,18 @@ std::unique_ptr< apemodevk::LoadedImage > apemodevk::ImageLoader::LoadImageFromD
                 imageBufferSuballocResult = pHostBufferPool->Suballocate( pImageBytes, imageWidth * imageHeight * 4 );
                 lodepng_free( pImageBytes ); /* Free decoded PNG since it is no longer needed */
 
+                bufferImageCopies.resize(1);
+                auto& bufferImageCopy = bufferImageCopies.back();
+                InitializeStruct(bufferImageCopy);
+
                 bufferImageCopy.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
                 bufferImageCopy.imageSubresource.layerCount = 1;
-                bufferImageCopy.imageExtent.width           = imageWidth;
-                bufferImageCopy.imageExtent.height          = imageHeight;
-                bufferImageCopy.imageExtent.depth           = 1;
-                bufferImageCopy.bufferOffset                = imageBufferSuballocResult.dynamicOffset;
-                bufferImageCopy.bufferImageHeight           = 0; /* Tightly packed according to the imageExtent */
-                bufferImageCopy.bufferRowLength             = 0; /* Tightly packed according to the imageExtent */
+                bufferImageCopy.imageExtent.width = imageWidth;
+                bufferImageCopy.imageExtent.height = imageHeight;
+                bufferImageCopy.imageExtent.depth = 1;
+                bufferImageCopy.bufferOffset = imageBufferSuballocResult.dynamicOffset;
+                bufferImageCopy.bufferImageHeight = 0; /* Tightly packed according to the imageExtent */
+                bufferImageCopy.bufferRowLength = 0; /* Tightly packed according to the imageExtent */
 
                 writeImageMemoryBarrier.dstAccessMask               = VK_ACCESS_TRANSFER_WRITE_BIT;
                 writeImageMemoryBarrier.oldLayout                   = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -290,8 +315,8 @@ std::unique_ptr< apemodevk::LoadedImage > apemodevk::ImageLoader::LoadImageFromD
                             imageBufferSuballocResult.descBufferInfo.buffer,
                             loadedImage->hImg,
                             VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                            1,
-                            &bufferImageCopy );
+                            (uint32_t) bufferImageCopies.size( ),
+                            bufferImageCopies.data( ) );
 
     readImgMemoryBarrier.image               = loadedImage->hImg;
     readImgMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
@@ -342,7 +367,7 @@ std::unique_ptr< apemodevk::LoadedImage > apemodevk::ImageLoader::LoadImageFromD
         /* Ensure the image memory transfer can be synchronized */
         loadedImage->queueId = acquiredQueue.queueId;
         loadedImage->queueFamilyId = acquiredQueue.queueFamilyId;
-    }
+    } 
 
     pNode->GetCommandBufferPool( )->Release( acquiredCmdBuffer );
     pNode->GetQueuePool( )->Release( acquiredQueue );

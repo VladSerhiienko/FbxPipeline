@@ -310,11 +310,11 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         apemodevk::ImageLoader imgLoader;
         imgLoader.Recreate( appSurface->pNode, nullptr );
 
-        auto pngContent = imgFileManager.ReadBinFile( "../../../assets/img/DragonMain_Diff.png" );
-        auto loadedPNG  = imgLoader.LoadImageFromData( pngContent, apemodevk::ImageLoader::eImageFileFormat_PNG, true, true );
+        //auto pngContent = imgFileManager.ReadBinFile( "../../../assets/img/DragonMain_Diff.png" );
+        //auto loadedPNG  = imgLoader.LoadImageFromData( pngContent, apemodevk::ImageLoader::eImageFileFormat_PNG, true, true );
 
-        auto ddsContent = imgFileManager.ReadBinFile( "../../../assets/env/kyoto_lod.dds" );
-        //auto ddsContent = imgFileManager.ReadBinFile( "../../../assets/env/Canyon/Unfiltered_HDR.dds" );
+        //auto ddsContent = imgFileManager.ReadBinFile( "../../../assets/env/kyoto_lod.dds" );
+        auto ddsContent = imgFileManager.ReadBinFile( "../../../assets/env/Canyon/Unfiltered_HDR.dds" );
         appContent->pLoadedDDS = imgLoader.LoadImageFromData( ddsContent, apemodevk::ImageLoader::eImageFileFormat_DDS, true, true ).release( );
 
         VkSamplerCreateInfo samplerCreateInfo;
@@ -343,8 +343,8 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         appContent->pSkybox->eImgLayout    = appContent->pLoadedDDS->eImgLayout;
         appContent->pSkybox->LevelOfDetail = 0;
         appContent->pSkybox->Exposure      = 1;
-
-        return true;
+         
+        return true;   
     }
 
     return false;
@@ -683,11 +683,11 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         renderPassBeginInfo.pClearValues             = clearValue;
 
         vkCmdBeginRenderPass( cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE );
-
+         
         DebugRendererVk::FrameUniformBuffer frameData;
         frameData.projectionMatrix = appContent->CamProjController.ProjMatrix(55, (float)width, (float)height, 0.1f, 1000.0f);
         frameData.viewMatrix = appContent->pCamController->ViewMatrix();
-        frameData.color = {1, 0, 0, 1};
+        frameData.color = {1, 0, 0, 1};    
 
         appContent->pSkyboxRenderer->Reset( appContent->FrameIndex );
         appContent->pDebugRenderer->Reset( appContent->FrameIndex );
@@ -702,7 +702,7 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         skyboxRenderParams.pCmdBuffer  = cmdBuffer;
         skyboxRenderParams.pNode       = appSurfaceVk->pNode;
         skyboxRenderParams.EnvMatrix   = appContent->pCamController->EnvViewMatrix( );
-        skyboxRenderParams.ProjMatrix  = apemodem::mat4::Ortho(0, 1, 1, 0, 0, 100, apemodem::kHandness);
+        skyboxRenderParams.ProjMatrix  = appContent->CamProjController.kProjBias;
         skyboxRenderParams.FieldOfView = apemodem::DegreesToRadians( 55 );
 
         appContent->pSkyboxRenderer->Render( appContent->pSkybox, &skyboxRenderParams );
