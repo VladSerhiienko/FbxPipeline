@@ -208,34 +208,55 @@ namespace apemodevk
         operator VkDescriptorSetLayoutBinding( ) const;
     };
 
-    struct DescriptorSetPool {
+    struct DescriptorSetBase {
+        struct Binding {
+            uint32_t         DstBinding      = UINT_ERROR;
+            VkDescriptorType eDescriptorType = VK_DESCRIPTOR_TYPE_MAX_ENUM;
 
-        struct DescriptorBufferInfo {
-            VkDescriptorBufferInfo BufferInfo;
-            VkDescriptorSet        pDescriptorSet = VK_NULL_HANDLE;
-            VkDescriptorType       eType = VK_DESCRIPTOR_TYPE_MAX_ENUM;
-
-            DescriptorBufferInfo( );
-            DescriptorBufferInfo( VkDescriptorSet pDescriptorSet, VkDescriptorBufferInfo bufferInfo, VkDescriptorType eType );
+            union {
+                VkDescriptorImageInfo  ImageInfo;
+                VkDescriptorBufferInfo BufferInfo;
+            };
         };
 
-        struct DescriptorImageInfo {
-            VkDescriptorImageInfo ImageInfo;
-            VkDescriptorSet       pDescriptorSet = VK_NULL_HANDLE;
-            VkDescriptorType      eType = VK_DESCRIPTOR_TYPE_MAX_ENUM;
+        Binding* pBinding     = nullptr;
+        uint32_t BindingCount = 0;
 
-            DescriptorImageInfo( );
-            DescriptorImageInfo( VkDescriptorSet pDescriptorSet, VkDescriptorImageInfo imageInfo, VkDescriptorType eType );
+        DescriptorSetBase( ) {
+        }
+
+        DescriptorSetBase( Binding* pBinding = nullptr, uint32_t BindingCount = 0 )
+            : pBinding( pBinding ), BindingCount( BindingCount ) {
+        }
+    };
+
+    template < uint32_t TBindingCount >
+    struct TDescriptorSet : DescriptorSetBase {
+        DescriptorSetBase::Binding Bindings[ TBindingCount ];
+        TDescriptorSet( ) : DescriptorSetBase( Bindings, TBindingCount ) {
+            uint32_t DstBinding = 0;
+            for ( auto& binding : Bindings ) {
+                binding.DstBinding = DstBinding++;
+            }
+        }
+    };
+
+    struct DescriptorSetPool {
+        struct DescriptorSetItem {
+            uint64_t        Hash           = UINT64_ERROR;
+            VkDescriptorSet pDescriptorSet = VK_NULL_HANDLE;
         };
 
         VkDevice                            pLogicalDevice       = VK_NULL_HANDLE;
         VkDescriptorPool                    pDescriptorPool      = VK_NULL_HANDLE;
         VkDescriptorSetLayout               pDescriptorSetLayout = VK_NULL_HANDLE;
-        std::vector< DescriptorBufferInfo > BufferSets;
-        std::vector< DescriptorImageInfo >  ImgSets;
+        std::vector< DescriptorSetItem >    Sets;
+        std::vector< VkWriteDescriptorSet > TempWrites;
 
-        bool Recreate( VkDevice pInLogicalDevice, VkDescriptorPool pInDescPool, VkDescriptorSetLayout pInLayout );
-        VkDescriptorSet GetDescSet( const VkDescriptorBufferInfo& InDescriptorBufferInfo, VkDescriptorType eInType );
-        VkDescriptorSet GetDescSet( const VkDescriptorImageInfo& InDescriptorImageInfo, VkDescriptorType eInType );
+        bool            Recreate( VkDevice pInLogicalDevice, VkDescriptorPool pInDescPool, VkDescriptorSetLayout pInLayout );
+        VkDescriptorSet GetDescSet( const DescriptorSetBase * pDescriptorSetBase );
+
+
+
     };
 }

@@ -21,7 +21,6 @@ struct SkyboxVertex {
     float texcoords[ 2 ];
 };
 
-template < bool bOriginBottomLeft = false >
 void FillScreenSpaceQuad( SkyboxVertex* pOutVertices,
                           const float   textureWidth,
                           const float   textureHeight,
@@ -43,15 +42,9 @@ void FillScreenSpaceQuad( SkyboxVertex* pOutVertices,
     float minv = texelHalfH;
     float maxv = 2.0f + texelHalfH;
 
-    if ( bOriginBottomLeft ) {
-        std::swap( minv, maxv );
-        minv -= 1.0f;
-        maxv -= 1.0f;
-    }
-
     pOutVertices[ 0 ].position[ 0 ]  = minx;
     pOutVertices[ 0 ].position[ 1 ]  = miny;
-    pOutVertices[ 0 ].position[ 2 ]  = zz;
+    pOutVertices[ 0 ].position[ 2 ]  = zz; 
     pOutVertices[ 0 ].texcoords[ 0 ] = minu;
     pOutVertices[ 0 ].texcoords[ 1 ] = minv;
 
@@ -131,7 +124,7 @@ bool apemodevk::SkyboxRenderer::Recreate( RecreateParameters* pParams ) {
         return false;
     }
 
-    VkDescriptorSetLayoutBinding bindings[ 3 ];
+    VkDescriptorSetLayoutBinding bindings[ 2 ];
     InitializeStruct( bindings );
 
     bindings[ 0 ].binding         = 0;
@@ -144,15 +137,10 @@ bool apemodevk::SkyboxRenderer::Recreate( RecreateParameters* pParams ) {
     bindings[ 1 ].descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     bindings[ 1 ].descriptorCount = 1;
 
-    bindings[ 2 ].binding         = 2;
-    bindings[ 2 ].stageFlags      = VK_SHADER_STAGE_FRAGMENT_BIT;
-    bindings[ 2 ].descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    bindings[ 2 ].descriptorCount = 1;
-
     VkDescriptorSetLayoutCreateInfo descSetLayoutCreateInfo;
     InitializeStruct( descSetLayoutCreateInfo );
 
-    descSetLayoutCreateInfo.bindingCount = GetArraySizeU(bindings);
+    descSetLayoutCreateInfo.bindingCount = GetArraySizeU( bindings );
     descSetLayoutCreateInfo.pBindings    = bindings;
 
     if ( false == hDescSetLayout.Recreate( *pParams->pNode, descSetLayoutCreateInfo ) ) {
@@ -270,7 +258,7 @@ bool apemodevk::SkyboxRenderer::Recreate( RecreateParameters* pParams ) {
     //
 
     inputAssemblyStateCreateInfo.topology          = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-    graphicsPipelineCreateInfo.pInputAssemblyState = &inputAssemblyStateCreateInfo;
+    graphicsPipelineCreateInfo.pInputAssemblyState = &inputAssemblyStateCreateInfo; 
 
     //
 
@@ -282,12 +270,12 @@ bool apemodevk::SkyboxRenderer::Recreate( RecreateParameters* pParams ) {
 
     //
 
-    // rasterizationStateCreateInfo.cullMode                = VK_CULL_MODE_NONE;
-    // rasterizationStateCreateInfo.frontFace               = VK_FRONT_FACE_CLOCKWISE; /* CW */
+    rasterizationStateCreateInfo.cullMode                = VK_CULL_MODE_NONE;
+    rasterizationStateCreateInfo.frontFace               = VK_FRONT_FACE_CLOCKWISE; /* CW */
     rasterizationStateCreateInfo.sType                   = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     rasterizationStateCreateInfo.polygonMode             = VK_POLYGON_MODE_FILL;
-    rasterizationStateCreateInfo.cullMode                = VK_CULL_MODE_BACK_BIT;
-    rasterizationStateCreateInfo.frontFace               = VK_FRONT_FACE_COUNTER_CLOCKWISE; /* CCW */
+    //rasterizationStateCreateInfo.cullMode                = VK_CULL_MODE_BACK_BIT;
+    //rasterizationStateCreateInfo.frontFace               = VK_FRONT_FACE_COUNTER_CLOCKWISE; /* CCW */
     rasterizationStateCreateInfo.depthClampEnable        = VK_FALSE;
     rasterizationStateCreateInfo.rasterizerDiscardEnable = VK_FALSE;
     rasterizationStateCreateInfo.depthBiasEnable         = VK_FALSE;
@@ -338,7 +326,7 @@ bool apemodevk::SkyboxRenderer::Recreate( RecreateParameters* pParams ) {
     }
 
     VkPhysicalDeviceProperties adapterProps;
-    vkGetPhysicalDeviceProperties( *pParams->pNode, &adapterProps );
+    vkGetPhysicalDeviceProperties( *pParams->pNode, &adapterProps ); 
 
     for ( uint32_t i = 0; i < pParams->FrameCount; ++i ) {
         BufferPools[ i ].Recreate( *pParams->pNode, *pParams->pNode, &adapterProps.limits, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, false );
@@ -369,13 +357,19 @@ bool apemodevk::SkyboxRenderer::Recreate( RecreateParameters* pParams ) {
     return true;
 }
 
+void apemodevk::SkyboxRenderer::Reset(uint32_t FrameIndex)
+{
+    BufferPools[ FrameIndex ].Reset( );
+}
+
 bool apemodevk::SkyboxRenderer::Render( Skybox* pSkybox, RenderParameters* pParams ) {
 
     const uint32_t vertexBufferSize = sizeof( SkyboxVertex ) * 3;
+
     if ( auto mappedVertices = (SkyboxVertex*) hVertexBufferMemory.Map( 0, vertexBufferSize, 0 ) ) {
         const apemodem::vec2 textureWidthHeight = pParams->Dims * pParams->Scale;
         FillScreenSpaceQuad( mappedVertices, textureWidthHeight.x, textureWidthHeight.y );
-        ProcessSkyboxTexcoords( mappedVertices, pParams->FieldOfView, textureWidthHeight.x, textureWidthHeight.y );
+        //ProcessSkyboxTexcoords( mappedVertices, pParams->FieldOfView, textureWidthHeight.x, textureWidthHeight.y );
 
         VkMappedMemoryRange range;
         InitializeStruct( range );
@@ -399,24 +393,32 @@ bool apemodevk::SkyboxRenderer::Render( Skybox* pSkybox, RenderParameters* pPara
     suballocResult.descBufferInfo.range = sizeof( FrameUniformBuffer );
 
     VkDescriptorImageInfo skyboxImageInfo;
-    InitializeStruct(skyboxImageInfo);
+    InitializeStruct( skyboxImageInfo );
     skyboxImageInfo.imageLayout = pSkybox->eImgLayout;
-    skyboxImageInfo.imageView = pSkybox->pImgView;
-    skyboxImageInfo.sampler = pSkybox->pSampler;
+    skyboxImageInfo.imageView   = pSkybox->pImgView;
+    skyboxImageInfo.sampler     = pSkybox->pSampler;
 
-    VkDescriptorSet descriptorSet[ 2 ];
-    descriptorSet[ 0 ] = DescSetPools[ FrameIndex ].GetDescSet( suballocResult.descBufferInfo, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC );
-    descriptorSet[ 1 ] = DescSetPools[ FrameIndex ].GetDescSet( skyboxImageInfo, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER );
+    VkDescriptorSet descriptorSet[ 1 ]  = {nullptr};
+    uint32_t        dynamicOffsets[ 1 ] = {0};
+
+    TDescriptorSet< 2 > descSet;
+    descSet.pBinding[ 0 ].eDescriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+    descSet.pBinding[ 0 ].BufferInfo      = suballocResult.descBufferInfo;
+    descSet.pBinding[ 1 ].eDescriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    descSet.pBinding[ 1 ].ImageInfo       = skyboxImageInfo;
+
+    descriptorSet[ 0 ]  = DescSetPools[ FrameIndex ].GetDescSet( &descSet );
+    dynamicOffsets[ 0 ] = suballocResult.dynamicOffset;
 
     vkCmdBindPipeline( pParams->pCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, hPipeline );
     vkCmdBindDescriptorSets( pParams->pCmdBuffer,
                              VK_PIPELINE_BIND_POINT_GRAPHICS,
                              hPipelineLayout,
                              0,
-                             2,
+                             GetArraySizeU( descriptorSet ),
                              descriptorSet,
-                             1,
-                             &suballocResult.dynamicOffset );
+                             GetArraySizeU( dynamicOffsets ),
+                             dynamicOffsets );
 
     VkBuffer     vertexBuffers[ 1 ] = {hVertexBuffer};
     VkDeviceSize vertexOffsets[ 1 ] = {0};
@@ -444,4 +446,9 @@ bool apemodevk::SkyboxRenderer::Render( Skybox* pSkybox, RenderParameters* pPara
     vkCmdDraw( pParams->pCmdBuffer, 3, 1, 0, 0 );
 
     return true;
+}
+
+void apemodevk::SkyboxRenderer::Flush(uint32_t FrameIndex)
+{
+    BufferPools[ FrameIndex ].Flush( );
 }

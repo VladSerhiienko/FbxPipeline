@@ -19,6 +19,8 @@
 #include <DebugRendererVk.h>
 #include <SceneRendererVk.h>
 #include <ImageLoaderVk.h>
+#include <SkyboxRendererVk.h>
+#include <SamplerManagerVk.h>
 
 #include <tbb/tbb.h>
 
@@ -72,6 +74,11 @@ public:
     NuklearRendererSdlBase*     pNkRenderer        = nullptr;
     DebugRendererVk*            pDebugRenderer     = nullptr;
     SceneRendererBase*          pSceneRendererBase = nullptr;
+
+    apemodevk::Skybox*         pSkybox         = nullptr;
+    apemodevk::SkyboxRenderer* pSkyboxRenderer = nullptr;
+    apemodevk::LoadedImage*    pLoadedDDS      = nullptr;
+    apemodevk::SamplerManager* pSamplerManager = nullptr;
 
     uint32_t FrameCount = 0;
     uint32_t FrameIndex = 0;
@@ -228,6 +235,13 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         appContent->pDebugRenderer->RecreateResources( &initParamsDbg );
         appContent->pSceneRendererBase = appSurface->CreateSceneRenderer( );
 
+        SceneRendererVk::RecreateParametersVk recreateParams;
+        recreateParams.pNode           = appSurface->pNode;
+        recreateParams.pShaderCompiler = appContent->pShaderCompiler;
+        recreateParams.pRenderPass     = appContent->hDbgRenderPass;
+        recreateParams.pDescPool       = appContent->DescPool;
+        recreateParams.FrameCount      = appContent->FrameCount;
+
         SceneRendererVk::SceneUpdateParametersVk updateParams;
         updateParams.pNode           = appSurface->pNode;
         updateParams.pShaderCompiler = appContent->pShaderCompiler;
@@ -235,7 +249,7 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         updateParams.pDescPool       = appContent->DescPool;
         updateParams.FrameCount      = appContent->FrameCount;
 
-        // -i "C:\Users\vladyslav.serhiienko\Downloads\blood-and-fire\source\DragonMain.fbx" -o "$(SolutionDir)assets\DragonMainp.fbxp" -p
+        // -i "E:\Media\Models\blood-and-fire\source\DragonMain.fbx" -o "$(SolutionDir)assets\DragonMainp.fbxp" -p
         // -i "E:\Media\Models\knight-artorias\source\Artorias.fbx.fbx" -o "$(SolutionDir)assets\Artoriasp.fbxp" -p
         // -i "E:\Media\Models\vanille-flirty-animation\source\happy.fbx" -o "$(SolutionDir)assets\vanille-flirty-animation.fbxp" -p
         // -i "E:\Media\Models\special-sniper-rifle-vss-vintorez\source\vintorez.FBX" -o "$(SolutionDir)assets\vintorez.fbxp" -p
@@ -261,16 +275,74 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         // appContent->Scenes.push_back( LoadSceneFromFile( "F:/Dev/Projects/ProjectFbxPipeline/FbxPipeline/assets/Mech6kv4p.fbxp" ));
         updateParams.pSceneSrc = appContent->Scenes.back( )->sourceScene;
 
-        appContent->pSceneRendererBase->UpdateScene( appContent->Scenes.back( ), &updateParams );
+        if ( false == appContent->pSceneRendererBase->Recreate( &recreateParams ) ) {
+            DebugBreak( ); 
+            return false;
+        }
+
+        if ( false == appContent->pSceneRendererBase->UpdateScene( appContent->Scenes.back( ), &updateParams ) ) {
+            DebugBreak( );
+            return false;
+        }
+
+        appContent->pSkybox         = new apemodevk::Skybox( );
+        appContent->pSkyboxRenderer = new apemodevk::SkyboxRenderer( );
+        appContent->pSamplerManager = new apemodevk::SamplerManager( );
+
+        apemodevk::SkyboxRenderer::RecreateParameters skyboxRendererRecreateParams;
+        skyboxRendererRecreateParams.pNode           = appSurface->pNode;
+        skyboxRendererRecreateParams.pShaderCompiler = appContent->pShaderCompiler;
+        skyboxRendererRecreateParams.pRenderPass     = appContent->hDbgRenderPass;
+        skyboxRendererRecreateParams.pDescPool       = appContent->DescPool;
+        skyboxRendererRecreateParams.FrameCount      = appContent->FrameCount;
+
+        if ( false == appContent->pSkyboxRenderer->Recreate( &skyboxRendererRecreateParams ) ) {
+            DebugBreak( ); 
+            return false;
+        }
+
+        if ( false == appContent->pSamplerManager->Recreate( appSurface->pNode ) ) {
+            DebugBreak( );
+            return false;
+        }
 
         apemodeos::FileManager imgFileManager;
         apemodevk::ImageLoader imgLoader;
         imgLoader.Recreate( appSurface->pNode, nullptr );
 
-        auto pngContent = imgFileManager.ReadBinFile( "C:/Users/vladyslav.serhiienko/Downloads/blood-and-fire/textures/DragonMain_Diff.png" );
-        auto ddsContent = imgFileManager.ReadBinFile( "C:/Users/vladyslav.serhiienko/Downloads/Unfiltered_HDR.dds" );
+        auto pngContent = imgFileManager.ReadBinFile( "../../../assets/img/DragonMain_Diff.png" );
         auto loadedPNG  = imgLoader.LoadImageFromData( pngContent, apemodevk::ImageLoader::eImageFileFormat_PNG, true, true );
-        auto loadedDDS  = imgLoader.LoadImageFromData( ddsContent, apemodevk::ImageLoader::eImageFileFormat_DDS, true, true );
+
+        auto ddsContent = imgFileManager.ReadBinFile( "../../../assets/env/kyoto_lod.dds" );
+        //auto ddsContent = imgFileManager.ReadBinFile( "../../../assets/env/Canyon/Unfiltered_HDR.dds" );
+        appContent->pLoadedDDS = imgLoader.LoadImageFromData( ddsContent, apemodevk::ImageLoader::eImageFileFormat_DDS, true, true ).release( );
+
+        VkSamplerCreateInfo samplerCreateInfo;
+        apemodevk::InitializeStruct( samplerCreateInfo );
+        samplerCreateInfo.addressModeU            = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        samplerCreateInfo.addressModeV            = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        samplerCreateInfo.addressModeW            = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        samplerCreateInfo.anisotropyEnable        = true;
+        samplerCreateInfo.maxAnisotropy           = 16;
+        samplerCreateInfo.compareEnable           = false;
+        samplerCreateInfo.compareOp               = VK_COMPARE_OP_NEVER;
+        samplerCreateInfo.magFilter               = VK_FILTER_LINEAR;
+        samplerCreateInfo.minFilter               = VK_FILTER_LINEAR;
+        samplerCreateInfo.minLod                  = 0;
+        samplerCreateInfo.maxLod                  = appContent->pLoadedDDS->imageCreateInfo.mipLevels;
+        samplerCreateInfo.mipmapMode              = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+        samplerCreateInfo.borderColor             = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
+        samplerCreateInfo.unnormalizedCoordinates = false;
+
+        auto samplerIndex = appContent->pSamplerManager->GetSamplerIndex(samplerCreateInfo);
+        assert ( samplerIndex != UINT_ERROR );
+
+        appContent->pSkybox->pSampler      = appContent->pSamplerManager->StoredSamplers[samplerIndex].pSampler;
+        appContent->pSkybox->pImgView      = appContent->pLoadedDDS->hImgView;
+        appContent->pSkybox->Dimension     = appContent->pLoadedDDS->imageCreateInfo.extent.width;
+        appContent->pSkybox->eImgLayout    = appContent->pLoadedDDS->eImgLayout;
+        appContent->pSkybox->LevelOfDetail = 0;
+        appContent->pSkybox->Exposure      = 1;
 
         return true;
     }
@@ -473,7 +545,7 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         | NK_WINDOW_MINIMIZABLE;
 
     auto ctx = &appContent->pNkRenderer->Context;
-    float clearColor[ 4 ] = {0};
+    float clearColor[ 4 ] = {0.5f, 0.5f, 1.0f, 1.0f};
 
     if (nk_begin(ctx, "Calculator", nk_rect(10, 10, 180, 250),
         NK_WINDOW_BORDER|NK_WINDOW_NO_SCROLLBAR|NK_WINDOW_MOVABLE))
@@ -613,12 +685,27 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         vkCmdBeginRenderPass( cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE );
 
         DebugRendererVk::FrameUniformBuffer frameData;
-        frameData.projectionMatrix = appContent->CamProjController.ProjMatrix(55.0f, (float)width, (float)height, 0.1f, 1000.0f);
+        frameData.projectionMatrix = appContent->CamProjController.ProjMatrix(55, (float)width, (float)height, 0.1f, 1000.0f);
         frameData.viewMatrix = appContent->pCamController->ViewMatrix();
         frameData.color = {1, 0, 0, 1};
 
+        appContent->pSkyboxRenderer->Reset( appContent->FrameIndex );
         appContent->pDebugRenderer->Reset( appContent->FrameIndex );
-        appContent->pSceneRendererBase->Reset( appContent->Scenes[0], appContent->FrameIndex );
+        appContent->pSceneRendererBase->Reset( appContent->Scenes[ 0 ], appContent->FrameIndex );
+
+        apemodevk::SkyboxRenderer::RenderParameters skyboxRenderParams;
+        skyboxRenderParams.Dims[ 0 ]   = (float) width;
+        skyboxRenderParams.Dims[ 1 ]   = (float) height;
+        skyboxRenderParams.Scale[ 0 ]  = 1;
+        skyboxRenderParams.Scale[ 1 ]  = 1;
+        skyboxRenderParams.FrameIndex  = appContent->FrameIndex;
+        skyboxRenderParams.pCmdBuffer  = cmdBuffer;
+        skyboxRenderParams.pNode       = appSurfaceVk->pNode;
+        skyboxRenderParams.EnvMatrix   = appContent->pCamController->EnvViewMatrix( );
+        skyboxRenderParams.ProjMatrix  = apemodem::mat4::Ortho(0, 1, 1, 0, 0, 100, apemodem::kHandness);
+        skyboxRenderParams.FieldOfView = apemodem::DegreesToRadians( 55 );
+
+        appContent->pSkyboxRenderer->Render( appContent->pSkybox, &skyboxRenderParams );
 
         DebugRendererVk::RenderParametersVk renderParamsDbg;
         renderParamsDbg.dims[ 0 ]  = (float) width;
@@ -683,6 +770,7 @@ void App::Update( float deltaSecs, Input const& inputState ) {
 
         appContent->pDebugRenderer->Flush( appContent->FrameIndex );
         appContent->pSceneRendererBase->Flush( appContent->Scenes[0], appContent->FrameIndex );
+        appContent->pSkyboxRenderer->Flush( appContent->FrameIndex );
 
         VkPipelineStageFlags waitPipelineStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 

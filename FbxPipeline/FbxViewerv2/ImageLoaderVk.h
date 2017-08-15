@@ -14,6 +14,7 @@ namespace apemodevk {
         apemodevk::TDispatchableHandle< VkDeviceMemory > hImgMemory;
         VkImageCreateInfo                                imageCreateInfo;
         VkImageViewCreateInfo                            imageViewCreateInfo;
+        VkImageLayout                                    eImgLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     };
 
     class ImageLoader {

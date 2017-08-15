@@ -448,7 +448,14 @@ bool apemode::DebugRendererVk::Render( RenderParametersVk* renderParams ) {
     auto suballocResult = BufferPools[ FrameIndex ].TSuballocate( *renderParams->pFrameData );
     assert( VK_NULL_HANDLE != suballocResult.descBufferInfo.buffer );
     suballocResult.descBufferInfo.range = sizeof(FrameUniformBuffer);
-    VkDescriptorSet descriptorSet[ 1 ]  = { DescSetPools[ FrameIndex ].GetDescSet( suballocResult.descBufferInfo, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC )};
+
+    VkDescriptorSet descriptorSet[ 1 ]  = {nullptr};
+
+    TDescriptorSet< 1 > descSet;
+    descSet.pBinding[ 0 ].eDescriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+    descSet.pBinding[ 0 ].BufferInfo      = suballocResult.descBufferInfo;
+
+    descriptorSet[ 0 ]  = DescSetPools[ FrameIndex ].GetDescSet( &descSet );
 
     vkCmdBindPipeline( renderParams->pCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, hPipeline );
     vkCmdBindDescriptorSets( renderParams->pCmdBuffer,

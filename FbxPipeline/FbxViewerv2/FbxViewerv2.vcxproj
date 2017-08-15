@@ -109,6 +109,9 @@
     <ProjectReference Include="..\sdl2\sdl2.vcxproj">
       <Project>{d319c0fc-c7ea-4643-b962-21f50f77fad2}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\tbb\tbb.vcxproj">
+      <Project>{f62787dd-1327-448b-9818-030062bcfaa5}</Project>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="vk\TInfoStructHasStructType.Vulkan.inl" />

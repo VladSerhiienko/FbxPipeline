@@ -284,7 +284,7 @@
       <Filter>Sources\Graphics\[Vulkan]</Filter>
     </ClCompile>
     <ClCompile Include="SamplerManagerVk.cpp">
-      <Filter>Sources</Filter>
+      <Filter>Sources\Graphics\[Vulkan]</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

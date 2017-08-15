@@ -31,17 +31,19 @@ namespace apemodevk {
         bool Recreate( RecreateParameters* pParams );
 
         struct RenderParameters {
-            apemodevk::GraphicsDevice* pNode = nullptr;             /* Required */
-            float FieldOfView = 0;/* Required */
+            apemodevk::GraphicsDevice* pNode       = nullptr;       /* Required */
+            float                      FieldOfView = 0;             /* Required */
+            uint32_t                   FrameIndex  = 0;             /* Required */
             apemodem::vec2             Dims;                        /* Required */
             apemodem::vec2             Scale;                       /* Required */
-            uint32_t                   FrameIndex = 0;              /* Required */
-            VkCommandBuffer            pCmdBuffer = VK_NULL_HANDLE; /* Required */
             apemodem::mat4             EnvMatrix;                   /* Required */
             apemodem::mat4             ProjMatrix;                  /* Required */
+            VkCommandBuffer            pCmdBuffer = VK_NULL_HANDLE; /* Required */
         };
 
-        bool Render(Skybox * pSkybox, RenderParameters* pParams );
+        void Reset( uint32_t FrameIndex );
+        bool Render( Skybox* pSkybox, RenderParameters* pParams );
+        void Flush( uint32_t FrameIndex );
 
         static uint32_t const kMaxFrameCount = 3;
 

@@ -149,9 +149,11 @@ bool apemodevk::ShaderCompiler::Compile( const std::string&                InFil
             pImpl->Compiler.PreprocessGlsl( fileContent, (shaderc_shader_kind) eShaderKind, fullPath.c_str( ), options );
 
         if ( shaderc_compilation_status_success != preprocessedSourceCompilationResult.GetCompilationStatus( ) ) {
-            platform::DebugTrace( "ShaderCompiler: Failed to PreprocessGlsl: %s: %s",
-                                  InFilePath.c_str( ),
-                                  preprocessedSourceCompilationResult.GetErrorMessage( ).c_str( ) );
+            OutputDebugStringA( "ShaderCompiler: PreprocessGlsl: " );
+            OutputDebugStringA( InFilePath.c_str( ) );
+            OutputDebugStringA( " " ); 
+            OutputDebugStringA( preprocessedSourceCompilationResult.GetErrorMessage( ).c_str( ) );
+            OutputDebugStringA( "\n" ); 
             platform::DebugBreak( );
             return false;
         }
@@ -176,8 +178,9 @@ bool apemodevk::ShaderCompiler::Compile( const std::string&                InFil
         OutputDebugStringA( "ShaderCompiler: -------------------------------------------\n" );
 
         if ( shaderc_compilation_status_success != assemblyCompilationResult.GetCompilationStatus( ) ) {
-            platform::DebugTrace( "ShaderCompiler: CompileGlslToSpvAssembly: %s",
-                                  assemblyCompilationResult.GetErrorMessage( ).c_str( ) );
+            OutputDebugStringA( "ShaderCompiler: CompileGlslToSpvAssembly: " );
+            OutputDebugStringA( assemblyCompilationResult.GetErrorMessage( ).c_str( ) );
+            OutputDebugStringA( "\n" ); 
             platform::DebugBreak( );
             return false;
         }
@@ -187,9 +190,11 @@ bool apemodevk::ShaderCompiler::Compile( const std::string&                InFil
             preprocessedSourceCompilationResult.begin( ), (shaderc_shader_kind) eShaderKind, fullPath.c_str( ), options );
 
         if ( shaderc_compilation_status_success != spvCompilationResult.GetCompilationStatus( ) ) {
-            platform::DebugTrace( "ShaderCompiler: CompileGlslToSpv: %s: %s",
-                                  InFilePath.c_str( ),
-                                  spvCompilationResult.GetErrorMessage( ).c_str( ) );
+            OutputDebugStringA( "ShaderCompiler: CompileGlslToSpv: " );
+            OutputDebugStringA( InFilePath.c_str( ) );
+            OutputDebugStringA( " " ); 
+            OutputDebugStringA( spvCompilationResult.GetErrorMessage( ).c_str( ) );
+            OutputDebugStringA( "\n" ); 
             platform::DebugBreak( );
             return false;
         }

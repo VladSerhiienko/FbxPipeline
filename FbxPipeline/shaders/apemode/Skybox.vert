@@ -24,8 +24,8 @@ layout( location = 1 ) out vec4 v_params0;
 layout( location = 2 ) out vec4 v_params1;
 
 void main( ) {
-    gl_Position = mul( u_frame.projMatrix, vec4( a_position, 1.0 ) );
-    v_dir = normalize( mul( u_frame.envMatrix, vec4( a_texcoords, 1.0, 0.0 ) ).xyz );
+    gl_Position =  u_frame.projMatrix * vec4( a_position, 1.0 );
+    v_dir = normalize( (u_frame.envMatrix * vec4( a_texcoords, 1.0, 0.0 ) ).xyz );
     v_params0 = u_frame.params0;
     v_params1 = u_frame.params1;
 }

@@ -103,8 +103,7 @@ std::unique_ptr< apemodevk::LoadedImage > apemodevk::ImageLoader::LoadImageFromD
             auto texture = gli::load( (const char*) InFileContent.data( ), InFileContent.size( ) );
 
             if ( false == texture.empty( ) ) {
-
-                uint32_t layerCount = (uint32_t)( texture.faces( ) * texture.layers( ) );
+                uint32_t layerCount = ( uint32_t )( texture.faces( ) * texture.layers( ) );
 
                 loadedImage->imageCreateInfo.format        = ToImgFormat( texture.format( ) );
                 loadedImage->imageCreateInfo.imageType     = ToImgType( texture.target( ) );
@@ -119,17 +118,17 @@ std::unique_ptr< apemodevk::LoadedImage > apemodevk::ImageLoader::LoadImageFromD
                 loadedImage->imageCreateInfo.sharingMode   = VK_SHARING_MODE_EXCLUSIVE;
                 loadedImage->imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-                loadedImage->imageViewCreateInfo.flags                       = 0;
-                loadedImage->imageViewCreateInfo.format                      = ToImgFormat( texture.format( ) );
-                loadedImage->imageViewCreateInfo.viewType                    = ToImgViewType( texture.target( ) );
-                loadedImage->imageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-                loadedImage->imageViewCreateInfo.subresourceRange.levelCount = (uint32_t) texture.levels( );
-                loadedImage->imageViewCreateInfo.subresourceRange.layerCount = layerCount;
+                loadedImage->imageViewCreateInfo.flags                           = 0;
+                loadedImage->imageViewCreateInfo.format                          = ToImgFormat( texture.format( ) );
+                loadedImage->imageViewCreateInfo.viewType                        = ToImgViewType( texture.target( ) );
+                loadedImage->imageViewCreateInfo.subresourceRange.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
+                loadedImage->imageViewCreateInfo.subresourceRange.levelCount     = (uint32_t) texture.levels( );
+                loadedImage->imageViewCreateInfo.subresourceRange.layerCount     = layerCount;
                 loadedImage->imageViewCreateInfo.subresourceRange.baseMipLevel   = 0;
                 loadedImage->imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
 
                 imageBufferSuballocResult = pHostBufferPool->Suballocate( texture.data( ), (uint32_t) texture.size( ) );
-
+                 
                 bufferImageCopy.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
                 bufferImageCopy.imageSubresource.layerCount = layerCount;
                 bufferImageCopy.imageExtent.width           = (uint32_t) texture.extent( ).x;
@@ -153,6 +152,8 @@ std::unique_ptr< apemodevk::LoadedImage > apemodevk::ImageLoader::LoadImageFromD
                 readImgMemoryBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
                 readImgMemoryBarrier.subresourceRange.levelCount = (uint32_t)texture.levels();
                 readImgMemoryBarrier.subresourceRange.layerCount = layerCount;
+
+                loadedImage->eImgLayout = readImgMemoryBarrier.newLayout;
             }
         } break;
         case apemodevk::ImageLoader::eImageFileFormat_PNG: {
@@ -221,6 +222,8 @@ std::unique_ptr< apemodevk::LoadedImage > apemodevk::ImageLoader::LoadImageFromD
                 readImgMemoryBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
                 readImgMemoryBarrier.subresourceRange.levelCount = 1;
                 readImgMemoryBarrier.subresourceRange.layerCount = 1;
+
+                loadedImage->eImgLayout = readImgMemoryBarrier.newLayout;
             }
         } break;
     }
@@ -247,10 +250,10 @@ std::unique_ptr< apemodevk::LoadedImage > apemodevk::ImageLoader::LoadImageFromD
         }
     }
 
-    auto acquiredQueue = pNode->GetQueuePool( )->Acquire( false, VK_QUEUE_TRANSFER_BIT, true );
+    auto acquiredQueue = pNode->GetQueuePool( )->Acquire( false, VK_QUEUE_TRANSFER_BIT | VK_QUEUE_GRAPHICS_BIT, true );
     if ( nullptr == acquiredQueue.pQueue ) {
         while ( nullptr == acquiredQueue.pQueue ) {
-            acquiredQueue = pNode->GetQueuePool( )->Acquire( false, VK_QUEUE_TRANSFER_BIT, false );
+            acquiredQueue = pNode->GetQueuePool( )->Acquire( false, VK_QUEUE_TRANSFER_BIT | VK_QUEUE_GRAPHICS_BIT, false );
         }
     }
 
@@ -269,8 +272,8 @@ std::unique_ptr< apemodevk::LoadedImage > apemodevk::ImageLoader::LoadImageFromD
     }
 
     writeImageMemoryBarrier.image               = loadedImage->hImg;
-    writeImageMemoryBarrier.srcQueueFamilyIndex = acquiredQueue.queueFamilyId;
-    writeImageMemoryBarrier.dstQueueFamilyIndex = acquiredQueue.queueFamilyId;
+    writeImageMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    writeImageMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 
     vkCmdPipelineBarrier( acquiredCmdBuffer.pCmdBuffer,
                           VK_PIPELINE_STAGE_HOST_BIT,
@@ -291,8 +294,8 @@ std::unique_ptr< apemodevk::LoadedImage > apemodevk::ImageLoader::LoadImageFromD
                             &bufferImageCopy );
 
     readImgMemoryBarrier.image               = loadedImage->hImg;
-    readImgMemoryBarrier.srcQueueFamilyIndex = acquiredQueue.queueFamilyId;
-    readImgMemoryBarrier.dstQueueFamilyIndex = acquiredQueue.queueFamilyId;
+    readImgMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    readImgMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 
     vkCmdPipelineBarrier( acquiredCmdBuffer.pCmdBuffer,
                           VK_PIPELINE_STAGE_TRANSFER_BIT,

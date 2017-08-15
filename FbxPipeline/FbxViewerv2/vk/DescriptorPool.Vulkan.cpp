@@ -259,19 +259,105 @@ bool apemodevk::DescriptorSetPool::Recreate( VkDevice              pInLogicalDev
     pLogicalDevice       = pInLogicalDevice;
     pDescriptorPool      = pInDescPool;
     pDescriptorSetLayout = pInLayout;
+
+    TempWrites.reserve( 16 ); /* TOFIX */
     return true;
 }
 
-VkDescriptorSet apemodevk::DescriptorSetPool::GetDescSet( const VkDescriptorBufferInfo& BufferInfo, VkDescriptorType eInType ) {
-    auto descSetIt = std::find_if( BufferSets.begin( ), BufferSets.end( ), [&]( const DescriptorBufferInfo& allocatedSet ) {
-        return allocatedSet.BufferInfo.buffer == BufferInfo.buffer && /* Buffer handles must match */
-               allocatedSet.BufferInfo.offset == BufferInfo.offset && /* Offsets must match */
-               allocatedSet.BufferInfo.range >= BufferInfo.range &&   /* Range can be greater */
-               allocatedSet.eType == eInType;                         /* Descriptor type must match */
+//VkDescriptorSet apemodevk::DescriptorSetPool::GetDescSet( const VkDescriptorBufferInfo& BufferInfo,
+//                                                          VkDescriptorType              eInType,
+//                                                          uint32_t                      DstBinding ) {
+//    auto descSetIt = std::find_if( BufferSets.begin( ), BufferSets.end( ), [&]( const DescriptorBufferInfo& allocatedSet ) {
+//        return allocatedSet.BufferInfo.buffer == BufferInfo.buffer && /* Buffer handles must match */
+//               allocatedSet.BufferInfo.offset == BufferInfo.offset && /* Offsets must match */
+//               allocatedSet.BufferInfo.range >= BufferInfo.range &&   /* Range can be greater */
+//               allocatedSet.DstBinding == DstBinding &&               /* Bindign must match */
+//               allocatedSet.eType == eInType;                         /* Descriptor type must match */
+//    } );
+//
+//    if ( descSetIt != BufferSets.end( ) )
+//        return descSetIt->pDescriptorSet;
+//
+//    VkDescriptorSetAllocateInfo descriptorSetAllocateInfo;
+//    InitializeStruct( descriptorSetAllocateInfo );
+//    descriptorSetAllocateInfo.descriptorSetCount = 1;
+//    descriptorSetAllocateInfo.descriptorPool     = pDescriptorPool;
+//    descriptorSetAllocateInfo.pSetLayouts        = &pDescriptorSetLayout;
+//
+//    VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
+//    if ( VK_SUCCESS != vkAllocateDescriptorSets( pLogicalDevice, &descriptorSetAllocateInfo, &descriptorSet ) ) {
+//        DebugBreak( );
+//        return nullptr;
+//    }
+//
+//    BufferSets.emplace_back( DescriptorBufferInfo{descriptorSet, BufferInfo, eInType, DstBinding} );
+//
+//    VkWriteDescriptorSet writeDescriptorSet;
+//    InitializeStruct( writeDescriptorSet );
+//    writeDescriptorSet.descriptorCount = 1;
+//    writeDescriptorSet.descriptorType  = eInType;
+//    writeDescriptorSet.pBufferInfo     = &BufferInfo;
+//    writeDescriptorSet.dstSet          = descriptorSet;
+//    writeDescriptorSet.dstBinding      = DstBinding;
+//    vkUpdateDescriptorSets( pLogicalDevice, 1, &writeDescriptorSet, 0, nullptr );
+//
+//    return descriptorSet;
+//}
+//
+//VkDescriptorSet apemodevk::DescriptorSetPool::GetDescSet( const VkDescriptorImageInfo& ImageInfo,
+//                                                          VkDescriptorType             eInType,
+//                                                          uint32_t                     DstBinding ) {
+//    auto descSetIt = std::find_if( ImgSets.begin( ), ImgSets.end( ), [&]( const DescriptorImageInfo& allocatedSet ) {
+//        return allocatedSet.ImageInfo.imageLayout == ImageInfo.imageLayout && /* Buffer handles must match */
+//               allocatedSet.ImageInfo.imageView == ImageInfo.imageView &&     /* Descriptor type must match */
+//               allocatedSet.ImageInfo.sampler == ImageInfo.sampler &&         /* Offsets must match */
+//               allocatedSet.DstBinding == DstBinding &&                       /* Bindign must match */
+//               allocatedSet.eType == eInType;                                 /* Descriptor type must match */
+//    } );
+//
+//    if ( descSetIt != ImgSets.end( ) )
+//        return descSetIt->pDescriptorSet;
+//
+//    VkDescriptorSetAllocateInfo descriptorSetAllocateInfo;
+//    InitializeStruct( descriptorSetAllocateInfo );
+//    descriptorSetAllocateInfo.descriptorSetCount = 1;
+//    descriptorSetAllocateInfo.descriptorPool     = pDescriptorPool;
+//    descriptorSetAllocateInfo.pSetLayouts        = &pDescriptorSetLayout;
+//
+//    VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
+//    if ( VK_SUCCESS != vkAllocateDescriptorSets( pLogicalDevice, &descriptorSetAllocateInfo, &descriptorSet ) ) {
+//        DebugBreak( );
+//        return nullptr;
+//    }
+//
+//    ImgSets.emplace_back( DescriptorImageInfo{descriptorSet, ImageInfo, eInType, DstBinding} );
+//
+//    VkWriteDescriptorSet writeDescriptorSet;
+//    InitializeStruct( writeDescriptorSet );
+//    writeDescriptorSet.descriptorCount = 1;
+//    writeDescriptorSet.descriptorType  = eInType;
+//    writeDescriptorSet.pImageInfo      = &ImageInfo;
+//    writeDescriptorSet.dstSet          = descriptorSet;
+//    writeDescriptorSet.dstBinding      = DstBinding;
+//    vkUpdateDescriptorSets( pLogicalDevice, 1, &writeDescriptorSet, 0, nullptr );
+//
+//    return descriptorSet;
+//}
+
+VkDescriptorSet apemodevk::DescriptorSetPool::GetDescSet( const DescriptorSetBase* pDescriptorSetBase ) {
+
+    apemode::CityHash64Wrapper cityHashBuilder;
+    for ( uint32_t i = 0; i < pDescriptorSetBase->BindingCount; ++i ) {
+        cityHashBuilder.CombineWith( pDescriptorSetBase->pBinding[ i ] );
+    }
+
+    auto descriptorSetHash = cityHashBuilder.Value;
+    auto descriptorSetIt = std::find_if( Sets.begin( ), Sets.end( ), [&]( const DescriptorSetItem& allocatedSet ) {
+        return allocatedSet.Hash == descriptorSetHash;
     } );
 
-    if ( descSetIt != BufferSets.end( ) )
-        return descSetIt->pDescriptorSet;
+    if ( descriptorSetIt != Sets.end( ) )
+        return descriptorSetIt->pDescriptorSet;
 
     VkDescriptorSetAllocateInfo descriptorSetAllocateInfo;
     InitializeStruct( descriptorSetAllocateInfo );
@@ -281,74 +367,73 @@ VkDescriptorSet apemodevk::DescriptorSetPool::GetDescSet( const VkDescriptorBuff
 
     VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
     if ( VK_SUCCESS != vkAllocateDescriptorSets( pLogicalDevice, &descriptorSetAllocateInfo, &descriptorSet ) ) {
-        DebugBreak( );
+        platform::DebugBreak( );
         return nullptr;
     }
 
-    BufferSets.emplace_back( DescriptorBufferInfo{descriptorSet, BufferInfo, eInType} );
+    DescriptorSetItem item;
+    item.Hash = descriptorSetHash;
+    item.pDescriptorSet = descriptorSet;
+    Sets.emplace_back( item );
 
-    VkWriteDescriptorSet writeDescriptorSet;
-    InitializeStruct( writeDescriptorSet );
-    writeDescriptorSet.descriptorCount = 1;
-    writeDescriptorSet.descriptorType  = eInType;
-    writeDescriptorSet.pBufferInfo     = &BufferInfo;
-    writeDescriptorSet.dstSet          = descriptorSet;
-    vkUpdateDescriptorSets( pLogicalDevice, 1, &writeDescriptorSet, 0, nullptr );
+    TempWrites.clear( );
+    TempWrites.reserve( pDescriptorSetBase->BindingCount );
 
+    std::for_each( pDescriptorSetBase->pBinding,
+                   pDescriptorSetBase->pBinding + pDescriptorSetBase->BindingCount,
+                   [&]( const DescriptorSetBase::Binding& descriptorSetBinding ) {
+                       TempWrites.emplace_back( );
+
+                       auto& writeDescriptorSet = TempWrites.back( );
+                       InitializeStruct( writeDescriptorSet );
+                       writeDescriptorSet.descriptorCount = 1;
+                       writeDescriptorSet.dstBinding      = descriptorSetBinding.DstBinding;
+                       writeDescriptorSet.descriptorType  = descriptorSetBinding.eDescriptorType;
+                       writeDescriptorSet.dstSet          = descriptorSet;
+
+                       switch ( descriptorSetBinding.eDescriptorType ) {
+                           // case VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER:
+                           // case VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER:
+                           case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
+                           case VK_DESCRIPTOR_TYPE_STORAGE_BUFFER:
+                           case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC:
+                           case VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC:
+                               writeDescriptorSet.pBufferInfo = &descriptorSetBinding.BufferInfo;
+                               break;
+
+                           case VK_DESCRIPTOR_TYPE_SAMPLER:
+                           case VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE:
+                           case VK_DESCRIPTOR_TYPE_STORAGE_IMAGE:
+                           case VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
+                           case VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT:
+                               writeDescriptorSet.pImageInfo = &descriptorSetBinding.ImageInfo;
+                               break;
+
+                           default:
+                               platform::DebugBreak( );
+                       }
+                   } );
+
+    vkUpdateDescriptorSets( pLogicalDevice, TempWrites.size( ), TempWrites.data( ), 0, nullptr );
     return descriptorSet;
 }
 
-VkDescriptorSet apemodevk::DescriptorSetPool::GetDescSet( const VkDescriptorImageInfo& ImageInfo, VkDescriptorType eInType ) {
-    auto descSetIt = std::find_if( ImgSets.begin( ), ImgSets.end( ), [&]( const DescriptorImageInfo& allocatedSet ) {
-        return allocatedSet.ImageInfo.imageLayout == ImageInfo.imageLayout && /* Buffer handles must match */
-               allocatedSet.ImageInfo.imageView == ImageInfo.imageView &&     /* Descriptor type must match */
-               allocatedSet.ImageInfo.sampler == ImageInfo.sampler &&         /* Offsets must match */
-               allocatedSet.eType == eInType;                                 /* Descriptor type must match */
-
-    } );
-
-    if ( descSetIt != ImgSets.end( ) )
-        return descSetIt->pDescriptorSet;
-
-    VkDescriptorSetAllocateInfo descriptorSetAllocateInfo;
-    InitializeStruct( descriptorSetAllocateInfo );
-    descriptorSetAllocateInfo.descriptorSetCount = 1;
-    descriptorSetAllocateInfo.descriptorPool     = pDescriptorPool;
-    descriptorSetAllocateInfo.pSetLayouts        = &pDescriptorSetLayout;
-
-    VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
-    if ( VK_SUCCESS != vkAllocateDescriptorSets( pLogicalDevice, &descriptorSetAllocateInfo, &descriptorSet ) ) {
-        DebugBreak( );
-        return nullptr;
-    }
-
-    ImgSets.emplace_back( DescriptorImageInfo{descriptorSet, ImageInfo, eInType} );
-
-    VkWriteDescriptorSet writeDescriptorSet;
-    InitializeStruct( writeDescriptorSet );
-    writeDescriptorSet.descriptorCount = 1;
-    writeDescriptorSet.descriptorType  = eInType;
-    writeDescriptorSet.pImageInfo      = &ImageInfo;
-    writeDescriptorSet.dstSet          = descriptorSet;
-    vkUpdateDescriptorSets( pLogicalDevice, 1, &writeDescriptorSet, 0, nullptr );
-
-    return descriptorSet;
-}
-
-apemodevk::DescriptorSetPool::DescriptorBufferInfo::DescriptorBufferInfo( ) {
-}
-
-apemodevk::DescriptorSetPool::DescriptorBufferInfo::DescriptorBufferInfo( VkDescriptorSet        pDescriptorSet,
-                                                                          VkDescriptorBufferInfo bufferInfo,
-                                                                          VkDescriptorType       eType )
-    : pDescriptorSet( pDescriptorSet ), BufferInfo( bufferInfo ), eType( eType ) {
-}
-
-apemodevk::DescriptorSetPool::DescriptorImageInfo::DescriptorImageInfo( ) {
-}
-
-apemodevk::DescriptorSetPool::DescriptorImageInfo::DescriptorImageInfo( VkDescriptorSet       pDescriptorSet,
-                                                                        VkDescriptorImageInfo imageInfo,
-                                                                        VkDescriptorType      eType )
-    : pDescriptorSet( pDescriptorSet ), ImageInfo( imageInfo ), eType( eType ) {
-}
+//apemodevk::DescriptorSetPool::DescriptorBufferInfo::DescriptorBufferInfo( ) {
+//}
+//
+//apemodevk::DescriptorSetPool::DescriptorBufferInfo::DescriptorBufferInfo( VkDescriptorSet        pDescriptorSet,
+//                                                                          VkDescriptorBufferInfo bufferInfo,
+//                                                                          VkDescriptorType       eType,
+//                                                                          uint32_t               DstBinding )
+//    : pDescriptorSet( pDescriptorSet ), BufferInfo( bufferInfo ), eType( eType ), DstBinding( DstBinding ) {
+//}
+//
+//apemodevk::DescriptorSetPool::DescriptorImageInfo::DescriptorImageInfo( ) {
+//}
+//
+//apemodevk::DescriptorSetPool::DescriptorImageInfo::DescriptorImageInfo( VkDescriptorSet       pDescriptorSet,
+//                                                                        VkDescriptorImageInfo imageInfo,
+//                                                                        VkDescriptorType      eType,
+//                                                                        uint32_t              DstBinding )
+//    : pDescriptorSet( pDescriptorSet ), ImageInfo( imageInfo ), eType( eType ), DstBinding( DstBinding ) {
+//}

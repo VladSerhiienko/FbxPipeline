@@ -1,11 +1,22 @@
 #pragma once
 
 #include <SceneRendererBase.h>
+#include <MathfuInc.h>
 #include <GraphicsDevice.Vulkan.h>
+#include <DescriptorPool.Vulkan.h>
+#include <BufferPools.Vulkan.h>
 
 namespace apemode {
     class SceneRendererVk : public SceneRendererBase {
     public:
+        struct RecreateParametersVk : RecreateParametersBase {
+            apemodevk::GraphicsDevice* pNode           = nullptr;        /* Required */
+            apemodevk::ShaderCompiler* pShaderCompiler = nullptr;        /* Required */
+            VkDescriptorPool           pDescPool       = VK_NULL_HANDLE; /* Required */
+            VkRenderPass               pRenderPass     = VK_NULL_HANDLE; /* Required */
+            uint32_t                   FrameCount      = 0;              /* Required */
+        };
+
         struct SceneUpdateParametersVk : SceneUpdateParametersBase {
             apemodevk::GraphicsDevice* pNode           = nullptr;        /* Required */
             apemodevk::ShaderCompiler* pShaderCompiler = nullptr;        /* Required */
@@ -14,7 +25,8 @@ namespace apemode {
             uint32_t                   FrameCount      = 0;              /* Required */
         };
 
-        void UpdateScene( Scene* pScene, const SceneUpdateParametersBase* pParams ) override;
+        bool Recreate( const RecreateParametersBase* pParams ) override;
+        bool UpdateScene( Scene* pScene, const SceneUpdateParametersBase* pParams ) override;
 
         struct SceneRenderParametersVk : SceneRenderParametersBase {
             apemodevk::GraphicsDevice* pNode       = nullptr;        /* Required */
@@ -26,8 +38,19 @@ namespace apemode {
             apemodem::mat4             ProjMatrix;                   /* Required */
         };
 
-        void Reset( const Scene* pScene, uint32_t FrameIndex ) override;
-        void RenderScene( const Scene* pScene, const SceneRenderParametersBase* pParams ) override;
-        void Flush( const Scene* pScene, uint32_t FrameIndex ) override;
+        bool Reset( const Scene* pScene, uint32_t FrameIndex ) override;
+        bool RenderScene( const Scene* pScene, const SceneRenderParametersBase* pParams ) override;
+        bool Flush( const Scene* pScene, uint32_t FrameIndex ) override;
+
+        static uint32_t const kMaxFrameCount = 3;
+
+        apemodevk::GraphicsDevice*                              pNode = nullptr;
+        apemodevk::TDispatchableHandle< VkDescriptorSetLayout > hDescSetLayout;
+        apemodevk::TDispatchableHandle< VkPipelineLayout >      hPipelineLayout;
+        apemodevk::TDispatchableHandle< VkPipelineCache >       hPipelineCache;
+        apemodevk::TDispatchableHandle< VkPipeline >            hPipeline;
+        apemodevk::TDescriptorSets< kMaxFrameCount >            DescSets;
+        apemodevk::HostBufferPool                               BufferPools[ kMaxFrameCount ];
+        apemodevk::DescriptorSetPool                            DescSetPools[ kMaxFrameCount ];
     };
 }
