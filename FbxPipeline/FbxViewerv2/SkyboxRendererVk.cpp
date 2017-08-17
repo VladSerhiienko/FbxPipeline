@@ -22,72 +22,6 @@ struct SkyboxVertex {
     float texcoords[ 2 ];
 };
 
-void FillScreenSpaceQuad( SkyboxVertex* pOutVertices,
-                          const float   textureWidth,
-                          const float   textureHeight,
-                          const float   texelHalf = 0.0f,
-                          const float   width     = 1.0f,
-                          const float   height    = 1.0f ) {
-    const float minx = -width;
-    const float maxx = +width;
-    const float miny = 0.0f;
-    const float maxy = height * 2.0f;
-
-    const float texelHalfW = texelHalf / textureWidth;
-    const float texelHalfH = texelHalf / textureHeight;
-    const float minu       = -1.0f + texelHalfW;
-    const float maxu       = +1.0f + texelHalfH;
-
-    const float zz = 0.0f;
-
-    float minv = texelHalfH;
-    float maxv = 2.0f + texelHalfH;
-
-    pOutVertices[ 0 ].position[ 0 ]  = minx;
-    pOutVertices[ 0 ].position[ 1 ]  = miny;
-    pOutVertices[ 0 ].position[ 2 ]  = zz; 
-    pOutVertices[ 0 ].texcoords[ 0 ] = minu;
-    pOutVertices[ 0 ].texcoords[ 1 ] = minv;
-
-    pOutVertices[ 1 ].position[ 0 ]  = maxx;
-    pOutVertices[ 1 ].position[ 1 ]  = miny;
-    pOutVertices[ 1 ].position[ 2 ]  = zz;
-    pOutVertices[ 1 ].texcoords[ 0 ] = maxu;
-    pOutVertices[ 1 ].texcoords[ 1 ] = minv;
-
-    pOutVertices[ 2 ].position[ 0 ]  = maxx;
-    pOutVertices[ 2 ].position[ 1 ]  = maxy;
-    pOutVertices[ 2 ].position[ 2 ]  = zz;
-    pOutVertices[ 2 ].texcoords[ 0 ] = maxu;
-    pOutVertices[ 2 ].texcoords[ 1 ] = maxv;
-}
-
-void ProcessSkyboxTexcoords( SkyboxVertex* pOutVertices,
-                             float         fieldOfView,
-                             const float   textureWidth,
-                             const float   textureHeight ) {
-
-    const float tanHalfFov = tanf( 0.5f * fieldOfView );
-    const float aspectWidthHeight = textureWidth / textureHeight;
-
-    for ( uint32_t i = 0; i < 3; ++i ) {
-        auto& skyboxVertex = pOutVertices[ i ];
-
-        apemodem::vec2 texcoords;
-        texcoords.x = skyboxVertex.texcoords[ 0 ];
-        texcoords.y = skyboxVertex.texcoords[ 1 ];
-
-        texcoords *= 2.0f;
-        texcoords -= 1.0f;
-
-        texcoords.x *= aspectWidthHeight;
-        texcoords *= tanHalfFov;
-
-        skyboxVertex.texcoords[ 0 ] = texcoords.x;
-        skyboxVertex.texcoords[ 1 ] = texcoords.y;
-    }
-}
-
 bool apemodevk::SkyboxRenderer::Recreate( RecreateParameters* pParams ) {
     if ( nullptr == pParams->pNode )
         return false;
@@ -217,44 +151,7 @@ bool apemodevk::SkyboxRenderer::Recreate( RecreateParameters* pParams ) {
     graphicsPipelineCreateInfo.stageCount = GetArraySizeU( shaderStageCreateInfo );
     graphicsPipelineCreateInfo.pStages    = shaderStageCreateInfo;
 
-//
-#if 0
-
-    vertexInputBindingDescription[ 0 ].stride    = sizeof( SkyboxVertex );
-    vertexInputBindingDescription[ 0 ].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-
-    vertexInputAttributeDescription[ 0 ].location = 0;
-    vertexInputAttributeDescription[ 0 ].binding  = vertexInputBindingDescription[ 0 ].binding;
-    vertexInputAttributeDescription[ 0 ].format   = VK_FORMAT_A2R10G10B10_UNORM_PACK32;
-    vertexInputAttributeDescription[ 0 ].offset   = ( size_t )( &( (SkyboxVertex*) 0 )->position );
-
-    vertexInputAttributeDescription[ 1 ].location = 1;
-    vertexInputAttributeDescription[ 1 ].binding  = vertexInputBindingDescription[ 0 ].binding;
-    vertexInputAttributeDescription[ 1 ].format   = VK_FORMAT_R16G16_UNORM;
-    vertexInputAttributeDescription[ 1 ].offset   = ( size_t )( &( (SkyboxVertex*) 0 )->texcoords );
-
-#else
-
-    vertexInputBindingDescription[ 0 ].stride    = sizeof(SkyboxVertex);
-    vertexInputBindingDescription[ 0 ].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-
-    vertexInputAttributeDescription[ 0 ].location = 0;
-    vertexInputAttributeDescription[ 0 ].binding  = vertexInputBindingDescription[ 0 ].binding;
-    vertexInputAttributeDescription[ 0 ].format   = VK_FORMAT_R32G32B32_SFLOAT;
-    vertexInputAttributeDescription[ 0 ].offset   = ( size_t )( &( (SkyboxVertex*) 0 )->position );
-
-    vertexInputAttributeDescription[ 1 ].location = 1;
-    vertexInputAttributeDescription[ 1 ].binding  = vertexInputBindingDescription[ 0 ].binding;
-    vertexInputAttributeDescription[ 1 ].format   = VK_FORMAT_R32G32_SFLOAT;
-    vertexInputAttributeDescription[ 1 ].offset   = ( size_t )( &( (SkyboxVertex*) 0 )->texcoords );
-
-#endif
-
-   /* vertexInputStateCreateInfo.vertexBindingDescriptionCount   = GetArraySizeU( vertexInputBindingDescription );
-    vertexInputStateCreateInfo.pVertexBindingDescriptions      = vertexInputBindingDescription;
-    vertexInputStateCreateInfo.vertexAttributeDescriptionCount = GetArraySizeU( vertexInputAttributeDescription );
-    vertexInputStateCreateInfo.pVertexAttributeDescriptions    = vertexInputAttributeDescription;*/
-    graphicsPipelineCreateInfo.pVertexInputState               = &vertexInputStateCreateInfo;
+    graphicsPipelineCreateInfo.pVertexInputState = &vertexInputStateCreateInfo;
 
     //
 
@@ -271,12 +168,10 @@ bool apemodevk::SkyboxRenderer::Recreate( RecreateParameters* pParams ) {
 
     //
 
-    rasterizationStateCreateInfo.cullMode                = VK_CULL_MODE_NONE;
-    rasterizationStateCreateInfo.frontFace               = VK_FRONT_FACE_CLOCKWISE; /* CW */
     rasterizationStateCreateInfo.sType                   = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     rasterizationStateCreateInfo.polygonMode             = VK_POLYGON_MODE_FILL;
-    //rasterizationStateCreateInfo.cullMode                = VK_CULL_MODE_BACK_BIT;
-    //rasterizationStateCreateInfo.frontFace               = VK_FRONT_FACE_COUNTER_CLOCKWISE; /* CCW */
+    rasterizationStateCreateInfo.cullMode                = VK_CULL_MODE_BACK_BIT;
+    rasterizationStateCreateInfo.frontFace               = VK_FRONT_FACE_COUNTER_CLOCKWISE; /* CCW */
     rasterizationStateCreateInfo.depthClampEnable        = VK_FALSE;
     rasterizationStateCreateInfo.rasterizerDiscardEnable = VK_FALSE;
     rasterizationStateCreateInfo.depthBiasEnable         = VK_FALSE;
@@ -334,27 +229,6 @@ bool apemodevk::SkyboxRenderer::Recreate( RecreateParameters* pParams ) {
         DescSetPools[ i ].Recreate( *pParams->pNode, pParams->pDescPool, hDescSetLayout );
     }
 
-    /*const uint32_t vertexBufferSize = sizeof(SkyboxVertex) * 3;
-
-    VkBufferCreateInfo bufferCreateInfo;
-    InitializeStruct( bufferCreateInfo );
-    bufferCreateInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-    bufferCreateInfo.size  = vertexBufferSize;
-
-    if ( false == hVertexBuffer.Recreate( *pParams->pNode, *pParams->pNode, bufferCreateInfo ) ) {
-        return false;
-    }
-
-    auto vertexBufferMemoryProps = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-    auto memoryAllocateInfo = hVertexBuffer.GetMemoryAllocateInfo( vertexBufferMemoryProps );
-    if ( false == hVertexBufferMemory.Recreate( *pParams->pNode, memoryAllocateInfo ) ) {
-        return false;
-    }
-
-    if ( false == hVertexBuffer.BindMemory( hVertexBufferMemory, 0 ) ) {
-        return false;
-    }*/
-
     return true;
 }
 
@@ -364,20 +238,6 @@ void apemodevk::SkyboxRenderer::Reset(uint32_t FrameIndex)
 }
 
 bool apemodevk::SkyboxRenderer::Render( Skybox* pSkybox, RenderParameters* pParams ) {
-
-    //const uint32_t vertexBufferSize = sizeof( SkyboxVertex ) * 3;
-
-    //if ( auto mappedVertices = (SkyboxVertex*) hVertexBufferMemory.Map( 0, vertexBufferSize, 0 ) ) {
-    //    const apemodem::vec2 textureWidthHeight = pParams->Dims * pParams->Scale;
-    //    FillScreenSpaceQuad( mappedVertices, textureWidthHeight.x, textureWidthHeight.y );
-    //    //ProcessSkyboxTexcoords( mappedVertices, pParams->FieldOfView, textureWidthHeight.x, textureWidthHeight.y );
-
-    //    VkMappedMemoryRange range;
-    //    InitializeStruct( range );
-    //    range.memory = hVertexBufferMemory;
-    //    range.size   = vertexBufferSize;
-    //    hVertexBufferMemory.Unmap( );
-    //}
 
     auto FrameIndex = (pParams->FrameIndex) % kMaxFrameCount;
 
