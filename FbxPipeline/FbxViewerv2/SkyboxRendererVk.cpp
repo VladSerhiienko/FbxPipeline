@@ -10,8 +10,9 @@
 #include <shaderc/shaderc.hpp>
 
 struct FrameUniformBuffer {
-    apemodem::mat4 projMarix;
-    apemodem::mat4 envMarix;
+    apemodem::mat4 ProjBias;
+    apemodem::mat4 InvView;
+    apemodem::mat4 InvProj;
     apemodem::vec4 params0;
     apemodem::vec4 params1;
 };
@@ -191,7 +192,7 @@ bool apemodevk::SkyboxRenderer::Recreate( RecreateParameters* pParams ) {
     InitializeStruct( colorBlendStateCreateInfo );
     InitializeStruct( colorBlendAttachmentState );
     InitializeStruct( depthStencilStateCreateInfo );
-    InitializeStruct( viewportStateCreateInfo );
+    InitializeStruct( viewportStateCreateInfo ); 
     InitializeStruct( multisampleStateCreateInfo );
     InitializeStruct( dynamicStateCreateInfo );
     InitializeStruct( shaderStageCreateInfo );
@@ -249,10 +250,10 @@ bool apemodevk::SkyboxRenderer::Recreate( RecreateParameters* pParams ) {
 
 #endif
 
-    vertexInputStateCreateInfo.vertexBindingDescriptionCount   = GetArraySizeU( vertexInputBindingDescription );
+   /* vertexInputStateCreateInfo.vertexBindingDescriptionCount   = GetArraySizeU( vertexInputBindingDescription );
     vertexInputStateCreateInfo.pVertexBindingDescriptions      = vertexInputBindingDescription;
     vertexInputStateCreateInfo.vertexAttributeDescriptionCount = GetArraySizeU( vertexInputAttributeDescription );
-    vertexInputStateCreateInfo.pVertexAttributeDescriptions    = vertexInputAttributeDescription;
+    vertexInputStateCreateInfo.pVertexAttributeDescriptions    = vertexInputAttributeDescription;*/
     graphicsPipelineCreateInfo.pVertexInputState               = &vertexInputStateCreateInfo;
 
     //
@@ -333,7 +334,7 @@ bool apemodevk::SkyboxRenderer::Recreate( RecreateParameters* pParams ) {
         DescSetPools[ i ].Recreate( *pParams->pNode, pParams->pDescPool, hDescSetLayout );
     }
 
-    const uint32_t vertexBufferSize = sizeof(SkyboxVertex) * 3;
+    /*const uint32_t vertexBufferSize = sizeof(SkyboxVertex) * 3;
 
     VkBufferCreateInfo bufferCreateInfo;
     InitializeStruct( bufferCreateInfo );
@@ -352,7 +353,7 @@ bool apemodevk::SkyboxRenderer::Recreate( RecreateParameters* pParams ) {
 
     if ( false == hVertexBuffer.BindMemory( hVertexBufferMemory, 0 ) ) {
         return false;
-    }
+    }*/
 
     return true;
 }
@@ -364,25 +365,26 @@ void apemodevk::SkyboxRenderer::Reset(uint32_t FrameIndex)
 
 bool apemodevk::SkyboxRenderer::Render( Skybox* pSkybox, RenderParameters* pParams ) {
 
-    const uint32_t vertexBufferSize = sizeof( SkyboxVertex ) * 3;
+    //const uint32_t vertexBufferSize = sizeof( SkyboxVertex ) * 3;
 
-    if ( auto mappedVertices = (SkyboxVertex*) hVertexBufferMemory.Map( 0, vertexBufferSize, 0 ) ) {
-        const apemodem::vec2 textureWidthHeight = pParams->Dims * pParams->Scale;
-        FillScreenSpaceQuad( mappedVertices, textureWidthHeight.x, textureWidthHeight.y );
-        //ProcessSkyboxTexcoords( mappedVertices, pParams->FieldOfView, textureWidthHeight.x, textureWidthHeight.y );
+    //if ( auto mappedVertices = (SkyboxVertex*) hVertexBufferMemory.Map( 0, vertexBufferSize, 0 ) ) {
+    //    const apemodem::vec2 textureWidthHeight = pParams->Dims * pParams->Scale;
+    //    FillScreenSpaceQuad( mappedVertices, textureWidthHeight.x, textureWidthHeight.y );
+    //    //ProcessSkyboxTexcoords( mappedVertices, pParams->FieldOfView, textureWidthHeight.x, textureWidthHeight.y );
 
-        VkMappedMemoryRange range;
-        InitializeStruct( range );
-        range.memory = hVertexBufferMemory;
-        range.size   = vertexBufferSize;
-        hVertexBufferMemory.Unmap( );
-    }
+    //    VkMappedMemoryRange range;
+    //    InitializeStruct( range );
+    //    range.memory = hVertexBufferMemory;
+    //    range.size   = vertexBufferSize;
+    //    hVertexBufferMemory.Unmap( );
+    //}
 
     auto FrameIndex = (pParams->FrameIndex) % kMaxFrameCount;
 
     FrameUniformBuffer frameData;
-    frameData.envMarix  = pParams->EnvMatrix;
-    frameData.projMarix = pParams->ProjMatrix;
+    frameData.InvView  = pParams->InvViewMatrix;
+    frameData.InvProj  = pParams->InvProjMatrix;
+    frameData.ProjBias = pParams->ProjBiasMatrix;
     frameData.params0.x = 0;                      /* u_lerpFactor */
     frameData.params0.y = pSkybox->Exposure;      /* u_exposure0 */
     frameData.params0.z = pSkybox->Dimension;     /* u_textureCubeDim0 */
@@ -420,11 +422,11 @@ bool apemodevk::SkyboxRenderer::Render( Skybox* pSkybox, RenderParameters* pPara
                              GetArraySizeU( dynamicOffsets ),
                              dynamicOffsets );
 
-#if 1
-    VkBuffer     vertexBuffers[ 1 ] = {hVertexBuffer};
-    VkDeviceSize vertexOffsets[ 1 ] = {0};
-    vkCmdBindVertexBuffers( pParams->pCmdBuffer, 0, 1, vertexBuffers, vertexOffsets );
-#endif
+//#if 1
+//    VkBuffer     vertexBuffers[ 1 ] = {hVertexBuffer};
+//    VkDeviceSize vertexOffsets[ 1 ] = {0};
+//    vkCmdBindVertexBuffers( pParams->pCmdBuffer, 0, 1, vertexBuffers, vertexOffsets );
+//#endif
 
     VkViewport viewport;
     InitializeStruct( viewport );

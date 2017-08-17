@@ -103,7 +103,8 @@ public:
     TDispatchableHandle< VkDeviceMemory >  hDepthImgMemory[ kMaxFrames ];
 
     AppContent( ) {
-        pCamController = new FreeLookCameraController( );
+        pCamController = new ModelViewCameraController( );
+        //pCamController = new FreeLookCameraController( );
         pCamInput      = new MouseKeyboardCameraControllerInput( );
     }
 
@@ -314,7 +315,8 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         //auto loadedPNG  = imgLoader.LoadImageFromData( pngContent, apemodevk::ImageLoader::eImageFileFormat_PNG, true, true );
 
         //auto ddsContent = imgFileManager.ReadBinFile( "../../../assets/env/kyoto_lod.dds" );
-        auto ddsContent = imgFileManager.ReadBinFile( "../../../assets/env/Canyon/Unfiltered_HDR.dds" );
+        auto ddsContent = imgFileManager.ReadBinFile( "../../../assets/env/PaperMill/Specular_HDR.dds" );
+        //auto ddsContent = imgFileManager.ReadBinFile( "../../../assets/env/Canyon/Unfiltered_HDR.dds" );
         appContent->pLoadedDDS = imgLoader.LoadImageFromData( ddsContent, apemodevk::ImageLoader::eImageFileFormat_DDS, true, true ).release( );
 
         VkSamplerCreateInfo samplerCreateInfo;
@@ -335,7 +337,7 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         samplerCreateInfo.unnormalizedCoordinates = false;
 
         auto samplerIndex = appContent->pSamplerManager->GetSamplerIndex(samplerCreateInfo);
-        assert ( samplerIndex != UINT_ERROR );
+        assert ( samplerIndex != UINT_ERROR ); 
 
         appContent->pSkybox->pSampler      = appContent->pSamplerManager->StoredSamplers[samplerIndex].pSampler;
         appContent->pSkybox->pImgView      = appContent->pLoadedDDS->hImgView;
@@ -668,11 +670,11 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         VkClearValue clearValue[2];
         clearValue[0].color.float32[ 0 ] = clearColor[ 0 ];
         clearValue[0].color.float32[ 1 ] = clearColor[ 1 ];
-        clearValue[0].color.float32[ 2 ] = clearColor[ 2 ];
+        clearValue[0].color.float32[ 2 ] = clearColor[ 2 ]; 
         clearValue[0].color.float32[ 3 ] = clearColor[ 3 ];
         clearValue[1].depthStencil.depth = 1;
         clearValue[1].depthStencil.stencil = 0;
-
+         
         VkRenderPassBeginInfo renderPassBeginInfo;
         InitializeStruct( renderPassBeginInfo );
         renderPassBeginInfo.renderPass               = appContent->hDbgRenderPass;
@@ -680,15 +682,20 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         renderPassBeginInfo.renderArea.extent.width  = appSurfaceVk->GetWidth( );
         renderPassBeginInfo.renderArea.extent.height = appSurfaceVk->GetHeight( );
         renderPassBeginInfo.clearValueCount          = 2;
-        renderPassBeginInfo.pClearValues             = clearValue;
+        renderPassBeginInfo.pClearValues             = clearValue; 
 
         vkCmdBeginRenderPass( cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE );
-         
+
+        auto View =appContent->pCamController->ViewMatrix();
+        auto  InvView = View.Inverse();
+        auto Proj = appContent->CamProjController.ProjMatrix(55, (float)width, (float)height, 0.1f, 1000.0f);
+        auto  InvProj = Proj.Inverse();
+
         DebugRendererVk::FrameUniformBuffer frameData;
-        frameData.projectionMatrix = appContent->CamProjController.ProjMatrix(55, (float)width, (float)height, 0.1f, 1000.0f);
+        frameData.projectionMatrix = Proj;
         frameData.viewMatrix = appContent->pCamController->ViewMatrix();
         frameData.color = {1, 0, 0, 1};    
-
+         
         appContent->pSkyboxRenderer->Reset( appContent->FrameIndex );
         appContent->pDebugRenderer->Reset( appContent->FrameIndex );
         appContent->pSceneRendererBase->Reset( appContent->Scenes[ 0 ], appContent->FrameIndex );
@@ -701,17 +708,18 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         skyboxRenderParams.FrameIndex  = appContent->FrameIndex;
         skyboxRenderParams.pCmdBuffer  = cmdBuffer;
         skyboxRenderParams.pNode       = appSurfaceVk->pNode;
-        skyboxRenderParams.EnvMatrix   = appContent->pCamController->EnvViewMatrix( );
-        skyboxRenderParams.ProjMatrix  = appContent->CamProjController.kProjBias;
-        skyboxRenderParams.FieldOfView = apemodem::DegreesToRadians( 55 );
+        skyboxRenderParams.InvViewMatrix  = InvView;
+        skyboxRenderParams.InvProjMatrix  = InvProj;
+        skyboxRenderParams.ProjBiasMatrix  = appContent->CamProjController.kProjBias;
+        skyboxRenderParams.FieldOfView = apemodem::DegreesToRadians( 67 );
 
         appContent->pSkyboxRenderer->Render( appContent->pSkybox, &skyboxRenderParams );
 
-        DebugRendererVk::RenderParametersVk renderParamsDbg;
+        DebugRendererVk::RenderParametersVk renderParamsDbg; 
         renderParamsDbg.dims[ 0 ]  = (float) width;
         renderParamsDbg.dims[ 1 ]  = (float) height;
         renderParamsDbg.scale[ 0 ] = 1;
-        renderParamsDbg.scale[ 1 ] = 1;
+        renderParamsDbg.scale[ 1 ] = 1; 
         renderParamsDbg.FrameIndex = appContent->FrameIndex;
         renderParamsDbg.pCmdBuffer = cmdBuffer;
         renderParamsDbg.pFrameData = &frameData;
@@ -719,7 +727,7 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         const float scale = 0.5f;
 
         frameData.worldMatrix
-            = mathfu::mat4::FromScaleVector({ scale, scale * 2, scale })
+            = mathfu::mat4::FromScaleVector({ scale, scale * 2, scale }) 
             * mathfu::mat4::FromTranslationVector(mathfu::vec3{ 0, scale * 3, 0 });
 
         frameData.color = { 0, 1, 0, 1 };

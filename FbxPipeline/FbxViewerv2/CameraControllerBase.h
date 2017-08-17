@@ -22,6 +22,19 @@ namespace apemode {
         }
 
         virtual apemodem::mat4 EnvViewMatrix( ) {
+
+#if 1
+            const apemodem::vec3 forward = apemodem::NormalizedSafe( Target - Position );
+            const apemodem::vec3 right   = apemodem::vec3::CrossProduct( {0.0f, 1.0f, 0.0f}, forward ).Normalized( );
+            const apemodem::vec3 up      = apemodem::vec3::CrossProduct( forward, right ).Normalized( );
+
+            return apemodem::mat4(  apemodem::vec4{right, 0.0f},
+                                    apemodem::vec4{up, 0.0f},
+                                    apemodem::vec4{forward, 0.0f},
+                                    apemodem::vec4{0.0f, 0.0f, 0.0f, 1.0f} );
+
+#else
+
             apemodem::vec3 axes[ 4 ];
             apemodem::vec3 up{0, 1, 0};
 
@@ -52,6 +65,7 @@ namespace apemode {
 #endif
 
             return apemodem::mat4( column0, column1, column2, column3 );
+#endif
         }
     };
 

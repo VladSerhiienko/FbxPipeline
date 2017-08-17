@@ -9,6 +9,7 @@ layout( set = 0, binding = 2 ) uniform samplerCube u_samplerCube1;
 layout( location = 0 ) in vec3 v_dir;
 layout( location = 1 ) in vec4 v_params0;
 layout( location = 2 ) in vec4 v_params1;
+layout( location = 3 ) in vec2 v_texcoords;
 layout( location = 0 ) out vec4 o_color;
 
 #define u_lerpFactor v_params0.y
@@ -42,6 +43,10 @@ void main( ) {
     o_color = toFilmic( textureColor0 );
 #endif // APEMODE_LERP
 
+    // o_color = vec4(0.0, v_texcoords.y, 0.0, 1.0);
+    // o_color = vec4(v_texcoords.x, 0.0, 0.0, 1.0);
+    // o_color = vec4(v_texcoords, 0.0, 1.0);
+    // o_color = vec4(v_texcoords, 0.5, 1.0);
     o_color = textureColor0;
     //o_color = vec4(1.0, 1.0, 0.5, 1.0);
 }

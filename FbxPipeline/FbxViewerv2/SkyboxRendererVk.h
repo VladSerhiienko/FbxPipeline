@@ -36,8 +36,9 @@ namespace apemodevk {
             uint32_t                   FrameIndex  = 0;             /* Required */
             apemodem::vec2             Dims;                        /* Required */
             apemodem::vec2             Scale;                       /* Required */
-            apemodem::mat4             EnvMatrix;                   /* Required */
-            apemodem::mat4             ProjMatrix;                  /* Required */
+            apemodem::mat4             InvViewMatrix;               /* Required */
+            apemodem::mat4             InvProjMatrix;               /* Required */
+            apemodem::mat4             ProjBiasMatrix;                  /* Required */
             VkCommandBuffer            pCmdBuffer = VK_NULL_HANDLE; /* Required */
         };
 
@@ -52,8 +53,8 @@ namespace apemodevk {
         apemodevk::TDispatchableHandle< VkPipelineLayout >      hPipelineLayout;
         apemodevk::TDispatchableHandle< VkPipelineCache >       hPipelineCache;
         apemodevk::TDispatchableHandle< VkPipeline >            hPipeline;
-        apemodevk::TDispatchableHandle< VkBuffer >              hVertexBuffer;
-        apemodevk::TDispatchableHandle< VkDeviceMemory >        hVertexBufferMemory;
+        //apemodevk::TDispatchableHandle< VkBuffer >              hVertexBuffer;
+        //apemodevk::TDispatchableHandle< VkDeviceMemory >        hVertexBufferMemory;
         apemodevk::TDescriptorSets< kMaxFrameCount >            DescSets;
         apemodevk::HostBufferPool                               BufferPools[ kMaxFrameCount ];
         apemodevk::DescriptorSetPool                            DescSetPools[ kMaxFrameCount ];
