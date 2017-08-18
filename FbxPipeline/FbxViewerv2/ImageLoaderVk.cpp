@@ -171,7 +171,7 @@ std::unique_ptr< apemodevk::LoadedImage > apemodevk::ImageLoader::LoadImageFromD
                 readImgMemoryBarrier.oldLayout                   = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
                 readImgMemoryBarrier.newLayout                   = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
                 readImgMemoryBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-                readImgMemoryBarrier.subresourceRange.levelCount = (uint32_t) texture.levels();
+                readImgMemoryBarrier.subresourceRange.levelCount = (uint32_t) texture.levels( );
                 readImgMemoryBarrier.subresourceRange.layerCount = (uint32_t) texture.faces( );
 
                 loadedImage->eImgLayout = readImgMemoryBarrier.newLayout;

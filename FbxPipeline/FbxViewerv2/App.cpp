@@ -89,18 +89,17 @@ public:
     DescriptorPool                         DescPool;
     TDispatchableHandle< VkCommandPool >   hCmdPool[ kMaxFrames ];
     TDispatchableHandle< VkCommandBuffer > hCmdBuffers[ kMaxFrames ];
-    //TDispatchableHandle< VkFence >         hFences[ kMaxFrames ];
     TDispatchableHandle< VkSemaphore >     hPresentCompleteSemaphores[ kMaxFrames ];
     TDispatchableHandle< VkSemaphore >     hRenderCompleteSemaphores[ kMaxFrames ];
 
-    TDispatchableHandle< VkRenderPass >    hNkRenderPass;
-    TDispatchableHandle< VkFramebuffer >   hNkFramebuffers[ kMaxFrames ];
+    TDispatchableHandle< VkRenderPass >  hNkRenderPass;
+    TDispatchableHandle< VkFramebuffer > hNkFramebuffers[ kMaxFrames ];
 
-    TDispatchableHandle< VkRenderPass >    hDbgRenderPass;
-    TDispatchableHandle< VkFramebuffer >   hDbgFramebuffers[ kMaxFrames ];
-    TDispatchableHandle< VkImage >         hDepthImgs[ kMaxFrames ];
-    TDispatchableHandle< VkImageView >     hDepthImgViews[ kMaxFrames ];
-    TDispatchableHandle< VkDeviceMemory >  hDepthImgMemory[ kMaxFrames ];
+    TDispatchableHandle< VkRenderPass >   hDbgRenderPass;
+    TDispatchableHandle< VkFramebuffer >  hDbgFramebuffers[ kMaxFrames ];
+    TDispatchableHandle< VkImage >        hDepthImgs[ kMaxFrames ];
+    TDispatchableHandle< VkImageView >    hDepthImgViews[ kMaxFrames ];
+    TDispatchableHandle< VkDeviceMemory > hDepthImgMemory[ kMaxFrames ];
 
     AppContent( ) {
         pCamController = new ModelViewCameraController( );
@@ -614,11 +613,10 @@ void App::Update( float deltaSecs, Input const& inputState ) {
     appContent->pCamController->Update( deltaSecs );
 
     if ( auto appSurfaceVk = (AppSurfaceSdlVk*) GetSurface( ) ) {
-
-        auto queueFamilyPool = appSurfaceVk->pNode->GetQueuePool()->GetPool(appSurfaceVk->PresentQueueFamilyIds[0]);
-        auto acquiredQueue = queueFamilyPool->Acquire(true);
-        while (acquiredQueue.pQueue == nullptr) {
-            acquiredQueue = queueFamilyPool->Acquire(true);
+        auto queueFamilyPool = appSurfaceVk->pNode->GetQueuePool( )->GetPool( appSurfaceVk->PresentQueueFamilyIds[ 0 ] );
+        auto acquiredQueue   = queueFamilyPool->Acquire( true );
+        while ( acquiredQueue.pQueue == nullptr ) {
+            acquiredQueue = queueFamilyPool->Acquire( true );
         }
 
         VkDevice        device                   = *appSurfaceVk->pNode;
@@ -667,14 +665,14 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         commandBufferBeginInfo.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
         CheckedCall( vkBeginCommandBuffer( cmdBuffer, &commandBufferBeginInfo ) );
 
-        VkClearValue clearValue[2];
-        clearValue[0].color.float32[ 0 ] = clearColor[ 0 ];
-        clearValue[0].color.float32[ 1 ] = clearColor[ 1 ];
-        clearValue[0].color.float32[ 2 ] = clearColor[ 2 ]; 
-        clearValue[0].color.float32[ 3 ] = clearColor[ 3 ];
-        clearValue[1].depthStencil.depth = 1;
-        clearValue[1].depthStencil.stencil = 0;
-         
+        VkClearValue clearValue[ 2 ];
+        clearValue[ 0 ].color.float32[ 0 ]   = clearColor[ 0 ];
+        clearValue[ 0 ].color.float32[ 1 ]   = clearColor[ 1 ];
+        clearValue[ 0 ].color.float32[ 2 ]   = clearColor[ 2 ];
+        clearValue[ 0 ].color.float32[ 3 ]   = clearColor[ 3 ];
+        clearValue[ 1 ].depthStencil.depth   = 1;
+        clearValue[ 1 ].depthStencil.stencil = 0;
+
         VkRenderPassBeginInfo renderPassBeginInfo;
         InitializeStruct( renderPassBeginInfo );
         renderPassBeginInfo.renderPass               = appContent->hDbgRenderPass;
@@ -686,32 +684,32 @@ void App::Update( float deltaSecs, Input const& inputState ) {
 
         vkCmdBeginRenderPass( cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE );
 
-        auto View =appContent->pCamController->ViewMatrix();
-        auto  InvView = View.Inverse();
-        auto Proj = appContent->CamProjController.ProjMatrix(55, (float)width, (float)height, 0.1f, 1000.0f);
-        auto  InvProj = Proj.Inverse();
+        auto View    = appContent->pCamController->ViewMatrix( );
+        auto InvView = View.Inverse( );
+        auto Proj    = appContent->CamProjController.ProjMatrix( 55, (float) width, (float) height, 0.1f, 1000.0f );
+        auto InvProj = Proj.Inverse( );
 
         DebugRendererVk::FrameUniformBuffer frameData;
         frameData.projectionMatrix = Proj;
-        frameData.viewMatrix = appContent->pCamController->ViewMatrix();
-        frameData.color = {1, 0, 0, 1};    
-         
+        frameData.viewMatrix       = appContent->pCamController->ViewMatrix( );
+        frameData.color            = {1, 0, 0, 1};
+
         appContent->pSkyboxRenderer->Reset( appContent->FrameIndex );
         appContent->pDebugRenderer->Reset( appContent->FrameIndex );
         appContent->pSceneRendererBase->Reset( appContent->Scenes[ 0 ], appContent->FrameIndex );
 
         apemodevk::SkyboxRenderer::RenderParameters skyboxRenderParams;
-        skyboxRenderParams.Dims[ 0 ]   = (float) width;
-        skyboxRenderParams.Dims[ 1 ]   = (float) height;
-        skyboxRenderParams.Scale[ 0 ]  = 1;
-        skyboxRenderParams.Scale[ 1 ]  = 1;
-        skyboxRenderParams.FrameIndex  = appContent->FrameIndex;
-        skyboxRenderParams.pCmdBuffer  = cmdBuffer;
-        skyboxRenderParams.pNode       = appSurfaceVk->pNode;
+        skyboxRenderParams.Dims[ 0 ]      = (float) width;
+        skyboxRenderParams.Dims[ 1 ]      = (float) height;
+        skyboxRenderParams.Scale[ 0 ]     = 1;
+        skyboxRenderParams.Scale[ 1 ]     = 1;
+        skyboxRenderParams.FrameIndex     = appContent->FrameIndex;
+        skyboxRenderParams.pCmdBuffer     = cmdBuffer;
+        skyboxRenderParams.pNode          = appSurfaceVk->pNode;
         skyboxRenderParams.InvViewMatrix  = InvView;
         skyboxRenderParams.InvProjMatrix  = InvProj;
-        skyboxRenderParams.ProjBiasMatrix  = appContent->CamProjController.kProjBias;
-        skyboxRenderParams.FieldOfView = apemodem::DegreesToRadians( 67 );
+        skyboxRenderParams.ProjBiasMatrix = appContent->CamProjController.ProjBiasMatrix( );
+        skyboxRenderParams.FieldOfView    = apemodem::DegreesToRadians( 67 );
 
         appContent->pSkyboxRenderer->Render( appContent->pSkybox, &skyboxRenderParams );
 

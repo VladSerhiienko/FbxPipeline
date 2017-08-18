@@ -7,14 +7,14 @@ namespace apemodevk {
     struct HostBufferPool;
 
     struct LoadedImage {
-        uint32_t                                         queueId       = 0;
-        uint32_t                                         queueFamilyId = 0;
         apemodevk::TDispatchableHandle< VkImage >        hImg;
         apemodevk::TDispatchableHandle< VkImageView >    hImgView;
         apemodevk::TDispatchableHandle< VkDeviceMemory > hImgMemory;
         VkImageCreateInfo                                imageCreateInfo;
         VkImageViewCreateInfo                            imageViewCreateInfo;
-        VkImageLayout                                    eImgLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        VkImageLayout                                    eImgLayout    = VK_IMAGE_LAYOUT_UNDEFINED;
+        uint32_t                                         queueId       = 0;
+        uint32_t                                         queueFamilyId = 0;
     };
 
     class ImageLoader {
