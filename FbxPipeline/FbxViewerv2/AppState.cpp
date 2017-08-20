@@ -1,4 +1,6 @@
-#include "AppState.h"
+#include <AppState.h>
+#include <spdlog/sinks/msvc_sink.h>
+#include <spdlog/sinks/stdout_sinks.h>
 
 apemode::AppState* gState = nullptr;
 
@@ -18,8 +20,8 @@ static std::string GetExecutableFileName( ) {
 }
 
 apemode::AppState::AppState( )
-    : msvcLogger( spdlog::create< spdlog::sinks::msvc_sink_st >( "apemode/msvc" ) )
-    , consoleLogger( spdlog::create< spdlog::sinks::stdout_sink_st >( "apemode/stdout" ) )
+    : msvcLogger( spdlog::create< spdlog::sinks::msvc_sink_mt >( "apemode/msvc" ) )
+    , consoleLogger( spdlog::create< spdlog::sinks::stdout_sink_mt >( "apemode/stdout" ) )
     , appOptions( new cxxopts::Options( GetExecutableFileName( ) ) ) {
     assert( nullptr == gState && "Single instance, controlled by AppContent (App)." );
     gState = this;

@@ -33,3 +33,7 @@ uint32_t apemodevk::SamplerManager::GetSamplerIndex( const VkSamplerCreateInfo& 
     platform::DebugBreak( );
     return UINT_ERROR;
 }
+
+bool apemodevk::SamplerManager::IsSamplerIndexValid( uint32_t samplerIndex ) {
+    return UINT_ERROR != samplerIndex;
+}

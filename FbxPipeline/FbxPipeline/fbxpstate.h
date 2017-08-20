@@ -29,35 +29,62 @@ namespace apemode {
         uint32_t                meshId      = (uint32_t) -1;
         std::vector< uint32_t > childIds;
         std::vector< uint32_t > materialIds;
+        std::vector< uint32_t > curveIds;
+    };
+
+    struct AnimStack {
+        uint64_t nameId;
+    };
+
+    struct AnimLayer {
+        uint32_t animStackId;
+        uint64_t nameId;
+    };
+
+    struct AnimCurveKey {
+        uint64_t time;
+    };
+
+    struct AnimCurve {
+        uint32_t                      animStackId;
+        uint32_t                      animLayerId;
+        uint32_t                      nodeId;
+        uint64_t                      nameId;
+        apemodefb::EAnimCurveProperty property;
+        apemodefb::EAnimCurveChannel  channel;
+        std::vector< AnimCurveKey >   keys;
     };
 
     struct Material {
-        uint32_t                          id;
-        uint64_t                          nameId;
-        std::vector<apemodefb::MaterialPropFb > props;
+        uint32_t                                 id;
+        uint64_t                                 nameId;
+        std::vector< apemodefb::MaterialPropFb > props;
     };
 
     using TupleUintUint = std::tuple< uint32_t, uint32_t >;
 
     struct State {
-        bool                              legacyTriangulationSdk = false;
-        fbxsdk::FbxManager*               manager                = nullptr;
-        fbxsdk::FbxScene*                 scene                  = nullptr;
-        std::shared_ptr< spdlog::logger > console;
-        flatbuffers::FlatBufferBuilder    builder;
-        cxxopts::Options                  options;
-        std::string                       fileName;
-        std::string                       folderPath;
-        std::vector< Node >               nodes;
-        std::vector< Material >           materials;
-        std::map< uint64_t, uint32_t >    textureDict;
-        std::map< uint64_t, uint32_t >    materialDict;
-        std::map< uint64_t, std::string > names;
-        std::vector<apemodefb::TransformFb >    transforms;
-        std::vector<apemodefb::TextureFb >      textures;
-        std::vector< Mesh >               meshes;
-        std::vector< std::string >        searchLocations;
-        std::set< std::string >        embedQueue;
+        bool                                  legacyTriangulationSdk = false;
+        fbxsdk::FbxManager*                   manager                = nullptr;
+        fbxsdk::FbxScene*                     scene                  = nullptr;
+        std::shared_ptr< spdlog::logger >     console;
+        flatbuffers::FlatBufferBuilder        builder;
+        cxxopts::Options                      options;
+        std::string                           fileName;
+        std::string                           folderPath;
+        std::vector< Node >                   nodes;
+        std::vector< Material >               materials;
+        std::map< uint64_t, uint32_t >        textureDict;
+        std::map< uint64_t, uint32_t >        materialDict;
+        std::map< uint64_t, std::string >     names;
+        std::vector< apemodefb::TransformFb > transforms;
+        std::vector< apemodefb::TextureFb >   textures;
+        std::vector< Mesh >                   meshes;
+        std::vector< AnimStack >              animStacks;
+        std::vector< AnimLayer >              animLayers;
+        std::vector< AnimCurve >              animCurves;
+        std::vector< std::string >            searchLocations;
+        std::set< std::string >               embedQueue;
 
         State( );
         ~State( );

@@ -85,11 +85,29 @@ void PreprocessMeshes( FbxScene* scene ) {
     }
 }
 
-void PreprocessAnimation( FbxScene* scene ) {
+void PreprocessAnimation( FbxScene* pScene ) {
     auto& s = apemode::Get( );
-    FbxAnimCurveFilterConstantKeyReducer;
-    FbxAnimCurveFilterResample;
 
+    int animStackCount = pScene->GetSrcObjectCount< FbxAnimStack >( );
+    s.console->info( "Scene has {} animation stacks:", animStackCount );
+
+    for ( int i = 0; i < animStackCount; i++ ) {
+        FbxAnimStack* pAnimStack = pScene->GetSrcObject< FbxAnimStack >( i );
+        s.animStacks.emplace_back( );
+        s.animStacks.back( ).nameId = s.PushName( pAnimStack->GetName( ) );
+
+        int animLayerCount = pAnimStack->GetMemberCount< FbxAnimLayer >( );
+        s.console->info( "\t- animation stack #{} \"{}\" has {} layers ", i, pAnimStack->GetName( ), animLayerCount );
+
+        for ( int j = 0; j < animLayerCount; j++ ) {
+            FbxAnimLayer* pAnimLayer = pAnimStack->GetMember< FbxAnimLayer >( j );
+            s.animLayers.emplace_back( );
+            s.animLayers.back( ).nameId      = s.PushName( pAnimLayer->GetName( ) );
+            s.animLayers.back( ).animStackId = s.animStacks.size( ) - 1;
+
+            s.console->info( "\t\t- animation layer #{} \"{}\"", j, pAnimLayer->GetName( ) );
+        }
+    }
 }
 
 void ExportScene( FbxScene* scene ) {

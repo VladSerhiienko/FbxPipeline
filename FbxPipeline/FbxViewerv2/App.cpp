@@ -31,6 +31,32 @@ namespace apemode {
     AppContent*    gAppContent = nullptr;
 }
 
+struct EFeedbackTypeWithOStream {
+    apemodevk::ShaderCompiler::IShaderFeedbackWriter::EFeedbackType e;
+
+    EFeedbackTypeWithOStream(  apemodevk::ShaderCompiler::IShaderFeedbackWriter::EFeedbackType e) : e(e) {
+    }
+
+    // clang-format off
+    template < typename OStream >
+    friend OStream& operator<<( OStream& os, const EFeedbackTypeWithOStream& feedbackType ) {
+        switch ( feedbackType.e ) {
+            case apemodevk::ShaderCompiler::IShaderFeedbackWriter::eFeedbackType_CompilationStage_Assembly:                 return os << "Assembly";
+            case apemodevk::ShaderCompiler::IShaderFeedbackWriter::eFeedbackType_CompilationStage_Preprocessed:             return os << "Preprocessed";
+            case apemodevk::ShaderCompiler::IShaderFeedbackWriter::eFeedbackType_CompilationStage_PreprocessedOptimized:    return os << "PreprocessedOptimized";
+            case apemodevk::ShaderCompiler::IShaderFeedbackWriter::eFeedbackType_CompilationStage_Spv:                      return os << "Spv";
+            case apemodevk::ShaderCompiler::IShaderFeedbackWriter::eFeedbackType_CompilationStatus_CompilationError:        return os << "CompilationError";
+            case apemodevk::ShaderCompiler::IShaderFeedbackWriter::eFeedbackType_CompilationStatus_InternalError:           return os << "InternalError";
+            case apemodevk::ShaderCompiler::IShaderFeedbackWriter::eFeedbackType_CompilationStatus_InvalidAssembly:         return os << "InvalidAssembly";
+            case apemodevk::ShaderCompiler::IShaderFeedbackWriter::eFeedbackType_CompilationStatus_InvalidStage:            return os << "InvalidStage";
+            case apemodevk::ShaderCompiler::IShaderFeedbackWriter::eFeedbackType_CompilationStatus_NullResultObject:        return os << "NullResultObject";
+            case apemodevk::ShaderCompiler::IShaderFeedbackWriter::eFeedbackType_CompilationStatus_Success:                 return os << "Success";
+            default:                                                                                                        return os;
+        }
+    }
+    // clang-format on
+};
+
 namespace apemodevk {
 
     class ShaderFileReader : public ShaderCompiler::IShaderFileReader {
@@ -39,10 +65,41 @@ namespace apemodevk {
 
         bool ReadShaderTxtFile( const std::string& FilePath,
                                 std::string&       OutFileFullPath,
-                                std::string&       OutFileContent ) const override {
+                                std::string&       OutFileContent ) override {
             OutFileFullPath = apemodeos::ResolveFullPath( FilePath );
             OutFileContent  = pFileManager->ReadTxtFile( FilePath );
             return false == OutFileContent.empty( );
+        }
+    };
+
+    class ShaderFeedbackWriter : public ShaderCompiler::IShaderFeedbackWriter {
+    public:
+        apemode::AppState*      pAppState    = nullptr;
+        apemodeos::FileManager* pFileManager = nullptr;
+
+        virtual void WriteFeedback( EFeedbackType                     eType,
+                                    const std::string&                FullFilePath,
+                                    const std::vector< std::string >& Macros,
+                                    const void*                       pContent, /* Txt or bin, @see EFeedbackType */
+                                    const void*                       pContentEnd ) {
+
+            const auto feedbackStage            = eType & eFeedbackType_CompilationStageMask;
+            const auto feedbackCompilationError = eType & eFeedbackType_CompilationStatusMask;
+
+            if ( eFeedbackType_CompilationStatus_Success != feedbackCompilationError ) {
+                pAppState->consoleLogger->error( "ShaderCompiler: {} / {} / {}",
+                                                 EFeedbackTypeWithOStream( feedbackStage ),
+                                                 EFeedbackTypeWithOStream( feedbackCompilationError ),
+                                                 FullFilePath );
+                pAppState->consoleLogger->error( "           Msg: {}", (const char*) pContent );
+                DebugBreak( );
+            } else {
+                pAppState->consoleLogger->info( "ShaderCompiler: {} / {} / {}",
+                                                EFeedbackTypeWithOStream( feedbackStage ),
+                                                EFeedbackTypeWithOStream( feedbackCompilationError ),
+                                                FullFilePath );
+                // TODO: Store compiled shader to file system
+            }
         }
     };
 }
@@ -68,6 +125,7 @@ public:
     apemodeos::FileManager      FileManager;
     apemodevk::ShaderCompiler*  pShaderCompiler;
     apemodevk::ShaderFileReader ShaderFileReader;
+    apemodevk::ShaderFeedbackWriter ShaderFeedbackWriter;
     CameraProjectionController  CamProjController;
     CameraControllerInputBase*  pCamInput          = nullptr;
     CameraControllerBase*       pCamController     = nullptr;
@@ -145,8 +203,13 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         appContent->FileTracker.ScanDirectory( "./shaders/**", true );
 
         appContent->ShaderFileReader.pFileManager = &appContent->FileManager;
+
+        appContent->ShaderFeedbackWriter.pAppState = appState;
+        appContent->ShaderFeedbackWriter.pFileManager = &appContent->FileManager;
+
         appContent->pShaderCompiler = new apemodevk::ShaderCompiler( );
         appContent->pShaderCompiler->SetShaderFileReader( &appContent->ShaderFileReader );
+        appContent->pShaderCompiler->SetShaderFeedbackWriter( &appContent->ShaderFeedbackWriter );
 
         totalSecs = 0.0f;
 
@@ -249,6 +312,8 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         updateParams.pDescPool       = appContent->DescPool;
         updateParams.FrameCount      = appContent->FrameCount;
 
+        // -i "E:\Media\Models\run-hedgehog-run\source\c61cca893cdc4f82b26a1d66585bd55d.zip\HEDGEHOG_ANIMATION_1024\animation_NEW_ONLY_ONE_ACTION_2.fbx" -o "$(SolutionDir)assets\hedgehogp.fbxp" -p
+        // -i "E:\Media\Models\bristleback-dota-fan-art\source\POSE.fbx" -o "$(SolutionDir)assets\bristlebackp.fbxp" -p
         // -i "E:\Media\Models\blood-and-fire\source\DragonMain.fbx" -o "$(SolutionDir)assets\DragonMainp.fbxp" -p
         // -i "E:\Media\Models\knight-artorias\source\Artorias.fbx.fbx" -o "$(SolutionDir)assets\Artoriasp.fbxp" -p
         // -i "E:\Media\Models\vanille-flirty-animation\source\happy.fbx" -o "$(SolutionDir)assets\vanille-flirty-animation.fbxp" -p
@@ -314,8 +379,8 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         //auto loadedPNG  = imgLoader.LoadImageFromData( pngContent, apemodevk::ImageLoader::eImageFileFormat_PNG, true, true );
 
         //auto ddsContent = imgFileManager.ReadBinFile( "../../../assets/env/kyoto_lod.dds" );
-        auto ddsContent = imgFileManager.ReadBinFile( "../../../assets/env/PaperMill/Specular_HDR.dds" );
-        //auto ddsContent = imgFileManager.ReadBinFile( "../../../assets/env/Canyon/Unfiltered_HDR.dds" );
+        //auto ddsContent = imgFileManager.ReadBinFile( "../../../assets/env/PaperMill/Specular_HDR.dds" );
+        auto ddsContent = imgFileManager.ReadBinFile( "../../../assets/env/Canyon/Unfiltered_HDR.dds" );
         appContent->pLoadedDDS = imgLoader.LoadImageFromData( ddsContent, apemodevk::ImageLoader::eImageFileFormat_DDS, true, true ).release( );
 
         VkSamplerCreateInfo samplerCreateInfo;
@@ -343,7 +408,7 @@ bool App::Initialize( int Args, char* ppArgs[] ) {
         appContent->pSkybox->Dimension     = appContent->pLoadedDDS->imageCreateInfo.extent.width;
         appContent->pSkybox->eImgLayout    = appContent->pLoadedDDS->eImgLayout;
         appContent->pSkybox->LevelOfDetail = 0;
-        appContent->pSkybox->Exposure      = 1;
+        appContent->pSkybox->Exposure      = 3;
          
         return true;   
     }
@@ -709,6 +774,7 @@ void App::Update( float deltaSecs, Input const& inputState ) {
         skyboxRenderParams.InvViewMatrix  = InvView;
         skyboxRenderParams.InvProjMatrix  = InvProj;
         skyboxRenderParams.ProjBiasMatrix = appContent->CamProjController.ProjBiasMatrix( );
+        skyboxRenderParams.FieldOfView    = apemodem::DegreesToRadians( 67 );
         skyboxRenderParams.FieldOfView    = apemodem::DegreesToRadians( 67 );
 
         appContent->pSkyboxRenderer->Render( appContent->pSkybox, &skyboxRenderParams );

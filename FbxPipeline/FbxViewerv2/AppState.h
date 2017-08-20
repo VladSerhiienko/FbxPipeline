@@ -2,8 +2,7 @@
 
 #include <cxxopts.hpp>
 #include <spdlog/spdlog.h>
-#include <spdlog/sinks/msvc_sink.h>
-#include <spdlog/sinks/stdout_sinks.h>
+#include <spdlog/fmt/ostr.h>
 
 namespace apemode {
 

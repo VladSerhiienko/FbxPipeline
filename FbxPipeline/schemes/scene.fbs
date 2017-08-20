@@ -38,6 +38,25 @@ enum EMaterialPropTypeFb : uint {
 	Texture,
 	Video,
 }
+enum EAnimCurveProperty : uint {
+	LclTranslation,
+    RotationOffset,
+    RotationPivot,
+    PreRotation,
+    PostRotation,
+    LclRotation,
+    ScalingOffset,
+    ScalingPivot,
+    LclScaling,
+    GeometricTranslation,
+    GeometricRotation,
+    GeometricScaling
+}
+enum EAnimCurveChannel : uint {
+	X,
+    Y,
+    Z,
+}
 
 struct vec2 {
     x : float;

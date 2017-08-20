@@ -4,6 +4,8 @@
 #include <CityHash.h>
 #include <fstream>
 #include <flatbuffers/util.h>
+#include <spdlog/sinks/msvc_sink.h>
+#include <spdlog/sinks/stdout_sinks.h>
 
 std::string GetExecutable( );
 void SplitFilename( const std::string& filePath, std::string& parentFolderName, std::string& fileName );
@@ -17,7 +19,12 @@ apemode::State& apemode::Get( ) {
     return s;
 }
 
-apemode::State::State( ) : console( spdlog::stdout_color_mt( "apemode" ) ), options( GetExecutable( ) ) {
+apemode::State::State( ) : options( GetExecutable( ) ) {
+
+    std::vector< spdlog::sink_ptr > sinks{std::make_shared< spdlog::sinks::wincolor_stdout_sink_mt >( ),
+                                          std::make_shared< spdlog::sinks::msvc_sink_mt >( )};
+    console = spdlog::create<>( "apemode", sinks.begin( ), sinks.end( ) );
+
     options.add_options( "input" )( "i,input-file", "Input", cxxopts::value< std::string >( ) );
     options.add_options( "input" )( "o,output-file", "Output", cxxopts::value< std::string >( ) );
     options.add_options( "input" )( "k,convert", "Convert", cxxopts::value< bool >( ) );
