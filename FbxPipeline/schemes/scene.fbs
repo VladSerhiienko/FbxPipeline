@@ -57,6 +57,9 @@ enum EAnimCurveChannel : uint {
     Y,
     Z,
 }
+enum EInterpolationMode : uint {
+	Const, Linear, Cubic
+}
 
 struct vec2 {
     x : float;

@@ -187,16 +187,161 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
             }
 
             /* Resample property */
-
-            ApplyFilter< 3 >( &resample, curves );
+            /* ApplyFilter< 3 >( &resample, curves ); */
 
         } else {
 
             /* Resample each channel */
-
-            for ( auto pAnimCurve : curves )
+            /* for ( auto pAnimCurve : curves )
                 if ( nullptr != pAnimCurve )
-                    ApplyFilter< 1 >( &resample, &pAnimCurve );
+                    ApplyFilter< 1 >( &resample, &pAnimCurve ); */
+        }
+    }
+
+    s.animCurves.reserve( s.animCurves.size( ) + animCurves.size( ) );
+
+    for (auto pAnimCurveTuple : animCurves) {
+        if ( auto pAnimCurve = std::get< FbxAnimCurve* >( pAnimCurveTuple ) ) {
+            s.animCurves.emplace_back( );
+
+            auto& curve = s.animCurves.back( );
+            curve.keys.resize( pAnimCurve->KeyGetCount( ) );
+
+            /* Constant and linear modes */
+
+            for ( int i = 0; i < pAnimCurve->KeyGetCount( ); ++i ) {
+                auto& key = curve.keys[ i ];
+                key.time  = (float) pAnimCurve->KeyGetTime( i ).GetMilliSeconds( );
+                key.value = pAnimCurve->KeyGetValue( i );
+
+                switch ( pAnimCurve->KeyGetInterpolation( i ) ) {
+                    case fbxsdk::FbxAnimCurveDef::eInterpolationConstant: {
+                        key.interpolationMode = apemodefb::EInterpolationMode_Const;
+                        switch ( pAnimCurve->KeyGetConstantMode( i ) ) {
+                            case fbxsdk::FbxAnimCurveDef::eConstantStandard:
+                                break;
+
+                            case fbxsdk::FbxAnimCurveDef::eConstantNext:
+                                assert( ( pAnimCurve->KeyGetCount( ) - 1 ) != i );
+                                key.value = pAnimCurve->KeyGetValue( i + 1 );
+                                break;
+                        }
+                    } break;
+
+                    case fbxsdk::FbxAnimCurveDef::eInterpolationLinear: {
+                        key.interpolationMode = apemodefb::EInterpolationMode_Linear;
+                        key.value = pAnimCurve->KeyGetValue( i );
+                    } break;
+                    case fbxsdk::FbxAnimCurveDef::eInterpolationCubic: {
+                        key.interpolationMode = apemodefb::EInterpolationMode_Cubic;
+                    }
+                }
+            }
+
+            /* Cubic modes, calculate tangents */
+
+            for ( int i = 0; i < pAnimCurve->KeyGetCount( ); ++i ) {
+                switch ( pAnimCurve->KeyGetInterpolation( i ) ) {
+                    case fbxsdk::FbxAnimCurveDef::eInterpolationCubic: {
+                        auto tangentMode = pAnimCurve->KeyGetTangentMode(i);
+                        switch ( pAnimCurve->KeyGetTangentMode( i ) ) {
+
+                            case fbxsdk::FbxAnimCurveDef::eTangentTCB: {
+                                // https://en.wikipedia.org/wiki/Kochanek%E2%80%93Bartels_spline
+                                // http://cubic.org/docs/hermite.htm
+
+                                auto k1 = pAnimCurve->KeyGet( i );
+
+                                auto& kk0 = curve.keys[ i - 1 ];
+                                auto& kk1 = curve.keys[ i ];
+                                auto& kk2 = curve.keys[ i + 1 ];
+                                auto& kk3 = curve.keys[ i + 2 ];
+
+                                auto t = k1.GetDataFloat( FbxAnimCurveDef::eTCBTension );
+                                auto c = k1.GetDataFloat( FbxAnimCurveDef::eTCBContinuity );
+                                auto b = k1.GetDataFloat( FbxAnimCurveDef::eTCBBias );
+
+                                mathfu::vec2 p0 = {kk0.time, kk0.value};
+                                mathfu::vec2 p1 = {kk1.time, kk1.value};
+                                mathfu::vec2 p2 = {kk2.time, kk2.value};
+                                mathfu::vec2 p3 = {kk3.time, kk3.value};
+
+                                mathfu::vec2 d1 = ( p1 - p0 ) * ( 1 - t ) * ( 1 + b ) * ( 1 + c ) * 0.5f +
+                                                  ( p2 - p1 ) * ( 1 - t ) * ( 1 - b ) * ( 1 - c ) * 0.5f;
+
+                                mathfu::vec2 d2 = ( p2 - p1 ) * ( 1 - t ) * ( 1 + b ) * ( 1 - c ) * 0.5f +
+                                                  ( p3 - p2 ) * ( 1 - t ) * ( 1 - b ) * ( 1 + c ) * 0.5f;
+
+                                kk1.tangents[ 1 ][ 0 ] = d1.x;
+                                kk1.tangents[ 1 ][ 1 ] = d1.y;
+
+                                kk2.tangents[ 0 ][ 0 ] = d2.x;
+                                kk2.tangents[ 0 ][ 1 ] = d2.y;
+
+                            } break;
+
+                            case fbxsdk::FbxAnimCurveDef::eTangentAuto: {
+                                // http://cubic.org/docs/hermite.htm
+
+                                auto k1 = pAnimCurve->KeyGet( i );
+
+                                auto& kk0 = curve.keys[ i - 1 ];
+                                auto& kk1 = curve.keys[ i ];
+                                auto& kk2 = curve.keys[ i + 1 ];
+
+                                mathfu::vec2 p0 = {kk0.time, kk0.value};
+                                mathfu::vec2 p2 = {kk2.time, kk2.value};
+
+                                float a  = pAnimCurve->KeyGetRightAuto( i );
+                                mathfu::vec2 d1 = ( p2 - p0 ) * a;
+
+                                kk1.tangents[ 0 ][ 0 ] = d1.x;
+                                kk1.tangents[ 0 ][ 1 ] = d1.y;
+
+                                kk1.tangents[ 1 ][ 0 ] = d1.x;
+                                kk1.tangents[ 1 ][ 1 ] = d1.y;
+
+                            } break;
+
+                            case fbxsdk::FbxAnimCurveDef::eTangentAutoBreak: {
+                                auto k1 = pAnimCurve->KeyGet( i );
+
+                                auto& kk0 = curve.keys[ i - 1 ];
+                                auto& kk1 = curve.keys[ i ];
+                                auto& kk2 = curve.keys[ i + 1 ];
+
+                                mathfu::vec2 p0 = {kk0.time, kk0.value};
+                                mathfu::vec2 p2 = {kk2.time, kk2.value};
+
+                                float a  = pAnimCurve->KeyGetLeftAuto( i );
+                                mathfu::vec2 d1 = ( p2 - p0 ) * a;
+
+                                kk1.tangents[ 1 ][ 0 ] = d1.x;
+                                kk1.tangents[ 1 ][ 1 ] = d1.y;
+                            } break;
+
+                            case fbxsdk::FbxAnimCurveDef::eTangentUser:
+                            case fbxsdk::FbxAnimCurveDef::eTangentBreak:
+                                // User will be set after switch with the next iteration.
+                                break;
+
+                            case fbxsdk::FbxAnimCurveDef::eTangentGenericBreak:
+                            case fbxsdk::FbxAnimCurveDef::eTangentGenericClamp:
+                            case fbxsdk::FbxAnimCurveDef::eTangentGenericTimeIndependent:
+                            case fbxsdk::FbxAnimCurveDef::eTangentGenericClampProgressive:
+                                assert( false && "TODO" );
+                                break;
+                        }
+
+                        /* Check if previous key is user key */
+                        if ( i && 0 != ( fbxsdk::FbxAnimCurveDef::eTangentUser & pAnimCurve->KeyGetTangentMode( i - 1 ) ) ) {
+                            curve.keys[ i - 1 ].tangents[ 1 ][ 0 ] = curve.keys[ i ].tangents[ 0 ][ 0 ];
+                            curve.keys[ i - 1 ].tangents[ 1 ][ 1 ] = curve.keys[ i ].tangents[ 0 ][ 1 ];
+                        }
+
+                    } break;
+                }
+            }
         }
     }
 }

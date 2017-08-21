@@ -42,7 +42,10 @@ namespace apemode {
     };
 
     struct AnimCurveKey {
-        uint64_t time;
+        float                         time;
+        float                         value;
+        float                         tangents[ 2 ][ 2 ];
+        apemodefb::EInterpolationMode interpolationMode;
     };
 
     struct AnimCurve {
