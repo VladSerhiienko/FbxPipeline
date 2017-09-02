@@ -7,38 +7,17 @@ void ApplyFilter( FbxAnimCurveFilter* pFilter, FbxAnimCurve** ppCurves ) {
     FbxStatus status  = FbxStatus::eSuccess;
 
     pFilter->Apply( ppCurves, TCurveCount, &status );
-    switch ( TCurveCount ) {
-        case 1:
-            if ( status.GetCode( ) != FbxStatus::eSuccess ) {
-                s.console->error( "Failed to apply \"{}\" to \"{}\": {}",
-                                  pFilter->GetName( ),
-                                  ( *ppCurves )->GetName( ),
-                                  status.GetErrorString( ) );
-            } else {
-                s.console->info( "Applied \"{}\" to \"{}\"", pFilter->GetName( ), ( *ppCurves )->GetName( ) );
-            }
-            break;
 
-        case 3:
-            if ( status.GetCode( ) != FbxStatus::eSuccess ) {
-                s.console->error( "Failed to apply \"{}\" to \"{}\", \"{}\", \"{}\": {}",
-                                  pFilter->GetName( ),
-                                  ppCurves[ 0 ]->GetName( ),
-                                  ppCurves[ 1 ]->GetName( ),
-                                  ppCurves[ 2 ]->GetName( ),
-                                  status.GetErrorString( ) );
-            } else {
-                s.console->info( "Applied \"{}\" to \"{}\", \"{}\", \"{}\"",
-                                 pFilter->GetName( ),
-                                 ppCurves[ 0 ]->GetName( ),
-                                 ppCurves[ 1 ]->GetName( ),
-                                 ppCurves[ 2 ]->GetName( ) );
-            }
-            break;
+    const char* P = TCurveCount == 1 ? "" : " (P)";
 
-        default:
-            assert( false );
-            break;
+    if ( status.GetCode( ) != FbxStatus::eSuccess ) {
+        for ( int i = 0; i < TCurveCount; ++i ) {
+            s.console->error( "Failed{}: \"{}\": \"{}\"", P, pFilter->GetName( ), ppCurves[ i ]->GetName( ) );
+        }
+    } else {
+        for ( int i = 0; i < TCurveCount; ++i ) {
+            s.console->info( "Applied{}: \"{}\": \"{}\"", P, pFilter->GetName( ), ppCurves[ i ]->GetName( ) );
+        }
     }
 }
 
@@ -144,6 +123,11 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
             ss.str( "" );
             ss.clear( );
         }
+
+        s.console->info( "\"{}\" <- \"{}\" ({} keys)",
+                         pNode->GetName( ),
+                         std::get< FbxAnimCurve* >( pAnimCurve )->GetName( ),
+                         std::get< FbxAnimCurve* >( pAnimCurve )->KeyGetCount( ) );
     }
 
     FbxAnimCurveFilterResample           resample;
@@ -152,49 +136,149 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
     FbxAnimCurveFilterKeyReducer         keyReducer;
     FbxAnimCurveFilterConstantKeyReducer constantKeyReducer;
 
+    FbxTime periodTime;
+    if ( s.resampleFPS > 0.0f )
+        periodTime.SetMilliSeconds( 1.0f / s.resampleFPS * 1000.0f );
+
     for ( int i = 0; i < animCurves.size( ); i += 3 ) {
 
-        /* Get curves from tuples */
+        /* Get pAnimChannels from tuples */
 
-        FbxAnimCurve* curves[] = {std::get< FbxAnimCurve* >( animCurves[ i ] ),
-                                  std::get< FbxAnimCurve* >( animCurves[ i + 1 ] ),
-                                  std::get< FbxAnimCurve* >( animCurves[ i + 2 ] )};
+        FbxAnimCurve* pAnimChannels[] = {std::get< FbxAnimCurve* >( animCurves[ i ] ),
+                                         std::get< FbxAnimCurve* >( animCurves[ i + 1 ] ),
+                                         std::get< FbxAnimCurve* >( animCurves[ i + 2 ] )};
 
         /* Apply filters on channels */
 
         int availableCurves = 0;
-        for ( auto pAnimCurve : curves ) {
-            availableCurves += nullptr != pAnimCurve;
 
-            if ( nullptr != pAnimCurve ) {
-                ApplyFilter< 1 >( &constantKeyReducer, &pAnimCurve );
-                ApplyFilter< 1 >( &keyReducer, &pAnimCurve );
+        if ( s.reduceCurves )
+            for ( auto pAnimCurve : pAnimChannels ) {
+
+                auto keyCount = 0;
+
+                if ( nullptr != pAnimCurve ) {
+                    keyCount = pAnimCurve->KeyGetCount( );
+                    ApplyFilter< 1 >( &constantKeyReducer, &pAnimCurve );
+                    ApplyFilter< 1 >( &keyReducer, &pAnimCurve );
+                }
+
+                /* NOTE: After key reducers key count can become zero. */
+                availableCurves += nullptr != pAnimCurve && pAnimCurve->KeyGetCount( ) > 0;
+
+                if ( pAnimCurve )
+                    if ( pAnimCurve->KeyGetCount( ) < 1 )
+                        s.console->warn( "Reduced: \"{}\": {} -> {} keys (no export)",
+                                         pAnimCurve->GetName( ),
+                                         keyCount,
+                                         pAnimCurve->KeyGetCount( ) );
+                    else
+                        s.console->info( "Reduced: \"{}\": {} -> {} keys",
+                                         pAnimCurve->GetName( ),
+                                         keyCount,
+                                         pAnimCurve->KeyGetCount( ) );
             }
-        }
 
         /* Apply filters on properties */
 
         if ( availableCurves == 3 ) {
-            ApplyFilter< 3 >( &keySync, curves );
+
+            if ( s.propertyCurveSync )
+                ApplyFilter< 3 >( &keySync, pAnimChannels );
 
             switch ( std::get< apemodefb::EAnimCurveProperty >( animCurves[ i ] ) ) {
                 case apemodefb::EAnimCurveProperty_GeometricRotation:
                 case apemodefb::EAnimCurveProperty_LclRotation:
                 case apemodefb::EAnimCurveProperty_PreRotation:
                 case apemodefb::EAnimCurveProperty_PostRotation:
-                    ApplyFilter< 3 >( &gimbleKiller, curves );
+                    ApplyFilter< 3 >( &gimbleKiller, pAnimChannels );
                     break;
             }
+        }
 
-            /* Resample property */
-            /* ApplyFilter< 3 >( &resample, curves ); */
+        if ( s.resampleFPS > 0.0f ) {
+            if ( availableCurves == 3 && s.propertyCurveSync ) {
+                /* Resample property */
+                /* NOTE: After sync start time, stop time and key count must be the same. */
 
-        } else {
+                auto keyCount = pAnimChannels[ 0 ]->KeyGetCount( );
+                assert( keyCount == pAnimChannels[ 1 ]->KeyGetCount( ) );
+                assert( keyCount == pAnimChannels[ 2 ]->KeyGetCount( ) );
 
-            /* Resample each channel */
-            /* for ( auto pAnimCurve : curves )
-                if ( nullptr != pAnimCurve )
-                    ApplyFilter< 1 >( &resample, &pAnimCurve ); */
+                auto startTime = pAnimChannels[ 0 ]->KeyGet( 0 ).GetTime( );
+                assert( startTime == pAnimChannels[ 1 ]->KeyGet( 0 ).GetTime( ) );
+                assert( startTime == pAnimChannels[ 2 ]->KeyGet( 0 ).GetTime( ) );
+
+                auto stopTime = pAnimChannels[ 0 ]->KeyGet( keyCount - 1 ).GetTime( );
+                assert( stopTime == pAnimChannels[ 1 ]->KeyGet( keyCount - 1 ).GetTime( ) );
+                assert( stopTime == pAnimChannels[ 2 ]->KeyGet( keyCount - 1 ).GetTime( ) );
+
+                resample.SetPeriodTime( periodTime );
+                resample.SetStartTime( startTime );
+                resample.SetStopTime( stopTime );
+
+                /* NOTE: After resampling all the keys become auto keys. */
+                ApplyFilter< 3 >( &resample, pAnimChannels );
+
+                auto expectedApproxKeyCount = ( stopTime.Get( ) - startTime.Get( ) ) / periodTime.Get( );
+                auto resampledKeyCount      = pAnimChannels[ 0 ]->KeyGetCount( );
+                auto diffKeyCount           = abs( resampledKeyCount - expectedApproxKeyCount );
+                assert( resampledKeyCount == pAnimChannels[ 1 ]->KeyGetCount( ) );
+                assert( resampledKeyCount == pAnimChannels[ 2 ]->KeyGetCount( ) );
+
+                for ( int i = 0; i < 3; ++i ) {
+
+                    spdlog::level::level_enum level = diffKeyCount > 3
+                                                    ? spdlog::level::warn
+                                                    : spdlog::level::info;
+
+                    s.console->log( level,
+                                    "Resampled (P): \"{}\": {} -> {} ({} -> {})",
+                                    pAnimChannels[ i ]->GetName( ),
+                                    keyCount,
+                                    resampledKeyCount,
+                                    expectedApproxKeyCount,
+                                    diffKeyCount );
+                }
+
+            } else {
+
+                /* Resample each channel */
+                for ( auto pAnimCurve : pAnimChannels )
+                    if ( nullptr != pAnimCurve ) {
+                        auto keyCount = pAnimCurve->KeyGetCount( );
+                        if (keyCount < 2) {
+                            s.console->warn( "Failed: \"{}\": No keys for resampling", pAnimCurve->GetName( ) );
+                            continue;
+                        }
+
+                        auto startTime = pAnimCurve->KeyGet( 0 ).GetTime( );
+                        auto stopTime  = pAnimCurve->KeyGet( keyCount - 1 ).GetTime( );
+
+                        resample.SetPeriodTime( periodTime );
+                        resample.SetStartTime( startTime );
+                        resample.SetStopTime( stopTime );
+
+                        /* NOTE: After resampling all the keys become auto keys. */
+                        ApplyFilter< 1 >( &resample, &pAnimCurve );
+
+                        auto expectedApproxKeyCount = ( stopTime.Get( ) - startTime.Get( ) ) / periodTime.Get( );
+                        auto resampledKeyCount      = pAnimCurve->KeyGetCount( );
+                        auto diffKeyCount           = abs( resampledKeyCount - expectedApproxKeyCount );
+
+                        spdlog::level::level_enum level = diffKeyCount > 3
+                                                        ? spdlog::level::warn
+                                                        : spdlog::level::info;
+
+                        s.console->log( level,
+                                        "Resampled: \"{}\": {} -> {} ({} -> {})",
+                                        pAnimCurve->GetName( ),
+                                        keyCount,
+                                        resampledKeyCount,
+                                        expectedApproxKeyCount,
+                                        diffKeyCount );
+                    }
+            }
         }
     }
 
@@ -202,14 +286,19 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
 
     for (auto pAnimCurveTuple : animCurves) {
         if ( auto pAnimCurve = std::get< FbxAnimCurve* >( pAnimCurveTuple ) ) {
+            auto pAnimStack = std::get< FbxAnimStack* >( pAnimCurveTuple );
+            auto pAnimLayer = std::get< FbxAnimLayer* >( pAnimCurveTuple );
+
             s.animCurves.emplace_back( );
 
             auto& curve = s.animCurves.back( );
-            curve.keys.resize( pAnimCurve->KeyGetCount( ) );
+            curve.nameId = s.PushName( pAnimCurve->GetName( ) );
+
+            auto  keyCount = pAnimCurve->KeyGetCount( );
+            curve.keys.resize( keyCount );
 
             /* Constant and linear modes */
-
-            for ( int i = 0; i < pAnimCurve->KeyGetCount( ); ++i ) {
+            for ( int i = 0; i < keyCount; ++i ) {
                 auto& key = curve.keys[ i ];
                 key.time  = (float) pAnimCurve->KeyGetTime( i ).GetMilliSeconds( );
                 key.value = pAnimCurve->KeyGetValue( i );
@@ -222,30 +311,41 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
                                 break;
 
                             case fbxsdk::FbxAnimCurveDef::eConstantNext:
-                                assert( ( pAnimCurve->KeyGetCount( ) - 1 ) != i );
-                                key.value = pAnimCurve->KeyGetValue( i + 1 );
+                                /* There is at least one key ahead. */
+                                if ( i < ( pAnimCurve->KeyGetCount( ) - 1 ) )
+                                    key.value = pAnimCurve->KeyGetValue( i + 1 );
                                 break;
                         }
                     } break;
 
                     case fbxsdk::FbxAnimCurveDef::eInterpolationLinear: {
                         key.interpolationMode = apemodefb::EInterpolationMode_Linear;
-                        key.value = pAnimCurve->KeyGetValue( i );
                     } break;
+
                     case fbxsdk::FbxAnimCurveDef::eInterpolationCubic: {
-                        key.interpolationMode = apemodefb::EInterpolationMode_Cubic;
-                    }
+                        /* Resampling at 60 FPS. */
+                        key.interpolationMode = apemodefb::EInterpolationMode_Linear;
+                        // key.interpolationMode = apemodefb::EInterpolationMode_Cubic;
+                    } break;
                 }
             }
 
             /* Cubic modes, calculate tangents */
 
-            for ( int i = 0; i < pAnimCurve->KeyGetCount( ); ++i ) {
+            /* TODO: Evaluate tangents externally without FBX.
+                     I want to have compact Hermite splines. */
+
+#if 0
+            /* Animation in FBX is fucked up. Just resampling the keys, sync where possible
+               Not sure how the handle those cases, what the fuck are weight and velocity properties. */
+
+            for ( int i = 0; i < keyCount; ++i ) {
                 switch ( pAnimCurve->KeyGetInterpolation( i ) ) {
                     case fbxsdk::FbxAnimCurveDef::eInterpolationCubic: {
                         auto tangentMode = pAnimCurve->KeyGetTangentMode(i);
                         switch ( pAnimCurve->KeyGetTangentMode( i ) ) {
 
+                            /* This case looks straightforward and correct */
                             case fbxsdk::FbxAnimCurveDef::eTangentTCB: {
                                 // https://en.wikipedia.org/wiki/Kochanek%E2%80%93Bartels_spline
                                 // http://cubic.org/docs/hermite.htm
@@ -280,6 +380,7 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
 
                             } break;
 
+                            /* TODO: Can be first or last key (will cause out of range reads) */
                             case fbxsdk::FbxAnimCurveDef::eTangentAuto: {
                                 // http://cubic.org/docs/hermite.htm
 
@@ -292,7 +393,7 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
                                 mathfu::vec2 p0 = {kk0.time, kk0.value};
                                 mathfu::vec2 p2 = {kk2.time, kk2.value};
 
-                                float a  = pAnimCurve->KeyGetRightAuto( i );
+                                float a = pAnimCurve->KeyGetRightAuto( i );
                                 mathfu::vec2 d1 = ( p2 - p0 ) * a;
 
                                 kk1.tangents[ 0 ][ 0 ] = d1.x;
@@ -320,10 +421,50 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
                                 kk1.tangents[ 1 ][ 1 ] = d1.y;
                             } break;
 
-                            case fbxsdk::FbxAnimCurveDef::eTangentUser:
-                            case fbxsdk::FbxAnimCurveDef::eTangentBreak:
-                                // User will be set after switch with the next iteration.
-                                break;
+                            case fbxsdk::FbxAnimCurveDef::eTangentUser: {
+                                bool bWeighted = pAnimCurve->KeyIsRightTangentWeighted( i );
+
+                                float d = pAnimCurve->KeyGetRightDerivative( i );
+                                float w = bWeighted ? pAnimCurve->KeyGetRightTangentWeight( i ) : 0.333f;
+
+                                auto& kk1 = curve.keys[ i ];
+                                auto& kk2 = curve.keys[ i + 1 ];
+
+                                float duration = kk2.time - kk1.time;
+                                float distance = kk2.value - kk1.value;
+
+                                /* Right */
+                                kk1.tangents[ 1 ][ 0 ] = w;
+                                kk1.tangents[ 1 ][ 1 ] = w * d;
+
+                                /* No break */
+                                kk1.tangents[ 0 ][ 0 ] = kk1.tangents[ 1 ][ 0 ];
+                                kk1.tangents[ 0 ][ 1 ] = kk1.tangents[ 1 ][ 1 ];
+
+                                /* Next left == Right */
+                                kk2.tangents[ 0 ][ 0 ] = kk1.tangents[ 1 ][ 0 ];
+                                kk2.tangents[ 0 ][ 1 ] = kk1.tangents[ 1 ][ 1 ];
+
+                            } break;
+
+                            case fbxsdk::FbxAnimCurveDef::eTangentBreak:{
+                                bool  bWeighted = pAnimCurve->KeyIsRightTangentWeighted( i );
+
+                                float d = pAnimCurve->KeyGetRightDerivative( i );
+                                float w = bWeighted ? pAnimCurve->KeyGetRightTangentWeight( i ) : 0.333f;
+
+                                auto& kk1 = curve.keys[ i ];
+                                auto& kk2 = curve.keys[ i + 1 ];
+
+                                /* Right */
+                                kk1.tangents[ 1 ][ 0 ] = w;
+                                kk1.tangents[ 1 ][ 1 ] = w * d;
+
+                                /* Next left == Right */
+                                kk2.tangents[ 0 ][ 0 ] = kk1.tangents[ 1 ][ 0 ];
+                                kk2.tangents[ 0 ][ 1 ] = kk1.tangents[ 1 ][ 1 ];
+
+                            } break;
 
                             case fbxsdk::FbxAnimCurveDef::eTangentGenericBreak:
                             case fbxsdk::FbxAnimCurveDef::eTangentGenericClamp:
@@ -334,14 +475,16 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
                         }
 
                         /* Check if previous key is user key */
-                        if ( i && 0 != ( fbxsdk::FbxAnimCurveDef::eTangentUser & pAnimCurve->KeyGetTangentMode( i - 1 ) ) ) {
+                        /*if ( i && 0 != ( fbxsdk::FbxAnimCurveDef::eTangentUser & pAnimCurve->KeyGetTangentMode( i - 1 ) ) ) {
                             curve.keys[ i - 1 ].tangents[ 1 ][ 0 ] = curve.keys[ i ].tangents[ 0 ][ 0 ];
                             curve.keys[ i - 1 ].tangents[ 1 ][ 1 ] = curve.keys[ i ].tangents[ 0 ][ 1 ];
-                        }
+                        }*/
 
                     } break;
                 }
             }
+#endif
+
         }
     }
 }

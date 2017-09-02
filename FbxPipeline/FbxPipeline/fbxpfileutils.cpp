@@ -14,6 +14,10 @@ std::string CurrentDirectory( ) {
     return std::filesystem::current_path( ).string( );
 }
 
+bool MakeDirectory( const char* directory ) {
+    return std::filesystem::create_directory( directory );
+}
+
 std::string GetFileName( const char* filePath ) {
     return std::filesystem::path( filePath ).filename( ).string( );
 }

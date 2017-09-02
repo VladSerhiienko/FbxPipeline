@@ -93,19 +93,47 @@ void PreprocessAnimation( FbxScene* pScene ) {
 
     for ( int i = 0; i < animStackCount; i++ ) {
         FbxAnimStack* pAnimStack = pScene->GetSrcObject< FbxAnimStack >( i );
+
+        std::string animStackName = pAnimStack->GetName( );
+        if ( animStackName.empty( ) ) {
+            animStackName = "AnimStack";
+
+            if ( animStackCount > 1 )
+                animStackName += std::to_string( i );
+
+            pAnimStack->SetName( animStackName.c_str( ) );
+        }
+
         s.animStacks.emplace_back( );
         s.animStacks.back( ).nameId = s.PushName( pAnimStack->GetName( ) );
 
         int animLayerCount = pAnimStack->GetMemberCount< FbxAnimLayer >( );
-        s.console->info( "\t- animation stack #{} \"{}\" has {} layers ", i, pAnimStack->GetName( ), animLayerCount );
+        s.console->info( "* Animation Stack #{} \"{}\" has {} layers ", i, pAnimStack->GetName( ), animLayerCount );
 
         for ( int j = 0; j < animLayerCount; j++ ) {
             FbxAnimLayer* pAnimLayer = pAnimStack->GetMember< FbxAnimLayer >( j );
+
+            std::string animLayerName = pAnimLayer->GetName( );
+            if ( animLayerName.empty( ) ) {
+                animLayerName = "AnimLayer";
+
+                if ( animLayerCount > 1 )
+                    animLayerName += std::to_string( i );
+
+                if ( animStackCount > 1 ) {
+                    animLayerName += "[";
+                    animLayerName += animStackName;
+                    animLayerName += "]";
+                }
+
+                pAnimLayer->SetName( animLayerName.c_str( ) );
+            }
+
             s.animLayers.emplace_back( );
             s.animLayers.back( ).nameId      = s.PushName( pAnimLayer->GetName( ) );
             s.animLayers.back( ).animStackId = s.animStacks.size( ) - 1;
 
-            s.console->info( "\t\t- animation layer #{} \"{}\"", j, pAnimLayer->GetName( ) );
+            s.console->info( "** Animation Layer #{} \"{}\"", j, pAnimLayer->GetName( ) );
         }
     }
 }

@@ -3,11 +3,18 @@
 #include <fbxpstate.h>
 #include <CityHash.h>
 #include <fstream>
+#include <iostream>
+#include <iomanip>
+
 #include <flatbuffers/util.h>
 #include <spdlog/sinks/msvc_sink.h>
 #include <spdlog/sinks/stdout_sinks.h>
 
+std::string CurrentDirectory( );
 std::string GetExecutable( );
+std::string ResolveFullPath( const char* path );
+bool        MakeDirectory( const char* directory );
+
 void SplitFilename( const std::string& filePath, std::string& parentFolderName, std::string& fileName );
 bool InitializeSdkObjects( FbxManager*& pManager, FbxScene*& pScene );
 void DestroySdkObjects( FbxManager* pManager );
@@ -19,25 +26,85 @@ apemode::State& apemode::Get( ) {
     return s;
 }
 
+std::shared_ptr< spdlog::logger > CreateLogger( spdlog::level::level_enum lvl, std::string logFile ) {
+    if ( logFile.empty( ) ) {
+
+        /* This code is about to create a name for log file.
+           The name should contain date and time.
+           TODO: Something portable and less ugly. */
+
+        tm currentTime;
+        time_t currentSystemTime = std::chrono::system_clock::to_time_t( std::chrono::system_clock::now( ) );
+        localtime_s( &currentTime, &currentSystemTime );
+
+        std::string curentTimeStr;
+        std::stringstream curentTimeStrStream;
+        curentTimeStrStream << std::put_time( &currentTime, "%F-%T-" );
+        curentTimeStrStream << currentSystemTime;
+        curentTimeStr = curentTimeStrStream.str( );
+        std::replace( curentTimeStr.begin( ), curentTimeStr.end( ), ':', '-' );
+
+        auto logsDirectory = ResolveFullPath( ( CurrentDirectory( ) + "/.logs" ).c_str( ) );
+        MakeDirectory( logsDirectory.c_str( ) );
+
+        // logFile = ResolveFullPath( ( logsDirectory + "/fbxp-" + curentTimeStr ).c_str( ) );
+        logFile = ResolveFullPath( ( logsDirectory + "/fbxp-" + curentTimeStr + ".fbxp-log.txt" ).c_str( ) );
+    }
+
+    // std::make_shared< spdlog::sinks::simple_file_sink_mt >( logFile )
+    // std::make_shared< spdlog::sinks::rotating_file_sink_mt >( logFile, "fbxp-rlog.txt", 65536, 1024 )
+
+    std::vector< spdlog::sink_ptr > sinks{
+        std::make_shared< spdlog::sinks::wincolor_stdout_sink_mt >( ),
+        std::make_shared< spdlog::sinks::msvc_sink_mt >( ),
+        std::make_shared< spdlog::sinks::simple_file_sink_mt >( logFile )
+        /*, std::make_shared< spdlog::sinks::rotating_file_sink_mt >( logFile, "fbxp-rlog.txt", 65536, 1024 )*/};
+
+    auto logger = spdlog::create<>( "apemode", sinks.begin( ), sinks.end( ) );
+    logger->set_level( lvl );
+
+    return logger;
+}
+
+apemode::State& apemode::Main( int argc, char** argv ) {
+    try {
+        s.options.parse( argc, argv );
+
+        auto lvl = spdlog::level::info;
+        if ( s.options[ "log-level" ].count( ) > 0 )
+            lvl = (spdlog::level::level_enum) s.options[ "log-level" ].as< int >( );
+
+        s.console = CreateLogger( lvl, s.options[ "l" ].as< std::string >( ) );
+    } catch ( const cxxopts::OptionException& e ) {
+        std::cerr << s.options.help( {"main"} ) << std::endl;
+        std::cerr << "Error parsing options:" << e.what( ) << std::endl;
+        std::exit( 1 );
+    }
+
+    return s;
+}
+
 apemode::State::State( ) : options( GetExecutable( ) ) {
-
-    std::vector< spdlog::sink_ptr > sinks{std::make_shared< spdlog::sinks::wincolor_stdout_sink_mt >( ),
-                                          std::make_shared< spdlog::sinks::msvc_sink_mt >( )};
-    console = spdlog::create<>( "apemode", sinks.begin( ), sinks.end( ) );
-
-    options.add_options( "input" )( "i,input-file", "Input", cxxopts::value< std::string >( ) );
-    options.add_options( "input" )( "o,output-file", "Output", cxxopts::value< std::string >( ) );
-    options.add_options( "input" )( "k,convert", "Convert", cxxopts::value< bool >( ) );
-    options.add_options( "input" )( "c,compress", "Compress", cxxopts::value< bool >( ) );
-    options.add_options( "input" )( "p,pack-meshes", "Pack meshes", cxxopts::value< bool >( ) );
-    options.add_options( "input" )( "s,split-meshes-per-material", "Split meshes per material", cxxopts::value< bool >( ) );
-    options.add_options( "input" )( "t,optimize-meshes", "Optimize meshes", cxxopts::value< bool >( ) );
-    options.add_options( "input" )( "e,search-location", "Add search location", cxxopts::value< std::vector< std::string > >( ) );
-    options.add_options( "input" )( "m,embed-file", "Embed file", cxxopts::value< std::vector< std::string > >( ) );
+    options.add_options( "main" )( "i,input-file", "Input", cxxopts::value< std::string >( ) );
+    options.add_options( "main" )( "o,output-file", "Output", cxxopts::value< std::string >( ) );
+    options.add_options( "main" )( "password", "Password", cxxopts::value< std::string >( ) );
+    options.add_options( "main" )( "k,convert", "Convert", cxxopts::value< bool >( ) );
+    options.add_options( "main" )( "c,compress", "Compress", cxxopts::value< bool >( ) );
+    options.add_options( "main" )( "p,pack-meshes", "Pack meshes", cxxopts::value< bool >( ) );
+    options.add_options( "main" )( "s,split-meshes-per-material", "Split meshes per material", cxxopts::value< bool >( ) );
+    options.add_options( "main" )( "t,optimize-meshes", "Optimize meshes", cxxopts::value< bool >( ) );
+    options.add_options( "main" )( "e,search-location", "Add search location", cxxopts::value< std::vector< std::string > >( ) );
+    options.add_options( "main" )( "m,embed-file", "Embed file", cxxopts::value< std::vector< std::string > >( ) );
+    options.add_options( "main" )( "l,log-file", "Log file (relative or absolute path)", cxxopts::value< std::string >( ) );
+    options.add_options( "main" )( "log-level", "Log level: 0 (most detailed) - 6 (off)", cxxopts::value< int >( ) );
+    options.add_options( "main" )( "sync-keys", "Synchronize curve keys for properties", cxxopts::value< bool >( ) );
+    options.add_options( "main" )( "reduce-keys", "Reduce the keys in the animation curves.", cxxopts::value< bool >( ) );
+    options.add_options( "main" )( "resample-framerate", "Frame rate at which animation curves will be resampled (60 - default, 0 - disable).", cxxopts::value< float >( ) );
 }
 
 apemode::State::~State( ) {
     Release( );
+    console->flush( );
 }
 
 bool apemode::State::Initialize( ) {
@@ -59,8 +126,8 @@ void apemode::State::Release( ) {
 bool apemode::State::Load( ) {
     const std::string inputFile = options[ "i" ].as< std::string >( );
     // SplitFilename( inputFile.c_str( ), folderPath, fileName );
-    // console->info( "File name  : \"{}\"", fileName );
-    // console->info( "Folder name: \"{}\"", folderPath );
+    // logger->info( "File name  : \"{}\"", fileName );
+    // logger->info( "Folder name: \"{}\"", folderPath );
     return LoadScene( manager, scene, inputFile.c_str( ) );
 }
 
@@ -235,6 +302,14 @@ bool apemode::State::Finish( ) {
 
 uint64_t apemode::State::PushName( std::string const& name ) {
     const uint64_t hash = CityHash64( name.data( ), name.size( ) );
+
+#if _DEBUG
+    auto it = names.find( hash );
+    if ( it == names.end( ) ) {
+        console->trace( "Adding {} -> {}", hash, name );
+    }
+#endif
+
     names.insert( std::make_pair( hash, name ) );
     return hash;
 }
@@ -267,7 +342,6 @@ bool InitializeSdkObjects( FbxManager*& pManager, FbxScene*& pScene ) {
 
     // Load plugins from the executable directory (optional)
     FbxString lPath = FbxGetApplicationDirectory( );
-    s.console->info( "Application directory {}.", lPath.Buffer( ) );
     pManager->LoadPluginsDirectory( lPath.Buffer( ) );
 
     // Create an FBX scene. This object holds most objects imported/exported from/to files.
@@ -292,13 +366,12 @@ void DestroySdkObjects( FbxManager* pManager ) {
 bool LoadScene( FbxManager* pManager, FbxDocument* pScene, const char* pFilename ) {
     int lFileMajor, lFileMinor, lFileRevision;
     int lSDKMajor, lSDKMinor, lSDKRevision;
-    // int lFileFormat = -1;
-    int  i, lAnimStackCount;
     bool lStatus;
     char lPassword[ 1024 ];
 
     // Get the file version number generate by the FBX SDK.
     FbxManager::GetFileFormatVersion( lSDKMajor, lSDKMinor, lSDKRevision );
+    s.console->info( "FBX SDK is {}.{}.{}.", lSDKMajor, lSDKMinor, lSDKRevision );
 
     // Create an importer.
     FbxImporter* lImporter = FbxImporter::Create( pManager, "" );
@@ -309,51 +382,21 @@ bool LoadScene( FbxManager* pManager, FbxDocument* pScene, const char* pFilename
 
     if ( !lImportStatus ) {
         FbxString error = lImporter->GetStatus( ).GetErrorString( );
-        s.console->info( "Call to FbxImporter::Initialize() failed." );
-        s.console->info( "Error returned: {}.", error.Buffer( ) );
+        s.console->error( "Call to FbxImporter::Initialize() failed." );
+        s.console->error( "Error returned: {}.", error.Buffer( ) );
 
         if ( lImporter->GetStatus( ).GetCode( ) == FbxStatus::eInvalidFileVersion ) {
-            s.console->info( "FBX file format version for this FBX SDK is {}.{}.{}.", lSDKMajor, lSDKMinor, lSDKRevision );
-            s.console->info( "FBX file format version for file '{}' is {}.{}.{}.", pFilename, lFileMajor, lFileMinor, lFileRevision );
+            s.console->error( "FBX SDK is {}.{}.{}.", lSDKMajor, lSDKMinor, lSDKRevision );
+            s.console->error( "\"{}\" is {}.{}.{}.", pFilename, lFileMajor, lFileMinor, lFileRevision );
         }
 
         DebugBreak( );
         return false;
     }
 
-    s.console->info( "FBX file format version for this FBX SDK is {}.{}.{}.", lSDKMajor, lSDKMinor, lSDKRevision );
 
     if ( lImporter->IsFBX( ) ) {
-        s.console->info(
-            "FBX file format version for file '{}' is {}.{}.{}.", pFilename, lFileMajor, lFileMinor, lFileRevision );
-
-        // From this point, it is possible to access animation stack information without
-        // the expense of loading the entire file.
-
-        s.console->info( "Animation Stack Information" );
-
-        lAnimStackCount = lImporter->GetAnimStackCount( );
-
-        s.console->info( "    Number of Animation Stacks: {}.", lAnimStackCount );
-        s.console->info( "    Current Animation Stack: \"{}\"", lImporter->GetActiveAnimStackName( ).Buffer( ) );
-        s.console->info( "" );
-
-        for ( i = 0; i < lAnimStackCount; i++ ) {
-            FbxTakeInfo* lTakeInfo = lImporter->GetTakeInfo( i );
-
-            s.console->info( "    Animation Stack {}", i );
-            s.console->info( "         Name: \"{}\"", lTakeInfo->mName.Buffer( ) );
-            s.console->info( "         Description: \"{}\"", lTakeInfo->mDescription.Buffer( ) );
-
-            // Change the value of the import name if the animation stack should be imported
-            // under a different name.
-            s.console->info( "         Import Name: \"{}\"", lTakeInfo->mImportName.Buffer( ) );
-
-            // Set the value of the import state to false if the animation stack should be not
-            // be imported.
-            s.console->info( "         Import State: {}", lTakeInfo->mSelect ? "true" : "false" );
-            s.console->info( "" );
-        }
+        s.console->info( "\"{}\" is {}.{}.{}.", pFilename, lFileMajor, lFileMinor, lFileRevision );
 
         // Set the import states. By default, the import states are always set to
         // true. The code below shows how to change these states.

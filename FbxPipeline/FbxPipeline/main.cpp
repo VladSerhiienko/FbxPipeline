@@ -5,17 +5,8 @@ void ExportScene( FbxScene* pScene );
 void ConvertScene( FbxManager* lSdkManager, FbxScene* lScene, FbxString lFilePath );
 
 int main( int argc, char** argv ) {
-    auto& s = apemode::Get( );
-
-    bool convert = false;
-
-    try {
-        s.options.parse( argc, argv );
-        convert = s.options[ "k" ].as< bool >( );
-    } catch ( const cxxopts::OptionException& e ) {
-        s.console->critical( "error parsing options: {0}", e.what( ) );
-        std::exit( 1 );
-    }
+    auto& s = apemode::Main( argc, argv );
+    bool convert = s.options[ "k" ].as< bool >( );
 
     if ( s.Initialize( ) ) {
         if ( s.Load( ) ) {
@@ -35,7 +26,9 @@ void ConvertScene( FbxManager* lSdkManager, FbxScene* lScene, FbxString lFilePat
     auto& s = apemode::Get( );
 
     const char* lFileTypes[] = {
-        "_fbx7ascii.fbx", "FBX ascii (*.fbx)", "_fbx6ascii.fbx", "FBX 6.0 ascii (*.fbx)", "_obj.obj", "Alias OBJ (*.obj)",
+        "_fbx7ascii.fbx", "FBX ascii (*.fbx)",
+        "_fbx6ascii.fbx", "FBX 6.0 ascii (*.fbx)",
+        "_obj.obj", "Alias OBJ (*.obj)",
         //"_dae.dae",           "Collada DAE (*.dae)",
         //"_fbx7binary.fbx",     "FBX binary (*.fbx)",
         //"_fbx6binary.fbx", "FBX 6.0 binary (*.fbx)",

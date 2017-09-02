@@ -88,6 +88,9 @@ namespace apemode {
         std::vector< AnimCurve >              animCurves;
         std::vector< std::string >            searchLocations;
         std::set< std::string >               embedQueue;
+        float                                 resampleFPS = 60.0f;
+        bool                                  reduceCurves = true;
+        bool                                  propertyCurveSync = true;
 
         State( );
         ~State( );
@@ -99,5 +102,6 @@ namespace apemode {
         uint64_t PushName( std::string const& name );
 
         friend State& Get( );
+        friend State& Main( int argc, char** argv );
     };
 }
