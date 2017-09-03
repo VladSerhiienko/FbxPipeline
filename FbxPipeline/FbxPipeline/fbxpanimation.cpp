@@ -137,8 +137,10 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
     FbxAnimCurveFilterConstantKeyReducer constantKeyReducer;
 
     FbxTime periodTime;
-    if ( s.resampleFPS > 0.0f )
-        periodTime.SetMilliSeconds( 1.0f / s.resampleFPS * 1000.0f );
+    if ( s.resampleFPS > 0.0f ) {
+        auto milliseconds = 1.0f / s.resampleFPS * 1000.0f;
+        periodTime.SetMilliSeconds( (FbxLongLong) milliseconds );
+    }
 
     for ( int i = 0; i < animCurves.size( ); i += 3 ) {
 
@@ -327,7 +329,7 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
                     } break;
 
                     case fbxsdk::FbxAnimCurveDef::eInterpolationCubic: {
-                        /* Resampling at 60 FPS. */
+                        /* Resampling */
                         key.interpolationMode = apemodefb::EInterpolationMode_Linear;
                         // key.interpolationMode = apemodefb::EInterpolationMode_Cubic;
                     } break;

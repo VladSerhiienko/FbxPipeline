@@ -145,7 +145,7 @@ bool apemode::State::Finish( ) {
         for ( auto& namePair : names ) {
             const auto valueOffset = builder.CreateString( namePair.second );
 
-           apemodefb::NameFbBuilder nameBuilder( builder );
+            apemodefb::NameFbBuilder nameBuilder( builder );
             nameBuilder.add_h( namePair.first );
             nameBuilder.add_v( valueOffset );
             nameOffsets.push_back( nameBuilder.Finish( ) );
@@ -164,13 +164,13 @@ bool apemode::State::Finish( ) {
     // Finalize nodes
     //
 
-    std::vector< flatbuffers::Offset<apemodefb::NodeFb > > nodeOffsets; {
+    std::vector< flatbuffers::Offset< apemodefb::NodeFb > > nodeOffsets; {
         nodeOffsets.reserve( nodes.size( ) );
         for ( auto& node : nodes ) {
-            const auto childIdsOffset = builder.CreateVector( node.childIds );
+            const auto childIdsOffset    = builder.CreateVector( node.childIds );
             const auto materialIdsOffset = builder.CreateVector( node.materialIds );
 
-           apemodefb::NodeFbBuilder nodeBuilder( builder );
+            apemodefb::NodeFbBuilder nodeBuilder( builder );
             nodeBuilder.add_id( node.id );
             nodeBuilder.add_name_id( node.nameId );
             nodeBuilder.add_culling_type( node.cullingType );
@@ -185,93 +185,90 @@ bool apemode::State::Finish( ) {
 
     //
     // Finalize materials
-    // 
+    //
 
-    std::vector< flatbuffers::Offset<apemodefb::MaterialFb > > materialOffsets; {
-        materialOffsets.reserve( materials.size( ) );
-        for (auto& material : materials) {
-            auto propsOffset = builder.CreateVectorOfStructs( material.props );
+    std::vector< flatbuffers::Offset< apemodefb::MaterialFb > > materialOffsets;
+    materialOffsets.reserve( materials.size( ) );
+    for ( auto& material : materials ) {
+        auto propsOffset = builder.CreateVectorOfStructs( material.props );
 
-           apemodefb::MaterialFbBuilder materialBuilder( builder );
-            materialBuilder.add_id( material.id );
-            materialBuilder.add_name_id( material.nameId );
-            materialBuilder.add_props( propsOffset );
-            materialOffsets.push_back( materialBuilder.Finish( ) );
-        }
+        apemodefb::MaterialFbBuilder materialBuilder( builder );
+        materialBuilder.add_id( material.id );
+        materialBuilder.add_name_id( material.nameId );
+        materialBuilder.add_props( propsOffset );
+        materialOffsets.push_back( materialBuilder.Finish( ) );
     }
 
     //
     // Finalize meshes
     //
 
-    std::vector< flatbuffers::Offset<apemodefb::MeshFb > > meshOffsets; {
-        materialOffsets.reserve( meshes.size( ) );
-        for ( auto& mesh : meshes ) {
-            auto vsOffset = builder.CreateVector( mesh.vertices );
-            auto smOffset = builder.CreateVectorOfStructs( mesh.submeshes );
-            auto ssOffset = builder.CreateVectorOfStructs( mesh.subsets );
-            auto siOffset = builder.CreateVector( mesh.indices );
+    std::vector< flatbuffers::Offset< apemodefb::MeshFb > > meshOffsets;
+    meshOffsets.reserve( meshes.size( ) );
+    for ( auto& mesh : meshes ) {
+        auto vsOffset = builder.CreateVector( mesh.vertices );
+        auto smOffset = builder.CreateVectorOfStructs( mesh.submeshes );
+        auto ssOffset = builder.CreateVectorOfStructs( mesh.subsets );
+        auto siOffset = builder.CreateVector( mesh.indices );
 
-            apemodefb::MeshFbBuilder meshBuilder( builder );
-            meshBuilder.add_vertices( vsOffset );
-            meshBuilder.add_submeshes( smOffset );
-            meshBuilder.add_subsets( ssOffset );
-            meshBuilder.add_indices( siOffset );
-            meshBuilder.add_index_type( mesh.indexType );
-            meshOffsets.push_back( meshBuilder.Finish( ) );
-        }
+        apemodefb::MeshFbBuilder meshBuilder( builder );
+        meshBuilder.add_vertices( vsOffset );
+        meshBuilder.add_submeshes( smOffset );
+        meshBuilder.add_subsets( ssOffset );
+        meshBuilder.add_indices( siOffset );
+        meshBuilder.add_index_type( mesh.indexType );
+        meshOffsets.push_back( meshBuilder.Finish( ) );
     }
 
     //
     // Finalize files
     //
 
-    /*std::vector< flatbuffers::Offset<apemodefb::FileFb > > fileOffsets; {
-        fileOffsets.reserve( embedQueue.size( ) );
-
-        std::vector< uint8_t > fileBuffer;
-
-        for ( auto& embedded : embedQueue ) {
-            fileBuffer = ReadFile( embedded.c_str( ) );
-            if ( !fileBuffer.empty( ) ) {
-                auto bytesOffset = builder.CreateVectorOfStructs( fileBuffer );
-                fileOffsets.push_back(apemodefb::CreateFileFbDirect( builder, (uint32_t) fileOffsets.size( ), 0, &fileBuffer ) );
-            }
+    std::vector< flatbuffers::Offset< apemodefb::FileFb > > fileOffsets;
+    fileOffsets.reserve( embedQueue.size( ) );
+    for ( auto& embedded : embedQueue ) {
+        std::vector< uint8_t > fileBuffer = ReadFile( embedded.c_str( ) );
+        if ( !fileBuffer.empty( ) ) {
+            fileOffsets.push_back( apemodefb::CreateFileFbDirect( builder, (uint32_t) fileOffsets.size( ), 0, &fileBuffer ) );
         }
-    }*/
+    }
 
-    const auto meshesOffset = builder.CreateVector( meshOffsets );
+    //
+    // Finalize Meshes
+    //
+
+    const auto meshesOffset = meshOffsets.empty( ) ? 0 : builder.CreateVector( meshOffsets );
 
     //
     // Finalize Materials
     //
 
-    const auto materialsOffset = builder.CreateVector( materialOffsets );
+    const auto materialsOffset = materialOffsets.empty( ) ? 0 : builder.CreateVector( materialOffsets );
 
     //
     // Finalize textures
     //
 
-    const auto texturesOffset = builder.CreateVectorOfStructs( textures );
+    const auto texturesOffset = textures.empty( ) ? 0 : builder.CreateVectorOfStructs( textures );
 
     //
     // Finalize files
     //
 
-    //const auto filesOffset = builder.CreateVector( fileOffsets );
+    const auto filesOffset = fileOffsets.empty( ) ? 0 : builder.CreateVector( fileOffsets );
 
     //
     // Finalize scene
     //
 
     apemodefb::SceneFbBuilder sceneBuilder( builder );
-    sceneBuilder.add_transforms( transformsOffset );
-    sceneBuilder.add_names( namesOffset );
-    sceneBuilder.add_nodes( nodesOffset );
-    sceneBuilder.add_meshes( meshesOffset );
-    sceneBuilder.add_textures( texturesOffset );
-    sceneBuilder.add_materials( materialsOffset );
-    //sceneBuilder.add_files( filesOffset );
+    if ( 0 != transformsOffset.o )  sceneBuilder.add_transforms( transformsOffset );
+    if ( 0 != namesOffset.o )       sceneBuilder.add_names( namesOffset );
+    if ( 0 != nodesOffset.o )       sceneBuilder.add_nodes( nodesOffset );
+    if ( 0 != meshesOffset.o )      sceneBuilder.add_meshes( meshesOffset );
+    if ( 0 != texturesOffset.o )    sceneBuilder.add_textures( texturesOffset );
+    if ( 0 != materialsOffset.o )   sceneBuilder.add_materials( materialsOffset );
+    if ( 0 != filesOffset.o )       sceneBuilder.add_files( filesOffset );
 
     apemodefb::FinishSceneFbBuffer( builder, sceneBuilder.Finish( ) );
 

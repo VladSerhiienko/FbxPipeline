@@ -71,11 +71,38 @@ std::string FindFile( const char* filepath ) {
     return "";
 }
 
-std::vector< uint8_t > ReadFile( const char* filepath ) {
-    const std::string fullpath = FindFile( filepath );
+bool WriteFile( const char* srcFilePath, const void* data, size_t dataSize ) {
+    if ( FILE* srcFile = fopen( srcFilePath, "wb" ) ) {
+        auto writtenDataSize = fwrite( data, 1, dataSize, srcFile );
+        fclose( srcFile );
+        srcFile = nullptr;
+        return writtenDataSize == dataSize;
+    }
 
-    if ( false == fullpath.empty( ) ) {
-        std::ifstream filestream( fullpath, std::ios::binary );
+    return false;
+}
+
+std::vector< uint8_t > ReadFile( const char* srcPath ) {
+    const std::string srcFilePath = FindFile( srcPath );
+
+#if 1
+    std::vector< uint8_t > fileBuffer;
+    if ( FILE* srcFile = fopen( srcFilePath.c_str( ), "rb" ) ) {
+        fseek( srcFile, 0, SEEK_END );
+        size_t srcImgFileSize = ftell( srcFile );
+        fseek( srcFile, 0, SEEK_SET );
+        fileBuffer.resize( srcImgFileSize );
+        fread( fileBuffer.data( ), 1, srcImgFileSize, srcFile );
+        fclose( srcFile );
+        srcFile = nullptr;
+    }
+
+    return fileBuffer;
+#else
+    /* Even though this code is safer and nicer, but it's super slow. */
+
+    if ( false == srcFilePath.empty( ) ) {
+        std::ifstream filestream( srcFilePath, std::ios::binary );
 
         if ( filestream.good( ) )
             return std::vector< uint8_t >( std::istreambuf_iterator< char >( filestream ),
@@ -84,6 +111,7 @@ std::vector< uint8_t > ReadFile( const char* filepath ) {
 
     assert( false && "Failed to open file." );
     return std::vector< uint8_t >( );
+#endif
 }
 
 void InitializeSeachLocations( ) {

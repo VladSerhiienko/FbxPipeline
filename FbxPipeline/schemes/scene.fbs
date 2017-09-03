@@ -117,6 +117,8 @@ struct AnimCurveKeyFb {
 table AnimCurveFb {
     id : uint;
     name_id : ulong( key );
+    node_id : uint;
+	property : EAnimCurveChannel;
 	stack_name_id : ulong;
 	layer_name_id : ulong;
 	keys : [AnimCurveKeyFb];
