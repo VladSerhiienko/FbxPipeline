@@ -76,6 +76,12 @@ struct vec4 {
     z : float;
     w : float;
 }
+struct mat4 {
+    x : vec4;
+    y : vec4;
+    z : vec4;
+    w : vec4;
+}
 struct StaticVertexFb {
     position : vec3;
     normal : vec3;
@@ -87,6 +93,33 @@ struct PackedVertexFb {
     normal : uint;
     tangent : uint;
     uv : uint;
+}
+struct StaticSkinnedVertexFb {
+    position : vec3;
+    normal : vec3;
+    tangent : vec4;
+    uv : vec2;
+    weights : vec4;
+    indices : vec4;
+}
+struct PackedSkinnedVertexFb {
+    position : uint;
+    normal : uint;
+    tangent : uint;
+    uv : uint;
+    weights : uint;
+    indices : uint;
+}
+struct AnimCurveKeyFb {
+    time : float;
+    value : float;
+}
+table AnimCurveFb {
+    id : uint;
+    name_id : ulong( key );
+	stack_name_id : ulong;
+	layer_name_id : ulong;
+	keys : [AnimCurveKeyFb];
 }
 struct TextureFb {
     id : uint;
@@ -125,7 +158,6 @@ table NameFb {
 	h : ulong( key );
 	v : string;
 }
-// (force_align:16)
 struct TransformFb {
     translation : vec3;
     rotation_offset : vec3;
@@ -140,12 +172,31 @@ struct TransformFb {
     geometric_rotation : vec3;
     geometric_scaling : vec3;
 }
+struct AnimTransformFb {
+    translation : uint;
+    rotation_offset : uint;
+    rotation_pivot : uint;
+    pre_rotation : uint;
+    post_rotation : uint;
+    rotation : uint;
+    scaling_offset : uint;
+    scaling_pivot : uint;
+    scaling : uint;
+    geometric_translation : uint;
+    geometric_rotation : uint;
+    geometric_scaling : uint;
+}
+struct SkinFb {
+    name_id : ulong( key );
+	bind_pose : mat4;
+}
 table MeshFb {
     vertices : [ubyte];
     submeshes : [SubmeshFb];
     subsets : [SubsetFb];
     indices : [ubyte];
     index_type : EIndexTypeFb;
+    skins : [SkinFb];
 }
 struct MaterialPropFb {
     name_id : ulong( key );
@@ -160,6 +211,7 @@ table MaterialFb {
 table NodeFb {
     id : uint;
     mesh_id : uint;
+    anim_transform_id : uint;
     name_id : ulong( key );
 	culling_type : ECullingType;
     child_ids : [uint];
@@ -172,8 +224,10 @@ table FileFb {
 }
 table SceneFb {
     transforms : [TransformFb];
+    anim_transforms : [AnimTransformFb];
     nodes : [NodeFb];
     meshes : [MeshFb];
+    anim_curves : [AnimCurveFb];
     materials : [MaterialFb];
     textures : [TextureFb];
     files : [FileFb];

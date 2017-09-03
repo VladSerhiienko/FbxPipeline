@@ -99,6 +99,7 @@ apemode::State::State( ) : options( GetExecutable( ) ) {
     options.add_options( "main" )( "log-level", "Log level: 0 (most detailed) - 6 (off)", cxxopts::value< int >( ) );
     options.add_options( "main" )( "sync-keys", "Synchronize curve keys for properties", cxxopts::value< bool >( ) );
     options.add_options( "main" )( "reduce-keys", "Reduce the keys in the animation curves.", cxxopts::value< bool >( ) );
+    options.add_options( "main" )( "reduce-const-keys", "Reduce constant keys in the animation curves.", cxxopts::value< bool >( ) );
     options.add_options( "main" )( "resample-framerate", "Frame rate at which animation curves will be resampled (60 - default, 0 - disable).", cxxopts::value< float >( ) );
 }
 

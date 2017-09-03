@@ -152,15 +152,19 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
 
         int availableCurves = 0;
 
-        if ( s.reduceCurves )
+        if ( s.reduceConstKeys || s.reduceKeys )
             for ( auto pAnimCurve : pAnimChannels ) {
 
                 auto keyCount = 0;
 
                 if ( nullptr != pAnimCurve ) {
                     keyCount = pAnimCurve->KeyGetCount( );
-                    ApplyFilter< 1 >( &constantKeyReducer, &pAnimCurve );
-                    ApplyFilter< 1 >( &keyReducer, &pAnimCurve );
+
+                    if ( s.reduceConstKeys )
+                        ApplyFilter< 1 >( &constantKeyReducer, &pAnimCurve );
+
+                    if ( s.reduceKeys )
+                        ApplyFilter< 1 >( &keyReducer, &pAnimCurve );
                 }
 
                 /* NOTE: After key reducers key count can become zero. */
@@ -266,7 +270,7 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
                         auto resampledKeyCount      = pAnimCurve->KeyGetCount( );
                         auto diffKeyCount           = abs( resampledKeyCount - expectedApproxKeyCount );
 
-                        spdlog::level::level_enum level = diffKeyCount > 3
+                        spdlog::level::level_enum level = diffKeyCount > 2
                                                         ? spdlog::level::warn
                                                         : spdlog::level::info;
 
