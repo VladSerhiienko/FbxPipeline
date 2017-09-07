@@ -89,7 +89,9 @@ void PreprocessAnimation( FbxScene* pScene ) {
     auto& s = apemode::Get( );
 
     int animStackCount = pScene->GetSrcObjectCount< FbxAnimStack >( );
-    s.console->info( "Scene has {} animation stacks:", animStackCount );
+
+    if ( animStackCount )
+        s.console->info( "Scene has {} animation stacks:", animStackCount );
 
     for ( int i = 0; i < animStackCount; i++ ) {
         FbxAnimStack* pAnimStack = pScene->GetSrcObject< FbxAnimStack >( i );
@@ -108,7 +110,7 @@ void PreprocessAnimation( FbxScene* pScene ) {
         s.animStacks.back( ).nameId = s.PushName( pAnimStack->GetName( ) );
 
         int animLayerCount = pAnimStack->GetMemberCount< FbxAnimLayer >( );
-        s.console->info( "* Animation Stack #{} \"{}\" has {} layers ", i, pAnimStack->GetName( ), animLayerCount );
+        s.console->info( "\t> Animation Stack #{} \"{}\" has {} layers ", i, pAnimStack->GetName( ), animLayerCount );
 
         for ( int j = 0; j < animLayerCount; j++ ) {
             FbxAnimLayer* pAnimLayer = pAnimStack->GetMember< FbxAnimLayer >( j );
@@ -133,7 +135,7 @@ void PreprocessAnimation( FbxScene* pScene ) {
             s.animLayers.back( ).nameId      = s.PushName( pAnimLayer->GetName( ) );
             s.animLayers.back( ).animStackId = s.animStacks.size( ) - 1;
 
-            s.console->info( "** Animation Layer #{} \"{}\"", j, pAnimLayer->GetName( ) );
+            s.console->info( "\t\t> Animation Layer #{} \"{}\"", j, pAnimLayer->GetName( ) );
         }
     }
 }

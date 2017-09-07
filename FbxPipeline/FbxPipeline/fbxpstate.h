@@ -88,6 +88,7 @@ namespace apemode {
         std::vector< AnimCurve >              animCurves;
         std::vector< std::string >            searchLocations;
         std::set< std::string >               embedQueue;
+        std::set< std::string >               missingQueue;
         float                                 resampleFPS       = 24.0f;
         bool                                  reduceKeys        = false;
         bool                                  reduceConstKeys   = false;
