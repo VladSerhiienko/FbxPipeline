@@ -195,6 +195,7 @@ void ExportMaterials( FbxScene* pScene ) {
                             if ( auto pFileTexture = FbxCast< FbxFileTexture >( pTexture ) )
                                 url = pFileTexture->GetFileName( );
                         }
+
                         if (url.empty()) {
                             url = pTexture->GetName( );
                         }
