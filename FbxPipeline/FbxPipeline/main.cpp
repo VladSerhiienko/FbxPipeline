@@ -22,6 +22,9 @@ int main( int argc, char** argv ) {
     return 0;
 }
 
+// C:\Users\vladyslav.serhiienko\Downloads\apto logo\apto logo.FBX
+// C:\Users\vladyslav.serhiienko\Downloads\girl-speedsculpt\source\Merged_PolySphere_4553.fbx
+
 void ConvertScene( FbxManager* lSdkManager, FbxScene* lScene, FbxString lFilePath ) {
     auto& s = apemode::Get( );
 

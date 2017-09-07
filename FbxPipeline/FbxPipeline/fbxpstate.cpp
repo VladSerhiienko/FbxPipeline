@@ -132,7 +132,7 @@ bool apemode::State::Load( ) {
     return LoadScene( manager, scene, inputFile.c_str( ) );
 }
 
-std::vector< uint8_t > ReadFile( const char* filepath );
+std::vector< uint8_t > ReadBinFile( const char* filepath );
 
 bool apemode::State::Finish( ) {
 
@@ -228,7 +228,7 @@ bool apemode::State::Finish( ) {
     fileOffsets.reserve( embedQueue.size( ) );
     for ( auto& embedded : embedQueue ) {
         if ( false == embedded.empty( ) ) {
-            std::vector< uint8_t > fileBuffer = ReadFile( embedded.c_str( ) );
+            std::vector< uint8_t > fileBuffer = ReadBinFile( embedded.c_str( ) );
             if ( !fileBuffer.empty( ) ) {
                 fileOffsets.push_back(
                     apemodefb::CreateFileFbDirect( builder, (uint32_t) fileOffsets.size( ), 0, &fileBuffer ) );

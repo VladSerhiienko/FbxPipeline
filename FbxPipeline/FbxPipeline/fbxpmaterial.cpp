@@ -149,27 +149,29 @@ void ExportTextures( std::string const& pn, apemode::Material& m, FbxProperty& p
 void ExportMaterials( FbxScene* pScene ) {
     auto& s = apemode::Get( );
 
-    int textureCount = pScene->GetTextureCount( );
-    for ( int textureIndex = 0; textureIndex < textureCount; ++textureIndex ) {
-        auto pTexture = pScene->GetTexture( textureIndex );
+    //int textureCount = pScene->GetTextureCount( );
+    //for ( int textureIndex = 0; textureIndex < textureCount; ++textureIndex ) {
+    //    auto pTexture = pScene->GetTexture( textureIndex );
 
-        /*auto srcObjectCount   = pTexture->GetSrcObjectCount( );
-        auto srcPropertyCount = pTexture->GetDstObjectCount( );
-        auto dstObjectCount   = pTexture->GetSrcObjectCount( );
-        auto dstPropertyCount = pTexture->GetDstPropertyCount( );
-        auto dstProperty      = pTexture->GetDstProperty( );
-        auto dstPropertyName  = dstProperty.GetName( );*/
+    //    /*auto srcObjectCount   = pTexture->GetSrcObjectCount( );
+    //    auto srcPropertyCount = pTexture->GetDstObjectCount( );
+    //    auto dstObjectCount   = pTexture->GetSrcObjectCount( );
+    //    auto dstPropertyCount = pTexture->GetDstPropertyCount( );
+    //    auto dstProperty      = pTexture->GetDstProperty( );
+    //    auto dstPropertyName  = dstProperty.GetName( );*/
 
-        std::string url = pTexture->GetUrl( );
+    //    std::string url = pTexture->GetUrl( );
 
-        if ( url.empty( ) ) {
-            if ( auto pFileTexture = FbxCast< FbxFileTexture >( pTexture ) )
-                url = pFileTexture->GetFileName( );
-        }
+    //    if ( url.empty( ) ) {
+    //        if ( auto pFileTexture = FbxCast< FbxFileTexture >( pTexture ) )
+    //            url = pFileTexture->GetFileName( );
+    //        if (auto pProcTexture = FbxCast< FbxProceduralTexture >(pTexture))
+    //            url = pProcTexture->GetName();
+    //    }
 
-        s.console->info( "Found texture \"{}\"", GetFileName( url.c_str( ) ) );
-        s.embedQueue.insert( FindFile( url.c_str( ) ) );
-    }
+    //    s.console->info( "Found texture \"{}\"",  url.c_str( )  );
+    //    //s.embedQueue.insert( FindFile( url.c_str( ) ) );
+    //}
 
     if ( auto c = pScene->GetMaterialCount( ) ) {
         s.materials.reserve( c );
@@ -182,11 +184,9 @@ void ExportMaterials( FbxScene* pScene ) {
             auto srcProperty = material->GetFirstProperty( );
             while ( srcProperty.IsValid( ) ) {
                 int srcObjCount = srcProperty.GetSrcObjectCount( );
-                //s.console->info( "Found property \"{}\" ({} objects)", srcProperty.GetNameAsCStr( ), srcObjCount );
 
                 for ( int srcObjIndex = 0; srcObjIndex < srcObjCount; ++srcObjIndex ) {
                     auto pSrcObj = srcProperty.GetSrcObject( srcObjIndex );
-                    //s.console->info( "Found object \"{}\"", pSrcObj->GetName( ) );
 
                     if ( auto pTexture = FbxCast< FbxTexture >( pSrcObj ) ) {
                         std::string url = pTexture->GetUrl( );
@@ -195,11 +195,19 @@ void ExportMaterials( FbxScene* pScene ) {
                             if ( auto pFileTexture = FbxCast< FbxFileTexture >( pTexture ) )
                                 url = pFileTexture->GetFileName( );
                         }
+                        if (url.empty()) {
+                            url = pTexture->GetName( );
+                        }
 
-                        s.console->info( "texture \"{}\" <= \"{}\" <= \"{}\"",
+                        s.console->info( "Found texture \"{}\" <= \"{}\" <= \"{}\"",
                                          GetFileName( url.c_str( ) ),
                                          pSrcObj->GetName( ),
                                          srcProperty.GetNameAsCStr( ) );
+
+                        auto fullFilePath = FindFile( url.c_str( ) );
+                        if ( false == fullFilePath.empty( ) ) {
+                            s.embedQueue.insert( fullFilePath );
+                        }
                     }
 
                     if ( auto pVideo = FbxCast< FbxVideo >( pSrcObj ) ) {
@@ -208,6 +216,15 @@ void ExportMaterials( FbxScene* pScene ) {
                         if ( url.empty( ) ) {
                             if ( auto pFileTexture = FbxCast< FbxFileTexture >( pVideo ) )
                                 url = pFileTexture->GetFileName( );
+                        }
+
+                        if ( url.empty( ) ) {
+                            url = pVideo->GetName( );
+                        }
+
+                        auto fullFilePath = FindFile(url.c_str());
+                        if (false == fullFilePath.empty()) {
+                            s.embedQueue.insert(fullFilePath);
                         }
 
                         s.console->info( "Found video \"{}\"", GetFileName( url.c_str( ) ) );

@@ -1,7 +1,13 @@
 #include <fbxppch.h>
 #include <fbxpstate.h>
 
+//#define _FbxPipeline_UnsafeFileReadWrite
+
+#if defined(_FbxPipeline_UnsafeFileReadWrite)
 #include <stdio.h>
+#endif
+
+
 #include <filesystem>
 #include <fstream>
 #include <iterator>
@@ -40,8 +46,16 @@ std::string& ReplaceSlashes( std::string& path ) {
     return path;
 }
 
+std::string ReplaceExtension( const char* path, const char* extension ) {
+    return std::filesystem::path( path ).replace_extension( extension ).string( );
+}
+
 std::string& RealPath( std::string& path ) {
     return path = std::filesystem::canonical( path ).string( );
+}
+
+std::string GetParentPath( const char* path ) {
+    return std::filesystem::path( path ).parent_path( ).string( );
 }
 
 std::string ResolveFullPath( const char* path ) {
@@ -57,14 +71,14 @@ std::string ResolveFullPath( const char* path ) {
 std::string FindFile( const char* filepath ) {
     auto& s = apemode::Get( );
 
-    assert( filepath && strlen( filepath ) );
-    const std::string filename = GetFileName( filepath );
-
-    for ( auto& searchLocation : s.searchLocations ) {
-        for ( auto fileOrFolderPath : std::filesystem::directory_iterator( searchLocation ) ) {
-            if ( std::filesystem::is_regular_file( fileOrFolderPath ) &&
-                 fileOrFolderPath.path( ).filename( ) == filename ) {
-                return ResolveFullPath( fileOrFolderPath.path( ).string( ).c_str( ) );
+    if ( filepath && strlen( filepath ) ) {
+        const std::string filename = GetFileName( filepath );
+        for ( auto& searchLocation : s.searchLocations ) {
+            for ( auto fileOrFolderPath : std::filesystem::directory_iterator( searchLocation ) ) {
+                if ( std::filesystem::is_regular_file( fileOrFolderPath ) &&
+                     fileOrFolderPath.path( ).filename( ) == filename ) {
+                    return ResolveFullPath( fileOrFolderPath.path( ).string( ).c_str( ) );
+                }
             }
         }
     }
@@ -83,10 +97,42 @@ bool WriteFile( const char* srcFilePath, const void* data, size_t dataSize ) {
     return false;
 }
 
-std::vector< uint8_t > ReadFile( const char* srcPath ) {
+std::string ReadTxtFile( const char* srcPath ) {
     const std::string srcFilePath = FindFile( srcPath );
 
-#if 1
+#if defined(_FbxPipeline_UnsafeFileReadWrite)
+    std::string fileBuffer;
+    if ( FILE* srcFile = fopen( srcFilePath.c_str( ), "r" ) ) {
+        fseek( srcFile, 0, SEEK_END );
+        size_t srcImgFileSize = ftell( srcFile );
+        fseek( srcFile, 0, SEEK_SET );
+        fileBuffer.resize( srcImgFileSize );
+        fread( &fileBuffer[ 0 ], 1, srcImgFileSize, srcFile );
+        fclose( srcFile );
+        srcFile = nullptr;
+    }
+
+    return fileBuffer;
+#else
+    /* Even though this code is safer and nicer, it's super slow. */
+
+    if ( false == srcFilePath.empty( ) ) {
+        std::ifstream filestream( srcFilePath, std::ios::binary );
+
+        if ( filestream.good( ) )
+            return std::string( std::istreambuf_iterator< char >( filestream ),
+                                std::istreambuf_iterator< char >( ) );
+    }
+
+    assert( false && "Failed to open file." );
+    return std::string( );
+#endif
+}
+
+std::vector< uint8_t > ReadBinFile( const char* srcPath ) {
+    const std::string srcFilePath = FindFile( srcPath );
+
+#if defined(_FbxPipeline_UnsafeFileReadWrite)
     std::vector< uint8_t > fileBuffer;
     if ( FILE* srcFile = fopen( srcFilePath.c_str( ), "rb" ) ) {
         fseek( srcFile, 0, SEEK_END );
@@ -100,7 +146,7 @@ std::vector< uint8_t > ReadFile( const char* srcPath ) {
 
     return fileBuffer;
 #else
-    /* Even though this code is safer and nicer, but it's super slow. */
+    /* Even though this code is safer and nicer, it's super slow. */
 
     if ( false == srcFilePath.empty( ) ) {
         std::ifstream filestream( srcFilePath, std::ios::binary );
@@ -117,50 +163,84 @@ std::vector< uint8_t > ReadFile( const char* srcPath ) {
 
 void InitializeSeachLocations( ) {
     auto& s = apemode::Get( );
-    auto& sl = s.options[ "e" ].as< std::vector< std::string > >( );
 
     std::set< std::string > searchDirectories;
-    for ( auto d : sl ) {
+
+    std::string inputFile = s.options[ "i" ].as< std::string >( );
+    ReplaceSlashes( inputFile );
+
+    const std::string fbmDirectory = ReplaceSlashes( ReplaceExtension( inputFile.c_str( ), "fbm" ) );
+    if ( DirectoryExists( fbmDirectory.c_str( ) ) ) {
+        searchDirectories.insert( fbmDirectory );
+    }
+
+    const std::string inputDirectory = ReplaceSlashes( GetParentPath( inputFile.c_str( ) ) );
+    if ( DirectoryExists( inputDirectory.c_str( ) ) ) {
+        searchDirectories.insert( inputDirectory );
+
+        /**
+         * Sketchfab archives usually have a file structure like:
+         *   > /c/path/to/model/ModelName/source/model.fbx
+         *   > /c/path/to/model/ModelName/textures/diffuse.png, ...
+         **/
+
+        std::string textureDirectorySketchfab = ReplaceSlashes( RealPath( ( inputDirectory + "/../textures/" ) ) );
+        if ( DirectoryExists( textureDirectorySketchfab.c_str( ) ) ) {
+            searchDirectories.insert( textureDirectorySketchfab );
+        } else {
+            /* Model file could be additionally archived, and when unarchived could be placed in the directory. */
+            textureDirectorySketchfab = ReplaceSlashes( RealPath( ( inputDirectory + "/../../textures/" ) ) );
+            if ( DirectoryExists( textureDirectorySketchfab.c_str( ) ) ) {
+                searchDirectories.insert( textureDirectorySketchfab );
+            }
+        }
+    }
+
+    auto& searchLocations = s.options["e"].as< std::vector< std::string > >();
+    for ( auto searchDirectory : searchLocations ) {
         bool addSubDirectories = false;
 
-        if ( d.size( ) > 4 ) {
-            const size_t ds = d.size( );
-            addSubDirectories |= d.compare( ds - 3, 3, "\\**" ) == 0;
-            addSubDirectories |= d.compare( ds - 3, 3, "/**" ) == 0;
+        if ( searchDirectory.size( ) > 4 ) {
+            const size_t ds = searchDirectory.size( );
+            addSubDirectories |= searchDirectory.compare( ds - 3, 3, "\\**" ) == 0;
+            addSubDirectories |= searchDirectory.compare( ds - 3, 3, "/**" ) == 0;
 
             if ( addSubDirectories )
-                d = d.substr( 0, d.size( ) - 2 );
+                searchDirectory = searchDirectory.substr( 0, searchDirectory.size( ) - 2 );
         }
 
-        if ( DirectoryExists( d.c_str( ) ) ) {
+        if ( DirectoryExists( searchDirectory.c_str( ) ) ) {
             if ( !addSubDirectories ) {
-                searchDirectories.insert( ResolveFullPath( d.c_str( ) ) );
+                searchDirectories.insert( ResolveFullPath( searchDirectory.c_str( ) ) );
             } else {
-                const std::string dd = ResolveFullPath( d.c_str( ) );
-                searchDirectories.insert( dd );
+                const std::string resolvedSearchDirectory = ResolveFullPath( searchDirectory.c_str( ) );
+                searchDirectories.insert( resolvedSearchDirectory );
 
-                for ( auto& rd : std::filesystem::recursive_directory_iterator( dd ) ) {
-                    if ( std::filesystem::is_directory( rd.path( ) ) )
-                        searchDirectories.insert( ResolveFullPath( rd.path( ).string( ).c_str( ) ) );
+                for ( auto& searchDirectoryIt : std::filesystem::recursive_directory_iterator( resolvedSearchDirectory ) ) {
+                    if ( std::filesystem::is_directory(searchDirectoryIt.path( ) ) )
+                        searchDirectories.insert( ResolveFullPath( searchDirectoryIt.path( ).string( ).c_str( ) ) );
                 }
             }
         }
     }
 
-    s.searchLocations.assign( searchDirectories.begin( ), searchDirectories.end( ) );
-    s.console->info( "Search locations:" );
-    for ( auto& l : s.searchLocations ) {
-        s.console->info( "\t{}", l );
-    }
+    if ( false == searchDirectories.empty( ) ) {
+        s.searchLocations.assign( searchDirectories.begin( ), searchDirectories.end( ) );
 
-    auto& ef = s.options[ "m" ].as< std::vector< std::string > >( );
-    for ( auto f : ef ) {
-        std::regex pattern( f );
+        s.console->info( "Search locations:" );
         for ( auto& searchLocation : s.searchLocations ) {
-            for ( auto fileOrFolderPath : std::filesystem::directory_iterator( searchLocation ) ) {
-                if ( std::filesystem::is_regular_file( fileOrFolderPath ) &&
-                     std::regex_match( fileOrFolderPath.path( ).string( ), pattern ) ) {
-                    s.embedQueue.insert( ResolveFullPath( fileOrFolderPath.path( ).string( ).c_str( ) ) );
+            s.console->info( "\t{}", searchLocation );
+        }
+
+        const auto& embedFilePatterns = s.options[ "m" ].as< std::vector< std::string > >( );
+        for ( auto& embedFilePattern : embedFilePatterns ) {
+            std::regex embedFilePatternRegex( embedFilePattern );
+            for ( auto& searchLocation : s.searchLocations ) {
+                for ( auto fileOrFolderPath : std::filesystem::directory_iterator( searchLocation ) ) {
+                    if ( std::filesystem::is_regular_file( fileOrFolderPath ) &&
+                         std::regex_match( fileOrFolderPath.path( ).string( ), embedFilePatternRegex ) ) {
+                        s.embedQueue.insert( ResolveFullPath( fileOrFolderPath.path( ).string( ).c_str( ) ) );
+                    }
                 }
             }
         }
