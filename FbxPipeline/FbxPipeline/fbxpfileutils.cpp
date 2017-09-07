@@ -163,20 +163,17 @@ std::vector< uint8_t > ReadBinFile( const char* srcPath ) {
 
 void InitializeSeachLocations( ) {
     auto& s = apemode::Get( );
-
-    std::set< std::string > searchDirectories;
+    auto searchLocations = s.options[ "e" ].as< std::vector< std::string > >( );
 
     std::string inputFile = s.options[ "i" ].as< std::string >( );
     ReplaceSlashes( inputFile );
 
     const std::string fbmDirectory = ReplaceSlashes( ReplaceExtension( inputFile.c_str( ), "fbm" ) );
-    if ( DirectoryExists( fbmDirectory.c_str( ) ) ) {
-        searchDirectories.insert( fbmDirectory );
-    }
+    searchLocations.push_back( fbmDirectory + "/**" );
 
     const std::string inputDirectory = ReplaceSlashes( GetParentPath( inputFile.c_str( ) ) );
     if ( DirectoryExists( inputDirectory.c_str( ) ) ) {
-        searchDirectories.insert( inputDirectory );
+        searchLocations.push_back( inputDirectory + "/**" );
 
         /**
          * Sketchfab archives usually have a file structure like:
@@ -186,17 +183,18 @@ void InitializeSeachLocations( ) {
 
         std::string textureDirectorySketchfab = ReplaceSlashes( RealPath( ( inputDirectory + "/../textures/" ) ) );
         if ( DirectoryExists( textureDirectorySketchfab.c_str( ) ) ) {
-            searchDirectories.insert( textureDirectorySketchfab );
+            searchLocations.push_back( textureDirectorySketchfab + "/**" );
         } else {
             /* Model file could be additionally archived, and when unarchived could be placed in the directory. */
             textureDirectorySketchfab = ReplaceSlashes( RealPath( ( inputDirectory + "/../../textures/" ) ) );
             if ( DirectoryExists( textureDirectorySketchfab.c_str( ) ) ) {
-                searchDirectories.insert( textureDirectorySketchfab );
+                searchLocations.push_back( textureDirectorySketchfab + "/**" );
             }
         }
     }
 
-    auto& searchLocations = s.options["e"].as< std::vector< std::string > >();
+    std::set< std::string > searchDirectories;
+
     for ( auto searchDirectory : searchLocations ) {
         bool addSubDirectories = false;
 
@@ -229,7 +227,7 @@ void InitializeSeachLocations( ) {
 
         s.console->info( "Search locations:" );
         for ( auto& searchLocation : s.searchLocations ) {
-            s.console->info( "\t{}", searchLocation );
+            s.console->info( "\t> {}", searchLocation );
         }
 
         const auto& embedFilePatterns = s.options[ "m" ].as< std::vector< std::string > >( );

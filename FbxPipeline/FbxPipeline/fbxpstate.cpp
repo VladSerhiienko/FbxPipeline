@@ -111,7 +111,6 @@ apemode::State::~State( ) {
 bool apemode::State::Initialize( ) {
     if (!manager || !scene) {
         InitializeSdkObjects( manager, scene );
-        InitializeSeachLocations( );
     }
 
     return manager && scene;

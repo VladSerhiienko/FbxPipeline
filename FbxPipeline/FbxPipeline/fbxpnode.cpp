@@ -2,6 +2,7 @@
 #include <fbxpstate.h>
 #include <queue>
 
+void InitializeSeachLocations( );
 void ExportMesh( FbxNode* node, apemode::Node& n, bool pack, bool optimize );
 void ExportMaterials( FbxScene* scene );
 void ExportMaterials( FbxNode* node, apemode::Node& n );
@@ -143,6 +144,7 @@ void PreprocessAnimation( FbxScene* pScene ) {
 void ExportScene( FbxScene* scene ) {
     auto& s = apemode::Get( );
 
+    InitializeSeachLocations( );
     PreprocessMeshes( scene );
     PreprocessAnimation( scene );
 
