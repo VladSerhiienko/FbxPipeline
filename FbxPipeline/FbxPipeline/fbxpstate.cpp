@@ -227,9 +227,12 @@ bool apemode::State::Finish( ) {
     std::vector< flatbuffers::Offset< apemodefb::FileFb > > fileOffsets;
     fileOffsets.reserve( embedQueue.size( ) );
     for ( auto& embedded : embedQueue ) {
-        std::vector< uint8_t > fileBuffer = ReadFile( embedded.c_str( ) );
-        if ( !fileBuffer.empty( ) ) {
-            fileOffsets.push_back( apemodefb::CreateFileFbDirect( builder, (uint32_t) fileOffsets.size( ), 0, &fileBuffer ) );
+        if ( false == embedded.empty( ) ) {
+            std::vector< uint8_t > fileBuffer = ReadFile( embedded.c_str( ) );
+            if ( !fileBuffer.empty( ) ) {
+                fileOffsets.push_back(
+                    apemodefb::CreateFileFbDirect( builder, (uint32_t) fileOffsets.size( ), 0, &fileBuffer ) );
+            }
         }
     }
 

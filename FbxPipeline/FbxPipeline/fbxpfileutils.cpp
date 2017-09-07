@@ -1,6 +1,7 @@
 #include <fbxppch.h>
 #include <fbxpstate.h>
 
+#include <stdio.h>
 #include <filesystem>
 #include <fstream>
 #include <iterator>

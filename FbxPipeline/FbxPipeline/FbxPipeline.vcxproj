@@ -92,7 +92,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir);$(FBX_SDK)include\;$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\snappy\;$(SolutionDir)..\ThirdParty\;$(SolutionDir)..\ThirdParty\mathfu\include;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\lua;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;$(SolutionDir)..\ThirdParty\draco;$(SolutionDir)..\ThirdParty\draco\io\;$(SolutionDir)..\ThirdParty\draco\compression\;$(SolutionDir)..\ThirdParty\draco\mesh\;$(SolutionDir)..\ThirdParty\draco\core\;$(SolutionDir)..\ThirdParty\lz4\lib\;$(SolutionDir)..\ThirdParty\cityhash\src\;$(SolutionDir)..\ThirdParty\forsythtriangleorderoptimizer\;$(SolutionDir)..\ThirdParty\vcache_optimizer\vcache_optimizer\;$(SolutionDir)..\ThirdParty\meshoptimizer\src\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>fbxppch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>KFBX_DLLINFO;FBXSDK_SHARED;FBXP_DEBUG=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>KFBX_DLLINFO;FBXSDK_SHARED;FBXP_DEBUG=1;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -119,7 +119,7 @@ exit 0</Command>
       <AdditionalIncludeDirectories>$(ProjectDir);$(FBX_SDK)include\;$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\;$(SolutionDir)..\ThirdParty\snappy\;$(SolutionDir)..\ThirdParty\;$(SolutionDir)..\ThirdParty\mathfu\include;$(SolutionDir)..\ThirdParty\mathfu\dependencies\vectorial\include\;$(SolutionDir)..\ThirdParty\lua;$(SolutionDir)..\ThirdParty\flatbuffers\include\;$(SolutionDir)..\ThirdParty\flatbuffers\grpc\;$(SolutionDir)..\ThirdParty\cxxopts\include\;$(SolutionDir)..\ThirdParty\spdlog\include\;$(SolutionDir)..\ThirdParty\draco;$(SolutionDir)..\ThirdParty\draco\io\;$(SolutionDir)..\ThirdParty\draco\compression\;$(SolutionDir)..\ThirdParty\draco\mesh\;$(SolutionDir)..\ThirdParty\draco\core\;$(SolutionDir)..\ThirdParty\lz4\lib\;$(SolutionDir)..\ThirdParty\cityhash\src\;$(SolutionDir)..\ThirdParty\forsythtriangleorderoptimizer\;$(SolutionDir)..\ThirdParty\vcache_optimizer\vcache_optimizer\;$(SolutionDir)..\ThirdParty\meshoptimizer\src\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>fbxppch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>KFBX_DLLINFO;FBXSDK_SHARED;FBXP_DEBUG=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>KFBX_DLLINFO;FBXSDK_SHARED;FBXP_DEBUG=1;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(FBX_SDK)lib\vs2015\$(PlatformTarget)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
