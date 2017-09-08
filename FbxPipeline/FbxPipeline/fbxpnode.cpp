@@ -144,13 +144,14 @@ void PreprocessAnimation( FbxScene* pScene ) {
 void ExportScene( FbxScene* scene ) {
     auto& s = apemode::Get( );
 
-    InitializeSeachLocations( );
     PreprocessMeshes( scene );
     PreprocessAnimation( scene );
 
     // Pre-allocate nodes and attributes.
     s.nodes.reserve( (size_t) scene->GetNodeCount( ) );
     s.meshes.reserve( (size_t) scene->GetNodeCount( ) );
+
+    InitializeSeachLocations( );
 
     // We want shared materials, so export all the scene material first
     // and reference them from the node scope by their indices.

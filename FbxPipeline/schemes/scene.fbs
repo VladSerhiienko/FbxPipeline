@@ -33,10 +33,11 @@ enum EIndexTypeFb : uint {
 	Count,
 }
 enum EMaterialPropTypeFb : uint {
-	Scalar,
-	Color,
+	Bool,
+	Float,
+	Float2,
+	Float3,
 	Texture,
-	Video,
 }
 enum EAnimCurveProperty : uint {
 	LclTranslation,

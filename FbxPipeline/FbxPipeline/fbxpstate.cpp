@@ -306,7 +306,7 @@ uint64_t apemode::State::PushName( std::string const& name ) {
 #if _DEBUG
     auto it = names.find( hash );
     if ( it == names.end( ) ) {
-        console->trace( "Adding {} -> {}", hash, name );
+        console->trace( "Adding name: {} -> {}", hash, name );
     }
 #endif
 
