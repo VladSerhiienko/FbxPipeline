@@ -234,13 +234,13 @@ exit 0</Command>
   <ItemGroup>
     <CustomBuild Include="..\schemes\scene.fbs">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)bin\flatc\$(PlatformToolset)$(Platform)$(Configuration)\flatc -o $(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration) -c $(SolutionDir)schemes\scene.fbs
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)bin\flatc\$(PlatformToolset)$(Platform)$(Configuration)\flatc -o $(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration) -c $(SolutionDir)schemes\scene.fbs --gen-mutable
 $(SolutionDir)bin\flatc\$(PlatformToolset)$(Platform)$(Configuration)\flatc -o $(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration) -s $(SolutionDir)schemes\scene.fbs</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)bin\flatc\$(PlatformToolset)$(Platform)$(Configuration)\flatc -o $(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration) -c $(SolutionDir)schemes\scene.fbs
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)bin\flatc\$(PlatformToolset)$(Platform)$(Configuration)\flatc -o $(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration) -c $(SolutionDir)schemes\scene.fbs --gen-mutable
 $(SolutionDir)bin\flatc\$(PlatformToolset)$(Platform)$(Configuration)\flatc -o $(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration) -s $(SolutionDir)schemes\scene.fbs</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)bin\flatc\$(PlatformToolset)$(Platform)$(Configuration)\flatc -o $(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration) -c $(SolutionDir)schemes\scene.fbs
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)bin\flatc\$(PlatformToolset)$(Platform)$(Configuration)\flatc -o $(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration) -c $(SolutionDir)schemes\scene.fbs --gen-mutable
 $(SolutionDir)bin\flatc\$(PlatformToolset)$(Platform)$(Configuration)\flatc -o $(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration) -s $(SolutionDir)schemes\scene.fbs</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)bin\flatc\$(PlatformToolset)$(Platform)$(Configuration)\flatc -o $(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration) -c $(SolutionDir)schemes\scene.fbs
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)bin\flatc\$(PlatformToolset)$(Platform)$(Configuration)\flatc -o $(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration) -c $(SolutionDir)schemes\scene.fbs --gen-mutable
 $(SolutionDir)bin\flatc\$(PlatformToolset)$(Platform)$(Configuration)\flatc -o $(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration) -s $(SolutionDir)schemes\scene.fbs</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\scene_generated.h;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)generated\$(PlatformToolset)$(Platform)$(Configuration)\scene_generated.h;%(Outputs)</Outputs>
