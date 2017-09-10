@@ -19,7 +19,6 @@ void SplitFilename( const std::string& filePath, std::string& parentFolderName, 
 bool InitializeSdkObjects( FbxManager*& pManager, FbxScene*& pScene );
 void DestroySdkObjects( FbxManager* pManager );
 bool LoadScene( FbxManager* pManager, FbxDocument* pScene, const char* pFilename );
-void InitializeSeachLocations( );
 
 apemode::State  s;
 apemode::State& apemode::Get( ) {
