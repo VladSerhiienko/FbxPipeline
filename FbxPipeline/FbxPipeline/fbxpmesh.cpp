@@ -367,15 +367,15 @@ bool GetSubsets( FbxMesh* mesh, apemode::Mesh& m, std::vector< apemodefb::Subset
  * Returns the value from the element layer by index with respect to reference mode.
  **/
 template < typename TElementLayer, typename TElementValue >
-TElementValue GetElementValue( const TElementLayer* elementLayer, uint32_t i ) {
-    assert( elementLayer );
-    switch ( const auto referenceMode = elementLayer->GetReferenceMode( ) ) {
+TElementValue GetElementValue( const TElementLayer* pElementLayer, uint32_t i ) {
+    assert( pElementLayer );
+    switch ( const auto referenceMode = pElementLayer->GetReferenceMode( ) ) {
         case FbxLayerElement::EReferenceMode::eDirect:
-            return elementLayer->GetDirectArray( ).GetAt( i );
+            return pElementLayer->GetDirectArray( ).GetAt( i );
         case FbxLayerElement::EReferenceMode::eIndex:
         case FbxLayerElement::EReferenceMode::eIndexToDirect: {
-            const int j = elementLayer->GetIndexArray( ).GetAt( i );
-            return elementLayer->GetDirectArray( ).GetAt( j );
+            const int j = pElementLayer->GetIndexArray( ).GetAt( i );
+            return pElementLayer->GetDirectArray( ).GetAt( j );
         }
 
         default:
@@ -383,7 +383,7 @@ TElementValue GetElementValue( const TElementLayer* elementLayer, uint32_t i ) {
                 "Reference mode {} of layer \"{}\" "
                 "is not supported.",
                 referenceMode,
-                elementLayer->GetName( ) );
+                pElementLayer->GetName( ) );
 
             DebugBreak( );
             return TElementValue( );
@@ -394,27 +394,27 @@ TElementValue GetElementValue( const TElementLayer* elementLayer, uint32_t i ) {
  * Returns the value from the element layer with respect to reference and mapping modes.
  **/
 template < typename TElementLayer, typename TElementValue >
-TElementValue GetElementValue( const TElementLayer* elementLayer,
+TElementValue GetElementValue( const TElementLayer* pElementLayer,
                                uint32_t             controlPointIndex,
                                uint32_t             vertexIndex,
                                uint32_t             polygonIndex ) {
-    if ( nullptr == elementLayer )
+    if ( nullptr == pElementLayer )
         return TElementValue( );
 
-    switch ( const auto mappingMode = elementLayer->GetMappingMode( ) ) {
+    switch ( const auto mappingMode = pElementLayer->GetMappingMode( ) ) {
         case FbxLayerElement::EMappingMode::eByControlPoint:
-            return GetElementValue< TElementLayer, TElementValue >( elementLayer, controlPointIndex );
+            return GetElementValue< TElementLayer, TElementValue >( pElementLayer, controlPointIndex );
         case FbxLayerElement::EMappingMode::eByPolygon:
-            return GetElementValue< TElementLayer, TElementValue >( elementLayer, polygonIndex );
+            return GetElementValue< TElementLayer, TElementValue >( pElementLayer, polygonIndex );
         case FbxLayerElement::EMappingMode::eByPolygonVertex:
-            return GetElementValue< TElementLayer, TElementValue >( elementLayer, vertexIndex );
+            return GetElementValue< TElementLayer, TElementValue >( pElementLayer, vertexIndex );
 
         default:
             apemode::Get( ).console->error(
                 "Mapping mode {} of layer \"{}\" "
                 "is not supported.",
                 mappingMode,
-                elementLayer->GetName( ) );
+                pElementLayer->GetName( ) );
 
             DebugBreak( );
             return TElementValue( );
@@ -425,13 +425,13 @@ TElementValue GetElementValue( const TElementLayer* elementLayer,
  * Returns nullptr in case element layer has unsupported properties or is null.
  **/
 template < typename TElementLayer >
-const TElementLayer* VerifyElementLayer( const TElementLayer* elementLayer ) {
-    if ( nullptr == elementLayer ) {
+const TElementLayer* VerifyElementLayer( const TElementLayer* pElementLayer ) {
+    if ( nullptr == pElementLayer ) {
         apemode::Get( ).console->error( "Missing element layer." );
         return nullptr;
     }
 
-    switch ( const auto mappingMode = elementLayer->GetMappingMode( ) ) {
+    switch ( const auto mappingMode = pElementLayer->GetMappingMode( ) ) {
         case FbxLayerElement::EMappingMode::eByControlPoint:
         case FbxLayerElement::EMappingMode::eByPolygon:
         case FbxLayerElement::EMappingMode::eByPolygonVertex:
@@ -441,11 +441,11 @@ const TElementLayer* VerifyElementLayer( const TElementLayer* elementLayer ) {
                 "Mapping mode {} of layer \"{}\" "
                 "is not supported.",
                 mappingMode,
-                elementLayer->GetName( ) );
+                pElementLayer->GetName( ) );
             return nullptr;
     }
 
-    switch ( const auto referenceMode = elementLayer->GetReferenceMode( ) ) {
+    switch ( const auto referenceMode = pElementLayer->GetReferenceMode( ) ) {
         case FbxLayerElement::EReferenceMode::eDirect:
         case FbxLayerElement::EReferenceMode::eIndex:
         case FbxLayerElement::EReferenceMode::eIndexToDirect:
@@ -455,21 +455,33 @@ const TElementLayer* VerifyElementLayer( const TElementLayer* elementLayer ) {
                 "Reference mode {} of layer \"{}\" "
                 "is not supported.",
                 referenceMode,
-                elementLayer->GetName( ) );
+                pElementLayer->GetName( ) );
             return nullptr;
     }
 
-    return elementLayer;
+    return pElementLayer;
 }
 
 /**
  * Helper structure to assign vertex property values
  **/
 struct StaticVertex {
-    float position  [ 3 ];
-    float normal    [ 3 ];
-    float tangent   [ 4 ];
-    float texCoords [ 2 ];
+    float position[ 3 ];
+    float normal[ 3 ];
+    float tangent[ 4 ];
+    float texCoords[ 2 ];
+};
+
+/**
+ * Helper structure to assign vertex property values
+ **/
+struct StaticSkinnedVertex {
+    float position[ 3 ];
+    float normal[ 3 ];
+    float tangent[ 4 ];
+    float texCoords[ 2 ];
+    float weights[ 4 ];
+    float indices[ 4 ];
 };
 
 //
@@ -613,31 +625,62 @@ void Pack( const apemodefb::StaticVertexFb* vertices,
            const mathfu::vec2               texcoordsMax );
 
 template < typename TIndex >
-void ExportMesh( FbxNode* node, FbxMesh* mesh, apemode::Node& n, apemode::Mesh& m, uint32_t vertexCount, bool pack, bool optimize ) {
+void ExportMesh( FbxNode*       pNode,
+                 FbxMesh*       pMesh,
+                 apemode::Node& n,
+                 apemode::Mesh& m,
+                 uint32_t       vertexCount,
+                 bool           pack,
+                 FbxSkin*       pSkin,
+                 bool           optimize ) {
     auto& s = apemode::Get( );
 
-    const uint16_t vertexStride           = (uint16_t) sizeof( apemodefb::StaticVertexFb );
-    const uint32_t vertexBufferSize       = vertexCount * vertexStride;
-    const uint16_t packedVertexStride     = (uint16_t) sizeof( apemodefb::PackedVertexFb );
-    const uint32_t packedVertexBufferSize = vertexCount * packedVertexStride;
+    const uint16_t vertexStride                  = (uint16_t) sizeof( apemodefb::StaticVertexFb );
+    const uint32_t vertexBufferSize              = vertexCount * vertexStride;
+    const uint16_t skinnedVertexStride           = (uint16_t) sizeof( apemodefb::StaticSkinnedVertexFb );
+    const uint32_t skinnedVertexBufferSize       = vertexCount * skinnedVertexStride;
+    const uint16_t packedVertexStride            = (uint16_t) sizeof( apemodefb::PackedVertexFb );
+    const uint32_t packedVertexBufferSize        = vertexCount * packedVertexStride;
+    const uint16_t packedSkinnedVertexStride     = (uint16_t) sizeof( apemodefb::PackedSkinnedVertexFb );
+    const uint32_t packedSkinnedVertexBufferSize = vertexCount * packedSkinnedVertexStride;
 
-    m.vertices.resize( vertexBufferSize );
+    m.vertices.resize( nullptr != pSkin ? skinnedVertexBufferSize : vertexBufferSize );
 
     mathfu::vec3 positionMin;
     mathfu::vec3 positionMax;
     mathfu::vec2 texcoordMin;
     mathfu::vec2 texcoordMax;
 
-    InitializeVertices( mesh,
-                        m,
-                        reinterpret_cast< StaticVertex* >( m.vertices.data( ) ),
-                        vertexCount,
-                        positionMin,
-                        positionMax,
-                        texcoordMin,
-                        texcoordMax );
+    if ( nullptr == pSkin )
+        InitializeVertices( pMesh,
+                            m,
+                            reinterpret_cast< StaticVertex* >( m.vertices.data( ) ),
+                            vertexCount,
+                            positionMin,
+                            positionMax,
+                            texcoordMin,
+                            texcoordMax );
+    else
+        InitializeVertices( pMesh,
+                            m,
+                            reinterpret_cast< StaticSkinnedVertex* >( m.vertices.data( ) ),
+                            vertexCount,
+                            positionMin,
+                            positionMax,
+                            texcoordMin,
+                            texcoordMax );
 
-    GetSubsets< TIndex >( mesh, m, m.subsets );
+    if ( nullptr != pSkin ) {
+        const auto clusterCount = pSkin->GetClusterCount( );
+        for ( auto i = 0; i < clusterCount; ++i ) {
+            auto pCluster = pSkin->GetCluster( i );
+            const auto indexCount = pCluster->GetControlPointIndicesCount( );
+            const auto weights = pCluster->GetControlPointWeights( );
+            const auto indices = pCluster->GetControlPointIndices( );
+        }
+    }
+
+    GetSubsets< TIndex >( pMesh, m, m.subsets );
 
     if ( m.subsets.empty( ) ) {
         m.subsets.push_back( apemodefb::SubsetFb( 0, 0, vertexCount ) );
@@ -695,8 +738,8 @@ void ExportMesh( FbxNode* node, FbxMesh* mesh, apemode::Node& n, apemode::Mesh& 
     if ( pack ) {
         auto const positionScale = positionMax - positionMin;
         auto const texcoordScale = texcoordMax - texcoordMin;
-        apemodefb::vec3 bboxScale( positionScale.x, positionScale.y, positionScale.z );
-        apemodefb::vec2 uvScale( texcoordScale.x, texcoordScale.y );
+        apemodefb::vec3 const bboxScale( positionScale.x, positionScale.y, positionScale.z );
+        apemodefb::vec2 const uvScale( texcoordScale.x, texcoordScale.y );
 
         m.submeshes.emplace_back( bboxMin,                         // bbox min
                                   bboxMax,                         // bbox max
@@ -749,19 +792,28 @@ void ExportMesh( FbxNode* node, apemode::Node& n, bool pack, bool optimize ) {
             s.console->warn( "Mesh \"{}\" was triangulated (success).", node->GetName( ) );
         }
 
-        if ( const auto deformerCount = mesh->GetDeformerCount( ) ) {
-            s.console->warn( "Mesh \"{}\" has {} deformers (ignored).", node->GetName( ), deformerCount );
+        if ( const auto deformerCount = mesh->GetDeformerCount( ) - mesh->GetDeformerCount( fbxsdk::FbxDeformer::eSkin ) ) {
+            s.console->warn( "Mesh \"{}\" has {} non-skin deformers (will be ignored).", node->GetName( ), deformerCount );
+        }
+
+        if ( const auto skinCount = mesh->GetDeformerCount( fbxsdk::FbxDeformer::eSkin ) ) {
+            if ( skinCount > 1 ) {
+                s.console->warn( "Mesh \"{}\" has {} skin deformers (only one will be included).", node->GetName( ), skinCount );
+            }
         }
 
         n.meshId = (uint32_t) s.meshes.size( );
         s.meshes.emplace_back( );
         apemode::Mesh& m = s.meshes.back( );
 
-        const uint32_t vertexCount = mesh->GetPolygonCount( ) * 3;
+        FbxSkin* pSkin = 0 != mesh->GetDeformerCount( fbxsdk::FbxDeformer::eSkin )
+                       ? FbxCast< FbxSkin >( mesh->GetDeformer( 0, fbxsdk::FbxDeformer::eSkin ) )
+                       : nullptr;
 
+        const uint32_t vertexCount = mesh->GetPolygonCount() * 3;
         if ( vertexCount < std::numeric_limits< uint16_t >::max( ) )
-            ExportMesh< uint16_t >( node, mesh, n, m, vertexCount, pack, optimize );
+            ExportMesh< uint16_t >( node, mesh, n, m, vertexCount, pack, pSkin, optimize );
         else
-            ExportMesh< uint32_t >( node, mesh, n, m, vertexCount, pack, optimize );
+            ExportMesh< uint32_t >( node, mesh, n, m, vertexCount, pack, pSkin, optimize );
     }
 }
