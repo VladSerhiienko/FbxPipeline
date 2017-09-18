@@ -484,12 +484,96 @@ struct StaticSkinnedVertex {
     float indices[ 4 ];
 };
 
+using BoneWeightType = float;
+using BoneIndexType = uint16_t;
+static const BoneIndexType sInvalidIndex = std::numeric_limits< BoneIndexType >::max( );
+
+enum EBoneCountPerControlPoint : BoneIndexType {
+    eBoneCountPerControlPoint_4 = 4,
+    eBoneCountPerControlPoint_8 = 8,
+};
+
+template < BoneIndexType TBoneCountPerControlPoint = eBoneCountPerControlPoint_4 >
+struct TControlPointSkinInfo {
+
+    static const BoneIndexType kBoneCountPerControlPoint = TBoneCountPerControlPoint;
+
+    BoneWeightType weights[ kBoneCountPerControlPoint ];
+    BoneIndexType  indices[ kBoneCountPerControlPoint ];
+
+    TControlPointSkinInfo( ) {
+        for ( BoneIndexType i = 0; i < kBoneCountPerControlPoint; ++i ) {
+            weights[ i ] = 0.0f;
+            indices[ i ] = sInvalidIndex;
+        }
+    }
+
+    /** Assignes bone to the control point.
+     * @param weight Bone influence weight.
+     * @param index Bone index.
+     * @return true of the bone was added, false otherwise.
+     **/
+    bool AddBone( float weight, uint16_t index ) {
+
+        for ( BoneIndexType i = 0; i < kBoneCountPerControlPoint; ++i ) {
+            if ( indices[ i ] == sInvalidIndex ) {
+                weights[ i ] = weight;
+                indices[ i ] = index;
+                return true;
+            }
+        }
+
+        for ( BoneIndexType i = 0; i < kBoneCountPerControlPoint; ++i ) {
+            if ( weights[ i ] < weight ) {
+                weights[ i ] = weight;
+                indices[ i ] = index;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /** Prepares assigned bones for GPU skinning.
+     * @note Ensures the sum fo the weights is exactly one.
+     *       Ensures the indices are valid (vertex packing will get zero or positive bone index).
+     **/
+    void NormalizeWeights( ) {
+        for ( BoneIndexType i = 0; i < kBoneCountPerControlPoint; ++i ) {
+            if ( indices[ i ] == sInvalidIndex ) {
+                assert( 0.0f == weights[ i ] );
+                indices[ i ] = 0;
+            }
+        }
+
+        BoneWeightType totalWeight = BoneWeightType( 0 );
+
+        for ( BoneIndexType i = 0; i < kBoneCountPerControlPoint; ++i ) {
+            totalWeight += weights[ i ];
+        }
+
+        for ( BoneIndexType i = 0; i < kBoneCountPerControlPoint; ++i ) {
+            weights[ i ] /= totalWeight;
+        }
+    }
+};
+
 //
 // Flatbuffers takes care about correct platform-independent alignment.
 //
 
 static_assert( sizeof( StaticVertex ) == sizeof( apemodefb::StaticVertexFb ), "Must match" );
-static_assert( sizeof( apemodefb::PackedVertexFb ) == sizeof( apemodefb::PackedVertexFb ), "Must match" );
+static_assert( sizeof( StaticSkinnedVertex ) == sizeof( apemodefb::StaticSkinnedVertexFb ), "Must match" );
+
+//
+// TODO: Add winding order parameter for each mesh.
+//
+
+template < typename TIndexType = int >
+struct TPolygonVertexOrder {
+    TIndexType indices[ 3 ] = {0, 2, 1}; // CCW
+    // TIndexType indices[ 3 ]  = {0, 1, 2}; // CW
+};
 
 /**
  * Initialize vertices with very basic properties like 'position', 'normal', 'tangent', 'texCoords'.
@@ -504,7 +588,9 @@ void InitializeVertices( FbxMesh*       mesh,
                          mathfu::vec3&  positionMax,
                          mathfu::vec2&  texcoordMin,
                          mathfu::vec2&  texcoordMax ) {
+
     auto& s = apemode::Get( );
+
     const uint32_t cc = (uint32_t) mesh->GetControlPointsCount( );
     const uint32_t pc = (uint32_t) mesh->GetPolygonCount( );
 
@@ -534,7 +620,7 @@ void InitializeVertices( FbxMesh*       mesh,
         // Having this array we can easily control polygon winding order.
         // Since mesh is triangular we can make it static [3] at compile-time.
         // for ( const uint32_t pvi : {0, 1, 2} ) {
-        for ( const uint32_t pvi : {0, 2, 1} ) {
+        for ( const uint32_t pvi : TPolygonVertexOrder< uint32_t >( ).indices ) {
             const uint32_t ci = (uint32_t) mesh->GetPolygonVertex( (int) pi, (int) pvi );
 
             const auto cp = mesh->GetControlPointAt( ci );
@@ -624,6 +710,16 @@ void Pack( const apemodefb::StaticVertexFb* vertices,
            const mathfu::vec2               texcoordsMin,
            const mathfu::vec2               texcoordsMax );
 
+uint32_t PackedMaxBoneCount( );
+
+void Pack( const apemodefb::StaticSkinnedVertexFb* vertices,
+           apemodefb::PackedSkinnedVertexFb*       packed,
+           const uint32_t                          vertexCount,
+           const mathfu::vec3                      positionMin,
+           const mathfu::vec3                      positionMax,
+           const mathfu::vec2                      texcoordsMin,
+           const mathfu::vec2                      texcoordsMax );
+
 template < typename TIndex >
 void ExportMesh( FbxNode*       pNode,
                  FbxMesh*       pMesh,
@@ -633,6 +729,7 @@ void ExportMesh( FbxNode*       pNode,
                  bool           pack,
                  FbxSkin*       pSkin,
                  bool           optimize ) {
+
     auto& s = apemode::Get( );
 
     const uint16_t vertexStride                  = (uint16_t) sizeof( apemodefb::StaticVertexFb );
@@ -644,14 +741,13 @@ void ExportMesh( FbxNode*       pNode,
     const uint16_t packedSkinnedVertexStride     = (uint16_t) sizeof( apemodefb::PackedSkinnedVertexFb );
     const uint32_t packedSkinnedVertexBufferSize = vertexCount * packedSkinnedVertexStride;
 
-    m.vertices.resize( nullptr != pSkin ? skinnedVertexBufferSize : vertexBufferSize );
-
     mathfu::vec3 positionMin;
     mathfu::vec3 positionMax;
     mathfu::vec2 texcoordMin;
     mathfu::vec2 texcoordMax;
 
-    if ( nullptr == pSkin )
+    if ( nullptr == pSkin ) {
+        m.vertices.resize( vertexBufferSize );
         InitializeVertices( pMesh,
                             m,
                             reinterpret_cast< StaticVertex* >( m.vertices.data( ) ),
@@ -660,29 +756,102 @@ void ExportMesh( FbxNode*       pNode,
                             positionMax,
                             texcoordMin,
                             texcoordMax );
-    else
-        InitializeVertices( pMesh,
-                            m,
-                            reinterpret_cast< StaticSkinnedVertex* >( m.vertices.data( ) ),
-                            vertexCount,
-                            positionMin,
-                            positionMax,
-                            texcoordMin,
-                            texcoordMax );
+    } else {
+        m.vertices.resize( skinnedVertexBufferSize );
 
-    if ( nullptr != pSkin ) {
+        /* Currently stick to 4 bones per vertex. */
+        using ControlPointSkinInfo = TControlPointSkinInfo<>;
+        std::vector< ControlPointSkinInfo > skinInfos;
+
+        /* Allocate skin info for each control point. */
+        skinInfos.resize( pMesh->GetControlPointsCount( ) );
+
+        /* Populate skin info for each control point. */
         const auto clusterCount = pSkin->GetClusterCount( );
+
+        if ( pack && clusterCount > PackedMaxBoneCount( ) ) {
+            s.console->warn( "Mesh \"{}\" has too large skin, {} bones ({} supported for packing).",
+                             pNode->GetName( ),
+                             clusterCount,
+                             PackedMaxBoneCount( ) );
+        }
+
         for ( auto i = 0; i < clusterCount; ++i ) {
-            auto pCluster = pSkin->GetCluster( i );
+
+            const auto pCluster = pSkin->GetCluster( i );
+            assert( nullptr != pCluster );
+
             const auto indexCount = pCluster->GetControlPointIndicesCount( );
-            const auto weights = pCluster->GetControlPointWeights( );
-            const auto indices = pCluster->GetControlPointIndices( );
+            const auto pWeights = pCluster->GetControlPointWeights( );
+            const auto pIndices = pCluster->GetControlPointIndices( );
+
+            assert( 0 != indexCount );
+            assert( nullptr != pWeights );
+            assert( nullptr != pIndices );
+
+            for ( int j = 0; j < indexCount; ++j ) {
+                /* Assign bone (weight + index) for the control point. */
+                skinInfos[ pIndices[ j ] ].AddBone( (BoneWeightType) pWeights[ j ], (BoneIndexType) i );
+            }
+        }
+
+        std::set< BoneIndexType > uniqueUsedIndices;
+
+        /* Normalize bone weights for each control point. */
+        for ( auto& skinInfo : skinInfos ) {
+            if ( pack )
+                for ( BoneIndexType bi = 0; bi < ControlPointSkinInfo::kBoneCountPerControlPoint; ++bi ) {
+                    uniqueUsedIndices.insert( skinInfo.indices[ bi ] );
+                }
+
+            skinInfo.NormalizeWeights( );
+        }
+
+        /* Remove invalid index to be 100% the bones cannot be reordered. */
+        uniqueUsedIndices.erase( uniqueUsedIndices.find( sInvalidIndex ) );
+
+        if ( pack )
+            if ( uniqueUsedIndices.size( ) > PackedMaxBoneCount( ) ) {
+                s.console->error( "Mesh \"{}\" is influenced by {} bones (only {} \"active\" bones supported).",
+                                  pNode->GetName( ),
+                                  uniqueUsedIndices.size( ),
+                                  PackedMaxBoneCount( ) );
+
+                s.console->warn( "Mesh \"{}\" will exported as static one.", pNode->GetName( ) );
+                return ExportMesh< TIndex >( pNode, pMesh, n, m, vertexCount, pack, nullptr, optimize );
+            } else {
+                // TODO: Bone reordering: Reorder bones meet "max 256" requirement
+                s.console->error( "Bone reordering is not yet supported." );
+                s.console->warn( "Mesh \"{}\" will exported as static one.", pNode->GetName( ) );
+                return ExportMesh< TIndex >( pNode, pMesh, n, m, vertexCount, pack, nullptr, optimize );
+            }
+
+        auto pSkinnedVertices = reinterpret_cast< StaticSkinnedVertex* >( m.vertices.data( ) );
+        InitializeVertices( pMesh, m, pSkinnedVertices, vertexCount, positionMin, positionMax, texcoordMin, texcoordMax );
+
+        /* Copy bone weights and indices to each skinned vertex. */
+
+        uint32_t vi = 0;
+        for ( int pi = 0; pi < pMesh->GetPolygonCount( ); ++pi ) {
+            for ( const int pvi : TPolygonVertexOrder< int >( ).indices ) {
+
+                const int ci = pMesh->GetPolygonVertex( pi, pvi );
+                assert( ci >= 0 );
+
+                for ( BoneIndexType bi = 0; bi < ControlPointSkinInfo::kBoneCountPerControlPoint; ++bi ) {
+                    pSkinnedVertices[ vi ].weights[ bi ] = (float) skinInfos[ ci ].weights[ bi ];
+                    pSkinnedVertices[ vi ].indices[ bi ] = (float) skinInfos[ ci ].indices[ bi ];
+                }
+
+                ++vi;
+            }
         }
     }
 
     GetSubsets< TIndex >( pMesh, m, m.subsets );
 
     if ( m.subsets.empty( ) ) {
+        /* Independently from GetSubsets implementation make sure there is at least one subset. */
         m.subsets.push_back( apemodefb::SubsetFb( 0, 0, vertexCount ) );
     }
 
@@ -716,18 +885,34 @@ void ExportMesh( FbxNode*       pNode,
     */
 
     if ( pack ) {
-        std::vector< apemodefb::StaticVertexFb > tempBuffer;
-        tempBuffer.resize( vertexCount );
-        memcpy( tempBuffer.data( ), m.vertices.data( ), m.vertices.size( ) );
 
-        m.vertices.resize( packedVertexBufferSize );
-        Pack( reinterpret_cast< apemodefb::StaticVertexFb* >( tempBuffer.data( ) ),
-              reinterpret_cast< apemodefb::PackedVertexFb* >( m.vertices.data( ) ),
-              vertexCount,
-              positionMin,
-              positionMax,
-              texcoordMin,
-              texcoordMax );
+        if (nullptr == pSkin) {
+            std::vector< apemodefb::StaticVertexFb > tempBuffer;
+            tempBuffer.resize( vertexCount );
+            memcpy( tempBuffer.data( ), m.vertices.data( ), m.vertices.size( ) );
+
+            m.vertices.resize( packedVertexBufferSize );
+            Pack( reinterpret_cast< apemodefb::StaticVertexFb* >( tempBuffer.data( ) ),
+                  reinterpret_cast< apemodefb::PackedVertexFb* >( m.vertices.data( ) ),
+                  vertexCount,
+                  positionMin,
+                  positionMax,
+                  texcoordMin,
+                  texcoordMax );
+        } else {
+            std::vector< apemodefb::StaticSkinnedVertexFb > tempBuffer;
+            tempBuffer.resize( vertexCount );
+            memcpy( tempBuffer.data( ), m.vertices.data( ), m.vertices.size( ) );
+
+            m.vertices.resize( packedVertexBufferSize );
+            Pack( reinterpret_cast< apemodefb::StaticSkinnedVertexFb* >( tempBuffer.data( ) ),
+                  reinterpret_cast< apemodefb::PackedSkinnedVertexFb* >( m.vertices.data( ) ),
+                  vertexCount,
+                  positionMin,
+                  positionMax,
+                  texcoordMin,
+                  texcoordMax );
+        }
     }
 
     apemodefb::vec3 bboxMin( positionMin.x, positionMin.y, positionMin.z );

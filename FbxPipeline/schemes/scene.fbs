@@ -23,7 +23,9 @@ enum EBlendMode : uint {
 }
 enum EVertexFormat : uint {
     Static,
+    StaticSkinned,
 	Packed,
+	PackedSkinned,
 }
 enum EIndexTypeFb : uint {
 	UInt16,

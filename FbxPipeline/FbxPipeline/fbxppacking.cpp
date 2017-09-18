@@ -183,6 +183,37 @@ uint32_t PackNormal_8_8_8_8( const mathfu::vec3 normal ) {
     return packedPosition.u;
 }
 
+uint32_t PackBoneWeights_10_10_10_2( const mathfu::vec4 boneWeights ) {
+    UIntPack_10_10_10_2 packed;
+
+    /* We know the sum is exactly one, so no need to save forth weight (if any) since
+       weight[3] == 1 - (weight[2] + weight[1] + weight[0]).
+       So we can increase precision here to 10/10/10/2 instead of 8/8/8/8
+       at the cost of additional calculation in vertex shaders.
+       */
+
+    packed.q.x = Unorm< 10 >( boneWeights.x ).Bits( );
+    packed.q.y = Unorm< 10 >( boneWeights.y ).Bits( );
+    packed.q.z = Unorm< 10 >( boneWeights.z ).Bits( );
+    packed.q.w = 0;
+
+    return packed.u;
+}
+
+uint32_t PackBoneIndices_8_8_8_8( const mathfu::vec4 boneIndices ) {
+    UIntPack_8_8_8_8 packedPosition;
+
+    const auto maxIndex = (float) Unorm< 8 >::sMax;
+    const auto normIndices = boneIndices / maxIndex;
+
+    packedPosition.q.x = Unorm< 8 >( normIndices.x ).Bits( );
+    packedPosition.q.y = Unorm< 8 >( normIndices.y ).Bits( );
+    packedPosition.q.z = Unorm< 8 >( normIndices.z ).Bits( );
+    packedPosition.q.w = Unorm< 8 >( normIndices.w ).Bits( );
+
+    return packedPosition.u;
+}
+
 uint32_t PackTangent_8_8_8_8( const mathfu::vec4 tangent ) {
     AssertInRange( tangent.w, -1.f, +1.f );
     UIntPack_8_8_8_8 packed;
@@ -198,7 +229,9 @@ void Pack( const StaticVertexFb* vertices,
            const mathfu::vec3    positionMax,
            const mathfu::vec2    texcoordsMin,
            const mathfu::vec2    texcoordsMax ) {
+
     for ( uint32_t i = 0; i < vertexCount; ++i ) {
+
         const auto position  = Cast< mathfu::vec3 >( vertices[ i ].position( ) );
         const auto texcoords = Cast< mathfu::vec2 >( vertices[ i ].uv( ) );
         const auto normal    = Cast< mathfu::vec3 >( vertices[ i ].normal( ) );
@@ -208,5 +241,34 @@ void Pack( const StaticVertexFb* vertices,
                                       PackNormal_10_10_10_2( normal.Normalized( ) ),
                                       PackTangent_10_10_10_2( tangent ),
                                       PackTexcoord_16_16_fixed( texcoords, texcoordsMin, texcoordsMax ) );
+    }
+}
+
+uint32_t PackedMaxBoneCount( ) {
+    return (uint32_t) Unorm< 8 >::sMax;
+}
+
+void Pack( const apemodefb::StaticSkinnedVertexFb* vertices,
+           apemodefb::PackedSkinnedVertexFb*       packed,
+           const uint32_t                          vertexCount,
+           const mathfu::vec3                      positionMin,
+           const mathfu::vec3                      positionMax,
+           const mathfu::vec2                      texcoordsMin,
+           const mathfu::vec2                      texcoordsMax ) {
+
+    for ( uint32_t i = 0; i < vertexCount; ++i ) {
+        const auto position  = Cast< mathfu::vec3 >( vertices[ i ].position( ) );
+        const auto texcoords = Cast< mathfu::vec2 >( vertices[ i ].uv( ) );
+        const auto normal    = Cast< mathfu::vec3 >( vertices[ i ].normal( ) );
+        const auto tangent   = Cast< mathfu::vec4 >( vertices[ i ].tangent( ) );
+        const auto weights   = Cast< mathfu::vec4 >( vertices[ i ].weights( ) );
+        const auto indices   = Cast< mathfu::vec4 >( vertices[ i ].indices( ) );
+
+        packed[ i ] = PackedSkinnedVertexFb( PackPosition_10_10_10_2( position, positionMin, positionMax ),
+                                             PackNormal_10_10_10_2( normal.Normalized( ) ),
+                                             PackTangent_10_10_10_2( tangent ),
+                                             PackTexcoord_16_16_fixed( texcoords, texcoordsMin, texcoordsMax ),
+                                             PackBoneWeights_10_10_10_2( weights ),
+                                             PackBoneIndices_8_8_8_8( indices ) );
     }
 }

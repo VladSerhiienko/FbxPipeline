@@ -129,9 +129,11 @@ namespace apemode {
 
     template < int BitCount >
     class Unorm {
-    private:
+    public:
         typedef typename ChooseUint< BitCount >::type T;
         static const T sMax = ( T( 1 ) << BitCount ) - 1;
+
+    private:
         T m_bits;
 
         /**
