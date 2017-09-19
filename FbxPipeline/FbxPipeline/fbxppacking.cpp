@@ -22,6 +22,14 @@ inline TMathFu Map( const TMathFu input,
     return ( input - input_start ) * output_range / input_range + output_start;
 }
 
+inline bool IsNearlyZero( float a, float tolerance ) {
+    return abs( a ) <= tolerance;
+}
+
+inline bool IsNearlyEqual( float a, float b, float tolerance ) {
+    return IsNearlyZero( a - b, tolerance );
+}
+
 template < typename TMathFu >
 inline void AssertInRange( const TMathFu v, float vmin = 0.0f, float vmax = 1.0f, float tolerance = 0.0001f ) {
     /*float values[ sizeof( TMathFu ) / sizeof( float ) ];
@@ -200,10 +208,24 @@ uint32_t PackBoneWeights_10_10_10_2( const mathfu::vec4 boneWeights ) {
     return packed.u;
 }
 
+mathfu::vec4 UnpackBoneWeights_10_10_10_2( const uint32_t boneWeights ) {
+    UIntPack_10_10_10_2 packed;
+    packed.u = boneWeights;
+
+    mathfu::vec4 unpacked;
+    unpacked.x = Unorm< 10 >::FromBits( packed.q.x );
+    unpacked.y = Unorm< 10 >::FromBits( packed.q.y );
+    unpacked.z = Unorm< 10 >::FromBits( packed.q.z );
+    unpacked.w = 1.0f - unpacked.x - unpacked.y - unpacked.z;
+    return unpacked;
+}
+
+
 uint32_t PackBoneIndices_8_8_8_8( const mathfu::vec4 boneIndices ) {
+    const auto maxIndex = (float)Unorm< 8 >::sMax;
+
     UIntPack_8_8_8_8 packedPosition;
 
-    const auto maxIndex = (float) Unorm< 8 >::sMax;
     const auto normIndices = boneIndices / maxIndex;
 
     packedPosition.q.x = Unorm< 8 >( normIndices.x ).Bits( );
@@ -212,6 +234,22 @@ uint32_t PackBoneIndices_8_8_8_8( const mathfu::vec4 boneIndices ) {
     packedPosition.q.w = Unorm< 8 >( normIndices.w ).Bits( );
 
     return packedPosition.u;
+}
+
+mathfu::vec4 UnpackBoneIndices_8_8_8_8( const uint32_t boneIndices ) {
+    const auto maxIndex = (float)Unorm< 8 >::sMax;
+
+    UIntPack_8_8_8_8 packed;
+    packed.u = boneIndices;
+
+    mathfu::vec4 unpacked;
+
+    unpacked.x = (float) (int) ( Unorm< 8 >::FromBits( packed.q.x ) * maxIndex );
+    unpacked.y = (float) (int) ( Unorm< 8 >::FromBits( packed.q.y ) * maxIndex );
+    unpacked.z = (float) (int) ( Unorm< 8 >::FromBits( packed.q.z ) * maxIndex );
+    unpacked.w = (float) (int) ( Unorm< 8 >::FromBits( packed.q.w ) * maxIndex );
+
+    return unpacked;
 }
 
 uint32_t PackTangent_8_8_8_8( const mathfu::vec4 tangent ) {
@@ -270,5 +308,21 @@ void Pack( const apemodefb::StaticSkinnedVertexFb* vertices,
                                              PackTexcoord_16_16_fixed( texcoords, texcoordsMin, texcoordsMax ),
                                              PackBoneWeights_10_10_10_2( weights ),
                                              PackBoneIndices_8_8_8_8( indices ) );
+
+#if 0
+        const auto unpackedWeights = UnpackBoneWeights_10_10_10_2( packed[ i ].weights( ) );
+        const auto unpackedIndices = UnpackBoneIndices_8_8_8_8( packed[ i ].indices( ) );
+
+        assert( IsNearlyEqual( weights.x, unpackedWeights.x, 1e-3f ) );
+        assert( IsNearlyEqual( weights.y, unpackedWeights.y, 1e-3f ) );
+        assert( IsNearlyEqual( weights.z, unpackedWeights.z, 1e-3f ) );
+        assert( IsNearlyEqual( weights.w, unpackedWeights.w, 1e-3f ) );
+
+        assert( IsNearlyEqual( indices.x, unpackedIndices.x, 1e-9f ) );
+        assert( IsNearlyEqual( indices.y, unpackedIndices.y, 1e-9f ) );
+        assert( IsNearlyEqual( indices.z, unpackedIndices.z, 1e-9f ) );
+        assert( IsNearlyEqual( indices.w, unpackedIndices.w, 1e-9f ) );
+#endif
+
     }
 }

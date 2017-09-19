@@ -27,8 +27,9 @@ uint32_t ExportNode( FbxNode* node ) {
     const uint32_t nodeId = static_cast< uint32_t >( s.nodes.size( ) );
     s.nodes.emplace_back( );
 
-    auto& n = s.nodes.back( );
+    auto& n  = s.nodes.back( );
     n.id = nodeId;
+    n.fbxId = node->GetUniqueID( );
     n.nameId = s.PushName( node->GetName( ) );
 
     ExportNodeAttributes( node, n );

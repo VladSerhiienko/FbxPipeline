@@ -1,6 +1,7 @@
 #include <fbxppch.h>
 #include <fbxpstate.h>
 #include <fbxpnorm.h>
+#include <map>
 
 /**
  * Helper function to calculate tangents when the tangent element layer is missing.
@@ -767,14 +768,20 @@ void ExportMesh( FbxNode*       pNode,
         skinInfos.resize( pMesh->GetControlPointsCount( ) );
 
         /* Populate skin info for each control point. */
-        const auto clusterCount = pSkin->GetClusterCount( );
+        const int clusterCount = pSkin->GetClusterCount( );
+        const bool packTooManyBones = pack && clusterCount > (int) PackedMaxBoneCount( );
 
-        if ( pack && clusterCount > PackedMaxBoneCount( ) ) {
+        if ( packTooManyBones ) {
             s.console->warn( "Mesh \"{}\" has too large skin, {} bones ({} supported for packing).",
                              pNode->GetName( ),
                              clusterCount,
                              PackedMaxBoneCount( ) );
         }
+
+        m.skins.emplace_back( );
+        auto& skin = m.skins.back( );
+        skin.nameId = s.PushName( pSkin->GetName( ) );
+        skin.linkFbxIds.reserve( clusterCount );
 
         for ( auto i = 0; i < clusterCount; ++i ) {
 
@@ -793,38 +800,122 @@ void ExportMesh( FbxNode*       pNode,
                 /* Assign bone (weight + index) for the control point. */
                 skinInfos[ pIndices[ j ] ].AddBone( (BoneWeightType) pWeights[ j ], (BoneIndexType) i );
             }
+
+            skin.linkFbxIds.push_back( pCluster->GetLink( )->GetUniqueID( ) );
+
+            /* TODO: The bind pose matrix must be calculated in the application. */
+
+            /*
+            FbxMatrix transformLinkMatrix;
+            pCluster->GetTransformLinkMatrix( transformLinkMatrix );
+            apemode::SkinLink skinLink;
+            skinLink.linkFbxId = pCluster->GetLink( )->GetUniqueID( );
+            skinLink.transformLinkMatrix = apemodefb::mat4( apemodefb::vec4( (float) transformLinkMatrix.Get( 0, 0 ),
+                                                                             (float) transformLinkMatrix.Get( 0, 1 ),
+                                                                             (float) transformLinkMatrix.Get( 0, 2 ),
+                                                                             (float) transformLinkMatrix.Get( 0, 3 ) ),
+                                                            apemodefb::vec4( (float) transformLinkMatrix.Get( 1, 0 ),
+                                                                             (float) transformLinkMatrix.Get( 1, 1 ),
+                                                                             (float) transformLinkMatrix.Get( 1, 2 ),
+                                                                             (float) transformLinkMatrix.Get( 1, 3 ) ),
+                                                            apemodefb::vec4( (float) transformLinkMatrix.Get( 2, 0 ),
+                                                                             (float) transformLinkMatrix.Get( 2, 1 ),
+                                                                             (float) transformLinkMatrix.Get( 2, 2 ),
+                                                                             (float) transformLinkMatrix.Get( 2, 3 ) ),
+                                                            apemodefb::vec4( (float) transformLinkMatrix.Get( 3, 0 ),
+                                                                             (float) transformLinkMatrix.Get( 3, 1 ),
+                                                                             (float) transformLinkMatrix.Get( 3, 2 ),
+                                                                             (float) transformLinkMatrix.Get( 3, 3 ) ) );
+                                                                             */
         }
 
         std::set< BoneIndexType > uniqueUsedIndices;
 
-        /* Normalize bone weights for each control point. */
-        for ( auto& skinInfo : skinInfos ) {
-            if ( pack )
+        if ( pack ) {
+            for ( auto& skinInfo : skinInfos ) {
                 for ( BoneIndexType bi = 0; bi < ControlPointSkinInfo::kBoneCountPerControlPoint; ++bi ) {
                     uniqueUsedIndices.insert( skinInfo.indices[ bi ] );
                 }
+            }
 
-            skinInfo.NormalizeWeights( );
+            auto invalidIt = uniqueUsedIndices.find( sInvalidIndex );
+            if ( invalidIt != uniqueUsedIndices.end( ) )
+                uniqueUsedIndices.erase( uniqueUsedIndices.find( sInvalidIndex ) );
         }
 
         /* Remove invalid index to be 100% the bones cannot be reordered. */
-        uniqueUsedIndices.erase( uniqueUsedIndices.find( sInvalidIndex ) );
 
-        if ( pack )
-            if ( uniqueUsedIndices.size( ) > PackedMaxBoneCount( ) ) {
+        if ( pack ) {
+
+            if ( packTooManyBones && uniqueUsedIndices.size( ) > PackedMaxBoneCount( ) ) {
                 s.console->error( "Mesh \"{}\" is influenced by {} bones (only {} \"active\" bones supported).",
                                   pNode->GetName( ),
                                   uniqueUsedIndices.size( ),
                                   PackedMaxBoneCount( ) );
 
                 s.console->warn( "Mesh \"{}\" will exported as static one.", pNode->GetName( ) );
-                return ExportMesh< TIndex >( pNode, pMesh, n, m, vertexCount, pack, nullptr, optimize );
-            } else {
-                // TODO: Bone reordering: Reorder bones meet "max 256" requirement
-                s.console->error( "Bone reordering is not yet supported." );
-                s.console->warn( "Mesh \"{}\" will exported as static one.", pNode->GetName( ) );
+
+                m.skins.clear( );
                 return ExportMesh< TIndex >( pNode, pMesh, n, m, vertexCount, pack, nullptr, optimize );
             }
+
+            /*
+
+            So what can happen and what I suggest:
+            This case handles the situation when we have, for example, 360 bones, but only 200 are influencing this mesh.
+            The idea is to minimize the skeleton to 200 bones and change the indices so that it could fit into the 255 range.
+
+            */
+
+            if ( packTooManyBones && uniqueUsedIndices.size( ) <= PackedMaxBoneCount( ) ) {
+
+                /*
+                
+                The code below builds two maps:
+                    > original index to node id
+                        2 | 3 | 6 | 7 | 9
+                        A | B | C | D | E
+                    > original index to reordered index
+                        2 | 3 | 6 | 7 | 9 
+                        0 | 1 | 2 | 3 | 4 
+
+                The two built maps are used to substitute indices in the skin infos
+                and to build a new shorter list of links for exporting.
+
+                */
+
+                std::map< uint16_t, uint64_t > originalIndexToFbxId;
+                for ( int i = 0; i < clusterCount; ++i ) {
+                    originalIndexToFbxId[ (uint16_t) i ] = pSkin->GetCluster( i )->GetLink( )->GetUniqueID( );
+                }
+
+                uint32_t reorderedIndexCounter = 0;
+                std::map< uint16_t, uint16_t > originalIndexToReorderedIndex;
+                for ( auto i : uniqueUsedIndices ) {
+                    originalIndexToReorderedIndex[ i ] = reorderedIndexCounter++;
+                }
+
+                for ( auto& skinInfo : skinInfos ) {
+                    for ( BoneIndexType bi = 0; bi < ControlPointSkinInfo::kBoneCountPerControlPoint; ++bi ) {
+                        skinInfo.indices[ bi ] = originalIndexToReorderedIndex[ skinInfo.indices[ bi ] ];
+                    }
+                }
+
+                std::vector< uint64_t > originalLinkIds = std::move( skin.linkFbxIds );
+                skin.linkFbxIds.resize( uniqueUsedIndices.size( ) );
+
+                for ( auto originalIndexReorderedIndex : originalIndexToReorderedIndex ) {
+                    skin.linkFbxIds[ originalIndexReorderedIndex.second ] =
+                        originalIndexToFbxId[ originalIndexReorderedIndex.first ];
+                }
+            }
+        }
+
+        /* Normalize bone weights for each control point. */
+
+        for (auto& skinInfo : skinInfos) {
+            skinInfo.NormalizeWeights();
+        }
 
         auto pSkinnedVertices = reinterpret_cast< StaticSkinnedVertex* >( m.vertices.data( ) );
         InitializeVertices( pMesh, m, pSkinnedVertices, vertexCount, positionMin, positionMax, texcoordMin, texcoordMax );
@@ -886,7 +977,9 @@ void ExportMesh( FbxNode*       pNode,
 
     if ( pack ) {
 
-        if (nullptr == pSkin) {
+        if ( nullptr == pSkin ) {
+
+            // TODO: Move memory
             std::vector< apemodefb::StaticVertexFb > tempBuffer;
             tempBuffer.resize( vertexCount );
             memcpy( tempBuffer.data( ), m.vertices.data( ), m.vertices.size( ) );
@@ -900,11 +993,13 @@ void ExportMesh( FbxNode*       pNode,
                   texcoordMin,
                   texcoordMax );
         } else {
+
+            // TODO: Move memory
             std::vector< apemodefb::StaticSkinnedVertexFb > tempBuffer;
             tempBuffer.resize( vertexCount );
             memcpy( tempBuffer.data( ), m.vertices.data( ), m.vertices.size( ) );
 
-            m.vertices.resize( packedVertexBufferSize );
+            m.vertices.resize( packedSkinnedVertexBufferSize );
             Pack( reinterpret_cast< apemodefb::StaticSkinnedVertexFb* >( tempBuffer.data( ) ),
                   reinterpret_cast< apemodefb::PackedSkinnedVertexFb* >( m.vertices.data( ) ),
                   vertexCount,
@@ -926,22 +1021,28 @@ void ExportMesh( FbxNode*       pNode,
         apemodefb::vec3 const bboxScale( positionScale.x, positionScale.y, positionScale.z );
         apemodefb::vec2 const uvScale( texcoordScale.x, texcoordScale.y );
 
-        m.submeshes.emplace_back( bboxMin,                         // bbox min
-                                  bboxMax,                         // bbox max
-                                  bboxMin,                         // position offset
-                                  bboxScale,                       // position scale
-                                  uvMin,                           // uv offset
-                                  uvScale,                         // uv scale
-                                  0,                               // base vertex
-                                  vertexCount,                     // vertex count
-                                  0,                               // base index
-                                  0,                               // index count
-                                  0,                               // base subset
-                                  (uint32_t) m.subsets.size( ),    // subset count
-                                  apemodefb::EVertexFormat_Packed, // vertex format
-                                  packedVertexStride               // vertex stride
+        const auto submeshVertexStride = nullptr != pSkin ? packedSkinnedVertexStride : packedVertexStride;
+        const auto submeshVertexFormat = nullptr != pSkin ? apemodefb::EVertexFormat_PackedSkinned : apemodefb::EVertexFormat_Packed;
+
+        m.submeshes.emplace_back( bboxMin,                      // bbox min
+                                  bboxMax,                      // bbox max
+                                  bboxMin,                      // position offset
+                                  bboxScale,                    // position scale
+                                  uvMin,                        // uv offset
+                                  uvScale,                      // uv scale
+                                  0,                            // base vertex
+                                  vertexCount,                  // vertex count
+                                  0,                            // base index
+                                  0,                            // index count
+                                  0,                            // base subset
+                                  (uint32_t) m.subsets.size( ), // subset count
+                                  submeshVertexFormat,          // vertex format
+                                  submeshVertexStride           // vertex stride
         );
     } else {
+        const auto submeshVertexStride = nullptr != pSkin ? skinnedVertexStride : vertexStride;
+        const auto submeshVertexFormat = nullptr != pSkin ? apemodefb::EVertexFormat_StaticSkinned : apemodefb::EVertexFormat_Static;
+
         m.submeshes.emplace_back( bboxMin,                             // bbox min
                                   bboxMax,                             // bbox max
                                   apemodefb::vec3( 0.0f, 0.0f, 0.0f ), // position offset
@@ -954,8 +1055,8 @@ void ExportMesh( FbxNode*       pNode,
                                   0,                                   // index count
                                   0,                                   // base subset
                                   (uint32_t) m.subsets.size( ),        // subset count
-                                  apemodefb::EVertexFormat_Static,     // vertex format
-                                  vertexStride                         // vertex stride
+                                  submeshVertexFormat,                 // vertex format
+                                  submeshVertexStride                  // vertex stride
         );
     }
 }

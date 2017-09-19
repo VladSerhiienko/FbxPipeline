@@ -193,7 +193,7 @@ struct AnimTransformFb {
 }
 struct SkinFb {
     name_id : ulong( key );
-	bind_pose : mat4;
+    links_ids : [uint];
 }
 table MeshFb {
     vertices : [ubyte];

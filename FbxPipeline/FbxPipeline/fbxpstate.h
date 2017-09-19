@@ -5,6 +5,12 @@
 
 namespace apemode {
 
+    struct Skin {
+        uint64_t                nameId = (uint64_t) 0;
+        std::vector< uint64_t > linkFbxIds;
+        std::vector< uint32_t > linkOrder;
+    };
+
     struct Mesh {
         bool                                hasTexcoords = false;
         apemodefb::vec3                     positionMin;
@@ -20,11 +26,13 @@ namespace apemode {
         std::vector< uint8_t >              indices;
         std::vector< uint8_t >              vertices;
         apemodefb::EIndexTypeFb             indexType;
+        std::vector< Skin >                 skins;
     };
 
     struct Node {
-        apemodefb::ECullingType  cullingType = apemodefb::ECullingType_CullingOff;
+        apemodefb::ECullingType cullingType = apemodefb::ECullingType_CullingOff;
         uint32_t                id          = (uint32_t) -1;
+        uint64_t                fbxId       = (uint64_t) 0;
         uint64_t                nameId      = (uint64_t) 0;
         uint32_t                meshId      = (uint32_t) -1;
         std::vector< uint32_t > childIds;
