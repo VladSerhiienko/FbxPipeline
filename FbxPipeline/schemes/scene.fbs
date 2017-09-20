@@ -191,7 +191,7 @@ struct AnimTransformFb {
     geometric_rotation : uint;
     geometric_scaling : uint;
 }
-struct SkinFb {
+table SkinFb {
     name_id : ulong( key );
     links_ids : [uint];
 }

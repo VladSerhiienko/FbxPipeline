@@ -124,7 +124,7 @@ void apemode::State::Release( ) {
 
 bool apemode::State::Load( ) {
     const std::string inputFile = options[ "i" ].as< std::string >( );
-    // SplitFilename( inputFile.c_str( ), folderPath, fileName );
+    SplitFilename( inputFile.c_str( ), folderPath, fileName );
     // logger->info( "File name  : \"{}\"", fileName );
     // logger->info( "Folder name: \"{}\"", folderPath );
     return LoadScene( manager, scene, inputFile.c_str( ) );
@@ -133,11 +133,13 @@ bool apemode::State::Load( ) {
 std::vector< uint8_t > ReadBinFile( const char* filepath );
 
 bool apemode::State::Finish( ) {
+    console->info( "Serialization" );
 
     //
     // Finalize names
     //
 
+    console->info( "> Names" );
     std::vector< flatbuffers::Offset<apemodefb::NameFb > > nameOffsets; {
         nameOffsets.reserve( names.size( ) );
         for ( auto& namePair : names ) {
@@ -151,17 +153,21 @@ bool apemode::State::Finish( ) {
     }
 
     const auto namesOffset = builder.CreateVector( nameOffsets );
+    console->info( "< Succeeded {} ", namesOffset.o );
 
     //
     // Finalize transforms
     //
 
+    console->info( "> Transforms" );
     const auto transformsOffset = builder.CreateVectorOfStructs( transforms );
+    console->info( "< Succeeded {} ", transformsOffset.o );
 
     //
     // Finalize nodes
     //
 
+    console->info( "> Nodes" );
     std::vector< flatbuffers::Offset< apemodefb::NodeFb > > nodeOffsets; {
         nodeOffsets.reserve( nodes.size( ) );
         for ( auto& node : nodes ) {
@@ -180,14 +186,18 @@ bool apemode::State::Finish( ) {
     }
 
     const auto nodesOffset = builder.CreateVector( nodeOffsets );
+    console->info( "< Succeeded {} ", nodesOffset.o );
 
     //
     // Finalize materials
     //
 
+    console->info( "> Materials" );
     std::vector< flatbuffers::Offset< apemodefb::MaterialFb > > materialOffsets;
     materialOffsets.reserve( materials.size( ) );
     for ( auto& material : materials ) {
+        console->info( "+ props {}", material.props.size( ) );
+
         auto propsOffset = builder.CreateVectorOfStructs( material.props );
 
         apemodefb::MaterialFbBuilder materialBuilder( builder );
@@ -197,17 +207,48 @@ bool apemode::State::Finish( ) {
         materialOffsets.push_back( materialBuilder.Finish( ) );
     }
 
+    const auto materialsOffset = materialOffsets.empty( ) ? 0 : builder.CreateVector( materialOffsets );
+    console->info( "< Succeeded {} ", materialsOffset.o );
+
     //
     // Finalize meshes
     //
 
+    console->info( "> Meshes" );
+    std::vector< uint32_t > tempLinkIndices;
     std::vector< flatbuffers::Offset< apemodefb::MeshFb > > meshOffsets;
     meshOffsets.reserve( meshes.size( ) );
     for ( auto& mesh : meshes ) {
+        console->info( "+ subsets {}, vertex count {}, vertex format {} ",
+                       mesh.subsets.size( ),
+                       mesh.submeshes[ 0 ].vertex_count( ),
+                       apemodefb::EnumNameEVertexFormat( mesh.submeshes[ 0 ].vertex_format( ) ) );
+
         auto vsOffset = builder.CreateVector( mesh.vertices );
         auto smOffset = builder.CreateVectorOfStructs( mesh.submeshes );
         auto ssOffset = builder.CreateVectorOfStructs( mesh.subsets );
         auto siOffset = builder.CreateVector( mesh.indices );
+
+        std::vector< flatbuffers::Offset< apemodefb::SkinFb > > skinOffsets;
+        skinOffsets.reserve( mesh.skins.size( ) );
+
+        std::transform( mesh.skins.begin( ), mesh.skins.end( ), std::back_inserter( skinOffsets ), [&]( const Skin& skin ) {
+            tempLinkIndices.clear( );
+            tempLinkIndices.reserve( skin.linkFbxIds.size( ) );
+
+            std::transform( skin.linkFbxIds.begin( ),
+                            skin.linkFbxIds.end( ),
+                            std::back_inserter( tempLinkIndices ),
+                            [&]( const uint64_t& linkFbxId ) {
+                                auto nodeDictIt = nodeDict.find( linkFbxId );
+                                assert( nodeDictIt != nodeDict.end( ) );
+                                return nodeDictIt->second;
+                            } );
+
+            return apemodefb::CreateSkinFb( builder, skin.nameId, builder.CreateVector( tempLinkIndices ) );
+        } );
+
+        auto skinsOffset = builder.CreateVector( skinOffsets );
 
         apemodefb::MeshFbBuilder meshBuilder( builder );
         meshBuilder.add_vertices( vsOffset );
@@ -215,53 +256,52 @@ bool apemode::State::Finish( ) {
         meshBuilder.add_subsets( ssOffset );
         meshBuilder.add_indices( siOffset );
         meshBuilder.add_index_type( mesh.indexType );
+        meshBuilder.add_skins( skinsOffset );
         meshOffsets.push_back( meshBuilder.Finish( ) );
     }
+
+    const auto meshesOffset = meshOffsets.empty( ) ? 0 : builder.CreateVector( meshOffsets );
+    console->info( "< Succeeded {} ", meshesOffset.o );
 
     //
     // Finalize files
     //
 
+    console->info( "> Files" );
     std::vector< flatbuffers::Offset< apemodefb::FileFb > > fileOffsets;
     fileOffsets.reserve( embedQueue.size( ) );
     for ( auto& embedded : embedQueue ) {
         if ( false == embedded.empty( ) ) {
+            console->info( "+ {} ", embedded );
+
             std::vector< uint8_t > fileBuffer = ReadBinFile( embedded.c_str( ) );
             if ( !fileBuffer.empty( ) ) {
-                fileOffsets.push_back(
-                    apemodefb::CreateFileFbDirect( builder, (uint32_t) fileOffsets.size( ), 0, &fileBuffer ) );
+                fileOffsets.push_back( apemodefb::CreateFileFbDirect( builder, (uint32_t) fileOffsets.size( ), 0, &fileBuffer ) );
             }
         }
     }
 
-    //
-    // Finalize Meshes
-    //
-
-    const auto meshesOffset = meshOffsets.empty( ) ? 0 : builder.CreateVector( meshOffsets );
-
-    //
-    // Finalize Materials
-    //
-
-    const auto materialsOffset = materialOffsets.empty( ) ? 0 : builder.CreateVector( materialOffsets );
+    const auto filesOffset = fileOffsets.empty() ? 0 : builder.CreateVector(fileOffsets);
+    console->info( "< Succeeded {} ", filesOffset.o );
 
     //
     // Finalize textures
     //
 
+    console->info( "> Textures" );
     const auto texturesOffset = textures.empty( ) ? 0 : builder.CreateVectorOfStructs( textures );
+    console->info( "< Succeeded {} ", texturesOffset.o );
 
     //
     // Finalize files
     //
 
-    const auto filesOffset = fileOffsets.empty( ) ? 0 : builder.CreateVector( fileOffsets );
 
     //
     // Finalize scene
     //
 
+    console->info( "> Scene" );
     apemodefb::SceneFbBuilder sceneBuilder( builder );
     if ( 0 != transformsOffset.o )  sceneBuilder.add_transforms( transformsOffset );
     if ( 0 != namesOffset.o )       sceneBuilder.add_names( namesOffset );
@@ -271,14 +311,22 @@ bool apemode::State::Finish( ) {
     if ( 0 != materialsOffset.o )   sceneBuilder.add_materials( materialsOffset );
     if ( 0 != filesOffset.o )       sceneBuilder.add_files( filesOffset );
 
-    apemodefb::FinishSceneFbBuffer( builder, sceneBuilder.Finish( ) );
+    auto sceneOffset = sceneBuilder.Finish( );
+    apemodefb::FinishSceneFbBuffer( builder, sceneOffset );
+    console->info( "< Succeeded {} ", sceneOffset.o );
 
     //
     // Write the file
     //
 
+    console->info( "> Verification" );
     flatbuffers::Verifier v( builder.GetBufferPointer( ), builder.GetSize( ) );
-    assert( apemodefb::VerifySceneFbBuffer( v ) );
+    if ( apemodefb::VerifySceneFbBuffer( v ) )
+        console->info( "< Succeeded" );
+    else {
+        assert( false );
+    }
+
 
     std::string output = options[ "o" ].as< std::string >( );
     if ( output.empty( ) ) {
@@ -290,7 +338,9 @@ bool apemode::State::Finish( ) {
         CreateDirectoryA( outputFolder.c_str( ), 0 );
     }
 
+    console->info( "> Saving" );
     if ( flatbuffers::SaveFile(output.c_str( ), (const char*) builder.GetBufferPointer( ), (size_t) builder.GetSize( ), true ) ) {
+        console->info( "< Succeeded" );
         return true;
     }
 

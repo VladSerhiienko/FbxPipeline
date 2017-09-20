@@ -32,6 +32,8 @@ uint32_t ExportNode( FbxNode* node ) {
     n.fbxId = node->GetUniqueID( );
     n.nameId = s.PushName( node->GetName( ) );
 
+    s.nodeDict[ n.fbxId ] = nodeId;
+
     ExportNodeAttributes( node, n );
     if ( auto c = node->GetChildCount( ) ) {
         n.childIds.reserve( c );

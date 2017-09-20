@@ -976,16 +976,10 @@ void ExportMesh( FbxNode*       pNode,
     */
 
     if ( pack ) {
-
+        std::vector< uint8_t > vertices( std::move( m.vertices ) );
         if ( nullptr == pSkin ) {
-
-            // TODO: Move memory
-            std::vector< apemodefb::StaticVertexFb > tempBuffer;
-            tempBuffer.resize( vertexCount );
-            memcpy( tempBuffer.data( ), m.vertices.data( ), m.vertices.size( ) );
-
             m.vertices.resize( packedVertexBufferSize );
-            Pack( reinterpret_cast< apemodefb::StaticVertexFb* >( tempBuffer.data( ) ),
+            Pack( reinterpret_cast< apemodefb::StaticVertexFb* >( vertices.data( ) ),
                   reinterpret_cast< apemodefb::PackedVertexFb* >( m.vertices.data( ) ),
                   vertexCount,
                   positionMin,
@@ -993,14 +987,8 @@ void ExportMesh( FbxNode*       pNode,
                   texcoordMin,
                   texcoordMax );
         } else {
-
-            // TODO: Move memory
-            std::vector< apemodefb::StaticSkinnedVertexFb > tempBuffer;
-            tempBuffer.resize( vertexCount );
-            memcpy( tempBuffer.data( ), m.vertices.data( ), m.vertices.size( ) );
-
             m.vertices.resize( packedSkinnedVertexBufferSize );
-            Pack( reinterpret_cast< apemodefb::StaticSkinnedVertexFb* >( tempBuffer.data( ) ),
+            Pack( reinterpret_cast< apemodefb::StaticSkinnedVertexFb* >( vertices.data( ) ),
                   reinterpret_cast< apemodefb::PackedSkinnedVertexFb* >( m.vertices.data( ) ),
                   vertexCount,
                   positionMin,

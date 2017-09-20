@@ -51,7 +51,23 @@ void ExportMaterials( FbxScene* pScene ) {
             s.materialDict[ m.nameId ] = id;
             s.console->info( "Material: \"{}\"", material->GetName( ) );
 
-            auto srcProperty = material->GetFirstProperty();
+            /*
+            https://help.sketchfab.com/hc/en-us/articles/202600873-Materials-and-Textures
+
+            Diffuse / Albedo / Base Color: 'diffuse', 'albedo', 'basecolor'
+            Metalness: 'metalness', 'metallic', 'metal', 'm'
+            Specular: 'specular', 'spec', 's'
+            Specular F0: 'specularf0', 'f0'
+            Roughness: 'roughness', 'rough', 'r'
+            Glossiness: 'glossiness', 'glossness', 'gloss', 'g', 'glossy'
+            AO: 'ambient occlusion', 'ao', 'occlusion', 'lightmap', 'diffuseintensity'
+            Cavity: 'cavity'
+            Normal Map: 'normal', 'nrm', 'normalmap'
+            Bump Map: 'bump', 'bumpmap', 'heightmap'
+            Emission: 'emission', 'emit', 'emissive'
+            Transparency: 'transparency', 'transparent', 'opacity', 'mask', 'alpha'
+            */
+
             ScanConnectedSrc(
                 material,
                 material->GetFirstProperty( ),
@@ -148,6 +164,9 @@ void ExportMaterials( FbxScene* pScene ) {
                             s.embedQueue.insert( fullFilePath );
                             found = true;
                         } else {
+                            // https://help.sketchfab.com/hc/en-us/articles/202600873-Materials-and-Textures
+                            // Anything that is not .JPG or .PNG is converted to .PNG.
+
                             /* Sketchfab case */
                             fullFilePath = FindFile( ( fileUrl + ".png" ).c_str( ) );
                             if ( false == fullFilePath.empty( ) ) {

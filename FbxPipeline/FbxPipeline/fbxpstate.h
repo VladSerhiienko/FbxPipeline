@@ -8,7 +8,6 @@ namespace apemode {
     struct Skin {
         uint64_t                nameId = (uint64_t) 0;
         std::vector< uint64_t > linkFbxIds;
-        std::vector< uint32_t > linkOrder;
     };
 
     struct Mesh {
@@ -85,6 +84,7 @@ namespace apemode {
         std::string                           folderPath;
         std::vector< Node >                   nodes;
         std::vector< Material >               materials;
+        std::map< uint64_t, uint32_t >        nodeDict;
         std::map< uint64_t, uint32_t >        textureDict;
         std::map< uint64_t, uint32_t >        materialDict;
         std::map< uint64_t, std::string >     names;
