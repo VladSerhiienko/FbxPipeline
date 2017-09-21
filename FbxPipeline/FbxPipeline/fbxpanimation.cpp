@@ -290,17 +290,25 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
 
     s.animCurves.reserve( s.animCurves.size( ) + animCurves.size( ) );
 
-    for (auto pAnimCurveTuple : animCurves) {
+    for ( auto pAnimCurveTuple : animCurves ) {
         if ( auto pAnimCurve = std::get< FbxAnimCurve* >( pAnimCurveTuple ) ) {
             auto pAnimStack = std::get< FbxAnimStack* >( pAnimCurveTuple );
             auto pAnimLayer = std::get< FbxAnimLayer* >( pAnimCurveTuple );
+            auto keyCount   = pAnimCurve->KeyGetCount( );
 
             s.animCurves.emplace_back( );
 
-            auto& curve = s.animCurves.back( );
-            curve.nameId = s.PushName( pAnimCurve->GetName( ) );
+            uint32_t curveId = s.animCurves.size( );
 
-            auto  keyCount = pAnimCurve->KeyGetCount( );
+            auto& curve       = s.animCurves.back( );
+            curve.id          = curveId;
+            curve.nameId      = s.PushName( pAnimCurve->GetName( ) );
+            curve.property    = std::get< apemodefb::EAnimCurveProperty >( pAnimCurveTuple );
+            curve.channel     = std::get< apemodefb::EAnimCurveChannel >( pAnimCurveTuple );
+            curve.animStackId = s.animStackDict[ pAnimStack->GetUniqueID( ) ];
+            curve.animLayerId = s.animStackDict[ pAnimLayer->GetUniqueID( ) ];
+            curve.nodeId      = n.id;
+
             curve.keys.resize( keyCount );
 
             /* Constant and linear modes */

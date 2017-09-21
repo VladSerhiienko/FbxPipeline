@@ -24,8 +24,9 @@ namespace apemode {
         std::vector< apemodefb::SubsetFb >  subsets;
         std::vector< uint8_t >              indices;
         std::vector< uint8_t >              vertices;
+        std::vector< uint32_t >             animCurveIds;
         apemodefb::EIndexTypeFb             indexType;
-        std::vector< Skin >                 skins;
+        uint32_t                            skinId = -1;
     };
 
     struct Node {
@@ -40,12 +41,14 @@ namespace apemode {
     };
 
     struct AnimStack {
+        uint32_t id;
         uint64_t nameId;
     };
 
     struct AnimLayer {
-        uint32_t animStackId;
+        uint32_t id;
         uint64_t nameId;
+        uint32_t animStackId;
     };
 
     struct AnimCurveKey {
@@ -56,6 +59,7 @@ namespace apemode {
     };
 
     struct AnimCurve {
+        uint32_t                      id;
         uint32_t                      animStackId;
         uint32_t                      animLayerId;
         uint32_t                      nodeId;
@@ -87,6 +91,8 @@ namespace apemode {
         std::map< uint64_t, uint32_t >        nodeDict;
         std::map< uint64_t, uint32_t >        textureDict;
         std::map< uint64_t, uint32_t >        materialDict;
+        std::map< uint64_t, uint32_t >        animStackDict;
+        std::map< uint64_t, uint32_t >        animLayerDict;
         std::map< uint64_t, std::string >     names;
         std::vector< apemodefb::TransformFb > transforms;
         std::vector< apemodefb::TextureFb >   textures;
@@ -94,6 +100,7 @@ namespace apemode {
         std::vector< AnimStack >              animStacks;
         std::vector< AnimLayer >              animLayers;
         std::vector< AnimCurve >              animCurves;
+        std::vector< Skin >                   skins;
         std::vector< std::string >            searchLocations;
         std::set< std::string >               embedQueue;
         std::set< std::string >               missingQueue;

@@ -113,6 +113,15 @@ struct PackedSkinnedVertexFb {
     weights : uint;
     indices : uint;
 }
+struct AnimStackFb {
+    id : uint;
+    name_id : ulong( key );
+}
+struct AnimLayerFb {
+    id : uint;
+    anim_stack_id : uint;
+    name_id : ulong( key );
+}
 struct AnimCurveKeyFb {
     time : float;
     value : float;
@@ -120,10 +129,8 @@ struct AnimCurveKeyFb {
 table AnimCurveFb {
     id : uint;
     name_id : ulong( key );
-    node_id : uint;
-	property : EAnimCurveChannel;
-	stack_name_id : ulong;
-	layer_name_id : ulong;
+	property : EAnimCurveProperty;
+	channel : EAnimCurveChannel;
 	keys : [AnimCurveKeyFb];
 }
 struct TextureFb {
@@ -177,20 +184,6 @@ struct TransformFb {
     geometric_rotation : vec3;
     geometric_scaling : vec3;
 }
-struct AnimTransformFb {
-    translation : uint;
-    rotation_offset : uint;
-    rotation_pivot : uint;
-    pre_rotation : uint;
-    post_rotation : uint;
-    rotation : uint;
-    scaling_offset : uint;
-    scaling_pivot : uint;
-    scaling : uint;
-    geometric_translation : uint;
-    geometric_rotation : uint;
-    geometric_scaling : uint;
-}
 table SkinFb {
     name_id : ulong( key );
     links_ids : [uint];
@@ -201,7 +194,7 @@ table MeshFb {
     subsets : [SubsetFb];
     indices : [ubyte];
     index_type : EIndexTypeFb;
-    skins : [SkinFb];
+	skin_id : uint;
 }
 struct MaterialPropFb {
     name_id : ulong( key );
@@ -216,11 +209,11 @@ table MaterialFb {
 table NodeFb {
     id : uint;
     mesh_id : uint;
-    anim_transform_id : uint;
     name_id : ulong( key );
 	culling_type : ECullingType;
     child_ids : [uint];
     material_ids : [uint];
+    anim_curve_ids : [uint];
 }
 table FileFb {
 	id : uint;
@@ -229,12 +222,14 @@ table FileFb {
 }
 table SceneFb {
     transforms : [TransformFb];
-    anim_transforms : [AnimTransformFb];
     nodes : [NodeFb];
     meshes : [MeshFb];
+    anim_stacks : [AnimStackFb];
+    anim_layers : [AnimLayerFb];
     anim_curves : [AnimCurveFb];
     materials : [MaterialFb];
     textures : [TextureFb];
+    skins : [SkinFb];
     files : [FileFb];
     names : [NameFb];
 }

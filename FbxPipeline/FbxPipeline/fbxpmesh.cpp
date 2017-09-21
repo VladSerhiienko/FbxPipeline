@@ -778,8 +778,10 @@ void ExportMesh( FbxNode*       pNode,
                              PackedMaxBoneCount( ) );
         }
 
-        m.skins.emplace_back( );
-        auto& skin = m.skins.back( );
+        m.skinId = (uint32_t) s.skins.size( );
+
+        s.skins.emplace_back( );
+        auto& skin = s.skins.back( );
         skin.nameId = s.PushName( pSkin->GetName( ) );
         skin.linkFbxIds.reserve( clusterCount );
 
@@ -855,7 +857,6 @@ void ExportMesh( FbxNode*       pNode,
 
                 s.console->warn( "Mesh \"{}\" will exported as static one.", pNode->GetName( ) );
 
-                m.skins.clear( );
                 return ExportMesh< TIndex >( pNode, pMesh, n, m, vertexCount, pack, nullptr, optimize );
             }
 

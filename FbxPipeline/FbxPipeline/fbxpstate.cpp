@@ -189,6 +189,60 @@ bool apemode::State::Finish( ) {
     console->info( "< Succeeded {} ", nodesOffset.o );
 
     //
+    // Finalize curves
+    //
+
+    console->info( "> AnimStacks" );
+    std::vector< apemodefb::AnimStackFb > stacks;
+    stacks.reserve( animStacks.size( ) );
+    std::transform( animStacks.begin( ), animStacks.end( ), std::back_inserter( stacks ), [&]( const AnimStack& animStack ) {
+        return apemodefb::AnimStackFb( animStack.id, animStack.nameId );
+    } );
+
+    const auto animStacksOffset = builder.CreateVectorOfStructs( stacks );
+    console->info( "< Succeeded {} ", animStacksOffset.o );
+
+    console->info( "> AnimLayers" );
+    std::vector< apemodefb::AnimLayerFb > layers;
+    stacks.reserve( animLayers.size( ) );
+    std::transform( animLayers.begin( ), animLayers.end( ), std::back_inserter( layers ), [&]( const AnimLayer& animLayer ) {
+        return apemodefb::AnimLayerFb( animLayer.id, animLayer.animStackId, animLayer.nameId );
+    } );
+
+    const auto animLayersOffset = builder.CreateVectorOfStructs( layers );
+    console->info( "< Succeeded {} ", animLayersOffset.o );
+
+    console->info( "> AnimCurves" );
+    std::vector< apemodefb::AnimCurveKeyFb > tempCurveKeys;
+    std::vector< flatbuffers::Offset< apemodefb::AnimCurveFb > > curveOffsets;
+    curveOffsets.reserve( animCurves.size( ) );
+    for ( auto& curve : animCurves ) {
+        console->info( "+ keys {} ({}/{}) ",
+                       curve.keys.size( ),
+                       apemodefb::EnumNameEAnimCurveProperty( curve.property ),
+                       apemodefb::EnumNameEAnimCurveChannel( curve.channel ) );
+
+        tempCurveKeys.clear( );
+        tempCurveKeys.reserve( curve.keys.size( ) );
+        std::transform( curve.keys.begin( ), curve.keys.end( ), std::back_inserter( tempCurveKeys ), [&]( const AnimCurveKey& curveKey ) {
+            return apemodefb::AnimCurveKeyFb( curveKey.time, curveKey.value );
+        } );
+
+        auto keysOffset = builder.CreateVectorOfStructs( tempCurveKeys );
+
+        apemodefb::AnimCurveFbBuilder curveBuilder( builder );
+        curveBuilder.add_id( curve.id );
+        curveBuilder.add_channel( curve.channel );
+        curveBuilder.add_property( curve.property );
+        curveBuilder.add_name_id( curve.nameId );
+        curveBuilder.add_keys( keysOffset );
+        curveOffsets.push_back( curveBuilder.Finish( ) );
+    }
+
+    const auto curvesOffset = curveOffsets.empty( ) ? 0 : builder.CreateVector( curveOffsets );
+    console->info( "< Succeeded {} ", curvesOffset.o );
+
+    //
     // Finalize materials
     //
 
@@ -211,11 +265,38 @@ bool apemode::State::Finish( ) {
     console->info( "< Succeeded {} ", materialsOffset.o );
 
     //
+    // Finalize skins
+    //
+
+    console->info( "> Skins" );
+    std::vector< uint32_t > tempLinkIndices;
+    std::vector< flatbuffers::Offset< apemodefb::SkinFb > > skinOffsets;
+    skinOffsets.reserve( skins.size( ) );
+
+    std::transform( skins.begin( ), skins.end( ), std::back_inserter( skinOffsets ), [&]( const Skin& skin ) {
+        tempLinkIndices.clear( );
+        tempLinkIndices.reserve( skin.linkFbxIds.size( ) );
+
+        std::transform( skin.linkFbxIds.begin( ),
+                        skin.linkFbxIds.end( ),
+                        std::back_inserter( tempLinkIndices ),
+                        [&]( const uint64_t& linkFbxId ) {
+                            auto nodeDictIt = nodeDict.find( linkFbxId );
+                            assert( nodeDictIt != nodeDict.end( ) );
+                            return nodeDictIt->second;
+                        } );
+
+        return apemodefb::CreateSkinFb( builder, skin.nameId, builder.CreateVector( tempLinkIndices ) );
+    } );
+
+    auto skinsOffset = builder.CreateVector( skinOffsets );
+    console->info( "< Succeeded {} ", materialsOffset.o );
+
+    //
     // Finalize meshes
     //
 
     console->info( "> Meshes" );
-    std::vector< uint32_t > tempLinkIndices;
     std::vector< flatbuffers::Offset< apemodefb::MeshFb > > meshOffsets;
     meshOffsets.reserve( meshes.size( ) );
     for ( auto& mesh : meshes ) {
@@ -229,34 +310,13 @@ bool apemode::State::Finish( ) {
         auto ssOffset = builder.CreateVectorOfStructs( mesh.subsets );
         auto siOffset = builder.CreateVector( mesh.indices );
 
-        std::vector< flatbuffers::Offset< apemodefb::SkinFb > > skinOffsets;
-        skinOffsets.reserve( mesh.skins.size( ) );
-
-        std::transform( mesh.skins.begin( ), mesh.skins.end( ), std::back_inserter( skinOffsets ), [&]( const Skin& skin ) {
-            tempLinkIndices.clear( );
-            tempLinkIndices.reserve( skin.linkFbxIds.size( ) );
-
-            std::transform( skin.linkFbxIds.begin( ),
-                            skin.linkFbxIds.end( ),
-                            std::back_inserter( tempLinkIndices ),
-                            [&]( const uint64_t& linkFbxId ) {
-                                auto nodeDictIt = nodeDict.find( linkFbxId );
-                                assert( nodeDictIt != nodeDict.end( ) );
-                                return nodeDictIt->second;
-                            } );
-
-            return apemodefb::CreateSkinFb( builder, skin.nameId, builder.CreateVector( tempLinkIndices ) );
-        } );
-
-        auto skinsOffset = builder.CreateVector( skinOffsets );
-
         apemodefb::MeshFbBuilder meshBuilder( builder );
         meshBuilder.add_vertices( vsOffset );
         meshBuilder.add_submeshes( smOffset );
         meshBuilder.add_subsets( ssOffset );
         meshBuilder.add_indices( siOffset );
         meshBuilder.add_index_type( mesh.indexType );
-        meshBuilder.add_skins( skinsOffset );
+        meshBuilder.add_skin_id( mesh.skinId );
         meshOffsets.push_back( meshBuilder.Finish( ) );
     }
 
@@ -293,11 +353,6 @@ bool apemode::State::Finish( ) {
     console->info( "< Succeeded {} ", texturesOffset.o );
 
     //
-    // Finalize files
-    //
-
-
-    //
     // Finalize scene
     //
 
@@ -310,6 +365,8 @@ bool apemode::State::Finish( ) {
     if ( 0 != texturesOffset.o )    sceneBuilder.add_textures( texturesOffset );
     if ( 0 != materialsOffset.o )   sceneBuilder.add_materials( materialsOffset );
     if ( 0 != filesOffset.o )       sceneBuilder.add_files( filesOffset );
+    if ( 0 != skinsOffset.o )       sceneBuilder.add_skins( skinsOffset );
+    if ( 0 != animStacksOffset.o )  sceneBuilder.add_anim_stacks( animStacksOffset );
 
     auto sceneOffset = sceneBuilder.Finish( );
     apemodefb::FinishSceneFbBuffer( builder, sceneOffset );
@@ -504,7 +561,7 @@ bool SaveScene( FbxManager* pManager, FbxDocument* pScene, const char* pFilename
 
         for ( lFormatIndex = 0; lFormatIndex < lFormatCount; lFormatIndex++ ) {
             if ( pManager->GetIOPluginRegistry( )->WriterIsFBX( lFormatIndex ) ) {
-                FbxString   lDesc  = pManager->GetIOPluginRegistry( )->GetWriterFormatDescription( lFormatIndex );
+                FbxString lDesc = pManager->GetIOPluginRegistry( )->GetWriterFormatDescription( lFormatIndex );
                 const char* lASCII = "ascii";
                 if ( lDesc.Find( lASCII ) >= 0 ) {
                     pFileFormat = lFormatIndex;
