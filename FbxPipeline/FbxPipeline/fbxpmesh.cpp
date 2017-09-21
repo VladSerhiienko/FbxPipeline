@@ -865,6 +865,8 @@ void ExportMesh( FbxNode*       pNode,
             This case handles the situation when we have, for example, 360 bones, but only 200 are influencing this mesh.
             The idea is to minimize the skeleton to 200 bones and change the indices so that it could fit into the 255 range.
 
+            TODO: Find some test cases or compose one yourself and check the solution.
+
             */
 
             if ( packTooManyBones && uniqueUsedIndices.size( ) <= PackedMaxBoneCount( ) ) {
@@ -885,23 +887,22 @@ void ExportMesh( FbxNode*       pNode,
                 */
 
                 std::map< uint16_t, uint64_t > originalIndexToFbxId;
-                for ( int i = 0; i < clusterCount; ++i ) {
-                    originalIndexToFbxId[ (uint16_t) i ] = pSkin->GetCluster( i )->GetLink( )->GetUniqueID( );
+                for ( int boneIndex = 0; boneIndex < clusterCount; ++boneIndex ) {
+                    originalIndexToFbxId[ (uint16_t) boneIndex ] = pSkin->GetCluster( boneIndex )->GetLink( )->GetUniqueID( );
                 }
 
                 uint32_t reorderedIndexCounter = 0;
                 std::map< uint16_t, uint16_t > originalIndexToReorderedIndex;
-                for ( auto i : uniqueUsedIndices ) {
-                    originalIndexToReorderedIndex[ i ] = reorderedIndexCounter++;
+                for ( auto boneIndex : uniqueUsedIndices ) {
+                    originalIndexToReorderedIndex[ boneIndex ] = reorderedIndexCounter++;
                 }
 
                 for ( auto& skinInfo : skinInfos ) {
-                    for ( BoneIndexType bi = 0; bi < ControlPointSkinInfo::kBoneCountPerControlPoint; ++bi ) {
-                        skinInfo.indices[ bi ] = originalIndexToReorderedIndex[ skinInfo.indices[ bi ] ];
+                    for ( BoneIndexType b = 0; b < ControlPointSkinInfo::kBoneCountPerControlPoint; ++b ) {
+                        skinInfo.indices[ b ] = originalIndexToReorderedIndex[ skinInfo.indices[ b ] ];
                     }
                 }
 
-                std::vector< uint64_t > originalLinkIds = std::move( skin.linkFbxIds );
                 skin.linkFbxIds.resize( uniqueUsedIndices.size( ) );
 
                 for ( auto originalIndexReorderedIndex : originalIndexToReorderedIndex ) {
@@ -913,8 +914,8 @@ void ExportMesh( FbxNode*       pNode,
 
         /* Normalize bone weights for each control point. */
 
-        for (auto& skinInfo : skinInfos) {
-            skinInfo.NormalizeWeights();
+        for ( auto& skinInfo : skinInfos ) {
+            skinInfo.NormalizeWeights( );
         }
 
         auto pSkinnedVertices = reinterpret_cast< StaticSkinnedVertex* >( m.vertices.data( ) );
@@ -922,19 +923,17 @@ void ExportMesh( FbxNode*       pNode,
 
         /* Copy bone weights and indices to each skinned vertex. */
 
-        uint32_t vi = 0;
-        for ( int pi = 0; pi < pMesh->GetPolygonCount( ); ++pi ) {
-            for ( const int pvi : TPolygonVertexOrder< int >( ).indices ) {
+        uint32_t vertexIndex = 0;
+        for ( int polygonIndex = 0; polygonIndex < pMesh->GetPolygonCount( ); ++polygonIndex ) {
+            for ( const int polygonVertexIndex : TPolygonVertexOrder< int >( ).indices ) {
 
-                const int ci = pMesh->GetPolygonVertex( pi, pvi );
-                assert( ci >= 0 );
-
-                for ( BoneIndexType bi = 0; bi < ControlPointSkinInfo::kBoneCountPerControlPoint; ++bi ) {
-                    pSkinnedVertices[ vi ].weights[ bi ] = (float) skinInfos[ ci ].weights[ bi ];
-                    pSkinnedVertices[ vi ].indices[ bi ] = (float) skinInfos[ ci ].indices[ bi ];
+                const int controlPointIndex = pMesh->GetPolygonVertex( polygonIndex, polygonVertexIndex );
+                for ( BoneIndexType b = 0; b < ControlPointSkinInfo::kBoneCountPerControlPoint; ++b ) {
+                    pSkinnedVertices[ vertexIndex ].weights[ b ] = (float) skinInfos[ controlPointIndex ].weights[ b ];
+                    pSkinnedVertices[ vertexIndex ].indices[ b ] = (float) skinInfos[ controlPointIndex ].indices[ b ];
                 }
 
-                ++vi;
+                ++vertexIndex;
             }
         }
     }
