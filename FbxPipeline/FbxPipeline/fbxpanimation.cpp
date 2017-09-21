@@ -306,7 +306,7 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
             curve.property    = std::get< apemodefb::EAnimCurveProperty >( pAnimCurveTuple );
             curve.channel     = std::get< apemodefb::EAnimCurveChannel >( pAnimCurveTuple );
             curve.animStackId = s.animStackDict[ pAnimStack->GetUniqueID( ) ];
-            curve.animLayerId = s.animStackDict[ pAnimLayer->GetUniqueID( ) ];
+            curve.animLayerId = s.animLayerDict[ pAnimLayer->GetUniqueID( ) ];
             curve.nodeId      = n.id;
 
             curve.keys.resize( keyCount );
