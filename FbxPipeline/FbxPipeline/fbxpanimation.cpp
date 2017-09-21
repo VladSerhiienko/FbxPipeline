@@ -299,6 +299,7 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
             s.animCurves.emplace_back( );
 
             uint32_t curveId = s.animCurves.size( );
+            n.curveIds.push_back( curveId );
 
             auto& curve       = s.animCurves.back( );
             curve.id          = curveId;

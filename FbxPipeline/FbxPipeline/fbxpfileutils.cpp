@@ -129,6 +129,53 @@ std::string ReadTxtFile( const char* srcPath ) {
 #endif
 }
 
+bool ReadBinFile( const char* srcPath, std::vector< uint8_t >& fileBuffer ) {
+    const std::string srcFilePath = FindFile( srcPath );
+
+    if ( FILE* srcFile = fopen( srcFilePath.c_str( ), "rb" ) ) {
+        fseek( srcFile, 0, SEEK_END );
+        size_t srcImgFileSize = ftell( srcFile );
+        fseek( srcFile, 0, SEEK_SET );
+        fileBuffer.resize( srcImgFileSize );
+        fread( fileBuffer.data( ), 1, srcImgFileSize, srcFile );
+        fclose( srcFile );
+        srcFile = nullptr;
+        return true;
+    }
+
+    fileBuffer.clear( );
+    return false;
+}
+
+std::string convertToString( double num ) {
+    std::ostringstream convert;
+    convert << num;
+    return convert.str( );
+}
+
+double roundOff( double n ) {
+    double d = n * 100.0;
+    int i = d + 0.5;
+    d = (float) i / 100.0;
+    return d;
+}
+
+std::string ToPrettySizeString( size_t size ) {
+    static const char* SIZES[] = {"B", "KB", "MB", "GB"};
+    int div = 0;
+    size_t rem = 0;
+
+    while ( size >= 1024 && div < ( sizeof SIZES / sizeof *SIZES ) ) {
+        rem = ( size % 1024 );
+        div++;
+        size /= 1024;
+    }
+
+    double size_d = (double) size + (double) rem / 1024.0;
+    std::string result = convertToString( roundOff( size_d ) ) + " " + SIZES[ div ];
+    return result;
+}
+
 std::vector< uint8_t > ReadBinFile( const char* srcPath ) {
     const std::string srcFilePath = FindFile( srcPath );
 

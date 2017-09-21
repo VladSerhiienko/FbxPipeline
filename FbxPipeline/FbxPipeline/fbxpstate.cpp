@@ -130,7 +130,10 @@ bool apemode::State::Load( ) {
     return LoadScene( manager, scene, inputFile.c_str( ) );
 }
 
-std::vector< uint8_t > ReadBinFile( const char* filepath );
+// std::vector< uint8_t > ReadBinFile( const char* filepath );
+
+std::string ToPrettySizeString( size_t size );
+bool ReadBinFile( const char* srcPath, std::vector< uint8_t >& fileBuffer );
 
 bool apemode::State::Finish( ) {
     console->info( "Serialization" );
@@ -171,8 +174,14 @@ bool apemode::State::Finish( ) {
     std::vector< flatbuffers::Offset< apemodefb::NodeFb > > nodeOffsets; {
         nodeOffsets.reserve( nodes.size( ) );
         for ( auto& node : nodes ) {
+            const auto curveIdsOffset    = builder.CreateVector( node.curveIds );
             const auto childIdsOffset    = builder.CreateVector( node.childIds );
             const auto materialIdsOffset = builder.CreateVector( node.materialIds );
+
+            console->info( "+ curve ids {}, child ids {}, material ids {}",
+                           node.curveIds.size( ),
+                           node.childIds.size( ),
+                           node.materialIds.size( ) );
 
             apemodefb::NodeFbBuilder nodeBuilder( builder );
             nodeBuilder.add_id( node.id );
@@ -181,6 +190,7 @@ bool apemode::State::Finish( ) {
             nodeBuilder.add_mesh_id( node.meshId );
             nodeBuilder.add_child_ids( childIdsOffset );
             nodeBuilder.add_material_ids( materialIdsOffset );
+            nodeBuilder.add_anim_curve_ids( curveIdsOffset );
             nodeOffsets.push_back( nodeBuilder.Finish( ) );
         }
     }
@@ -286,6 +296,8 @@ bool apemode::State::Finish( ) {
                             return nodeDictIt->second;
                         } );
 
+        console->info( "+ link ids {} ", skin.linkFbxIds.size( ) );
+
         return apemodefb::CreateSkinFb( builder, skin.nameId, builder.CreateVector( tempLinkIndices ) );
     } );
 
@@ -328,15 +340,14 @@ bool apemode::State::Finish( ) {
     //
 
     console->info( "> Files" );
+    std::vector< uint8_t > tempFileBuffer;
     std::vector< flatbuffers::Offset< apemodefb::FileFb > > fileOffsets;
     fileOffsets.reserve( embedQueue.size( ) );
     for ( auto& embedded : embedQueue ) {
         if ( false == embedded.empty( ) ) {
-            console->info( "+ {} ", embedded );
-
-            std::vector< uint8_t > fileBuffer = ReadBinFile( embedded.c_str( ) );
-            if ( !fileBuffer.empty( ) ) {
-                fileOffsets.push_back( apemodefb::CreateFileFbDirect( builder, (uint32_t) fileOffsets.size( ), 0, &fileBuffer ) );
+            if ( ReadBinFile( embedded.c_str( ), tempFileBuffer ) ) {
+                console->info( "+ {} ({}, {}) ", ToPrettySizeString( tempFileBuffer.size( ) ), tempFileBuffer.size( ), embedded );
+                fileOffsets.push_back( apemodefb::CreateFileFbDirect( builder, (uint32_t) fileOffsets.size( ), 0, &tempFileBuffer ) );
             }
         }
     }
@@ -384,7 +395,6 @@ bool apemode::State::Finish( ) {
         assert( false );
     }
 
-
     std::string output = options[ "o" ].as< std::string >( );
     if ( output.empty( ) ) {
         output = folderPath + fileName + "." +apemodefb::SceneFbExtension( );
@@ -396,7 +406,8 @@ bool apemode::State::Finish( ) {
     }
 
     console->info( "> Saving" );
-    if ( flatbuffers::SaveFile(output.c_str( ), (const char*) builder.GetBufferPointer( ), (size_t) builder.GetSize( ), true ) ) {
+    if ( flatbuffers::SaveFile( output.c_str( ), (const char*) builder.GetBufferPointer( ), (size_t) builder.GetSize( ), true ) ) {
+        console->info( "+ {} ({}, {}) ", ToPrettySizeString( builder.GetSize( ) ), builder.GetSize( ), ResolveFullPath( output.c_str( ) ) );
         console->info( "< Succeeded" );
         return true;
     }
