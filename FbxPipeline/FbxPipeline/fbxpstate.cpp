@@ -394,17 +394,17 @@ bool apemode::State::Finish( ) {
 
     console->info( "> Scene" );
     apemodefb::SceneFbBuilder sceneBuilder( builder );
-    if ( 0 != transformsOffset.o )  sceneBuilder.add_transforms( transformsOffset );
-    if ( 0 != namesOffset.o )       sceneBuilder.add_names( namesOffset );
-    if ( 0 != nodesOffset.o )       sceneBuilder.add_nodes( nodesOffset );
-    if ( 0 != meshesOffset.o )      sceneBuilder.add_meshes( meshesOffset );
-    if ( 0 != texturesOffset.o )    sceneBuilder.add_textures( texturesOffset );
-    if ( 0 != materialsOffset.o )   sceneBuilder.add_materials( materialsOffset );
-    if ( 0 != filesOffset.o )       sceneBuilder.add_files( filesOffset );
-    if ( 0 != skinsOffset.o )       sceneBuilder.add_skins( skinsOffset );
-    if ( 0 != camerasOffset.o )     sceneBuilder.add_cameras( camerasOffset );
-    if ( 0 != lightsOffset.o )      sceneBuilder.add_lights( lightsOffset );
-    if ( 0 != animStacksOffset.o )  sceneBuilder.add_anim_stacks( animStacksOffset );
+    sceneBuilder.add_transforms( transformsOffset );
+    sceneBuilder.add_names( namesOffset );
+    sceneBuilder.add_nodes( nodesOffset );
+    sceneBuilder.add_meshes( meshesOffset );
+    sceneBuilder.add_textures( texturesOffset );
+    sceneBuilder.add_materials( materialsOffset );
+    sceneBuilder.add_files( filesOffset );
+    sceneBuilder.add_skins( skinsOffset );
+    sceneBuilder.add_cameras( camerasOffset );
+    sceneBuilder.add_lights( lightsOffset );
+    sceneBuilder.add_anim_stacks( animStacksOffset );
 
     auto sceneOffset = sceneBuilder.Finish( );
     apemodefb::FinishSceneFbBuffer( builder, sceneOffset );
