@@ -193,6 +193,8 @@ bool apemode::State::Finish( ) {
             apemodefb::NodeFbBuilder nodeBuilder( builder );
             nodeBuilder.add_id( node.id );
             nodeBuilder.add_name_id( node.nameId );
+            nodeBuilder.add_camera_id( node.cameraId );
+            nodeBuilder.add_light_id( node.lightId );
             nodeBuilder.add_culling_type( node.cullingType );
             nodeBuilder.add_mesh_id( node.meshId );
             nodeBuilder.add_child_ids( childIdsOffset );
@@ -343,6 +345,22 @@ bool apemode::State::Finish( ) {
     console->info( "< Succeeded {} ", meshesOffset.o );
 
     //
+    // Finalize cameras
+    //
+
+    console->info( "> Cameras" );
+    const auto camerasOffset = builder.CreateVectorOfStructs( cameras );
+    console->info( "< Succeeded {} ", camerasOffset.o );
+
+    //
+    // Finalize lights
+    //
+
+    console->info( "> Lights" );
+    const auto lightsOffset = builder.CreateVectorOfStructs( lights );
+    console->info( "< Succeeded {} ", lightsOffset.o );
+
+    //
     // Finalize files
     //
 
@@ -384,6 +402,8 @@ bool apemode::State::Finish( ) {
     if ( 0 != materialsOffset.o )   sceneBuilder.add_materials( materialsOffset );
     if ( 0 != filesOffset.o )       sceneBuilder.add_files( filesOffset );
     if ( 0 != skinsOffset.o )       sceneBuilder.add_skins( skinsOffset );
+    if ( 0 != camerasOffset.o )     sceneBuilder.add_cameras( camerasOffset );
+    if ( 0 != lightsOffset.o )      sceneBuilder.add_lights( lightsOffset );
     if ( 0 != animStacksOffset.o )  sceneBuilder.add_anim_stacks( animStacksOffset );
 
     auto sceneOffset = sceneBuilder.Finish( );

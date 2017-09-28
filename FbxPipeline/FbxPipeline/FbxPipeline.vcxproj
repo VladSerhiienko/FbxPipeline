@@ -202,6 +202,8 @@ exit 0</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CityHash.cpp" />
+    <ClCompile Include="fbxpcam.cpp" />
+    <ClCompile Include="fbxplight.cpp" />
     <ClCompile Include="fbxppacking.cpp" />
     <ClCompile Include="fbxpanimation.cpp" />
     <ClCompile Include="fbxpfileutils.cpp" />

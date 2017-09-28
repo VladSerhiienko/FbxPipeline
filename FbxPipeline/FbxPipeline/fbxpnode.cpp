@@ -8,6 +8,8 @@ void ExportMaterials( FbxScene* scene );
 void ExportMaterials( FbxNode* node, apemode::Node& n );
 void ExportTransform( FbxNode* node, apemode::Node& n );
 void ExportAnimation( FbxNode* node, apemode::Node& n );
+void ExportCamera( FbxNode* node, apemode::Node& n );
+void ExportLight( FbxNode* node, apemode::Node& n );
 
 void ExportNodeAttributes( FbxNode* node, apemode::Node& n ) {
     auto& s = apemode::Get( );
@@ -19,6 +21,8 @@ void ExportNodeAttributes( FbxNode* node, apemode::Node& n ) {
     ExportAnimation( node, n );
     ExportMesh( node, n, s.options[ "p" ].as< bool >( ), s.options[ "t" ].as< bool >( ) );
     ExportMaterials( node, n );
+    ExportCamera( node, n );
+    ExportLight( node, n );
 }
 
 uint32_t ExportNode( FbxNode* node ) {

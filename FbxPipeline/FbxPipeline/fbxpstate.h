@@ -8,6 +8,15 @@ inline void DebugBreak( ) {
 
 namespace apemode {
 
+    /**
+     * Flatbuffers generate immutable fields (where mutable are expected) for defined structs.
+     * Mostly the usage is: Mutable( some_struct.mutable_some_field( ) ) = some_field_value.
+     **/
+    template < typename TConst, typename TMutable = std::remove_const< TConst >::type >
+    inline TMutable& Mutable( TConst& v ) {
+        return const_cast< TMutable& >( v );
+    }
+
     struct Skin {
         uint64_t                nameId = (uint64_t) 0;
         std::vector< uint64_t > linkFbxIds;
@@ -38,6 +47,8 @@ namespace apemode {
         uint64_t                fbxId       = (uint64_t) 0;
         uint64_t                nameId      = (uint64_t) 0;
         uint32_t                meshId      = (uint32_t) -1;
+        uint32_t                lightId     = (uint32_t) -1;
+        uint32_t                cameraId    = (uint32_t) -1;
         std::vector< uint32_t > childIds;
         std::vector< uint32_t > materialIds;
         std::vector< uint32_t > curveIds;
@@ -104,6 +115,8 @@ namespace apemode {
         std::map< uint64_t, std::string >     names;
         std::vector< apemodefb::TransformFb > transforms;
         std::vector< apemodefb::TextureFb >   textures;
+        std::vector< apemodefb::CameraFb >    cameras;
+        std::vector< apemodefb::LightFb >     lights;
         std::vector< Mesh >                   meshes;
         std::vector< AnimStack >              animStacks;
         std::vector< AnimLayer >              animLayers;

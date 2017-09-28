@@ -63,6 +63,16 @@ enum EAnimCurveChannel : uint {
 enum EInterpolationMode : uint {
 	Const, Linear, Cubic
 }
+enum ELightType : uint {
+	Point, 
+	Directional, 
+	Spot,
+	Area,
+}
+enum EAreaLightType : uint {
+	Rect, 
+	Sphere, 
+}
 
 struct vec2 {
     x : float;
@@ -206,9 +216,34 @@ table MaterialFb {
     name_id : ulong( key );
     props : [MaterialPropFb];
 }
+struct CameraFb {
+    id : uint;
+    name_id : ulong( key );
+	up : vec3;
+	aspect : vec2;
+}
+struct LightFb {
+    id : uint;
+    name_id : ulong( key );
+	light_type : ELightType;
+	area_light_type : EAreaLightType;
+	color : vec3;
+	fog : float;
+	intensity : float;
+	inner_angle : float;
+	near_attenuation_start : float;
+	near_attenuation_end : float;
+	far_attenuation_start : float;
+	far_attenuation_end : float;
+	outer_angle : float;
+	decay_start : float;
+	casts_shadows : bool;
+}
 table NodeFb {
     id : uint;
     mesh_id : uint;
+    light_id : uint;
+    camera_id : uint;
     name_id : ulong( key );
 	culling_type : ECullingType;
     child_ids : [uint];
@@ -229,6 +264,8 @@ table SceneFb {
     anim_curves : [AnimCurveFb];
     materials : [MaterialFb];
     textures : [TextureFb];
+    cameras : [CameraFb];
+    lights : [LightFb];
     skins : [SkinFb];
     files : [FileFb];
     names : [NameFb];

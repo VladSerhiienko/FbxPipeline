@@ -946,13 +946,11 @@ void ExportMesh( FbxNode*       pNode,
         m.subsets.push_back( apemodefb::SubsetFb( 0, 0, vertexCount ) );
     }
 
-    m.indices.resize( vertexCount * sizeof( TIndex ) );
-    auto indices = (TIndex*) m.indices.data( );
+    /* Fill indices. */
 
     TIndex index = 0;
-    while ( index < vertexCount ) {
-        *indices++ = index++;
-    }
+    m.indices.resize( vertexCount * sizeof( TIndex ) );
+    std::generate( (TIndex*) m.indices.data( ), ( (TIndex*) m.indices.data( ) ) + vertexCount, [&index] { return index++; } );
 
     if ( std::is_same< TIndex, uint16_t >::value ) {
         m.indexType = apemodefb::EIndexTypeFb_UInt16;
@@ -1000,12 +998,11 @@ void ExportMesh( FbxNode*       pNode,
 
     apemodefb::vec3 bboxMin( positionMin.x, positionMin.y, positionMin.z );
     apemodefb::vec3 bboxMax( positionMax.x, positionMax.y, positionMax.z );
-    apemodefb::vec2 uvMin( texcoordMin.x, texcoordMin.y );
-    apemodefb::vec2 uvMax( texcoordMax.x, texcoordMax.y );
 
     if ( pack ) {
         auto const positionScale = positionMax - positionMin;
         auto const texcoordScale = texcoordMax - texcoordMin;
+        apemodefb::vec2 uvMin( texcoordMin.x, texcoordMin.y );
         apemodefb::vec3 const bboxScale( positionScale.x, positionScale.y, positionScale.z );
         apemodefb::vec2 const uvScale( texcoordScale.x, texcoordScale.y );
 
