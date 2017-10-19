@@ -1,0 +1,163 @@
+This is a C++ implementation of Tom Forsyth's linear-speed vertex cache optimisation algorithm
+( http://www.eelpi.gotdns.org/papers/papers.html ).
+
+The optimizer does not change the way the mesh looks like; it does not add or remove triangle, and does not
+manipulate individual vertex attributes. Instead, it reorders triangles (and optionally vertices) to
+make better of of the GPU vertex cache and memory bandwidth, preserving the shape. Visual changes to the mesh
+are considered an error.
+
+
+
+BUILDING INSTRUCTIONS
+=====================
+
+
+vcache_optimizer itself is made up of headers only; it does not have to be built.
+
+In order to build the tests and the ply viewer, follow these steps:
+
+
+Linux:
+------
+
+./waf configure
+./waf
+
+To run the ply viewer without running the optimizer, execute
+
+> build/ply_viewer/ply_viewer <name of PLY file to show>
+
+this will run the PLY viewer, load the specified PLY file, and show it.
+To let the optimizer run after loading, run this instead:
+
+> build/ply_viewer/ply_viewer <name of PLY file to show> -optimize
+
+
+Windows:
+--------
+
+<TODO VisualC build steps>
+
+
+
+USAGE
+=====
+
+
+vcache_optimizer works with surface meshes made up of triangles. Volume meshes, quad meshes etc. are not supported.
+
+The meshes can be made up of submeshes, as it is common with meshes in computer games; there, submeshes are used
+to support multiple materials in the same mesh (one material per submesh).
+
+Submeshes in the mesh are expected to be separated from each other. This holds true at least for the triangles;
+for example, a mixed set of triangles like "1 1 2 2 1 3 1", where 1/2/3 refers to a triangle of submesh 1/2/3,
+is invalid. A valid version of this set would be "1 1 1 1 2 2 3". Another would be "2 2 1 1 1 1 3". If such
+an ordering is inevitable, then the getters defined below must do some internal mapping. From the point of
+view of the vcache_optimizer, the triangles are ordered contiguously and separated.
+
+The submeshes may use a common set of vertices. In this case, get_num_vertices() should return the total number
+of vertices and get_vertex() should ignore the submesh parameter. If submeshes share vertices, the vertex
+reordering should be disabled, otherwise submeshes may get corrupted.
+
+
+In order to use vcache_optimizer , the mesh type has to conform to the VcacheMesh concept. Several functions are required,
+as well as a traits class defining some types.
+
+
+The traits class has the following type definitions:
+
+- submesh_id_t
+  fulfills the CopyConstructibe and EqualityComparable concepts
+  used for identifying submeshes
+
+- vertex_t
+  fulfills the CopyConstructibe concept
+  contains or at least refers to a vertex. Copying an instance of this class copies a vertex.
+  The vcache_optimizer code uses this type for using getting/setting vertices using get_vertex / set_vertex.
+
+- triangles_t
+  fulfills the CopyConstructibe concept
+  contains or at least refers to a triangle. Copying an instance of this class copies a triangle.
+  The vcache_optimizer code uses this type for using getting/setting triangles using get_triangle / set_triangle.
+  In addition, the triangles_t type defines an index ( [] ) operator for retrieving triangle vertex indices.
+  The index may be 0, 1, or 2. Triangles are made up of three vertex indices.
+
+- vertex_index_t / triangle_index_t
+  integral number types
+  convertible to size_t
+
+
+
+The traits class can be implemented and supplied in two ways:
+
+
+1. Supply it as a template parameter to vcache_optimizer
+   The traits class can have any name and be in any namespace.
+   Example:
+   vcache_optimizer < mymesh, float, mytraits > optimizer;
+
+
+2. Specialize the mesh_traits template
+   The traits class must be in the vcache_optimizer namespace.
+
+   Example:
+
+   namespace vcache_optimizer
+   {
+       template < >
+       typename mesh_traits < mymesh >
+       {
+         ...
+       }
+   }
+
+   vcache_optimizer < mymesh > optimizer;
+
+
+
+The following free functions must be defined for the mesh.
+
+- triangle_t create_new_triangle(VcacheMesh &vcache_mesh, vertex_index_t const &vtx1, vertex_index_t const &vtx2, vertex_index_t const &vtx3)
+  Creates a new triangle of triangle_t type, made up of the vertex indices vtx1,vtx2,vtx3.
+
+- std::size_t get_num_triangles(VcacheMesh const &vcache_mesh, submesh_id_t const &submesh_id)
+  Returns the number of triangles the specified submesh has inside vcache_mesh.
+
+- std::size_t get_num_vertices(VcacheMesh const &vcache_mesh, submesh_id_t const &submesh_id)
+  Returns the number of vertices the specified submesh has inside vcache_mesh.
+
+- triangle_t get_triangle(VcacheMesh const &vcache_mesh, submesh_id_t const &submesh_id, triangle_index_t const &index)
+  Returns a triangle with the given index, from the specified submesh inside the vcache_mesh.
+  The minimum index is 0, the maximum index is (get_num_triangles() - 1).
+
+- vertex_t get_vertex(VcacheMesh const &vcache_mesh, submesh_id_t const &submesh_id, vertex_index_t const &index)
+  Returns a vertex with the given index, from the specified submesh inside the vcache_mesh.
+  The minimum index is 0, the maximum index is (get_num_vertices() - 1).
+
+- void set_triangle(VcacheMesh &vcache_mesh, submesh_id_t const &submesh_id, triangle_index_t const &index, triangle_t const &new_triangle)
+  Sets the given triangle in the specified submesh inside the vcache_mesh.
+  The minimum index is 0, the maximum index is (get_num_triangles() - 1).
+
+- void set_vertex(VcacheMesh &vcache_mesh, submesh_id_t const &submesh_id, vertex_index_t const &index, vertex_t const &new_vertex)
+  Sets the given vertex in the specified submesh inside the vcache_mesh.
+  The minimum index is 0, the maximum index is (get_num_vertices() - 1).
+
+
+
+vcache_optimizer itself is a functor; to perform the optimization, call it like this:
+
+   optimizer(my_mesh, "id_of_submesh_to_be_optimized", true/false);
+
+The first parameter is the mesh meeting the VcacheMesh concept requirments.
+The second parameter is the ID of the sumesh to be optimized. If your mesh does not have submeshes, you can specify an empty string here.
+The third parameter is optional, and true by default. It specifies whether or not the optimizer shall do the second step: reorder vertices.
+As explained in Tom Forsyths paper, this secondary step tries to reorder the vertices for a more linearized access pattern, improving the use
+of memory bandwidth. However, in a mesh with submeshes, vertex reordering may be undesirable. Set the third parameter to false in that case.
+
+
+
+LICENSING
+=========
+
+This optimizer code is released under the Boost Software License, version 1.0. The file LICENSE_1_0.txt contains a copy of this license.
+

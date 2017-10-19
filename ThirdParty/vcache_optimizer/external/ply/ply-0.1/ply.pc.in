@@ -1,0 +1,11 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: ply
+Description: ply
+Requires: 
+Version: @VERSION@
+Libs: -L${libdir} -lply
+Cflags: -I${includedir}

@@ -19,21 +19,6 @@
 [submodule "ThirdParty/nuklear"]
 	path = ThirdParty/nuklear
 	url = git@github.com:vurtun/nuklear.git
-[submodule "ThirdParty/vcache_optimizer"]
-	path = ThirdParty/vcache_optimizer
-	url = git@github.com:dv1/vcache_optimizer.git
-[submodule "ThirdParty/meshoptimizer"]
-	path = ThirdParty/meshoptimizer
-	url = https://github.com/zeux/meshoptimizer.git
-[submodule "ThirdParty/amd-tootle"]
-	path = ThirdParty/amd-tootle
-	url = git@github.com:GPUOpen-Tools/amd-tootle.git
-[submodule "ThirdParty/microprofile"]
-	path = ThirdParty/microprofile
-	url = git@github.com:jonasmr/microprofile.git
-[submodule "ThirdParty/tbb"]
-	path = ThirdParty/tbb
-	url = git@github.com:01org/tbb.git
 [submodule "ThirdParty/gli"]
 	path = ThirdParty/gli
 	url = git@github.com:g-truc/gli.git
