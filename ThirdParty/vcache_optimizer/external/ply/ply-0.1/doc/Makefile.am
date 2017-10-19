@@ -1,1 +1,0 @@
-EXTRA_DIST = PLY_FILES.txt
