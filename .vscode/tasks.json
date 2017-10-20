@@ -32,7 +32,7 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "dependsOn": [ "CMake/AppEzri(Debug/Ubuntu)"]
+            "dependsOn": [ "CMake/FbxPipeline(Debug/Ubuntu)"]
         }
     ]
 }
