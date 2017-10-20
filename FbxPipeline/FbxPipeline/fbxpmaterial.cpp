@@ -75,12 +75,12 @@ void ExportMaterials( FbxScene* pScene ) {
 
                     bool supported = false;
                     switch ( srcProperty.GetPropertyDataType( ).GetType( ) ) {
-                        case fbxsdk::eFbxBool:
-                        case fbxsdk::eFbxFloat:
-                        case fbxsdk::eFbxDouble:
-                        case fbxsdk::eFbxDouble2:
-                        case fbxsdk::eFbxDouble3:
-                        case fbxsdk::eFbxDouble4:
+                        case eFbxBool:
+                        case eFbxFloat:
+                        case eFbxDouble:
+                        case eFbxDouble2:
+                        case eFbxDouble3:
+                        case eFbxDouble4:
                             supported = true;
                             break;
                     }
@@ -98,25 +98,25 @@ void ExportMaterials( FbxScene* pScene ) {
                                     srcObjCount );
 
                     switch ( srcProperty.GetPropertyDataType( ).GetType( ) ) {
-                        case fbxsdk::eFbxBool:
+                        case eFbxBool:
                             m.props.emplace_back(
                                 s.PushName( srcProperty.GetNameAsCStr( ) ),
                                 apemodefb::EMaterialPropTypeFb_Bool,
                                 apemodefb::vec3( static_cast< float >( srcProperty.Get< FbxBool >( ) ), 0, 0 ) );
                             break;
-                        case fbxsdk::eFbxFloat:
+                        case eFbxFloat:
                             m.props.emplace_back(
                                 s.PushName( srcProperty.GetNameAsCStr( ) ),
                                 apemodefb::EMaterialPropTypeFb_Float,
                                 apemodefb::vec3( static_cast< float >( srcProperty.Get< float >( ) ), 0, 0 ) );
                             break;
-                        case fbxsdk::eFbxDouble:
+                        case eFbxDouble:
                             m.props.emplace_back(
                                 s.PushName( srcProperty.GetNameAsCStr( ) ),
                                 apemodefb::EMaterialPropTypeFb_Float,
                                 apemodefb::vec3( static_cast< float >( srcProperty.Get< double >( ) ), 0, 0 ) );
                             break;
-                        case fbxsdk::eFbxDouble2:
+                        case eFbxDouble2:
                             m.props.emplace_back(
                                 s.PushName( srcProperty.GetNameAsCStr( ) ),
                                 apemodefb::EMaterialPropTypeFb_Float2,
@@ -124,8 +124,8 @@ void ExportMaterials( FbxScene* pScene ) {
                                                  static_cast< float >( srcProperty.Get< FbxDouble2 >( )[ 1 ] ),
                                                  0 ) );
                             break;
-                        case fbxsdk::eFbxDouble3:
-                        case fbxsdk::eFbxDouble4:
+                        case eFbxDouble3:
+                        case eFbxDouble4:
                             m.props.emplace_back(
                                 s.PushName( srcProperty.GetNameAsCStr( ) ),
                                 apemodefb::EMaterialPropTypeFb_Float3,
@@ -140,7 +140,7 @@ void ExportMaterials( FbxScene* pScene ) {
                 },
                 [&]( FbxProperty& srcProperty, FbxObject* pSrcObj, int srcObjIndex ) {
                     if ( auto pTexture = FbxCast< FbxTexture >( pSrcObj ) ) {
-                        std::string fileUrl = pTexture->GetUrl( );
+                        std::string fileUrl = pTexture->GetUrl( ).Buffer();
 
                         if ( fileUrl.empty( ) ) {
                             if ( auto pFileTexture = FbxCast< FbxFileTexture >( pTexture ) )

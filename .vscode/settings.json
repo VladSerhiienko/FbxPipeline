@@ -1,0 +1,23 @@
+{
+    
+        "todo.file": "TODO", // Todo file name
+        "todo.defaultContent": "\nTodo:\n  ☐ Item\n", // New todo files default content
+        "todo.symbols.box": "☐", // Box symbol
+        "todo.symbols.done": "✔", // Done symbol
+        "todo.symbols.cancel": "✘", // Cancel symbol
+        "todo.colors.cancel": "#f92672", // Cancelled todo color
+        "todo.colors.done": "#a6e22e", // Done todo color
+        "todo.colors.comment": "#75715e", // Comment color
+        "todo.colors.project": "#66d9ef", // Project color
+        "todo.colors.tag": "#e6db74", // Tag color
+        "todo.tags.names": ["critical", "high", "low", "today"], // Special tags' names
+        "todo.tags.backgroundColors": ["#e54545", "#e59f45", "#e5d145", "#ae81ff"], // Special tags' background colors
+        "todo.tags.foregroundColors": ["#000000", "#000000", "#000000", "#000000"], // Special tags' foreground colors
+        "todo.formatting.enabled": true, // Enable markdown-like formatting
+        
+        // Controls the font size in pixels.
+        "editor.fontSize": 16,
+        
+        // Controls the font family.
+        "editor.fontFamily": "'Ubuntu Mono'"
+}

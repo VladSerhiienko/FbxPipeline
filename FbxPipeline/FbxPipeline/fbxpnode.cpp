@@ -65,18 +65,18 @@ void PreprocessMeshes( FbxScene* scene ) {
         s.console->info( "Triangulation succeeded for all nodes." );
     }
 
-    FbxArray< FbxNode* > affectedNodes;
-    s.console->info( "Removing bad polygons..." );
-    geometryConverter.RemoveBadPolygonsFromMeshes( s.scene, &affectedNodes );
-    if ( 0 != affectedNodes.Size( ) ) {
-        s.console->warn( "Removed bad polygons from {} nodes:", affectedNodes.Size( ) );
-        for ( int32_t i = 0; i < affectedNodes.Size( ); ++i ) {
-            assert( nullptr != affectedNodes[ i ] );
-            s.console->warn( "\t > {}", affectedNodes[ i ]->GetName( ) );
-        }
-    } else {
-        s.console->info( "No bad polygons in the scene." );
-    }
+    // FbxArray< FbxNode* > affectedNodes;
+    // s.console->info( "Removing bad polygons..." );
+    // geometryConverter.RemoveBadPolygonsFromMeshes( s.scene, &affectedNodes );
+    // if ( 0 != affectedNodes.Size( ) ) {
+    //     s.console->warn( "Removed bad polygons from {} nodes:", affectedNodes.Size( ) );
+    //     for ( int32_t i = 0; i < affectedNodes.Size( ); ++i ) {
+    //         assert( nullptr != affectedNodes[ i ] );
+    //         s.console->warn( "\t > {}", affectedNodes[ i ]->GetName( ) );
+    //     }
+    // } else {
+    //     s.console->info( "No bad polygons in the scene." );
+    // }
 
     if ( s.options[ "s" ].as< bool >( ) ) {
         s.console->info( "Splitting per material..." );

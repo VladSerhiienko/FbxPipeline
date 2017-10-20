@@ -3,6 +3,9 @@
 #include <fbxppch.h>
 #include <scene_generated.h>
 
+inline void DebugBreak( ) {
+}
+
 namespace apemode {
 
     struct Skin {
@@ -77,10 +80,15 @@ namespace apemode {
 
     using TupleUintUint = std::tuple< uint32_t, uint32_t >;
 
+    struct State;
+    State& Get( );
+    State& Main( int argc, char** argv );
+
     struct State {
         bool                                  legacyTriangulationSdk = false;
-        fbxsdk::FbxManager*                   manager                = nullptr;
-        fbxsdk::FbxScene*                     scene                  = nullptr;
+        FbxManager*                           manager                = nullptr;
+        FbxScene*                             scene                  = nullptr;
+        std::string                           executableName;
         std::shared_ptr< spdlog::logger >     console;
         flatbuffers::FlatBufferBuilder        builder;
         cxxopts::Options                      options;

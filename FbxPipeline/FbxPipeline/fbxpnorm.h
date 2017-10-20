@@ -285,7 +285,8 @@ namespace apemode {
                     f.q.Mantissa = 0;
                 } else {
                     // Denormal.
-                    uint32_t MantissaShift = 10 - (uint32) FMath::TruncToInt( FMath::Log2( Mantissa ) );
+                    uint32_t MantissaShift = 10 - (uint32_t) (int)(log2( Mantissa ) + 0.5);
+                    // uint32_t MantissaShift = 10 - (uint32_t) FMath::TruncToInt( FMath::Log2( Mantissa ) );
                     f.q.e = 127 - ( 15 - 1 ) - MantissaShift;
                     f.q.m = Mantissa << ( MantissaShift + 23 - 10 );
                 }

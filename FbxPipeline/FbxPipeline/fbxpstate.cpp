@@ -32,13 +32,16 @@ std::shared_ptr< spdlog::logger > CreateLogger( spdlog::level::level_enum lvl, s
            The name should contain date and time.
            TODO: Something portable and less ugly. */
 
-        tm currentTime;
+        // tm currentTime;
+        tm* pCurrentTime = nullptr;
         time_t currentSystemTime = std::chrono::system_clock::to_time_t( std::chrono::system_clock::now( ) );
-        localtime_s( &currentTime, &currentSystemTime );
+        // pCurrentTime = &currentTime;
+        // localtime_s( pCurrentTime, &currentSystemTime );
+        pCurrentTime = localtime( &currentSystemTime );
 
         std::string curentTimeStr;
         std::stringstream curentTimeStrStream;
-        curentTimeStrStream << std::put_time( &currentTime, "%F-%T-" );
+        curentTimeStrStream << std::put_time( pCurrentTime, "%F-%T-" );
         curentTimeStrStream << currentSystemTime;
         curentTimeStr = curentTimeStrStream.str( );
         std::replace( curentTimeStr.begin( ), curentTimeStr.end( ), ':', '-' );
@@ -54,9 +57,12 @@ std::shared_ptr< spdlog::logger > CreateLogger( spdlog::level::level_enum lvl, s
     // std::make_shared< spdlog::sinks::rotating_file_sink_mt >( logFile, "fbxp-rlog.txt", 65536, 1024 )
 
     std::vector< spdlog::sink_ptr > sinks{
-        std::make_shared< spdlog::sinks::wincolor_stdout_sink_mt >( ),
-        std::make_shared< spdlog::sinks::msvc_sink_mt >( ),
+        std::make_shared< spdlog::sinks::stdout_sink_mt >( ),
         std::make_shared< spdlog::sinks::simple_file_sink_mt >( logFile )
+    // std::vector< spdlog::sink_ptr > sinks{
+    //     std::make_shared< spdlog::sinks::wincolor_stdout_sink_mt >( ),
+    //     std::make_shared< spdlog::sinks::msvc_sink_mt >( ),
+    //     std::make_shared< spdlog::sinks::simple_file_sink_mt >( logFile )
         /*, std::make_shared< spdlog::sinks::rotating_file_sink_mt >( logFile, "fbxp-rlog.txt", 65536, 1024 )*/};
 
     auto logger = spdlog::create<>( "apemode", sinks.begin( ), sinks.end( ) );
@@ -68,6 +74,7 @@ std::shared_ptr< spdlog::logger > CreateLogger( spdlog::level::level_enum lvl, s
 apemode::State& apemode::Main( int argc, char** argv ) {
     try {
         s.options.parse( argc, argv );
+        s.executableName = argv[ 0 ];
 
         auto lvl = spdlog::level::info;
         if ( s.options[ "log-level" ].count( ) > 0 )
@@ -402,7 +409,8 @@ bool apemode::State::Finish( ) {
         std::string outputFolder, outputFileName;
         SplitFilename( output, outputFolder, outputFileName );
         (void) outputFileName;
-        CreateDirectoryA( outputFolder.c_str( ), 0 );
+        MakeDirectory( outputFolder.c_str( ) );
+        // CreateDirectoryA( outputFolder.c_str( ), 0 );
     }
 
     console->info( "> Saving" );
@@ -616,9 +624,11 @@ bool SaveScene( FbxManager* pManager, FbxDocument* pScene, const char* pFilename
 #pragma region Utils
 
 std::string GetExecutable( ) {
-    char szFileName[ 1024 ];
-    GetModuleFileNameA( NULL, szFileName, 1024 );
-    return szFileName;
+    return apemode::Get().executableName;
+
+    // char szFileName[ 1024 ];
+    // GetModuleFileNameA( NULL, szFileName, 1024 );
+    // return szFileName;
 }
 
 void SplitFilename( const std::string& filePath, std::string& parentFolderName, std::string& fileName ) {

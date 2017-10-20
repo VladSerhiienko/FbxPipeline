@@ -5,10 +5,40 @@
 using namespace apemode;
 using namespace apemodefb;
 
-template < typename TMathFu, typename TFb >
-inline TMathFu Cast( const TFb v ) {
-    static_assert( sizeof( TMathFu ) == sizeof( TFb ), "Cannot cast." );
-    return TMathFu( reinterpret_cast< const float* >( &v ) );
+template < typename X, typename Y >
+inline X Cast( const Y v ) {
+    static_assert( sizeof( X ) == sizeof( Y ), "Cannot cast." );
+    return X( reinterpret_cast< const float* >( &v ) );
+}
+
+template <>
+inline apemodefb::vec4 Cast( const mathfu::vec4 v ) {
+    apemodefb::vec4( v.x, v.y, v.z, v.w );
+}
+
+template <>
+inline apemodefb::vec3 Cast( const mathfu::vec3 v ) {
+    apemodefb::vec3( v.x, v.y, v.z );
+}
+
+template <>
+inline apemodefb::vec2 Cast( const mathfu::vec2 v ) {
+    apemodefb::vec2( v.x, v.y );
+}
+
+template <>
+inline mathfu::vec4 Cast( const apemodefb::vec4 v ) {
+    mathfu::vec4( v.x( ), v.y( ), v.z( ), v.w( ) );
+}
+
+template <>
+inline mathfu::vec3 Cast( const apemodefb::vec3 v ) {
+    mathfu::vec3( v.x( ), v.y( ), v.z( ) );
+}
+
+template <>
+inline mathfu::vec2 Cast( const apemodefb::vec2 v ) {
+    mathfu::vec2( v.x( ), v.y( ) );
 }
 
 template < typename TMathFu >
@@ -144,7 +174,8 @@ uint32_t PackTexcoord_16_16_fixed( const mathfu::vec2 texcoord,
 uint32_t PackTexcoord_16_16_half( const mathfu::vec2 texcoord,
                                   const mathfu::vec2 texcoordMin,
                                   const mathfu::vec2 texcoordMax ) {
-    const bool sOverflowCheck = FBXP_DEBUG;
+    const bool sOverflowCheck = 1;
+    // const bool sOverflowCheck = FBXP_DEBUG;
 
     UIntPack_16_16 packed;
     packed.q.x = Half< sOverflowCheck >( texcoord.x ).Bits( );

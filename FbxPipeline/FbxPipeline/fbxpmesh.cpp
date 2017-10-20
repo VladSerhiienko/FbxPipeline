@@ -146,9 +146,9 @@ bool GetSubsets( FbxMesh* mesh, apemode::Mesh& m, std::vector< apemodefb::Subset
             if ( const auto materialElement = mesh->GetElementMaterial( m ) ) {
                 switch ( const auto mappingMode = materialElement->GetMappingMode( ) ) {
                     /* Case when there is a single entry in the material element arrays. */
-                    case fbxsdk::FbxLayerElement::eAllSame: {
+                    case FbxLayerElement::eAllSame: {
                         switch ( const auto referenceMode = materialElement->GetReferenceMode( ) ) {
-                            case fbxsdk::FbxLayerElement::EReferenceMode::eDirect: {
+                            case FbxLayerElement::EReferenceMode::eDirect: {
                                 const auto directArray = materialElement->mDirectArray;
                                 /* There must be at least 1 material. */
                                 if ( directArray && directArray->GetCount( ) < 1 ) {
@@ -169,8 +169,8 @@ bool GetSubsets( FbxMesh* mesh, apemode::Mesh& m, std::vector< apemodefb::Subset
                                 s.console->error( "Failed to find mapping material in material element {}.", m );
                             } break;
 
-                            case fbxsdk::FbxLayerElement::EReferenceMode::eIndex:
-                            case fbxsdk::FbxLayerElement::EReferenceMode::eIndexToDirect: {
+                            case FbxLayerElement::EReferenceMode::eIndex:
+                            case FbxLayerElement::EReferenceMode::eIndexToDirect: {
                                 const auto indexArray = materialElement->mIndexArray;
                                 /* There must be at least 1 material index. */
                                 if ( indexArray && indexArray->GetCount( ) < 1 ) {
@@ -190,9 +190,9 @@ bool GetSubsets( FbxMesh* mesh, apemode::Mesh& m, std::vector< apemodefb::Subset
                         }
                     } break;
 
-                    case fbxsdk::FbxLayerElement::eByPolygon: {
+                    case FbxLayerElement::eByPolygon: {
                         switch ( const auto referenceMode = materialElement->GetReferenceMode( ) ) {
-                            case fbxsdk::FbxLayerElement::EReferenceMode::eDirect: {
+                            case FbxLayerElement::EReferenceMode::eDirect: {
                                 const auto directArray = materialElement->mDirectArray;
                                 if ( directArray && directArray->GetCount( ) < 1 ) {
                                     s.console->error( "Material element {} has no indices, skipped.", m );
@@ -211,8 +211,8 @@ bool GetSubsets( FbxMesh* mesh, apemode::Mesh& m, std::vector< apemodefb::Subset
 
                             } break;
 
-                            case fbxsdk::FbxLayerElement::EReferenceMode::eIndex:
-                            case fbxsdk::FbxLayerElement::EReferenceMode::eIndexToDirect: {
+                            case FbxLayerElement::EReferenceMode::eIndex:
+                            case FbxLayerElement::EReferenceMode::eIndexToDirect: {
                                 const auto indexArray = materialElement->mIndexArray;
                                 if ( indexArray && indexArray->GetCount( ) < 2 ) {
                                     s.console->error( "Material element {} has no indices, skipped.", m );
@@ -1066,11 +1066,11 @@ void ExportMesh( FbxNode* node, apemode::Node& n, bool pack, bool optimize ) {
             s.console->warn( "Mesh \"{}\" was triangulated (success).", node->GetName( ) );
         }
 
-        if ( const auto deformerCount = mesh->GetDeformerCount( ) - mesh->GetDeformerCount( fbxsdk::FbxDeformer::eSkin ) ) {
+        if ( const auto deformerCount = mesh->GetDeformerCount( ) - mesh->GetDeformerCount(FbxDeformer::eSkin ) ) {
             s.console->warn( "Mesh \"{}\" has {} non-skin deformers (will be ignored).", node->GetName( ), deformerCount );
         }
 
-        if ( const auto skinCount = mesh->GetDeformerCount( fbxsdk::FbxDeformer::eSkin ) ) {
+        if ( const auto skinCount = mesh->GetDeformerCount(FbxDeformer::eSkin ) ) {
             if ( skinCount > 1 ) {
                 s.console->warn( "Mesh \"{}\" has {} skin deformers (only one will be included).", node->GetName( ), skinCount );
             }
@@ -1080,8 +1080,8 @@ void ExportMesh( FbxNode* node, apemode::Node& n, bool pack, bool optimize ) {
         s.meshes.emplace_back( );
         apemode::Mesh& m = s.meshes.back( );
 
-        FbxSkin* pSkin = 0 != mesh->GetDeformerCount( fbxsdk::FbxDeformer::eSkin )
-                       ? FbxCast< FbxSkin >( mesh->GetDeformer( 0, fbxsdk::FbxDeformer::eSkin ) )
+        FbxSkin* pSkin = 0 != mesh->GetDeformerCount(FbxDeformer::eSkin )
+                       ? FbxCast< FbxSkin >( mesh->GetDeformer( 0,FbxDeformer::eSkin ) )
                        : nullptr;
 
         const uint32_t vertexCount = mesh->GetPolygonCount() * 3;

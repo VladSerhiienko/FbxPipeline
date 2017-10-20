@@ -7,14 +7,15 @@
 #include <stdio.h>
 #endif
 
-
-#include <filesystem>
+#include <experimental/filesystem>
+// #include <filesystem>
 #include <fstream>
 #include <iterator>
 #include <string>
 
 namespace std {
-    namespace filesystem = std::tr2::sys;
+    namespace filesystem = std::experimental::filesystem::v1;
+    // namespace filesystem = std::tr2::sys;
 }
 
 std::string CurrentDirectory( ) {
@@ -41,7 +42,7 @@ bool FileExists( const char* filePath ) {
     return std::filesystem::is_regular_file( filePath );
 }
 
-std::string& ReplaceSlashes( std::string& path ) {
+std::string ReplaceSlashes( std::string path ) {
     std::replace( path.begin( ), path.end( ), '\\', '/' );
     return path;
 }
@@ -50,7 +51,7 @@ std::string ReplaceExtension( const char* path, const char* extension ) {
     return std::filesystem::path( path ).replace_extension( extension ).string( );
 }
 
-std::string& RealPath( std::string& path ) {
+std::string RealPath( std::string path ) {
     return path = std::filesystem::canonical( path ).string( );
 }
 

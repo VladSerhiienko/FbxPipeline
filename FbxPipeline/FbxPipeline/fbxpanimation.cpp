@@ -47,7 +47,8 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
 
 #pragma region
 #define EmplaceBackChannel( _P, _eC, _C ) \
-    animCurves.emplace_back( apemodefb::EAnimCurveProperty_##_P, _eC, pNode->##_P.GetCurve( pAnimLayer, _C ), pAnimLayer, pAnimStack );
+    animCurves.emplace_back( apemodefb::EAnimCurveProperty_##_P, _eC, pNode->_P.GetCurve( pAnimLayer, _C ), pAnimLayer, pAnimStack );
+    // animCurves.emplace_back( apemodefb::EAnimCurveProperty_##_P, _eC, pNode->##_P.GetCurve( pAnimLayer, _C ), pAnimLayer, pAnimStack );
 
 #define EmplaceBack( _P )                                                                   \
     EmplaceBackChannel( _P, apemodefb::EAnimCurveChannel_X, FBXSDK_CURVENODE_COMPONENT_X ); \
@@ -319,13 +320,13 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
                 key.value = pAnimCurve->KeyGetValue( i );
 
                 switch ( pAnimCurve->KeyGetInterpolation( i ) ) {
-                    case fbxsdk::FbxAnimCurveDef::eInterpolationConstant: {
+                    case FbxAnimCurveDef::eInterpolationConstant: {
                         key.interpolationMode = apemodefb::EInterpolationMode_Const;
                         switch ( pAnimCurve->KeyGetConstantMode( i ) ) {
-                            case fbxsdk::FbxAnimCurveDef::eConstantStandard:
+                            case FbxAnimCurveDef::eConstantStandard:
                                 break;
 
-                            case fbxsdk::FbxAnimCurveDef::eConstantNext:
+                            case FbxAnimCurveDef::eConstantNext:
                                 /* There is at least one key ahead. */
                                 if ( i < ( pAnimCurve->KeyGetCount( ) - 1 ) )
                                     key.value = pAnimCurve->KeyGetValue( i + 1 );
@@ -333,11 +334,11 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
                         }
                     } break;
 
-                    case fbxsdk::FbxAnimCurveDef::eInterpolationLinear: {
+                    case FbxAnimCurveDef::eInterpolationLinear: {
                         key.interpolationMode = apemodefb::EInterpolationMode_Linear;
                     } break;
 
-                    case fbxsdk::FbxAnimCurveDef::eInterpolationCubic: {
+                    case FbxAnimCurveDef::eInterpolationCubic: {
                         /* Resampling */
                         key.interpolationMode = apemodefb::EInterpolationMode_Linear;
                         // key.interpolationMode = apemodefb::EInterpolationMode_Cubic;
@@ -356,12 +357,12 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
 
             for ( int i = 0; i < keyCount; ++i ) {
                 switch ( pAnimCurve->KeyGetInterpolation( i ) ) {
-                    case fbxsdk::FbxAnimCurveDef::eInterpolationCubic: {
+                    case FbxAnimCurveDef::eInterpolationCubic: {
                         auto tangentMode = pAnimCurve->KeyGetTangentMode(i);
                         switch ( pAnimCurve->KeyGetTangentMode( i ) ) {
 
                             /* This case looks straightforward and correct */
-                            case fbxsdk::FbxAnimCurveDef::eTangentTCB: {
+                            case FbxAnimCurveDef::eTangentTCB: {
                                 // https://en.wikipedia.org/wiki/Kochanek%E2%80%93Bartels_spline
                                 // http://cubic.org/docs/hermite.htm
 
@@ -396,7 +397,7 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
                             } break;
 
                             /* TODO: Can be first or last key (will cause out of range reads) */
-                            case fbxsdk::FbxAnimCurveDef::eTangentAuto: {
+                            case FbxAnimCurveDef::eTangentAuto: {
                                 // http://cubic.org/docs/hermite.htm
 
                                 auto k1 = pAnimCurve->KeyGet( i );
@@ -419,7 +420,7 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
 
                             } break;
 
-                            case fbxsdk::FbxAnimCurveDef::eTangentAutoBreak: {
+                            case FbxAnimCurveDef::eTangentAutoBreak: {
                                 auto k1 = pAnimCurve->KeyGet( i );
 
                                 auto& kk0 = curve.keys[ i - 1 ];
@@ -436,7 +437,7 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
                                 kk1.tangents[ 1 ][ 1 ] = d1.y;
                             } break;
 
-                            case fbxsdk::FbxAnimCurveDef::eTangentUser: {
+                            case FbxAnimCurveDef::eTangentUser: {
                                 bool bWeighted = pAnimCurve->KeyIsRightTangentWeighted( i );
 
                                 float d = pAnimCurve->KeyGetRightDerivative( i );
@@ -462,7 +463,7 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
 
                             } break;
 
-                            case fbxsdk::FbxAnimCurveDef::eTangentBreak:{
+                            case FbxAnimCurveDef::eTangentBreak:{
                                 bool  bWeighted = pAnimCurve->KeyIsRightTangentWeighted( i );
 
                                 float d = pAnimCurve->KeyGetRightDerivative( i );
@@ -481,16 +482,16 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
 
                             } break;
 
-                            case fbxsdk::FbxAnimCurveDef::eTangentGenericBreak:
-                            case fbxsdk::FbxAnimCurveDef::eTangentGenericClamp:
-                            case fbxsdk::FbxAnimCurveDef::eTangentGenericTimeIndependent:
-                            case fbxsdk::FbxAnimCurveDef::eTangentGenericClampProgressive:
+                            case FbxAnimCurveDef::eTangentGenericBreak:
+                            case FbxAnimCurveDef::eTangentGenericClamp:
+                            case FbxAnimCurveDef::eTangentGenericTimeIndependent:
+                            case FbxAnimCurveDef::eTangentGenericClampProgressive:
                                 assert( false && "TODO" );
                                 break;
                         }
 
                         /* Check if previous key is user key */
-                        /*if ( i && 0 != ( fbxsdk::FbxAnimCurveDef::eTangentUser & pAnimCurve->KeyGetTangentMode( i - 1 ) ) ) {
+                        /*if ( i && 0 != ( FbxAnimCurveDef::eTangentUser & pAnimCurve->KeyGetTangentMode( i - 1 ) ) ) {
                             curve.keys[ i - 1 ].tangents[ 1 ][ 0 ] = curve.keys[ i ].tangents[ 0 ][ 0 ];
                             curve.keys[ i - 1 ].tangents[ 1 ][ 1 ] = curve.keys[ i ].tangents[ 0 ][ 1 ];
                         }*/
