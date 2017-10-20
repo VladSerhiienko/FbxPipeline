@@ -1,5 +1,0 @@
-/home/user/vserhiienko/projectmaps/dbuildubuntu/CMakeFiles/edit_cache.dir
-/home/user/vserhiienko/projectmaps/dbuildubuntu/CMakeFiles/fbxp.dir
-/home/user/vserhiienko/projectmaps/dbuildubuntu/CMakeFiles/flatc.dir
-/home/user/vserhiienko/projectmaps/dbuildubuntu/CMakeFiles/rebuild_cache.dir
-/home/user/vserhiienko/projectmaps/dbuildubuntu/CMakeFiles/flatbuffers.dir

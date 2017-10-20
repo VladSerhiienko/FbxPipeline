@@ -260,3 +260,6 @@ paket-files/
 /FbxPipeline/shaders/nuklear_texture/runtime
 /FbxPipeline/assets/shaders/runtime
 /FbxPipeline/assets/shaders/include
+
+build*/
+dbuild*/
