@@ -30,18 +30,18 @@
  - No libraries needed except *flatbuffers*
  - Single generated header file from the scheme file (the pre-generated file in the repository can be used)
  - Packing for meshes (reduces memory bandwidth)
- - Mesh optimisation (reduces GPU vertex caching and memory bandwidth)
  - No processing on loading (simply *memcpy* the data and set appropriate *image/buffers formats/attributes*)
  - Binary format (the loading speed is an essential factor; however, the way the file will be serialised depends on flatbuffers, that is very flexible)
+ - Animation
+ - Skinning
  - Free
 
 ## Features, that will be available soon:
- - Animation
- - Skinning
+ - Animation compression
+ - Mesh optimisation (reduces GPU vertex caching and memory bandwidth)
  - Parallelize mesh processing
  - Integration of *zlib/lzma* for compression
  - Image compression (*ETC, PVR*, PVR SDK)
- - Animation compression
 
 ## Command line example
 ```sh
