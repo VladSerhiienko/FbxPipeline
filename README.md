@@ -67,6 +67,11 @@ git submodule update --recursive
 
 cd ThirdParty
 
+cd mathfu
+git submodule init
+git submodule update --recursive
+cd ..
+
 cd flatbuffers
 git checkout master
 git pull origin master
