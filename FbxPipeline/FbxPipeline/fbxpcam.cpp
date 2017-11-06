@@ -7,25 +7,25 @@ void ExportCamera( FbxNode* pNode, apemode::Node& n ) {
     if ( auto pCamera = pNode->GetCamera( ) ) {
         float width, height;
         switch ( const auto format = pCamera->CameraFormat.Get( ) ) {
-            case fbxsdk::FbxCamera::eCustomFormat: {
+            case FbxCamera::eCustomFormat: {
                 switch ( const auto aspectRatioMode = pCamera->AspectRatioMode.Get( ) ) {
-                    case fbxsdk::FbxCamera::eWindowSize:
+                    case FbxCamera::eWindowSize:
                         width  = 0;
                         height = 0;
                         break;
-                    case fbxsdk::FbxCamera::eFixedRatio:
+                    case FbxCamera::eFixedRatio:
                         width  = (float) pCamera->AspectWidth.Get( );
                         height = 1;
                         break;
-                    case fbxsdk::FbxCamera::eFixedResolution:
+                    case FbxCamera::eFixedResolution:
                         width  = (float) pCamera->AspectWidth.Get( );
                         height = (float) pCamera->AspectHeight.Get( );
                         break;
-                    case fbxsdk::FbxCamera::eFixedWidth:
+                    case FbxCamera::eFixedWidth:
                         width  = (float) pCamera->AspectWidth.Get( );
                         height = 0;
                         break;
-                    case fbxsdk::FbxCamera::eFixedHeight:
+                    case FbxCamera::eFixedHeight:
                         width  = 0;
                         height = (float) pCamera->AspectHeight.Get( );
                         break;
@@ -34,40 +34,40 @@ void ExportCamera( FbxNode* pNode, apemode::Node& n ) {
                         break;
                 }
             } break;
-            case fbxsdk::FbxCamera::eD1NTSC: {
+            case FbxCamera::eD1NTSC: {
                 width  = 720;
                 height = 486;
             } break;
-            case fbxsdk::FbxCamera::eNTSC:
-            case fbxsdk::FbxCamera::e640x480: {
+            case FbxCamera::eNTSC:
+            case FbxCamera::e640x480: {
                 width  = 640;
                 height = 480;
             } break;
-            case fbxsdk::FbxCamera::ePAL: {
+            case FbxCamera::ePAL: {
                 width  = 570;
                 height = 486;
             } break;
-            case fbxsdk::FbxCamera::eD1PAL: {
+            case FbxCamera::eD1PAL: {
                 width  = 720;
                 height = 576;
             } break;
-            case fbxsdk::FbxCamera::eHD: {
+            case FbxCamera::eHD: {
                 width  = 1920;
                 height = 1080;
             } break;
-            case fbxsdk::FbxCamera::e320x200: {
+            case FbxCamera::e320x200: {
                 width  = 320;
                 height = 200;
             } break;
-            case fbxsdk::FbxCamera::e320x240: {
+            case FbxCamera::e320x240: {
                 width  = 320;
                 height = 240;
             } break;
-            case fbxsdk::FbxCamera::e128x128: {
+            case FbxCamera::e128x128: {
                 width  = 128;
                 height = 128;
             } break;
-            case fbxsdk::FbxCamera::eFullscreen: {
+            case FbxCamera::eFullscreen: {
                 width  = 1280;
                 height = 1024;
             } break;

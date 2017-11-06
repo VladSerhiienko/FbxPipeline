@@ -12,7 +12,7 @@ namespace apemode {
      * Flatbuffers generate immutable fields (where mutable are expected) for defined structs.
      * Mostly the usage is: Mutable( some_struct.mutable_some_field( ) ) = some_field_value.
      **/
-    template < typename TConst, typename TMutable = std::remove_const< TConst >::type >
+    template < typename TConst, typename TMutable = typename std::remove_const< TConst >::type >
     inline TMutable& Mutable( TConst& v ) {
         return const_cast< TMutable& >( v );
     }

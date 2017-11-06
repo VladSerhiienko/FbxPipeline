@@ -55,6 +55,35 @@
 |-e,--search-location|Sets search location(s) for the files specified for embedding (*two stars* at the end mean recursive look-ups), the option can be used multiple times, for example: **-e** *../path/one/* **-e** *../path/two/\*\** (*all the child folders in ../path/two/ folder will be added recursively*)|
 |-m,--embed-file|Embed file, regex (**.\*\\.png** means all the *.png* files), the option can be used multiple times|
 
+## How to build (Linux, bash + cmake + make):
+
+### Bash
+```
+cd <dev directory>
+git clone git@github.com:VladSerhiienko/FbxPipeline.git
+cd FbxPipeline
+git submodule init
+git submodule update --recursive
+
+cd ThirdParty
+
+cd flatbuffers
+git checkout master
+git pull origin master
+cmake -Bbuild_linux_x86-64 -H.
+make -C build_linux_x86-64
+cd ..
+
+cd ..
+mkdir -p FbxPipeline/generated
+ThirdParty/flatbuffers/build_linux_x86-64/flatc -o FbxPipeline/generated -c FbxPipeline/schemes/scene.fbs --gen-mutable
+ThirdParty/flatbuffers/build_linux_x86-64/flatc -o FbxPipeline/generated -s FbxPipeline/schemes/scene.fbs --gen-mutable
+
+cmake -Bbuild_linux_x86-64 -H.
+make -C build_linux_x86-64
+
+```
+
 # License
 Licensed under the Apache License, Version 2.0 (the "License"); you may not
 use this file except in compliance with the License. You may obtain a copy of

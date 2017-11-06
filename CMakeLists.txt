@@ -22,70 +22,37 @@ message(STATUS "FBX_SDK_INCLUDE_DIR = ${FBX_SDK_INCLUDE_DIR}")
 message(STATUS "FBX_SDK_LIBRARY_DIR = ${FBX_SDK_LIBRARY_DIR}")
 message(STATUS "FBX_SDK_LIBRARY = ${FBX_SDK_LIBRARY}")
 
-add_executable(
-    flatc
-    ${CMAKE_SOURCE_DIR}/ThirdParty/flatbuffers/grpc/src/compiler/cpp_generator.cc
-    ${CMAKE_SOURCE_DIR}/ThirdParty/flatbuffers/grpc/src/compiler/go_generator.cc
-    ${CMAKE_SOURCE_DIR}/ThirdParty/flatbuffers/src/code_generators.cpp
-    ${CMAKE_SOURCE_DIR}/ThirdParty/flatbuffers/src/flatc.cpp
-    ${CMAKE_SOURCE_DIR}/ThirdParty/flatbuffers/src/idl_gen_cpp.cpp
-    ${CMAKE_SOURCE_DIR}/ThirdParty/flatbuffers/src/idl_gen_fbs.cpp
-    ${CMAKE_SOURCE_DIR}/ThirdParty/flatbuffers/src/idl_gen_general.cpp
-    ${CMAKE_SOURCE_DIR}/ThirdParty/flatbuffers/src/idl_gen_go.cpp
-    ${CMAKE_SOURCE_DIR}/ThirdParty/flatbuffers/src/idl_gen_grpc.cpp
-    ${CMAKE_SOURCE_DIR}/ThirdParty/flatbuffers/src/idl_gen_js.cpp
-    ${CMAKE_SOURCE_DIR}/ThirdParty/flatbuffers/src/idl_gen_php.cpp
-    ${CMAKE_SOURCE_DIR}/ThirdParty/flatbuffers/src/idl_gen_python.cpp
-    ${CMAKE_SOURCE_DIR}/ThirdParty/flatbuffers/src/idl_gen_text.cpp
-    ${CMAKE_SOURCE_DIR}/ThirdParty/flatbuffers/src/idl_parser.cpp
-    ${CMAKE_SOURCE_DIR}/ThirdParty/flatbuffers/src/reflection.cpp
-    ${CMAKE_SOURCE_DIR}/ThirdParty/flatbuffers/src/util.cpp
-)
-
-add_custom_command(
-    TARGET flatc
-    POST_BUILD
-    DEPENDS ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs
-    COMMAND echo Generating Headers From Schemes
-    COMMAND mkdir -p ${CMAKE_SOURCE_DIR}/FbxPipeline/generated
-    COMMAND ./flatc -o ${CMAKE_SOURCE_DIR}/FbxPipeline/generated -c ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs --gen-mutable
-    COMMAND ./flatc -o ${CMAKE_SOURCE_DIR}/FbxPipeline/generated -s ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs --gen-mutable
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/dbuildubuntu
-    COMMENT "Generating Headers From Schemes"
-    VERBATIM
-)
-
-target_include_directories(
-    flatc
-    PUBLIC
-    ${CMAKE_SOURCE_DIR}/ThirdParty/flatbuffers/include
-    ${CMAKE_SOURCE_DIR}/ThirdParty/flatbuffers/grpc
-)
-
-add_library(
-    flatbuffers
-    STATIC
-    ${CMAKE_SOURCE_DIR}/ThirdParty/flatbuffers/src/code_generators.cpp
-    ${CMAKE_SOURCE_DIR}/ThirdParty/flatbuffers/src/idl_gen_text.cpp
-    ${CMAKE_SOURCE_DIR}/ThirdParty/flatbuffers/src/idl_parser.cpp
-    ${CMAKE_SOURCE_DIR}/ThirdParty/flatbuffers/src/reflection.cpp
-    ${CMAKE_SOURCE_DIR}/ThirdParty/flatbuffers/src/util.cpp
-)
-
-target_include_directories(
-    flatbuffers
-    PUBLIC
-    ${CMAKE_SOURCE_DIR}/ThirdParty/flatbuffers/include
-    ${CMAKE_SOURCE_DIR}/ThirdParty/flatbuffers/grpc
-)
+if (WIN32)
+    add_custom_command(
+        OUTPUT ${CMAKE_SOURCE_DIR}/FbxPipeline/generated/scene_generated.h
+        DEPENDS ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs
+        COMMAND mkdir ${CMAKE_SOURCE_DIR}/FbxPipeline/generated
+        COMMAND ${CMAKE_SOURCE_DIR}/build_windows_x86-64/Release/flatc.exe -o ${CMAKE_SOURCE_DIR}/FbxPipeline/generated -c ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs --gen-mutable
+        COMMAND ${CMAKE_SOURCE_DIR}/build_windows_x86-64/Release/flatc.exe -o ${CMAKE_SOURCE_DIR}/FbxPipeline/generated -s ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs --gen-mutable
+        COMMENT "Generating Headers From Schemes"
+        VERBATIM
+    )
+else()
+    add_custom_command(
+        OUTPUT ${CMAKE_SOURCE_DIR}/FbxPipeline/generated/scene_generated.h
+        DEPENDS ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs
+        COMMAND mkdir -p ${CMAKE_SOURCE_DIR}/FbxPipeline/generated
+        COMMAND ${CMAKE_SOURCE_DIR}/build_linux_x86-64/flatc -o ${CMAKE_SOURCE_DIR}/FbxPipeline/generated -c ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs --gen-mutable
+        COMMAND ${CMAKE_SOURCE_DIR}/build_linux_x86-64/flatc -o ${CMAKE_SOURCE_DIR}/FbxPipeline/generated -s ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs --gen-mutable
+        COMMENT "Generating Headers From Schemes"
+        VERBATIM
+    )
+endif()
 
 add_executable(
-    fbxp
+    FbxPipeline
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/CityHash.cpp
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpanimation.cpp
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpfileutils.cpp
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpmaterial.cpp
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpmem.cpp
+    ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpcam.cpp
+    ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxplight.cpp
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpmesh.cpp
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpmeshopt.cpp
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpnode.cpp
@@ -96,40 +63,40 @@ add_executable(
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/main.cpp
 )
 
-add_dependencies (
-    fbxp
-    flatc
-)
-
 target_include_directories(
-    fbxp
+    FbxPipeline
     PUBLIC
     ${CMAKE_SOURCE_DIR}/FbxPipeline/generated
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline
     ${CMAKE_SOURCE_DIR}/ThirdParty/flatbuffers/include
-    PRIVATE
+    ${CMAKE_SOURCE_DIR}/ThirdParty/flatbuffers/grpc
     ${FBX_SDK_INCLUDE_DIR}
     ${CMAKE_SOURCE_DIR}/ThirdParty/include
     ${CMAKE_SOURCE_DIR}/ThirdParty/cxxopts/include
-    ${CMAKE_SOURCE_DIR}/ThirdParty/gli
-    ${CMAKE_SOURCE_DIR}/ThirdParty/gli/gli
-    ${CMAKE_SOURCE_DIR}/ThirdParty/glm
-    ${CMAKE_SOURCE_DIR}/ThirdParty/glm/glm
-    ${CMAKE_SOURCE_DIR}/ThirdParty/lodepng
-    ${CMAKE_SOURCE_DIR}/ThirdParty/lua
     ${CMAKE_SOURCE_DIR}/ThirdParty/mathfu/include
     ${CMAKE_SOURCE_DIR}/ThirdParty/mathfu/dependencies/vectorial/include
-    ${CMAKE_SOURCE_DIR}/ThirdParty/nuklear
-    ${CMAKE_SOURCE_DIR}/ThirdParty/sdl2/include
     ${CMAKE_SOURCE_DIR}/ThirdParty/spdlog/include
 )
 
+if (WIN32)
+    set(
+        third_party_libs
+    )
+
+else()
+    set(
+        third_party_libs
+        ${CMAKE_SOURCE_DIR}/ThirdParty/flatbuffers/build_linux_x86-64/libflatbuffers.a
+        pthread
+        m
+        dl
+        stdc++fs
+        dl
+    )
+endif()
+
 target_link_libraries( # Specifies the target library.
-    fbxp
-    flatbuffers
+    FbxPipeline
     ${FBX_SDK_LIBRARY}
-    pthread
-    m
-    dl
-    stdc++fs
+    ${third_party_libs}
 )

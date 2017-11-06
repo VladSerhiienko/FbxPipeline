@@ -5,7 +5,7 @@ void ExportLight(FbxNode* pNode, apemode::Node& n) {
     auto& s = apemode::Get( );
     if ( auto pLight = pNode->GetLight( ) ) {
         switch ( pLight->LightType.Get( ) ) {
-            case fbxsdk::FbxLight::eVolume:
+            case FbxLight::eVolume:
                 return;
         }
 
@@ -30,22 +30,22 @@ void ExportLight(FbxNode* pNode, apemode::Node& n) {
         light.mutate_casts_shadows( pLight->CastShadows.Get( ) );
 
         switch ( const auto lightType = pLight->LightType.Get( ) ) {
-            case fbxsdk::FbxLight::ePoint:
+            case FbxLight::ePoint:
                 light.mutate_light_type( apemodefb::ELightType_Point );
                 break;
-            case fbxsdk::FbxLight::eDirectional:
+            case FbxLight::eDirectional:
                 light.mutate_light_type( apemodefb::ELightType_Directional );
                 break;
-            case fbxsdk::FbxLight::eSpot:
+            case FbxLight::eSpot:
                 light.mutate_light_type( apemodefb::ELightType_Spot );
                 break;
-            case fbxsdk::FbxLight::eArea:
+            case FbxLight::eArea:
                 light.mutate_light_type( apemodefb::ELightType_Area );
                 switch ( const auto areaLightShape = pLight->AreaLightShape.Get( ) ) {
-                    case fbxsdk::FbxLight::eRectangle:
+                    case FbxLight::eRectangle:
                         light.mutate_area_light_type( apemodefb::EAreaLightType_Rect );
                         break;
-                    case fbxsdk::FbxLight::eSphere:
+                    case FbxLight::eSphere:
                         light.mutate_area_light_type( apemodefb::EAreaLightType_Sphere );
                         break;
                 } break;
@@ -60,15 +60,15 @@ void ExportLight(FbxNode* pNode, apemode::Node& n) {
 
         switch (lightType)
         {
-        case fbxsdk::FbxLight::ePoint:
+        case FbxLight::ePoint:
             break;
-        case fbxsdk::FbxLight::eDirectional:
+        case FbxLight::eDirectional:
             break;
-        case fbxsdk::FbxLight::eSpot:
+        case FbxLight::eSpot:
             break;
-        case fbxsdk::FbxLight::eArea:
+        case FbxLight::eArea:
             break;
-        case fbxsdk::FbxLight::eVolume:
+        case FbxLight::eVolume:
             break;
         default:
             break;
