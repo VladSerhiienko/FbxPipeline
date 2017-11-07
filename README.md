@@ -80,12 +80,38 @@ make -C build_linux_x86-64
 cd ..
 
 cd ..
-mkdir -p FbxPipeline/generated
 ThirdParty/flatbuffers/build_linux_x86-64/flatc -o FbxPipeline/generated -c FbxPipeline/schemes/scene.fbs --gen-mutable
 ThirdParty/flatbuffers/build_linux_x86-64/flatc -o FbxPipeline/generated -s FbxPipeline/schemes/scene.fbs --gen-mutable
 
 cmake -Bbuild_linux_x86-64 -H.
 make -C build_linux_x86-64
+
+```
+
+## How to build (Windows, PS + cmake + MSBuild): 
+
+### PowerShell:
+```
+cd <dev directory>
+git clone git@github.com:VladSerhiienko/FbxPipeline.git
+cd FbxPipeline
+git submodule init
+git submodule update --recursive
+
+cd flatbuffers
+git checkout master
+git pull origin master
+cmake -G "Visual Studio 14 2015 Win64" -Bbuild_windows_x86-64 "-H."
+cd build_windows_x86-64
+& 'C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe' FlatBuffers.sln /target:ALL_BUILD /p:Configuration=Debug
+& 'C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe' FlatBuffers.sln /target:ALL_BUILD /p:Configuration=Release
+cd ../../
+
+cd ..
+.\ThirdParty\flatbuffers\build_windows_x86-64\Release\flatc.exe -o FbxPipeline/generated -c FbxPipeline/schemes/scene.fbs --gen-mutable
+.\ThirdParty\flatbuffers\build_windows_x86-64\Release\flatc.exe -o FbxPipeline/generated -c FbxPipeline/schemes/scene.fbs --gen-mutable
+cmake -G "Visual Studio 14 2015 Win64" -Bbuild_windows_x86-64 "-H."
+& 'C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe' FbxPipeline.sln /target:ALL_BUILD /p:Configuration=Debug
 
 ```
 
