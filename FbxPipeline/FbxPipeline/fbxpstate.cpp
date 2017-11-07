@@ -46,11 +46,13 @@ std::shared_ptr< spdlog::logger > CreateLogger( spdlog::level::level_enum lvl, s
         curentTimeStr = curentTimeStrStream.str( );
         std::replace( curentTimeStr.begin( ), curentTimeStr.end( ), ':', '-' );
 
-        auto logsDirectory = ResolveFullPath( ( CurrentDirectory( ) + "/.logs" ).c_str( ) );
+        auto logsDirectory = CurrentDirectory( ) + "/.logs";
+        logsDirectory = ResolveFullPath( logsDirectory.c_str( ) );
         MakeDirectory( logsDirectory.c_str( ) );
 
         // logFile = ResolveFullPath( ( logsDirectory + "/fbxp-" + curentTimeStr ).c_str( ) );
-        logFile = ResolveFullPath( ( logsDirectory + "/fbxp-" + curentTimeStr + ".fbxp-log.txt" ).c_str( ) );
+        logFile = logsDirectory + "/fbxp-" + curentTimeStr + ".fbxp-log.txt";
+        logFile = ResolveFullPath( logFile.c_str( ) );
     }
 
     // std::make_shared< spdlog::sinks::simple_file_sink_mt >( logFile )
@@ -163,7 +165,7 @@ bool apemode::State::Finish( ) {
     }
 
     const auto namesOffset = builder.CreateVector( nameOffsets );
-    console->info( "< Succeeded {} ", namesOffset.o );
+    console->info( "< Succeeded {} ", ToPrettySizeString( namesOffset.o ) );
 
     //
     // Finalize transforms
@@ -171,7 +173,7 @@ bool apemode::State::Finish( ) {
 
     console->info( "> Transforms" );
     const auto transformsOffset = builder.CreateVectorOfStructs( transforms );
-    console->info( "< Succeeded {} ", transformsOffset.o );
+    console->info( "< Succeeded {} ", ToPrettySizeString( transformsOffset.o ) );
 
     //
     // Finalize nodes
@@ -205,7 +207,7 @@ bool apemode::State::Finish( ) {
     }
 
     const auto nodesOffset = builder.CreateVector( nodeOffsets );
-    console->info( "< Succeeded {} ", nodesOffset.o );
+    console->info( "< Succeeded {} ", ToPrettySizeString( nodesOffset.o ) );
 
     //
     // Finalize curves
@@ -219,7 +221,7 @@ bool apemode::State::Finish( ) {
     } );
 
     const auto animStacksOffset = builder.CreateVectorOfStructs( stacks );
-    console->info( "< Succeeded {} ", animStacksOffset.o );
+    console->info( "< Succeeded {} ", ToPrettySizeString( animStacksOffset.o ) );
 
     console->info( "> AnimLayers" );
     std::vector< apemodefb::AnimLayerFb > layers;
@@ -229,7 +231,7 @@ bool apemode::State::Finish( ) {
     } );
 
     const auto animLayersOffset = builder.CreateVectorOfStructs( layers );
-    console->info( "< Succeeded {} ", animLayersOffset.o );
+    console->info( "< Succeeded {} ", ToPrettySizeString( animLayersOffset.o ) );
 
     console->info( "> AnimCurves" );
     std::vector< apemodefb::AnimCurveKeyFb > tempCurveKeys;
@@ -258,8 +260,8 @@ bool apemode::State::Finish( ) {
         curveOffsets.push_back( curveBuilder.Finish( ) );
     }
 
-    const auto curvesOffset = curveOffsets.empty( ) ? 0 : builder.CreateVector( curveOffsets );
-    console->info( "< Succeeded {} ", curvesOffset.o );
+    const auto curvesOffset = builder.CreateVector( curveOffsets );
+    console->info( "< Succeeded {} ", ToPrettySizeString( curvesOffset.o ) );
 
     //
     // Finalize materials
@@ -280,8 +282,8 @@ bool apemode::State::Finish( ) {
         materialOffsets.push_back( materialBuilder.Finish( ) );
     }
 
-    const auto materialsOffset = materialOffsets.empty( ) ? 0 : builder.CreateVector( materialOffsets );
-    console->info( "< Succeeded {} ", materialsOffset.o );
+    const auto materialsOffset = builder.CreateVector( materialOffsets );
+    console->info( "< Succeeded {} ", ToPrettySizeString( materialsOffset.o ) );
 
     //
     // Finalize skins
@@ -311,7 +313,7 @@ bool apemode::State::Finish( ) {
     } );
 
     auto skinsOffset = builder.CreateVector( skinOffsets );
-    console->info( "< Succeeded {} ", materialsOffset.o );
+    console->info( "< Succeeded {} ", ToPrettySizeString( skinsOffset.o ) );
 
     //
     // Finalize meshes
@@ -341,8 +343,8 @@ bool apemode::State::Finish( ) {
         meshOffsets.push_back( meshBuilder.Finish( ) );
     }
 
-    const auto meshesOffset = meshOffsets.empty( ) ? 0 : builder.CreateVector( meshOffsets );
-    console->info( "< Succeeded {} ", meshesOffset.o );
+    const auto meshesOffset = builder.CreateVector( meshOffsets );
+    console->info( "< Succeeded {} ", ToPrettySizeString( meshesOffset.o ) );
 
     //
     // Finalize cameras
@@ -350,7 +352,7 @@ bool apemode::State::Finish( ) {
 
     console->info( "> Cameras" );
     const auto camerasOffset = builder.CreateVectorOfStructs( cameras );
-    console->info( "< Succeeded {} ", camerasOffset.o );
+    console->info( "< Succeeded {} ", ToPrettySizeString( camerasOffset.o ) );
 
     //
     // Finalize lights
@@ -358,7 +360,7 @@ bool apemode::State::Finish( ) {
 
     console->info( "> Lights" );
     const auto lightsOffset = builder.CreateVectorOfStructs( lights );
-    console->info( "< Succeeded {} ", lightsOffset.o );
+    console->info( "< Succeeded {} ", ToPrettySizeString( lightsOffset.o ) );
 
     //
     // Finalize files
@@ -377,16 +379,16 @@ bool apemode::State::Finish( ) {
         }
     }
 
-    const auto filesOffset = fileOffsets.empty() ? 0 : builder.CreateVector(fileOffsets);
-    console->info( "< Succeeded {} ", filesOffset.o );
+    const auto filesOffset = builder.CreateVector(fileOffsets);
+    console->info( "< Succeeded {} ", ToPrettySizeString( filesOffset.o ) );
 
     //
     // Finalize textures
     //
 
     console->info( "> Textures" );
-    const auto texturesOffset = textures.empty( ) ? 0 : builder.CreateVectorOfStructs( textures );
-    console->info( "< Succeeded {} ", texturesOffset.o );
+    const auto texturesOffset = builder.CreateVectorOfStructs( textures );
+    console->info( "< Succeeded {} ", ToPrettySizeString( texturesOffset.o ) );
 
     //
     // Finalize scene
@@ -408,7 +410,7 @@ bool apemode::State::Finish( ) {
 
     auto sceneOffset = sceneBuilder.Finish( );
     apemodefb::FinishSceneFbBuffer( builder, sceneOffset );
-    console->info( "< Succeeded {} ", sceneOffset.o );
+    console->info( "< Succeeded {} ", ToPrettySizeString( sceneOffset.o ) );
 
     //
     // Write the file

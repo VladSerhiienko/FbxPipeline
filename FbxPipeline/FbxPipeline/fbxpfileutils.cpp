@@ -52,7 +52,8 @@ std::string ReplaceExtension( const char* path, const char* extension ) {
 }
 
 std::string RealPath( std::string path ) {
-    return path = std::filesystem::canonical( path ).string( );
+    return path;
+    // return std::filesystem::canonical( path ).string( );
 }
 
 std::string GetParentPath( const char* path ) {
@@ -229,12 +230,12 @@ void InitializeSeachLocations( ) {
          *   > /c/path/to/model/ModelName/textures/diffuse.png, ...
          **/
 
-        std::string textureDirectorySketchfab = ReplaceSlashes( RealPath( ( inputDirectory + "/../textures/" ) ) );
+        std::string textureDirectorySketchfab = ReplaceSlashes( RealPath( ( inputDirectory + "/../textures" ) ) );
         if ( DirectoryExists( textureDirectorySketchfab.c_str( ) ) ) {
             searchLocations.push_back( textureDirectorySketchfab + "/**" );
         } else {
             /* Model file could be additionally archived, and when unarchived could be placed in the directory. */
-            textureDirectorySketchfab = ReplaceSlashes( RealPath( ( inputDirectory + "/../../textures/" ) ) );
+            textureDirectorySketchfab = ReplaceSlashes( RealPath( ( inputDirectory + "/../../textures" ) ) );
             if ( DirectoryExists( textureDirectorySketchfab.c_str( ) ) ) {
                 searchLocations.push_back( textureDirectorySketchfab + "/**" );
             }
