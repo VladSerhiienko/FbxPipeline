@@ -13,32 +13,32 @@ inline X Cast( const Y v ) {
 
 template <>
 inline apemodefb::vec4 Cast( const mathfu::vec4 v ) {
-    apemodefb::vec4( v.x, v.y, v.z, v.w );
+    return apemodefb::vec4( v.x, v.y, v.z, v.w );
 }
 
 template <>
 inline apemodefb::vec3 Cast( const mathfu::vec3 v ) {
-    apemodefb::vec3( v.x, v.y, v.z );
+    return apemodefb::vec3( v.x, v.y, v.z );
 }
 
 template <>
 inline apemodefb::vec2 Cast( const mathfu::vec2 v ) {
-    apemodefb::vec2( v.x, v.y );
+    return apemodefb::vec2( v.x, v.y );
 }
 
 template <>
 inline mathfu::vec4 Cast( const apemodefb::vec4 v ) {
-    mathfu::vec4( v.x( ), v.y( ), v.z( ), v.w( ) );
+    return mathfu::vec4( v.x( ), v.y( ), v.z( ), v.w( ) );
 }
 
 template <>
 inline mathfu::vec3 Cast( const apemodefb::vec3 v ) {
-    mathfu::vec3( v.x( ), v.y( ), v.z( ) );
+    return mathfu::vec3( v.x( ), v.y( ), v.z( ) );
 }
 
 template <>
 inline mathfu::vec2 Cast( const apemodefb::vec2 v ) {
-    mathfu::vec2( v.x( ), v.y( ) );
+    return mathfu::vec2( v.x( ), v.y( ) );
 }
 
 template < typename TMathFu >
