@@ -263,3 +263,4 @@ paket-files/
 
 build*/
 dbuild*/
+dependencies/
