@@ -28,7 +28,7 @@ apemode::State& apemode::Get( ) {
 std::shared_ptr< spdlog::logger > CreateLogger( spdlog::level::level_enum lvl, std::string logFile ) {
     if ( logFile.empty( ) ) {
 
-        /* This code is about to create a name for log file.
+        /* This code is about creation of a name for a log file.
            The name should contain date and time.
            TODO: Something portable and less ugly. */
 
@@ -55,17 +55,16 @@ std::shared_ptr< spdlog::logger > CreateLogger( spdlog::level::level_enum lvl, s
         logFile = ResolveFullPath( logFile.c_str( ) );
     }
 
-    // std::make_shared< spdlog::sinks::simple_file_sink_mt >( logFile )
-    // std::make_shared< spdlog::sinks::rotating_file_sink_mt >( logFile, "fbxp-rlog.txt", 65536, 1024 )
-
-    std::vector< spdlog::sink_ptr > sinks{
+    std::vector< spdlog::sink_ptr > sinks {
+#if _WIN32
+        std::make_shared< spdlog::sinks::wincolor_stdout_sink_mt >( ),
+        std::make_shared< spdlog::sinks::msvc_sink_mt >( ),
+        std::make_shared< spdlog::sinks::simple_file_sink_mt >( logFile )
+#else
         std::make_shared< spdlog::sinks::stdout_sink_mt >( ),
         std::make_shared< spdlog::sinks::simple_file_sink_mt >( logFile )
-    // std::vector< spdlog::sink_ptr > sinks{
-    //     std::make_shared< spdlog::sinks::wincolor_stdout_sink_mt >( ),
-    //     std::make_shared< spdlog::sinks::msvc_sink_mt >( ),
-    //     std::make_shared< spdlog::sinks::simple_file_sink_mt >( logFile )
-        /*, std::make_shared< spdlog::sinks::rotating_file_sink_mt >( logFile, "fbxp-rlog.txt", 65536, 1024 )*/};
+#endif
+    };
 
     auto logger = spdlog::create<>( "apemode", sinks.begin( ), sinks.end( ) );
     logger->set_level( lvl );
@@ -117,7 +116,7 @@ apemode::State::~State( ) {
 }
 
 bool apemode::State::Initialize( ) {
-    if (!manager || !scene) {
+    if ( !manager || !scene ) {
         InitializeSdkObjects( manager, scene );
     }
 

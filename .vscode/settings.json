@@ -19,5 +19,5 @@
         "editor.fontSize": 16,
         
         // Controls the font family.
-        "editor.fontFamily": "'Ubuntu Mono'"
+        // "editor.fontFamily": "'Ubuntu Mono'"
 }

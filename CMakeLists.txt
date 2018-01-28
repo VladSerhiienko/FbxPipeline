@@ -1,19 +1,116 @@
-
 cmake_minimum_required(VERSION 3.4.1)
-project (FbxPipeline)
+
+include(ExternalProject)
+project(FbxPipeline)
 
 message(STATUS "CMAKE_SYSTEM_INFO_FILE = ${CMAKE_SYSTEM_INFO_FILE}")
 message(STATUS "CMAKE_SYSTEM_NAME = ${CMAKE_SYSTEM_NAME}")
 message(STATUS "CMAKE_SYSTEM_PROCESSOR = ${CMAKE_SYSTEM_PROCESSOR}")
 message(STATUS "CMAKE_SYSTEM = ${CMAKE_SYSTEM}")
+message(STATUS "CMAKE_SOURCE_DIR = ${CMAKE_SOURCE_DIR}")
+message(STATUS "CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}")
+message(STATUS "VK_SDK_PATH = $ENV{VK_SDK_PATH}")
+
+set(BUILD_FOLDER_SUFFIX "build_${CMAKE_SYSTEM_NAME}_${CMAKE_SYSTEM_PROCESSOR}")
+string(TOLOWER  ${BUILD_FOLDER_SUFFIX} BUILD_FOLDER_SUFFIX)
+message(STATUS "BUILD_FOLDER_SUFFIX = ${BUILD_FOLDER_SUFFIX}")
+
+ExternalProject_Add(
+    mathfu
+    GIT_REPOSITORY "git@github.com:google/mathfu.git"
+    GIT_TAG "master"
+    SOURCE_DIR "${CMAKE_SOURCE_DIR}/dependencies/mathfu"
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+    INSTALL_COMMAND ""
+    UPDATE_COMMAND ""
+    PATCH_COMMAND ""
+    LOG_DOWNLOAD ON
+)
+
+ExternalProject_Get_Property(mathfu SOURCE_DIR)
+set(mathfu_source_dir ${SOURCE_DIR})
+message(STATUS "mathfu_source_dir = ${mathfu_source_dir}")
+
+ExternalProject_Add(
+    cxxopts
+    GIT_REPOSITORY "git@github.com:jarro2783/cxxopts.git"
+    GIT_TAG "1_0"
+    SOURCE_DIR "${CMAKE_SOURCE_DIR}/dependencies/cxxopts"
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+    INSTALL_COMMAND ""
+    UPDATE_COMMAND ""
+    PATCH_COMMAND ""
+    LOG_DOWNLOAD ON
+)
+
+ExternalProject_Get_Property(cxxopts SOURCE_DIR)
+set(cxxopts_source_dir ${SOURCE_DIR})
+message(STATUS "cxxopts_source_dir = ${cxxopts_source_dir}")
+
+ExternalProject_Add(
+    spdlog
+    GIT_REPOSITORY "git@github.com:gabime/spdlog.git"
+    GIT_TAG "master"
+    SOURCE_DIR "${CMAKE_SOURCE_DIR}/dependencies/spdlog"
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+    INSTALL_COMMAND ""
+    UPDATE_COMMAND ""
+    PATCH_COMMAND ""
+    LOG_DOWNLOAD ON
+)
+
+ExternalProject_Get_Property(spdlog SOURCE_DIR)
+set(spdlog_source_dir ${SOURCE_DIR})
+message(STATUS "spdlog_source_dir = ${spdlog_source_dir}")
+
+ExternalProject_Add(
+    flatbuffers
+    GIT_REPOSITORY "git@github.com:google/flatbuffers.git"
+    GIT_TAG "master"
+    UPDATE_COMMAND ""
+    PATCH_COMMAND ""
+    SOURCE_DIR "${CMAKE_SOURCE_DIR}/dependencies/flatbuffers"
+    CMAKE_ARGS -B${BUILD_FOLDER_SUFFIX} -H.
+    TEST_COMMAND ""
+    INSTALL_COMMAND ""
+)
+
+ExternalProject_Get_Property(flatbuffers SOURCE_DIR)
+ExternalProject_Get_Property(flatbuffers BINARY_DIR)
+set(flatbuffers_source_dir ${SOURCE_DIR})
+set(flatbuffers_binary_dir ${BINARY_DIR})
+message(STATUS "flatbuffers_source_dir = ${flatbuffers_source_dir}")
+message(STATUS "flatbuffers_binary_dir = ${flatbuffers_binary_dir}")
+
+ExternalProject_Add(
+    zlib
+    GIT_REPOSITORY "git@github.com:madler/zlib.git"
+    GIT_TAG "master"
+    UPDATE_COMMAND ""
+    PATCH_COMMAND ""
+    SOURCE_DIR "${CMAKE_SOURCE_DIR}/dependencies/zlib"
+    CMAKE_ARGS -B${BUILD_FOLDER_SUFFIX} -H.
+    TEST_COMMAND ""
+    INSTALL_COMMAND ""
+)
+
+ExternalProject_Get_Property(zlib SOURCE_DIR)
+ExternalProject_Get_Property(zlib BINARY_DIR)
+set(zlib_source_dir ${SOURCE_DIR})
+set(zlib_binary_dir ${BINARY_DIR})
+message(STATUS "zlib_source_dir = ${zlib_source_dir}")
+message(STATUS "zlib_binary_dir = ${zlib_binary_dir}")
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG")
 
 if (WIN32)
-    set(FBX_SDK_INCLUDE_DIR "C:/Program Files/Autodesk/FBX/FBX SDK/2017.0.1/include" CACHE PATH "FBX SDK Include Directory")
-    set(FBX_SDK_LIBRARY_DEBUG "C:/Program Files/Autodesk/FBX/FBX SDK/2017.0.1/lib/vs2015/x64/debug/libfbxsdk-md.lib" CACHE PATH "FBX SDK Library")
-    set(FBX_SDK_LIBRARY_RELEASE "C:/Program Files/Autodesk/FBX/FBX SDK/2017.0.1/lib/vs2015/x64/release/libfbxsdk-md.lib" CACHE PATH "FBX SDK Library")
+    set(FBX_SDK_INCLUDE_DIR "C:/Program Files/Autodesk/FBX/FBX SDK/2018.1.1/include" CACHE PATH "FBX SDK Include Directory")
+    set(FBX_SDK_LIBRARY_DEBUG "C:/Program Files/Autodesk/FBX/FBX SDK/2018.1.1/lib/vs2015/x64/debug/libfbxsdk-md.lib" CACHE PATH "FBX SDK Library")
+    set(FBX_SDK_LIBRARY_RELEASE "C:/Program Files/Autodesk/FBX/FBX SDK/2018.1.1/lib/vs2015/x64/release/libfbxsdk-md.lib" CACHE PATH "FBX SDK Library")
 else()
     add_definitions("-g")
     set(FBX_SDK_INCLUDE_DIR "~/FbxSdk/include" CACHE PATH "FBX SDK Include Directory")
@@ -30,8 +127,8 @@ if (WIN32)
     add_custom_command(
         OUTPUT ${CMAKE_SOURCE_DIR}/FbxPipeline/generated/scene_generated.h
         DEPENDS ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs
-        COMMAND ${CMAKE_SOURCE_DIR}/ThirdParty/flatbuffers/build_windows_x86-64/Release/flatc.exe -o ${CMAKE_SOURCE_DIR}/FbxPipeline/generated -c ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs --gen-mutable
-        COMMAND ${CMAKE_SOURCE_DIR}/ThirdParty/flatbuffers/build_windows_x86-64/Release/flatc.exe -o ${CMAKE_SOURCE_DIR}/FbxPipeline/generated -s ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs --gen-mutable
+        COMMAND ${flatbuffers_binary_dir}/Debug/flatc.exe -o ${CMAKE_SOURCE_DIR}/FbxPipeline/generated -c ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs --gen-mutable
+        COMMAND ${flatbuffers_binary_dir}/Debug/flatc.exe -o ${CMAKE_SOURCE_DIR}/FbxPipeline/generated -s ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs --gen-mutable
         COMMENT "Generating Headers From Schemes"
         VERBATIM
     )
@@ -39,8 +136,8 @@ else()
     add_custom_command(
         OUTPUT ${CMAKE_SOURCE_DIR}/FbxPipeline/generated/scene_generated.h
         DEPENDS ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs
-        COMMAND ${CMAKE_SOURCE_DIR}/ThirdParty/flatbuffers/build_linux_x86-64/flatc -o ${CMAKE_SOURCE_DIR}/FbxPipeline/generated -c ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs --gen-mutable
-        COMMAND ${CMAKE_SOURCE_DIR}/ThirdParty/flatbuffers/build_linux_x86-64/flatc -o ${CMAKE_SOURCE_DIR}/FbxPipeline/generated -s ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs --gen-mutable
+        COMMAND ${flatbuffers_binary_dir}/flatc -o ${CMAKE_SOURCE_DIR}/FbxPipeline/generated -c ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs --gen-mutable
+        COMMAND ${flatbuffers_binary_dir}/flatc -o ${CMAKE_SOURCE_DIR}/FbxPipeline/generated -s ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs --gen-mutable
         COMMENT "Generating Headers From Schemes"
         VERBATIM
     )
@@ -48,6 +145,9 @@ endif()
 
 add_executable(
     FbxPipeline
+    ${CMAKE_SOURCE_DIR}/FbxPipeline/generated/scene_generated.h
+    ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpnorm.h
+    ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpstate.h
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/CityHash.cpp
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpanimation.cpp
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpfileutils.cpp
@@ -65,26 +165,36 @@ add_executable(
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/main.cpp
 )
 
+add_dependencies(
+    FbxPipeline
+    mathfu
+    cxxopts
+    spdlog
+    zlib
+    flatbuffers
+)
+
 target_include_directories(
     FbxPipeline
     PUBLIC
     ${CMAKE_SOURCE_DIR}/FbxPipeline/generated
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline
-    ${CMAKE_SOURCE_DIR}/ThirdParty/flatbuffers/include
-    ${CMAKE_SOURCE_DIR}/ThirdParty/flatbuffers/grpc
+    ${CMAKE_SOURCE_DIR}/dependencies/cxxopts/include
+    ${CMAKE_SOURCE_DIR}/dependencies/mathfu/include
+    ${CMAKE_SOURCE_DIR}/dependencies/mathfu/dependencies/vectorial/include
+    ${CMAKE_SOURCE_DIR}/dependencies/spdlog/include
+    ${flatbuffers_source_dir}/include
+    ${flatbuffers_source_dir}/grpc
     ${FBX_SDK_INCLUDE_DIR}
-    ${CMAKE_SOURCE_DIR}/ThirdParty/include
-    ${CMAKE_SOURCE_DIR}/ThirdParty/cxxopts/include
-    ${CMAKE_SOURCE_DIR}/ThirdParty/mathfu/include
-    ${CMAKE_SOURCE_DIR}/ThirdParty/mathfu/dependencies/vectorial/include
-    ${CMAKE_SOURCE_DIR}/ThirdParty/spdlog/include
 )
 
 if (WIN32)
     set(
         third_party_libs
-        debug ${CMAKE_SOURCE_DIR}/ThirdParty/flatbuffers/build_windows_x86-64/Debug/flatbuffers.lib
-        optimized ${CMAKE_SOURCE_DIR}/ThirdParty/flatbuffers/build_windows_x86-64/Release/flatbuffers.lib
+        debug ${zlib_binary_dir}/Debug/zlibstaticd.lib
+        debug ${flatbuffers_binary_dir}/Debug/flatbuffers.lib
+        optimized ${zlib_binary_dir}/Release/zlibstatic.lib
+        optimized ${flatbuffers_binary_dir}/Release/flatbuffers.lib
         winmm.lib
         imm32.lib
         version.lib
@@ -92,7 +202,7 @@ if (WIN32)
 else()
     set(
         third_party_libs
-        ${CMAKE_SOURCE_DIR}/ThirdParty/flatbuffers/build_linux_x86-64/libflatbuffers.a
+        ${flatbuffers_binary_dir}/flatbuffers.a
         pthread
         stdc++fs
         m

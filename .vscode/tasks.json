@@ -33,6 +33,24 @@
                 "isDefault": true
             },
             "dependsOn": [ "CMake/FbxPipeline(Debug/Ubuntu)"]
+        },
+        {
+            "label": "CMake/Maps(Windows/VS2017)",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "-G",
+                "\"'Visual Studio 15 2017 Win64'\"",
+                "-B${workspaceFolder}/build_windows_amd64",
+                "-H${workspaceFolder}"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         }
     ]
 }
