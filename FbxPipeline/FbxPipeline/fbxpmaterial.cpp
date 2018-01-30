@@ -75,6 +75,10 @@ void ExportMaterials( FbxScene* pScene ) {
                     bool supported = false;
                     switch ( srcProperty.GetPropertyDataType( ).GetType( ) ) {
                         case eFbxBool:
+                        case eFbxInt:
+                        case eFbxUInt:
+                        case eFbxShort:
+                        case eFbxUShort:
                         case eFbxFloat:
                         case eFbxDouble:
                         case eFbxDouble2:
@@ -101,6 +105,24 @@ void ExportMaterials( FbxScene* pScene ) {
                             m.properties.emplace_back( s.PushValue( srcProperty.GetNameAsCStr( ) ),
                                                        s.PushValue( srcProperty.Get< FbxBool >( ) ) );
                             break;
+                        case eFbxInt:
+                            m.properties.emplace_back( s.PushValue( srcProperty.GetNameAsCStr( ) ),
+                                                       s.PushValue( srcProperty.Get< int32_t >( ) ) );
+                            break;
+                        case eFbxUInt:
+                            m.properties.emplace_back(
+                                s.PushValue( srcProperty.GetNameAsCStr( ) ),
+                                s.PushValue( static_cast< int32_t >( srcProperty.Get< uint32_t >( ) ) ) );
+                            break;
+                        case eFbxShort:
+                            m.properties.emplace_back( s.PushValue( srcProperty.GetNameAsCStr( ) ),
+                                                       s.PushValue( static_cast< int32_t >( srcProperty.Get< int16_t >( ) ) ) );
+                            break;
+                        case eFbxUShort:
+                            m.properties.emplace_back(
+                                s.PushValue( srcProperty.GetNameAsCStr( ) ),
+                                s.PushValue( static_cast< int32_t >( srcProperty.Get< uint16_t >( ) ) ) );
+                            break;
                         case eFbxFloat:
                             m.properties.emplace_back( s.PushValue( srcProperty.GetNameAsCStr( ) ),
                                                        s.PushValue( srcProperty.Get< float >( ) ) );
@@ -114,7 +136,6 @@ void ExportMaterials( FbxScene* pScene ) {
                                 s.PushValue( srcProperty.GetNameAsCStr( ) ),
                                 s.PushValue( static_cast< float >( srcProperty.Get< FbxDouble2 >( )[ 0 ] ),
                                              static_cast< float >( srcProperty.Get< FbxDouble2 >( )[ 1 ] ) ) );
-
                             break;
                         case eFbxDouble3:
                             m.properties.emplace_back(
@@ -122,7 +143,6 @@ void ExportMaterials( FbxScene* pScene ) {
                                 s.PushValue( static_cast< float >( srcProperty.Get< FbxDouble3 >( )[ 0 ] ),
                                              static_cast< float >( srcProperty.Get< FbxDouble3 >( )[ 1 ] ),
                                              static_cast< float >( srcProperty.Get< FbxDouble3 >( )[ 2 ] ) ) );
-
                             break;
                         case eFbxDouble4:
                             m.properties.emplace_back(
@@ -131,7 +151,6 @@ void ExportMaterials( FbxScene* pScene ) {
                                              static_cast< float >( srcProperty.Get< FbxDouble4 >( )[ 1 ] ),
                                              static_cast< float >( srcProperty.Get< FbxDouble4 >( )[ 2 ] ),
                                              static_cast< float >( srcProperty.Get< FbxDouble4 >( )[ 3 ] ) ) );
-
                             break;
 
                         default:
