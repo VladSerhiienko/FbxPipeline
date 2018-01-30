@@ -112,7 +112,9 @@ apemode::State::State( ) : options( GetExecutable( ) ) {
 
 apemode::State::~State( ) {
     Release( );
-    console->flush( );
+
+    if ( console )
+        console->flush( );
 }
 
 bool apemode::State::Initialize( ) {
@@ -151,15 +153,11 @@ bool apemode::State::Finish( ) {
     //
 
     console->info( "> Names" );
-    std::vector< flatbuffers::Offset<apemodefb::NameFb > > nameOffsets; {
+    std::vector< flatbuffers::Offset< flatbuffers::String > > nameOffsets; {
         nameOffsets.reserve( names.size( ) );
-        for ( auto& namePair : names ) {
-            const auto valueOffset = builder.CreateString( namePair.second );
-
-            apemodefb::NameFbBuilder nameBuilder( builder );
-            nameBuilder.add_h( namePair.first );
-            nameBuilder.add_v( valueOffset );
-            nameOffsets.push_back( nameBuilder.Finish( ) );
+        for ( auto& name : names ) {
+            const auto valueOffset = builder.CreateString( name );
+            nameOffsets.push_back( valueOffset );
         }
     }
 
@@ -446,18 +444,18 @@ bool apemode::State::Finish( ) {
     return false;
 }
 
-uint64_t apemode::State::PushName( std::string const& name ) {
-    const uint64_t hash = CityHash64( name.data( ), name.size( ) );
+uint32_t apemode::State::PushName( std::string const& name ) {
 
-#if _DEBUG
-    auto it = names.find( hash );
-    if ( it == names.end( ) ) {
-        console->trace( "Adding name: {} -> {}", hash, name );
+    auto nameIt = std::find( names.begin(), names.end(), name );
+    if ( nameIt == names.end( ) ) {
+        console->trace( "Adding name: {}", name );
+
+        const uint32_t nameIndex = static_cast< uint32_t >( names.size( ) );
+        names.emplace_back( name );
+        return nameIndex;
     }
-#endif
 
-    names.insert( std::make_pair( hash, name ) );
-    return hash;
+    return static_cast< uint32_t >( std::distance( names.begin(), nameIt ) );
 }
 
 #pragma region FBX SDK Initialization

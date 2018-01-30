@@ -18,7 +18,7 @@ namespace apemode {
     }
 
     struct Skin {
-        uint64_t                nameId = (uint64_t) 0;
+        uint32_t                nameId = (uint64_t) 0;
         std::vector< uint64_t > linkFbxIds;
     };
 
@@ -45,7 +45,7 @@ namespace apemode {
         apemodefb::ECullingType cullingType = apemodefb::ECullingType_CullingOff;
         uint32_t                id          = (uint32_t) -1;
         uint64_t                fbxId       = (uint64_t) 0;
-        uint64_t                nameId      = (uint64_t) 0;
+        uint32_t                nameId      = (uint64_t) 0;
         uint32_t                meshId      = (uint32_t) -1;
         uint32_t                lightId     = (uint32_t) -1;
         uint32_t                cameraId    = (uint32_t) -1;
@@ -56,12 +56,12 @@ namespace apemode {
 
     struct AnimStack {
         uint32_t id;
-        uint64_t nameId;
+        uint32_t nameId;
     };
 
     struct AnimLayer {
         uint32_t id;
-        uint64_t nameId;
+        uint32_t nameId;
         uint32_t animStackId;
     };
 
@@ -77,7 +77,7 @@ namespace apemode {
         uint32_t                      animStackId;
         uint32_t                      animLayerId;
         uint32_t                      nodeId;
-        uint64_t                      nameId;
+        uint32_t                      nameId;
         apemodefb::EAnimCurveProperty property;
         apemodefb::EAnimCurveChannel  channel;
         std::vector< AnimCurveKey >   keys;
@@ -85,7 +85,7 @@ namespace apemode {
 
     struct Material {
         uint32_t                                 id;
-        uint64_t                                 nameId;
+        uint32_t                                 nameId;
         std::vector< apemodefb::MaterialPropFb > props;
     };
 
@@ -96,7 +96,6 @@ namespace apemode {
     State& Main( int argc, char** argv );
 
     struct State {
-        bool                                  legacyTriangulationSdk = false;
         FbxManager*                           manager                = nullptr;
         FbxScene*                             scene                  = nullptr;
         std::string                           executableName;
@@ -112,7 +111,7 @@ namespace apemode {
         std::map< uint64_t, uint32_t >        materialDict;
         std::map< uint64_t, uint32_t >        animStackDict;
         std::map< uint64_t, uint32_t >        animLayerDict;
-        std::map< uint64_t, std::string >     names;
+        std::vector< std::string >            names;
         std::vector< apemodefb::TransformFb > transforms;
         std::vector< apemodefb::TextureFb >   textures;
         std::vector< apemodefb::CameraFb >    cameras;
@@ -129,6 +128,7 @@ namespace apemode {
         bool                                  reduceKeys        = false;
         bool                                  reduceConstKeys   = false;
         bool                                  propertyCurveSync = true;
+        bool                                  legacyTriangulationSdk = false;
 
         State( );
         ~State( );
@@ -137,7 +137,7 @@ namespace apemode {
         void     Release( );
         bool     Load( );
         bool     Finish( );
-        uint64_t PushName( std::string const& name );
+        uint32_t PushName( std::string const& name );
 
         friend State& Get( );
         friend State& Main( int argc, char** argv );

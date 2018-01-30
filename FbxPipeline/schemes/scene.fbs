@@ -125,12 +125,12 @@ struct PackedSkinnedVertexFb {
 }
 struct AnimStackFb {
     id : uint;
-    name_id : ulong( key );
+    name_id : uint( key );
 }
 struct AnimLayerFb {
     id : uint;
     anim_stack_id : uint;
-    name_id : ulong( key );
+    name_id : uint( key );
 }
 struct AnimCurveKeyFb {
     time : float;
@@ -138,14 +138,14 @@ struct AnimCurveKeyFb {
 }
 table AnimCurveFb {
     id : uint;
-    name_id : ulong( key );
+    name_id : uint( key );
 	property : EAnimCurveProperty;
 	channel : EAnimCurveChannel;
 	keys : [AnimCurveKeyFb];
 }
 struct TextureFb {
     id : uint;
-    name_id : ulong( key );
+    name_id : uint( key );
     file_id : uint;
     blend_mode : EBlendMode;
     wrap_mode_u : EWrapMode;
@@ -195,7 +195,7 @@ struct TransformFb {
     geometric_scaling : vec3;
 }
 table SkinFb {
-    name_id : ulong( key );
+    name_id : uint( key );
     links_ids : [uint];
 }
 table MeshFb {
@@ -207,24 +207,24 @@ table MeshFb {
 	skin_id : uint;
 }
 struct MaterialPropFb {
-    name_id : ulong( key );
+    name_id : uint( key );
     type : EMaterialPropTypeFb;
     value : vec3;
 }
 table MaterialFb {
     id : uint;
-    name_id : ulong( key );
+    name_id : uint( key );
     props : [MaterialPropFb];
 }
 struct CameraFb {
     id : uint;
-    name_id : ulong( key );
+    name_id : uint( key );
 	up : vec3;
 	aspect : vec2;
 }
 struct LightFb {
     id : uint;
-    name_id : ulong( key );
+    name_id : uint( key );
 	light_type : ELightType;
 	area_light_type : EAreaLightType;
 	color : vec3;
@@ -244,7 +244,7 @@ table NodeFb {
     mesh_id : uint;
     light_id : uint;
     camera_id : uint;
-    name_id : ulong( key );
+    name_id : uint( key );
 	culling_type : ECullingType;
     child_ids : [uint];
     material_ids : [uint];
@@ -252,7 +252,7 @@ table NodeFb {
 }
 table FileFb {
 	id : uint;
-    name_id : ulong( key );
+    name_id : uint( key );
 	buffer : [ubyte];
 }
 table SceneFb {
@@ -268,7 +268,7 @@ table SceneFb {
     lights : [LightFb];
     skins : [SkinFb];
     files : [FileFb];
-    names : [NameFb];
+    names : [string];
 }
 
 root_type SceneFb;

@@ -4,12 +4,12 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "taskName": "CMake/FbxPipeline(Debug/Ubuntu)",
+            "label": "CMake/FbxPipeline(Debug/Ubuntu)",
             "type": "shell",
             "command": "cmake",
             "args": [
                 "-DCMAKE_BUILD_TYPE=Debug",
-                "-B${workspaceFolder}/dbuildubuntu",
+                "-B${workspaceFolder}/build_linux_x86_64",
                 "-H${workspaceFolder}"
             ],
             "options": {
@@ -21,12 +21,12 @@
             }
         },
         {
-            "taskName": "Build/FbxPipeline(Debug/Ubuntu)",
+            "label": "Build/FbxPipeline(Debug/Ubuntu)",
             "type": "shell",
             "command": "make",
             "args": [],
             "options": {
-                "cwd": "${workspaceFolder}/dbuildubuntu"
+                "cwd": "${workspaceFolder}/build_linux_x86_64"
             },
             "group": {
                 "kind": "build",
@@ -35,7 +35,7 @@
             "dependsOn": [ "CMake/FbxPipeline(Debug/Ubuntu)"]
         },
         {
-            "label": "CMake/Maps(Windows/VS2017)",
+            "label": "CMake/FbxPipeline(Windows/VS2017)",
             "type": "shell",
             "command": "cmake",
             "args": [

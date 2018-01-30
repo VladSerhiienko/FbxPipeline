@@ -104,6 +104,46 @@ set(zlib_binary_dir ${BINARY_DIR})
 message(STATUS "zlib_source_dir = ${zlib_source_dir}")
 message(STATUS "zlib_binary_dir = ${zlib_binary_dir}")
 
+ExternalProject_Add(
+    rapidjson
+    GIT_REPOSITORY "git@github.com:Tencent/rapidjson.git"
+    GIT_TAG "master"
+    UPDATE_COMMAND ""
+    PATCH_COMMAND ""
+    SOURCE_DIR "${CMAKE_SOURCE_DIR}/dependencies/rapidjson"
+    CMAKE_ARGS -B${BUILD_FOLDER_SUFFIX} -H. -DRAPIDJSON_BUILD_DOC=OFF
+                                            -DRAPIDJSON_BUILD_TESTS=OFF
+                                            -DRAPIDJSON_BUILD_EXAMPLES=OFF
+    TEST_COMMAND ""
+    INSTALL_COMMAND ""
+)
+
+ExternalProject_Get_Property(rapidjson SOURCE_DIR)
+ExternalProject_Get_Property(rapidjson BINARY_DIR)
+set(rapidjson_source_dir ${SOURCE_DIR})
+set(rapidjson_binary_dir ${BINARY_DIR})
+message(STATUS "rapidjson_source_dir = ${rapidjson_source_dir}")
+message(STATUS "rapidjson_binary_dir = ${rapidjson_binary_dir}")
+
+ExternalProject_Add(
+    pybind11
+    GIT_REPOSITORY "git@github.com:pybind/pybind11.git"
+    GIT_TAG "master"
+    UPDATE_COMMAND ""
+    PATCH_COMMAND ""
+    SOURCE_DIR "${CMAKE_SOURCE_DIR}/dependencies/pybind11"
+    CMAKE_ARGS -B${BUILD_FOLDER_SUFFIX} -H. -DPYBIND11_TEST=OFF
+    TEST_COMMAND ""
+    INSTALL_COMMAND ""
+)
+
+ExternalProject_Get_Property(pybind11 SOURCE_DIR)
+ExternalProject_Get_Property(pybind11 BINARY_DIR)
+set(pybind11_source_dir ${SOURCE_DIR})
+set(pybind11_binary_dir ${BINARY_DIR})
+message(STATUS "pybind11_source_dir = ${pybind11}")
+message(STATUS "pybind11_binary_dir = ${pybind11_binary_dir}")
+
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG")
 
@@ -172,6 +212,8 @@ add_dependencies(
     spdlog
     zlib
     flatbuffers
+    rapidjson
+    pybind11
 )
 
 target_include_directories(
@@ -185,6 +227,7 @@ target_include_directories(
     ${CMAKE_SOURCE_DIR}/dependencies/spdlog/include
     ${flatbuffers_source_dir}/include
     ${flatbuffers_source_dir}/grpc
+    ${rapidjson_source_dir}/include
     ${FBX_SDK_INCLUDE_DIR}
 )
 
@@ -202,7 +245,8 @@ if (WIN32)
 else()
     set(
         third_party_libs
-        ${flatbuffers_binary_dir}/flatbuffers.a
+        ${zlib_binary_dir}/libz.a
+        ${flatbuffers_binary_dir}/libflatbuffers.a
         pthread
         stdc++fs
         m
