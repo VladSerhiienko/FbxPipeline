@@ -31,30 +31,30 @@ void ExportLight(FbxNode* pNode, apemode::Node& n) {
 
         switch ( const auto lightType = pLight->LightType.Get( ) ) {
             case FbxLight::ePoint:
-                light.mutate_light_type( apemodefb::ELightType_Point );
+                light.mutate_light_type( apemodefb::ELightTypeFb_Point );
                 break;
             case FbxLight::eDirectional:
-                light.mutate_light_type( apemodefb::ELightType_Directional );
+                light.mutate_light_type( apemodefb::ELightTypeFb_Directional );
                 break;
             case FbxLight::eSpot:
-                light.mutate_light_type( apemodefb::ELightType_Spot );
+                light.mutate_light_type( apemodefb::ELightTypeFb_Spot );
                 break;
             case FbxLight::eArea:
-                light.mutate_light_type( apemodefb::ELightType_Area );
+                light.mutate_light_type( apemodefb::ELightTypeFb_Area );
                 switch ( const auto areaLightShape = pLight->AreaLightShape.Get( ) ) {
                     case FbxLight::eRectangle:
-                        light.mutate_area_light_type( apemodefb::EAreaLightType_Rect );
+                        light.mutate_area_light_type( apemodefb::EAreaLightTypeFb_Rect );
                         break;
                     case FbxLight::eSphere:
-                        light.mutate_area_light_type( apemodefb::EAreaLightType_Sphere );
+                        light.mutate_area_light_type( apemodefb::EAreaLightTypeFb_Sphere );
                         break;
                 } break;
         }
 
         if ( pLight->GetName( ) && 0 != strlen( pLight->GetName( ) ) )
-            light.mutate_name_id( s.PushName( pLight->GetName( ) ) );
+            light.mutate_name_id( s.PushValue( pLight->GetName( ) ) );
         else
-            light.mutate_name_id( s.PushName( pNode->GetName( ) ) );
+            light.mutate_name_id( s.PushValue( pNode->GetName( ) ) );
 
         /*FbxLight::EType lightType = pLight->LightType.Get( );
 

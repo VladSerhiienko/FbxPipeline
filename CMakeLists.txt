@@ -125,6 +125,23 @@ set(rapidjson_binary_dir ${BINARY_DIR})
 message(STATUS "rapidjson_source_dir = ${rapidjson_source_dir}")
 message(STATUS "rapidjson_binary_dir = ${rapidjson_binary_dir}")
 
+
+if (WIN32)
+    set(
+        pybind11_cmake_args
+        -G
+        "Visual Studio 15 2017 Win64"
+        -B${BUILD_FOLDER_SUFFIX} "-H."
+        -DPYBIND11_TEST=OFF
+    )
+else()
+    set(
+        pybind11_cmake_args
+        -B${BUILD_FOLDER_SUFFIX} -H.
+        -DPYBIND11_TEST=OFF
+    )
+endif()
+
 ExternalProject_Add(
     pybind11
     GIT_REPOSITORY "git@github.com:pybind/pybind11.git"
@@ -132,7 +149,7 @@ ExternalProject_Add(
     UPDATE_COMMAND ""
     PATCH_COMMAND ""
     SOURCE_DIR "${CMAKE_SOURCE_DIR}/dependencies/pybind11"
-    CMAKE_ARGS -B${BUILD_FOLDER_SUFFIX} -H. -DPYBIND11_TEST=OFF
+    CMAKE_ARGS ${pybind11_cmake_args}
     TEST_COMMAND ""
     INSTALL_COMMAND ""
 )
@@ -141,11 +158,18 @@ ExternalProject_Get_Property(pybind11 SOURCE_DIR)
 ExternalProject_Get_Property(pybind11 BINARY_DIR)
 set(pybind11_source_dir ${SOURCE_DIR})
 set(pybind11_binary_dir ${BINARY_DIR})
-message(STATUS "pybind11_source_dir = ${pybind11}")
+message(STATUS "pybind11_source_dir = ${pybind11_source_dir}")
 message(STATUS "pybind11_binary_dir = ${pybind11_binary_dir}")
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG")
+
+if (WIN32)
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_CRT_SECURE_NO_WARNINGS")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -D_CRT_SECURE_NO_WARNINGS")
+endif()
+
+find_package(PythonLibs REQUIRED)
 
 if (WIN32)
     set(FBX_SDK_INCLUDE_DIR "C:/Program Files/Autodesk/FBX/FBX SDK/2018.1.1/include" CACHE PATH "FBX SDK Include Directory")
@@ -169,6 +193,7 @@ if (WIN32)
         DEPENDS ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs
         COMMAND ${flatbuffers_binary_dir}/Debug/flatc.exe -o ${CMAKE_SOURCE_DIR}/FbxPipeline/generated -c ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs --gen-mutable
         COMMAND ${flatbuffers_binary_dir}/Debug/flatc.exe -o ${CMAKE_SOURCE_DIR}/FbxPipeline/generated -s ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs --gen-mutable
+        COMMAND ${flatbuffers_binary_dir}/Debug/flatc.exe -o ${CMAKE_SOURCE_DIR}/FbxPipeline/generated -p ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs --gen-mutable
         COMMENT "Generating Headers From Schemes"
         VERBATIM
     )
@@ -178,6 +203,7 @@ else()
         DEPENDS ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs
         COMMAND ${flatbuffers_binary_dir}/flatc -o ${CMAKE_SOURCE_DIR}/FbxPipeline/generated -c ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs --gen-mutable
         COMMAND ${flatbuffers_binary_dir}/flatc -o ${CMAKE_SOURCE_DIR}/FbxPipeline/generated -s ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs --gen-mutable
+        COMMAND ${flatbuffers_binary_dir}/flatc -o ${CMAKE_SOURCE_DIR}/FbxPipeline/generated -p ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs --gen-mutable
         COMMENT "Generating Headers From Schemes"
         VERBATIM
     )
@@ -188,7 +214,6 @@ add_executable(
     ${CMAKE_SOURCE_DIR}/FbxPipeline/generated/scene_generated.h
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpnorm.h
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpstate.h
-    ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/CityHash.cpp
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpanimation.cpp
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpfileutils.cpp
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpmaterial.cpp
@@ -202,6 +227,7 @@ add_executable(
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxppch.cpp
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpstate.cpp
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxptransform.cpp
+    ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpextensions.cpp
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/main.cpp
 )
 
@@ -219,6 +245,7 @@ add_dependencies(
 target_include_directories(
     FbxPipeline
     PUBLIC
+    ${PYTHON_INCLUDE_DIR}
     ${CMAKE_SOURCE_DIR}/FbxPipeline/generated
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline
     ${CMAKE_SOURCE_DIR}/dependencies/cxxopts/include
@@ -228,6 +255,7 @@ target_include_directories(
     ${flatbuffers_source_dir}/include
     ${flatbuffers_source_dir}/grpc
     ${rapidjson_source_dir}/include
+    ${pybind11_source_dir}/include
     ${FBX_SDK_INCLUDE_DIR}
 )
 
@@ -238,6 +266,8 @@ if (WIN32)
         debug ${flatbuffers_binary_dir}/Debug/flatbuffers.lib
         optimized ${zlib_binary_dir}/Release/zlibstatic.lib
         optimized ${flatbuffers_binary_dir}/Release/flatbuffers.lib
+        ${PYTHON_LIBRARY}
+        # "C:/Python27amd64/libs/python27.lib"
         winmm.lib
         imm32.lib
         version.lib

@@ -1,32 +1,37 @@
 
 namespace apemodefb;
 
-enum EVersion : uint {
-    Value = 3
+enum EVersionFb : uint {
+    Value = 4
 }
-enum ECullingType : uint
+
+enum ECullingTypeFb : uint
 {
 	CullingOff,
 	CullingOnCCW,
 	CullingOnCW
 }
-enum EWrapMode : uint {
+
+enum EWrapModeFb : uint {
     Repeat,
     Clamp
 }
-enum EBlendMode : uint {
+
+enum EBlendModeFb : uint {
     Translucent,
     Additive,
     Modulate,
     Modulate2,
     Over
 }
-enum EVertexFormat : uint {
+
+enum EVertexFormatFb : uint {
     Static,
     StaticSkinned,
 	Packed,
 	PackedSkinned,
 }
+
 enum EIndexTypeFb : uint {
 	UInt16,
 	UInt16Compressed,
@@ -34,6 +39,7 @@ enum EIndexTypeFb : uint {
 	UInt32Compressed,
 	Count,
 }
+
 enum EMaterialPropTypeFb : uint {
 	Bool,
 	Float,
@@ -41,7 +47,8 @@ enum EMaterialPropTypeFb : uint {
 	Float3,
 	Texture,
 }
-enum EAnimCurveProperty : uint {
+
+enum EAnimCurvePropertyFb : uint {
 	LclTranslation,
     RotationOffset,
     RotationPivot,
@@ -55,51 +62,69 @@ enum EAnimCurveProperty : uint {
     GeometricRotation,
     GeometricScaling
 }
-enum EAnimCurveChannel : uint {
+
+enum EAnimCurveChannelFb : uint {
 	X,
     Y,
     Z,
 }
-enum EInterpolationMode : uint {
+
+enum EInterpolationModeFb : uint {
 	Const, Linear, Cubic
 }
-enum ELightType : uint {
+
+enum ELightTypeFb : uint {
 	Point, 
 	Directional, 
 	Spot,
 	Area,
 }
-enum EAreaLightType : uint {
+
+enum EAreaLightTypeFb : uint {
 	Rect, 
 	Sphere, 
 }
 
-struct vec2 {
+enum EValueTypeFb : uint {
+	Bool,
+    Int,
+    Float,
+    Float2,
+    Float3,
+    Float4,
+    String
+}
+
+struct Vec2Fb {
     x : float;
     y : float;
 }
-struct vec3 {
+
+struct Vec3Fb {
     x : float;
     y : float;
     z : float;
 }
-struct vec4 {
+
+struct Vec4Fb {
     x : float;
     y : float;
     z : float;
     w : float;
 }
-struct mat4 {
-    x : vec4;
-    y : vec4;
-    z : vec4;
-    w : vec4;
+
+struct Mat4Fb {
+    x : Vec4Fb;
+    y : Vec4Fb;
+    z : Vec4Fb;
+    w : Vec4Fb;
 }
+
 struct StaticVertexFb {
-    position : vec3;
-    normal : vec3;
-    tangent : vec4;
-    uv : vec2;
+    position : Vec3Fb;
+    normal : Vec3Fb;
+    tangent : Vec4Fb;
+    uv : Vec2Fb;
 }
 struct PackedVertexFb {
     position : uint;
@@ -107,14 +132,16 @@ struct PackedVertexFb {
     tangent : uint;
     uv : uint;
 }
+
 struct StaticSkinnedVertexFb {
-    position : vec3;
-    normal : vec3;
-    tangent : vec4;
-    uv : vec2;
-    weights : vec4;
-    indices : vec4;
+    position : Vec3Fb;
+    normal : Vec3Fb;
+    tangent : Vec4Fb;
+    uv : Vec2Fb;
+    weights : Vec4Fb;
+    indices : Vec4Fb;
 }
+
 struct PackedSkinnedVertexFb {
     position : uint;
     normal : uint;
@@ -123,81 +150,92 @@ struct PackedSkinnedVertexFb {
     weights : uint;
     indices : uint;
 }
+
 struct AnimStackFb {
     id : uint;
     name_id : uint( key );
 }
+
 struct AnimLayerFb {
     id : uint;
     anim_stack_id : uint;
     name_id : uint( key );
 }
+
 struct AnimCurveKeyFb {
     time : float;
     value : float;
 }
+
 table AnimCurveFb {
     id : uint;
     name_id : uint( key );
-	property : EAnimCurveProperty;
-	channel : EAnimCurveChannel;
+	property : EAnimCurvePropertyFb;
+	channel : EAnimCurveChannelFb;
 	keys : [AnimCurveKeyFb];
 }
+
 struct TextureFb {
     id : uint;
     name_id : uint( key );
     file_id : uint;
-    blend_mode : EBlendMode;
-    wrap_mode_u : EWrapMode;
-    wrap_mode_v : EWrapMode;
+    blend_mode : EBlendModeFb;
+    wrap_mode_u : EWrapModeFb;
+    wrap_mode_v : EWrapModeFb;
     offset_u : float;
     offset_v : float;
     scale_u : float;
     scale_v : float;
 }
+
 struct SubmeshFb {
-	bbox_min : vec3;
-	bbox_max : vec3;
-	position_offset : vec3;
-	position_scale : vec3;
-	uv_offset : vec2;
-	uv_scale : vec2;
+	bbox_min : Vec3Fb;
+	bbox_max : Vec3Fb;
+	position_offset : Vec3Fb;
+	position_scale : Vec3Fb;
+	uv_offset : Vec2Fb;
+	uv_scale : Vec2Fb;
     base_vertex : uint;
     vertex_count : uint;
     base_index : uint;
     index_count : uint;
     base_subset : ushort;
     subset_count : ushort;
-    vertex_format : EVertexFormat;
+    vertex_format : EVertexFormatFb;
     vertex_stride : ushort;
 }
+
 struct SubsetFb {
     material_id : uint;
     base_index : uint;
     index_count : uint;
 }
+
 table NameFb {
 	h : ulong( key );
 	v : string;
 }
+
 struct TransformFb {
-    translation : vec3;
-    rotation_offset : vec3;
-    rotation_pivot : vec3;
-    pre_rotation : vec3;
-    post_rotation : vec3;
-    rotation : vec3;
-    scaling_offset : vec3;
-    scaling_pivot : vec3;
-    scaling : vec3;
-    geometric_translation : vec3;
-    geometric_rotation : vec3;
-    geometric_scaling : vec3;
+    translation : Vec3Fb;
+    rotation_offset : Vec3Fb;
+    rotation_pivot : Vec3Fb;
+    pre_rotation : Vec3Fb;
+    post_rotation : Vec3Fb;
+    rotation : Vec3Fb;
+    scaling_offset : Vec3Fb;
+    scaling_pivot : Vec3Fb;
+    scaling : Vec3Fb;
+    geometric_translation : Vec3Fb;
+    geometric_rotation : Vec3Fb;
+    geometric_scaling : Vec3Fb;
 }
+
 table SkinFb {
     name_id : uint( key );
     links_ids : [uint];
 }
+
 table MeshFb {
     vertices : [ubyte];
     submeshes : [SubmeshFb];
@@ -206,28 +244,32 @@ table MeshFb {
     index_type : EIndexTypeFb;
 	skin_id : uint;
 }
+
 struct MaterialPropFb {
     name_id : uint( key );
-    type : EMaterialPropTypeFb;
-    value : vec3;
+    value_id : uint;
 }
+
 table MaterialFb {
     id : uint;
     name_id : uint( key );
-    props : [MaterialPropFb];
+    properties : [MaterialPropFb];
+    textures : [MaterialPropFb];
 }
+
 struct CameraFb {
     id : uint;
     name_id : uint( key );
-	up : vec3;
-	aspect : vec2;
+	up : Vec3Fb;
+	aspect : Vec2Fb;
 }
+
 struct LightFb {
     id : uint;
     name_id : uint( key );
-	light_type : ELightType;
-	area_light_type : EAreaLightType;
-	color : vec3;
+	light_type : ELightTypeFb;
+	area_light_type : EAreaLightTypeFb;
+	color : Vec3Fb;
 	fog : float;
 	intensity : float;
 	inner_angle : float;
@@ -239,22 +281,25 @@ struct LightFb {
 	decay_start : float;
 	casts_shadows : bool;
 }
+
 table NodeFb {
     id : uint;
     mesh_id : uint;
     light_id : uint;
     camera_id : uint;
     name_id : uint( key );
-	culling_type : ECullingType;
+	culling_type : ECullingTypeFb;
     child_ids : [uint];
     material_ids : [uint];
     anim_curve_ids : [uint];
 }
+
 table FileFb {
 	id : uint;
     name_id : uint( key );
 	buffer : [ubyte];
 }
+
 table SceneFb {
     transforms : [TransformFb];
     nodes : [NodeFb];
@@ -268,7 +313,11 @@ table SceneFb {
     lights : [LightFb];
     skins : [SkinFb];
     files : [FileFb];
-    names : [string];
+    
+    bool_values : [bool];
+    int_values : [int];
+    float_values : [float];
+    string_values : [string];
 }
 
 root_type SceneFb;

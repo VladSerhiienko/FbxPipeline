@@ -340,7 +340,7 @@ bool GetSubsets( FbxMesh* mesh, apemode::Mesh& m, std::vector< apemodefb::Subset
     }
 
     if ( !subsetPolies.empty( ) ) {
-        const TIndex indexCount = subsetIndexCount; 
+        const TIndex indexCount = subsetIndexCount;
         const auto subsetLength = indexCount - subsetStartIndex;
         subsets.emplace_back( materialIndex, (uint32_t) subsetStartIndex * 3, (uint32_t) subsetLength * 3 );
 
@@ -664,10 +664,10 @@ void InitializeVertices( FbxMesh*       mesh,
         }
     }
 
-    m.positionMin = apemodefb::vec3( positionMin.x, positionMin.y, positionMin.z );
-    m.positionMax = apemodefb::vec3( positionMax.x, positionMax.y, positionMax.z );
-    m.texcoordMin = apemodefb::vec2( texcoordMin.x, texcoordMin.y );
-    m.texcoordMax = apemodefb::vec2( texcoordMax.x, texcoordMax.y );
+    m.positionMin = apemodefb::Vec3Fb( positionMin.x, positionMin.y, positionMin.z );
+    m.positionMax = apemodefb::Vec3Fb( positionMax.x, positionMax.y, positionMax.z );
+    m.texcoordMin = apemodefb::Vec2Fb( texcoordMin.x, texcoordMin.y );
+    m.texcoordMax = apemodefb::Vec2Fb( texcoordMax.x, texcoordMax.y );
 
     if ( nullptr == uve ) {
         s.console->error( "Mesh \"{}\" does not have texcoords geometry layer.",
@@ -782,7 +782,7 @@ void ExportMesh( FbxNode*       pNode,
 
         s.skins.emplace_back( );
         auto& skin = s.skins.back( );
-        skin.nameId = s.PushName( pSkin->GetName( ) );
+        skin.nameId = s.PushValue( pSkin->GetName( ) );
         skin.linkFbxIds.reserve( clusterCount );
 
         for ( auto i = 0; i < clusterCount; ++i ) {
@@ -873,14 +873,14 @@ void ExportMesh( FbxNode*       pNode,
             if ( packTooManyBones && uniqueUsedIndices.size( ) <= PackedMaxBoneCount( ) ) {
 
                 /*
-                
+
                 The code below builds two maps:
                     > original index to node id
                         2 | 3 | 6 | 7 | 9
                         A | B | C | D | E
                     > original index to reordered index
-                        2 | 3 | 6 | 7 | 9 
-                        0 | 1 | 2 | 3 | 4 
+                        2 | 3 | 6 | 7 | 9
+                        0 | 1 | 2 | 3 | 4
 
                 The two built maps are used to substitute indices in the skin infos
                 and to build a new shorter list of links for exporting.
@@ -996,18 +996,18 @@ void ExportMesh( FbxNode*       pNode,
         }
     }
 
-    apemodefb::vec3 bboxMin( positionMin.x, positionMin.y, positionMin.z );
-    apemodefb::vec3 bboxMax( positionMax.x, positionMax.y, positionMax.z );
+    apemodefb::Vec3Fb bboxMin( positionMin.x, positionMin.y, positionMin.z );
+    apemodefb::Vec3Fb bboxMax( positionMax.x, positionMax.y, positionMax.z );
 
     if ( pack ) {
         auto const positionScale = positionMax - positionMin;
         auto const texcoordScale = texcoordMax - texcoordMin;
-        apemodefb::vec2 uvMin( texcoordMin.x, texcoordMin.y );
-        apemodefb::vec3 const bboxScale( positionScale.x, positionScale.y, positionScale.z );
-        apemodefb::vec2 const uvScale( texcoordScale.x, texcoordScale.y );
+        apemodefb::Vec2Fb uvMin( texcoordMin.x, texcoordMin.y );
+        apemodefb::Vec3Fb const bboxScale( positionScale.x, positionScale.y, positionScale.z );
+        apemodefb::Vec2Fb const uvScale( texcoordScale.x, texcoordScale.y );
 
         const auto submeshVertexStride = nullptr != pSkin ? packedSkinnedVertexStride : packedVertexStride;
-        const auto submeshVertexFormat = nullptr != pSkin ? apemodefb::EVertexFormat_PackedSkinned : apemodefb::EVertexFormat_Packed;
+        const auto submeshVertexFormat = nullptr != pSkin ? apemodefb::EVertexFormatFb_PackedSkinned : apemodefb::EVertexFormatFb_Packed;
 
         m.submeshes.emplace_back( bboxMin,                      // bbox min
                                   bboxMax,                      // bbox max
@@ -1026,14 +1026,14 @@ void ExportMesh( FbxNode*       pNode,
         );
     } else {
         const auto submeshVertexStride = nullptr != pSkin ? skinnedVertexStride : vertexStride;
-        const auto submeshVertexFormat = nullptr != pSkin ? apemodefb::EVertexFormat_StaticSkinned : apemodefb::EVertexFormat_Static;
+        const auto submeshVertexFormat = nullptr != pSkin ? apemodefb::EVertexFormatFb_StaticSkinned : apemodefb::EVertexFormatFb_Static;
 
         m.submeshes.emplace_back( bboxMin,                             // bbox min
                                   bboxMax,                             // bbox max
-                                  apemodefb::vec3( 0.0f, 0.0f, 0.0f ), // position offset
-                                  apemodefb::vec3( 1.0f, 1.0f, 1.0f ), // position scale
-                                  apemodefb::vec2( 0.0f, 0.0f ),       // uv offset
-                                  apemodefb::vec2( 1.0f, 1.0f ),       // uv scale
+                                  apemodefb::Vec3Fb( 0.0f, 0.0f, 0.0f ), // position offset
+                                  apemodefb::Vec3Fb( 1.0f, 1.0f, 1.0f ), // position scale
+                                  apemodefb::Vec2Fb( 0.0f, 0.0f ),       // uv offset
+                                  apemodefb::Vec2Fb( 1.0f, 1.0f ),       // uv scale
                                   0,                                   // base vertex
                                   vertexCount,                         // vertex count
                                   0,                                   // base index

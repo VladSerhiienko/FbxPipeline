@@ -4,7 +4,6 @@
 
 std::string FindFile( const char* filepath );
 std::string GetFileName( const char* filePath );
-void SplitFilename( const std::string& filePath, std::string& parentFolderName, std::string& fileName );
 
 template < typename TPropertyCallbackFn, typename TObjectCallbackFn >
 void ScanConnectedSrc( FbxObject*          pPropObj,
@@ -46,7 +45,7 @@ void ExportMaterials( FbxScene* pScene ) {
             s.materials.emplace_back( );
             auto& m  = s.materials.back( );
             m.id = id;
-            m.nameId = s.PushName( material->GetName( ) );
+            m.nameId = s.PushValue( material->GetName( ) );
 
             s.materialDict[ m.nameId ] = id;
             s.console->info( "Material: \"{}\"", material->GetName( ) );
@@ -99,39 +98,40 @@ void ExportMaterials( FbxScene* pScene ) {
 
                     switch ( srcProperty.GetPropertyDataType( ).GetType( ) ) {
                         case eFbxBool:
-                            m.props.emplace_back(
-                                s.PushName( srcProperty.GetNameAsCStr( ) ),
-                                apemodefb::EMaterialPropTypeFb_Bool,
-                                apemodefb::vec3( static_cast< float >( srcProperty.Get< FbxBool >( ) ), 0, 0 ) );
+                            m.properties.emplace_back( s.PushValue( srcProperty.GetNameAsCStr( ) ),
+                                                       s.PushValue( srcProperty.Get< FbxBool >( ) ) );
                             break;
                         case eFbxFloat:
-                            m.props.emplace_back(
-                                s.PushName( srcProperty.GetNameAsCStr( ) ),
-                                apemodefb::EMaterialPropTypeFb_Float,
-                                apemodefb::vec3( static_cast< float >( srcProperty.Get< float >( ) ), 0, 0 ) );
+                            m.properties.emplace_back( s.PushValue( srcProperty.GetNameAsCStr( ) ),
+                                                       s.PushValue( srcProperty.Get< float >( ) ) );
                             break;
                         case eFbxDouble:
-                            m.props.emplace_back(
-                                s.PushName( srcProperty.GetNameAsCStr( ) ),
-                                apemodefb::EMaterialPropTypeFb_Float,
-                                apemodefb::vec3( static_cast< float >( srcProperty.Get< double >( ) ), 0, 0 ) );
+                            m.properties.emplace_back( s.PushValue( srcProperty.GetNameAsCStr( ) ),
+                                                       s.PushValue( static_cast< float >( srcProperty.Get< double >( ) ) ) );
                             break;
                         case eFbxDouble2:
-                            m.props.emplace_back(
-                                s.PushName( srcProperty.GetNameAsCStr( ) ),
-                                apemodefb::EMaterialPropTypeFb_Float2,
-                                apemodefb::vec3( static_cast< float >( srcProperty.Get< FbxDouble2 >( )[ 0 ] ),
-                                                 static_cast< float >( srcProperty.Get< FbxDouble2 >( )[ 1 ] ),
-                                                 0 ) );
+                            m.properties.emplace_back(
+                                s.PushValue( srcProperty.GetNameAsCStr( ) ),
+                                s.PushValue( static_cast< float >( srcProperty.Get< FbxDouble2 >( )[ 0 ] ),
+                                             static_cast< float >( srcProperty.Get< FbxDouble2 >( )[ 1 ] ) ) );
+
                             break;
                         case eFbxDouble3:
+                            m.properties.emplace_back(
+                                s.PushValue( srcProperty.GetNameAsCStr( ) ),
+                                s.PushValue( static_cast< float >( srcProperty.Get< FbxDouble3 >( )[ 0 ] ),
+                                             static_cast< float >( srcProperty.Get< FbxDouble3 >( )[ 1 ] ),
+                                             static_cast< float >( srcProperty.Get< FbxDouble3 >( )[ 2 ] ) ) );
+
+                            break;
                         case eFbxDouble4:
-                            m.props.emplace_back(
-                                s.PushName( srcProperty.GetNameAsCStr( ) ),
-                                apemodefb::EMaterialPropTypeFb_Float3,
-                                apemodefb::vec3( static_cast< float >( srcProperty.Get< FbxDouble3 >( )[ 0 ] ),
-                                                 static_cast< float >( srcProperty.Get< FbxDouble3 >( )[ 1 ] ),
-                                                 static_cast< float >( srcProperty.Get< FbxDouble3 >( )[ 2 ] ) ) );
+                            m.properties.emplace_back(
+                                s.PushValue( srcProperty.GetNameAsCStr( ) ),
+                                s.PushValue( static_cast< float >( srcProperty.Get< FbxDouble4 >( )[ 0 ] ),
+                                             static_cast< float >( srcProperty.Get< FbxDouble4 >( )[ 1 ] ),
+                                             static_cast< float >( srcProperty.Get< FbxDouble4 >( )[ 2 ] ),
+                                             static_cast< float >( srcProperty.Get< FbxDouble4 >( )[ 3 ] ) ) );
+
                             break;
 
                         default:
@@ -181,19 +181,18 @@ void ExportMaterials( FbxScene* pScene ) {
                             s.missingQueue.insert( GetFileName( fileUrl.c_str( ) ) );
                         } else {
                             s.textures.emplace_back( (uint32_t) s.textures.size( ),
-                                                     s.PushName( pTexture->GetName( ) ),
-                                                     s.PushName( GetFileName( fullFilePath.c_str( ) ) ),
-                                                     (apemodefb::EBlendMode) pTexture->GetBlendMode( ),
-                                                     (apemodefb::EWrapMode) pTexture->GetWrapModeU( ),
-                                                     (apemodefb::EWrapMode) pTexture->GetWrapModeV( ),
+                                                     s.PushValue( pTexture->GetName( ) ),
+                                                     s.PushValue( GetFileName( fullFilePath.c_str( ) ) ),
+                                                     (apemodefb::EBlendModeFb) pTexture->GetBlendMode( ),
+                                                     (apemodefb::EWrapModeFb) pTexture->GetWrapModeU( ),
+                                                     (apemodefb::EWrapModeFb) pTexture->GetWrapModeV( ),
                                                      (float) pTexture->GetTranslationU( ),
                                                      (float) pTexture->GetTranslationV( ),
                                                      (float) pTexture->GetScaleU( ),
                                                      (float) pTexture->GetScaleV( ) );
 
-                            m.props.emplace_back( s.PushName( srcProperty.GetNameAsCStr( ) ),
-                                                  apemodefb::EMaterialPropTypeFb_Texture,
-                                                  apemodefb::vec3( static_cast< float >( s.textures.back( ).id( ) ), 0, 0 ) );
+                            m.textures.emplace_back( s.PushValue( srcProperty.GetNameAsCStr( ) ),
+                                                     s.textures.back( ).id( ) );
 
                             s.console->info( "Found texture \"{}\" (\"{}\") (\"{}\")",
                                              pTexture->GetName( ),
@@ -212,7 +211,7 @@ void ExportMaterials( FbxNode* node, apemode::Node& n ) {
         n.materialIds.reserve( c );
         for ( auto i = 0; i < c; ++i ) {
             auto material = node->GetMaterial( i );
-            auto nameId   = s.PushName( material->GetName( ) );
+            auto nameId   = s.PushValue( material->GetName( ) );
             assert( s.materialDict.find( nameId ) != s.materialDict.end( ) );
             n.materialIds.push_back( s.materialDict[ nameId ] );
         }

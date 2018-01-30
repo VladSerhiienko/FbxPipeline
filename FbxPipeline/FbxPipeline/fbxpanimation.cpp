@@ -38,8 +38,16 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
         }
     }
 
-    std::vector< std::tuple< apemodefb::EAnimCurveProperty, apemodefb::EAnimCurveChannel, FbxAnimCurve*, FbxAnimLayer*, FbxAnimStack* > > animCurves;
-    animCurves.reserve( animLayers.size( ) * ( apemodefb::EAnimCurveChannel_MAX + 1 ) * ( apemodefb::EAnimCurveProperty_MAX + 1 ) );
+    std::vector< std::tuple< apemodefb::EAnimCurvePropertyFb,
+                             apemodefb::EAnimCurveChannelFb,
+                             FbxAnimCurve*,
+                             FbxAnimLayer*,
+                             FbxAnimStack* > >
+        animCurves;
+
+    animCurves.reserve( animLayers.size( ) *
+                        ( apemodefb::EAnimCurveChannelFb_MAX + 1 ) *
+                        ( apemodefb::EAnimCurvePropertyFb_MAX + 1 ) );
 
     for ( auto pAnimLayerTuple : animLayers ) {
         auto pAnimLayer = std::get< FbxAnimLayer* >( pAnimLayerTuple );
@@ -47,13 +55,13 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
 
 #pragma region
 #define EmplaceBackChannel( _P, _eC, _C ) \
-    animCurves.emplace_back( apemodefb::EAnimCurveProperty_##_P, _eC, pNode->_P.GetCurve( pAnimLayer, _C ), pAnimLayer, pAnimStack );
+    animCurves.emplace_back( apemodefb::EAnimCurvePropertyFb_##_P, _eC, pNode->_P.GetCurve( pAnimLayer, _C ), pAnimLayer, pAnimStack );
     // animCurves.emplace_back( apemodefb::EAnimCurveProperty_##_P, _eC, pNode->##_P.GetCurve( pAnimLayer, _C ), pAnimLayer, pAnimStack );
 
 #define EmplaceBack( _P )                                                                   \
-    EmplaceBackChannel( _P, apemodefb::EAnimCurveChannel_X, FBXSDK_CURVENODE_COMPONENT_X ); \
-    EmplaceBackChannel( _P, apemodefb::EAnimCurveChannel_Y, FBXSDK_CURVENODE_COMPONENT_Y ); \
-    EmplaceBackChannel( _P, apemodefb::EAnimCurveChannel_Z, FBXSDK_CURVENODE_COMPONENT_Z );
+    EmplaceBackChannel( _P, apemodefb::EAnimCurveChannelFb_X, FBXSDK_CURVENODE_COMPONENT_X ); \
+    EmplaceBackChannel( _P, apemodefb::EAnimCurveChannelFb_Y, FBXSDK_CURVENODE_COMPONENT_Y ); \
+    EmplaceBackChannel( _P, apemodefb::EAnimCurveChannelFb_Z, FBXSDK_CURVENODE_COMPONENT_Z );
 #pragma endregion
 
         EmplaceBack( LclTranslation );
@@ -88,26 +96,26 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
             ss << pNode->GetName( );
 
             ss << " ";
-            switch ( std::get< apemodefb::EAnimCurveProperty >( pAnimCurve ) ) {
-            case apemodefb::EAnimCurveProperty_LclTranslation:          ss << "LclTranslation"; break;
-            case apemodefb::EAnimCurveProperty_RotationOffset:          ss << "RotationOffset"; break;
-            case apemodefb::EAnimCurveProperty_RotationPivot:           ss << "RotationPivot"; break;
-            case apemodefb::EAnimCurveProperty_PreRotation:             ss << "PreRotation"; break;
-            case apemodefb::EAnimCurveProperty_PostRotation:            ss << "PostRotation"; break;
-            case apemodefb::EAnimCurveProperty_LclRotation:             ss << "LclRotation"; break;
-            case apemodefb::EAnimCurveProperty_ScalingOffset:           ss << "ScalingOffset"; break;
-            case apemodefb::EAnimCurveProperty_ScalingPivot:            ss << "ScalingPivot"; break;
-            case apemodefb::EAnimCurveProperty_LclScaling:              ss << "LclScaling"; break;
-            case apemodefb::EAnimCurveProperty_GeometricTranslation:    ss << "GeometricTranslation"; break;
-            case apemodefb::EAnimCurveProperty_GeometricRotation:       ss << "GeometricRotation"; break;
-            case apemodefb::EAnimCurveProperty_GeometricScaling:        ss << "GeometricScaling"; break;
+            switch ( std::get< apemodefb::EAnimCurvePropertyFb >( pAnimCurve ) ) {
+            case apemodefb::EAnimCurvePropertyFb_LclTranslation:          ss << "LclTranslation"; break;
+            case apemodefb::EAnimCurvePropertyFb_RotationOffset:          ss << "RotationOffset"; break;
+            case apemodefb::EAnimCurvePropertyFb_RotationPivot:           ss << "RotationPivot"; break;
+            case apemodefb::EAnimCurvePropertyFb_PreRotation:             ss << "PreRotation"; break;
+            case apemodefb::EAnimCurvePropertyFb_PostRotation:            ss << "PostRotation"; break;
+            case apemodefb::EAnimCurvePropertyFb_LclRotation:             ss << "LclRotation"; break;
+            case apemodefb::EAnimCurvePropertyFb_ScalingOffset:           ss << "ScalingOffset"; break;
+            case apemodefb::EAnimCurvePropertyFb_ScalingPivot:            ss << "ScalingPivot"; break;
+            case apemodefb::EAnimCurvePropertyFb_LclScaling:              ss << "LclScaling"; break;
+            case apemodefb::EAnimCurvePropertyFb_GeometricTranslation:    ss << "GeometricTranslation"; break;
+            case apemodefb::EAnimCurvePropertyFb_GeometricRotation:       ss << "GeometricRotation"; break;
+            case apemodefb::EAnimCurvePropertyFb_GeometricScaling:        ss << "GeometricScaling"; break;
             }
 
             ss << " ";
-            switch ( std::get< apemodefb::EAnimCurveChannel >( pAnimCurve ) ) {
-            case apemodefb::EAnimCurveChannel_X:    ss << "X"; break;
-            case apemodefb::EAnimCurveChannel_Y:    ss << "Y"; break;
-            case apemodefb::EAnimCurveChannel_Z:    ss << "Z"; break;
+            switch ( std::get< apemodefb::EAnimCurveChannelFb >( pAnimCurve ) ) {
+            case apemodefb::EAnimCurveChannelFb_X:    ss << "X"; break;
+            case apemodefb::EAnimCurveChannelFb_Y:    ss << "Y"; break;
+            case apemodefb::EAnimCurveChannelFb_Z:    ss << "Z"; break;
             }
 
             /* Avoid noise in the names */
@@ -193,11 +201,11 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
             if ( s.propertyCurveSync )
                 ApplyFilter< 3 >( &keySync, pAnimChannels );
 
-            switch ( std::get< apemodefb::EAnimCurveProperty >( animCurves[ i ] ) ) {
-                case apemodefb::EAnimCurveProperty_GeometricRotation:
-                case apemodefb::EAnimCurveProperty_LclRotation:
-                case apemodefb::EAnimCurveProperty_PreRotation:
-                case apemodefb::EAnimCurveProperty_PostRotation:
+            switch ( std::get< apemodefb::EAnimCurvePropertyFb >( animCurves[ i ] ) ) {
+                case apemodefb::EAnimCurvePropertyFb_GeometricRotation:
+                case apemodefb::EAnimCurvePropertyFb_LclRotation:
+                case apemodefb::EAnimCurvePropertyFb_PreRotation:
+                case apemodefb::EAnimCurvePropertyFb_PostRotation:
                     ApplyFilter< 3 >( &gimbleKiller, pAnimChannels );
                     break;
             }
@@ -299,14 +307,14 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
 
             s.animCurves.emplace_back( );
 
-            uint32_t curveId = s.animCurves.size( );
+            uint32_t curveId = static_cast< uint32_t >( s.animCurves.size( ) );
             n.curveIds.push_back( curveId );
 
             auto& curve       = s.animCurves.back( );
             curve.id          = curveId;
-            curve.nameId      = s.PushName( pAnimCurve->GetName( ) );
-            curve.property    = std::get< apemodefb::EAnimCurveProperty >( pAnimCurveTuple );
-            curve.channel     = std::get< apemodefb::EAnimCurveChannel >( pAnimCurveTuple );
+            curve.nameId      = s.PushValue( pAnimCurve->GetName( ) );
+            curve.property    = std::get< apemodefb::EAnimCurvePropertyFb >( pAnimCurveTuple );
+            curve.channel     = std::get< apemodefb::EAnimCurveChannelFb >( pAnimCurveTuple );
             curve.animStackId = s.animStackDict[ pAnimStack->GetUniqueID( ) ];
             curve.animLayerId = s.animLayerDict[ pAnimLayer->GetUniqueID( ) ];
             curve.nodeId      = n.id;
@@ -321,7 +329,7 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
 
                 switch ( pAnimCurve->KeyGetInterpolation( i ) ) {
                     case FbxAnimCurveDef::eInterpolationConstant: {
-                        key.interpolationMode = apemodefb::EInterpolationMode_Const;
+                        key.interpolationMode = apemodefb::EInterpolationModeFb_Const;
                         switch ( pAnimCurve->KeyGetConstantMode( i ) ) {
                             case FbxAnimCurveDef::eConstantStandard:
                                 break;
@@ -335,12 +343,12 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
                     } break;
 
                     case FbxAnimCurveDef::eInterpolationLinear: {
-                        key.interpolationMode = apemodefb::EInterpolationMode_Linear;
+                        key.interpolationMode = apemodefb::EInterpolationModeFb_Linear;
                     } break;
 
                     case FbxAnimCurveDef::eInterpolationCubic: {
                         /* Resampling */
-                        key.interpolationMode = apemodefb::EInterpolationMode_Linear;
+                        key.interpolationMode = apemodefb::EInterpolationModeFb_Linear;
                         // key.interpolationMode = apemodefb::EInterpolationMode_Cubic;
                     } break;
                 }

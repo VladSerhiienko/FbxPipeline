@@ -1,10 +1,10 @@
 #include <fbxppch.h>
 #include <fbxpstate.h>
 
-inline apemodefb::vec3 Cast( FbxDouble3 const& d ) {
-    return apemodefb::vec3{static_cast< float >( d.mData[ 0 ] ),
-                          static_cast< float >( d.mData[ 1 ] ),
-                          static_cast< float >( d.mData[ 2 ] )};
+inline apemodefb::Vec3Fb Cast( FbxDouble3 const& d ) {
+    return apemodefb::Vec3Fb{static_cast< float >( d.mData[ 0 ] ),
+                             static_cast< float >( d.mData[ 1 ] ),
+                             static_cast< float >( d.mData[ 2 ] )};
 }
 
 void ExportTransform( FbxNode* node, apemode::Node & n ) {

@@ -149,33 +149,32 @@ bool ReadBinFile( const char* srcPath, std::vector< uint8_t >& fileBuffer ) {
     return false;
 }
 
-std::string convertToString( double num ) {
-    std::ostringstream convert;
-    convert << num;
-    return convert.str( );
-}
-
-double roundOff( double n ) {
-    double d = n * 100.0;
-    int i = d + 0.5;
-    d = (float) i / 100.0;
-    return d;
+template < int TPrecision = 100 >
+float RoundOff( float n ) {
+    const float i = n * static_cast< float >( TPrecision ) + 0.5f;
+    return ( (float) (int) i ) / static_cast< float >( TPrecision );
 }
 
 std::string ToPrettySizeString( size_t size ) {
-    static const char* SIZES[] = {"B", "KB", "MB", "GB"};
+    static const char* kSizeStrings[] = {"B", "KB", "MB", "GB"};
+
     int div = 0;
     size_t rem = 0;
 
-    while ( size >= 1024 && div < ( sizeof SIZES / sizeof *SIZES ) ) {
+    while ( size >= 1024 && div < ARRAYSIZE( kSizeStrings ) ) {
         rem = ( size % 1024 );
         div++;
         size /= 1024;
     }
 
-    double size_d = (double) size + (double) rem / 1024.0;
-    std::string result = convertToString( roundOff( size_d ) ) + " " + SIZES[ div ];
-    return result;
+    float size_d =  static_cast< float >( size ) +  static_cast< float >( rem ) / 1024.0f;
+
+    std::ostringstream oss;
+    oss << RoundOff( size_d );
+    oss << " ";
+    oss << kSizeStrings[ div ];
+
+    return oss.str( );
 }
 
 std::vector< uint8_t > ReadBinFile( const char* srcPath ) {

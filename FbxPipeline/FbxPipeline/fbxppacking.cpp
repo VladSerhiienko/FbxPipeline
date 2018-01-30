@@ -12,32 +12,32 @@ inline X Cast( const Y v ) {
 }
 
 template <>
-inline apemodefb::vec4 Cast( const mathfu::vec4 v ) {
-    return apemodefb::vec4( v.x, v.y, v.z, v.w );
+inline apemodefb::Vec4Fb Cast( const mathfu::vec4 v ) {
+    return apemodefb::Vec4Fb( v.x, v.y, v.z, v.w );
 }
 
 template <>
-inline apemodefb::vec3 Cast( const mathfu::vec3 v ) {
-    return apemodefb::vec3( v.x, v.y, v.z );
+inline apemodefb::Vec3Fb Cast( const mathfu::vec3 v ) {
+    return apemodefb::Vec3Fb( v.x, v.y, v.z );
 }
 
 template <>
-inline apemodefb::vec2 Cast( const mathfu::vec2 v ) {
-    return apemodefb::vec2( v.x, v.y );
+inline apemodefb::Vec2Fb Cast( const mathfu::vec2 v ) {
+    return apemodefb::Vec2Fb( v.x, v.y );
 }
 
 template <>
-inline mathfu::vec4 Cast( const apemodefb::vec4 v ) {
+inline mathfu::vec4 Cast( const apemodefb::Vec4Fb v ) {
     return mathfu::vec4( v.x( ), v.y( ), v.z( ), v.w( ) );
 }
 
 template <>
-inline mathfu::vec3 Cast( const apemodefb::vec3 v ) {
+inline mathfu::vec3 Cast( const apemodefb::Vec3Fb v ) {
     return mathfu::vec3( v.x( ), v.y( ), v.z( ) );
 }
 
 template <>
-inline mathfu::vec2 Cast( const apemodefb::vec2 v ) {
+inline mathfu::vec2 Cast( const apemodefb::Vec2Fb v ) {
     return mathfu::vec2( v.x( ), v.y( ) );
 }
 

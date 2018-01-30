@@ -1,7 +1,6 @@
 
 #include <fbxppch.h>
 #include <fbxpstate.h>
-#include <CityHash.h>
 #include <fstream>
 #include <iostream>
 #include <iomanip>
@@ -15,12 +14,12 @@ std::string GetExecutable( );
 std::string ResolveFullPath( const char* path );
 bool        MakeDirectory( const char* directory );
 
-void SplitFilename( const std::string& filePath, std::string& parentFolderName, std::string& fileName );
+void SplitFilename( const std::string& filePath, std::string * parentFolderName, std::string * fileName );
 bool InitializeSdkObjects( FbxManager*& pManager, FbxScene*& pScene );
 void DestroySdkObjects( FbxManager* pManager );
 bool LoadScene( FbxManager* pManager, FbxDocument* pScene, const char* pFilename );
 
-apemode::State  s;
+apemode::State s;
 apemode::State& apemode::Get( ) {
     return s;
 }
@@ -134,13 +133,11 @@ void apemode::State::Release( ) {
 
 bool apemode::State::Load( ) {
     const std::string inputFile = options[ "i" ].as< std::string >( );
-    SplitFilename( inputFile.c_str( ), folderPath, fileName );
+    SplitFilename( inputFile.c_str( ), &folderPath, &fileName );
     // logger->info( "File name  : \"{}\"", fileName );
     // logger->info( "Folder name: \"{}\"", folderPath );
     return LoadScene( manager, scene, inputFile.c_str( ) );
 }
-
-// std::vector< uint8_t > ReadBinFile( const char* filepath );
 
 std::string ToPrettySizeString( size_t size );
 bool ReadBinFile( const char* srcPath, std::vector< uint8_t >& fileBuffer );
@@ -149,20 +146,32 @@ bool apemode::State::Finish( ) {
     console->info( "Serialization" );
 
     //
-    // Finalize names
+    // Finalize values
     //
 
-    console->info( "> Names" );
-    std::vector< flatbuffers::Offset< flatbuffers::String > > nameOffsets; {
-        nameOffsets.reserve( names.size( ) );
-        for ( auto& name : names ) {
-            const auto valueOffset = builder.CreateString( name );
-            nameOffsets.push_back( valueOffset );
+    console->info( "> Strings" );
+    std::vector< flatbuffers::Offset< flatbuffers::String > > stringOffsets; {
+        stringOffsets.reserve( stringValues.size( ) );
+        for ( auto& string : stringValues ) {
+            const auto valueOffset = builder.CreateString( string );
+            stringOffsets.push_back( valueOffset );
         }
     }
 
-    const auto namesOffset = builder.CreateVector( nameOffsets );
-    console->info( "< Succeeded {} ", ToPrettySizeString( namesOffset.o ) );
+    const auto stringsOffset = builder.CreateVector( stringOffsets );
+    console->info( "< Succeeded {} ", ToPrettySizeString( stringsOffset.o ) );
+
+    console->info( "> Floats" );
+    const auto floatsOffset = builder.CreateVector( floatValues );
+    console->info( "< Succeeded {} ", ToPrettySizeString( floatsOffset.o ) );
+
+    console->info( "> Ints" );
+    const auto intsOffset = builder.CreateVector( intValues );
+    console->info( "< Succeeded {} ", ToPrettySizeString( intsOffset.o ) );
+
+    console->info( "> Bools" );
+    const auto boolsOffset = builder.CreateVector( boolValues );
+    console->info( "< Succeeded {} ", ToPrettySizeString( boolsOffset.o ) );
 
     //
     // Finalize transforms
@@ -237,8 +246,8 @@ bool apemode::State::Finish( ) {
     for ( auto& curve : animCurves ) {
         console->info( "+ keys {} ({}/{}) ",
                        curve.keys.size( ),
-                       apemodefb::EnumNameEAnimCurveProperty( curve.property ),
-                       apemodefb::EnumNameEAnimCurveChannel( curve.channel ) );
+                       apemodefb::EnumNameEAnimCurvePropertyFb( curve.property ),
+                       apemodefb::EnumNameEAnimCurveChannelFb( curve.channel ) );
 
         tempCurveKeys.clear( );
         tempCurveKeys.reserve( curve.keys.size( ) );
@@ -268,14 +277,17 @@ bool apemode::State::Finish( ) {
     std::vector< flatbuffers::Offset< apemodefb::MaterialFb > > materialOffsets;
     materialOffsets.reserve( materials.size( ) );
     for ( auto& material : materials ) {
-        console->info( "+ props {}", material.props.size( ) );
+        console->info( "+ properties {}", material.properties.size( ) );
+        console->info( "+ textures {}", material.textures.size( ) );
 
-        auto propsOffset = builder.CreateVectorOfStructs( material.props );
+        auto propertiesOffset = builder.CreateVectorOfStructs( material.properties );
+        auto texturesOffset = builder.CreateVectorOfStructs( material.textures );
 
         apemodefb::MaterialFbBuilder materialBuilder( builder );
         materialBuilder.add_id( material.id );
         materialBuilder.add_name_id( material.nameId );
-        materialBuilder.add_props( propsOffset );
+        materialBuilder.add_properties( propertiesOffset );
+        materialBuilder.add_textures( texturesOffset );
         materialOffsets.push_back( materialBuilder.Finish( ) );
     }
 
@@ -323,7 +335,7 @@ bool apemode::State::Finish( ) {
         console->info( "+ subsets {}, vertex count {}, vertex format {} ",
                        mesh.subsets.size( ),
                        mesh.submeshes[ 0 ].vertex_count( ),
-                       apemodefb::EnumNameEVertexFormat( mesh.submeshes[ 0 ].vertex_format( ) ) );
+                       apemodefb::EnumNameEVertexFormatFb( mesh.submeshes[ 0 ].vertex_format( ) ) );
 
         auto vsOffset = builder.CreateVector( mesh.vertices );
         auto smOffset = builder.CreateVectorOfStructs( mesh.submeshes );
@@ -394,7 +406,7 @@ bool apemode::State::Finish( ) {
     console->info( "> Scene" );
     apemodefb::SceneFbBuilder sceneBuilder( builder );
     sceneBuilder.add_transforms( transformsOffset );
-    sceneBuilder.add_names( namesOffset );
+    sceneBuilder.add_string_values( stringsOffset );
     sceneBuilder.add_nodes( nodesOffset );
     sceneBuilder.add_meshes( meshesOffset );
     sceneBuilder.add_textures( texturesOffset );
@@ -425,11 +437,9 @@ bool apemode::State::Finish( ) {
     if ( output.empty( ) ) {
         output = folderPath + fileName + "." +apemodefb::SceneFbExtension( );
     } else {
-        std::string outputFolder, outputFileName;
-        SplitFilename( output, outputFolder, outputFileName );
-        (void) outputFileName;
+        std::string outputFolder;
+        SplitFilename( output, &outputFolder, nullptr );
         MakeDirectory( outputFolder.c_str( ) );
-        // CreateDirectoryA( outputFolder.c_str( ), 0 );
     }
 
     console->info( "> Saving" );
@@ -444,18 +454,139 @@ bool apemode::State::Finish( ) {
     return false;
 }
 
-uint32_t apemode::State::PushName( std::string const& name ) {
-
-    auto nameIt = std::find( names.begin(), names.end(), name );
-    if ( nameIt == names.end( ) ) {
-        console->trace( "Adding name: {}", name );
-
-        const uint32_t nameIndex = static_cast< uint32_t >( names.size( ) );
-        names.emplace_back( name );
-        return nameIndex;
+template < typename T >
+uint32_t VectorInsertUnique( std::vector< T > & values, const T& value ) {
+    const auto valueIt = std::find( values.begin( ), values.end( ), value );
+    if ( valueIt == values.end( ) ) {
+        const uint32_t valueIndex = static_cast< uint32_t >( values.size( ) );
+        values.emplace_back( value );
+        return valueIndex;
     }
 
-    return static_cast< uint32_t >( std::distance( names.begin(), nameIt ) );
+    return static_cast< uint32_t >( std::distance( values.begin( ), valueIt ) );
+}
+
+apemode::ValueId apemode::State::PushValue( const bool value ) {
+    if ( boolValues.empty( ) ) {
+        boolValues.push_back( false );
+        boolValues.push_back( true );
+    }
+
+    return apemode::ValueId( apemodefb::EValueTypeFb_Bool, value );
+}
+
+apemode::ValueId apemode::State::PushValue( const int32_t value ) {
+    return apemode::ValueId( apemodefb::EValueTypeFb_Int,
+                             static_cast< uint32_t >( VectorInsertUnique( intValues, value ) ) );
+}
+
+apemode::ValueId apemode::State::PushValue( const float value ) {
+    return apemode::ValueId( apemodefb::EValueTypeFb_Float,
+                             static_cast< uint32_t >( VectorInsertUnique( floatValues, value ) ) );
+}
+
+apemode::ValueId apemode::State::PushValue( const float x, const float y ) {
+    if ( !floatValues.empty( ) ) {
+        if ( floatValues.size( ) >= 2 ) {
+            const uint32_t len = static_cast< uint32_t >( floatValues.size( ) - floatValues.size( ) % 2 );
+            for ( uint32_t i = 0; i < len; i += 2 ) {
+                if ( floatValues[ i ] == x && floatValues[ i + 1 ] == y ) {
+                    return apemode::ValueId( apemodefb::EValueTypeFb_Float2, i );
+                }
+            }
+        }
+
+        const uint32_t ii = static_cast< uint32_t >( floatValues.size( ) - 1 );
+        if ( ii && floatValues[ ii ] == x ) {
+            floatValues.push_back( y );
+            return apemode::ValueId( apemodefb::EValueTypeFb_Float2, ii );
+        }
+    }
+
+    const uint32_t i = static_cast< uint32_t >( floatValues.size( ) );
+    floatValues.push_back( x );
+    floatValues.push_back( y );
+
+    return apemode::ValueId( apemodefb::EValueTypeFb_Float2, i );
+}
+
+apemode::ValueId apemode::State::PushValue( const float x, const float y, const float z ) {
+    if ( !floatValues.empty( ) ) {
+
+        if ( floatValues.size( ) >= 3 ) {
+            const uint32_t len = static_cast< uint32_t >( floatValues.size( ) - floatValues.size( ) % 3 );
+            for ( uint32_t i = 0; i < len; i += 3 ) {
+                if ( floatValues[ i ] == x && floatValues[ i + 1 ] == y && floatValues[ i + 2 ] == z ) {
+                    return apemode::ValueId( apemodefb::EValueTypeFb_Float3, i );
+                }
+            }
+        }
+
+        const uint32_t ii = static_cast< uint32_t >( floatValues.size( ) - 1 );
+
+        if ( ii > 0 && floatValues[ ii - 1 ] == x && floatValues[ ii ] == y ) {
+            floatValues.push_back( z );
+            return apemode::ValueId( apemodefb::EValueTypeFb_Float3, ii - 1 );
+        } else if ( ii && floatValues[ ii ] == x ) {
+            floatValues.push_back( y );
+            floatValues.push_back( z );
+            return apemode::ValueId( apemodefb::EValueTypeFb_Float3, ii );
+        }
+    }
+
+    const uint32_t i = static_cast< uint32_t >( floatValues.size( ) );
+    floatValues.push_back( x );
+    floatValues.push_back( y );
+    floatValues.push_back( z );
+
+    return apemode::ValueId( apemodefb::EValueTypeFb_Float3, i );
+}
+
+apemode::ValueId apemode::State::PushValue( const float x, const float y, const float z, const float w ) {
+    if ( !floatValues.empty( ) ) {
+
+        if ( floatValues.size( ) >= 4 ) {
+            const uint32_t len = static_cast< uint32_t >( floatValues.size( ) - floatValues.size( ) % 4 );
+            for ( uint32_t i = 0; i < len; i += 4 ) {
+                if ( floatValues[ i ] == x && floatValues[ i + 1 ] == y && floatValues[ i + 2 ] == z && floatValues[ i + 3 ] == w ) {
+                    return apemode::ValueId( apemodefb::EValueTypeFb_Float4, i );
+                }
+            }
+        }
+
+        const uint32_t ii = static_cast< uint32_t >( floatValues.size( ) - 1 );
+
+        if ( ii > 1 && floatValues[ ii - 2 ] == x && floatValues[ ii - 1 ] == y && floatValues[ ii ] == z ) {
+            floatValues.push_back( w );
+            return apemode::ValueId( apemodefb::EValueTypeFb_Float4, ii - 2 );
+        } else if ( ii > 0 && floatValues[ ii - 1 ] == x && floatValues[ ii ] == y ) {
+            floatValues.push_back( z );
+            floatValues.push_back( w );
+            return apemode::ValueId( apemodefb::EValueTypeFb_Float4, ii - 1 );
+        } else if ( ii && floatValues[ ii ] == x ) {
+            floatValues.push_back( y );
+            floatValues.push_back( z );
+            floatValues.push_back( w );
+            return apemode::ValueId( apemodefb::EValueTypeFb_Float4, ii );
+        }
+    }
+
+    const uint32_t i = static_cast< uint32_t >( floatValues.size( ) );
+    floatValues.push_back( x );
+    floatValues.push_back( y );
+    floatValues.push_back( z );
+    floatValues.push_back( w );
+
+    return apemode::ValueId( apemodefb::EValueTypeFb_Float4, i );
+}
+
+apemode::ValueId apemode::State::PushValue( std::string const& value ) {
+    return apemode::ValueId( apemodefb::EValueTypeFb_String,
+                             static_cast< uint32_t >( VectorInsertUnique( stringValues, value ) ) );
+}
+
+apemode::ValueId apemode::State::PushValue( const char* value ) {
+    return PushValue( std::string( value ) );
 }
 
 #pragma region FBX SDK Initialization
@@ -650,16 +781,20 @@ std::string GetExecutable( ) {
     // return szFileName;
 }
 
-void SplitFilename( const std::string& filePath, std::string& parentFolderName, std::string& fileName ) {
+void SplitFilename( const std::string& filePath, std::string * parentFolderName, std::string * fileName ) {
     using namespace std;
 
     const size_t found = filePath.find_last_of( "/\\" );
     if ( found != filePath.npos ) {
-        parentFolderName = filePath.substr( 0, found + 1 );
-        fileName         = filePath.substr( found + 1 );
+        if ( parentFolderName )
+            *parentFolderName = filePath.substr( 0, found + 1 );
+        if ( fileName )
+            *fileName = filePath.substr( found + 1 );
     } else {
-        parentFolderName = "/";
-        fileName         = filePath;
+        if ( parentFolderName )
+            *parentFolderName = "/";
+        if ( fileName )
+            *fileName = filePath;
     }
 }
 

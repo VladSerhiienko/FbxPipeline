@@ -14,7 +14,7 @@ void ExportLight( FbxNode* node, apemode::Node& n );
 void ExportNodeAttributes( FbxNode* node, apemode::Node& n ) {
     auto& s = apemode::Get( );
 
-    n.cullingType = (apemodefb::ECullingType) node->mCullingType;
+    n.cullingType = (apemodefb::ECullingTypeFb) node->mCullingType;
     s.console->info( "Node \"{}\" has {} culling type.", node->GetName(), n.cullingType );
 
     ExportTransform( node, n );
@@ -34,7 +34,7 @@ uint32_t ExportNode( FbxNode* node ) {
     auto& n  = s.nodes.back( );
     n.id = nodeId;
     n.fbxId = node->GetUniqueID( );
-    n.nameId = s.PushName( node->GetName( ) );
+    n.nameId = s.PushValue( node->GetName( ) );
 
     s.nodeDict[ n.fbxId ] = nodeId;
 
@@ -118,7 +118,7 @@ void PreprocessAnimation( FbxScene* pScene ) {
         s.animStackDict[ pAnimStack->GetUniqueID( ) ] = animStackId;
 
         s.animStacks.emplace_back( );
-        s.animStacks.back( ).nameId = s.PushName( pAnimStack->GetName( ) );
+        s.animStacks.back( ).nameId = s.PushValue( pAnimStack->GetName( ) );
         s.animStacks.back( ).id = animStackId;
 
         int animLayerCount = pAnimStack->GetMemberCount< FbxAnimLayer >( );
@@ -148,7 +148,7 @@ void PreprocessAnimation( FbxScene* pScene ) {
 
             s.animLayers.emplace_back( );
             s.animLayers.back( ).id = animLayerId;
-            s.animLayers.back( ).nameId = s.PushName( pAnimLayer->GetName( ) );
+            s.animLayers.back( ).nameId = s.PushValue( pAnimLayer->GetName( ) );
             s.animLayers.back( ).animStackId = animStackId;
 
             s.console->info( "\t\t> Animation Layer #{} \"{}\"", j, pAnimLayer->GetName( ) );
