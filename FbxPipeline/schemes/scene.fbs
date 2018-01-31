@@ -25,6 +25,38 @@ enum EBlendModeFb : uint {
     Over
 }
 
+enum EAlphaSourceFb : uint {
+    None,
+    RGBIntensity,
+    Black
+}
+
+enum ETextureUseFb : uint {
+    eStandard,
+    eShadowMap,
+    eLightMap,
+    eSphericalReflectionMap,
+    eSphereReflectionMap,
+    eBumpNormalMap
+}
+
+enum EMappingTypeFb : uint {
+    Null,
+    Planar,
+    Spherical,
+    Cylindrical,
+    Box,
+    Face,
+    UV,
+    Environment
+}
+
+enum EPlanarMappingNormalFb : uint {
+    PlanarNormalX,
+    PlanarNormalY,
+    PlanarNormalZ
+}
+
 enum EVertexFormatFb : uint {
     Static,
     StaticSkinned,
@@ -179,6 +211,7 @@ struct TextureFb {
     id : uint;
     name_id : uint( key );
     file_id : uint;
+    texture_type_id : uint;
     blend_mode : EBlendModeFb;
     wrap_mode_u : EWrapModeFb;
     wrap_mode_v : EWrapModeFb;
@@ -186,6 +219,20 @@ struct TextureFb {
     offset_v : float;
     scale_u : float;
     scale_v : float;
+    cropping_bottom : int;
+    cropping_left : int;
+    cropping_right : int;
+    cropping_top : int;
+    rotation_u : float;
+    rotation_v : float;
+    rotation_w : float;
+    swap_uv : bool;
+    wipe_mode : bool;
+    premultiplied_alpha : bool;
+    alpha_source : EAlphaSourceFb;
+    texture_use : ETextureUseFb;
+    mapping_type : EMappingTypeFb;
+    planar_mapping_normal : EPlanarMappingNormalFb;
 }
 
 struct SubmeshFb {

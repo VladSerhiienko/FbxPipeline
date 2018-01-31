@@ -22,6 +22,7 @@ int main( int argc, char** argv ) {
     return 0;
 }
 
+// -i "C:\Sources\Models\bristleback-dota-fan-art\source\POSE.fbx" -o "C:\Sources\Models\bristleback-dota-fan-art.fbxp"
 // -i "C:\Sources\Models\warcraft-draenei-fanart\source\untitled1.fbx" -o "C:\Sources\Models\warcraft-draenei-fanart.fbxp"
 
 // C:\Users\vladyslav.serhiienko\Downloads\apto logo\apto logo.FBX

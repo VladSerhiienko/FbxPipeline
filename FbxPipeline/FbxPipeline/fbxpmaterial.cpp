@@ -102,12 +102,14 @@ void ExportMaterials( FbxScene* pScene ) {
 
                     switch ( srcProperty.GetPropertyDataType( ).GetType( ) ) {
                         case eFbxBool:
-                            m.properties.emplace_back( s.PushValue( srcProperty.GetNameAsCStr( ) ),
-                                                       s.PushValue( srcProperty.Get< FbxBool >( ) ) );
+                            m.properties.emplace_back(
+                                s.PushValue( srcProperty.GetNameAsCStr( ) ),
+                                s.PushValue( srcProperty.Get< FbxBool >( ) ) );
                             break;
                         case eFbxInt:
-                            m.properties.emplace_back( s.PushValue( srcProperty.GetNameAsCStr( ) ),
-                                                       s.PushValue( srcProperty.Get< int32_t >( ) ) );
+                            m.properties.emplace_back(
+                                s.PushValue( srcProperty.GetNameAsCStr( ) ),
+                                s.PushValue( srcProperty.Get< int32_t >( ) ) );
                             break;
                         case eFbxUInt:
                             m.properties.emplace_back(
@@ -115,8 +117,9 @@ void ExportMaterials( FbxScene* pScene ) {
                                 s.PushValue( static_cast< int32_t >( srcProperty.Get< uint32_t >( ) ) ) );
                             break;
                         case eFbxShort:
-                            m.properties.emplace_back( s.PushValue( srcProperty.GetNameAsCStr( ) ),
-                                                       s.PushValue( static_cast< int32_t >( srcProperty.Get< int16_t >( ) ) ) );
+                            m.properties.emplace_back(
+                                s.PushValue( srcProperty.GetNameAsCStr( ) ),
+                                s.PushValue( static_cast< int32_t >( srcProperty.Get< int16_t >( ) ) ) );
                             break;
                         case eFbxUShort:
                             m.properties.emplace_back(
@@ -124,12 +127,14 @@ void ExportMaterials( FbxScene* pScene ) {
                                 s.PushValue( static_cast< int32_t >( srcProperty.Get< uint16_t >( ) ) ) );
                             break;
                         case eFbxFloat:
-                            m.properties.emplace_back( s.PushValue( srcProperty.GetNameAsCStr( ) ),
-                                                       s.PushValue( srcProperty.Get< float >( ) ) );
+                            m.properties.emplace_back(
+                                s.PushValue( srcProperty.GetNameAsCStr( ) ),
+                                s.PushValue( srcProperty.Get< float >( ) ) );
                             break;
                         case eFbxDouble:
-                            m.properties.emplace_back( s.PushValue( srcProperty.GetNameAsCStr( ) ),
-                                                       s.PushValue( static_cast< float >( srcProperty.Get< double >( ) ) ) );
+                            m.properties.emplace_back(
+                                s.PushValue( srcProperty.GetNameAsCStr( ) ),
+                                s.PushValue( static_cast< float >( srcProperty.Get< double >( ) ) ) );
                             break;
                         case eFbxDouble2:
                             m.properties.emplace_back(
@@ -202,13 +207,28 @@ void ExportMaterials( FbxScene* pScene ) {
                             s.textures.emplace_back( (uint32_t) s.textures.size( ),
                                                      s.PushValue( pTexture->GetName( ) ),
                                                      s.PushValue( GetFileName( fullFilePath.c_str( ) ) ),
+                                                     s.PushValue( pTexture->GetTextureType( ).Buffer( ) ),
                                                      (apemodefb::EBlendModeFb) pTexture->GetBlendMode( ),
                                                      (apemodefb::EWrapModeFb) pTexture->GetWrapModeU( ),
                                                      (apemodefb::EWrapModeFb) pTexture->GetWrapModeV( ),
                                                      (float) pTexture->GetTranslationU( ),
                                                      (float) pTexture->GetTranslationV( ),
                                                      (float) pTexture->GetScaleU( ),
-                                                     (float) pTexture->GetScaleV( ) );
+                                                     (float) pTexture->GetScaleV( ),
+                                                     pTexture->GetCroppingBottom( ),
+                                                     pTexture->GetCroppingLeft( ),
+                                                     pTexture->GetCroppingRight( ),
+                                                     pTexture->GetCroppingTop( ),
+                                                     (float) pTexture->GetRotationU( ),
+                                                     (float) pTexture->GetRotationV( ),
+                                                     (float) pTexture->GetRotationW( ),
+                                                     pTexture->GetSwapUV( ),
+                                                     pTexture->GetWipeMode( ),
+                                                     pTexture->GetPremultiplyAlpha( ),
+                                                     (apemodefb::EAlphaSourceFb) pTexture->GetAlphaSource( ),
+                                                     (apemodefb::ETextureUseFb) pTexture->GetTextureUse( ),
+                                                     (apemodefb::EMappingTypeFb) pTexture->GetMappingType( ),
+                                                     (apemodefb::EPlanarMappingNormalFb) pTexture->GetPlanarMappingNormal( ) );
 
                             m.textures.emplace_back( s.PushValue( srcProperty.GetNameAsCStr( ) ),
                                                      s.textures.back( ).id( ) );
