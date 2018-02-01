@@ -301,7 +301,7 @@ table MaterialFb {
     id : uint;
     name_id : uint( key );
     properties : [MaterialPropFb];
-    textures : [MaterialPropFb];
+    texture_properties : [MaterialPropFb];
 }
 
 struct CameraFb {

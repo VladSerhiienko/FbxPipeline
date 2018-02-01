@@ -14,7 +14,7 @@ int main( int argc, char** argv ) {
                 ConvertScene( s.manager, s.scene, s.options[ "i" ].as< std::string >( ).c_str( ) );
             else {
                 ExportScene( s.scene );
-                s.Finish( );
+                s.Finalize( );
             }
         }
     }

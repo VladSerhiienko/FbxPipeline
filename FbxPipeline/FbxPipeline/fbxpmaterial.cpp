@@ -172,6 +172,11 @@ void ExportMaterials( FbxScene* pScene ) {
                         }
 
                         if ( fileUrl.empty( ) ) {
+                            if ( auto pFileTexture = FbxCast< FbxFileTexture >( pTexture ) )
+                                fileUrl = pFileTexture->GetRelativeFileName( );
+                        }
+
+                        if ( fileUrl.empty( ) ) {
                             fileUrl = pTexture->GetName( );
                         }
 

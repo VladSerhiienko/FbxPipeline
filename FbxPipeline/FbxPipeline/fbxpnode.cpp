@@ -156,7 +156,7 @@ void PreprocessAnimation( FbxScene* pScene ) {
     }
 }
 
-void ExportScene( FbxScene* scene ) {
+FBXPIPELINE_API void ExportScene( FbxScene* scene ) {
     auto& s = apemode::Get( );
 
     PreprocessMeshes( scene );

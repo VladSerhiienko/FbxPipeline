@@ -17,12 +17,12 @@ namespace apemode {
         return const_cast< TMutable& >( v );
     }
 
-    struct Skin {
+    struct FBXPIPELINE_API Skin {
         uint32_t                nameId = (uint64_t) 0;
         std::vector< uint64_t > linkFbxIds;
     };
 
-    struct ValueId {
+    struct FBXPIPELINE_API ValueId {
         uint32_t valueType : 8;
         uint32_t valueIndex : 24;
 
@@ -43,7 +43,7 @@ namespace apemode {
     static_assert( sizeof ValueId == sizeof uint32_t, "Not packed." );
     static_assert( apemodefb::EValueTypeFb_MAX < 255, "Does not fit into a byte." );
 
-    struct Mesh {
+    struct FBXPIPELINE_API Mesh {
         bool                                hasTexcoords = false;
         apemodefb::Vec3Fb                   positionMin;
         apemodefb::Vec3Fb                   positionMax;
@@ -62,7 +62,7 @@ namespace apemode {
         uint32_t                            skinId = -1;
     };
 
-    struct Node {
+    struct FBXPIPELINE_API Node {
         apemodefb::ECullingTypeFb cullingType = apemodefb::ECullingTypeFb_CullingOff;
         uint32_t                  id          = (uint32_t) -1;
         uint64_t                  fbxId       = (uint64_t) 0;
@@ -75,25 +75,25 @@ namespace apemode {
         std::vector< uint32_t >   curveIds;
     };
 
-    struct AnimStack {
+    struct FBXPIPELINE_API AnimStack {
         uint32_t id;
         uint32_t nameId;
     };
 
-    struct AnimLayer {
+    struct FBXPIPELINE_API AnimLayer {
         uint32_t id;
         uint32_t nameId;
         uint32_t animStackId;
     };
 
-    struct AnimCurveKey {
+    struct FBXPIPELINE_API AnimCurveKey {
         float                           time;
         float                           value;
         float                           tangents[ 2 ][ 2 ];
         apemodefb::EInterpolationModeFb interpolationMode;
     };
 
-    struct AnimCurve {
+    struct FBXPIPELINE_API AnimCurve {
         uint32_t                        id;
         uint32_t                        animStackId;
         uint32_t                        animLayerId;
@@ -104,7 +104,7 @@ namespace apemode {
         std::vector< AnimCurveKey >     keys;
     };
 
-    struct Material {
+    struct FBXPIPELINE_API Material {
         uint32_t                                 id;
         uint32_t                                 nameId;
         std::vector< apemodefb::MaterialPropFb > properties;
@@ -113,47 +113,41 @@ namespace apemode {
 
     using TupleUintUint = std::tuple< uint32_t, uint32_t >;
 
-    struct State;
-    State& Get( );
-    State& Main( int argc, char** argv );
+    struct FBXPIPELINE_API State {
+        FbxManager*                            manager = nullptr;
+        FbxScene*                              scene   = nullptr;
+        std::string                            executableName;
+        std::shared_ptr< spdlog::logger >      console;
+        flatbuffers::FlatBufferBuilder         builder;
+        cxxopts::Options                       options;
+        std::string                            fileName;
+        std::string                            folderPath;
+        std::vector< Node >                    nodes;
+        std::vector< Material >                materials;
+        std::map< uint64_t, uint32_t >         nodeDict;
+        std::map< uint64_t, uint32_t >         textureDict;
+        std::map< uint64_t, uint32_t >         materialDict;
+        std::map< uint64_t, uint32_t >         animStackDict;
+        std::map< uint64_t, uint32_t >         animLayerDict;
+        std::vector< apemodefb::TransformFb >  transforms;
+        std::vector< apemodefb::TextureFb >    textures;
+        std::vector< apemodefb::CameraFb >     cameras;
+        std::vector< apemodefb::LightFb >      lights;
+        std::vector< Mesh >                    meshes;
+        std::vector< AnimStack >               animStacks;
+        std::vector< AnimLayer >               animLayers;
+        std::vector< AnimCurve >               animCurves;
+        std::vector< Skin >                    skins;
+        std::vector< std::string >             searchLocations;
+        std::set< std::string >                embedQueue;
+        std::set< std::string >                missingQueue;
+        std::vector< bool >                    boolValues;
+        std::vector< int32_t >                 intValues;
+        std::vector< float >                   floatValues;
+        std::vector< std::string >             stringValues;
 
-    struct ExtensionBase {
-        virtual void run( State& ) {
-        }
-    };
+        std::vector< std::function< void( apemode::State*, std::string ) > > extensions;
 
-    struct State {
-        FbxManager*                           manager = nullptr;
-        FbxScene*                             scene   = nullptr;
-        std::string                           executableName;
-        std::shared_ptr< spdlog::logger >     console;
-        flatbuffers::FlatBufferBuilder        builder;
-        cxxopts::Options                      options;
-        std::string                           fileName;
-        std::string                           folderPath;
-        std::vector< Node >                   nodes;
-        std::vector< Material >               materials;
-        std::map< uint64_t, uint32_t >        nodeDict;
-        std::map< uint64_t, uint32_t >        textureDict;
-        std::map< uint64_t, uint32_t >        materialDict;
-        std::map< uint64_t, uint32_t >        animStackDict;
-        std::map< uint64_t, uint32_t >        animLayerDict;
-        std::vector< apemodefb::TransformFb > transforms;
-        std::vector< apemodefb::TextureFb >   textures;
-        std::vector< apemodefb::CameraFb >    cameras;
-        std::vector< apemodefb::LightFb >     lights;
-        std::vector< Mesh >                   meshes;
-        std::vector< AnimStack >              animStacks;
-        std::vector< AnimLayer >              animLayers;
-        std::vector< AnimCurve >              animCurves;
-        std::vector< Skin >                   skins;
-        std::vector< std::string >            searchLocations;
-        std::set< std::string >               embedQueue;
-        std::set< std::string >               missingQueue;
-        std::vector< bool >                   boolValues;
-        std::vector< int32_t >                intValues;
-        std::vector< float >                  floatValues;
-        std::vector< std::string >            stringValues;
         float                                 resampleFPS            = 24.0f;
         bool                                  reduceKeys             = false;
         bool                                  reduceConstKeys        = false;
@@ -166,7 +160,7 @@ namespace apemode {
         bool Initialize( );
         void Release( );
         bool Load( );
-        bool Finish( );
+        bool Finalize( );
 
         ValueId PushValue( const char * value );
         ValueId PushValue( const std::string& value );
@@ -177,7 +171,7 @@ namespace apemode {
         ValueId PushValue( const float x, const float y, const float z, const float w );
         ValueId PushValue( const bool value );
 
-        friend State& Get( );
-        friend State& Main( int argc, char** argv );
+        FBXPIPELINE_API friend State& Get( );
+        FBXPIPELINE_API friend State& Main( int argc, char** argv );
     };
 }

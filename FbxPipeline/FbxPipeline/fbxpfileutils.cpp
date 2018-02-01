@@ -2,8 +2,7 @@
 #include <fbxpstate.h>
 
 #define _FbxPipeline_UnsafeFileReadWrite
-
-#if defined(_FbxPipeline_UnsafeFileReadWrite)
+#if defined( _FbxPipeline_UnsafeFileReadWrite )
 #include <stdio.h>
 #endif
 
@@ -20,6 +19,10 @@ namespace std {
 
 std::string CurrentDirectory( ) {
     return std::filesystem::current_path( ).string( );
+}
+
+std::string FileExtension( const char* path ) {
+    return std::filesystem::path( path ).extension( ).string( );
 }
 
 bool MakeDirectory( const char* directory ) {
@@ -99,8 +102,8 @@ bool WriteFile( const char* srcFilePath, const void* data, size_t dataSize ) {
     return false;
 }
 
-std::string ReadTxtFile( const char* srcPath ) {
-    const std::string srcFilePath = FindFile( srcPath );
+std::string ReadTxtFile( const char* srcPath, bool findFile ) {
+    const std::string srcFilePath = findFile ? FindFile( srcPath ) : srcPath;
 
 #if defined(_FbxPipeline_UnsafeFileReadWrite)
     std::string fileBuffer;
@@ -131,8 +134,83 @@ std::string ReadTxtFile( const char* srcPath ) {
 #endif
 }
 
-bool ReadBinFile( const char* srcPath, std::vector< uint8_t >& fileBuffer ) {
-    const std::string srcFilePath = FindFile( srcPath );
+bool ReadTxtFile( const char* srcPath, std::string& fileBuffer, bool findFile ) {
+    const std::string srcFilePath = findFile ? FindFile( srcPath ) : srcPath;
+
+#if defined( _FbxPipeline_UnsafeFileReadWrite )
+
+    if ( FILE* srcFile = fopen( srcFilePath.c_str( ), "r" ) ) {
+        fseek( srcFile, 0, SEEK_END );
+        size_t srcImgFileSize = ftell( srcFile );
+        fseek( srcFile, 0, SEEK_SET );
+        fileBuffer.resize( srcImgFileSize );
+        fread( &fileBuffer[ 0 ], 1, srcImgFileSize, srcFile );
+        fclose( srcFile );
+        srcFile = nullptr;
+        return true;
+    }
+
+#else
+
+    /* Even though this code is safer and nicer, it's super slow. */
+
+    if ( false == srcFilePath.empty( ) ) {
+        std::ifstream filestream( srcFilePath, std::ios::binary );
+
+        if ( filestream.good( ) ) {
+            fileBuffer = std::string( std::istreambuf_iterator< char >( filestream ),
+                                      std::istreambuf_iterator< char >( ) );
+            return true;
+        }
+    }
+
+#endif
+
+    assert( false && "Failed to open file." );
+    fileBuffer.clear( );
+    return false;
+}
+
+std::vector< uint8_t > ReadBinFile( const char* srcPath , bool findFile ) {
+    const std::string srcFilePath = findFile ? FindFile( srcPath ) : srcPath;
+
+#if defined( _FbxPipeline_UnsafeFileReadWrite )
+
+    std::vector< uint8_t > fileBuffer;
+    if ( FILE* srcFile = fopen( srcFilePath.c_str( ), "rb" ) ) {
+        fseek( srcFile, 0, SEEK_END );
+        size_t srcImgFileSize = ftell( srcFile );
+        fseek( srcFile, 0, SEEK_SET );
+        fileBuffer.resize( srcImgFileSize );
+        fread( fileBuffer.data( ), 1, srcImgFileSize, srcFile );
+        fclose( srcFile );
+        srcFile = nullptr;
+    }
+
+    return fileBuffer;
+
+#else
+
+    /* Even though this code is safer and nicer, it's super slow. */
+
+    if ( false == srcFilePath.empty( ) ) {
+        std::ifstream filestream( srcFilePath, std::ios::binary );
+
+        if ( filestream.good( ) )
+            return std::vector< uint8_t >( std::istreambuf_iterator< char >( filestream ),
+                                           std::istreambuf_iterator< char >( ) );
+    }
+
+    assert( false && "Failed to open file." );
+    return std::vector< uint8_t >( );
+
+#endif
+}
+
+bool ReadBinFile( const char* srcPath, std::vector< uint8_t >& fileBuffer, bool findFile ) {
+    const std::string srcFilePath = findFile ? FindFile( srcPath ) : srcPath;
+
+#if defined( _FbxPipeline_UnsafeFileReadWrite )
 
     if ( FILE* srcFile = fopen( srcFilePath.c_str( ), "rb" ) ) {
         fseek( srcFile, 0, SEEK_END );
@@ -145,6 +223,23 @@ bool ReadBinFile( const char* srcPath, std::vector< uint8_t >& fileBuffer ) {
         return true;
     }
 
+#else
+
+    /* Even though this code is safer and nicer, it's super slow. */
+
+    if ( false == srcFilePath.empty( ) ) {
+        std::ifstream filestream( srcFilePath, std::ios::binary );
+
+        if ( filestream.good( ) ) {
+            fileBuffer = std::vector< uint8_t >( std::istreambuf_iterator< char >( filestream ),
+                                                 std::istreambuf_iterator< char >( ) );
+            return true;
+        }
+    }
+
+#endif
+
+    assert( false && "Failed to open file." );
     fileBuffer.clear( );
     return false;
 }
@@ -177,43 +272,13 @@ std::string ToPrettySizeString( size_t size ) {
     return oss.str( );
 }
 
-std::vector< uint8_t > ReadBinFile( const char* srcPath ) {
-    const std::string srcFilePath = FindFile( srcPath );
-
-#if defined(_FbxPipeline_UnsafeFileReadWrite)
-    std::vector< uint8_t > fileBuffer;
-    if ( FILE* srcFile = fopen( srcFilePath.c_str( ), "rb" ) ) {
-        fseek( srcFile, 0, SEEK_END );
-        size_t srcImgFileSize = ftell( srcFile );
-        fseek( srcFile, 0, SEEK_SET );
-        fileBuffer.resize( srcImgFileSize );
-        fread( fileBuffer.data( ), 1, srcImgFileSize, srcFile );
-        fclose( srcFile );
-        srcFile = nullptr;
-    }
-
-    return fileBuffer;
-#else
-    /* Even though this code is safer and nicer, it's super slow. */
-
-    if ( false == srcFilePath.empty( ) ) {
-        std::ifstream filestream( srcFilePath, std::ios::binary );
-
-        if ( filestream.good( ) )
-            return std::vector< uint8_t >( std::istreambuf_iterator< char >( filestream ),
-                                           std::istreambuf_iterator< char >( ) );
-    }
-
-    assert( false && "Failed to open file." );
-    return std::vector< uint8_t >( );
-#endif
-}
-
 void InitializeSeachLocations( ) {
     auto& s = apemode::Get( );
-    auto searchLocations = s.options[ "e" ].as< std::vector< std::string > >( );
+    auto searchLocations = s.options[ "search-location" ].as< std::vector< std::string > >( );
 
-    std::string inputFile = s.options[ "i" ].as< std::string >( );
+    searchLocations.push_back( CurrentDirectory( ) );
+
+    std::string inputFile = s.options[ "input-file" ].as< std::string >( );
     ReplaceSlashes( inputFile );
 
     const std::string fbmDirectory = ReplaceSlashes( ReplaceExtension( inputFile.c_str( ), "fbm" ) );
@@ -278,7 +343,7 @@ void InitializeSeachLocations( ) {
             s.console->info( "\t> {}", searchLocation );
         }
 
-        const auto& embedFilePatterns = s.options[ "m" ].as< std::vector< std::string > >( );
+        const auto& embedFilePatterns = s.options[ "embed-file" ].as< std::vector< std::string > >( );
         for ( auto& embedFilePattern : embedFilePatterns ) {
             std::regex embedFilePatternRegex( embedFilePattern );
             for ( auto& searchLocation : s.searchLocations ) {

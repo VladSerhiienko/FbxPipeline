@@ -100,8 +100,10 @@ apemode::State::State( ) : options( GetExecutable( ) ) {
     options.add_options( "main" )( "s,split-meshes-per-material", "Split meshes per material", cxxopts::value< bool >( ) );
     options.add_options( "main" )( "t,optimize-meshes", "Optimize meshes", cxxopts::value< bool >( ) );
     options.add_options( "main" )( "e,search-location", "Add search location", cxxopts::value< std::vector< std::string > >( ) );
-    options.add_options( "main" )( "m,embed-file", "Embed file", cxxopts::value< std::vector< std::string > >( ) );
     options.add_options( "main" )( "l,log-file", "Log file (relative or absolute path)", cxxopts::value< std::string >( ) );
+    options.add_options( "main" )( "m,embed-file", "Embed file", cxxopts::value< std::vector< std::string > >( ) );
+    options.add_options( "main" )( "script-file", "Script file", cxxopts::value< std::vector< std::string > >( ) );
+    options.add_options( "main" )( "script-input", "Script input string", cxxopts::value< std::vector< std::string > >( ) );
     options.add_options( "main" )( "log-level", "Log level: 0 (most detailed) - 6 (off)", cxxopts::value< int >( ) );
     options.add_options( "main" )( "sync-keys", "Synchronize curve keys for properties", cxxopts::value< bool >( ) );
     options.add_options( "main" )( "reduce-keys", "Reduce the keys in the animation curves.", cxxopts::value< bool >( ) );
@@ -140,9 +142,14 @@ bool apemode::State::Load( ) {
 }
 
 std::string ToPrettySizeString( size_t size );
-bool ReadBinFile( const char* srcPath, std::vector< uint8_t >& fileBuffer );
+bool ReadBinFile( const char* srcPath, std::vector< uint8_t >& fileBuffer, bool findFile );
 
-bool apemode::State::Finish( ) {
+
+void RunExtensionsOnFinalize( );
+
+bool apemode::State::Finalize( ) {
+    RunExtensionsOnFinalize( );
+
     console->info( "Serialization" );
 
     //
@@ -287,7 +294,7 @@ bool apemode::State::Finish( ) {
         materialBuilder.add_id( material.id );
         materialBuilder.add_name_id( material.nameId );
         materialBuilder.add_properties( propertiesOffset );
-        materialBuilder.add_textures( texturesOffset );
+        materialBuilder.add_texture_properties( texturesOffset );
         materialOffsets.push_back( materialBuilder.Finish( ) );
     }
 
@@ -381,7 +388,7 @@ bool apemode::State::Finish( ) {
     fileOffsets.reserve( embedQueue.size( ) );
     for ( auto& embedded : embedQueue ) {
         if ( false == embedded.empty( ) ) {
-            if ( ReadBinFile( embedded.c_str( ), tempFileBuffer ) ) {
+            if ( ReadBinFile( embedded.c_str( ), tempFileBuffer, true ) ) {
                 console->info( "+ {} ({}, {}) ", ToPrettySizeString( tempFileBuffer.size( ) ), tempFileBuffer.size( ), embedded );
                 fileOffsets.push_back( apemodefb::CreateFileFbDirect( builder, (uint32_t) fileOffsets.size( ), 0, &tempFileBuffer ) );
             }
@@ -426,6 +433,7 @@ bool apemode::State::Finish( ) {
     //
 
     console->info( "> Verification" );
+
     flatbuffers::Verifier v( builder.GetBufferPointer( ), builder.GetSize( ) );
     if ( apemodefb::VerifySceneFbBuffer( v ) )
         console->info( "< Succeeded" );

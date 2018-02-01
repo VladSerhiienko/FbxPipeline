@@ -1,5 +1,11 @@
 #pragma once
 
+#if defined( FBXPIPELINE_EXPORT )
+#define FBXPIPELINE_API __declspec( dllexport )
+#else
+#define FBXPIPELINE_API __declspec( dllimport )
+#endif // FBXPIPELINE_EXPORT
+
 //
 // STL
 //

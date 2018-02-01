@@ -9,11 +9,24 @@ message(STATUS "CMAKE_SYSTEM_PROCESSOR = ${CMAKE_SYSTEM_PROCESSOR}")
 message(STATUS "CMAKE_SYSTEM = ${CMAKE_SYSTEM}")
 message(STATUS "CMAKE_SOURCE_DIR = ${CMAKE_SOURCE_DIR}")
 message(STATUS "CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}")
-message(STATUS "VK_SDK_PATH = $ENV{VK_SDK_PATH}")
 
 set(BUILD_FOLDER_SUFFIX "build_${CMAKE_SYSTEM_NAME}_${CMAKE_SYSTEM_PROCESSOR}")
 string(TOLOWER  ${BUILD_FOLDER_SUFFIX} BUILD_FOLDER_SUFFIX)
 message(STATUS "BUILD_FOLDER_SUFFIX = ${BUILD_FOLDER_SUFFIX}")
+
+if (WIN32)
+    set(
+        default_cmake_args
+        -G
+        "Visual Studio 15 2017 Win64"
+        -B${BUILD_FOLDER_SUFFIX} "-H."
+    )
+else()
+    set(
+        default_cmake_args
+        -B${BUILD_FOLDER_SUFFIX} -H.
+    )
+endif()
 
 ExternalProject_Add(
     mathfu
@@ -73,7 +86,7 @@ ExternalProject_Add(
     UPDATE_COMMAND ""
     PATCH_COMMAND ""
     SOURCE_DIR "${CMAKE_SOURCE_DIR}/dependencies/flatbuffers"
-    CMAKE_ARGS -B${BUILD_FOLDER_SUFFIX} -H.
+    CMAKE_ARGS ${default_cmake_args}
     TEST_COMMAND ""
     INSTALL_COMMAND ""
 )
@@ -92,7 +105,7 @@ ExternalProject_Add(
     UPDATE_COMMAND ""
     PATCH_COMMAND ""
     SOURCE_DIR "${CMAKE_SOURCE_DIR}/dependencies/zlib"
-    CMAKE_ARGS -B${BUILD_FOLDER_SUFFIX} -H.
+    CMAKE_ARGS ${default_cmake_args}
     TEST_COMMAND ""
     INSTALL_COMMAND ""
 )
@@ -111,9 +124,9 @@ ExternalProject_Add(
     UPDATE_COMMAND ""
     PATCH_COMMAND ""
     SOURCE_DIR "${CMAKE_SOURCE_DIR}/dependencies/rapidjson"
-    CMAKE_ARGS -B${BUILD_FOLDER_SUFFIX} -H. -DRAPIDJSON_BUILD_DOC=OFF
-                                            -DRAPIDJSON_BUILD_TESTS=OFF
-                                            -DRAPIDJSON_BUILD_EXAMPLES=OFF
+    CMAKE_ARGS ${default_cmake_args} -DRAPIDJSON_BUILD_DOC=OFF
+                                     -DRAPIDJSON_BUILD_TESTS=OFF
+                                     -DRAPIDJSON_BUILD_EXAMPLES=OFF
     TEST_COMMAND ""
     INSTALL_COMMAND ""
 )
@@ -125,23 +138,6 @@ set(rapidjson_binary_dir ${BINARY_DIR})
 message(STATUS "rapidjson_source_dir = ${rapidjson_source_dir}")
 message(STATUS "rapidjson_binary_dir = ${rapidjson_binary_dir}")
 
-
-if (WIN32)
-    set(
-        pybind11_cmake_args
-        -G
-        "Visual Studio 15 2017 Win64"
-        -B${BUILD_FOLDER_SUFFIX} "-H."
-        -DPYBIND11_TEST=OFF
-    )
-else()
-    set(
-        pybind11_cmake_args
-        -B${BUILD_FOLDER_SUFFIX} -H.
-        -DPYBIND11_TEST=OFF
-    )
-endif()
-
 ExternalProject_Add(
     pybind11
     GIT_REPOSITORY "git@github.com:pybind/pybind11.git"
@@ -149,7 +145,7 @@ ExternalProject_Add(
     UPDATE_COMMAND ""
     PATCH_COMMAND ""
     SOURCE_DIR "${CMAKE_SOURCE_DIR}/dependencies/pybind11"
-    CMAKE_ARGS ${pybind11_cmake_args}
+    CMAKE_ARGS ${default_cmake_args} -DPYBIND11_TEST=OFF
     TEST_COMMAND ""
     INSTALL_COMMAND ""
 )
@@ -170,13 +166,23 @@ if (WIN32)
 endif()
 
 find_package(PythonLibs REQUIRED)
+if ( PYTHONLIBS_FOUND )
+    get_filename_component(PYTHON_LIBRARY_DIR ${PYTHON_LIBRARY} DIRECTORY)
+    get_filename_component(PYTHON_DIR ${PYTHON_LIBRARY_DIR} DIRECTORY)
+    message(STATUS "PYTHONLIBS_VERSION_STRING = ${PYTHONLIBS_VERSION_STRING}")
+    message(STATUS "PYTHON_LIBRARY = ${PYTHON_LIBRARY}")
+    message(STATUS "PYTHON_LIBRARY_DIR = ${PYTHON_LIBRARY_DIR}")
+    message(STATUS "PYTHON_DIR = ${PYTHON_DIR}")
+endif ()
 
 if (WIN32)
+    set(CONFIGURATION_SUFFIX "/$(Configuration)")
     set(FBX_SDK_INCLUDE_DIR "C:/Program Files/Autodesk/FBX/FBX SDK/2018.1.1/include" CACHE PATH "FBX SDK Include Directory")
     set(FBX_SDK_LIBRARY_DEBUG "C:/Program Files/Autodesk/FBX/FBX SDK/2018.1.1/lib/vs2015/x64/debug/libfbxsdk-md.lib" CACHE PATH "FBX SDK Library")
     set(FBX_SDK_LIBRARY_RELEASE "C:/Program Files/Autodesk/FBX/FBX SDK/2018.1.1/lib/vs2015/x64/release/libfbxsdk-md.lib" CACHE PATH "FBX SDK Library")
 else()
     add_definitions("-g")
+    set(CONFIGURATION_SUFFIX "")
     set(FBX_SDK_INCLUDE_DIR "~/FbxSdk/include" CACHE PATH "FBX SDK Include Directory")
     set(FBX_SDK_LIBRARY_DIR "~/FbxSdk/lib" CACHE PATH "FBX SDK Library Directory")
     find_library( FBX_SDK_LIBRARY_RELEASE fbxsdk HINTS ${FBX_SDK_LIBRARY_DIR}/gcc4/x64/release ${FBX_SDK_LIBRARY_DIR}/clang/release )
@@ -209,8 +215,9 @@ else()
     )
 endif()
 
-add_executable(
+add_library(
     FbxPipeline
+    SHARED
     ${CMAKE_SOURCE_DIR}/FbxPipeline/generated/scene_generated.h
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpnorm.h
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpstate.h
@@ -228,7 +235,52 @@ add_executable(
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpstate.cpp
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxptransform.cpp
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpextensions.cpp
-    ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/main.cpp
+)
+
+file(
+    GLOB 
+    python_dlls_pdbs
+    ${PYTHON_DIR}/*.dll
+    ${PYTHON_DIR}/*.pdb
+)
+
+if( PYTHONLIBS_FOUND )
+    message(STATUS "Adding python dynamic lib and debug files to output directory")
+    foreach( python_dll_pdb ${python_dlls_pdbs} )
+        message(STATUS "Adding ${python_dll_pdb} to output directory")
+        add_custom_command(
+            TARGET
+            FbxPipeline
+            POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${python_dll_pdb}
+            ${CMAKE_BINARY_DIR}${CONFIGURATION_SUFFIX}
+        )
+    endforeach()
+endif()
+
+file(
+    GLOB 
+    fbxpipeline_scripts
+    ${CMAKE_SOURCE_DIR}/FbxPipeline/scripts/*
+)
+
+foreach( fbxpipeline_script ${fbxpipeline_scripts} )
+    message(STATUS "Adding ${fbxpipeline_script} to script directory")
+    add_custom_command(
+        TARGET
+        FbxPipeline
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${fbxpipeline_script}
+        ${CMAKE_BINARY_DIR}${CONFIGURATION_SUFFIX}
+    )
+endforeach()
+
+target_compile_definitions(
+    FbxPipeline
+    PRIVATE
+    FBXPIPELINE_EXPORT=1
 )
 
 add_dependencies(
@@ -259,6 +311,12 @@ target_include_directories(
     ${FBX_SDK_INCLUDE_DIR}
 )
 
+set_target_properties(
+    FbxPipeline
+    PROPERTIES
+    SUFFIX ".pyd"
+)
+
 if (WIN32)
     set(
         third_party_libs
@@ -267,7 +325,6 @@ if (WIN32)
         optimized ${zlib_binary_dir}/Release/zlibstatic.lib
         optimized ${flatbuffers_binary_dir}/Release/flatbuffers.lib
         ${PYTHON_LIBRARY}
-        # "C:/Python27amd64/libs/python27.lib"
         winmm.lib
         imm32.lib
         version.lib
@@ -284,9 +341,46 @@ else()
     )
 endif()
 
-target_link_libraries( # Specifies the target library.
+target_link_libraries(
     FbxPipeline
     debug ${FBX_SDK_LIBRARY_DEBUG}
     optimized ${FBX_SDK_LIBRARY_RELEASE}
     ${third_party_libs}
 )
+
+add_executable(
+    FbxPipelineLauncher
+    ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/main.cpp
+)
+
+target_include_directories(
+    FbxPipelineLauncher
+    PUBLIC
+    ${PYTHON_INCLUDE_DIR}
+    ${CMAKE_SOURCE_DIR}/FbxPipeline/generated
+    ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline
+    ${CMAKE_SOURCE_DIR}/dependencies/cxxopts/include
+    ${CMAKE_SOURCE_DIR}/dependencies/mathfu/include
+    ${CMAKE_SOURCE_DIR}/dependencies/mathfu/dependencies/vectorial/include
+    ${CMAKE_SOURCE_DIR}/dependencies/spdlog/include
+    ${flatbuffers_source_dir}/include
+    ${flatbuffers_source_dir}/grpc
+    ${rapidjson_source_dir}/include
+    ${pybind11_source_dir}/include
+    ${FBX_SDK_INCLUDE_DIR}
+)
+
+target_link_libraries(
+    FbxPipelineLauncher
+    FbxPipeline
+)
+
+set_target_properties(
+    FbxPipelineLauncher
+    PROPERTIES
+    VS_DEBUGGER_WORKING_DIRECTORY
+    "$(OutDir)"
+)
+
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+set(PREDEFINED_TARGETS_FOLDER "CustomTargets")
