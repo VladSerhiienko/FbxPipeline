@@ -254,7 +254,7 @@ paket-files/
 /ThirdParty/draco_build_v140x86
 *.sublime-workspace
 /FbxPipeline/lib
-/FbxPipeline/generated
+# /FbxPipeline/generated
 /FbxPipeline/obj
 /FbxPipeline/shaders/nuklear_texture/include
 /FbxPipeline/shaders/nuklear_texture/runtime
