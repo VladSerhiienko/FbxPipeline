@@ -36,7 +36,6 @@ void RunExtensionsOnFinalize( ) {
         py::scoped_interpreter guard{};
 
         // Load FbxPipeline module from .pyd in current directory.
-        // TODO: _d suffix is not needed for debug builds, isn't it?
         s.console->info( "Importing python FbxPipeline module ..." );
         py::module thisModule = py::module::import( "FbxPipeline" );
 

@@ -56,7 +56,6 @@ std::string ReplaceExtension( const char* path, const char* extension ) {
 
 std::string RealPath( std::string path ) {
     return path;
-    // return std::filesystem::canonical( path ).string( );
 }
 
 std::string GetParentPath( const char* path ) {

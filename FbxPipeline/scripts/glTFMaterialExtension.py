@@ -99,13 +99,31 @@ def gltf_material_json_to_material(state, gltf_material_json, gltf_texture_index
     material = FbxPipeline.Material()
     material.name_id = state.push_string(gltf_material_json["name"])
 
+    FbxPipeline.log_info("gltf material: {}".format(gltf_material_json["name"]))
+
     if "doubleSided" in gltf_material_json:
+        FbxPipeline.log_info("             : doubleSided")
         materialProperty = FbxPipeline.MaterialPropFb()
         materialProperty.name_id = state.push_string("doubleSided")
         materialProperty.value_id = state.push_bool(gltf_material_json["doubleSided"])
         material.properties.push_back(materialProperty)
+
+    if "alphaCutoff" in gltf_material_json:
+        FbxPipeline.log_info("             : alphaCutoff")
+        materialProperty = FbxPipeline.MaterialPropFb()
+        materialProperty.name_id = state.push_string("alphaCutoff")
+        materialProperty.value_id = state.push_float(gltf_material_json["alphaCutoff"])
+        material.properties.push_back(materialProperty)
+
+    if "alphaMode" in gltf_material_json:
+        FbxPipeline.log_info("             : alphaMode")
+        materialProperty = FbxPipeline.MaterialPropFb()
+        materialProperty.name_id = state.push_string("alphaMode")
+        materialProperty.value_id = state.push_string(gltf_material_json["alphaMode"])
+        material.properties.push_back(materialProperty)
     
     if "emissiveFactor" in gltf_material_json:
+        FbxPipeline.log_info("             : emissiveFactor")
         materialProperty = FbxPipeline.MaterialPropFb()
         materialProperty.name_id = state.push_string("emissiveFactor")
         materialProperty.value_id = state.push_float3(gltf_material_json["emissiveFactor"][0],
@@ -114,6 +132,7 @@ def gltf_material_json_to_material(state, gltf_material_json, gltf_texture_index
         material.properties.push_back(materialProperty)
 
     if "normalTexture" in gltf_material_json:
+        FbxPipeline.log_info("             : normalTexture")
         materialProperty = FbxPipeline.MaterialPropFb()
         materialProperty.name_id = state.push_string("normalTexture")
         materialProperty.value_id = gltf_texture_index_to_texture_index[gltf_material_json["normalTexture"]["index"]]
@@ -123,6 +142,7 @@ def gltf_material_json_to_material(state, gltf_material_json, gltf_texture_index
         pbr_metallic_roughness_json = gltf_material_json["pbrMetallicRoughness"]
 
         if "baseColorFactor" in pbr_metallic_roughness_json:
+            FbxPipeline.log_info("             : baseColorFactor")
             materialProperty = FbxPipeline.MaterialPropFb()
             materialProperty.name_id = state.push_string("baseColorFactor")
             materialProperty.value_id = state.push_float4(pbr_metallic_roughness_json["baseColorFactor"][0],
@@ -132,28 +152,77 @@ def gltf_material_json_to_material(state, gltf_material_json, gltf_texture_index
             material.properties.push_back(materialProperty)
         
         if "metallicFactor" in pbr_metallic_roughness_json:
+            FbxPipeline.log_info("             : metallicFactor")
             materialProperty = FbxPipeline.MaterialPropFb()
             materialProperty.name_id = state.push_string("metallicFactor")
             materialProperty.value_id = state.push_float(pbr_metallic_roughness_json["metallicFactor"])
             material.properties.push_back(materialProperty)
 
         if "baseColorTexture" in pbr_metallic_roughness_json:
+            FbxPipeline.log_info("             : baseColorTexture")
             materialProperty = FbxPipeline.MaterialPropFb()
             materialProperty.name_id = state.push_string("baseColorTexture")
             materialProperty.value_id = gltf_texture_index_to_texture_index[pbr_metallic_roughness_json["baseColorTexture"]["index"]]
             material.texture_properties.push_back(materialProperty)
 
         if "metallicRoughnessTexture" in pbr_metallic_roughness_json:
+            FbxPipeline.log_info("             : metallicRoughnessTexture")
             materialProperty = FbxPipeline.MaterialPropFb()
             materialProperty.name_id = state.push_string("metallicRoughnessTexture")
             materialProperty.value_id = gltf_texture_index_to_texture_index[pbr_metallic_roughness_json["metallicRoughnessTexture"]["index"]]
             material.texture_properties.push_back(materialProperty)
         
         if "roughnessFactor" in pbr_metallic_roughness_json:
+            FbxPipeline.log_info("             : roughnessFactor")
             materialProperty = FbxPipeline.MaterialPropFb()
             materialProperty.name_id = state.push_string("roughnessFactor")
             materialProperty.value_id = state.push_float(pbr_metallic_roughness_json["roughnessFactor"])
             material.properties.push_back(materialProperty)
+
+    if "extensions" in gltf_material_json:
+        gltf_material_extensions_json = gltf_material_json["extensions"]
+        if "KHR_materials_pbrSpecularGlossiness" in  gltf_material_extensions_json:
+            pbr_metallic_roughness_json = gltf_material_extensions_json["KHR_materials_pbrSpecularGlossiness"]
+
+            if "diffuseFactor" in pbr_metallic_roughness_json:
+                FbxPipeline.log_info("             : diffuseFactor")
+                materialProperty = FbxPipeline.MaterialPropFb()
+                materialProperty.name_id = state.push_string("diffuseFactor")
+                materialProperty.value_id = state.push_float4(pbr_metallic_roughness_json["diffuseFactor"][0],
+                                                              pbr_metallic_roughness_json["diffuseFactor"][1],
+                                                              pbr_metallic_roughness_json["diffuseFactor"][2],
+                                                              pbr_metallic_roughness_json["diffuseFactor"][3])
+                material.properties.push_back(materialProperty)
+
+            if "diffuseTexture" in pbr_metallic_roughness_json:
+                FbxPipeline.log_info("             : diffuseTexture")
+                materialProperty = FbxPipeline.MaterialPropFb()
+                materialProperty.name_id = state.push_string("diffuseTexture")
+                materialProperty.value_id = gltf_texture_index_to_texture_index[pbr_metallic_roughness_json["diffuseTexture"]["index"]]
+                material.texture_properties.push_back(materialProperty)
+
+            if "specularFactor" in pbr_metallic_roughness_json:
+                FbxPipeline.log_info("             : specularFactor")
+                materialProperty = FbxPipeline.MaterialPropFb()
+                materialProperty.name_id = state.push_string("specularFactor")
+                materialProperty.value_id = state.push_float3(pbr_metallic_roughness_json["specularFactor"][0],
+                                                              pbr_metallic_roughness_json["specularFactor"][1],
+                                                              pbr_metallic_roughness_json["specularFactor"][2])
+                material.properties.push_back(materialProperty)
+
+            if "glossinessFactor" in pbr_metallic_roughness_json:
+                FbxPipeline.log_info("             : glossinessFactor")
+                materialProperty = FbxPipeline.MaterialPropFb()
+                materialProperty.name_id = state.push_string("glossinessFactor")
+                materialProperty.value_id = state.push_float(pbr_metallic_roughness_json["glossinessFactor"])
+                material.properties.push_back(materialProperty)
+
+            if "specularGlossinessTexture" in pbr_metallic_roughness_json:
+                FbxPipeline.log_info("             : specularGlossinessTexture")
+                materialProperty = FbxPipeline.MaterialPropFb()
+                materialProperty.name_id = state.push_string("specularGlossinessTexture")
+                materialProperty.value_id = gltf_texture_index_to_texture_index[pbr_metallic_roughness_json["specularGlossinessTexture"]["index"]]
+                material.texture_properties.push_back(materialProperty)
 
     return material
 
@@ -182,7 +251,7 @@ def gltf_export_materials(state, gltf_path):
             if material_index != -1:
                 overrided_materials.append(state.materials[material_index])
                 material = gltf_material_json_to_material(state, gltf_material_json, gltf_texture_index_to_texture_index)
-                material.id = material_index
+                # material.id = material_index
                 state.materials[material_index] = material
 
         for overrided_material in overrided_materials:
