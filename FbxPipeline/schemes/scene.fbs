@@ -32,12 +32,12 @@ enum EAlphaSourceFb : uint {
 }
 
 enum ETextureUseFb : uint {
-    eStandard,
-    eShadowMap,
-    eLightMap,
-    eSphericalReflectionMap,
-    eSphereReflectionMap,
-    eBumpNormalMap
+    Standard,
+    ShadowMap,
+    LightMap,
+    SphericalReflectionMap,
+    SphereReflectionMap,
+    BumpNormalMap
 }
 
 enum EMappingTypeFb : uint {

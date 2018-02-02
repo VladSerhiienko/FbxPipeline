@@ -218,36 +218,36 @@ inline const char *EnumNameEAlphaSourceFb(EAlphaSourceFb e) {
 }
 
 enum ETextureUseFb {
-  ETextureUseFb_eStandard = 0,
-  ETextureUseFb_eShadowMap = 1,
-  ETextureUseFb_eLightMap = 2,
-  ETextureUseFb_eSphericalReflectionMap = 3,
-  ETextureUseFb_eSphereReflectionMap = 4,
-  ETextureUseFb_eBumpNormalMap = 5,
-  ETextureUseFb_MIN = ETextureUseFb_eStandard,
-  ETextureUseFb_MAX = ETextureUseFb_eBumpNormalMap
+  ETextureUseFb_Standard = 0,
+  ETextureUseFb_ShadowMap = 1,
+  ETextureUseFb_LightMap = 2,
+  ETextureUseFb_SphericalReflectionMap = 3,
+  ETextureUseFb_SphereReflectionMap = 4,
+  ETextureUseFb_BumpNormalMap = 5,
+  ETextureUseFb_MIN = ETextureUseFb_Standard,
+  ETextureUseFb_MAX = ETextureUseFb_BumpNormalMap
 };
 
 inline ETextureUseFb (&EnumValuesETextureUseFb())[6] {
   static ETextureUseFb values[] = {
-    ETextureUseFb_eStandard,
-    ETextureUseFb_eShadowMap,
-    ETextureUseFb_eLightMap,
-    ETextureUseFb_eSphericalReflectionMap,
-    ETextureUseFb_eSphereReflectionMap,
-    ETextureUseFb_eBumpNormalMap
+    ETextureUseFb_Standard,
+    ETextureUseFb_ShadowMap,
+    ETextureUseFb_LightMap,
+    ETextureUseFb_SphericalReflectionMap,
+    ETextureUseFb_SphereReflectionMap,
+    ETextureUseFb_BumpNormalMap
   };
   return values;
 }
 
 inline const char **EnumNamesETextureUseFb() {
   static const char *names[] = {
-    "eStandard",
-    "eShadowMap",
-    "eLightMap",
-    "eSphericalReflectionMap",
-    "eSphereReflectionMap",
-    "eBumpNormalMap",
+    "Standard",
+    "ShadowMap",
+    "LightMap",
+    "SphericalReflectionMap",
+    "SphereReflectionMap",
+    "BumpNormalMap",
     nullptr
   };
   return names;

@@ -22,22 +22,22 @@ namespace apemode {
         std::vector< uint64_t > linkFbxIds;
     };
 
+    /**
+     * ValueId class contains value type (string, float, ...) and value index (0, 1, 2, ...).
+     * Type indicate the collection (floatValues, stringValues, ...), index indicate the position of the value in the collection.
+     * How to unpack:
+     * const uint32_t packedId = ... uint32_t id from somewhere;
+     * const uint32_t valueType = packedId & 0x000f;
+     * const uint32_t valueIndex = ( packedId >> 8 ) & 0x0fff;
+     **/
     struct FBXPIPELINE_API ValueId {
+
         uint32_t valueType : 8;
         uint32_t valueIndex : 24;
 
-        ValueId( uint32_t packedValue ) {
-            *reinterpret_cast< uint32_t* >( this ) = packedValue;
-        }
-
-        ValueId( uint32_t type, uint32_t index ) {
-            valueType  = type;
-            valueIndex = index;
-        }
-
-        operator uint32_t( ) const {
-            return *reinterpret_cast< const uint32_t* >( this );
-        }
+        ValueId( uint32_t value );
+        ValueId( uint8_t type, uint32_t index );
+        operator uint32_t( ) const;
     };
 
     static_assert( sizeof ValueId == sizeof uint32_t, "Not packed." );
@@ -108,7 +108,13 @@ namespace apemode {
         uint32_t                                 id;
         uint32_t                                 nameId;
         std::vector< apemodefb::MaterialPropFb > properties;
-        std::vector< apemodefb::MaterialPropFb > textures;
+        std::vector< apemodefb::MaterialPropFb > textureProperties;
+    };
+
+    struct FBXPIPELINE_API File {
+        uint32_t    id;
+        uint32_t    nameId;
+        std::string fullPath;
     };
 
     using TupleUintUint = std::tuple< uint32_t, uint32_t >;
@@ -124,6 +130,7 @@ namespace apemode {
         std::string                            folderPath;
         std::vector< Node >                    nodes;
         std::vector< Material >                materials;
+        std::vector< File >                    embeddedFiles;
         std::map< uint64_t, uint32_t >         nodeDict;
         std::map< uint64_t, uint32_t >         textureDict;
         std::map< uint64_t, uint32_t >         materialDict;
@@ -139,8 +146,6 @@ namespace apemode {
         std::vector< AnimCurve >               animCurves;
         std::vector< Skin >                    skins;
         std::vector< std::string >             searchLocations;
-        std::set< std::string >                embedQueue;
-        std::set< std::string >                missingQueue;
         std::vector< bool >                    boolValues;
         std::vector< int32_t >                 intValues;
         std::vector< float >                   floatValues;
@@ -169,7 +174,9 @@ namespace apemode {
         ValueId PushValue( const float x, const float y );
         ValueId PushValue( const float x, const float y, const float z );
         ValueId PushValue( const float x, const float y, const float z, const float w );
-        ValueId PushValue( const bool value );
+        ValueId PushValue(const bool value);
+
+        uint32_t EmbedFile( const std::string fullPath );
 
         FBXPIPELINE_API friend State& Get( );
         FBXPIPELINE_API friend State& Main( int argc, char** argv );

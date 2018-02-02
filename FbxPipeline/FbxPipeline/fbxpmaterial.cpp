@@ -4,6 +4,7 @@
 
 std::string FindFile( const char* filepath );
 std::string GetFileName( const char* filePath );
+std::string ReplaceExtension( const char* path, const char* extension );
 
 template < typename TPropertyCallbackFn, typename TObjectCallbackFn >
 void ScanConnectedSrc( FbxObject*          pPropObj,
@@ -185,13 +186,12 @@ void ExportMaterials( FbxScene* pScene ) {
                                          pSrcObj->GetName( ),
                                          srcProperty.GetNameAsCStr( ) );
 
-                        bool found = false;
+                        uint32_t fileId = std::numeric_limits< uint32_t >::max( );
 
                         auto fullFilePath = FindFile( fileUrl.c_str( ) );
                         if ( false == fullFilePath.empty( ) ) {
                             s.console->info( "Full path (default): \"{}\"", fullFilePath );
-                            s.embedQueue.insert( fullFilePath );
-                            found = true;
+                            fileId = s.EmbedFile( fullFilePath );
                         } else {
                             // https://help.sketchfab.com/hc/en-us/articles/202600873-Materials-and-Textures
                             // Anything that is not .JPG or .PNG is converted to .PNG.
@@ -200,18 +200,23 @@ void ExportMaterials( FbxScene* pScene ) {
                             fullFilePath = FindFile( ( fileUrl + ".png" ).c_str( ) );
                             if ( false == fullFilePath.empty( ) ) {
                                 s.console->info( "Full path (sketchfab): \"{}\"", fullFilePath );
-                                s.embedQueue.insert( fullFilePath );
-                                found = true;
+                                fileId = s.EmbedFile( fullFilePath );
+                            } else {
+
+                                fullFilePath = FindFile( ReplaceExtension( fileUrl.c_str( ), ".png" ).c_str( ) );
+                                if ( false == fullFilePath.empty( ) ) {
+                                    s.console->info( "Full path (sketchfab): \"{}\"", fullFilePath );
+                                    fileId = s.EmbedFile( fullFilePath );
+                                }
                             }
                         }
 
-                        if ( false == found ) {
+                        if ( fileId == std::numeric_limits< uint32_t >::max( ) ) {
                             s.console->error( "Missing: \"{}\"", GetFileName( fileUrl.c_str( ) ) );
-                            s.missingQueue.insert( GetFileName( fileUrl.c_str( ) ) );
                         } else {
                             s.textures.emplace_back( (uint32_t) s.textures.size( ),
                                                      s.PushValue( pTexture->GetName( ) ),
-                                                     s.PushValue( GetFileName( fullFilePath.c_str( ) ) ),
+                                                     fileId,
                                                      s.PushValue( pTexture->GetTextureType( ).Buffer( ) ),
                                                      (apemodefb::EBlendModeFb) pTexture->GetBlendMode( ),
                                                      (apemodefb::EWrapModeFb) pTexture->GetWrapModeU( ),
@@ -235,8 +240,8 @@ void ExportMaterials( FbxScene* pScene ) {
                                                      (apemodefb::EMappingTypeFb) pTexture->GetMappingType( ),
                                                      (apemodefb::EPlanarMappingNormalFb) pTexture->GetPlanarMappingNormal( ) );
 
-                            m.textures.emplace_back( s.PushValue( srcProperty.GetNameAsCStr( ) ),
-                                                     s.textures.back( ).id( ) );
+                            m.textureProperties.emplace_back( s.PushValue( srcProperty.GetNameAsCStr( ) ),
+                                                              s.textures.back( ).id( ) );
 
                             s.console->info( "Found texture \"{}\" (\"{}\") (\"{}\")",
                                              pTexture->GetName( ),

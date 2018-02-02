@@ -12,7 +12,9 @@
 std::string CurrentDirectory( );
 std::string GetExecutable( );
 std::string ResolveFullPath( const char* path );
+std::string GetFileName( const char* filePath );
 bool        MakeDirectory( const char* directory );
+bool        FileExists( const char* filePath );
 
 void SplitFilename( const std::string& filePath, std::string * parentFolderName, std::string * fileName );
 bool InitializeSdkObjects( FbxManager*& pManager, FbxScene*& pScene );
@@ -285,10 +287,10 @@ bool apemode::State::Finalize( ) {
     materialOffsets.reserve( materials.size( ) );
     for ( auto& material : materials ) {
         console->info( "+ properties {}", material.properties.size( ) );
-        console->info( "+ textures {}", material.textures.size( ) );
+        console->info( "+ textures {}", material.textureProperties.size( ) );
 
         auto propertiesOffset = builder.CreateVectorOfStructs( material.properties );
-        auto texturesOffset = builder.CreateVectorOfStructs( material.textures );
+        auto texturesOffset = builder.CreateVectorOfStructs( material.textureProperties );
 
         apemodefb::MaterialFbBuilder materialBuilder( builder );
         materialBuilder.add_id( material.id );
@@ -385,12 +387,17 @@ bool apemode::State::Finalize( ) {
     console->info( "> Files" );
     std::vector< uint8_t > tempFileBuffer;
     std::vector< flatbuffers::Offset< apemodefb::FileFb > > fileOffsets;
-    fileOffsets.reserve( embedQueue.size( ) );
-    for ( auto& embedded : embedQueue ) {
-        if ( false == embedded.empty( ) ) {
-            if ( ReadBinFile( embedded.c_str( ), tempFileBuffer, true ) ) {
-                console->info( "+ {} ({}, {}) ", ToPrettySizeString( tempFileBuffer.size( ) ), tempFileBuffer.size( ), embedded );
-                fileOffsets.push_back( apemodefb::CreateFileFbDirect( builder, (uint32_t) fileOffsets.size( ), 0, &tempFileBuffer ) );
+    fileOffsets.reserve( embeddedFiles.size( ) );
+    for ( auto& embeddedFile : embeddedFiles) {
+        if ( false == embeddedFile.fullPath.empty( ) ) {
+            if ( ReadBinFile( embeddedFile.fullPath.c_str( ), tempFileBuffer, true ) ) {
+                console->info( "+ {} ({}, {}) ",
+                               ToPrettySizeString( tempFileBuffer.size( ) ),
+                               tempFileBuffer.size( ),
+                               embeddedFile.fullPath );
+
+                fileOffsets.push_back( apemodefb::CreateFileFbDirect(
+                    builder, (uint32_t) fileOffsets.size( ), embeddedFile.nameId, &tempFileBuffer ) );
             }
         }
     }
@@ -483,14 +490,34 @@ apemode::ValueId apemode::State::PushValue( const bool value ) {
     return apemode::ValueId( apemodefb::EValueTypeFb_Bool, value );
 }
 
+uint32_t apemode::State::EmbedFile( const std::string fullPath) {
+    if ( fullPath.empty( ) || false == FileExists( fullPath.c_str( ) ) )
+        return std::numeric_limits< uint32_t >::max( );
+
+    for ( auto embeddedFileIt = embeddedFiles.begin( ); embeddedFileIt != embeddedFiles.end( ); ++embeddedFileIt ) {
+        if ( embeddedFileIt->fullPath == fullPath ) {
+            return static_cast< uint32_t >( std::distance( embeddedFiles.begin( ), embeddedFileIt ) );
+        }
+    }
+
+    const uint32_t embeddedFileId     = static_cast< uint32_t >( embeddedFiles.size( ) );
+    const uint32_t embeddedFileNameId = PushValue( GetFileName( fullPath.c_str( ) ) );
+
+    File embeddedFile;
+    embeddedFile.id       = embeddedFileId;
+    embeddedFile.nameId   = embeddedFileNameId;
+    embeddedFile.fullPath = fullPath;
+
+    embeddedFiles.emplace_back( embeddedFile );
+    return embeddedFileId;
+}
+
 apemode::ValueId apemode::State::PushValue( const int32_t value ) {
-    return apemode::ValueId( apemodefb::EValueTypeFb_Int,
-                             static_cast< uint32_t >( VectorInsertUnique( intValues, value ) ) );
+    return apemode::ValueId( apemodefb::EValueTypeFb_Int, static_cast< uint32_t >( VectorInsertUnique( intValues, value ) ) );
 }
 
 apemode::ValueId apemode::State::PushValue( const float value ) {
-    return apemode::ValueId( apemodefb::EValueTypeFb_Float,
-                             static_cast< uint32_t >( VectorInsertUnique( floatValues, value ) ) );
+    return apemode::ValueId( apemodefb::EValueTypeFb_Float, static_cast< uint32_t >( VectorInsertUnique( floatValues, value ) ) );
 }
 
 apemode::ValueId apemode::State::PushValue( const float x, const float y ) {
@@ -807,3 +834,20 @@ void SplitFilename( const std::string& filePath, std::string * parentFolderName,
 }
 
 #pragma endregion
+
+apemode::ValueId::ValueId( uint32_t packedValue ) {
+    *reinterpret_cast< uint32_t* >(this) = packedValue;
+}
+
+apemode::ValueId::ValueId( uint8_t type, uint32_t index ) {
+    valueType  = type;
+    valueIndex = index;
+}
+
+apemode::ValueId::operator uint32_t( ) const {
+    return *reinterpret_cast< const uint32_t* >(this);
+    const uint32_t packed = *reinterpret_cast< const uint32_t* >(this);
+    const uint32_t valueType = packed & 0x000f;
+    const uint32_t valueIndex = (packed >> 8) & 0x0fff;
+    return packed;
+}

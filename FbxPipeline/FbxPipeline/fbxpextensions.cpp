@@ -4,26 +4,8 @@
 
 #include <pybind11/pybind11.h>
 #include <pybind11/embed.h>
-#include <pybind11/stl.h>
-#include <pybind11/complex.h>
-#include <pybind11/functional.h>
 
 namespace py = pybind11;
-
-namespace apemode {
-    void RegisterExtension( std::function< void( apemode::State*, std::string ) > func ) {
-        auto& s = apemode::Get( );
-        s.console->info( "Registering extension function ..." );
-        s.extensions.push_back( func );
-    }
-} // namespace apemode
-
-PYBIND11_MODULE( FbxPipeline, m ) {
-    m.doc( ) = "python extension base for FbxPipeline";
-
-    py::class_< apemode::State > state( m, "State" );
-    m.def( "RegisterExtension", &apemode::RegisterExtension );
-}
 
 bool        FileExists( const char* path );
 std::string FileExtension( const char* path );
@@ -39,9 +21,11 @@ void RunExtensionsOnFinalize( ) {
     bool bContainsPythonExtensions = false;
     for ( auto& scriptFile : scriptFiles ) {
         if ( FileExtension( scriptFile.c_str( ) ) == ".py" ) {
+
             s.console->info( "Found a script with .py extension" );
             bContainsPythonExtensions = true;
             break;
+
         }
     }
 
@@ -60,10 +44,11 @@ void RunExtensionsOnFinalize( ) {
         for ( auto& scriptFile : scriptFiles ) {
             if ( FileExtension( scriptFile.c_str( ) ) == ".py" ) {
                 if ( ReadTxtFile( scriptFile.c_str( ), pythonFileContent, true ) ) {
-
                     try {
+
                         s.console->info( "Executing python script \"{}\" (size: {}) ... ", scriptFile, ToPrettySizeString( scriptFile.size( ) ) );
-                        py::exec( pythonFileContent.c_str( ) );
+                        py::exec( pythonFileContent.c_str( ), py::globals() );
+
                     } catch ( py::error_already_set e ) {
                         s.console->error( "Failed to execute \"{}\": error_already_set\n{}", scriptFile, e.what( ) );
                     } catch ( std::runtime_error e ) {
@@ -77,11 +62,12 @@ void RunExtensionsOnFinalize( ) {
             }
         }
 
-        for ( auto& e : s.extensions ) {
-            for ( auto& i : scriptInputs ) {
-
+        for ( auto& extensionFunc : s.extensions ) {
+            for ( auto& scriptInput : scriptInputs ) {
                 try {
-                    e( &s, i );
+
+                    extensionFunc( &s, scriptInput );
+
                 } catch ( std::runtime_error e ) {
                     s.console->error( "Failed to run extension: runtime_error\n{}", e.what( ) );
                 } catch ( std::exception e ) {

@@ -350,7 +350,7 @@ void InitializeSeachLocations( ) {
                 for ( auto fileOrFolderPath : std::filesystem::directory_iterator( searchLocation ) ) {
                     if ( std::filesystem::is_regular_file( fileOrFolderPath ) &&
                          std::regex_match( fileOrFolderPath.path( ).string( ), embedFilePatternRegex ) ) {
-                        s.embedQueue.insert( ResolveFullPath( fileOrFolderPath.path( ).string( ).c_str( ) ) );
+                        s.EmbedFile( ResolveFullPath( fileOrFolderPath.path( ).string( ).c_str( ) ) );
                     }
                 }
             }

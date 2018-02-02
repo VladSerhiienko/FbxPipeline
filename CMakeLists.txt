@@ -235,7 +235,16 @@ add_library(
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpstate.cpp
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxptransform.cpp
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpextensions.cpp
+    ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpembeddedpy.cpp
 )
+
+if( MSVC )
+    target_compile_options(
+        FbxPipeline
+        PRIVATE
+        /bigobj
+    )
+endif()
 
 file(
     GLOB 

@@ -3,10 +3,10 @@
 # namespace: apemodefb
 
 class ETextureUseFb(object):
-    eStandard = 0
-    eShadowMap = 1
-    eLightMap = 2
-    eSphericalReflectionMap = 3
-    eSphereReflectionMap = 4
-    eBumpNormalMap = 5
+    Standard = 0
+    ShadowMap = 1
+    LightMap = 2
+    SphericalReflectionMap = 3
+    SphereReflectionMap = 4
+    BumpNormalMap = 5
 
