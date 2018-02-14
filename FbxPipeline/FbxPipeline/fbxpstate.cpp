@@ -22,7 +22,7 @@ void DestroySdkObjects( FbxManager* pManager );
 bool LoadScene( FbxManager* pManager, FbxDocument* pScene, const char* pFilename );
 
 apemode::State s;
-apemode::State& apemode::Get( ) {
+apemode::State& apemode::State::Get( ) {
     return s;
 }
 
@@ -73,7 +73,7 @@ std::shared_ptr< spdlog::logger > CreateLogger( spdlog::level::level_enum lvl, s
     return logger;
 }
 
-apemode::State& apemode::Main( int argc, char** argv ) {
+apemode::State& apemode::State::Main( int argc, char** argv ) {
     try {
         s.options.parse( argc, argv );
         s.executableName = argv[ 0 ];
@@ -809,7 +809,7 @@ bool SaveScene( FbxManager* pManager, FbxDocument* pScene, const char* pFilename
 #pragma region Utils
 
 std::string GetExecutable( ) {
-    return apemode::Get().executableName;
+    return apemode::State::Get().executableName;
 
     // char szFileName[ 1024 ];
     // GetModuleFileNameA( NULL, szFileName, 1024 );

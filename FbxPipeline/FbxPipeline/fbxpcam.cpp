@@ -2,7 +2,7 @@
 #include <fbxpstate.h>
 
 void ExportCamera( FbxNode* pNode, apemode::Node& n ) {
-    auto& s = apemode::Get( );
+    auto& s = apemode::State::Get( );
 
     if ( auto pCamera = pNode->GetCamera( ) ) {
         float width, height;

@@ -2,7 +2,7 @@
 #include <fbxpstate.h>
 
 void ExportLight(FbxNode* pNode, apemode::Node& n) {
-    auto& s = apemode::Get( );
+    auto& s = apemode::State::Get( );
     if ( auto pLight = pNode->GetLight( ) ) {
         switch ( pLight->LightType.Get( ) ) {
             case FbxLight::eVolume:

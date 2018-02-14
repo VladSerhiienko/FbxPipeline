@@ -225,7 +225,7 @@
 // template < typename TIndex >
 // void Optimize( apemode::Mesh& m, const Vertex * vertices, uint32_t& vertexCount, uint32_t vertexStride ) {
 
-//     auto& s = apemode::Get( );
+//     auto& s = apemode::State::Get( );
 
 //     VcacheMesh< TIndex > mm;
 //     mm.m = &m;

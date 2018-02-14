@@ -33,7 +33,7 @@ void ScanConnectedSrc( FbxObject*          pPropObj,
 
 
 void ExportMaterials( FbxScene* pScene ) {
-    auto& s = apemode::Get( );
+    auto& s = apemode::State::Get( );
 
     if ( auto c = pScene->GetMaterialCount( ) ) {
         s.materials.reserve( c );
@@ -255,7 +255,7 @@ void ExportMaterials( FbxScene* pScene ) {
 }
 
 void ExportMaterials( FbxNode* node, apemode::Node& n ) {
-    auto& s = apemode::Get( );
+    auto& s = apemode::State::Get( );
     if ( const auto c = node->GetMaterialCount( ) ) {
         n.materialIds.reserve( c );
         for ( auto i = 0; i < c; ++i ) {

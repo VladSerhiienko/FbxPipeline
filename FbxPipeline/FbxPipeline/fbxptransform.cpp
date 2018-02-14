@@ -21,5 +21,5 @@ void ExportTransform( FbxNode* node, apemode::Node & n ) {
                                       Cast( node->GeometricRotation.Get( ) ),
                                       Cast( node->GeometricScaling.Get( ) ) );
 
-    apemode::Get( ).transforms.push_back( transform );
+    apemode::State::Get( ).transforms.push_back( transform );
 }

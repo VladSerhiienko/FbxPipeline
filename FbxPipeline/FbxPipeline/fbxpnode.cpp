@@ -12,7 +12,7 @@ void ExportCamera( FbxNode* node, apemode::Node& n );
 void ExportLight( FbxNode* node, apemode::Node& n );
 
 void ExportNodeAttributes( FbxNode* node, apemode::Node& n ) {
-    auto& s = apemode::Get( );
+    auto& s = apemode::State::Get( );
 
     n.cullingType = (apemodefb::ECullingTypeFb) node->mCullingType;
     s.console->info( "Node \"{}\" has {} culling type.", node->GetName(), n.cullingType );
@@ -26,7 +26,7 @@ void ExportNodeAttributes( FbxNode* node, apemode::Node& n ) {
 }
 
 uint32_t ExportNode( FbxNode* node ) {
-    auto& s = apemode::Get( );
+    auto& s = apemode::State::Get( );
 
     const uint32_t nodeId = static_cast< uint32_t >( s.nodes.size( ) );
     s.nodes.emplace_back( );
@@ -57,7 +57,7 @@ uint32_t ExportNode( FbxNode* node ) {
  *                      > Split meshes per material
  **/
 void PreprocessMeshes( FbxScene* scene ) {
-    auto& s = apemode::Get( );
+    auto& s = apemode::State::Get( );
 
     FbxGeometryConverter geometryConverter( s.manager );
 
@@ -94,7 +94,7 @@ void PreprocessMeshes( FbxScene* scene ) {
 }
 
 void PreprocessAnimation( FbxScene* pScene ) {
-    auto& s = apemode::Get( );
+    auto& s = apemode::State::Get( );
 
     int animStackCount = pScene->GetSrcObjectCount< FbxAnimStack >( );
 
@@ -157,7 +157,7 @@ void PreprocessAnimation( FbxScene* pScene ) {
 }
 
 FBXPIPELINE_API void ExportScene( FbxScene* scene ) {
-    auto& s = apemode::Get( );
+    auto& s = apemode::State::Get( );
 
     PreprocessMeshes( scene );
     PreprocessAnimation( scene );

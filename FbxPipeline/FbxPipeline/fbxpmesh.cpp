@@ -111,7 +111,7 @@ void CalculateFaceNormals( TVertex* vertices, size_t vertexCount ) {
  **/
 template < typename TIndex >
 bool GetSubsets( FbxMesh* mesh, apemode::Mesh& m, std::vector< apemodefb::SubsetFb >& subsets ) {
-    auto& s = apemode::Get( );
+    auto& s = apemode::State::Get( );
     s.console->info("Mesh \"{}\" has {} material(s) assigned.", mesh->GetNode( )->GetName( ), mesh->GetNode( )->GetMaterialCount( ) );
 
     subsets.clear( );
@@ -380,7 +380,7 @@ TElementValue GetElementValue( const TElementLayer* pElementLayer, uint32_t i ) 
         }
 
         default:
-            apemode::Get( ).console->error(
+            apemode::State::Get( ).console->error(
                 "Reference mode {} of layer \"{}\" "
                 "is not supported.",
                 referenceMode,
@@ -411,7 +411,7 @@ TElementValue GetElementValue( const TElementLayer* pElementLayer,
             return GetElementValue< TElementLayer, TElementValue >( pElementLayer, vertexIndex );
 
         default:
-            apemode::Get( ).console->error(
+            apemode::State::Get( ).console->error(
                 "Mapping mode {} of layer \"{}\" "
                 "is not supported.",
                 mappingMode,
@@ -428,7 +428,7 @@ TElementValue GetElementValue( const TElementLayer* pElementLayer,
 template < typename TElementLayer >
 const TElementLayer* VerifyElementLayer( const TElementLayer* pElementLayer ) {
     if ( nullptr == pElementLayer ) {
-        apemode::Get( ).console->error( "Missing element layer." );
+        apemode::State::Get( ).console->error( "Missing element layer." );
         return nullptr;
     }
 
@@ -438,7 +438,7 @@ const TElementLayer* VerifyElementLayer( const TElementLayer* pElementLayer ) {
         case FbxLayerElement::EMappingMode::eByPolygonVertex:
             break;
         default:
-            apemode::Get( ).console->error(
+            apemode::State::Get( ).console->error(
                 "Mapping mode {} of layer \"{}\" "
                 "is not supported.",
                 mappingMode,
@@ -452,7 +452,7 @@ const TElementLayer* VerifyElementLayer( const TElementLayer* pElementLayer ) {
         case FbxLayerElement::EReferenceMode::eIndexToDirect:
             break;
         default:
-            apemode::Get( ).console->error(
+            apemode::State::Get( ).console->error(
                 "Reference mode {} of layer \"{}\" "
                 "is not supported.",
                 referenceMode,
@@ -590,7 +590,7 @@ void InitializeVertices( FbxMesh*       mesh,
                          mathfu::vec2&  texcoordMin,
                          mathfu::vec2&  texcoordMax ) {
 
-    auto& s = apemode::Get( );
+    auto& s = apemode::State::Get( );
 
     const uint32_t cc = (uint32_t) mesh->GetControlPointsCount( );
     const uint32_t pc = (uint32_t) mesh->GetPolygonCount( );
@@ -731,7 +731,7 @@ void ExportMesh( FbxNode*       pNode,
                  FbxSkin*       pSkin,
                  bool           optimize ) {
 
-    auto& s = apemode::Get( );
+    auto& s = apemode::State::Get( );
 
     const uint16_t vertexStride                  = (uint16_t) sizeof( apemodefb::StaticVertexFb );
     const uint32_t vertexBufferSize              = vertexCount * vertexStride;
@@ -1047,7 +1047,7 @@ void ExportMesh( FbxNode*       pNode,
 }
 
 void ExportMesh( FbxNode* node, apemode::Node& n, bool pack, bool optimize ) {
-    auto& s = apemode::Get( );
+    auto& s = apemode::State::Get( );
     if ( auto mesh = node->GetMesh( ) ) {
         s.console->info( "Node \"{}\" has mesh.", node->GetName( ) );
         if ( !mesh->IsTriangleMesh( ) ) {

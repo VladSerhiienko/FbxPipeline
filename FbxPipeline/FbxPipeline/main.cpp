@@ -5,7 +5,7 @@ void ExportScene( FbxScene* pScene );
 void ConvertScene( FbxManager* lSdkManager, FbxScene* lScene, FbxString lFilePath );
 
 int main( int argc, char** argv ) {
-    auto& s = apemode::Main( argc, argv );
+    auto& s = apemode::State::Main( argc, argv );
     bool convert = s.options[ "k" ].as< bool >( );
 
     if ( s.Initialize( ) ) {
@@ -35,7 +35,7 @@ int main( int argc, char** argv ) {
 // C:\Users\vladyslav.serhiienko\Downloads\bristleback-dota-fan-art\source\POSE.fbx
 
 void ConvertScene( FbxManager* lSdkManager, FbxScene* lScene, FbxString lFilePath ) {
-    auto& s = apemode::Get( );
+    auto& s = apemode::State::Get( );
 
     const char* lFileTypes[] = {
         "_fbx7ascii.fbx", "FBX ascii (*.fbx)",

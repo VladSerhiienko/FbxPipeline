@@ -1,10 +1,18 @@
 #pragma once
 
+#ifdef _WIN32
+
 #if defined( FBXPIPELINE_EXPORT )
 #define FBXPIPELINE_API __declspec( dllexport )
 #else
 #define FBXPIPELINE_API __declspec( dllimport )
 #endif // FBXPIPELINE_EXPORT
+
+#else
+
+#define FBXPIPELINE_API
+
+#endif // _WIN32
 
 //
 // STL

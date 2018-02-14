@@ -3,8 +3,14 @@
 #include <fbxppch.h>
 #include <scene_generated.h>
 
+#ifndef DebugBreak
 inline void DebugBreak( ) {
 }
+#endif
+
+#ifndef ARRAYSIZE
+#define ARRAYSIZE(arr) sizeof(arr) / sizeof(arr[0])
+#endif
 
 namespace apemode {
 
@@ -40,7 +46,7 @@ namespace apemode {
         operator uint32_t( ) const;
     };
 
-    static_assert( sizeof ValueId == sizeof uint32_t, "Not packed." );
+    static_assert( sizeof( ValueId ) == sizeof( uint32_t ), "Not packed." );
     static_assert( apemodefb::EValueTypeFb_MAX < 255, "Does not fit into a byte." );
 
     struct FBXPIPELINE_API Mesh {
@@ -178,7 +184,7 @@ namespace apemode {
 
         uint32_t EmbedFile( const std::string fullPath );
 
-        FBXPIPELINE_API friend State& Get( );
-        FBXPIPELINE_API friend State& Main( int argc, char** argv );
+        static State& Get( );
+        static State& Main( int argc, char** argv );
     };
 }

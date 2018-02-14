@@ -244,28 +244,28 @@ if( MSVC )
         PRIVATE
         /bigobj
     )
-endif()
 
-file(
-    GLOB 
-    python_dlls_pdbs
-    ${PYTHON_DIR}/*.dll
-    ${PYTHON_DIR}/*.pdb
-)
+    file(
+        GLOB 
+        python_dlls_pdbs
+        ${PYTHON_DIR}/*.dll
+        ${PYTHON_DIR}/*.pdb
+    )
 
-if( PYTHONLIBS_FOUND )
-    message(STATUS "Adding python dynamic lib and debug files to output directory")
-    foreach( python_dll_pdb ${python_dlls_pdbs} )
-        message(STATUS "Adding ${python_dll_pdb} to output directory")
-        add_custom_command(
-            TARGET
-            FbxPipeline
-            POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${python_dll_pdb}
-            ${CMAKE_BINARY_DIR}${CONFIGURATION_SUFFIX}
-        )
-    endforeach()
+    if( PYTHONLIBS_FOUND )
+        message(STATUS "Adding python dynamic lib and debug files to output directory")
+        foreach( python_dll_pdb ${python_dlls_pdbs} )
+            message(STATUS "Adding ${python_dll_pdb} to output directory")
+            add_custom_command(
+                TARGET
+                FbxPipeline
+                POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                ${python_dll_pdb}
+                ${CMAKE_BINARY_DIR}${CONFIGURATION_SUFFIX}
+            )
+        endforeach()
+    endif()
 endif()
 
 file(
@@ -343,6 +343,7 @@ else()
         third_party_libs
         ${zlib_binary_dir}/libz.a
         ${flatbuffers_binary_dir}/libflatbuffers.a
+        ${PYTHON_LIBRARY}
         pthread
         stdc++fs
         m

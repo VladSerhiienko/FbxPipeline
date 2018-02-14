@@ -14,19 +14,19 @@ namespace py = pybind11;
 namespace apemode {
 
     void LogInfo( const std::string message ) {
-        auto& s = apemode::Get( );
+        auto& s = apemode::State::Get( );
         assert( s.console );
         s.console->info( "[py] " + message );
     }
 
     void LogError( const std::string message ) {
-        auto& s = apemode::Get( );
+        auto& s = apemode::State::Get( );
         assert( s.console );
         s.console->error( "[py] " + message );
     }
 
     void RegisterExtension( std::function< void( apemode::State*, std::string ) > func ) {
-        auto& s = apemode::Get( );
+        auto& s = apemode::State::Get( );
         s.console->info( "Registering extension function ..." );
         s.extensions.push_back( func );
     }

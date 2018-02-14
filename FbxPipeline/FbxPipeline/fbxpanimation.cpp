@@ -3,7 +3,7 @@
 
 template < int TCurveCount >
 void ApplyFilter( FbxAnimCurveFilter* pFilter, FbxAnimCurve** ppCurves ) {
-    auto& s = apemode::Get( );
+    auto& s = apemode::State::Get( );
     FbxStatus status  = FbxStatus::eSuccess;
 
     pFilter->Apply( ppCurves, TCurveCount, &status );
@@ -22,7 +22,7 @@ void ApplyFilter( FbxAnimCurveFilter* pFilter, FbxAnimCurve** ppCurves ) {
 }
 
 void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
-    auto& s      = apemode::Get( );
+    auto& s      = apemode::State::Get( );
     auto  pScene = pNode->GetScene( );
 
     std::vector< std::tuple< FbxAnimLayer*, FbxAnimStack* > > animLayers;

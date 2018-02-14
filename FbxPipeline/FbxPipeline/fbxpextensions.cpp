@@ -13,7 +13,7 @@ std::string ToPrettySizeString( size_t size );
 bool        ReadTxtFile( const char* srcPath, std::string& fileBuffer, bool findFile );
 
 void RunExtensionsOnFinalize( ) {
-    auto& s = apemode::Get( );
+    auto& s = apemode::State::Get( );
 
     auto& scriptFiles  = s.options[ "script-file" ].as< std::vector< std::string > >( );
     auto& scriptInputs = s.options[ "script-input" ].as< std::vector< std::string > >( );

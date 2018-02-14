@@ -73,7 +73,7 @@ std::string ResolveFullPath( const char* path ) {
 }
 
 std::string FindFile( const char* filepath ) {
-    auto& s = apemode::Get( );
+    auto& s = apemode::State::Get( );
 
     if ( filepath && strlen( filepath ) ) {
         const std::string filename = GetFileName( filepath );
@@ -272,7 +272,7 @@ std::string ToPrettySizeString( size_t size ) {
 }
 
 void InitializeSeachLocations( ) {
-    auto& s = apemode::Get( );
+    auto& s = apemode::State::Get( );
     auto searchLocations = s.options[ "search-location" ].as< std::vector< std::string > >( );
 
     searchLocations.push_back( CurrentDirectory( ) );
