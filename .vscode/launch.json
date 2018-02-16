@@ -10,25 +10,22 @@
             "request": "launch",
             "program": "${workspaceFolder}/build_linux_x86_64/FbxPipelineLauncher",
             "args": [
-                "-i",
-                "/home/user/vserhiienko/models_v2/knight_artorias/source/Artorias.fbx.fbx",
-                "-o",
-                "/home/user/vserhiienko/models_v2/knight_artorias.fbxp",
-                "-l",
-                "/home/user/vserhiienko/models_v2/knight_artorias.log.txt",
-                "-e",
-                "/home/user/vserhiienko/models_v2/knight_artorias/**",
-                "-e",
-                "/home/user/vserhiienko/FbxPipeline/build_linux_x86_64",
-                "--script-file",
-                "glTFMaterialExtension.py",
-                "--script-input",
-                "/home/user/vserhiienko/models_v2/knight_artorias/scene.gltf"
+                "-i", "/home/user/vserhiienko/models_v2/dreadroamer_free/source/Zbot_Animation.fbx",
+                "-o", "/home/user/vserhiienko/models_v2/dreadroamer.fbxp",
+                "-l", "/home/user/vserhiienko/models_v2/dreadroamer.log.txt",
+                "-e", "/home/user/vserhiienko/models_v2/dreadroamer_free/**",
+                "--script-input", "/home/user/vserhiienko/models_v2/dreadroamer_free/scene.gltf",
+                
+                // "-i", "/home/user/vserhiienko/models_v2/knight_artorias/source/Artorias.fbx.fbx",
+                // "-o", "/home/user/vserhiienko/models_v2/knight_artorias.fbxp",
+                // "-l", "/home/user/vserhiienko/models_v2/knight_artorias.log.txt",
+                // "-e", "/home/user/vserhiienko/models_v2/knight_artorias/**",
 
-                // "-i",
-                // "/home/user/vserhiienko/models/warcraft-draenei-fanart/source/untitled1.fbx",
-                // "-o",
-                // "/home/user/vserhiienko/models/warcraft-draenei-fanart.fbxp"
+                // "-i", "/home/user/vserhiienko/models/warcraft-draenei-fanart/source/untitled1.fbx",
+                // "-o", "/home/user/vserhiienko/models/warcraft-draenei-fanart.fbxp"
+
+                "-e", "/home/user/vserhiienko/FbxPipeline/build_linux_x86_64",
+                "--script-file", "glTFMaterialExtension.py"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
