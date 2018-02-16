@@ -1,17 +1,111 @@
 {
     "configurations": [
         {
-            "name": "null",
-            "includePath": [],
+            "name": "Mac",
+            "includePath": [
+                "/usr/include",
+                "/usr/local/include",
+                "${workspaceRoot}"
+            ],
             "defines": [],
+            "intelliSenseMode": "clang-x64",
             "browse": {
                 "path": [
+                    "/usr/include",
+                    "/usr/local/include",
                     "${workspaceRoot}"
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""
             },
-            "intelliSenseMode": "clang-x64"
+            "macFrameworkPath": [
+                "/System/Library/Frameworks",
+                "/Library/Frameworks"
+            ]
+        },
+        {
+            "name": "Linux",
+            "includePath": [
+                "/usr/include/x86_64-linux-gnu/c++/6.3.0",
+                "/usr/include/c++/6.3.0",
+                "/usr/local/include",
+                "/usr/lib/clang/3.6.2/include",
+                "/usr/include/x86_64-linux-gnu",
+                "/usr/include",
+                "${workspaceRoot}",
+                "/home/user/FbxSdk/include",
+                "${workspaceRoot}/FbxPipeline",
+                "${workspaceRoot}/FbxPipeline/generated",
+                "${workspaceRoot}/FbxPipeline/FbxPipeline",
+                "${workspaceRoot}/dependencies/FbxPipeline",
+                "${workspaceRoot}/dependencies/flatbuffers/include",
+                "${workspaceRoot}/dependencies/cxxopts/include",
+                "${workspaceRoot}/dependencies/mathfu/include",
+                "${workspaceRoot}/dependencies/pybind11/include",
+                "${workspaceRoot}/dependencies/spdlog/include",
+                "${workspaceRoot}/dependencies/zlib"
+            ],
+            "defines": [],
+            "intelliSenseMode": "clang-x64",
+            "browse": {
+                "path": [
+                    "/usr/include/x86_64-linux-gnu/c++/6.3.0",
+                    "/usr/include/c++/6.3.0",
+                    "/usr/local/include",
+                    "/usr/lib/clang/3.6.2/include",
+                    "/usr/include/x86_64-linux-gnu",
+                    "/usr/include",
+                    "/home/user/FbxSdk/include",
+                    "${workspaceRoot}"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            }
+        },
+        {
+            "name": "Win32",
+            "includePath": [
+                "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\include",
+                "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\atlmfc\\include",
+                "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Tools\\MSVC\\14.12.25827\\include",
+                "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Tools\\MSVC\\14.12.25827\\atlmfc\\include",
+                "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.16299.0\\ucrt",
+                "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.16299.0\\um",
+                "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.16299.0\\shared",
+                "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.16299.0\\winrt",
+                "C:\\Program Files (x86)\\Windows Kits\\NETFXSDK\\4.7.1\\Include\\um",
+                "${workspaceRoot}/thirdparty/lmvlib",
+                "${workspaceRoot}/thirdparty/lmvlib/DottyUtilsLib",
+                "${workspaceRoot}/thirdparty/lmvlib/LMVLib",
+                "${workspaceRoot}/thirdparty/lmvlib/SceneLib",
+                "${workspaceRoot}",
+                "${workspaceRoot}/thirdparty/cxxopts/include"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE"
+            ],
+            "intelliSenseMode": "msvc-x64",
+            "browse": {
+                "path": [
+                    "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\include",
+                    "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\atlmfc\\include",
+                    "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Tools\\MSVC\\14.12.25827\\include",
+                    "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Tools\\MSVC\\14.12.25827\\atlmfc\\include",
+                    "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.16299.0\\ucrt",
+                    "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.16299.0\\um",
+                    "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.16299.0\\shared",
+                    "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.16299.0\\winrt",
+                    "C:\\Program Files (x86)\\Windows Kits\\NETFXSDK\\4.7.1\\Include\\um",
+                    "${workspaceRoot}/thirdparty/lmvlib",
+                    "${workspaceRoot}/thirdparty/lmvlib/DottyUtilsLib",
+                    "${workspaceRoot}/thirdparty/lmvlib/LMVLib",
+                    "${workspaceRoot}/thirdparty/lmvlib/SceneLib",
+                    "${workspaceRoot}"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            }
         }
     ],
     "version": 3

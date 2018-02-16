@@ -14,6 +14,8 @@
                 "/home/user/vserhiienko/models_v2/knight_artorias/source/Artorias.fbx.fbx",
                 "-o",
                 "/home/user/vserhiienko/models_v2/knight_artorias.fbxp",
+                "-l",
+                "/home/user/vserhiienko/models_v2/knight_artorias.log.txt",
                 "-e",
                 "/home/user/vserhiienko/models_v2/knight_artorias/**",
                 "-e",

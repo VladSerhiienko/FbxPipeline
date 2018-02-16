@@ -95,7 +95,6 @@ apemode::State& apemode::State::Main( int argc, char** argv ) {
 apemode::State::State( ) : options( GetExecutable( ) ) {
     options.add_options( "main" )( "i,input-file", "Input", cxxopts::value< std::string >( ) );
     options.add_options( "main" )( "o,output-file", "Output", cxxopts::value< std::string >( ) );
-    options.add_options( "main" )( "password", "Password", cxxopts::value< std::string >( ) );
     options.add_options( "main" )( "k,convert", "Convert", cxxopts::value< bool >( ) );
     options.add_options( "main" )( "c,compress", "Compress", cxxopts::value< bool >( ) );
     options.add_options( "main" )( "p,pack-meshes", "Pack meshes", cxxopts::value< bool >( ) );
@@ -104,6 +103,7 @@ apemode::State::State( ) : options( GetExecutable( ) ) {
     options.add_options( "main" )( "e,search-location", "Add search location", cxxopts::value< std::vector< std::string > >( ) );
     options.add_options( "main" )( "l,log-file", "Log file (relative or absolute path)", cxxopts::value< std::string >( ) );
     options.add_options( "main" )( "m,embed-file", "Embed file", cxxopts::value< std::vector< std::string > >( ) );
+    options.add_options( "main" )( "password", "Password", cxxopts::value< std::string >( ) );
     options.add_options( "main" )( "script-file", "Script file", cxxopts::value< std::vector< std::string > >( ) );
     options.add_options( "main" )( "script-input", "Script input string", cxxopts::value< std::vector< std::string > >( ) );
     options.add_options( "main" )( "log-level", "Log level: 0 (most detailed) - 6 (off)", cxxopts::value< int >( ) );
@@ -148,6 +148,33 @@ bool ReadBinFile( const char* srcPath, std::vector< uint8_t >& fileBuffer, bool 
 
 
 void RunExtensionsOnFinalize( );
+
+std::string ToString( const std::vector< uint32_t >& xx ) {
+    std::stringstream ss;
+    ss << "[ ";
+    for ( auto& x : xx ) {
+        ss << x;
+        ss << " ";
+    }
+    ss << "]";
+    return ss.str( );
+}
+
+std::string ToString( const std::vector< apemodefb::SubsetFb >& xx ) {
+    std::stringstream ss;
+    ss << "[ ";
+    for ( auto& x : xx ) {
+        ss << "{ material id: ";
+        ss << x.material_id();
+        ss << ", base index: ";
+        ss << x.base_index();
+        ss << ", index count: ";
+        ss << x.index_count();
+        ss << " } ";
+    }
+    ss << "]";
+    return ss.str( );
+}
 
 bool apemode::State::Finalize( ) {
     RunExtensionsOnFinalize( );
@@ -202,10 +229,11 @@ bool apemode::State::Finalize( ) {
             const auto childIdsOffset    = builder.CreateVector( node.childIds );
             const auto materialIdsOffset = builder.CreateVector( node.materialIds );
 
-            console->info( "+ curve ids {}, child ids {}, material ids {}",
+            console->info( "+ curve ids {}, child ids {}, material ids {}, mesh id {}",
                            node.curveIds.size( ),
                            node.childIds.size( ),
-                           node.materialIds.size( ) );
+                           ToString( node.materialIds ),
+                           node.meshId == -1 ? "<none>" : std::to_string( node.meshId ) );
 
             apemodefb::NodeFbBuilder nodeBuilder( builder );
             nodeBuilder.add_id( node.id );
@@ -342,7 +370,7 @@ bool apemode::State::Finalize( ) {
     meshOffsets.reserve( meshes.size( ) );
     for ( auto& mesh : meshes ) {
         console->info( "+ subsets {}, vertex count {}, vertex format {} ",
-                       mesh.subsets.size( ),
+                       ToString( mesh.subsets ),
                        mesh.submeshes[ 0 ].vertex_count( ),
                        apemodefb::EnumNameEVertexFormatFb( mesh.submeshes[ 0 ].vertex_format( ) ) );
 
