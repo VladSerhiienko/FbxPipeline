@@ -874,8 +874,10 @@ apemode::ValueId::ValueId( uint8_t type, uint32_t index ) {
 
 apemode::ValueId::operator uint32_t( ) const {
     return *reinterpret_cast< const uint32_t* >(this);
+    /*
     const uint32_t packed = *reinterpret_cast< const uint32_t* >(this);
     const uint32_t valueType = packed & 0x000f;
     const uint32_t valueIndex = (packed >> 8) & 0x0fff;
     return packed;
+    */
 }
