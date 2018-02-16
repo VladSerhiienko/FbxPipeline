@@ -8,12 +8,25 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build_linux_x86_64/FbxPipeline",
+            "program": "${workspaceFolder}/build_linux_x86_64/FbxPipelineLauncher",
             "args": [
                 "-i",
-                "/home/user/vserhiienko/models/warcraft-draenei-fanart/source/untitled1.fbx",
+                "/home/user/vserhiienko/models_v2/knight_artorias/source/Artorias.fbx.fbx",
                 "-o",
-                "/home/user/vserhiienko/models/warcraft-draenei-fanart.fbxp"
+                "/home/user/vserhiienko/models_v2/knight_artorias.fbxp",
+                "-e",
+                "/home/user/vserhiienko/models_v2/knight_artorias/**",
+                "-e",
+                "/home/user/vserhiienko/FbxPipeline/build_linux_x86_64",
+                "--script-file",
+                "glTFMaterialExtension.py",
+                "--script-input",
+                "/home/user/vserhiienko/models_v2/knight_artorias/scene.gltf"
+
+                // "-i",
+                // "/home/user/vserhiienko/models/warcraft-draenei-fanart/source/untitled1.fbx",
+                // "-o",
+                // "/home/user/vserhiienko/models/warcraft-draenei-fanart.fbxp"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

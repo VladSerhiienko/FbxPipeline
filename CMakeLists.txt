@@ -320,11 +320,26 @@ target_include_directories(
     ${FBX_SDK_INCLUDE_DIR}
 )
 
+# target_link_libraries(
+#     FbxPipeline
+#     PRIVATE
+#     pybind11::module
+#     pybind11::embed
+# )
+
 set_target_properties(
     FbxPipeline
     PROPERTIES
-    SUFFIX ".pyd"
+    PREFIX "${PYTHON_MODULE_PREFIX}"
+    SUFFIX "${PYTHON_MODULE_EXTENSION}"
 )
+
+# set_target_properties(
+#     FbxPipeline
+#     PROPERTIES
+#     SUFFIX ".pyd"
+#     PREFIX ""
+# )
 
 if (WIN32)
     set(

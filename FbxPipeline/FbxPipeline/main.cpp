@@ -22,6 +22,15 @@ int main( int argc, char** argv ) {
     return 0;
 }
 
+
+/*
+-i "/home/user/vserhiienko/models_v2/knight_artorias/source/Artorias.fbx.fbx"
+-o ""/home/user/vserhiienko/models_v2/knight_artorias.fbxp"
+-e "/home/user/vserhiienko/models_v2/knight_artorias/**"
+--script-file "glTFMaterialExtension.py"
+--script-input "/home/user/vserhiienko/models_v2/knight_artorias/scene.gltf"
+*/
+ 
 // -i "C:\Sources\Models\1972-datsun-240k-gt\source\datsun240k.fbx" -o "C:\Sources\Models\1972-datsun-240k-gt.fbxp" -e "C:\Sources\Models\1972_datsun_240k_gt\**" --script-file "glTFMaterialExtension.py" --script-input "C:\Sources\Models\1972_datsun_240k_gt\scene.gltf"
 // -i "C:\Sources\Models\bristleback-dota-fan-art\source\POSE.fbx" -o "C:\Sources\Models\bristleback-dota-fan-art.fbxp" -e "C:\Sources\Models\bristleback_dota_fan-art\**" --script-file "glTFMaterialExtension.py" --script-input "C:\Sources\Models\bristleback_dota_fan-art\scene.gltf"
 // -i "C:\Sources\Models\warcraft-draenei-fanart\source\untitled1.fbx" -o "C:\Sources\Models\warcraft-draenei-fanart.fbxp" -e "C:\Sources\Models\warcraft_draenei_fanart\**" --script-file "glTFMaterialExtension.py" --script-input "C:\Sources\Models\warcraft_draenei_fanart\scene.gltf"
