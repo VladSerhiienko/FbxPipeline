@@ -197,19 +197,7 @@ void InitializePyModule( py::module & m ) {
     m.def( "resolve_full_path", []( const std::string s ) { return ResolveFullPath( s.c_str( ) ); } );
 }
 
-// TODO: Fix it to be the same for Windows and Ubuntu.
-//       For some reason it does not work for GCC pipeline.
-
-#ifdef _WIN32
-
-PYBIND11_MODULE( FbxPipeline, m ) {
-    InitializePyModule( m );
-}
-
-#else
-
+// TODO: PYBIND11_MODULE
 PYBIND11_EMBEDDED_MODULE( FbxPipeline, m ) {
     InitializePyModule( m );
 }
-
-#endif

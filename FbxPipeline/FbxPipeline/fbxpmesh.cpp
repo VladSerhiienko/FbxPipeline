@@ -428,7 +428,7 @@ TElementValue GetElementValue( const TElementLayer* pElementLayer,
 template < typename TElementLayer >
 const TElementLayer* VerifyElementLayer( const TElementLayer* pElementLayer ) {
     if ( nullptr == pElementLayer ) {
-        apemode::State::Get( ).console->error( "Missing element layer." );
+        apemode::State::Get( ).console->warn( "Missing element layer." );
         return nullptr;
     }
 

@@ -54,8 +54,8 @@ std::string ReplaceExtension( const char* path, const char* extension ) {
     return std::filesystem::path( path ).replace_extension( extension ).string( );
 }
 
-std::string RealPath( std::string path ) {
-    return path;
+std::string RealPath( const std::string & path ) {
+    return std::filesystem::canonical( path ).string( );
 }
 
 std::string GetParentPath( const char* path ) {
@@ -63,11 +63,13 @@ std::string GetParentPath( const char* path ) {
 }
 
 std::string ResolveFullPath( const char* path ) {
+    /*
     if ( std::filesystem::is_directory( path ) ) {
         const size_t lastIndex = strlen( path ) - 1;
         if ( path[ lastIndex ] != '\\' && path[ lastIndex ] != '/' )
             return ReplaceSlashes( RealPath( std::filesystem::absolute( path ).string( ) ) ) + "/";
     }
+    */
 
     return ReplaceSlashes( RealPath( std::filesystem::absolute( path ).string( ) ) );
 }
@@ -79,8 +81,7 @@ std::string FindFile( const char* filepath ) {
         const std::string filename = GetFileName( filepath );
         for ( auto& searchLocation : s.searchLocations ) {
             for ( auto fileOrFolderPath : std::filesystem::directory_iterator( searchLocation ) ) {
-                if ( std::filesystem::is_regular_file( fileOrFolderPath ) &&
-                     fileOrFolderPath.path( ).filename( ) == filename ) {
+                if ( std::filesystem::is_regular_file( fileOrFolderPath ) && fileOrFolderPath.path( ).filename( ) == filename ) {
                     return ResolveFullPath( fileOrFolderPath.path( ).string( ).c_str( ) );
                 }
             }
@@ -327,7 +328,7 @@ void InitializeSeachLocations( ) {
                 searchDirectories.insert( resolvedSearchDirectory );
 
                 for ( auto& searchDirectoryIt : std::filesystem::recursive_directory_iterator( resolvedSearchDirectory ) ) {
-                    if ( std::filesystem::is_directory(searchDirectoryIt.path( ) ) )
+                    if ( std::filesystem::is_directory( searchDirectoryIt.path( ) ) )
                         searchDirectories.insert( ResolveFullPath( searchDirectoryIt.path( ).string( ).c_str( ) ) );
                 }
             }

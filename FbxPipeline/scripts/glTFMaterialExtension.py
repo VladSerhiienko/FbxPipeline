@@ -77,7 +77,7 @@ def sync_textures(state, gltf_json):
             texture.premultiplied_alpha = True
             state.textures.push_back(texture)
             gltf_texture_index_to_texture_index[gltf_texture_index] = texture_index
-    
+
     FbxPipeline.log_info("TextureMap: {}".format(gltf_texture_index_to_texture_index))
     return gltf_texture_index_to_texture_index
 
@@ -121,7 +121,7 @@ def gltf_material_json_to_material(state, gltf_material_json, gltf_texture_index
         materialProperty.name_id = state.push_string("alphaMode")
         materialProperty.value_id = state.push_string(gltf_material_json["alphaMode"])
         material.properties.push_back(materialProperty)
-    
+
     if "emissiveFactor" in gltf_material_json:
         FbxPipeline.log_info("             : emissiveFactor")
         materialProperty = FbxPipeline.MaterialPropFb()
@@ -138,6 +138,13 @@ def gltf_material_json_to_material(state, gltf_material_json, gltf_texture_index
         materialProperty.value_id = gltf_texture_index_to_texture_index[gltf_material_json["normalTexture"]["index"]]
         material.texture_properties.push_back(materialProperty)
 
+    if "occlusionTexture" in gltf_material_json:
+        FbxPipeline.log_info("             : occlusionTexture")
+        materialProperty = FbxPipeline.MaterialPropFb()
+        materialProperty.name_id = state.push_string("occlusionTexture")
+        materialProperty.value_id = gltf_texture_index_to_texture_index[gltf_material_json["occlusionTexture"]["index"]]
+        material.texture_properties.push_back(materialProperty)
+
     if "pbrMetallicRoughness" in gltf_material_json:
         pbr_metallic_roughness_json = gltf_material_json["pbrMetallicRoughness"]
 
@@ -150,7 +157,7 @@ def gltf_material_json_to_material(state, gltf_material_json, gltf_texture_index
                                                           pbr_metallic_roughness_json["baseColorFactor"][2],
                                                           pbr_metallic_roughness_json["baseColorFactor"][3])
             material.properties.push_back(materialProperty)
-        
+
         if "metallicFactor" in pbr_metallic_roughness_json:
             FbxPipeline.log_info("             : metallicFactor")
             materialProperty = FbxPipeline.MaterialPropFb()
@@ -171,7 +178,7 @@ def gltf_material_json_to_material(state, gltf_material_json, gltf_texture_index
             materialProperty.name_id = state.push_string("metallicRoughnessTexture")
             materialProperty.value_id = gltf_texture_index_to_texture_index[pbr_metallic_roughness_json["metallicRoughnessTexture"]["index"]]
             material.texture_properties.push_back(materialProperty)
-        
+
         if "roughnessFactor" in pbr_metallic_roughness_json:
             FbxPipeline.log_info("             : roughnessFactor")
             materialProperty = FbxPipeline.MaterialPropFb()
@@ -228,7 +235,7 @@ def gltf_material_json_to_material(state, gltf_material_json, gltf_texture_index
 
 def gltf_export_materials(state, gltf_path):
     FbxPipeline.log_info("gltf_export_materials: {}".format(gltf_path))
-    
+
     if (os.path.splitext(gltf_path)[1].lower() == ".gltf" and os.path.isfile(gltf_path)):
         gltf_json = json.load(open(gltf_path))
 
@@ -240,7 +247,7 @@ def gltf_export_materials(state, gltf_path):
         if (gltf_materials_json == None):
             FbxPipeline.log_error("Failed to get gltf materials from json.")
             return
-            
+
         gltf_texture_index_to_texture_index = sync_textures(state, gltf_json)
         overrided_materials = list()
 

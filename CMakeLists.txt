@@ -246,7 +246,7 @@ if( MSVC )
     )
 
     file(
-        GLOB 
+        GLOB
         python_dlls_pdbs
         ${PYTHON_DIR}/*.dll
         ${PYTHON_DIR}/*.pdb
@@ -269,7 +269,7 @@ if( MSVC )
 endif()
 
 file(
-    GLOB 
+    GLOB
     fbxpipeline_scripts
     ${CMAKE_SOURCE_DIR}/FbxPipeline/scripts/*
 )
@@ -319,27 +319,6 @@ target_include_directories(
     ${pybind11_source_dir}/include
     ${FBX_SDK_INCLUDE_DIR}
 )
-
-# target_link_libraries(
-#     FbxPipeline
-#     PRIVATE
-#     pybind11::module
-#     pybind11::embed
-# )
-
-set_target_properties(
-    FbxPipeline
-    PROPERTIES
-    PREFIX "${PYTHON_MODULE_PREFIX}"
-    SUFFIX "${PYTHON_MODULE_EXTENSION}"
-)
-
-# set_target_properties(
-#     FbxPipeline
-#     PROPERTIES
-#     SUFFIX ".pyd"
-#     PREFIX ""
-# )
 
 if (WIN32)
     set(

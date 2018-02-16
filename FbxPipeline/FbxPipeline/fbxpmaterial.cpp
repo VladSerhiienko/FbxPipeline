@@ -75,6 +75,7 @@ void ExportMaterials( FbxScene* pScene ) {
 
                     bool supported = false;
                     switch ( srcProperty.GetPropertyDataType( ).GetType( ) ) {
+                        case eFbxString:
                         case eFbxBool:
                         case eFbxInt:
                         case eFbxUInt:
@@ -102,6 +103,11 @@ void ExportMaterials( FbxScene* pScene ) {
                                     srcObjCount );
 
                     switch ( srcProperty.GetPropertyDataType( ).GetType( ) ) {
+                        case eFbxString:
+                            m.properties.emplace_back(
+                                s.PushValue( srcProperty.GetNameAsCStr( ) ),
+                                s.PushValue( srcProperty.Get< FbxString >( ).Buffer( ) ) );
+                            break;
                         case eFbxBool:
                             m.properties.emplace_back(
                                 s.PushValue( srcProperty.GetNameAsCStr( ) ),

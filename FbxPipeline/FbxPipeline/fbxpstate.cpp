@@ -144,18 +144,21 @@ bool apemode::State::Load( ) {
 }
 
 std::string ToPrettySizeString( size_t size );
-bool ReadBinFile( const char* srcPath, std::vector< uint8_t >& fileBuffer, bool findFile );
-
-
-void RunExtensionsOnFinalize( );
+bool        ReadBinFile( const char* srcPath, std::vector< uint8_t >& fileBuffer, bool findFile );
+void        RunExtensionsOnFinalize( );
 
 std::string ToString( const std::vector< uint32_t >& xx ) {
     std::stringstream ss;
     ss << "[ ";
-    for ( auto& x : xx ) {
-        ss << x;
-        ss << " ";
-    }
+
+    if ( xx.empty( ) )
+        ss << "<none> ";
+    else
+        for ( auto& x : xx ) {
+            ss << x;
+            ss << " ";
+        }
+
     ss << "]";
     return ss.str( );
 }
@@ -163,20 +166,33 @@ std::string ToString( const std::vector< uint32_t >& xx ) {
 std::string ToString( const std::vector< apemodefb::SubsetFb >& xx ) {
     std::stringstream ss;
     ss << "[ ";
-    for ( auto& x : xx ) {
-        ss << "{ material id: ";
-        ss << x.material_id();
-        ss << ", base index: ";
-        ss << x.base_index();
-        ss << ", index count: ";
-        ss << x.index_count();
-        ss << " } ";
-    }
+
+    if ( xx.empty( ) )
+        ss << "<none> ";
+    else
+        for ( auto& x : xx ) {
+            ss << "{ material id: ";
+            ss << x.material_id( );
+            ss << ", base index: ";
+            ss << x.base_index( );
+            ss << ", index count: ";
+            ss << x.index_count( );
+            ss << " } ";
+        }
+
     ss << "]";
     return ss.str( );
 }
 
 bool apemode::State::Finalize( ) {
+
+    // TODO: Integrate extension support on all levels of scene exporting.
+    console->info( "Extensions" );
+
+    //
+    // Extend values
+    //
+
     RunExtensionsOnFinalize( );
 
     console->info( "Serialization" );
@@ -229,7 +245,7 @@ bool apemode::State::Finalize( ) {
             const auto childIdsOffset    = builder.CreateVector( node.childIds );
             const auto materialIdsOffset = builder.CreateVector( node.materialIds );
 
-            console->info( "+ curve ids {}, child ids {}, material ids {}, mesh id {}",
+            console->info( "+ curve ids: {}, child ids: {}, material ids: {}, mesh id: {}",
                            node.curveIds.size( ),
                            node.childIds.size( ),
                            ToString( node.materialIds ),
@@ -314,8 +330,7 @@ bool apemode::State::Finalize( ) {
     std::vector< flatbuffers::Offset< apemodefb::MaterialFb > > materialOffsets;
     materialOffsets.reserve( materials.size( ) );
     for ( auto& material : materials ) {
-        console->info( "+ properties {}", material.properties.size( ) );
-        console->info( "+ textures {}", material.textureProperties.size( ) );
+        console->info( "+ properties: {}, textures: {}", material.properties.size( ), material.textureProperties.size( ) );
 
         auto propertiesOffset = builder.CreateVectorOfStructs( material.properties );
         auto texturesOffset = builder.CreateVectorOfStructs( material.textureProperties );
@@ -347,13 +362,13 @@ bool apemode::State::Finalize( ) {
         std::transform( skin.linkFbxIds.begin( ),
                         skin.linkFbxIds.end( ),
                         std::back_inserter( tempLinkIndices ),
-                        [&]( const uint64_t& linkFbxId ) {
+                        [&]( const uint64_t linkFbxId ) {
                             auto nodeDictIt = nodeDict.find( linkFbxId );
                             assert( nodeDictIt != nodeDict.end( ) );
                             return nodeDictIt->second;
                         } );
 
-        console->info( "+ link ids {} ", skin.linkFbxIds.size( ) );
+        console->info( "+ link ids: {} ", skin.linkFbxIds.size( ) );
 
         return apemodefb::CreateSkinFb( builder, skin.nameId, builder.CreateVector( tempLinkIndices ) );
     } );
@@ -369,7 +384,7 @@ bool apemode::State::Finalize( ) {
     std::vector< flatbuffers::Offset< apemodefb::MeshFb > > meshOffsets;
     meshOffsets.reserve( meshes.size( ) );
     for ( auto& mesh : meshes ) {
-        console->info( "+ subsets {}, vertex count {}, vertex format {} ",
+        console->info( "+ subsets: {}, vertex count: {}, vertex format: {} ",
                        ToString( mesh.subsets ),
                        mesh.submeshes[ 0 ].vertex_count( ),
                        apemodefb::EnumNameEVertexFormatFb( mesh.submeshes[ 0 ].vertex_format( ) ) );
@@ -478,7 +493,7 @@ bool apemode::State::Finalize( ) {
 
     std::string output = options[ "o" ].as< std::string >( );
     if ( output.empty( ) ) {
-        output = folderPath + fileName + "." +apemodefb::SceneFbExtension( );
+        output = folderPath + fileName + "." + apemodefb::SceneFbExtension( );
     } else {
         std::string outputFolder;
         SplitFilename( output, &outputFolder, nullptr );

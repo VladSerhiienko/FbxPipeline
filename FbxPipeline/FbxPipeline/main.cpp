@@ -22,7 +22,6 @@ int main( int argc, char** argv ) {
     return 0;
 }
 
-
 /*
 -i "/home/user/vserhiienko/models_v2/knight_artorias/source/Artorias.fbx.fbx"
 -o ""/home/user/vserhiienko/models_v2/knight_artorias.fbxp"
@@ -30,18 +29,25 @@ int main( int argc, char** argv ) {
 --script-file "glTFMaterialExtension.py"
 --script-input "/home/user/vserhiienko/models_v2/knight_artorias/scene.gltf"
 */
- 
-// -i "C:\Sources\Models\1972-datsun-240k-gt\source\datsun240k.fbx" -o "C:\Sources\Models\1972-datsun-240k-gt.fbxp" -e "C:\Sources\Models\1972_datsun_240k_gt\**" --script-file "glTFMaterialExtension.py" --script-input "C:\Sources\Models\1972_datsun_240k_gt\scene.gltf"
-// -i "C:\Sources\Models\bristleback-dota-fan-art\source\POSE.fbx" -o "C:\Sources\Models\bristleback-dota-fan-art.fbxp" -e "C:\Sources\Models\bristleback_dota_fan-art\**" --script-file "glTFMaterialExtension.py" --script-input "C:\Sources\Models\bristleback_dota_fan-art\scene.gltf"
-// -i "C:\Sources\Models\warcraft-draenei-fanart\source\untitled1.fbx" -o "C:\Sources\Models\warcraft-draenei-fanart.fbxp" -e "C:\Sources\Models\warcraft_draenei_fanart\**" --script-file "glTFMaterialExtension.py" --script-input "C:\Sources\Models\warcraft_draenei_fanart\scene.gltf"
 
-// -i "C:\Sources\Models\bristleback-dota-fan-art\source\POSE.fbx" -o "C:\Sources\Models\bristleback-dota-fan-art.fbxp"
-// -i "C:\Sources\Models\warcraft-draenei-fanart\source\untitled1.fbx" -o "C:\Sources\Models\warcraft-draenei-fanart.fbxp"
+/*
+-i "C:/Sources/Models/warcraft-draenei-fanart/source/untitled1.fbx" -o "C:/Sources/Models/warcraft-draenei-fanart.fbxp" -l "C:/Sources/Models/warcraft-draenei-fanart.txt" -e "C:/Sources/Models/warcraft-draenei-fanart/**" -e "C:/Sources/Models/warcraft_draenei_fanart/**" --script-file "glTFMaterialExtension.py" --script-input "C:/Sources/Models/warcraft_draenei_fanart/scene.gltf"
+-i "C:/Sources/Models/1972-datsun-240k-gt/source/datsun240k.fbx" -o "C:/Sources/Models/1972-datsun-240k-gt.fbxp" -l "C:/Sources/Models/1972-datsun-240k-gt.txt" -e "C:/Sources/Models/1972_datsun_240k_gt/**" -e "C:/Sources/Models/1972-datsun-240k-gt/**" --script-file "glTFMaterialExtension.py" --script-input "C:/Sources/Models/1972_datsun_240k_gt/scene.gltf"
+-i "C:/Sources/Models/dreadroamer-free/source/Zbot_Animation.fbx" -o "C:/Sources/Models/dreadroamer-free.fbxp" -l "C:/Sources/Models/dreadroamer-free.txt" -e "C:/Sources/Models/dreadroamer-free/**" -e "C:/Sources/Models/dreadroamer_free/**" --script-file "glTFMaterialExtension.py" --script-input "C:/Sources/Models/dreadroamer_free/scene.gltf"
+-i "C:\Sources\Models\knight-artorias\source\Artorias.fbx.fbx" -o "C:/Sources/Models/knight-artorias.fbxp" -l "C:/Sources/Models/knight-artorias.txt" -e "C:/Sources/Models/knight-artorias/**" -e "C:/Sources/Models/knight_artorias/**" --script-file "glTFMaterialExtension.py" --script-input "C:\Sources\Models\knight_artorias\scene.gltf"
+*/
 
-// C:\Users\vladyslav.serhiienko\Downloads\apto logo\apto logo.FBX
-// C:\Users\vladyslav.serhiienko\Downloads\girl-speedsculpt\source\Merged_PolySphere_4553.fbx
-// C:\Users\vladyslav.serhiienko\Downloads\zophrac\source\Gunan_animated.fbx
-// C:\Users\vladyslav.serhiienko\Downloads\bristleback-dota-fan-art\source\POSE.fbx
+// -i "C:/Sources/Models/1972-datsun-240k-gt/source/datsun240k.fbx" -o "C:/Sources/Models/1972-datsun-240k-gt.fbxp" -e "C:/Sources/Models/1972_datsun_240k_gt/**" --script-file "glTFMaterialExtension.py" --script-input "C:/Sources/Models/1972_datsun_240k_gt/scene.gltf"
+// -i "C:/Sources/Models/bristleback-dota-fan-art/source/POSE.fbx" -o "C:/Sources/Models/bristleback-dota-fan-art.fbxp" -e "C:/Sources/Models/bristleback_dota_fan-art/**" --script-file "glTFMaterialExtension.py" --script-input "C:/Sources/Models/bristleback_dota_fan-art/scene.gltf"
+// -i "C:/Sources/Models/warcraft-draenei-fanart/source/untitled1.fbx" -o "C:/Sources/Models/warcraft-draenei-fanart.fbxp" -e "C:/Sources/Models/warcraft_draenei_fanart/**" --script-file "glTFMaterialExtension.py" --script-input "C:/Sources/Models/warcraft_draenei_fanart/scene.gltf"
+
+// -i "C:/Sources/Models/bristleback-dota-fan-art/source/POSE.fbx" -o "C:/Sources/Models/bristleback-dota-fan-art.fbxp"
+// -i "C:/Sources/Models/warcraft-draenei-fanart/source/untitled1.fbx" -o "C:/Sources/Models/warcraft-draenei-fanart.fbxp"
+
+// C:/Users/vladyslav.serhiienko/Downloads/apto logo/apto logo.FBX
+// C:/Users/vladyslav.serhiienko/Downloads/girl-speedsculpt/source/Merged_PolySphere_4553.fbx
+// C:/Users/vladyslav.serhiienko/Downloads/zophrac/source/Gunan_animated.fbx
+// C:/Users/vladyslav.serhiienko/Downloads/bristleback-dota-fan-art/source/POSE.fbx
 
 void ConvertScene( FbxManager* lSdkManager, FbxScene* lScene, FbxString lFilePath ) {
     auto& s = apemode::State::Get( );
