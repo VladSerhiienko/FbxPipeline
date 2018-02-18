@@ -1049,42 +1049,51 @@ void ExportMesh( FbxNode*       pNode,
 void ExportMesh( FbxNode* node, apemode::Node& n, bool pack, bool optimize ) {
     auto& s = apemode::State::Get( );
     if ( auto mesh = node->GetMesh( ) ) {
+
         s.console->info( "Node \"{}\" has mesh.", node->GetName( ) );
         if ( !mesh->IsTriangleMesh( ) ) {
+
             s.console->warn( "Mesh \"{}\" is not triangular, processing...", node->GetName( ) );
             FbxGeometryConverter converter( mesh->GetNode( )->GetFbxManager( ) );
             mesh = (FbxMesh*) converter.Triangulate( mesh, true, s.legacyTriangulationSdk );
 
             if ( nullptr == mesh ) {
                 s.console->error( "Mesh \"{}\" triangulation failed (mesh will be skipped).", node->GetName( ) );
-                return;
-            }
-
-            s.console->warn( "Mesh \"{}\" was triangulated (success).", node->GetName( ) );
-        }
-
-        if ( const auto deformerCount = mesh->GetDeformerCount( ) - mesh->GetDeformerCount(FbxDeformer::eSkin ) ) {
-            s.console->warn( "Mesh \"{}\" has {} non-skin deformers (will be ignored).", node->GetName( ), deformerCount );
-        }
-
-        if ( const auto skinCount = mesh->GetDeformerCount(FbxDeformer::eSkin ) ) {
-            if ( skinCount > 1 ) {
-                s.console->warn( "Mesh \"{}\" has {} skin deformers (only one will be included).", node->GetName( ), skinCount );
+            } else {
+                s.console->warn( "Mesh \"{}\" was triangulated (success).", node->GetName( ) );
             }
         }
 
-        n.meshId = (uint32_t) s.meshes.size( );
-        s.meshes.emplace_back( );
-        apemode::Mesh& m = s.meshes.back( );
+        if ( nullptr != mesh ) {
 
-        FbxSkin* pSkin = 0 != mesh->GetDeformerCount(FbxDeformer::eSkin )
-                       ? FbxCast< FbxSkin >( mesh->GetDeformer( 0,FbxDeformer::eSkin ) )
-                       : nullptr;
+            if ( const auto deformerCount = mesh->GetDeformerCount( ) - mesh->GetDeformerCount( FbxDeformer::eSkin ) ) {
+                s.console->warn( "Mesh \"{}\" has {} non-skin deformers (will be ignored).", node->GetName( ), deformerCount );
+            }
 
-        const uint32_t vertexCount = mesh->GetPolygonCount() * 3;
-        if ( vertexCount < std::numeric_limits< uint16_t >::max( ) )
-            ExportMesh< uint16_t >( node, mesh, n, m, vertexCount, pack, pSkin, optimize );
-        else
-            ExportMesh< uint32_t >( node, mesh, n, m, vertexCount, pack, pSkin, optimize );
+            if ( const auto skinCount = mesh->GetDeformerCount( FbxDeformer::eSkin ) ) {
+                if ( skinCount > 1 ) {
+                    s.console->warn( "Mesh \"{}\" has {} skin deformers (only one will be included).", node->GetName( ), skinCount );
+                }
+            }
+
+            if ( const uint32_t vertexCount = mesh->GetPolygonCount( ) * 3 ) {
+
+                n.meshId = (uint32_t) s.meshes.size( );
+                s.meshes.emplace_back( );
+                apemode::Mesh& m = s.meshes.back( );
+
+                FbxSkin* pSkin = 0 != mesh->GetDeformerCount( FbxDeformer::eSkin )
+                                     ? FbxCast< FbxSkin >( mesh->GetDeformer( 0, FbxDeformer::eSkin ) )
+                                     : nullptr;
+
+                if ( vertexCount < std::numeric_limits< uint16_t >::max( ) )
+                    ExportMesh< uint16_t >( node, mesh, n, m, vertexCount, pack, pSkin, optimize );
+                else
+                    ExportMesh< uint32_t >( node, mesh, n, m, vertexCount, pack, pSkin, optimize );
+
+            } else {
+                s.console->error( "Mesh \"{}\" has no vertices (skipped).", node->GetName( ) );
+            }
+        }
     }
 }

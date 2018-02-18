@@ -70,6 +70,19 @@ std::shared_ptr< spdlog::logger > CreateLogger( spdlog::level::level_enum lvl, s
     auto logger = spdlog::create<>( "apemode", sinks.begin( ), sinks.end( ) );
     logger->set_level( lvl );
 
+    spdlog::set_pattern( "%v" );
+    logger->info( "    ______" );
+    logger->info( "   / __/ /_  _  ______" );
+    logger->info( "  / /_/ __ \\| |/_/ __ \\" );
+    logger->info( " / __/ /_/ />  </ /_/ /" );
+    logger->info( "/_/ /_.___/_/|_/ .___/" );
+    logger->info( "              /_/" );
+    logger->info( "" );
+
+    spdlog::set_pattern( "%c" );
+    logger->info( "" );
+
+    spdlog::set_pattern( "[%T.%f] [%L] %v" );
     return logger;
 }
 
@@ -98,6 +111,7 @@ apemode::State::State( ) : options( GetExecutable( ) ) {
     options.add_options( "main" )( "k,convert", "Convert", cxxopts::value< bool >( ) );
     options.add_options( "main" )( "c,compress", "Compress", cxxopts::value< bool >( ) );
     options.add_options( "main" )( "p,pack-meshes", "Pack meshes", cxxopts::value< bool >( ) );
+    options.add_options( "main" )( "b,remove-bad-polies", "Remove bad polygons", cxxopts::value< bool >( ) );
     options.add_options( "main" )( "s,split-meshes-per-material", "Split meshes per material", cxxopts::value< bool >( ) );
     options.add_options( "main" )( "t,optimize-meshes", "Optimize meshes", cxxopts::value< bool >( ) );
     options.add_options( "main" )( "e,search-location", "Add search location", cxxopts::value< std::vector< std::string > >( ) );
@@ -384,9 +398,11 @@ bool apemode::State::Finalize( ) {
     std::vector< flatbuffers::Offset< apemodefb::MeshFb > > meshOffsets;
     meshOffsets.reserve( meshes.size( ) );
     for ( auto& mesh : meshes ) {
-        console->info( "+ subsets: {}, vertex count: {}, vertex format: {} ",
+        console->info( "+ subsets ({}): {}, vertex count: {}, vertex bytes: {}, vertex format: {} ",
+                       mesh.subsets.size( ),
                        ToString( mesh.subsets ),
                        mesh.submeshes[ 0 ].vertex_count( ),
+                       mesh.vertices.size( ),
                        apemodefb::EnumNameEVertexFormatFb( mesh.submeshes[ 0 ].vertex_format( ) ) );
 
         auto vsOffset = builder.CreateVector( mesh.vertices );
