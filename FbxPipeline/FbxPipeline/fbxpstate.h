@@ -180,7 +180,8 @@ namespace apemode {
         ValueId PushValue( const float x, const float y );
         ValueId PushValue( const float x, const float y, const float z );
         ValueId PushValue( const float x, const float y, const float z, const float w );
-        ValueId PushValue(const bool value);
+        ValueId PushValue( const bool value );
+        uint32_t PushValue( const apemodefb::TextureFb & value );
 
         uint32_t EmbedFile( const std::string fullPath );
 

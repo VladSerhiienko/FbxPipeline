@@ -549,6 +549,49 @@ apemode::ValueId apemode::State::PushValue( const bool value ) {
     return apemode::ValueId( apemodefb::EValueTypeFb_Bool, value );
 }
 
+
+uint32_t apemode::State::PushValue( const apemodefb::TextureFb & other ) {
+    for ( uint32_t i = 0; i < textures.size( ); ++i ) {
+        const auto& texture = textures[ i ];
+
+        //
+        // Note: Do not compare name_id and id
+        //
+
+        if ( texture.alpha_source( )            == other.alpha_source( ) &&
+             texture.blend_mode( )              == other.blend_mode( ) &&
+             texture.wrap_mode_u( )             == other.wrap_mode_u( ) &&
+             texture.wrap_mode_v( )             == other.wrap_mode_v( ) &&
+             texture.mapping_type( )            == other.mapping_type( ) &&
+             texture.file_id( )                 == other.file_id( ) &&
+             texture.offset_u( )                == other.offset_u( ) &&
+             texture.offset_v( )                == other.offset_v( ) &&
+             texture.scale_u( )                 == other.scale_u( ) &&
+             texture.scale_v( )                 == other.scale_v( ) &&
+             texture.premultiplied_alpha( )     == other.premultiplied_alpha( ) &&
+             texture.swap_uv( )                 == other.swap_uv( ) &&
+             texture.rotation_u( )              == other.rotation_u( ) &&
+             texture.rotation_v( )              == other.rotation_v( ) &&
+             texture.rotation_w( )              == other.rotation_w( ) &&
+             texture.wipe_mode( )               == other.wipe_mode( ) &&
+             texture.texture_use( )             == other.texture_use( ) &&
+             texture.texture_type_id( )         == other.texture_type_id( ) &&
+             texture.planar_mapping_normal( )   == other.planar_mapping_normal( ) &&
+             texture.cropping_bottom( )         == other.cropping_bottom( ) &&
+             texture.cropping_left( )           == other.cropping_left( ) &&
+             texture.cropping_right( )          == other.cropping_right( ) &&
+             texture.cropping_top( )            == other.cropping_top( ) ) {
+
+            return i;
+        }
+    }
+
+    const uint32_t id = static_cast< uint32_t >( textures.size( ) );
+    textures.push_back( other );
+    textures.back().mutate_id( id );
+    return id;
+}
+
 uint32_t apemode::State::EmbedFile( const std::string fullPath) {
     if ( fullPath.empty( ) || false == FileExists( fullPath.c_str( ) ) )
         return std::numeric_limits< uint32_t >::max( );

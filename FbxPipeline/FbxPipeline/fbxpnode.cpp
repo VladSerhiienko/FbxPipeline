@@ -61,6 +61,8 @@ void PreprocessMeshes( FbxScene* scene ) {
 
     FbxGeometryConverter geometryConverter( s.manager );
 
+#if FBXSDK_VERSION_MAJOR > 2015
+
     if ( s.options[ "remove-bad-polies" ].as< bool >( ) ) {
         s.console->info( "Removing bad polygons..." );
 
@@ -77,6 +79,8 @@ void PreprocessMeshes( FbxScene* scene ) {
             s.console->info( "No bad polygons in the scene." );
         }
     }
+
+#endif
 
     if ( s.options[ "split-meshes-per-material" ].as< bool >( ) ) {
         s.console->info( "Splitting per material..." );
