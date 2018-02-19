@@ -47,8 +47,6 @@ def sync_textures(state, gltf_json):
             FbxPipeline.log_info("            : sampler_index: {}".format(gltf_sampler_index))
             FbxPipeline.log_info("            : wrap_mode_u: {} wrap_mode_v: {}".format(wrap_mode_u, wrap_mode_v))
 
-            texture_index = state.textures.size()
-
             texture = FbxPipeline.TextureFb()
             texture.id = texture_index
             texture.name_id = state.push_string(texture_file_name)
@@ -75,7 +73,8 @@ def sync_textures(state, gltf_json):
             texture.swap_uv = False
             texture.wipe_mode = False
             texture.premultiplied_alpha = True
-            state.textures.push_back(texture)
+            
+            texture_index = state.push_texture(texture)
             gltf_texture_index_to_texture_index[gltf_texture_index] = texture_index
 
     FbxPipeline.log_info("TextureMap: {}".format(gltf_texture_index_to_texture_index))
