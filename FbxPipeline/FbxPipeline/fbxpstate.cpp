@@ -478,8 +478,11 @@ bool apemode::State::Finalize( ) {
 
     console->info( "> Scene" );
     apemodefb::SceneFbBuilder sceneBuilder( builder );
-    sceneBuilder.add_transforms( transformsOffset );
     sceneBuilder.add_string_values( stringsOffset );
+    sceneBuilder.add_float_values( floatsOffset );
+    sceneBuilder.add_int_values( intsOffset );
+    sceneBuilder.add_bool_values( boolsOffset );
+    sceneBuilder.add_transforms( transformsOffset );
     sceneBuilder.add_nodes( nodesOffset );
     sceneBuilder.add_meshes( meshesOffset );
     sceneBuilder.add_textures( texturesOffset );

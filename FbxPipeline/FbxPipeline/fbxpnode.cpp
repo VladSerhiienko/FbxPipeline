@@ -28,26 +28,32 @@ void ExportNodeAttributes( FbxNode* node, apemode::Node& n ) {
 uint32_t ExportNode( FbxNode* node ) {
     auto& s = apemode::State::Get( );
 
-    const uint32_t nodeId = static_cast< uint32_t >( s.nodes.size( ) );
-    s.nodes.emplace_back( );
+    if ( false == node->GetObjectFlags( FbxObject::EObjectFlag::eHidden ) ) {
+        const uint32_t nodeId = static_cast< uint32_t >( s.nodes.size( ) );
+        s.nodes.emplace_back( );
 
-    auto& n  = s.nodes.back( );
-    n.id = nodeId;
-    n.fbxId = node->GetUniqueID( );
-    n.nameId = s.PushValue( node->GetName( ) );
+        auto& n  = s.nodes.back( );
+        n.id     = nodeId;
+        n.fbxId  = node->GetUniqueID( );
+        n.nameId = s.PushValue( node->GetName( ) );
 
-    s.nodeDict[ n.fbxId ] = nodeId;
+        s.nodeDict[ n.fbxId ] = nodeId;
 
-    ExportNodeAttributes( node, n );
-    if ( auto c = node->GetChildCount( ) ) {
-        n.childIds.reserve( c );
-        for ( auto i = 0; i < c; ++i ) {
-            const auto childId = ExportNode( node->GetChild( i ) );
-            s.nodes[ nodeId ].childIds.push_back( childId );
+        ExportNodeAttributes( node, n );
+        if ( auto c = node->GetChildCount( ) ) {
+            n.childIds.reserve( c );
+            for ( auto i = 0; i < c; ++i ) {
+                const auto childId = ExportNode( node->GetChild( i ) );
+                if ( childId != -1 )
+                    s.nodes[ nodeId ].childIds.push_back( childId );
+            }
         }
+
+        return nodeId;
     }
 
-    return nodeId;
+    s.console->info( "Node {} is hidden", node->GetName( ) );
+    return uint32_t( -1 );
 }
 
 /**
