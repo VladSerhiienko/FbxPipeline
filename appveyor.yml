@@ -1,0 +1,29 @@
+version: '{build}'
+branches:
+  only:
+  - master
+skip_tags: true
+image: Visual Studio 2017
+platform: x64
+configuration: Release
+install:
+- ps: >-
+      md fbx
+      cd fbx
+      Start-FileDownload "http://download.autodesk.com/us/fbx/2018/2018.1.1/fbx20181_1_fbxsdk_vs2015_win.exe" "fbxsdk.exe"
+      Start-Process -FilePath "fbxsdk.exe" /S -Wait
+      cd ..
+before_build:
+  - cmake -G "Visual Studio 15 2017 Win64" -Bbuild_windows_amd64
+build:
+  project: build_windows_amd64/FbxPipeline.sln
+  parallel: true
+  verbosity: minimal
+notifications:
+- provider: Email
+  to:
+  - vlad.serhiienko@gmail.com
+  subject: FbxPipeline build {{buildVersion}} - {{status}}
+  on_build_success: false
+  on_build_failure: true
+  on_build_status_changed: true
