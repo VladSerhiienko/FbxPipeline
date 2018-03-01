@@ -28,17 +28,29 @@
  - Image compression (*ETC, PVR*, PVR SDK)
 
 ## Command line example
+### Fbx + textures 
 ```sh
 -i "$(ModelsDir)knight-artorias\source\Artorias.fbx"
 -o "$(SolutionDir)assets\Artoriasv2.fbxp"
 -e "$(ModelsDir)knight-artorias\**" -m ".*\.png"
 -p
 ```
+### Fbx + materials with textures in glTF
+```sh
+-i "C:\Sources\Models\knight-artorias\source\Artorias.fbx.fbx"
+-o "C:/Sources/Models/knight-artorias.fbxp"
+-l "C:/Sources/Models/knight-artorias.txt"
+-e "C:/Sources/Models/knight-artorias/**"
+-e "C:/Sources/Models/knight_artorias/**"
+--script-file "glTFMaterialExtension.py"
+--script-input "C:\Sources\Models\knight_artorias\scene.gltf"
+```
 |Argument|Comment|
 |--------|-------|
 |-i|Input .FBX file|
 |-o|Output .FBX file|
 |-p|Enable mesh packing|
+|-b|Remove bad polies|
 |-e|Sets search location(s) for the files specified for embedding (*two stars* at the end mean recursive look-ups), the option can be used multiple times, for example: **-e** *../path/one/* **-e** *../path/two/\*\** (*all the child folders in ../path/two/ folder will be added recursively*)|
 |-m|Embed file, regex (**.\*\\.png** means all the *.png* files), the option can be used multiple times|
 
