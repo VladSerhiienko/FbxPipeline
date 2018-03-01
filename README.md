@@ -7,7 +7,8 @@
                         /_/                          
 ```
 
-**FbxPipeline** is the command line exporter for the *.FBX* files. It suits for the projects that already use or plan to use **flatbuffers** (Google's library for serialisation, https://google.github.io/flatbuffers/).
+
+**FbxPipeline** [![Build status](https://ci.appveyor.com/api/projects/status/lob4wuwoji3awkeq?svg=true)](https://ci.appveyor.com/project/VladSerhiienko/fbxpipeline) is the command line exporter for the *.FBX* files. It suits for the projects that already use or plan to use **flatbuffers** (Google's library for serialisation, https://google.github.io/flatbuffers/).
 
 ## The main advantages are:
  - No libraries needed except *flatbuffers*
