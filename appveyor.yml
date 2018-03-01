@@ -7,14 +7,13 @@ image: Visual Studio 2017
 platform: x64
 configuration: Release
 init:
-- git config --global core.autocrlf true
+  - git config --global core.autocrlf true
 install:
-- ps: >-
-    md fbx
-    cd fbx
-    Start-FileDownload "http://download.autodesk.com/us/fbx/2018/2018.1.1/fbx20181_1_fbxsdk_vs2015_win.exe" "fbxsdk.exe"
-    Start-Process -FilePath "fbxsdk.exe" /S -Wait
-    cd ..
+  - ps: md fbx
+  - ps: cd fbx
+  - ps: Start-FileDownload "http://download.autodesk.com/us/fbx/2018/2018.1.1/fbx20181_1_fbxsdk_vs2015_win.exe" "fbxsdk.exe"
+  - ps: Start-Process -FilePath "fbxsdk.exe" /S -Wait
+  - ps: cd ..
 before_build:
   - cmake -G "Visual Studio 15 2017 Win64" -Bbuild_windows_amd64
 build:
@@ -24,7 +23,7 @@ build:
 notifications:
 - provider: Email
   to:
-  - vlad.serhiienko@gmail.com
+    - vlad.serhiienko@gmail.com
   subject: FbxPipeline build {{buildVersion}} - {{status}}
   on_build_success: false
   on_build_failure: true
