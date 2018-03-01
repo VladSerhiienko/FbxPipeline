@@ -1,33 +1,17 @@
 ```
-                                 ___                       ___
-                                /  /\       _____         /__/|
-                               /  /:/_     /  /::\       |  |:|
-                              /  /:/ /\   /  /:/\:\      |  |:|
-                             /  /:/ /:/  /  /:/~/::\   __|__|:|
-                            /__/:/ /:/  /__/:/ /:/\:| /__/::::\____
-                            \  \:\/:/   \  \:\/:/~/:/    ~\~~\::::/
-                             \  \::/     \  \::/ /:/      |~~|:|~~
-                              \  \:\      \  \:\/:/       |  |:|
-                               \  \:\      \  \::/        |  |:|
-                                \__\/       \__\/         |__|/
-      ___                     ___         ___                                     ___           ___
-     /  /\      ___          /  /\       /  /\                      ___          /__/\         /  /\
-    /  /::\    /  /\        /  /::\     /  /:/_                    /  /\         \  \:\       /  /:/_
-   /  /:/\:\  /  /:/       /  /:/\:\   /  /:/ /\    ___     ___   /  /:/          \  \:\     /  /:/ /\
-  /  /:/~/:/ /__/::\      /  /:/~/:/  /  /:/ /:/_  /__/\   /  /\ /__/::\      _____\__\:\   /  /:/ /:/_
- /__/:/ /:/  \__\/\:\__  /__/:/ /:/  /__/:/ /:/ /\ \  \:\ /  /:/ \__\/\:\__  /__/::::::::\ /__/:/ /:/ /\
- \  \:\/:/      \  \:\/\ \  \:\/:/   \  \:\/:/ /:/  \  \:\  /:/     \  \:\/\ \  \:\~~\~~\/ \  \:\/:/ /:/
-  \  \::/        \__\::/  \  \::/     \  \::/ /:/    \  \:\/:/       \__\::/  \  \:\  ~~~   \  \::/ /:/
-   \  \:\        /__/:/    \  \:\      \  \:\/:/      \  \::/        /__/:/    \  \:\        \  \:\/:/
-    \  \:\       \__\/      \  \:\      \  \::/        \__\/         \__\/      \  \:\        \  \::/
-     \__\/                   \__\/       \__\/                                   \__\/         \__\/
-
+    ________         ____  _            ___          
+   / ____/ /_  _  __/ __ \(_)___  ___  / (_)___  ___ 
+  / /_  / __ \| |/_/ /_/ / / __ \/ _ \/ / / __ \/ _ \
+ / __/ / /_/ />  </ ____/ / /_/ /  __/ / / / / /  __/
+/_/   /_.___/_/|_/_/   /_/ .___/\___/_/_/_/ /_/\___/ 
+                        /_/                          
 ```
-# FbxPipeline
+
 **FbxPipeline** is the command line exporter for the *.FBX* files. It suits for the projects that already use or plan to use **flatbuffers** (Google's library for serialisation, https://google.github.io/flatbuffers/).
 
 ## The main advantages are:
  - No libraries needed except *flatbuffers*
+ - Python Embedding (glTF plugin example)
  - Single generated header file from the scheme file (the pre-generated file in the repository can be used)
  - Packing for meshes (reduces memory bandwidth)
  - No processing on loading (simply *memcpy* the data and set appropriate *image/buffers formats/attributes*)
@@ -45,15 +29,18 @@
 
 ## Command line example
 ```sh
--i "$(ModelsDir)knight-artorias\source\Artorias.fbx" -o "$(SolutionDir)assets\Artoriasv2.fbxp" -p -e "$(ModelsDir)knight-artorias\**" -m ".*\.png"
+-i "$(ModelsDir)knight-artorias\source\Artorias.fbx"
+-o "$(SolutionDir)assets\Artoriasv2.fbxp"
+-e "$(ModelsDir)knight-artorias\**" -m ".*\.png"
+-p
 ```
 |Argument|Comment|
 |--------|-------|
-|-i, --input-file|Input .FBX file|
-|-o, --output-file|Output .FBX file|
-|-p,--pack-meshes|Enable mesh packing|
-|-e,--search-location|Sets search location(s) for the files specified for embedding (*two stars* at the end mean recursive look-ups), the option can be used multiple times, for example: **-e** *../path/one/* **-e** *../path/two/\*\** (*all the child folders in ../path/two/ folder will be added recursively*)|
-|-m,--embed-file|Embed file, regex (**.\*\\.png** means all the *.png* files), the option can be used multiple times|
+|-i|Input .FBX file|
+|-o|Output .FBX file|
+|-p|Enable mesh packing|
+|-e|Sets search location(s) for the files specified for embedding (*two stars* at the end mean recursive look-ups), the option can be used multiple times, for example: **-e** *../path/one/* **-e** *../path/two/\*\** (*all the child folders in ../path/two/ folder will be added recursively*)|
+|-m|Embed file, regex (**.\*\\.png** means all the *.png* files), the option can be used multiple times|
 
 ## How to build (Linux, bash + cmake + make):
 
@@ -62,29 +49,8 @@
 cd <dev directory>
 git clone git@github.com:VladSerhiienko/FbxPipeline.git
 cd FbxPipeline
-git submodule init
-git submodule update --recursive
-
-cd ThirdParty
-
-cd mathfu
-git submodule init
-git submodule update --recursive
-cd ..
-
-cd flatbuffers
-git checkout master
-git pull origin master
-cmake -Bbuild_linux_x86-64 -H.
-make -C build_linux_x86-64
-cd ..
-
-cd ..
-ThirdParty/flatbuffers/build_linux_x86-64/flatc -o FbxPipeline/generated -c FbxPipeline/schemes/scene.fbs --gen-mutable
-ThirdParty/flatbuffers/build_linux_x86-64/flatc -o FbxPipeline/generated -s FbxPipeline/schemes/scene.fbs --gen-mutable
-
-cmake -Bbuild_linux_x86-64 -H.
-make -C build_linux_x86-64
+cmake -Bbuild_linux_x86_64 -H.
+make -C build_linux_x86_64
 
 ```
 
@@ -95,30 +61,8 @@ make -C build_linux_x86-64
 cd <dev directory>
 git clone git@github.com:VladSerhiienko/FbxPipeline.git
 cd FbxPipeline
-git submodule init
-git submodule update --recursive
-
-cd ThirdParty
-
-cd mathfu
-git submodule init
-git submodule update --recursive
-cd ..
-
-cd flatbuffers
-git checkout master
-git pull origin master
-cmake -G "Visual Studio 14 2015 Win64" -Bbuild_windows_x86-64 "-H."
-cd build_windows_x86-64
-& 'C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe' FlatBuffers.sln /target:ALL_BUILD /p:Configuration=Debug
-& 'C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe' FlatBuffers.sln /target:ALL_BUILD /p:Configuration=Release
-cd ../../
-
-cd ..
-.\ThirdParty\flatbuffers\build_windows_x86-64\Release\flatc.exe -o FbxPipeline/generated -c FbxPipeline/schemes/scene.fbs --gen-mutable
-.\ThirdParty\flatbuffers\build_windows_x86-64\Release\flatc.exe -o FbxPipeline/generated -c FbxPipeline/schemes/scene.fbs --gen-mutable
-cmake -G "Visual Studio 14 2015 Win64" -Bbuild_windows_x86-64 "-H."
-& 'C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe' FbxPipeline.sln /target:ALL_BUILD /p:Configuration=Debug
+cmake -G "Visual Studio 14 2015 Win64" -Bbuild_windows_amd64 "-H."
+& 'C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe' build_windows_amd64\FbxPipeline.sln /target:ALL_BUILD /p:Configuration=Debug
 
 ```
 
