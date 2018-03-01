@@ -7,6 +7,7 @@ image: Visual Studio 2017
 platform: x64
 configuration: Release
 install:
+- git config --global core.autocrlf true
 - ps: >-
       md fbx
       cd fbx
