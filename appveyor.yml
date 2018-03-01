@@ -9,11 +9,7 @@ configuration: Release
 init:
   - git config --global core.autocrlf true
 install:
-  # https://www.python.org/ftp/python/3.6.4/python-3.6.4-amd64.exe
-  - ps: cat CMakeLists.txt
   - ps: (Get-Content CMakeLists.txt).replace("git@github.com:","https://github.com/") | Set-Content CMakeLists.txt
-  # - ps: cat CMakeLists.txt | %{$_ -replace "git@github.com:","https://github.com/"} | Out-File CMakeLists.txt
-  - ps: cat CMakeLists.txt
   - ps: md installs
   - ps: cd installs
   - ps: Start-FileDownload "http://download.autodesk.com/us/fbx/2018/2018.1.1/fbx20181_1_fbxsdk_vs2015_win.exe" "fbxsdk.exe"
