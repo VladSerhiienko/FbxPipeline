@@ -205,9 +205,9 @@ if (WIN32)
     add_custom_command(
         OUTPUT ${CMAKE_SOURCE_DIR}/FbxPipeline/generated/scene_generated.h
         DEPENDS ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs
-        COMMAND ${flatbuffers_binary_dir}/Debug/flatc.exe -o ${CMAKE_SOURCE_DIR}/FbxPipeline/generated -c ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs --gen-mutable
-        COMMAND ${flatbuffers_binary_dir}/Debug/flatc.exe -o ${CMAKE_SOURCE_DIR}/FbxPipeline/generated -s ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs --gen-mutable
-        COMMAND ${flatbuffers_binary_dir}/Debug/flatc.exe -o ${CMAKE_SOURCE_DIR}/FbxPipeline/generated -p ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs --gen-mutable
+        COMMAND ${flatbuffers_binary_dir}${CONFIGURATION_SUFFIX}/flatc.exe -o ${CMAKE_SOURCE_DIR}/FbxPipeline/generated -c ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs --gen-mutable
+        COMMAND ${flatbuffers_binary_dir}${CONFIGURATION_SUFFIX}/flatc.exe -o ${CMAKE_SOURCE_DIR}/FbxPipeline/generated -s ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs --gen-mutable
+        COMMAND ${flatbuffers_binary_dir}${CONFIGURATION_SUFFIX}/flatc.exe -o ${CMAKE_SOURCE_DIR}/FbxPipeline/generated -p ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs --gen-mutable
         COMMENT "Generating Headers From Schemes"
         VERBATIM
     )
@@ -331,10 +331,10 @@ target_include_directories(
 if (WIN32)
     set(
         third_party_libs
-        debug ${zlib_binary_dir}/Debug/zlibstaticd.lib
-        debug ${flatbuffers_binary_dir}/Debug/flatbuffers.lib
-        optimized ${zlib_binary_dir}/Release/zlibstatic.lib
-        optimized ${flatbuffers_binary_dir}/Release/flatbuffers.lib
+        debug ${zlib_binary_dir}${CONFIGURATION_SUFFIX}/zlibstaticd.lib
+        debug ${flatbuffers_binary_dir}${CONFIGURATION_SUFFIX}/flatbuffers.lib
+        optimized ${zlib_binary_dir}${CONFIGURATION_SUFFIX}/zlibstatic.lib
+        optimized ${flatbuffers_binary_dir}${CONFIGURATION_SUFFIX}/flatbuffers.lib
         ${PYTHON_LIBRARY}
         winmm.lib
         imm32.lib
