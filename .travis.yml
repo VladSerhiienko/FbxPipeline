@@ -37,13 +37,13 @@ install:
   - wget -O fbx20171_fbxsdk_linux.tar.gz http://download.autodesk.com/us/fbx/2017/2017.1/fbx20171_fbxsdk_linux.tar.gz
   - tar -xf fbx20171_fbxsdk_linux.tar.gz
   - chmod ugo+x fbx20171_fbxsdk_linux
-  - yes yes | ./fbx20171_fbxsdk_linux /usr/local;
+  - yes yes | ./fbx20171_fbxsdk_linux /usr/local
 
 script:
   - cat CMakeLists.txt
   - sed 's,git@github.com:,https://github.com/,g' CMakeLists.txt
   - cat CMakeLists.txt
-  - cmake -GNinja -H. -Bbuild_linux_x86_64 -DFBX_SDK_INCLUDE_DIR:STRING=/usr/local -DFBX_SDK_LIBRARY_DIR:STRING=/usr/local
+  - cmake -GNinja -H. -Bbuild_linux_x86_64 -DFBX_SDK_INCLUDE_DIR:STRING=/usr/local/fbx20171_fbxsdk_linux/include -DFBX_SDK_LIBRARY_DIR:STRING=/usr/local/fbx20171_fbxsdk_linux/lib
   - cd build_linux_x86_64
   - ninja
   - cd ..
