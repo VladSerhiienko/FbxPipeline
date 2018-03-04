@@ -1,0 +1,36 @@
+language: cpp
+sudo: required
+os: linux
+dist: trusty
+
+branches:
+  only:
+    - master
+
+compiler:
+  - gcc
+
+before_script:
+  - sudo apt-get install 
+
+install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y libassimp-dev libglm-dev graphviz libxcb-dri3-0 libxcb-present0 libpciaccess0 cmake libpng-dev libxcb-dri3-dev libx11-dev libx11-xcb-dev libmirclient-dev libwayland-dev libxrandr-dev
+  - wget -O fbx20171_fbxsdk_linux.tar.gz http://download.autodesk.com/us/fbx/2017/2017.1/fbx20171_fbxsdk_linux.tar.gz
+  - tar -xf fbx20171_fbxsdk_linux.tar.gz
+  - chmod ugo+x fbx20171_fbxsdk_linux.run
+  - yes yes | ./fbx20171_fbxsdk_linux /usr/local;
+
+script:
+  - sed 's,git@github.com,https://github.com/,g' <CMakeLists.txt >CMakeLists.txt
+  - cmake -H. -Bbuild_linux_x86_64 -DFBX_SDK_INCLUDE_DIR:STRING=/usr/local -DFBX_SDK_LIBRARY_DIR:STRING=/usr/local
+  - cd build_linux_x86_64
+  - make
+  - cd ..
+
+notifications:
+  email:
+    recipients:
+      - vlad.serhiienko@gmail.com
+    on_success: change
+    on_failure: always
