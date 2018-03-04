@@ -40,7 +40,9 @@ install:
   - yes yes | ./fbx20171_fbxsdk_linux /usr/local;
 
 script:
-  - sed 's,git@github.com,https://github.com/,g' <CMakeLists.txt >CMakeLists.txt
+  - cat CMakeLists.txt
+  - sed 's,git@github.com,https://github.com/,g' CMakeLists.txt
+  - cat CMakeLists.txt
   - cmake -GNinja -H. -Bbuild_linux_x86_64 -DFBX_SDK_INCLUDE_DIR:STRING=/usr/local -DFBX_SDK_LIBRARY_DIR:STRING=/usr/local
   - cd build_linux_x86_64
   - ninja
