@@ -38,6 +38,7 @@ install:
   - tar -xf fbx20171_fbxsdk_linux.tar.gz
   - chmod ugo+x fbx20171_fbxsdk_linux
   - yes yes | ./fbx20171_fbxsdk_linux /usr/local
+  - tree -d /usr/local
 
 script:
   - cat CMakeLists.txt
