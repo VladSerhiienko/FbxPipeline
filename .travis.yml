@@ -34,19 +34,19 @@ before_script:
 install:
   - sudo apt-get -qq update
   - sudo apt-get install -y libassimp-dev libglm-dev graphviz libxcb-dri3-0 libxcb-present0 libpciaccess0 cmake libpng-dev libxcb-dri3-dev libx11-dev libx11-xcb-dev libmirclient-dev libwayland-dev libxrandr-dev
-  - wget -O fbx20171_fbxsdk_linux.tar.gz http://download.autodesk.com/us/fbx/2017/2017.1/fbx20171_fbxsdk_linux.tar.gz
-  - tar -xf fbx20171_fbxsdk_linux.tar.gz
-  - chmod ugo+x fbx20171_fbxsdk_linux
-  - yes yes | ./fbx20171_fbxsdk_linux /usr/local
-  - tree -d /usr/local
+  - sudo wget -O fbx20181_1_fbxsdk_linux.tar.gz http://download.autodesk.com/us/fbx/2018/2018.1.1/fbx20181_1_fbxsdk_linux.tar.gz
+  - sudo tar -xf fbx20181_1_fbxsdk_linux.tar.gz
+  - sudo chmod ugo+x fbx20181_1_fbxsdk_linux
+  - sudo mkdir /home/travis/build/VladSerhiienko/Viewer/FbxSdk
+  - yes yes | sudo ./fbx20181_1_fbxsdk_linux /home/travis/build/VladSerhiienko/Viewer/FbxSdk
 
 script:
   - cat CMakeLists.txt
-  - sed 's,git@github.com:,https://github.com/,g' CMakeLists.txt
+  - sed -i 's,git@github.com:,https://github.com/,g' CMakeLists.txt
   - cat CMakeLists.txt
-  - cmake -GNinja -H. -Bbuild_linux_x86_64 -DFBX_SDK_INCLUDE_DIR:STRING=/usr/local/fbx20171_fbxsdk_linux/include -DFBX_SDK_LIBRARY_DIR:STRING=/usr/local/fbx20171_fbxsdk_linux/lib
+  - cmake -H. -Bbuild_linux_x86_64 -DFBX_SDK_INCLUDE_DIR:STRING=/home/travis/build/VladSerhiienko/Viewer/FbxSdk/include -DFBX_SDK_LIBRARY_DIR:STRING=/home/travis/build/VladSerhiienko/Viewer/FbxSdk/lib
   - cd build_linux_x86_64
-  - ninja
+  - make
   - cd ..
 
 notifications:
