@@ -21,41 +21,60 @@ void ApplyFilter( FbxAnimCurveFilter* pFilter, FbxAnimCurve** ppCurves ) {
     }
 }
 
+struct FbxAnimLayerComposite {
+    FbxAnimLayer* pAnimLayer;
+    FbxAnimStack* pAnimStack;
+};
+
+struct FbxAnimCurveComposite {
+    apemodefb::EAnimCurvePropertyFb eAnimCurveProperty;
+    apemodefb::EAnimCurveChannelFb  eAnimCurveChannel;
+    FbxAnimCurve*                   pAnimCurve;
+    FbxAnimLayer*                   pAnimLayer;
+    FbxAnimStack*                   pAnimStack;
+};
+
 void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
     auto& s      = apemode::State::Get( );
     auto  pScene = pNode->GetScene( );
 
-    std::vector< std::tuple< FbxAnimLayer*, FbxAnimStack* > > animLayers;
+    std::vector< FbxAnimLayerComposite > animLayers;
     animLayers.reserve( s.animLayers.size( ) );
 
     int animStackCount = pScene->GetSrcObjectCount< FbxAnimStack >( );
     for ( int i = 0; i < animStackCount; i++ ) {
         FbxAnimStack* pAnimStack = pScene->GetSrcObject< FbxAnimStack >( i );
-        int animLayerCount = pAnimStack->GetMemberCount< FbxAnimLayer >( );
+        int animLayerCount = pAnimStack ? pAnimStack->GetMemberCount< FbxAnimLayer >( ) : 0;
         for ( int j = 0; j < animLayerCount; j++ ) {
-            FbxAnimLayer* pAnimLayer = pAnimStack->GetMember< FbxAnimLayer >( j );
-            animLayers.emplace_back( pAnimLayer, pAnimStack );
+            FbxAnimLayerComposite item;
+            item.pAnimLayer = pAnimStack->GetMember< FbxAnimLayer >( j );
+            item.pAnimStack = pAnimStack;
+            animLayers.push_back( item );
         }
     }
 
-    std::vector< std::tuple< apemodefb::EAnimCurvePropertyFb,
-                             apemodefb::EAnimCurveChannelFb,
-                             FbxAnimCurve*,
-                             FbxAnimLayer*,
-                             FbxAnimStack* > >
-        animCurves;
+    std::vector< FbxAnimCurveComposite > animCurves;
 
     animCurves.reserve( animLayers.size( ) *
                         ( apemodefb::EAnimCurveChannelFb_MAX + 1 ) *
                         ( apemodefb::EAnimCurvePropertyFb_MAX + 1 ) );
 
     for ( auto pAnimLayerTuple : animLayers ) {
-        auto pAnimLayer = std::get< FbxAnimLayer* >( pAnimLayerTuple );
-        auto pAnimStack = std::get< FbxAnimStack* >( pAnimLayerTuple );
+        auto pAnimLayer = pAnimLayerTuple.pAnimLayer;
+        auto pAnimStack = pAnimLayerTuple.pAnimStack;
 
 #pragma region
-#define EmplaceBackChannel( _P, _eC, _C ) \
-    animCurves.emplace_back( apemodefb::EAnimCurvePropertyFb_##_P, _eC, pNode->_P.GetCurve( pAnimLayer, _C ), pAnimLayer, pAnimStack );
+#define EmplaceBackChannel( _P, _eC, _C )                                             \
+    {                                                                                 \
+        FbxAnimCurveComposite animCurveComposite;                                     \
+        animCurveComposite.eAnimCurveProperty = apemodefb::EAnimCurvePropertyFb_##_P; \
+        animCurveComposite.eAnimCurveChannel  = _eC;                                  \
+        animCurveComposite.pAnimCurve         = pNode->_P.GetCurve( pAnimLayer, _C ); \
+        animCurveComposite.pAnimLayer         = pAnimLayer;                           \
+        animCurveComposite.pAnimStack         = pAnimStack;\
+        animCurves.push_back( animCurveComposite ); \
+    }
+
     // animCurves.emplace_back( apemodefb::EAnimCurveProperty_##_P, _eC, pNode->##_P.GetCurve( pAnimLayer, _C ), pAnimLayer, pAnimStack );
 
 #define EmplaceBack( _P )                                                                   \
@@ -87,16 +106,16 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
     /* Ensure each curve has a name */
 
     std::stringstream ss;
-    for (auto pAnimCurve : animCurves) {
-        if ( nullptr == std::get< FbxAnimCurve* >( pAnimCurve ) )
+    for (auto pAnimCurveComposite : animCurves) {
+        if ( nullptr == pAnimCurveComposite.pAnimCurve )
             continue;
 
-        std::string curveName = std::get< FbxAnimCurve* >( pAnimCurve )->GetName( );
+        std::string curveName = pAnimCurveComposite.pAnimCurve->GetName( );
         if ( curveName.empty( ) ) {
             ss << pNode->GetName( );
 
             ss << " ";
-            switch ( std::get< apemodefb::EAnimCurvePropertyFb >( pAnimCurve ) ) {
+            switch ( pAnimCurveComposite.eAnimCurveProperty ) {
             case apemodefb::EAnimCurvePropertyFb_LclTranslation:          ss << "LclTranslation"; break;
             case apemodefb::EAnimCurvePropertyFb_RotationOffset:          ss << "RotationOffset"; break;
             case apemodefb::EAnimCurvePropertyFb_RotationPivot:           ss << "RotationPivot"; break;
@@ -112,7 +131,7 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
             }
 
             ss << " ";
-            switch ( std::get< apemodefb::EAnimCurveChannelFb >( pAnimCurve ) ) {
+            switch ( pAnimCurveComposite.eAnimCurveChannel ) {
             case apemodefb::EAnimCurveChannelFb_X:    ss << "X"; break;
             case apemodefb::EAnimCurveChannelFb_Y:    ss << "Y"; break;
             case apemodefb::EAnimCurveChannelFb_Z:    ss << "Z"; break;
@@ -122,21 +141,21 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
 
             if ( animLayers.size( ) > 1 ) {
                 ss << " [";
-                ss << std::get< FbxAnimStack* >( pAnimCurve )->GetName( );
+                ss << pAnimCurveComposite.pAnimStack->GetName( );
                 ss << ", ";
-                ss << std::get< FbxAnimLayer* >( pAnimCurve )->GetName( );
+                ss << pAnimCurveComposite.pAnimLayer->GetName( );
                 ss << "]";
             }
 
-            std::get< FbxAnimCurve* >( pAnimCurve )->SetName( ss.str( ).c_str( ) );
+            pAnimCurveComposite.pAnimCurve->SetName( ss.str( ).c_str( ) );
             ss.str( "" );
             ss.clear( );
         }
 
         s.console->info( "\"{}\" <- \"{}\" ({} keys)",
                          pNode->GetName( ),
-                         std::get< FbxAnimCurve* >( pAnimCurve )->GetName( ),
-                         std::get< FbxAnimCurve* >( pAnimCurve )->KeyGetCount( ) );
+                         pAnimCurveComposite.pAnimCurve->GetName( ),
+                         pAnimCurveComposite.pAnimCurve->KeyGetCount( ) );
     }
 
     FbxAnimCurveFilterResample           resample;
@@ -155,9 +174,10 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
 
         /* Get pAnimChannels from tuples */
 
-        FbxAnimCurve* pAnimChannels[] = {std::get< FbxAnimCurve* >( animCurves[ i ] ),
-                                         std::get< FbxAnimCurve* >( animCurves[ i + 1 ] ),
-                                         std::get< FbxAnimCurve* >( animCurves[ i + 2 ] )};
+        FbxAnimCurve* pAnimChannels[] = {
+            animCurves[ i ].pAnimCurve,
+            animCurves[ i + 1 ].pAnimCurve,
+            animCurves[ i + 2 ].pAnimCurve};
 
         /* Apply filters on channels */
 
@@ -201,7 +221,7 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
             if ( s.propertyCurveSync )
                 ApplyFilter< 3 >( &keySync, pAnimChannels );
 
-            switch ( std::get< apemodefb::EAnimCurvePropertyFb >( animCurves[ i ] ) ) {
+            switch ( animCurves[ i ].eAnimCurveProperty ) {
                 case apemodefb::EAnimCurvePropertyFb_GeometricRotation:
                 case apemodefb::EAnimCurvePropertyFb_LclRotation:
                 case apemodefb::EAnimCurvePropertyFb_PreRotation:
@@ -300,9 +320,9 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
     s.animCurves.reserve( s.animCurves.size( ) + animCurves.size( ) );
 
     for ( auto pAnimCurveTuple : animCurves ) {
-        if ( auto pAnimCurve = std::get< FbxAnimCurve* >( pAnimCurveTuple ) ) {
-            auto pAnimStack = std::get< FbxAnimStack* >( pAnimCurveTuple );
-            auto pAnimLayer = std::get< FbxAnimLayer* >( pAnimCurveTuple );
+        if ( auto pAnimCurve = pAnimCurveTuple.pAnimCurve ) {
+            auto pAnimStack = pAnimCurveTuple.pAnimStack;
+            auto pAnimLayer = pAnimCurveTuple.pAnimLayer;
             auto keyCount   = pAnimCurve->KeyGetCount( );
 
             s.animCurves.emplace_back( );
@@ -313,8 +333,8 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
             auto& curve       = s.animCurves.back( );
             curve.id          = curveId;
             curve.nameId      = s.PushValue( pAnimCurve->GetName( ) );
-            curve.property    = std::get< apemodefb::EAnimCurvePropertyFb >( pAnimCurveTuple );
-            curve.channel     = std::get< apemodefb::EAnimCurveChannelFb >( pAnimCurveTuple );
+            curve.property    = pAnimCurveTuple.eAnimCurveProperty;
+            curve.channel     = pAnimCurveTuple.eAnimCurveChannel;
             curve.animStackId = s.animStackDict[ pAnimStack->GetUniqueID( ) ];
             curve.animLayerId = s.animLayerDict[ pAnimLayer->GetUniqueID( ) ];
             curve.nodeId      = n.id;
