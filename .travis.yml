@@ -37,14 +37,14 @@ install:
   - sudo wget -O fbx20181_1_fbxsdk_linux.tar.gz http://download.autodesk.com/us/fbx/2018/2018.1.1/fbx20181_1_fbxsdk_linux.tar.gz
   - sudo tar -xf fbx20181_1_fbxsdk_linux.tar.gz
   - sudo chmod ugo+x fbx20181_1_fbxsdk_linux
-  - sudo mkdir /home/travis/build/VladSerhiienko/Viewer/FbxSdk
-  - yes yes | sudo ./fbx20181_1_fbxsdk_linux /home/travis/build/VladSerhiienko/Viewer/FbxSdk
+  - sudo mkdir /home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk
+  - yes yes | sudo ./fbx20181_1_fbxsdk_linux /home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk
 
 script:
   - cat CMakeLists.txt
   - sed -i 's,git@github.com:,https://github.com/,g' CMakeLists.txt
   - cat CMakeLists.txt
-  - cmake -H. -Bbuild_linux_x86_64 -DFBX_SDK_INCLUDE_DIR:STRING=/home/travis/build/VladSerhiienko/Viewer/FbxSdk/include -DFBX_SDK_LIBRARY_DIR:STRING=/home/travis/build/VladSerhiienko/Viewer/FbxSdk/lib
+  - cmake -H. -Bbuild_linux_x86_64 -DFBX_SDK_INCLUDE_DIR:STRING=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/include -DFBX_SDK_LIBRARY_DIR:STRING=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/lib
   - cd build_linux_x86_64
   - make
   - cd ..
