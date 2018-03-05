@@ -32,8 +32,8 @@ install:
   - yes yes | sudo ./fbx20181_1_fbxsdk_linux /home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk
 
 script:
-  - ln -s /usr/bin/gcc-6 /usr/local/bin/gcc
-  - ln -s /usr/bin/g++-6 /usr/local/bin/g++
+  # - ln -s /usr/bin/gcc-6 /usr/local/bin/gcc
+  # - ln -s /usr/bin/g++-6 /usr/local/bin/g++
   - export CC=/usr/bin/gcc-6
   - export CXX=/usr/bin/g++-6
   - gcc -v && g++ -v && cmake --version
@@ -41,7 +41,6 @@ script:
   - cmake -H. -Bbuild_linux_x86_64 -DFBX_SDK_INCLUDE_DIR:STRING=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/include -DFBX_SDK_LIBRARY_DIR:STRING=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/lib
   - cd build_linux_x86_64
   - make
-  - cd ..
 
 notifications:
   email:
