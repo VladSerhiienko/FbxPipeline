@@ -1,23 +1,17 @@
-
+dist: trusty
+sudo: required
 language:
   - cpp
-
-matrix:
-  fast_finish: true
-  include:
-    - os: linux
-      compiler: g++
-      sudo: required
-      dist: trusty
-
-cache:
-  apt: true
-
+compiler:
+  - gcc
 addons:
   apt:
+    sources:
+      - ubuntu-toolchain-r-test
     packages:
-      - ninja-build
-      - lcov
+      - gcc-6
+      - g++-6
+      - cmake
 
 branches:
   only:
@@ -38,6 +32,11 @@ install:
   - yes yes | sudo ./fbx20181_1_fbxsdk_linux /home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk
 
 script:
+  - ln -s /usr/bin/gcc-6 /usr/local/bin/gcc
+  - ln -s /usr/bin/g++-6 /usr/local/bin/g++
+  - export CC=/usr/bin/gcc-6
+  - export CXX=/usr/bin/g++-6
+  - gcc -v && g++ -v && cmake --version
   - sed -i 's,git@github.com:,https://github.com/,g' CMakeLists.txt
   - cmake -H. -Bbuild_linux_x86_64 -DFBX_SDK_INCLUDE_DIR:STRING=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/include -DFBX_SDK_LIBRARY_DIR:STRING=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/lib
   - cd build_linux_x86_64
