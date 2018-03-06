@@ -143,19 +143,12 @@ ExternalProject_Add(
     GIT_REPOSITORY "git@github.com:pybind/pybind11.git"
     GIT_TAG "master"
     SOURCE_DIR "${CMAKE_SOURCE_DIR}/dependencies/pybind11"
-
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ""
     INSTALL_COMMAND ""
     UPDATE_COMMAND ""
     PATCH_COMMAND ""
     LOG_DOWNLOAD ON
-
-    # UPDATE_COMMAND ""
-    # PATCH_COMMAND ""
-    # CMAKE_ARGS ${default_cmake_args} -DPYBIND11_TEST=OFF -DPYBIND11_INSTALL=OFF
-    # TEST_COMMAND ""
-    # INSTALL_COMMAND ""
 )
 
 ExternalProject_Get_Property(pybind11 SOURCE_DIR)

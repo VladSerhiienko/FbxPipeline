@@ -48,7 +48,7 @@ def sync_textures(state, gltf_json):
             FbxPipeline.log_info("            : wrap_mode_u: {} wrap_mode_v: {}".format(wrap_mode_u, wrap_mode_v))
 
             texture = FbxPipeline.TextureFb()
-            texture.id = texture_index
+            texture.id = 0
             texture.name_id = state.push_string(texture_file_name)
             texture.file_id = texture_file_id
             texture.texture_type_id = state.push_string("TextureVideoClip")
