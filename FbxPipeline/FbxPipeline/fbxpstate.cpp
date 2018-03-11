@@ -86,7 +86,7 @@ std::shared_ptr< spdlog::logger > CreateLogger( spdlog::level::level_enum lvl, s
     return logger;
 }
 
-apemode::State& apemode::State::Main( int argc, char** argv ) {
+apemode::State& apemode::State::Main( int argc, const char**& argv ) {
     try {
         s.options.parse( argc, argv );
         s.executableName = argv[ 0 ];

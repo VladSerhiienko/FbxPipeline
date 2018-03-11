@@ -186,6 +186,6 @@ namespace apemode {
         uint32_t EmbedFile( const std::string fullPath );
 
         static State& Get( );
-        static State& Main( int argc, char** argv );
+        static State& Main( int argc, const char**& argv );
     };
 }
