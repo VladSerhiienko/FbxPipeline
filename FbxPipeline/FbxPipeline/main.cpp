@@ -5,7 +5,8 @@ void ExportScene( FbxScene* pScene );
 void ConvertScene( FbxManager* lSdkManager, FbxScene* lScene, FbxString lFilePath );
 
 int main( int argc, char** argv ) {
-    auto& s = apemode::State::Main( argc, argv );
+
+    auto& s = apemode::State::Main( argc, (const char**&) argv );
     bool convert = s.options[ "k" ].as< bool >( );
 
     if ( s.Initialize( ) ) {
