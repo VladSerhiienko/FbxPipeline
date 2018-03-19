@@ -172,7 +172,7 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
 
     for ( int i = 0; i < animCurves.size( ); i += 3 ) {
 
-        /* Get pAnimChannels from tuples */
+        /* Get pAnimChannels from structs */
 
         FbxAnimCurve* pAnimChannels[] = {
             animCurves[ i ].pAnimCurve,

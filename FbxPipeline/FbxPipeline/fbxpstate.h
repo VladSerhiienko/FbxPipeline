@@ -123,8 +123,6 @@ namespace apemode {
         std::string fullPath;
     };
 
-    using TupleUintUint = std::tuple< uint32_t, uint32_t >;
-
     struct FBXPIPELINE_API State {
         FbxManager*                            manager = nullptr;
         FbxScene*                              scene   = nullptr;

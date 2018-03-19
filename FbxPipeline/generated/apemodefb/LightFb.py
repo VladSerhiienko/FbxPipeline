@@ -16,37 +16,37 @@ class LightFb(object):
     # LightFb
     def NameId(self): return self._tab.Get(flatbuffers.number_types.Uint32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(4))
     # LightFb
-    def LightType(self): return self._tab.Get(flatbuffers.number_types.Uint32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(8))
+    def LightType(self): return self._tab.Get(flatbuffers.number_types.Uint8Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(8))
     # LightFb
-    def AreaLightType(self): return self._tab.Get(flatbuffers.number_types.Uint32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(12))
+    def AreaLightType(self): return self._tab.Get(flatbuffers.number_types.Uint8Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(9))
     # LightFb
     def Color(self, obj):
-        obj.Init(self._tab.Bytes, self._tab.Pos + 16)
+        obj.Init(self._tab.Bytes, self._tab.Pos + 12)
         return obj
 
     # LightFb
-    def Fog(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(28))
+    def Fog(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(24))
     # LightFb
-    def Intensity(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(32))
+    def Intensity(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(28))
     # LightFb
-    def InnerAngle(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(36))
+    def InnerAngle(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(32))
     # LightFb
-    def NearAttenuationStart(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(40))
+    def NearAttenuationStart(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(36))
     # LightFb
-    def NearAttenuationEnd(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(44))
+    def NearAttenuationEnd(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(40))
     # LightFb
-    def FarAttenuationStart(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(48))
+    def FarAttenuationStart(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(44))
     # LightFb
-    def FarAttenuationEnd(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(52))
+    def FarAttenuationEnd(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(48))
     # LightFb
-    def OuterAngle(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(56))
+    def OuterAngle(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(52))
     # LightFb
-    def DecayStart(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(60))
+    def DecayStart(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(56))
     # LightFb
-    def CastsShadows(self): return self._tab.Get(flatbuffers.number_types.BoolFlags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(64))
+    def CastsShadows(self): return self._tab.Get(flatbuffers.number_types.BoolFlags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(60))
 
 def CreateLightFb(builder, id, nameId, lightType, areaLightType, color_x, color_y, color_z, fog, intensity, innerAngle, nearAttenuationStart, nearAttenuationEnd, farAttenuationStart, farAttenuationEnd, outerAngle, decayStart, castsShadows):
-    builder.Prep(4, 68)
+    builder.Prep(4, 64)
     builder.Pad(3)
     builder.PrependBool(castsShadows)
     builder.PrependFloat32(decayStart)
@@ -62,8 +62,9 @@ def CreateLightFb(builder, id, nameId, lightType, areaLightType, color_x, color_
     builder.PrependFloat32(color_z)
     builder.PrependFloat32(color_y)
     builder.PrependFloat32(color_x)
-    builder.PrependUint32(areaLightType)
-    builder.PrependUint32(lightType)
+    builder.Pad(2)
+    builder.PrependUint8(areaLightType)
+    builder.PrependUint8(lightType)
     builder.PrependUint32(nameId)
     builder.PrependUint32(id)
     return builder.Offset()

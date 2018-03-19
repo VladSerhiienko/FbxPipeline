@@ -45,7 +45,7 @@ class MeshFb(object):
         o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(6))
         if o != 0:
             x = self._tab.Vector(o)
-            x += flatbuffers.number_types.UOffsetTFlags.py_type(j) * 92
+            x += flatbuffers.number_types.UOffsetTFlags.py_type(j) * 88
             from .SubmeshFb import SubmeshFb
             obj = SubmeshFb()
             obj.Init(self._tab.Bytes, x)
@@ -104,7 +104,7 @@ class MeshFb(object):
     def IndexType(self):
         o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(12))
         if o != 0:
-            return self._tab.Get(flatbuffers.number_types.Uint32Flags, o + self._tab.Pos)
+            return self._tab.Get(flatbuffers.number_types.Uint8Flags, o + self._tab.Pos)
         return 0
 
     # MeshFb
@@ -118,11 +118,11 @@ def MeshFbStart(builder): builder.StartObject(6)
 def MeshFbAddVertices(builder, vertices): builder.PrependUOffsetTRelativeSlot(0, flatbuffers.number_types.UOffsetTFlags.py_type(vertices), 0)
 def MeshFbStartVerticesVector(builder, numElems): return builder.StartVector(1, numElems, 1)
 def MeshFbAddSubmeshes(builder, submeshes): builder.PrependUOffsetTRelativeSlot(1, flatbuffers.number_types.UOffsetTFlags.py_type(submeshes), 0)
-def MeshFbStartSubmeshesVector(builder, numElems): return builder.StartVector(92, numElems, 4)
+def MeshFbStartSubmeshesVector(builder, numElems): return builder.StartVector(88, numElems, 4)
 def MeshFbAddSubsets(builder, subsets): builder.PrependUOffsetTRelativeSlot(2, flatbuffers.number_types.UOffsetTFlags.py_type(subsets), 0)
 def MeshFbStartSubsetsVector(builder, numElems): return builder.StartVector(12, numElems, 4)
 def MeshFbAddIndices(builder, indices): builder.PrependUOffsetTRelativeSlot(3, flatbuffers.number_types.UOffsetTFlags.py_type(indices), 0)
 def MeshFbStartIndicesVector(builder, numElems): return builder.StartVector(1, numElems, 1)
-def MeshFbAddIndexType(builder, indexType): builder.PrependUint32Slot(4, indexType, 0)
+def MeshFbAddIndexType(builder, indexType): builder.PrependUint8Slot(4, indexType, 0)
 def MeshFbAddSkinId(builder, skinId): builder.PrependUint32Slot(5, skinId, 0)
 def MeshFbEnd(builder): return builder.EndObject()

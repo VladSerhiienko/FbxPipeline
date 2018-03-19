@@ -20,55 +20,55 @@ class TextureFb(object):
     # TextureFb
     def TextureTypeId(self): return self._tab.Get(flatbuffers.number_types.Uint32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(12))
     # TextureFb
-    def BlendMode(self): return self._tab.Get(flatbuffers.number_types.Uint32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(16))
+    def BlendMode(self): return self._tab.Get(flatbuffers.number_types.Uint8Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(16))
     # TextureFb
-    def WrapModeU(self): return self._tab.Get(flatbuffers.number_types.Uint32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(20))
+    def WrapModeU(self): return self._tab.Get(flatbuffers.number_types.Uint8Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(17))
     # TextureFb
-    def WrapModeV(self): return self._tab.Get(flatbuffers.number_types.Uint32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(24))
+    def WrapModeV(self): return self._tab.Get(flatbuffers.number_types.Uint8Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(18))
     # TextureFb
-    def OffsetU(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(28))
+    def OffsetU(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(20))
     # TextureFb
-    def OffsetV(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(32))
+    def OffsetV(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(24))
     # TextureFb
-    def ScaleU(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(36))
+    def ScaleU(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(28))
     # TextureFb
-    def ScaleV(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(40))
+    def ScaleV(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(32))
     # TextureFb
-    def CroppingBottom(self): return self._tab.Get(flatbuffers.number_types.Int32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(44))
+    def CroppingBottom(self): return self._tab.Get(flatbuffers.number_types.Int32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(36))
     # TextureFb
-    def CroppingLeft(self): return self._tab.Get(flatbuffers.number_types.Int32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(48))
+    def CroppingLeft(self): return self._tab.Get(flatbuffers.number_types.Int32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(40))
     # TextureFb
-    def CroppingRight(self): return self._tab.Get(flatbuffers.number_types.Int32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(52))
+    def CroppingRight(self): return self._tab.Get(flatbuffers.number_types.Int32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(44))
     # TextureFb
-    def CroppingTop(self): return self._tab.Get(flatbuffers.number_types.Int32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(56))
+    def CroppingTop(self): return self._tab.Get(flatbuffers.number_types.Int32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(48))
     # TextureFb
-    def RotationU(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(60))
+    def RotationU(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(52))
     # TextureFb
-    def RotationV(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(64))
+    def RotationV(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(56))
     # TextureFb
-    def RotationW(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(68))
+    def RotationW(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(60))
     # TextureFb
-    def SwapUv(self): return self._tab.Get(flatbuffers.number_types.BoolFlags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(72))
+    def SwapUv(self): return self._tab.Get(flatbuffers.number_types.BoolFlags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(64))
     # TextureFb
-    def WipeMode(self): return self._tab.Get(flatbuffers.number_types.BoolFlags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(73))
+    def WipeMode(self): return self._tab.Get(flatbuffers.number_types.BoolFlags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(65))
     # TextureFb
-    def PremultipliedAlpha(self): return self._tab.Get(flatbuffers.number_types.BoolFlags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(74))
+    def PremultipliedAlpha(self): return self._tab.Get(flatbuffers.number_types.BoolFlags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(66))
     # TextureFb
-    def AlphaSource(self): return self._tab.Get(flatbuffers.number_types.Uint32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(76))
+    def AlphaSource(self): return self._tab.Get(flatbuffers.number_types.Uint8Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(67))
     # TextureFb
-    def TextureUse(self): return self._tab.Get(flatbuffers.number_types.Uint32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(80))
+    def TextureUse(self): return self._tab.Get(flatbuffers.number_types.Uint8Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(68))
     # TextureFb
-    def MappingType(self): return self._tab.Get(flatbuffers.number_types.Uint32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(84))
+    def MappingType(self): return self._tab.Get(flatbuffers.number_types.Uint8Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(69))
     # TextureFb
-    def PlanarMappingNormal(self): return self._tab.Get(flatbuffers.number_types.Uint32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(88))
+    def PlanarMappingNormal(self): return self._tab.Get(flatbuffers.number_types.Uint8Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(70))
 
 def CreateTextureFb(builder, id, nameId, fileId, textureTypeId, blendMode, wrapModeU, wrapModeV, offsetU, offsetV, scaleU, scaleV, croppingBottom, croppingLeft, croppingRight, croppingTop, rotationU, rotationV, rotationW, swapUv, wipeMode, premultipliedAlpha, alphaSource, textureUse, mappingType, planarMappingNormal):
-    builder.Prep(4, 92)
-    builder.PrependUint32(planarMappingNormal)
-    builder.PrependUint32(mappingType)
-    builder.PrependUint32(textureUse)
-    builder.PrependUint32(alphaSource)
+    builder.Prep(4, 72)
     builder.Pad(1)
+    builder.PrependUint8(planarMappingNormal)
+    builder.PrependUint8(mappingType)
+    builder.PrependUint8(textureUse)
+    builder.PrependUint8(alphaSource)
     builder.PrependBool(premultipliedAlpha)
     builder.PrependBool(wipeMode)
     builder.PrependBool(swapUv)
@@ -83,9 +83,10 @@ def CreateTextureFb(builder, id, nameId, fileId, textureTypeId, blendMode, wrapM
     builder.PrependFloat32(scaleU)
     builder.PrependFloat32(offsetV)
     builder.PrependFloat32(offsetU)
-    builder.PrependUint32(wrapModeV)
-    builder.PrependUint32(wrapModeU)
-    builder.PrependUint32(blendMode)
+    builder.Pad(1)
+    builder.PrependUint8(wrapModeV)
+    builder.PrependUint8(wrapModeU)
+    builder.PrependUint8(blendMode)
     builder.PrependUint32(textureTypeId)
     builder.PrependUint32(fileId)
     builder.PrependUint32(nameId)

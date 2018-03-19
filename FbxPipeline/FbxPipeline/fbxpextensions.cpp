@@ -15,6 +15,10 @@ bool        ReadTxtFile( const char* srcPath, std::string& fileBuffer, bool find
 void RunExtensionsOnFinalize( ) {
     auto& s = apemode::State::Get( );
 
+    s.console->info( "" );
+    s.console->info( "" );
+    s.console->info( "RunExtensionsOnFinalize" );
+
     auto& scriptFiles  = s.options[ "script-file" ].as< std::vector< std::string > >( );
     auto& scriptInputs = s.options[ "script-input" ].as< std::vector< std::string > >( );
 

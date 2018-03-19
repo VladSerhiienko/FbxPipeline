@@ -57,7 +57,7 @@ class NodeFb(object):
     def CullingType(self):
         o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(14))
         if o != 0:
-            return self._tab.Get(flatbuffers.number_types.Uint32Flags, o + self._tab.Pos)
+            return self._tab.Get(flatbuffers.number_types.Uint8Flags, o + self._tab.Pos)
         return 0
 
     # NodeFb
@@ -132,7 +132,7 @@ def NodeFbAddMeshId(builder, meshId): builder.PrependUint32Slot(1, meshId, 0)
 def NodeFbAddLightId(builder, lightId): builder.PrependUint32Slot(2, lightId, 0)
 def NodeFbAddCameraId(builder, cameraId): builder.PrependUint32Slot(3, cameraId, 0)
 def NodeFbAddNameId(builder, nameId): builder.PrependUint32Slot(4, nameId, 0)
-def NodeFbAddCullingType(builder, cullingType): builder.PrependUint32Slot(5, cullingType, 0)
+def NodeFbAddCullingType(builder, cullingType): builder.PrependUint8Slot(5, cullingType, 0)
 def NodeFbAddChildIds(builder, childIds): builder.PrependUOffsetTRelativeSlot(6, flatbuffers.number_types.UOffsetTFlags.py_type(childIds), 0)
 def NodeFbStartChildIdsVector(builder, numElems): return builder.StartVector(4, numElems, 4)
 def NodeFbAddMaterialIds(builder, materialIds): builder.PrependUOffsetTRelativeSlot(7, flatbuffers.number_types.UOffsetTFlags.py_type(materialIds), 0)

@@ -274,6 +274,11 @@ std::string ToPrettySizeString( size_t size ) {
 
 void InitializeSeachLocations( ) {
     auto& s = apemode::State::Get( );
+
+    s.console->info( "" );
+    s.console->info( "" );
+    s.console->info( "InitializeSeachLocations" );
+
     auto searchLocations = s.options[ "search-location" ].as< std::vector< std::string > >( );
 
     searchLocations.push_back( CurrentDirectory( ) );

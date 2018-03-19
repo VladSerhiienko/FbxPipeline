@@ -54,15 +54,15 @@ class SubmeshFb(object):
     # SubmeshFb
     def SubsetCount(self): return self._tab.Get(flatbuffers.number_types.Uint16Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(82))
     # SubmeshFb
-    def VertexFormat(self): return self._tab.Get(flatbuffers.number_types.Uint32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(84))
+    def VertexFormat(self): return self._tab.Get(flatbuffers.number_types.Uint8Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(84))
     # SubmeshFb
-    def VertexStride(self): return self._tab.Get(flatbuffers.number_types.Uint16Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(88))
+    def VertexStride(self): return self._tab.Get(flatbuffers.number_types.Uint16Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(86))
 
 def CreateSubmeshFb(builder, bbox_min_x, bbox_min_y, bbox_min_z, bbox_max_x, bbox_max_y, bbox_max_z, position_offset_x, position_offset_y, position_offset_z, position_scale_x, position_scale_y, position_scale_z, uv_offset_x, uv_offset_y, uv_scale_x, uv_scale_y, baseVertex, vertexCount, baseIndex, indexCount, baseSubset, subsetCount, vertexFormat, vertexStride):
-    builder.Prep(4, 92)
-    builder.Pad(2)
+    builder.Prep(4, 88)
     builder.PrependUint16(vertexStride)
-    builder.PrependUint32(vertexFormat)
+    builder.Pad(1)
+    builder.PrependUint8(vertexFormat)
     builder.PrependUint16(subsetCount)
     builder.PrependUint16(baseSubset)
     builder.PrependUint32(indexCount)

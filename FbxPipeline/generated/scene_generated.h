@@ -1151,9 +1151,10 @@ MANUALLY_ALIGNED_STRUCT(4) TextureFb FLATBUFFERS_FINAL_CLASS {
   uint32_t name_id_;
   uint32_t file_id_;
   uint32_t texture_type_id_;
-  uint32_t blend_mode_;
-  uint32_t wrap_mode_u_;
-  uint32_t wrap_mode_v_;
+  uint8_t blend_mode_;
+  uint8_t wrap_mode_u_;
+  uint8_t wrap_mode_v_;
+  int8_t padding0__;
   float offset_u_;
   float offset_v_;
   float scale_u_;
@@ -1168,11 +1169,11 @@ MANUALLY_ALIGNED_STRUCT(4) TextureFb FLATBUFFERS_FINAL_CLASS {
   uint8_t swap_uv_;
   uint8_t wipe_mode_;
   uint8_t premultiplied_alpha_;
-  int8_t padding0__;
-  uint32_t alpha_source_;
-  uint32_t texture_use_;
-  uint32_t mapping_type_;
-  uint32_t planar_mapping_normal_;
+  uint8_t alpha_source_;
+  uint8_t texture_use_;
+  uint8_t mapping_type_;
+  uint8_t planar_mapping_normal_;
+  int8_t padding1__;
 
  public:
   TextureFb() {
@@ -1183,9 +1184,10 @@ MANUALLY_ALIGNED_STRUCT(4) TextureFb FLATBUFFERS_FINAL_CLASS {
         name_id_(flatbuffers::EndianScalar(_name_id)),
         file_id_(flatbuffers::EndianScalar(_file_id)),
         texture_type_id_(flatbuffers::EndianScalar(_texture_type_id)),
-        blend_mode_(flatbuffers::EndianScalar(static_cast<uint32_t>(_blend_mode))),
-        wrap_mode_u_(flatbuffers::EndianScalar(static_cast<uint32_t>(_wrap_mode_u))),
-        wrap_mode_v_(flatbuffers::EndianScalar(static_cast<uint32_t>(_wrap_mode_v))),
+        blend_mode_(flatbuffers::EndianScalar(static_cast<uint8_t>(_blend_mode))),
+        wrap_mode_u_(flatbuffers::EndianScalar(static_cast<uint8_t>(_wrap_mode_u))),
+        wrap_mode_v_(flatbuffers::EndianScalar(static_cast<uint8_t>(_wrap_mode_v))),
+        padding0__(0),
         offset_u_(flatbuffers::EndianScalar(_offset_u)),
         offset_v_(flatbuffers::EndianScalar(_offset_v)),
         scale_u_(flatbuffers::EndianScalar(_scale_u)),
@@ -1200,12 +1202,13 @@ MANUALLY_ALIGNED_STRUCT(4) TextureFb FLATBUFFERS_FINAL_CLASS {
         swap_uv_(flatbuffers::EndianScalar(static_cast<uint8_t>(_swap_uv))),
         wipe_mode_(flatbuffers::EndianScalar(static_cast<uint8_t>(_wipe_mode))),
         premultiplied_alpha_(flatbuffers::EndianScalar(static_cast<uint8_t>(_premultiplied_alpha))),
-        padding0__(0),
-        alpha_source_(flatbuffers::EndianScalar(static_cast<uint32_t>(_alpha_source))),
-        texture_use_(flatbuffers::EndianScalar(static_cast<uint32_t>(_texture_use))),
-        mapping_type_(flatbuffers::EndianScalar(static_cast<uint32_t>(_mapping_type))),
-        planar_mapping_normal_(flatbuffers::EndianScalar(static_cast<uint32_t>(_planar_mapping_normal))) {
+        alpha_source_(flatbuffers::EndianScalar(static_cast<uint8_t>(_alpha_source))),
+        texture_use_(flatbuffers::EndianScalar(static_cast<uint8_t>(_texture_use))),
+        mapping_type_(flatbuffers::EndianScalar(static_cast<uint8_t>(_mapping_type))),
+        planar_mapping_normal_(flatbuffers::EndianScalar(static_cast<uint8_t>(_planar_mapping_normal))),
+        padding1__(0) {
     (void)padding0__;
+    (void)padding1__;
   }
   uint32_t id() const {
     return flatbuffers::EndianScalar(id_);
@@ -1242,19 +1245,19 @@ MANUALLY_ALIGNED_STRUCT(4) TextureFb FLATBUFFERS_FINAL_CLASS {
     return static_cast<EBlendModeFb>(flatbuffers::EndianScalar(blend_mode_));
   }
   void mutate_blend_mode(EBlendModeFb _blend_mode) {
-    flatbuffers::WriteScalar(&blend_mode_, static_cast<uint32_t>(_blend_mode));
+    flatbuffers::WriteScalar(&blend_mode_, static_cast<uint8_t>(_blend_mode));
   }
   EWrapModeFb wrap_mode_u() const {
     return static_cast<EWrapModeFb>(flatbuffers::EndianScalar(wrap_mode_u_));
   }
   void mutate_wrap_mode_u(EWrapModeFb _wrap_mode_u) {
-    flatbuffers::WriteScalar(&wrap_mode_u_, static_cast<uint32_t>(_wrap_mode_u));
+    flatbuffers::WriteScalar(&wrap_mode_u_, static_cast<uint8_t>(_wrap_mode_u));
   }
   EWrapModeFb wrap_mode_v() const {
     return static_cast<EWrapModeFb>(flatbuffers::EndianScalar(wrap_mode_v_));
   }
   void mutate_wrap_mode_v(EWrapModeFb _wrap_mode_v) {
-    flatbuffers::WriteScalar(&wrap_mode_v_, static_cast<uint32_t>(_wrap_mode_v));
+    flatbuffers::WriteScalar(&wrap_mode_v_, static_cast<uint8_t>(_wrap_mode_v));
   }
   float offset_u() const {
     return flatbuffers::EndianScalar(offset_u_);
@@ -1344,28 +1347,28 @@ MANUALLY_ALIGNED_STRUCT(4) TextureFb FLATBUFFERS_FINAL_CLASS {
     return static_cast<EAlphaSourceFb>(flatbuffers::EndianScalar(alpha_source_));
   }
   void mutate_alpha_source(EAlphaSourceFb _alpha_source) {
-    flatbuffers::WriteScalar(&alpha_source_, static_cast<uint32_t>(_alpha_source));
+    flatbuffers::WriteScalar(&alpha_source_, static_cast<uint8_t>(_alpha_source));
   }
   ETextureUseFb texture_use() const {
     return static_cast<ETextureUseFb>(flatbuffers::EndianScalar(texture_use_));
   }
   void mutate_texture_use(ETextureUseFb _texture_use) {
-    flatbuffers::WriteScalar(&texture_use_, static_cast<uint32_t>(_texture_use));
+    flatbuffers::WriteScalar(&texture_use_, static_cast<uint8_t>(_texture_use));
   }
   EMappingTypeFb mapping_type() const {
     return static_cast<EMappingTypeFb>(flatbuffers::EndianScalar(mapping_type_));
   }
   void mutate_mapping_type(EMappingTypeFb _mapping_type) {
-    flatbuffers::WriteScalar(&mapping_type_, static_cast<uint32_t>(_mapping_type));
+    flatbuffers::WriteScalar(&mapping_type_, static_cast<uint8_t>(_mapping_type));
   }
   EPlanarMappingNormalFb planar_mapping_normal() const {
     return static_cast<EPlanarMappingNormalFb>(flatbuffers::EndianScalar(planar_mapping_normal_));
   }
   void mutate_planar_mapping_normal(EPlanarMappingNormalFb _planar_mapping_normal) {
-    flatbuffers::WriteScalar(&planar_mapping_normal_, static_cast<uint32_t>(_planar_mapping_normal));
+    flatbuffers::WriteScalar(&planar_mapping_normal_, static_cast<uint8_t>(_planar_mapping_normal));
   }
 };
-STRUCT_END(TextureFb, 92);
+STRUCT_END(TextureFb, 72);
 
 MANUALLY_ALIGNED_STRUCT(4) SubmeshFb FLATBUFFERS_FINAL_CLASS {
  private:
@@ -1381,9 +1384,9 @@ MANUALLY_ALIGNED_STRUCT(4) SubmeshFb FLATBUFFERS_FINAL_CLASS {
   uint32_t index_count_;
   uint16_t base_subset_;
   uint16_t subset_count_;
-  uint32_t vertex_format_;
+  uint8_t vertex_format_;
+  int8_t padding0__;
   uint16_t vertex_stride_;
-  int16_t padding0__;
 
  public:
   SubmeshFb() {
@@ -1402,9 +1405,9 @@ MANUALLY_ALIGNED_STRUCT(4) SubmeshFb FLATBUFFERS_FINAL_CLASS {
         index_count_(flatbuffers::EndianScalar(_index_count)),
         base_subset_(flatbuffers::EndianScalar(_base_subset)),
         subset_count_(flatbuffers::EndianScalar(_subset_count)),
-        vertex_format_(flatbuffers::EndianScalar(static_cast<uint32_t>(_vertex_format))),
-        vertex_stride_(flatbuffers::EndianScalar(_vertex_stride)),
-        padding0__(0) {
+        vertex_format_(flatbuffers::EndianScalar(static_cast<uint8_t>(_vertex_format))),
+        padding0__(0),
+        vertex_stride_(flatbuffers::EndianScalar(_vertex_stride)) {
     (void)padding0__;
   }
   const Vec3Fb &bbox_min() const {
@@ -1483,7 +1486,7 @@ MANUALLY_ALIGNED_STRUCT(4) SubmeshFb FLATBUFFERS_FINAL_CLASS {
     return static_cast<EVertexFormatFb>(flatbuffers::EndianScalar(vertex_format_));
   }
   void mutate_vertex_format(EVertexFormatFb _vertex_format) {
-    flatbuffers::WriteScalar(&vertex_format_, static_cast<uint32_t>(_vertex_format));
+    flatbuffers::WriteScalar(&vertex_format_, static_cast<uint8_t>(_vertex_format));
   }
   uint16_t vertex_stride() const {
     return flatbuffers::EndianScalar(vertex_stride_);
@@ -1492,7 +1495,7 @@ MANUALLY_ALIGNED_STRUCT(4) SubmeshFb FLATBUFFERS_FINAL_CLASS {
     flatbuffers::WriteScalar(&vertex_stride_, _vertex_stride);
   }
 };
-STRUCT_END(SubmeshFb, 92);
+STRUCT_END(SubmeshFb, 88);
 
 MANUALLY_ALIGNED_STRUCT(4) SubsetFb FLATBUFFERS_FINAL_CLASS {
  private:
@@ -1728,8 +1731,9 @@ MANUALLY_ALIGNED_STRUCT(4) LightFb FLATBUFFERS_FINAL_CLASS {
  private:
   uint32_t id_;
   uint32_t name_id_;
-  uint32_t light_type_;
-  uint32_t area_light_type_;
+  uint8_t light_type_;
+  uint8_t area_light_type_;
+  int16_t padding0__;
   Vec3Fb color_;
   float fog_;
   float intensity_;
@@ -1741,7 +1745,7 @@ MANUALLY_ALIGNED_STRUCT(4) LightFb FLATBUFFERS_FINAL_CLASS {
   float outer_angle_;
   float decay_start_;
   uint8_t casts_shadows_;
-  int8_t padding0__;  int16_t padding1__;
+  int8_t padding1__;  int16_t padding2__;
 
  public:
   LightFb() {
@@ -1750,8 +1754,9 @@ MANUALLY_ALIGNED_STRUCT(4) LightFb FLATBUFFERS_FINAL_CLASS {
   LightFb(uint32_t _id, uint32_t _name_id, ELightTypeFb _light_type, EAreaLightTypeFb _area_light_type, const Vec3Fb &_color, float _fog, float _intensity, float _inner_angle, float _near_attenuation_start, float _near_attenuation_end, float _far_attenuation_start, float _far_attenuation_end, float _outer_angle, float _decay_start, bool _casts_shadows)
       : id_(flatbuffers::EndianScalar(_id)),
         name_id_(flatbuffers::EndianScalar(_name_id)),
-        light_type_(flatbuffers::EndianScalar(static_cast<uint32_t>(_light_type))),
-        area_light_type_(flatbuffers::EndianScalar(static_cast<uint32_t>(_area_light_type))),
+        light_type_(flatbuffers::EndianScalar(static_cast<uint8_t>(_light_type))),
+        area_light_type_(flatbuffers::EndianScalar(static_cast<uint8_t>(_area_light_type))),
+        padding0__(0),
         color_(_color),
         fog_(flatbuffers::EndianScalar(_fog)),
         intensity_(flatbuffers::EndianScalar(_intensity)),
@@ -1763,9 +1768,10 @@ MANUALLY_ALIGNED_STRUCT(4) LightFb FLATBUFFERS_FINAL_CLASS {
         outer_angle_(flatbuffers::EndianScalar(_outer_angle)),
         decay_start_(flatbuffers::EndianScalar(_decay_start)),
         casts_shadows_(flatbuffers::EndianScalar(static_cast<uint8_t>(_casts_shadows))),
-        padding0__(0),
-        padding1__(0) {
-    (void)padding0__;    (void)padding1__;
+        padding1__(0),
+        padding2__(0) {
+    (void)padding0__;
+    (void)padding1__;    (void)padding2__;
   }
   uint32_t id() const {
     return flatbuffers::EndianScalar(id_);
@@ -1790,13 +1796,13 @@ MANUALLY_ALIGNED_STRUCT(4) LightFb FLATBUFFERS_FINAL_CLASS {
     return static_cast<ELightTypeFb>(flatbuffers::EndianScalar(light_type_));
   }
   void mutate_light_type(ELightTypeFb _light_type) {
-    flatbuffers::WriteScalar(&light_type_, static_cast<uint32_t>(_light_type));
+    flatbuffers::WriteScalar(&light_type_, static_cast<uint8_t>(_light_type));
   }
   EAreaLightTypeFb area_light_type() const {
     return static_cast<EAreaLightTypeFb>(flatbuffers::EndianScalar(area_light_type_));
   }
   void mutate_area_light_type(EAreaLightTypeFb _area_light_type) {
-    flatbuffers::WriteScalar(&area_light_type_, static_cast<uint32_t>(_area_light_type));
+    flatbuffers::WriteScalar(&area_light_type_, static_cast<uint8_t>(_area_light_type));
   }
   const Vec3Fb &color() const {
     return color_;
@@ -1865,7 +1871,7 @@ MANUALLY_ALIGNED_STRUCT(4) LightFb FLATBUFFERS_FINAL_CLASS {
     flatbuffers::WriteScalar(&casts_shadows_, static_cast<uint8_t>(_casts_shadows));
   }
 };
-STRUCT_END(LightFb, 68);
+STRUCT_END(LightFb, 64);
 
 struct AnimCurveFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   enum {
@@ -1901,16 +1907,16 @@ struct AnimCurveFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     }
   }
   EAnimCurvePropertyFb property() const {
-    return static_cast<EAnimCurvePropertyFb>(GetField<uint32_t>(VT_PROPERTY, 0));
+    return static_cast<EAnimCurvePropertyFb>(GetField<uint8_t>(VT_PROPERTY, 0));
   }
   bool mutate_property(EAnimCurvePropertyFb _property) {
-    return SetField<uint32_t>(VT_PROPERTY, static_cast<uint32_t>(_property), 0);
+    return SetField<uint8_t>(VT_PROPERTY, static_cast<uint8_t>(_property), 0);
   }
   EAnimCurveChannelFb channel() const {
-    return static_cast<EAnimCurveChannelFb>(GetField<uint32_t>(VT_CHANNEL, 0));
+    return static_cast<EAnimCurveChannelFb>(GetField<uint8_t>(VT_CHANNEL, 0));
   }
   bool mutate_channel(EAnimCurveChannelFb _channel) {
-    return SetField<uint32_t>(VT_CHANNEL, static_cast<uint32_t>(_channel), 0);
+    return SetField<uint8_t>(VT_CHANNEL, static_cast<uint8_t>(_channel), 0);
   }
   const flatbuffers::Vector<const AnimCurveKeyFb *> *keys() const {
     return GetPointer<const flatbuffers::Vector<const AnimCurveKeyFb *> *>(VT_KEYS);
@@ -1922,8 +1928,8 @@ struct AnimCurveFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     return VerifyTableStart(verifier) &&
            VerifyField<uint32_t>(verifier, VT_ID) &&
            VerifyField<uint32_t>(verifier, VT_NAME_ID) &&
-           VerifyField<uint32_t>(verifier, VT_PROPERTY) &&
-           VerifyField<uint32_t>(verifier, VT_CHANNEL) &&
+           VerifyField<uint8_t>(verifier, VT_PROPERTY) &&
+           VerifyField<uint8_t>(verifier, VT_CHANNEL) &&
            VerifyOffset(verifier, VT_KEYS) &&
            verifier.Verify(keys()) &&
            verifier.EndTable();
@@ -1940,10 +1946,10 @@ struct AnimCurveFbBuilder {
     fbb_.AddElement<uint32_t>(AnimCurveFb::VT_NAME_ID, name_id, 0);
   }
   void add_property(EAnimCurvePropertyFb property) {
-    fbb_.AddElement<uint32_t>(AnimCurveFb::VT_PROPERTY, static_cast<uint32_t>(property), 0);
+    fbb_.AddElement<uint8_t>(AnimCurveFb::VT_PROPERTY, static_cast<uint8_t>(property), 0);
   }
   void add_channel(EAnimCurveChannelFb channel) {
-    fbb_.AddElement<uint32_t>(AnimCurveFb::VT_CHANNEL, static_cast<uint32_t>(channel), 0);
+    fbb_.AddElement<uint8_t>(AnimCurveFb::VT_CHANNEL, static_cast<uint8_t>(channel), 0);
   }
   void add_keys(flatbuffers::Offset<flatbuffers::Vector<const AnimCurveKeyFb *>> keys) {
     fbb_.AddOffset(AnimCurveFb::VT_KEYS, keys);
@@ -1969,10 +1975,10 @@ inline flatbuffers::Offset<AnimCurveFb> CreateAnimCurveFb(
     flatbuffers::Offset<flatbuffers::Vector<const AnimCurveKeyFb *>> keys = 0) {
   AnimCurveFbBuilder builder_(_fbb);
   builder_.add_keys(keys);
-  builder_.add_channel(channel);
-  builder_.add_property(property);
   builder_.add_name_id(name_id);
   builder_.add_id(id);
+  builder_.add_channel(channel);
+  builder_.add_property(property);
   return builder_.Finish();
 }
 
@@ -2186,10 +2192,10 @@ struct MeshFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     return GetPointer<flatbuffers::Vector<uint8_t> *>(VT_INDICES);
   }
   EIndexTypeFb index_type() const {
-    return static_cast<EIndexTypeFb>(GetField<uint32_t>(VT_INDEX_TYPE, 0));
+    return static_cast<EIndexTypeFb>(GetField<uint8_t>(VT_INDEX_TYPE, 0));
   }
   bool mutate_index_type(EIndexTypeFb _index_type) {
-    return SetField<uint32_t>(VT_INDEX_TYPE, static_cast<uint32_t>(_index_type), 0);
+    return SetField<uint8_t>(VT_INDEX_TYPE, static_cast<uint8_t>(_index_type), 0);
   }
   uint32_t skin_id() const {
     return GetField<uint32_t>(VT_SKIN_ID, 0);
@@ -2207,7 +2213,7 @@ struct MeshFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            verifier.Verify(subsets()) &&
            VerifyOffset(verifier, VT_INDICES) &&
            verifier.Verify(indices()) &&
-           VerifyField<uint32_t>(verifier, VT_INDEX_TYPE) &&
+           VerifyField<uint8_t>(verifier, VT_INDEX_TYPE) &&
            VerifyField<uint32_t>(verifier, VT_SKIN_ID) &&
            verifier.EndTable();
   }
@@ -2229,7 +2235,7 @@ struct MeshFbBuilder {
     fbb_.AddOffset(MeshFb::VT_INDICES, indices);
   }
   void add_index_type(EIndexTypeFb index_type) {
-    fbb_.AddElement<uint32_t>(MeshFb::VT_INDEX_TYPE, static_cast<uint32_t>(index_type), 0);
+    fbb_.AddElement<uint8_t>(MeshFb::VT_INDEX_TYPE, static_cast<uint8_t>(index_type), 0);
   }
   void add_skin_id(uint32_t skin_id) {
     fbb_.AddElement<uint32_t>(MeshFb::VT_SKIN_ID, skin_id, 0);
@@ -2256,11 +2262,11 @@ inline flatbuffers::Offset<MeshFb> CreateMeshFb(
     uint32_t skin_id = 0) {
   MeshFbBuilder builder_(_fbb);
   builder_.add_skin_id(skin_id);
-  builder_.add_index_type(index_type);
   builder_.add_indices(indices);
   builder_.add_subsets(subsets);
   builder_.add_submeshes(submeshes);
   builder_.add_vertices(vertices);
+  builder_.add_index_type(index_type);
   return builder_.Finish();
 }
 
@@ -2449,10 +2455,10 @@ struct NodeFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     }
   }
   ECullingTypeFb culling_type() const {
-    return static_cast<ECullingTypeFb>(GetField<uint32_t>(VT_CULLING_TYPE, 0));
+    return static_cast<ECullingTypeFb>(GetField<uint8_t>(VT_CULLING_TYPE, 0));
   }
   bool mutate_culling_type(ECullingTypeFb _culling_type) {
-    return SetField<uint32_t>(VT_CULLING_TYPE, static_cast<uint32_t>(_culling_type), 0);
+    return SetField<uint8_t>(VT_CULLING_TYPE, static_cast<uint8_t>(_culling_type), 0);
   }
   const flatbuffers::Vector<uint32_t> *child_ids() const {
     return GetPointer<const flatbuffers::Vector<uint32_t> *>(VT_CHILD_IDS);
@@ -2479,7 +2485,7 @@ struct NodeFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyField<uint32_t>(verifier, VT_LIGHT_ID) &&
            VerifyField<uint32_t>(verifier, VT_CAMERA_ID) &&
            VerifyField<uint32_t>(verifier, VT_NAME_ID) &&
-           VerifyField<uint32_t>(verifier, VT_CULLING_TYPE) &&
+           VerifyField<uint8_t>(verifier, VT_CULLING_TYPE) &&
            VerifyOffset(verifier, VT_CHILD_IDS) &&
            verifier.Verify(child_ids()) &&
            VerifyOffset(verifier, VT_MATERIAL_IDS) &&
@@ -2509,7 +2515,7 @@ struct NodeFbBuilder {
     fbb_.AddElement<uint32_t>(NodeFb::VT_NAME_ID, name_id, 0);
   }
   void add_culling_type(ECullingTypeFb culling_type) {
-    fbb_.AddElement<uint32_t>(NodeFb::VT_CULLING_TYPE, static_cast<uint32_t>(culling_type), 0);
+    fbb_.AddElement<uint8_t>(NodeFb::VT_CULLING_TYPE, static_cast<uint8_t>(culling_type), 0);
   }
   void add_child_ids(flatbuffers::Offset<flatbuffers::Vector<uint32_t>> child_ids) {
     fbb_.AddOffset(NodeFb::VT_CHILD_IDS, child_ids);
@@ -2547,12 +2553,12 @@ inline flatbuffers::Offset<NodeFb> CreateNodeFb(
   builder_.add_anim_curve_ids(anim_curve_ids);
   builder_.add_material_ids(material_ids);
   builder_.add_child_ids(child_ids);
-  builder_.add_culling_type(culling_type);
   builder_.add_name_id(name_id);
   builder_.add_camera_id(camera_id);
   builder_.add_light_id(light_id);
   builder_.add_mesh_id(mesh_id);
   builder_.add_id(id);
+  builder_.add_culling_type(culling_type);
   return builder_.Finish();
 }
 

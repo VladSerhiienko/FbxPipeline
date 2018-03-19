@@ -28,6 +28,10 @@ void ExportNodeAttributes( FbxNode* node, apemode::Node& n ) {
 uint32_t ExportNode( FbxNode* node ) {
     auto& s = apemode::State::Get( );
 
+    s.console->info( "" );
+    s.console->info( "" );
+    s.console->info( "ExportNode: {}", node->GetName() );
+
     if ( false == node->GetObjectFlags( FbxObject::EObjectFlag::eHidden ) ) {
         const uint32_t nodeId = static_cast< uint32_t >( s.nodes.size( ) );
         s.nodes.emplace_back( );

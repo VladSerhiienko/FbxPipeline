@@ -1501,7 +1501,7 @@ apemodefb.AnimCurveFb.prototype.mutate_name_id = function(value) {
  */
 apemodefb.AnimCurveFb.prototype.property = function() {
   var offset = this.bb.__offset(this.bb_pos, 8);
-  return offset ? /** @type {apemodefb.EAnimCurvePropertyFb} */ (this.bb.readUint32(this.bb_pos + offset)) : apemodefb.EAnimCurvePropertyFb.LclTranslation;
+  return offset ? /** @type {apemodefb.EAnimCurvePropertyFb} */ (this.bb.readUint8(this.bb_pos + offset)) : apemodefb.EAnimCurvePropertyFb.LclTranslation;
 };
 
 /**
@@ -1515,7 +1515,7 @@ apemodefb.AnimCurveFb.prototype.mutate_property = function(value) {
     return false;
   }
 
-  this.bb.writeUint32(this.bb_pos + offset, value);
+  this.bb.writeUint8(this.bb_pos + offset, value);
   return true;
 };
 
@@ -1524,7 +1524,7 @@ apemodefb.AnimCurveFb.prototype.mutate_property = function(value) {
  */
 apemodefb.AnimCurveFb.prototype.channel = function() {
   var offset = this.bb.__offset(this.bb_pos, 10);
-  return offset ? /** @type {apemodefb.EAnimCurveChannelFb} */ (this.bb.readUint32(this.bb_pos + offset)) : apemodefb.EAnimCurveChannelFb.X;
+  return offset ? /** @type {apemodefb.EAnimCurveChannelFb} */ (this.bb.readUint8(this.bb_pos + offset)) : apemodefb.EAnimCurveChannelFb.X;
 };
 
 /**
@@ -1538,7 +1538,7 @@ apemodefb.AnimCurveFb.prototype.mutate_channel = function(value) {
     return false;
   }
 
-  this.bb.writeUint32(this.bb_pos + offset, value);
+  this.bb.writeUint8(this.bb_pos + offset, value);
   return true;
 };
 
@@ -1588,7 +1588,7 @@ apemodefb.AnimCurveFb.addNameId = function(builder, nameId) {
  * @param {apemodefb.EAnimCurvePropertyFb} property
  */
 apemodefb.AnimCurveFb.addProperty = function(builder, property) {
-  builder.addFieldInt32(2, property, apemodefb.EAnimCurvePropertyFb.LclTranslation);
+  builder.addFieldInt8(2, property, apemodefb.EAnimCurvePropertyFb.LclTranslation);
 };
 
 /**
@@ -1596,7 +1596,7 @@ apemodefb.AnimCurveFb.addProperty = function(builder, property) {
  * @param {apemodefb.EAnimCurveChannelFb} channel
  */
 apemodefb.AnimCurveFb.addChannel = function(builder, channel) {
-  builder.addFieldInt32(3, channel, apemodefb.EAnimCurveChannelFb.X);
+  builder.addFieldInt8(3, channel, apemodefb.EAnimCurveChannelFb.X);
 };
 
 /**
@@ -1742,7 +1742,7 @@ apemodefb.TextureFb.prototype.mutate_texture_type_id = function(value) {
  * @returns {apemodefb.EBlendModeFb}
  */
 apemodefb.TextureFb.prototype.blendMode = function() {
-  return /** @type {apemodefb.EBlendModeFb} */ (this.bb.readUint32(this.bb_pos + 16));
+  return /** @type {apemodefb.EBlendModeFb} */ (this.bb.readUint8(this.bb_pos + 16));
 };
 
 /**
@@ -1756,7 +1756,7 @@ apemodefb.TextureFb.prototype.mutate_blend_mode = function(value) {
     return false;
   }
 
-  this.bb.writeUint32(this.bb_pos + offset, value);
+  this.bb.writeUint8(this.bb_pos + offset, value);
   return true;
 };
 
@@ -1764,7 +1764,7 @@ apemodefb.TextureFb.prototype.mutate_blend_mode = function(value) {
  * @returns {apemodefb.EWrapModeFb}
  */
 apemodefb.TextureFb.prototype.wrapModeU = function() {
-  return /** @type {apemodefb.EWrapModeFb} */ (this.bb.readUint32(this.bb_pos + 20));
+  return /** @type {apemodefb.EWrapModeFb} */ (this.bb.readUint8(this.bb_pos + 17));
 };
 
 /**
@@ -1772,13 +1772,13 @@ apemodefb.TextureFb.prototype.wrapModeU = function() {
  * @returns {boolean}
  */
 apemodefb.TextureFb.prototype.mutate_wrap_mode_u = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 20);
+  var offset = this.bb.__offset(this.bb_pos, 17);
 
   if (offset === 0) {
     return false;
   }
 
-  this.bb.writeUint32(this.bb_pos + offset, value);
+  this.bb.writeUint8(this.bb_pos + offset, value);
   return true;
 };
 
@@ -1786,7 +1786,7 @@ apemodefb.TextureFb.prototype.mutate_wrap_mode_u = function(value) {
  * @returns {apemodefb.EWrapModeFb}
  */
 apemodefb.TextureFb.prototype.wrapModeV = function() {
-  return /** @type {apemodefb.EWrapModeFb} */ (this.bb.readUint32(this.bb_pos + 24));
+  return /** @type {apemodefb.EWrapModeFb} */ (this.bb.readUint8(this.bb_pos + 18));
 };
 
 /**
@@ -1794,13 +1794,13 @@ apemodefb.TextureFb.prototype.wrapModeV = function() {
  * @returns {boolean}
  */
 apemodefb.TextureFb.prototype.mutate_wrap_mode_v = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 24);
+  var offset = this.bb.__offset(this.bb_pos, 18);
 
   if (offset === 0) {
     return false;
   }
 
-  this.bb.writeUint32(this.bb_pos + offset, value);
+  this.bb.writeUint8(this.bb_pos + offset, value);
   return true;
 };
 
@@ -1808,7 +1808,7 @@ apemodefb.TextureFb.prototype.mutate_wrap_mode_v = function(value) {
  * @returns {number}
  */
 apemodefb.TextureFb.prototype.offsetU = function() {
-  return this.bb.readFloat32(this.bb_pos + 28);
+  return this.bb.readFloat32(this.bb_pos + 20);
 };
 
 /**
@@ -1816,7 +1816,7 @@ apemodefb.TextureFb.prototype.offsetU = function() {
  * @returns {boolean}
  */
 apemodefb.TextureFb.prototype.mutate_offset_u = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 28);
+  var offset = this.bb.__offset(this.bb_pos, 20);
 
   if (offset === 0) {
     return false;
@@ -1830,7 +1830,7 @@ apemodefb.TextureFb.prototype.mutate_offset_u = function(value) {
  * @returns {number}
  */
 apemodefb.TextureFb.prototype.offsetV = function() {
-  return this.bb.readFloat32(this.bb_pos + 32);
+  return this.bb.readFloat32(this.bb_pos + 24);
 };
 
 /**
@@ -1838,7 +1838,7 @@ apemodefb.TextureFb.prototype.offsetV = function() {
  * @returns {boolean}
  */
 apemodefb.TextureFb.prototype.mutate_offset_v = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 32);
+  var offset = this.bb.__offset(this.bb_pos, 24);
 
   if (offset === 0) {
     return false;
@@ -1852,7 +1852,7 @@ apemodefb.TextureFb.prototype.mutate_offset_v = function(value) {
  * @returns {number}
  */
 apemodefb.TextureFb.prototype.scaleU = function() {
-  return this.bb.readFloat32(this.bb_pos + 36);
+  return this.bb.readFloat32(this.bb_pos + 28);
 };
 
 /**
@@ -1860,7 +1860,7 @@ apemodefb.TextureFb.prototype.scaleU = function() {
  * @returns {boolean}
  */
 apemodefb.TextureFb.prototype.mutate_scale_u = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 36);
+  var offset = this.bb.__offset(this.bb_pos, 28);
 
   if (offset === 0) {
     return false;
@@ -1874,7 +1874,7 @@ apemodefb.TextureFb.prototype.mutate_scale_u = function(value) {
  * @returns {number}
  */
 apemodefb.TextureFb.prototype.scaleV = function() {
-  return this.bb.readFloat32(this.bb_pos + 40);
+  return this.bb.readFloat32(this.bb_pos + 32);
 };
 
 /**
@@ -1882,7 +1882,7 @@ apemodefb.TextureFb.prototype.scaleV = function() {
  * @returns {boolean}
  */
 apemodefb.TextureFb.prototype.mutate_scale_v = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 40);
+  var offset = this.bb.__offset(this.bb_pos, 32);
 
   if (offset === 0) {
     return false;
@@ -1896,7 +1896,7 @@ apemodefb.TextureFb.prototype.mutate_scale_v = function(value) {
  * @returns {number}
  */
 apemodefb.TextureFb.prototype.croppingBottom = function() {
-  return this.bb.readInt32(this.bb_pos + 44);
+  return this.bb.readInt32(this.bb_pos + 36);
 };
 
 /**
@@ -1904,7 +1904,7 @@ apemodefb.TextureFb.prototype.croppingBottom = function() {
  * @returns {boolean}
  */
 apemodefb.TextureFb.prototype.mutate_cropping_bottom = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 44);
+  var offset = this.bb.__offset(this.bb_pos, 36);
 
   if (offset === 0) {
     return false;
@@ -1918,7 +1918,7 @@ apemodefb.TextureFb.prototype.mutate_cropping_bottom = function(value) {
  * @returns {number}
  */
 apemodefb.TextureFb.prototype.croppingLeft = function() {
-  return this.bb.readInt32(this.bb_pos + 48);
+  return this.bb.readInt32(this.bb_pos + 40);
 };
 
 /**
@@ -1926,7 +1926,7 @@ apemodefb.TextureFb.prototype.croppingLeft = function() {
  * @returns {boolean}
  */
 apemodefb.TextureFb.prototype.mutate_cropping_left = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 48);
+  var offset = this.bb.__offset(this.bb_pos, 40);
 
   if (offset === 0) {
     return false;
@@ -1940,7 +1940,7 @@ apemodefb.TextureFb.prototype.mutate_cropping_left = function(value) {
  * @returns {number}
  */
 apemodefb.TextureFb.prototype.croppingRight = function() {
-  return this.bb.readInt32(this.bb_pos + 52);
+  return this.bb.readInt32(this.bb_pos + 44);
 };
 
 /**
@@ -1948,7 +1948,7 @@ apemodefb.TextureFb.prototype.croppingRight = function() {
  * @returns {boolean}
  */
 apemodefb.TextureFb.prototype.mutate_cropping_right = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 52);
+  var offset = this.bb.__offset(this.bb_pos, 44);
 
   if (offset === 0) {
     return false;
@@ -1962,7 +1962,7 @@ apemodefb.TextureFb.prototype.mutate_cropping_right = function(value) {
  * @returns {number}
  */
 apemodefb.TextureFb.prototype.croppingTop = function() {
-  return this.bb.readInt32(this.bb_pos + 56);
+  return this.bb.readInt32(this.bb_pos + 48);
 };
 
 /**
@@ -1970,7 +1970,7 @@ apemodefb.TextureFb.prototype.croppingTop = function() {
  * @returns {boolean}
  */
 apemodefb.TextureFb.prototype.mutate_cropping_top = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 56);
+  var offset = this.bb.__offset(this.bb_pos, 48);
 
   if (offset === 0) {
     return false;
@@ -1984,7 +1984,7 @@ apemodefb.TextureFb.prototype.mutate_cropping_top = function(value) {
  * @returns {number}
  */
 apemodefb.TextureFb.prototype.rotationU = function() {
-  return this.bb.readFloat32(this.bb_pos + 60);
+  return this.bb.readFloat32(this.bb_pos + 52);
 };
 
 /**
@@ -1992,7 +1992,7 @@ apemodefb.TextureFb.prototype.rotationU = function() {
  * @returns {boolean}
  */
 apemodefb.TextureFb.prototype.mutate_rotation_u = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 60);
+  var offset = this.bb.__offset(this.bb_pos, 52);
 
   if (offset === 0) {
     return false;
@@ -2006,7 +2006,7 @@ apemodefb.TextureFb.prototype.mutate_rotation_u = function(value) {
  * @returns {number}
  */
 apemodefb.TextureFb.prototype.rotationV = function() {
-  return this.bb.readFloat32(this.bb_pos + 64);
+  return this.bb.readFloat32(this.bb_pos + 56);
 };
 
 /**
@@ -2014,7 +2014,7 @@ apemodefb.TextureFb.prototype.rotationV = function() {
  * @returns {boolean}
  */
 apemodefb.TextureFb.prototype.mutate_rotation_v = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 64);
+  var offset = this.bb.__offset(this.bb_pos, 56);
 
   if (offset === 0) {
     return false;
@@ -2028,7 +2028,7 @@ apemodefb.TextureFb.prototype.mutate_rotation_v = function(value) {
  * @returns {number}
  */
 apemodefb.TextureFb.prototype.rotationW = function() {
-  return this.bb.readFloat32(this.bb_pos + 68);
+  return this.bb.readFloat32(this.bb_pos + 60);
 };
 
 /**
@@ -2036,7 +2036,7 @@ apemodefb.TextureFb.prototype.rotationW = function() {
  * @returns {boolean}
  */
 apemodefb.TextureFb.prototype.mutate_rotation_w = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 68);
+  var offset = this.bb.__offset(this.bb_pos, 60);
 
   if (offset === 0) {
     return false;
@@ -2050,7 +2050,7 @@ apemodefb.TextureFb.prototype.mutate_rotation_w = function(value) {
  * @returns {boolean}
  */
 apemodefb.TextureFb.prototype.swapUv = function() {
-  return !!this.bb.readInt8(this.bb_pos + 72);
+  return !!this.bb.readInt8(this.bb_pos + 64);
 };
 
 /**
@@ -2058,7 +2058,7 @@ apemodefb.TextureFb.prototype.swapUv = function() {
  * @returns {boolean}
  */
 apemodefb.TextureFb.prototype.mutate_swap_uv = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 72);
+  var offset = this.bb.__offset(this.bb_pos, 64);
 
   if (offset === 0) {
     return false;
@@ -2072,7 +2072,7 @@ apemodefb.TextureFb.prototype.mutate_swap_uv = function(value) {
  * @returns {boolean}
  */
 apemodefb.TextureFb.prototype.wipeMode = function() {
-  return !!this.bb.readInt8(this.bb_pos + 73);
+  return !!this.bb.readInt8(this.bb_pos + 65);
 };
 
 /**
@@ -2080,7 +2080,7 @@ apemodefb.TextureFb.prototype.wipeMode = function() {
  * @returns {boolean}
  */
 apemodefb.TextureFb.prototype.mutate_wipe_mode = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 73);
+  var offset = this.bb.__offset(this.bb_pos, 65);
 
   if (offset === 0) {
     return false;
@@ -2094,7 +2094,7 @@ apemodefb.TextureFb.prototype.mutate_wipe_mode = function(value) {
  * @returns {boolean}
  */
 apemodefb.TextureFb.prototype.premultipliedAlpha = function() {
-  return !!this.bb.readInt8(this.bb_pos + 74);
+  return !!this.bb.readInt8(this.bb_pos + 66);
 };
 
 /**
@@ -2102,7 +2102,7 @@ apemodefb.TextureFb.prototype.premultipliedAlpha = function() {
  * @returns {boolean}
  */
 apemodefb.TextureFb.prototype.mutate_premultiplied_alpha = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 74);
+  var offset = this.bb.__offset(this.bb_pos, 66);
 
   if (offset === 0) {
     return false;
@@ -2116,7 +2116,7 @@ apemodefb.TextureFb.prototype.mutate_premultiplied_alpha = function(value) {
  * @returns {apemodefb.EAlphaSourceFb}
  */
 apemodefb.TextureFb.prototype.alphaSource = function() {
-  return /** @type {apemodefb.EAlphaSourceFb} */ (this.bb.readUint32(this.bb_pos + 76));
+  return /** @type {apemodefb.EAlphaSourceFb} */ (this.bb.readUint8(this.bb_pos + 67));
 };
 
 /**
@@ -2124,13 +2124,13 @@ apemodefb.TextureFb.prototype.alphaSource = function() {
  * @returns {boolean}
  */
 apemodefb.TextureFb.prototype.mutate_alpha_source = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 76);
+  var offset = this.bb.__offset(this.bb_pos, 67);
 
   if (offset === 0) {
     return false;
   }
 
-  this.bb.writeUint32(this.bb_pos + offset, value);
+  this.bb.writeUint8(this.bb_pos + offset, value);
   return true;
 };
 
@@ -2138,7 +2138,7 @@ apemodefb.TextureFb.prototype.mutate_alpha_source = function(value) {
  * @returns {apemodefb.ETextureUseFb}
  */
 apemodefb.TextureFb.prototype.textureUse = function() {
-  return /** @type {apemodefb.ETextureUseFb} */ (this.bb.readUint32(this.bb_pos + 80));
+  return /** @type {apemodefb.ETextureUseFb} */ (this.bb.readUint8(this.bb_pos + 68));
 };
 
 /**
@@ -2146,13 +2146,13 @@ apemodefb.TextureFb.prototype.textureUse = function() {
  * @returns {boolean}
  */
 apemodefb.TextureFb.prototype.mutate_texture_use = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 80);
+  var offset = this.bb.__offset(this.bb_pos, 68);
 
   if (offset === 0) {
     return false;
   }
 
-  this.bb.writeUint32(this.bb_pos + offset, value);
+  this.bb.writeUint8(this.bb_pos + offset, value);
   return true;
 };
 
@@ -2160,7 +2160,7 @@ apemodefb.TextureFb.prototype.mutate_texture_use = function(value) {
  * @returns {apemodefb.EMappingTypeFb}
  */
 apemodefb.TextureFb.prototype.mappingType = function() {
-  return /** @type {apemodefb.EMappingTypeFb} */ (this.bb.readUint32(this.bb_pos + 84));
+  return /** @type {apemodefb.EMappingTypeFb} */ (this.bb.readUint8(this.bb_pos + 69));
 };
 
 /**
@@ -2168,13 +2168,13 @@ apemodefb.TextureFb.prototype.mappingType = function() {
  * @returns {boolean}
  */
 apemodefb.TextureFb.prototype.mutate_mapping_type = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 84);
+  var offset = this.bb.__offset(this.bb_pos, 69);
 
   if (offset === 0) {
     return false;
   }
 
-  this.bb.writeUint32(this.bb_pos + offset, value);
+  this.bb.writeUint8(this.bb_pos + offset, value);
   return true;
 };
 
@@ -2182,7 +2182,7 @@ apemodefb.TextureFb.prototype.mutate_mapping_type = function(value) {
  * @returns {apemodefb.EPlanarMappingNormalFb}
  */
 apemodefb.TextureFb.prototype.planarMappingNormal = function() {
-  return /** @type {apemodefb.EPlanarMappingNormalFb} */ (this.bb.readUint32(this.bb_pos + 88));
+  return /** @type {apemodefb.EPlanarMappingNormalFb} */ (this.bb.readUint8(this.bb_pos + 70));
 };
 
 /**
@@ -2190,13 +2190,13 @@ apemodefb.TextureFb.prototype.planarMappingNormal = function() {
  * @returns {boolean}
  */
 apemodefb.TextureFb.prototype.mutate_planar_mapping_normal = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 88);
+  var offset = this.bb.__offset(this.bb_pos, 70);
 
   if (offset === 0) {
     return false;
   }
 
-  this.bb.writeUint32(this.bb_pos + offset, value);
+  this.bb.writeUint8(this.bb_pos + offset, value);
   return true;
 };
 
@@ -2230,12 +2230,12 @@ apemodefb.TextureFb.prototype.mutate_planar_mapping_normal = function(value) {
  * @returns {flatbuffers.Offset}
  */
 apemodefb.TextureFb.createTextureFb = function(builder, id, name_id, file_id, texture_type_id, blend_mode, wrap_mode_u, wrap_mode_v, offset_u, offset_v, scale_u, scale_v, cropping_bottom, cropping_left, cropping_right, cropping_top, rotation_u, rotation_v, rotation_w, swap_uv, wipe_mode, premultiplied_alpha, alpha_source, texture_use, mapping_type, planar_mapping_normal) {
-  builder.prep(4, 92);
-  builder.writeInt32(planar_mapping_normal);
-  builder.writeInt32(mapping_type);
-  builder.writeInt32(texture_use);
-  builder.writeInt32(alpha_source);
+  builder.prep(4, 72);
   builder.pad(1);
+  builder.writeInt8(planar_mapping_normal);
+  builder.writeInt8(mapping_type);
+  builder.writeInt8(texture_use);
+  builder.writeInt8(alpha_source);
   builder.writeInt8(+premultiplied_alpha);
   builder.writeInt8(+wipe_mode);
   builder.writeInt8(+swap_uv);
@@ -2250,9 +2250,10 @@ apemodefb.TextureFb.createTextureFb = function(builder, id, name_id, file_id, te
   builder.writeFloat32(scale_u);
   builder.writeFloat32(offset_v);
   builder.writeFloat32(offset_u);
-  builder.writeInt32(wrap_mode_v);
-  builder.writeInt32(wrap_mode_u);
-  builder.writeInt32(blend_mode);
+  builder.pad(1);
+  builder.writeInt8(wrap_mode_v);
+  builder.writeInt8(wrap_mode_u);
+  builder.writeInt8(blend_mode);
   builder.writeInt32(texture_type_id);
   builder.writeInt32(file_id);
   builder.writeInt32(name_id);
@@ -2470,7 +2471,7 @@ apemodefb.SubmeshFb.prototype.mutate_subset_count = function(value) {
  * @returns {apemodefb.EVertexFormatFb}
  */
 apemodefb.SubmeshFb.prototype.vertexFormat = function() {
-  return /** @type {apemodefb.EVertexFormatFb} */ (this.bb.readUint32(this.bb_pos + 84));
+  return /** @type {apemodefb.EVertexFormatFb} */ (this.bb.readUint8(this.bb_pos + 84));
 };
 
 /**
@@ -2484,7 +2485,7 @@ apemodefb.SubmeshFb.prototype.mutate_vertex_format = function(value) {
     return false;
   }
 
-  this.bb.writeUint32(this.bb_pos + offset, value);
+  this.bb.writeUint8(this.bb_pos + offset, value);
   return true;
 };
 
@@ -2492,7 +2493,7 @@ apemodefb.SubmeshFb.prototype.mutate_vertex_format = function(value) {
  * @returns {number}
  */
 apemodefb.SubmeshFb.prototype.vertexStride = function() {
-  return this.bb.readUint16(this.bb_pos + 88);
+  return this.bb.readUint16(this.bb_pos + 86);
 };
 
 /**
@@ -2500,7 +2501,7 @@ apemodefb.SubmeshFb.prototype.vertexStride = function() {
  * @returns {boolean}
  */
 apemodefb.SubmeshFb.prototype.mutate_vertex_stride = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 88);
+  var offset = this.bb.__offset(this.bb_pos, 86);
 
   if (offset === 0) {
     return false;
@@ -2539,10 +2540,10 @@ apemodefb.SubmeshFb.prototype.mutate_vertex_stride = function(value) {
  * @returns {flatbuffers.Offset}
  */
 apemodefb.SubmeshFb.createSubmeshFb = function(builder, bbox_min_x, bbox_min_y, bbox_min_z, bbox_max_x, bbox_max_y, bbox_max_z, position_offset_x, position_offset_y, position_offset_z, position_scale_x, position_scale_y, position_scale_z, uv_offset_x, uv_offset_y, uv_scale_x, uv_scale_y, base_vertex, vertex_count, base_index, index_count, base_subset, subset_count, vertex_format, vertex_stride) {
-  builder.prep(4, 92);
-  builder.pad(2);
+  builder.prep(4, 88);
   builder.writeInt16(vertex_stride);
-  builder.writeInt32(vertex_format);
+  builder.pad(1);
+  builder.writeInt8(vertex_format);
   builder.writeInt16(subset_count);
   builder.writeInt16(base_subset);
   builder.writeInt32(index_count);
@@ -3198,7 +3199,7 @@ apemodefb.MeshFb.prototype.verticesArray = function() {
  */
 apemodefb.MeshFb.prototype.submeshes = function(index, obj) {
   var offset = this.bb.__offset(this.bb_pos, 6);
-  return offset ? (obj || new apemodefb.SubmeshFb).__init(this.bb.__vector(this.bb_pos + offset) + index * 92, this.bb) : null;
+  return offset ? (obj || new apemodefb.SubmeshFb).__init(this.bb.__vector(this.bb_pos + offset) + index * 88, this.bb) : null;
 };
 
 /**
@@ -3257,7 +3258,7 @@ apemodefb.MeshFb.prototype.indicesArray = function() {
  */
 apemodefb.MeshFb.prototype.indexType = function() {
   var offset = this.bb.__offset(this.bb_pos, 12);
-  return offset ? /** @type {apemodefb.EIndexTypeFb} */ (this.bb.readUint32(this.bb_pos + offset)) : apemodefb.EIndexTypeFb.UInt16;
+  return offset ? /** @type {apemodefb.EIndexTypeFb} */ (this.bb.readUint8(this.bb_pos + offset)) : apemodefb.EIndexTypeFb.UInt16;
 };
 
 /**
@@ -3271,7 +3272,7 @@ apemodefb.MeshFb.prototype.mutate_index_type = function(value) {
     return false;
   }
 
-  this.bb.writeUint32(this.bb_pos + offset, value);
+  this.bb.writeUint8(this.bb_pos + offset, value);
   return true;
 };
 
@@ -3347,7 +3348,7 @@ apemodefb.MeshFb.addSubmeshes = function(builder, submeshesOffset) {
  * @param {number} numElems
  */
 apemodefb.MeshFb.startSubmeshesVector = function(builder, numElems) {
-  builder.startVector(92, numElems, 4);
+  builder.startVector(88, numElems, 4);
 };
 
 /**
@@ -3400,7 +3401,7 @@ apemodefb.MeshFb.startIndicesVector = function(builder, numElems) {
  * @param {apemodefb.EIndexTypeFb} indexType
  */
 apemodefb.MeshFb.addIndexType = function(builder, indexType) {
-  builder.addFieldInt32(4, indexType, apemodefb.EIndexTypeFb.UInt16);
+  builder.addFieldInt8(4, indexType, apemodefb.EIndexTypeFb.UInt16);
 };
 
 /**
@@ -3869,7 +3870,7 @@ apemodefb.LightFb.prototype.mutate_name_id = function(value) {
  * @returns {apemodefb.ELightTypeFb}
  */
 apemodefb.LightFb.prototype.lightType = function() {
-  return /** @type {apemodefb.ELightTypeFb} */ (this.bb.readUint32(this.bb_pos + 8));
+  return /** @type {apemodefb.ELightTypeFb} */ (this.bb.readUint8(this.bb_pos + 8));
 };
 
 /**
@@ -3883,7 +3884,7 @@ apemodefb.LightFb.prototype.mutate_light_type = function(value) {
     return false;
   }
 
-  this.bb.writeUint32(this.bb_pos + offset, value);
+  this.bb.writeUint8(this.bb_pos + offset, value);
   return true;
 };
 
@@ -3891,7 +3892,7 @@ apemodefb.LightFb.prototype.mutate_light_type = function(value) {
  * @returns {apemodefb.EAreaLightTypeFb}
  */
 apemodefb.LightFb.prototype.areaLightType = function() {
-  return /** @type {apemodefb.EAreaLightTypeFb} */ (this.bb.readUint32(this.bb_pos + 12));
+  return /** @type {apemodefb.EAreaLightTypeFb} */ (this.bb.readUint8(this.bb_pos + 9));
 };
 
 /**
@@ -3899,13 +3900,13 @@ apemodefb.LightFb.prototype.areaLightType = function() {
  * @returns {boolean}
  */
 apemodefb.LightFb.prototype.mutate_area_light_type = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 12);
+  var offset = this.bb.__offset(this.bb_pos, 9);
 
   if (offset === 0) {
     return false;
   }
 
-  this.bb.writeUint32(this.bb_pos + offset, value);
+  this.bb.writeUint8(this.bb_pos + offset, value);
   return true;
 };
 
@@ -3914,14 +3915,14 @@ apemodefb.LightFb.prototype.mutate_area_light_type = function(value) {
  * @returns {apemodefb.Vec3Fb|null}
  */
 apemodefb.LightFb.prototype.color = function(obj) {
-  return (obj || new apemodefb.Vec3Fb).__init(this.bb_pos + 16, this.bb);
+  return (obj || new apemodefb.Vec3Fb).__init(this.bb_pos + 12, this.bb);
 };
 
 /**
  * @returns {number}
  */
 apemodefb.LightFb.prototype.fog = function() {
-  return this.bb.readFloat32(this.bb_pos + 28);
+  return this.bb.readFloat32(this.bb_pos + 24);
 };
 
 /**
@@ -3929,7 +3930,7 @@ apemodefb.LightFb.prototype.fog = function() {
  * @returns {boolean}
  */
 apemodefb.LightFb.prototype.mutate_fog = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 28);
+  var offset = this.bb.__offset(this.bb_pos, 24);
 
   if (offset === 0) {
     return false;
@@ -3943,7 +3944,7 @@ apemodefb.LightFb.prototype.mutate_fog = function(value) {
  * @returns {number}
  */
 apemodefb.LightFb.prototype.intensity = function() {
-  return this.bb.readFloat32(this.bb_pos + 32);
+  return this.bb.readFloat32(this.bb_pos + 28);
 };
 
 /**
@@ -3951,7 +3952,7 @@ apemodefb.LightFb.prototype.intensity = function() {
  * @returns {boolean}
  */
 apemodefb.LightFb.prototype.mutate_intensity = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 32);
+  var offset = this.bb.__offset(this.bb_pos, 28);
 
   if (offset === 0) {
     return false;
@@ -3965,7 +3966,7 @@ apemodefb.LightFb.prototype.mutate_intensity = function(value) {
  * @returns {number}
  */
 apemodefb.LightFb.prototype.innerAngle = function() {
-  return this.bb.readFloat32(this.bb_pos + 36);
+  return this.bb.readFloat32(this.bb_pos + 32);
 };
 
 /**
@@ -3973,7 +3974,7 @@ apemodefb.LightFb.prototype.innerAngle = function() {
  * @returns {boolean}
  */
 apemodefb.LightFb.prototype.mutate_inner_angle = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 36);
+  var offset = this.bb.__offset(this.bb_pos, 32);
 
   if (offset === 0) {
     return false;
@@ -3987,7 +3988,7 @@ apemodefb.LightFb.prototype.mutate_inner_angle = function(value) {
  * @returns {number}
  */
 apemodefb.LightFb.prototype.nearAttenuationStart = function() {
-  return this.bb.readFloat32(this.bb_pos + 40);
+  return this.bb.readFloat32(this.bb_pos + 36);
 };
 
 /**
@@ -3995,7 +3996,7 @@ apemodefb.LightFb.prototype.nearAttenuationStart = function() {
  * @returns {boolean}
  */
 apemodefb.LightFb.prototype.mutate_near_attenuation_start = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 40);
+  var offset = this.bb.__offset(this.bb_pos, 36);
 
   if (offset === 0) {
     return false;
@@ -4009,7 +4010,7 @@ apemodefb.LightFb.prototype.mutate_near_attenuation_start = function(value) {
  * @returns {number}
  */
 apemodefb.LightFb.prototype.nearAttenuationEnd = function() {
-  return this.bb.readFloat32(this.bb_pos + 44);
+  return this.bb.readFloat32(this.bb_pos + 40);
 };
 
 /**
@@ -4017,7 +4018,7 @@ apemodefb.LightFb.prototype.nearAttenuationEnd = function() {
  * @returns {boolean}
  */
 apemodefb.LightFb.prototype.mutate_near_attenuation_end = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 44);
+  var offset = this.bb.__offset(this.bb_pos, 40);
 
   if (offset === 0) {
     return false;
@@ -4031,7 +4032,7 @@ apemodefb.LightFb.prototype.mutate_near_attenuation_end = function(value) {
  * @returns {number}
  */
 apemodefb.LightFb.prototype.farAttenuationStart = function() {
-  return this.bb.readFloat32(this.bb_pos + 48);
+  return this.bb.readFloat32(this.bb_pos + 44);
 };
 
 /**
@@ -4039,7 +4040,7 @@ apemodefb.LightFb.prototype.farAttenuationStart = function() {
  * @returns {boolean}
  */
 apemodefb.LightFb.prototype.mutate_far_attenuation_start = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 48);
+  var offset = this.bb.__offset(this.bb_pos, 44);
 
   if (offset === 0) {
     return false;
@@ -4053,7 +4054,7 @@ apemodefb.LightFb.prototype.mutate_far_attenuation_start = function(value) {
  * @returns {number}
  */
 apemodefb.LightFb.prototype.farAttenuationEnd = function() {
-  return this.bb.readFloat32(this.bb_pos + 52);
+  return this.bb.readFloat32(this.bb_pos + 48);
 };
 
 /**
@@ -4061,7 +4062,7 @@ apemodefb.LightFb.prototype.farAttenuationEnd = function() {
  * @returns {boolean}
  */
 apemodefb.LightFb.prototype.mutate_far_attenuation_end = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 52);
+  var offset = this.bb.__offset(this.bb_pos, 48);
 
   if (offset === 0) {
     return false;
@@ -4075,7 +4076,7 @@ apemodefb.LightFb.prototype.mutate_far_attenuation_end = function(value) {
  * @returns {number}
  */
 apemodefb.LightFb.prototype.outerAngle = function() {
-  return this.bb.readFloat32(this.bb_pos + 56);
+  return this.bb.readFloat32(this.bb_pos + 52);
 };
 
 /**
@@ -4083,7 +4084,7 @@ apemodefb.LightFb.prototype.outerAngle = function() {
  * @returns {boolean}
  */
 apemodefb.LightFb.prototype.mutate_outer_angle = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 56);
+  var offset = this.bb.__offset(this.bb_pos, 52);
 
   if (offset === 0) {
     return false;
@@ -4097,7 +4098,7 @@ apemodefb.LightFb.prototype.mutate_outer_angle = function(value) {
  * @returns {number}
  */
 apemodefb.LightFb.prototype.decayStart = function() {
-  return this.bb.readFloat32(this.bb_pos + 60);
+  return this.bb.readFloat32(this.bb_pos + 56);
 };
 
 /**
@@ -4105,7 +4106,7 @@ apemodefb.LightFb.prototype.decayStart = function() {
  * @returns {boolean}
  */
 apemodefb.LightFb.prototype.mutate_decay_start = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 60);
+  var offset = this.bb.__offset(this.bb_pos, 56);
 
   if (offset === 0) {
     return false;
@@ -4119,7 +4120,7 @@ apemodefb.LightFb.prototype.mutate_decay_start = function(value) {
  * @returns {boolean}
  */
 apemodefb.LightFb.prototype.castsShadows = function() {
-  return !!this.bb.readInt8(this.bb_pos + 64);
+  return !!this.bb.readInt8(this.bb_pos + 60);
 };
 
 /**
@@ -4127,7 +4128,7 @@ apemodefb.LightFb.prototype.castsShadows = function() {
  * @returns {boolean}
  */
 apemodefb.LightFb.prototype.mutate_casts_shadows = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 64);
+  var offset = this.bb.__offset(this.bb_pos, 60);
 
   if (offset === 0) {
     return false;
@@ -4159,7 +4160,7 @@ apemodefb.LightFb.prototype.mutate_casts_shadows = function(value) {
  * @returns {flatbuffers.Offset}
  */
 apemodefb.LightFb.createLightFb = function(builder, id, name_id, light_type, area_light_type, color_x, color_y, color_z, fog, intensity, inner_angle, near_attenuation_start, near_attenuation_end, far_attenuation_start, far_attenuation_end, outer_angle, decay_start, casts_shadows) {
-  builder.prep(4, 68);
+  builder.prep(4, 64);
   builder.pad(3);
   builder.writeInt8(+casts_shadows);
   builder.writeFloat32(decay_start);
@@ -4175,8 +4176,9 @@ apemodefb.LightFb.createLightFb = function(builder, id, name_id, light_type, are
   builder.writeFloat32(color_z);
   builder.writeFloat32(color_y);
   builder.writeFloat32(color_x);
-  builder.writeInt32(area_light_type);
-  builder.writeInt32(light_type);
+  builder.pad(2);
+  builder.writeInt8(area_light_type);
+  builder.writeInt8(light_type);
   builder.writeInt32(name_id);
   builder.writeInt32(id);
   return builder.offset();
@@ -4337,7 +4339,7 @@ apemodefb.NodeFb.prototype.mutate_name_id = function(value) {
  */
 apemodefb.NodeFb.prototype.cullingType = function() {
   var offset = this.bb.__offset(this.bb_pos, 14);
-  return offset ? /** @type {apemodefb.ECullingTypeFb} */ (this.bb.readUint32(this.bb_pos + offset)) : apemodefb.ECullingTypeFb.CullingOff;
+  return offset ? /** @type {apemodefb.ECullingTypeFb} */ (this.bb.readUint8(this.bb_pos + offset)) : apemodefb.ECullingTypeFb.CullingOff;
 };
 
 /**
@@ -4351,7 +4353,7 @@ apemodefb.NodeFb.prototype.mutate_culling_type = function(value) {
     return false;
   }
 
-  this.bb.writeUint32(this.bb_pos + offset, value);
+  this.bb.writeUint8(this.bb_pos + offset, value);
   return true;
 };
 
@@ -4482,7 +4484,7 @@ apemodefb.NodeFb.addNameId = function(builder, nameId) {
  * @param {apemodefb.ECullingTypeFb} cullingType
  */
 apemodefb.NodeFb.addCullingType = function(builder, cullingType) {
-  builder.addFieldInt32(5, cullingType, apemodefb.ECullingTypeFb.CullingOff);
+  builder.addFieldInt8(5, cullingType, apemodefb.ECullingTypeFb.CullingOff);
 };
 
 /**
@@ -4924,7 +4926,7 @@ apemodefb.SceneFb.prototype.materialsLength = function() {
  */
 apemodefb.SceneFb.prototype.textures = function(index, obj) {
   var offset = this.bb.__offset(this.bb_pos, 18);
-  return offset ? (obj || new apemodefb.TextureFb).__init(this.bb.__vector(this.bb_pos + offset) + index * 92, this.bb) : null;
+  return offset ? (obj || new apemodefb.TextureFb).__init(this.bb.__vector(this.bb_pos + offset) + index * 72, this.bb) : null;
 };
 
 /**
@@ -4960,7 +4962,7 @@ apemodefb.SceneFb.prototype.camerasLength = function() {
  */
 apemodefb.SceneFb.prototype.lights = function(index, obj) {
   var offset = this.bb.__offset(this.bb_pos, 22);
-  return offset ? (obj || new apemodefb.LightFb).__init(this.bb.__vector(this.bb_pos + offset) + index * 68, this.bb) : null;
+  return offset ? (obj || new apemodefb.LightFb).__init(this.bb.__vector(this.bb_pos + offset) + index * 64, this.bb) : null;
 };
 
 /**
@@ -5284,7 +5286,7 @@ apemodefb.SceneFb.addTextures = function(builder, texturesOffset) {
  * @param {number} numElems
  */
 apemodefb.SceneFb.startTexturesVector = function(builder, numElems) {
-  builder.startVector(92, numElems, 4);
+  builder.startVector(72, numElems, 4);
 };
 
 /**
@@ -5316,7 +5318,7 @@ apemodefb.SceneFb.addLights = function(builder, lightsOffset) {
  * @param {number} numElems
  */
 apemodefb.SceneFb.startLightsVector = function(builder, numElems) {
-  builder.startVector(68, numElems, 4);
+  builder.startVector(64, numElems, 4);
 };
 
 /**

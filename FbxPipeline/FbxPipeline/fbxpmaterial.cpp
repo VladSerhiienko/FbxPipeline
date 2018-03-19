@@ -35,12 +35,17 @@ void ScanConnectedSrc( FbxObject*          pPropObj,
 void ExportMaterials( FbxScene* pScene ) {
     auto& s = apemode::State::Get( );
 
+    s.console->info( "" );
+    s.console->info( "" );
+    s.console->info( "ExportMaterials" );
+
     if ( auto c = pScene->GetMaterialCount( ) ) {
         s.materials.reserve( c );
         s.textures.reserve( c * 3 );
 
         for ( auto i = 0; i < c; ++i ) {
             auto material = pScene->GetMaterial( i );
+            auto materialId = material->GetUniqueID();
             const uint32_t id = static_cast< uint32_t >( s.materials.size( ) );
 
             s.materials.emplace_back( );
@@ -48,8 +53,10 @@ void ExportMaterials( FbxScene* pScene ) {
             m.id = id;
             m.nameId = s.PushValue( material->GetName( ) );
 
-            s.materialDict[ m.nameId ] = id;
-            s.console->info( "Material: \"{}\"", material->GetName( ) );
+            s.materialDict[ materialId ] = id;
+
+            s.console->info( "" );
+            s.console->info( "Material: \"{}\" ({})", material->GetName( ), materialId );
 
             /*
             https://help.sketchfab.com/hc/en-us/articles/202600873-Materials-and-Textures
@@ -266,9 +273,11 @@ void ExportMaterials( FbxNode* node, apemode::Node& n ) {
         n.materialIds.reserve( c );
         for ( auto i = 0; i < c; ++i ) {
             auto material = node->GetMaterial( i );
-            auto nameId   = s.PushValue( material->GetName( ) );
-            assert( s.materialDict.find( nameId ) != s.materialDict.end( ) );
-            n.materialIds.push_back( s.materialDict[ nameId ] );
+            auto materialId = material->GetUniqueID();
+            assert( s.materialDict.find( materialId ) != s.materialDict.end( ) );
+            n.materialIds.push_back( s.materialDict[ materialId ] );
+
+            s.console->info( "Node \"{}\" += Material \"{}\" ({})", node->GetName( ), material->GetName( ), materialId );
         }
     }
 }

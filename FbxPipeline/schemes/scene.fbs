@@ -1,23 +1,23 @@
 
 namespace apemodefb;
 
-enum EVersionFb : uint {
+enum EVersionFb : ubyte {
     Value = 4
 }
 
-enum ECullingTypeFb : uint
+enum ECullingTypeFb : ubyte
 {
 	CullingOff,
 	CullingOnCCW,
 	CullingOnCW
 }
 
-enum EWrapModeFb : uint {
+enum EWrapModeFb : ubyte {
     Repeat,
     Clamp
 }
 
-enum EBlendModeFb : uint {
+enum EBlendModeFb : ubyte {
     Translucent,
     Additive,
     Modulate,
@@ -25,13 +25,13 @@ enum EBlendModeFb : uint {
     Over
 }
 
-enum EAlphaSourceFb : uint {
+enum EAlphaSourceFb : ubyte {
     None,
     RGBIntensity,
     Black
 }
 
-enum ETextureUseFb : uint {
+enum ETextureUseFb : ubyte {
     Standard,
     ShadowMap,
     LightMap,
@@ -40,7 +40,7 @@ enum ETextureUseFb : uint {
     BumpNormalMap
 }
 
-enum EMappingTypeFb : uint {
+enum EMappingTypeFb : ubyte {
     Null,
     Planar,
     Spherical,
@@ -51,20 +51,20 @@ enum EMappingTypeFb : uint {
     Environment
 }
 
-enum EPlanarMappingNormalFb : uint {
+enum EPlanarMappingNormalFb : ubyte {
     PlanarNormalX,
     PlanarNormalY,
     PlanarNormalZ
 }
 
-enum EVertexFormatFb : uint {
+enum EVertexFormatFb : ubyte {
     Static,
     StaticSkinned,
 	Packed,
 	PackedSkinned,
 }
 
-enum EIndexTypeFb : uint {
+enum EIndexTypeFb : ubyte {
 	UInt16,
 	UInt16Compressed,
 	UInt32,
@@ -72,7 +72,7 @@ enum EIndexTypeFb : uint {
 	Count,
 }
 
-enum EMaterialPropTypeFb : uint {
+enum EMaterialPropTypeFb : ubyte {
 	Bool,
 	Float,
 	Float2,
@@ -80,7 +80,7 @@ enum EMaterialPropTypeFb : uint {
 	Texture,
 }
 
-enum EAnimCurvePropertyFb : uint {
+enum EAnimCurvePropertyFb : ubyte {
 	LclTranslation,
     RotationOffset,
     RotationPivot,
@@ -95,29 +95,29 @@ enum EAnimCurvePropertyFb : uint {
     GeometricScaling
 }
 
-enum EAnimCurveChannelFb : uint {
+enum EAnimCurveChannelFb : ubyte {
 	X,
     Y,
     Z,
 }
 
-enum EInterpolationModeFb : uint {
+enum EInterpolationModeFb : ubyte {
 	Const, Linear, Cubic
 }
 
-enum ELightTypeFb : uint {
+enum ELightTypeFb : ubyte {
 	Point, 
 	Directional, 
 	Spot,
 	Area,
 }
 
-enum EAreaLightTypeFb : uint {
+enum EAreaLightTypeFb : ubyte {
 	Rect, 
 	Sphere, 
 }
 
-enum EValueTypeFb : uint {
+enum EValueTypeFb : ubyte {
 	Bool,
     Int,
     Float,
@@ -158,6 +158,7 @@ struct StaticVertexFb {
     tangent : Vec4Fb;
     uv : Vec2Fb;
 }
+
 struct PackedVertexFb {
     position : uint;
     normal : uint;

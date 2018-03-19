@@ -199,17 +199,11 @@ std::string ToString( const std::vector< apemodefb::SubsetFb >& xx ) {
 }
 
 bool apemode::State::Finalize( ) {
-
-    // TODO: Integrate extension support on all levels of scene exporting.
-    console->info( "Extensions" );
-
-    //
-    // Extend values
-    //
-
     RunExtensionsOnFinalize( );
 
-    console->info( "Serialization" );
+    console->info( "" );
+    console->info( "" );
+    console->info( "Finalize" );
 
     //
     // Finalize values

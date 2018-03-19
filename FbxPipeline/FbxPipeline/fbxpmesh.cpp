@@ -132,7 +132,24 @@ bool GetSubsets( FbxMesh* mesh, apemode::Mesh& m, std::vector< apemodefb::Subset
         s.console->info( "\t#{} - \"{}\".", k, mesh->GetNode( )->GetMaterial( k )->GetName( ) );
     }
 
-    std::vector< std::tuple< TIndex, TIndex > > items;
+    struct MaterialMappingItem {
+        TIndex materialIndex;
+        TIndex polygonIndex;
+
+        MaterialMappingItem( )
+            : materialIndex( 0 ), polygonIndex( 0 ) {
+        }
+
+        MaterialMappingItem( TIndex materialIndex, TIndex polygonIndex )
+            : materialIndex( materialIndex ), polygonIndex( polygonIndex ) {
+        }
+
+        MaterialMappingItem( const MaterialMappingItem& o )
+            : materialIndex( o.materialIndex ), polygonIndex( o.polygonIndex ) {
+        }
+    };
+
+    std::vector< MaterialMappingItem > materialMapping;
     std::vector< apemodefb::SubsetFb > subsetPolies;
 
     subsets.reserve( mesh->GetNode( )->GetMaterialCount( ) );
@@ -205,23 +222,24 @@ bool GetSubsets( FbxMesh* mesh, apemode::Mesh& m, std::vector< apemodefb::Subset
                                     mappingDirectToIndex[ mesh->GetNode( )->GetMaterial( k ) ] = (TIndex) k;
                                 }
 
-                                items.reserve( mesh->GetPolygonCount( ) );
+                                materialMapping.reserve( mesh->GetPolygonCount( ) );
                                 for ( uint32_t i = 0; i < (uint32_t) mesh->GetPolygonCount( ); ++i )
-                                    items.emplace_back( mappingDirectToIndex[ directArray->GetAt( i ) ], i );
+                                    materialMapping.emplace_back( mappingDirectToIndex[ directArray->GetAt( i ) ], (TIndex) i );
 
                             } break;
 
                             case FbxLayerElement::EReferenceMode::eIndex:
                             case FbxLayerElement::EReferenceMode::eIndexToDirect: {
+
                                 const auto indexArray = materialElement->mIndexArray;
                                 if ( indexArray && indexArray->GetCount( ) < 2 ) {
                                     s.console->error( "Material element {} has no indices, skipped.", m );
                                     break;
                                 }
 
-                                items.reserve( mesh->GetPolygonCount( ) );
+                                materialMapping.reserve( mesh->GetPolygonCount( ) );
                                 for ( uint32_t i = 0; i < (uint32_t) mesh->GetPolygonCount( ); ++i )
-                                    items.emplace_back( (TIndex) indexArray->GetAt( i ), i );
+                                    materialMapping.emplace_back( (TIndex) indexArray->GetAt( i ), (TIndex)i );
 
                             } break;
 
@@ -239,7 +257,7 @@ bool GetSubsets( FbxMesh* mesh, apemode::Mesh& m, std::vector< apemodefb::Subset
         }
     }
 
-    if ( items.empty( ) ) {
+    if ( materialMapping.empty( ) ) {
         s.console->error( "Mesh \"{}\" has no correctly mapped materials (fallback to first one).", mesh->GetNode( )->GetName( ) );
         // Splitted meshes per material case, do not issue a debug break.
         return false;
@@ -255,22 +273,25 @@ bool GetSubsets( FbxMesh* mesh, apemode::Mesh& m, std::vector< apemodefb::Subset
     //                {10, 4}, {15, 1}, {17, 1}.
     //
 
-    using U = std::tuple< TIndex, TIndex >;
-    auto sortByMaterialIndex = [&]( const U& a, const U& b ) { return std::get< 0 >( a ) < std::get< 0 >( b ); };
-    auto sortByPolygonIndex  = [&]( const U& a, const U& b ) { return std::get< 1 >( a ) < std::get< 1 >( b ); };
+    auto sortByMaterialIndex = [&]( const MaterialMappingItem& a, const MaterialMappingItem& b ) {
+        return a.materialIndex < b.materialIndex;
+    };
 
-    // Sort items by material index.
-    std::sort( items.begin( ), items.end( ), sortByMaterialIndex );
+    auto sortByPolygonIndex = [&]( const MaterialMappingItem& a, const MaterialMappingItem& b ) {
+        return a.polygonIndex < b.polygonIndex;
+    };
+
+    // Sort materialMapping by material index.
+    std::sort( materialMapping.begin( ), materialMapping.end( ), sortByMaterialIndex );
 
     auto extractSubsetsFromRange = [&]( const uint32_t mii, const uint32_t ii, const uint32_t i ) {
         uint32_t ki = ii;
-        TIndex k  = std::get< 1 >( items[ ii ] );
+        TIndex k  = materialMapping[ ii ].polygonIndex;
 
         uint32_t j = ii;
         for ( ; j < i; ++j ) {
-
-            const TIndex kk  = std::get< 1 >( items[ j ] );
-            if ((kk - k) > 1) {
+            const TIndex kk = materialMapping[ j ].polygonIndex;
+            if ( ( kk - k ) > 1 ) {
                 // s.console->info( "Break in {} - {} vs {}", j, k, kk );
 
                 // Process a case where there is a break in polygon indices.
@@ -288,17 +309,17 @@ bool GetSubsets( FbxMesh* mesh, apemode::Mesh& m, std::vector< apemodefb::Subset
     };
 
     uint32_t ii = 0;
-    TIndex mii = std::get< 0 >( items.front( ) );
+    TIndex mii = materialMapping.front( ).materialIndex;
 
     uint32_t i  = 0;
-    const uint32_t ic = (uint32_t) items.size( );
+    const uint32_t ic = (uint32_t) materialMapping.size( );
     for ( ; i < ic; ++i ) {
-        const TIndex mi = std::get< 0 >( items[ i ] );
+        const TIndex mi = materialMapping[ i ].materialIndex;
         if ( mi != mii ) {
             s.console->info( "Material #{} has {} assigned polygons ({} - {}).", mii, i - ii, ii, i - 1 );
 
-            // Sort items by polygon index.
-            std::sort( items.data( ) + ii, items.data( ) + i, sortByPolygonIndex );
+            // Sort materialMapping by polygon index.
+            std::sort( materialMapping.data( ) + ii, materialMapping.data( ) + i, sortByPolygonIndex );
             extractSubsetsFromRange( mii, ii, i );
             ii  = i;
             mii = mi;
@@ -306,7 +327,7 @@ bool GetSubsets( FbxMesh* mesh, apemode::Mesh& m, std::vector< apemodefb::Subset
     }
 
     s.console->info( "Material #{} has {} assigned polygons ({} - {}).", mii, i - ii, ii, i - 1 );
-    std::sort( items.data( ) + ii, items.data( ) + i, sortByPolygonIndex );
+    std::sort( materialMapping.data( ) + ii, materialMapping.data( ) + i, sortByPolygonIndex );
     extractSubsetsFromRange( mii, ii, i );
 
     TIndex subsetStartIndex = 0;
@@ -319,7 +340,7 @@ bool GetSubsets( FbxMesh* mesh, apemode::Mesh& m, std::vector< apemodefb::Subset
 
     for ( auto& sp : subsetPolies ) {
         if ( materialIndex != sp.material_id( ) ) {
-            const TIndex indexCount = subsetIndexCount; // (TIndex)indices.size();
+            const TIndex indexCount = subsetIndexCount;
 
             if ( materialIndex != (uint32_t) -1 ) {
                 const auto subsetLength = indexCount - subsetStartIndex;

@@ -160,7 +160,7 @@ class SceneFb(object):
         o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(18))
         if o != 0:
             x = self._tab.Vector(o)
-            x += flatbuffers.number_types.UOffsetTFlags.py_type(j) * 92
+            x += flatbuffers.number_types.UOffsetTFlags.py_type(j) * 72
             from .TextureFb import TextureFb
             obj = TextureFb()
             obj.Init(self._tab.Bytes, x)
@@ -198,7 +198,7 @@ class SceneFb(object):
         o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(22))
         if o != 0:
             x = self._tab.Vector(o)
-            x += flatbuffers.number_types.UOffsetTFlags.py_type(j) * 68
+            x += flatbuffers.number_types.UOffsetTFlags.py_type(j) * 64
             from .LightFb import LightFb
             obj = LightFb()
             obj.Init(self._tab.Bytes, x)
@@ -349,11 +349,11 @@ def SceneFbStartAnimCurvesVector(builder, numElems): return builder.StartVector(
 def SceneFbAddMaterials(builder, materials): builder.PrependUOffsetTRelativeSlot(6, flatbuffers.number_types.UOffsetTFlags.py_type(materials), 0)
 def SceneFbStartMaterialsVector(builder, numElems): return builder.StartVector(4, numElems, 4)
 def SceneFbAddTextures(builder, textures): builder.PrependUOffsetTRelativeSlot(7, flatbuffers.number_types.UOffsetTFlags.py_type(textures), 0)
-def SceneFbStartTexturesVector(builder, numElems): return builder.StartVector(92, numElems, 4)
+def SceneFbStartTexturesVector(builder, numElems): return builder.StartVector(72, numElems, 4)
 def SceneFbAddCameras(builder, cameras): builder.PrependUOffsetTRelativeSlot(8, flatbuffers.number_types.UOffsetTFlags.py_type(cameras), 0)
 def SceneFbStartCamerasVector(builder, numElems): return builder.StartVector(28, numElems, 4)
 def SceneFbAddLights(builder, lights): builder.PrependUOffsetTRelativeSlot(9, flatbuffers.number_types.UOffsetTFlags.py_type(lights), 0)
-def SceneFbStartLightsVector(builder, numElems): return builder.StartVector(68, numElems, 4)
+def SceneFbStartLightsVector(builder, numElems): return builder.StartVector(64, numElems, 4)
 def SceneFbAddSkins(builder, skins): builder.PrependUOffsetTRelativeSlot(10, flatbuffers.number_types.UOffsetTFlags.py_type(skins), 0)
 def SceneFbStartSkinsVector(builder, numElems): return builder.StartVector(4, numElems, 4)
 def SceneFbAddFiles(builder, files): builder.PrependUOffsetTRelativeSlot(11, flatbuffers.number_types.UOffsetTFlags.py_type(files), 0)
