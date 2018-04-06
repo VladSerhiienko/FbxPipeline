@@ -32,6 +32,7 @@ int main( int argc, char** argv ) {
 */
 
 /*
+-i "C:\Sources\Models\skull_salazar_downloadable\source\model\model.dae" -b -o "C:\Sources\Models\skull_salazar.fbxp" -l "C:\Sources\Models\skull_salazar.txt" -e "C:\Sources\Models\skull_salazar_downloadable\**" --script-file "glTFMaterialExtension.py" --script-input "C:\Sources\Models\skull_salazar_downloadable\scene.gltf"
 -i "C:\Sources\Models\graograman__fur_study\source\LIONSKETCH.fbx" -b -o "C:\Sources\Models\graograman.fbxp" -l "C:\Sources\Models\graograman.txt" -e "C:\Sources\Models\graograman__fur_study\**" --script-file "glTFMaterialExtension.py" --script-input "C:\Sources\Models\graograman__fur_study\scene.gltf"
 -i "C:/Sources/Models/warcraft-draenei-fanart/source/untitled1.fbx" -o "C:/Sources/Models/warcraft-draenei-fanart.fbxp" -l "C:/Sources/Models/warcraft-draenei-fanart.txt" -e "C:/Sources/Models/warcraft-draenei-fanart/**" -e "C:/Sources/Models/warcraft_draenei_fanart/**" --script-file "glTFMaterialExtension.py" --script-input "C:/Sources/Models/warcraft_draenei_fanart/scene.gltf"
 -i "C:/Sources/Models/1972-datsun-240k-gt/source/datsun240k.fbx" -b -o "C:/Sources/Models/1972-datsun-240k-gt.fbxp" -l "C:/Sources/Models/1972-datsun-240k-gt.txt" -e "C:/Sources/Models/1972_datsun_240k_gt/**" -e "C:/Sources/Models/1972-datsun-240k-gt/**" --script-file "glTFMaterialExtension.py" --script-input "C:/Sources/Models/1972_datsun_240k_gt/scene.gltf"

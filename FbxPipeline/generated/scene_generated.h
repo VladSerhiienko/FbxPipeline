@@ -66,15 +66,15 @@ enum EVersionFb {
   EVersionFb_MAX = EVersionFb_Value
 };
 
-inline EVersionFb (&EnumValuesEVersionFb())[1] {
-  static EVersionFb values[] = {
+inline const EVersionFb (&EnumValuesEVersionFb())[1] {
+  static const EVersionFb values[] = {
     EVersionFb_Value
   };
   return values;
 }
 
-inline const char **EnumNamesEVersionFb() {
-  static const char *names[] = {
+inline const char * const *EnumNamesEVersionFb() {
+  static const char * const names[] = {
     "Value",
     nullptr
   };
@@ -94,8 +94,8 @@ enum ECullingTypeFb {
   ECullingTypeFb_MAX = ECullingTypeFb_CullingOnCW
 };
 
-inline ECullingTypeFb (&EnumValuesECullingTypeFb())[3] {
-  static ECullingTypeFb values[] = {
+inline const ECullingTypeFb (&EnumValuesECullingTypeFb())[3] {
+  static const ECullingTypeFb values[] = {
     ECullingTypeFb_CullingOff,
     ECullingTypeFb_CullingOnCCW,
     ECullingTypeFb_CullingOnCW
@@ -103,8 +103,8 @@ inline ECullingTypeFb (&EnumValuesECullingTypeFb())[3] {
   return values;
 }
 
-inline const char **EnumNamesECullingTypeFb() {
-  static const char *names[] = {
+inline const char * const *EnumNamesECullingTypeFb() {
+  static const char * const names[] = {
     "CullingOff",
     "CullingOnCCW",
     "CullingOnCW",
@@ -125,16 +125,16 @@ enum EWrapModeFb {
   EWrapModeFb_MAX = EWrapModeFb_Clamp
 };
 
-inline EWrapModeFb (&EnumValuesEWrapModeFb())[2] {
-  static EWrapModeFb values[] = {
+inline const EWrapModeFb (&EnumValuesEWrapModeFb())[2] {
+  static const EWrapModeFb values[] = {
     EWrapModeFb_Repeat,
     EWrapModeFb_Clamp
   };
   return values;
 }
 
-inline const char **EnumNamesEWrapModeFb() {
-  static const char *names[] = {
+inline const char * const *EnumNamesEWrapModeFb() {
+  static const char * const names[] = {
     "Repeat",
     "Clamp",
     nullptr
@@ -157,8 +157,8 @@ enum EBlendModeFb {
   EBlendModeFb_MAX = EBlendModeFb_Over
 };
 
-inline EBlendModeFb (&EnumValuesEBlendModeFb())[5] {
-  static EBlendModeFb values[] = {
+inline const EBlendModeFb (&EnumValuesEBlendModeFb())[5] {
+  static const EBlendModeFb values[] = {
     EBlendModeFb_Translucent,
     EBlendModeFb_Additive,
     EBlendModeFb_Modulate,
@@ -168,8 +168,8 @@ inline EBlendModeFb (&EnumValuesEBlendModeFb())[5] {
   return values;
 }
 
-inline const char **EnumNamesEBlendModeFb() {
-  static const char *names[] = {
+inline const char * const *EnumNamesEBlendModeFb() {
+  static const char * const names[] = {
     "Translucent",
     "Additive",
     "Modulate",
@@ -193,8 +193,8 @@ enum EAlphaSourceFb {
   EAlphaSourceFb_MAX = EAlphaSourceFb_Black
 };
 
-inline EAlphaSourceFb (&EnumValuesEAlphaSourceFb())[3] {
-  static EAlphaSourceFb values[] = {
+inline const EAlphaSourceFb (&EnumValuesEAlphaSourceFb())[3] {
+  static const EAlphaSourceFb values[] = {
     EAlphaSourceFb_None,
     EAlphaSourceFb_RGBIntensity,
     EAlphaSourceFb_Black
@@ -202,8 +202,8 @@ inline EAlphaSourceFb (&EnumValuesEAlphaSourceFb())[3] {
   return values;
 }
 
-inline const char **EnumNamesEAlphaSourceFb() {
-  static const char *names[] = {
+inline const char * const *EnumNamesEAlphaSourceFb() {
+  static const char * const names[] = {
     "None",
     "RGBIntensity",
     "Black",
@@ -228,8 +228,8 @@ enum ETextureUseFb {
   ETextureUseFb_MAX = ETextureUseFb_BumpNormalMap
 };
 
-inline ETextureUseFb (&EnumValuesETextureUseFb())[6] {
-  static ETextureUseFb values[] = {
+inline const ETextureUseFb (&EnumValuesETextureUseFb())[6] {
+  static const ETextureUseFb values[] = {
     ETextureUseFb_Standard,
     ETextureUseFb_ShadowMap,
     ETextureUseFb_LightMap,
@@ -240,8 +240,8 @@ inline ETextureUseFb (&EnumValuesETextureUseFb())[6] {
   return values;
 }
 
-inline const char **EnumNamesETextureUseFb() {
-  static const char *names[] = {
+inline const char * const *EnumNamesETextureUseFb() {
+  static const char * const names[] = {
     "Standard",
     "ShadowMap",
     "LightMap",
@@ -271,8 +271,8 @@ enum EMappingTypeFb {
   EMappingTypeFb_MAX = EMappingTypeFb_Environment
 };
 
-inline EMappingTypeFb (&EnumValuesEMappingTypeFb())[8] {
-  static EMappingTypeFb values[] = {
+inline const EMappingTypeFb (&EnumValuesEMappingTypeFb())[8] {
+  static const EMappingTypeFb values[] = {
     EMappingTypeFb_Null,
     EMappingTypeFb_Planar,
     EMappingTypeFb_Spherical,
@@ -285,8 +285,8 @@ inline EMappingTypeFb (&EnumValuesEMappingTypeFb())[8] {
   return values;
 }
 
-inline const char **EnumNamesEMappingTypeFb() {
-  static const char *names[] = {
+inline const char * const *EnumNamesEMappingTypeFb() {
+  static const char * const names[] = {
     "Null",
     "Planar",
     "Spherical",
@@ -313,8 +313,8 @@ enum EPlanarMappingNormalFb {
   EPlanarMappingNormalFb_MAX = EPlanarMappingNormalFb_PlanarNormalZ
 };
 
-inline EPlanarMappingNormalFb (&EnumValuesEPlanarMappingNormalFb())[3] {
-  static EPlanarMappingNormalFb values[] = {
+inline const EPlanarMappingNormalFb (&EnumValuesEPlanarMappingNormalFb())[3] {
+  static const EPlanarMappingNormalFb values[] = {
     EPlanarMappingNormalFb_PlanarNormalX,
     EPlanarMappingNormalFb_PlanarNormalY,
     EPlanarMappingNormalFb_PlanarNormalZ
@@ -322,8 +322,8 @@ inline EPlanarMappingNormalFb (&EnumValuesEPlanarMappingNormalFb())[3] {
   return values;
 }
 
-inline const char **EnumNamesEPlanarMappingNormalFb() {
-  static const char *names[] = {
+inline const char * const *EnumNamesEPlanarMappingNormalFb() {
+  static const char * const names[] = {
     "PlanarNormalX",
     "PlanarNormalY",
     "PlanarNormalZ",
@@ -346,8 +346,8 @@ enum EVertexFormatFb {
   EVertexFormatFb_MAX = EVertexFormatFb_PackedSkinned
 };
 
-inline EVertexFormatFb (&EnumValuesEVertexFormatFb())[4] {
-  static EVertexFormatFb values[] = {
+inline const EVertexFormatFb (&EnumValuesEVertexFormatFb())[4] {
+  static const EVertexFormatFb values[] = {
     EVertexFormatFb_Static,
     EVertexFormatFb_StaticSkinned,
     EVertexFormatFb_Packed,
@@ -356,8 +356,8 @@ inline EVertexFormatFb (&EnumValuesEVertexFormatFb())[4] {
   return values;
 }
 
-inline const char **EnumNamesEVertexFormatFb() {
-  static const char *names[] = {
+inline const char * const *EnumNamesEVertexFormatFb() {
+  static const char * const names[] = {
     "Static",
     "StaticSkinned",
     "Packed",
@@ -382,8 +382,8 @@ enum EIndexTypeFb {
   EIndexTypeFb_MAX = EIndexTypeFb_Count
 };
 
-inline EIndexTypeFb (&EnumValuesEIndexTypeFb())[5] {
-  static EIndexTypeFb values[] = {
+inline const EIndexTypeFb (&EnumValuesEIndexTypeFb())[5] {
+  static const EIndexTypeFb values[] = {
     EIndexTypeFb_UInt16,
     EIndexTypeFb_UInt16Compressed,
     EIndexTypeFb_UInt32,
@@ -393,8 +393,8 @@ inline EIndexTypeFb (&EnumValuesEIndexTypeFb())[5] {
   return values;
 }
 
-inline const char **EnumNamesEIndexTypeFb() {
-  static const char *names[] = {
+inline const char * const *EnumNamesEIndexTypeFb() {
+  static const char * const names[] = {
     "UInt16",
     "UInt16Compressed",
     "UInt32",
@@ -420,8 +420,8 @@ enum EMaterialPropTypeFb {
   EMaterialPropTypeFb_MAX = EMaterialPropTypeFb_Texture
 };
 
-inline EMaterialPropTypeFb (&EnumValuesEMaterialPropTypeFb())[5] {
-  static EMaterialPropTypeFb values[] = {
+inline const EMaterialPropTypeFb (&EnumValuesEMaterialPropTypeFb())[5] {
+  static const EMaterialPropTypeFb values[] = {
     EMaterialPropTypeFb_Bool,
     EMaterialPropTypeFb_Float,
     EMaterialPropTypeFb_Float2,
@@ -431,8 +431,8 @@ inline EMaterialPropTypeFb (&EnumValuesEMaterialPropTypeFb())[5] {
   return values;
 }
 
-inline const char **EnumNamesEMaterialPropTypeFb() {
-  static const char *names[] = {
+inline const char * const *EnumNamesEMaterialPropTypeFb() {
+  static const char * const names[] = {
     "Bool",
     "Float",
     "Float2",
@@ -465,8 +465,8 @@ enum EAnimCurvePropertyFb {
   EAnimCurvePropertyFb_MAX = EAnimCurvePropertyFb_GeometricScaling
 };
 
-inline EAnimCurvePropertyFb (&EnumValuesEAnimCurvePropertyFb())[12] {
-  static EAnimCurvePropertyFb values[] = {
+inline const EAnimCurvePropertyFb (&EnumValuesEAnimCurvePropertyFb())[12] {
+  static const EAnimCurvePropertyFb values[] = {
     EAnimCurvePropertyFb_LclTranslation,
     EAnimCurvePropertyFb_RotationOffset,
     EAnimCurvePropertyFb_RotationPivot,
@@ -483,8 +483,8 @@ inline EAnimCurvePropertyFb (&EnumValuesEAnimCurvePropertyFb())[12] {
   return values;
 }
 
-inline const char **EnumNamesEAnimCurvePropertyFb() {
-  static const char *names[] = {
+inline const char * const *EnumNamesEAnimCurvePropertyFb() {
+  static const char * const names[] = {
     "LclTranslation",
     "RotationOffset",
     "RotationPivot",
@@ -515,8 +515,8 @@ enum EAnimCurveChannelFb {
   EAnimCurveChannelFb_MAX = EAnimCurveChannelFb_Z
 };
 
-inline EAnimCurveChannelFb (&EnumValuesEAnimCurveChannelFb())[3] {
-  static EAnimCurveChannelFb values[] = {
+inline const EAnimCurveChannelFb (&EnumValuesEAnimCurveChannelFb())[3] {
+  static const EAnimCurveChannelFb values[] = {
     EAnimCurveChannelFb_X,
     EAnimCurveChannelFb_Y,
     EAnimCurveChannelFb_Z
@@ -524,8 +524,8 @@ inline EAnimCurveChannelFb (&EnumValuesEAnimCurveChannelFb())[3] {
   return values;
 }
 
-inline const char **EnumNamesEAnimCurveChannelFb() {
-  static const char *names[] = {
+inline const char * const *EnumNamesEAnimCurveChannelFb() {
+  static const char * const names[] = {
     "X",
     "Y",
     "Z",
@@ -547,8 +547,8 @@ enum EInterpolationModeFb {
   EInterpolationModeFb_MAX = EInterpolationModeFb_Cubic
 };
 
-inline EInterpolationModeFb (&EnumValuesEInterpolationModeFb())[3] {
-  static EInterpolationModeFb values[] = {
+inline const EInterpolationModeFb (&EnumValuesEInterpolationModeFb())[3] {
+  static const EInterpolationModeFb values[] = {
     EInterpolationModeFb_Const,
     EInterpolationModeFb_Linear,
     EInterpolationModeFb_Cubic
@@ -556,8 +556,8 @@ inline EInterpolationModeFb (&EnumValuesEInterpolationModeFb())[3] {
   return values;
 }
 
-inline const char **EnumNamesEInterpolationModeFb() {
-  static const char *names[] = {
+inline const char * const *EnumNamesEInterpolationModeFb() {
+  static const char * const names[] = {
     "Const",
     "Linear",
     "Cubic",
@@ -580,8 +580,8 @@ enum ELightTypeFb {
   ELightTypeFb_MAX = ELightTypeFb_Area
 };
 
-inline ELightTypeFb (&EnumValuesELightTypeFb())[4] {
-  static ELightTypeFb values[] = {
+inline const ELightTypeFb (&EnumValuesELightTypeFb())[4] {
+  static const ELightTypeFb values[] = {
     ELightTypeFb_Point,
     ELightTypeFb_Directional,
     ELightTypeFb_Spot,
@@ -590,8 +590,8 @@ inline ELightTypeFb (&EnumValuesELightTypeFb())[4] {
   return values;
 }
 
-inline const char **EnumNamesELightTypeFb() {
-  static const char *names[] = {
+inline const char * const *EnumNamesELightTypeFb() {
+  static const char * const names[] = {
     "Point",
     "Directional",
     "Spot",
@@ -613,16 +613,16 @@ enum EAreaLightTypeFb {
   EAreaLightTypeFb_MAX = EAreaLightTypeFb_Sphere
 };
 
-inline EAreaLightTypeFb (&EnumValuesEAreaLightTypeFb())[2] {
-  static EAreaLightTypeFb values[] = {
+inline const EAreaLightTypeFb (&EnumValuesEAreaLightTypeFb())[2] {
+  static const EAreaLightTypeFb values[] = {
     EAreaLightTypeFb_Rect,
     EAreaLightTypeFb_Sphere
   };
   return values;
 }
 
-inline const char **EnumNamesEAreaLightTypeFb() {
-  static const char *names[] = {
+inline const char * const *EnumNamesEAreaLightTypeFb() {
+  static const char * const names[] = {
     "Rect",
     "Sphere",
     nullptr
@@ -647,8 +647,8 @@ enum EValueTypeFb {
   EValueTypeFb_MAX = EValueTypeFb_String
 };
 
-inline EValueTypeFb (&EnumValuesEValueTypeFb())[7] {
-  static EValueTypeFb values[] = {
+inline const EValueTypeFb (&EnumValuesEValueTypeFb())[7] {
+  static const EValueTypeFb values[] = {
     EValueTypeFb_Bool,
     EValueTypeFb_Int,
     EValueTypeFb_Float,
@@ -660,8 +660,8 @@ inline EValueTypeFb (&EnumValuesEValueTypeFb())[7] {
   return values;
 }
 
-inline const char **EnumNamesEValueTypeFb() {
-  static const char *names[] = {
+inline const char * const *EnumNamesEValueTypeFb() {
+  static const char * const names[] = {
     "Bool",
     "Int",
     "Float",
@@ -679,7 +679,7 @@ inline const char *EnumNameEValueTypeFb(EValueTypeFb e) {
   return EnumNamesEValueTypeFb()[index];
 }
 
-MANUALLY_ALIGNED_STRUCT(4) Vec2Fb FLATBUFFERS_FINAL_CLASS {
+FLATBUFFERS_MANUALLY_ALIGNED_STRUCT(4) Vec2Fb FLATBUFFERS_FINAL_CLASS {
  private:
   float x_;
   float y_;
@@ -705,9 +705,9 @@ MANUALLY_ALIGNED_STRUCT(4) Vec2Fb FLATBUFFERS_FINAL_CLASS {
     flatbuffers::WriteScalar(&y_, _y);
   }
 };
-STRUCT_END(Vec2Fb, 8);
+FLATBUFFERS_STRUCT_END(Vec2Fb, 8);
 
-MANUALLY_ALIGNED_STRUCT(4) Vec3Fb FLATBUFFERS_FINAL_CLASS {
+FLATBUFFERS_MANUALLY_ALIGNED_STRUCT(4) Vec3Fb FLATBUFFERS_FINAL_CLASS {
  private:
   float x_;
   float y_;
@@ -741,9 +741,9 @@ MANUALLY_ALIGNED_STRUCT(4) Vec3Fb FLATBUFFERS_FINAL_CLASS {
     flatbuffers::WriteScalar(&z_, _z);
   }
 };
-STRUCT_END(Vec3Fb, 12);
+FLATBUFFERS_STRUCT_END(Vec3Fb, 12);
 
-MANUALLY_ALIGNED_STRUCT(4) Vec4Fb FLATBUFFERS_FINAL_CLASS {
+FLATBUFFERS_MANUALLY_ALIGNED_STRUCT(4) Vec4Fb FLATBUFFERS_FINAL_CLASS {
  private:
   float x_;
   float y_;
@@ -785,9 +785,9 @@ MANUALLY_ALIGNED_STRUCT(4) Vec4Fb FLATBUFFERS_FINAL_CLASS {
     flatbuffers::WriteScalar(&w_, _w);
   }
 };
-STRUCT_END(Vec4Fb, 16);
+FLATBUFFERS_STRUCT_END(Vec4Fb, 16);
 
-MANUALLY_ALIGNED_STRUCT(4) Mat4Fb FLATBUFFERS_FINAL_CLASS {
+FLATBUFFERS_MANUALLY_ALIGNED_STRUCT(4) Mat4Fb FLATBUFFERS_FINAL_CLASS {
  private:
   Vec4Fb x_;
   Vec4Fb y_;
@@ -829,9 +829,9 @@ MANUALLY_ALIGNED_STRUCT(4) Mat4Fb FLATBUFFERS_FINAL_CLASS {
     return w_;
   }
 };
-STRUCT_END(Mat4Fb, 64);
+FLATBUFFERS_STRUCT_END(Mat4Fb, 64);
 
-MANUALLY_ALIGNED_STRUCT(4) StaticVertexFb FLATBUFFERS_FINAL_CLASS {
+FLATBUFFERS_MANUALLY_ALIGNED_STRUCT(4) StaticVertexFb FLATBUFFERS_FINAL_CLASS {
  private:
   Vec3Fb position_;
   Vec3Fb normal_;
@@ -873,9 +873,9 @@ MANUALLY_ALIGNED_STRUCT(4) StaticVertexFb FLATBUFFERS_FINAL_CLASS {
     return uv_;
   }
 };
-STRUCT_END(StaticVertexFb, 48);
+FLATBUFFERS_STRUCT_END(StaticVertexFb, 48);
 
-MANUALLY_ALIGNED_STRUCT(4) PackedVertexFb FLATBUFFERS_FINAL_CLASS {
+FLATBUFFERS_MANUALLY_ALIGNED_STRUCT(4) PackedVertexFb FLATBUFFERS_FINAL_CLASS {
  private:
   uint32_t position_;
   uint32_t normal_;
@@ -917,9 +917,9 @@ MANUALLY_ALIGNED_STRUCT(4) PackedVertexFb FLATBUFFERS_FINAL_CLASS {
     flatbuffers::WriteScalar(&uv_, _uv);
   }
 };
-STRUCT_END(PackedVertexFb, 16);
+FLATBUFFERS_STRUCT_END(PackedVertexFb, 16);
 
-MANUALLY_ALIGNED_STRUCT(4) StaticSkinnedVertexFb FLATBUFFERS_FINAL_CLASS {
+FLATBUFFERS_MANUALLY_ALIGNED_STRUCT(4) StaticSkinnedVertexFb FLATBUFFERS_FINAL_CLASS {
  private:
   Vec3Fb position_;
   Vec3Fb normal_;
@@ -977,9 +977,9 @@ MANUALLY_ALIGNED_STRUCT(4) StaticSkinnedVertexFb FLATBUFFERS_FINAL_CLASS {
     return indices_;
   }
 };
-STRUCT_END(StaticSkinnedVertexFb, 80);
+FLATBUFFERS_STRUCT_END(StaticSkinnedVertexFb, 80);
 
-MANUALLY_ALIGNED_STRUCT(4) PackedSkinnedVertexFb FLATBUFFERS_FINAL_CLASS {
+FLATBUFFERS_MANUALLY_ALIGNED_STRUCT(4) PackedSkinnedVertexFb FLATBUFFERS_FINAL_CLASS {
  private:
   uint32_t position_;
   uint32_t normal_;
@@ -1037,9 +1037,9 @@ MANUALLY_ALIGNED_STRUCT(4) PackedSkinnedVertexFb FLATBUFFERS_FINAL_CLASS {
     flatbuffers::WriteScalar(&indices_, _indices);
   }
 };
-STRUCT_END(PackedSkinnedVertexFb, 24);
+FLATBUFFERS_STRUCT_END(PackedSkinnedVertexFb, 24);
 
-MANUALLY_ALIGNED_STRUCT(4) AnimStackFb FLATBUFFERS_FINAL_CLASS {
+FLATBUFFERS_MANUALLY_ALIGNED_STRUCT(4) AnimStackFb FLATBUFFERS_FINAL_CLASS {
  private:
   uint32_t id_;
   uint32_t name_id_;
@@ -1072,9 +1072,9 @@ MANUALLY_ALIGNED_STRUCT(4) AnimStackFb FLATBUFFERS_FINAL_CLASS {
     return static_cast<int>(key > val) - static_cast<int>(key < val);
   }
 };
-STRUCT_END(AnimStackFb, 8);
+FLATBUFFERS_STRUCT_END(AnimStackFb, 8);
 
-MANUALLY_ALIGNED_STRUCT(4) AnimLayerFb FLATBUFFERS_FINAL_CLASS {
+FLATBUFFERS_MANUALLY_ALIGNED_STRUCT(4) AnimLayerFb FLATBUFFERS_FINAL_CLASS {
  private:
   uint32_t id_;
   uint32_t anim_stack_id_;
@@ -1115,9 +1115,9 @@ MANUALLY_ALIGNED_STRUCT(4) AnimLayerFb FLATBUFFERS_FINAL_CLASS {
     return static_cast<int>(key > val) - static_cast<int>(key < val);
   }
 };
-STRUCT_END(AnimLayerFb, 12);
+FLATBUFFERS_STRUCT_END(AnimLayerFb, 12);
 
-MANUALLY_ALIGNED_STRUCT(4) AnimCurveKeyFb FLATBUFFERS_FINAL_CLASS {
+FLATBUFFERS_MANUALLY_ALIGNED_STRUCT(4) AnimCurveKeyFb FLATBUFFERS_FINAL_CLASS {
  private:
   float time_;
   float value_;
@@ -1143,9 +1143,9 @@ MANUALLY_ALIGNED_STRUCT(4) AnimCurveKeyFb FLATBUFFERS_FINAL_CLASS {
     flatbuffers::WriteScalar(&value_, _value);
   }
 };
-STRUCT_END(AnimCurveKeyFb, 8);
+FLATBUFFERS_STRUCT_END(AnimCurveKeyFb, 8);
 
-MANUALLY_ALIGNED_STRUCT(4) TextureFb FLATBUFFERS_FINAL_CLASS {
+FLATBUFFERS_MANUALLY_ALIGNED_STRUCT(4) TextureFb FLATBUFFERS_FINAL_CLASS {
  private:
   uint32_t id_;
   uint32_t name_id_;
@@ -1368,9 +1368,9 @@ MANUALLY_ALIGNED_STRUCT(4) TextureFb FLATBUFFERS_FINAL_CLASS {
     flatbuffers::WriteScalar(&planar_mapping_normal_, static_cast<uint8_t>(_planar_mapping_normal));
   }
 };
-STRUCT_END(TextureFb, 72);
+FLATBUFFERS_STRUCT_END(TextureFb, 92);
 
-MANUALLY_ALIGNED_STRUCT(4) SubmeshFb FLATBUFFERS_FINAL_CLASS {
+FLATBUFFERS_MANUALLY_ALIGNED_STRUCT(4) SubmeshFb FLATBUFFERS_FINAL_CLASS {
  private:
   Vec3Fb bbox_min_;
   Vec3Fb bbox_max_;
@@ -1495,9 +1495,9 @@ MANUALLY_ALIGNED_STRUCT(4) SubmeshFb FLATBUFFERS_FINAL_CLASS {
     flatbuffers::WriteScalar(&vertex_stride_, _vertex_stride);
   }
 };
-STRUCT_END(SubmeshFb, 88);
+FLATBUFFERS_STRUCT_END(SubmeshFb, 92);
 
-MANUALLY_ALIGNED_STRUCT(4) SubsetFb FLATBUFFERS_FINAL_CLASS {
+FLATBUFFERS_MANUALLY_ALIGNED_STRUCT(4) SubsetFb FLATBUFFERS_FINAL_CLASS {
  private:
   uint32_t material_id_;
   uint32_t base_index_;
@@ -1531,9 +1531,9 @@ MANUALLY_ALIGNED_STRUCT(4) SubsetFb FLATBUFFERS_FINAL_CLASS {
     flatbuffers::WriteScalar(&index_count_, _index_count);
   }
 };
-STRUCT_END(SubsetFb, 12);
+FLATBUFFERS_STRUCT_END(SubsetFb, 12);
 
-MANUALLY_ALIGNED_STRUCT(4) TransformFb FLATBUFFERS_FINAL_CLASS {
+FLATBUFFERS_MANUALLY_ALIGNED_STRUCT(4) TransformFb FLATBUFFERS_FINAL_CLASS {
  private:
   Vec3Fb translation_;
   Vec3Fb rotation_offset_;
@@ -1639,9 +1639,9 @@ MANUALLY_ALIGNED_STRUCT(4) TransformFb FLATBUFFERS_FINAL_CLASS {
     return geometric_scaling_;
   }
 };
-STRUCT_END(TransformFb, 144);
+FLATBUFFERS_STRUCT_END(TransformFb, 144);
 
-MANUALLY_ALIGNED_STRUCT(4) MaterialPropFb FLATBUFFERS_FINAL_CLASS {
+FLATBUFFERS_MANUALLY_ALIGNED_STRUCT(4) MaterialPropFb FLATBUFFERS_FINAL_CLASS {
  private:
   uint32_t name_id_;
   uint32_t value_id_;
@@ -1674,9 +1674,9 @@ MANUALLY_ALIGNED_STRUCT(4) MaterialPropFb FLATBUFFERS_FINAL_CLASS {
     flatbuffers::WriteScalar(&value_id_, _value_id);
   }
 };
-STRUCT_END(MaterialPropFb, 8);
+FLATBUFFERS_STRUCT_END(MaterialPropFb, 8);
 
-MANUALLY_ALIGNED_STRUCT(4) CameraFb FLATBUFFERS_FINAL_CLASS {
+FLATBUFFERS_MANUALLY_ALIGNED_STRUCT(4) CameraFb FLATBUFFERS_FINAL_CLASS {
  private:
   uint32_t id_;
   uint32_t name_id_;
@@ -1725,9 +1725,9 @@ MANUALLY_ALIGNED_STRUCT(4) CameraFb FLATBUFFERS_FINAL_CLASS {
     return aspect_;
   }
 };
-STRUCT_END(CameraFb, 28);
+FLATBUFFERS_STRUCT_END(CameraFb, 28);
 
-MANUALLY_ALIGNED_STRUCT(4) LightFb FLATBUFFERS_FINAL_CLASS {
+FLATBUFFERS_MANUALLY_ALIGNED_STRUCT(4) LightFb FLATBUFFERS_FINAL_CLASS {
  private:
   uint32_t id_;
   uint32_t name_id_;
@@ -1871,7 +1871,7 @@ MANUALLY_ALIGNED_STRUCT(4) LightFb FLATBUFFERS_FINAL_CLASS {
     flatbuffers::WriteScalar(&casts_shadows_, static_cast<uint8_t>(_casts_shadows));
   }
 };
-STRUCT_END(LightFb, 64);
+FLATBUFFERS_STRUCT_END(LightFb, 68);
 
 struct AnimCurveFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   enum {
@@ -2984,6 +2984,10 @@ inline const apemodefb::SceneFb *GetSceneFb(const void *buf) {
   return flatbuffers::GetRoot<apemodefb::SceneFb>(buf);
 }
 
+inline const apemodefb::SceneFb *GetSizePrefixedSceneFb(const void *buf) {
+  return flatbuffers::GetSizePrefixedRoot<apemodefb::SceneFb>(buf);
+}
+
 inline SceneFb *GetMutableSceneFb(void *buf) {
   return flatbuffers::GetMutableRoot<SceneFb>(buf);
 }
@@ -3002,6 +3006,11 @@ inline bool VerifySceneFbBuffer(
   return verifier.VerifyBuffer<apemodefb::SceneFb>(SceneFbIdentifier());
 }
 
+inline bool VerifySizePrefixedSceneFbBuffer(
+    flatbuffers::Verifier &verifier) {
+  return verifier.VerifySizePrefixedBuffer<apemodefb::SceneFb>(SceneFbIdentifier());
+}
+
 inline const char *SceneFbExtension() {
   return "apemode";
 }
@@ -3010,6 +3019,12 @@ inline void FinishSceneFbBuffer(
     flatbuffers::FlatBufferBuilder &fbb,
     flatbuffers::Offset<apemodefb::SceneFb> root) {
   fbb.Finish(root, SceneFbIdentifier());
+}
+
+inline void FinishSizePrefixedSceneFbBuffer(
+    flatbuffers::FlatBufferBuilder &fbb,
+    flatbuffers::Offset<apemodefb::SceneFb> root) {
+  fbb.FinishSizePrefixed(root, SceneFbIdentifier());
 }
 
 }  // namespace apemodefb
