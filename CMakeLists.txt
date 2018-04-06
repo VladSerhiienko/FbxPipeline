@@ -82,13 +82,14 @@ message(STATUS "spdlog_source_dir = ${spdlog_source_dir}")
 ExternalProject_Add(
     flatbuffers
     GIT_REPOSITORY "git@github.com:google/flatbuffers.git"
-    GIT_TAG "master"
+    GIT_TAG "v1.8.0"
     UPDATE_COMMAND ""
     PATCH_COMMAND ""
     SOURCE_DIR "${CMAKE_SOURCE_DIR}/dependencies/flatbuffers"
     CMAKE_ARGS ${default_cmake_args}
     TEST_COMMAND ""
     INSTALL_COMMAND ""
+    LOG_DOWNLOAD ON
 )
 
 ExternalProject_Get_Property(flatbuffers SOURCE_DIR)
