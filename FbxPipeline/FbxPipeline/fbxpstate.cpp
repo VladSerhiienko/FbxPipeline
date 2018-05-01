@@ -206,11 +206,13 @@ bool apemode::State::Finalize( ) {
     //
 
     for ( auto& node : nodes ) {
-        auto& mesh = meshes[ node.meshId ];
-        for ( auto& subset : mesh.subsets ) {
-            if ( subset.material_id( ) != uint32_t( -1 ) ) {
-                assert( node.materialIds.size( ) > subset.material_id( ) );
-                subset.mutate_material_id( node.materialIds[ subset.material_id( ) ] );
+        if ( node.meshId != uint32_t( -1 ) ) {
+            auto& mesh = meshes[ node.meshId ];
+            for ( auto& subset : mesh.subsets ) {
+                if ( subset.material_id( ) != uint32_t( -1 ) ) {
+                    assert( node.materialIds.size( ) > subset.material_id( ) );
+                    subset.mutate_material_id( node.materialIds[ subset.material_id( ) ] );
+                }
             }
         }
     }
