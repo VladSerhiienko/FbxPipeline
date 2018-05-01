@@ -268,7 +268,7 @@ bool apemode::State::Finalize( ) {
             const auto curveIdsOffset    = builder.CreateVector( node.curveIds );
             const auto childIdsOffset    = builder.CreateVector( node.childIds );
 
-            console->info( "+ curve ids: {}, child ids: {}, material ids: {}, mesh id: {}",
+            console->info( "+ curve ids: {}, child ids: {}, unique material ids: {}, mesh id: {}",
                            node.curveIds.size( ),
                            node.childIds.size( ),
                            ToString( node.materialIds ),
