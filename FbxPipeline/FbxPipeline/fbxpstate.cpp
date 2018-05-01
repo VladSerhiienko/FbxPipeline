@@ -201,6 +201,20 @@ std::string ToString( const std::vector< apemodefb::SubsetFb >& xx ) {
 bool apemode::State::Finalize( ) {
     RunExtensionsOnFinalize( );
 
+    //
+    // Set global material indices to subsets
+    //
+
+    for ( auto& node : nodes ) {
+        auto& mesh = meshes[ node.meshId ];
+        for ( auto& subset : mesh.subsets ) {
+            if ( subset.material_id( ) != uint32_t( -1 ) ) {
+                assert( node.materialIds.size( ) > subset.material_id( ) );
+                subset.mutate_material_id( node.materialIds[ subset.material_id( ) ] );
+            }
+        }
+    }
+
     console->info( "" );
     console->info( "" );
     console->info( "Finalize" );
@@ -251,7 +265,6 @@ bool apemode::State::Finalize( ) {
         for ( auto& node : nodes ) {
             const auto curveIdsOffset    = builder.CreateVector( node.curveIds );
             const auto childIdsOffset    = builder.CreateVector( node.childIds );
-            const auto materialIdsOffset = builder.CreateVector( node.materialIds );
 
             console->info( "+ curve ids: {}, child ids: {}, material ids: {}, mesh id: {}",
                            node.curveIds.size( ),
@@ -267,7 +280,6 @@ bool apemode::State::Finalize( ) {
             nodeBuilder.add_culling_type( node.cullingType );
             nodeBuilder.add_mesh_id( node.meshId );
             nodeBuilder.add_child_ids( childIdsOffset );
-            nodeBuilder.add_material_ids( materialIdsOffset );
             nodeBuilder.add_anim_curve_ids( curveIdsOffset );
             nodeOffsets.push_back( nodeBuilder.Finish( ) );
         }
@@ -486,6 +498,7 @@ bool apemode::State::Finalize( ) {
     sceneBuilder.add_cameras( camerasOffset );
     sceneBuilder.add_lights( lightsOffset );
     sceneBuilder.add_anim_stacks( animStacksOffset );
+    sceneBuilder.add_version( apemodefb::EVersionFb::EVersionFb_Value );
 
     auto sceneOffset = sceneBuilder.Finish( );
     apemodefb::FinishSceneFbBuffer( builder, sceneOffset );

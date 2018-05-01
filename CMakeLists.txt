@@ -229,6 +229,7 @@ endif()
 add_library(
     FbxPipeline
     SHARED
+    ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs
     ${CMAKE_SOURCE_DIR}/FbxPipeline/generated/scene_generated.h
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpnorm.h
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpstate.h

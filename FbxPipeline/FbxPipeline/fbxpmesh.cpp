@@ -964,7 +964,8 @@ void ExportMesh( FbxNode*       pNode,
 
     if ( m.subsets.empty( ) ) {
         /* Independently from GetSubsets implementation make sure there is at least one subset. */
-        m.subsets.push_back( apemodefb::SubsetFb( 0, 0, vertexCount ) );
+        const uint32_t materialId = pMesh->GetNode( )->GetMaterialCount( ) > 0 ? 0 : uint32_t( -1 );
+        m.subsets.push_back( apemodefb::SubsetFb( materialId, 0, vertexCount ) );
     }
 
     /* Fill indices. */

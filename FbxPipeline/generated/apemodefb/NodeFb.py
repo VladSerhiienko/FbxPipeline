@@ -83,30 +83,8 @@ class NodeFb(object):
         return 0
 
     # NodeFb
-    def MaterialIds(self, j):
-        o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(18))
-        if o != 0:
-            a = self._tab.Vector(o)
-            return self._tab.Get(flatbuffers.number_types.Uint32Flags, a + flatbuffers.number_types.UOffsetTFlags.py_type(j * 4))
-        return 0
-
-    # NodeFb
-    def MaterialIdsAsNumpy(self):
-        o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(18))
-        if o != 0:
-            return self._tab.GetVectorAsNumpy(flatbuffers.number_types.Uint32Flags, o)
-        return 0
-
-    # NodeFb
-    def MaterialIdsLength(self):
-        o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(18))
-        if o != 0:
-            return self._tab.VectorLen(o)
-        return 0
-
-    # NodeFb
     def AnimCurveIds(self, j):
-        o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(20))
+        o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(18))
         if o != 0:
             a = self._tab.Vector(o)
             return self._tab.Get(flatbuffers.number_types.Uint32Flags, a + flatbuffers.number_types.UOffsetTFlags.py_type(j * 4))
@@ -114,19 +92,19 @@ class NodeFb(object):
 
     # NodeFb
     def AnimCurveIdsAsNumpy(self):
-        o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(20))
+        o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(18))
         if o != 0:
             return self._tab.GetVectorAsNumpy(flatbuffers.number_types.Uint32Flags, o)
         return 0
 
     # NodeFb
     def AnimCurveIdsLength(self):
-        o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(20))
+        o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(18))
         if o != 0:
             return self._tab.VectorLen(o)
         return 0
 
-def NodeFbStart(builder): builder.StartObject(9)
+def NodeFbStart(builder): builder.StartObject(8)
 def NodeFbAddId(builder, id): builder.PrependUint32Slot(0, id, 0)
 def NodeFbAddMeshId(builder, meshId): builder.PrependUint32Slot(1, meshId, 0)
 def NodeFbAddLightId(builder, lightId): builder.PrependUint32Slot(2, lightId, 0)
@@ -135,8 +113,6 @@ def NodeFbAddNameId(builder, nameId): builder.PrependUint32Slot(4, nameId, 0)
 def NodeFbAddCullingType(builder, cullingType): builder.PrependUint8Slot(5, cullingType, 0)
 def NodeFbAddChildIds(builder, childIds): builder.PrependUOffsetTRelativeSlot(6, flatbuffers.number_types.UOffsetTFlags.py_type(childIds), 0)
 def NodeFbStartChildIdsVector(builder, numElems): return builder.StartVector(4, numElems, 4)
-def NodeFbAddMaterialIds(builder, materialIds): builder.PrependUOffsetTRelativeSlot(7, flatbuffers.number_types.UOffsetTFlags.py_type(materialIds), 0)
-def NodeFbStartMaterialIdsVector(builder, numElems): return builder.StartVector(4, numElems, 4)
-def NodeFbAddAnimCurveIds(builder, animCurveIds): builder.PrependUOffsetTRelativeSlot(8, flatbuffers.number_types.UOffsetTFlags.py_type(animCurveIds), 0)
+def NodeFbAddAnimCurveIds(builder, animCurveIds): builder.PrependUOffsetTRelativeSlot(7, flatbuffers.number_types.UOffsetTFlags.py_type(animCurveIds), 0)
 def NodeFbStartAnimCurveIdsVector(builder, numElems): return builder.StartVector(4, numElems, 4)
 def NodeFbEnd(builder): return builder.EndObject()

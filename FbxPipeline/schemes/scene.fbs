@@ -2,7 +2,7 @@
 namespace apemodefb;
 
 enum EVersionFb : ubyte {
-    Value = 4
+    Value = 5
 }
 
 enum ECullingTypeFb : ubyte
@@ -106,15 +106,15 @@ enum EInterpolationModeFb : ubyte {
 }
 
 enum ELightTypeFb : ubyte {
-	Point, 
-	Directional, 
+	Point,
+	Directional,
 	Spot,
 	Area,
 }
 
 enum EAreaLightTypeFb : ubyte {
-	Rect, 
-	Sphere, 
+	Rect,
+	Sphere,
 }
 
 enum EValueTypeFb : ubyte {
@@ -338,7 +338,6 @@ table NodeFb {
     name_id : uint( key );
 	culling_type : ECullingTypeFb;
     child_ids : [uint];
-    material_ids : [uint];
     anim_curve_ids : [uint];
 }
 
@@ -349,6 +348,8 @@ table FileFb {
 }
 
 table SceneFb {
+	version : EVersionFb;
+
     transforms : [TransformFb];
     nodes : [NodeFb];
     meshes : [MeshFb];
@@ -361,7 +362,7 @@ table SceneFb {
     lights : [LightFb];
     skins : [SkinFb];
     files : [FileFb];
-    
+
     bool_values : [bool];
     int_values : [int];
     float_values : [float];
@@ -369,5 +370,5 @@ table SceneFb {
 }
 
 root_type SceneFb;
-file_extension "apemode";
+file_extension "fbxp";
 file_identifier "FBXP";

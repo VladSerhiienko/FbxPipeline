@@ -34,6 +34,14 @@
 // Math
 //
 
+#ifdef _WIN32
+#ifndef MATHFU_COMPILE_WITHOUT_SIMD_SUPPORT
+// TODO: Fix the issue and remove the definition.
+// NOTE: In Release configuration crashes, probably because of unaligned memory and SSE instructions.
+#define MATHFU_COMPILE_WITHOUT_SIMD_SUPPORT 1
+#endif
+#endif
+
 #include <math.h>
 #include <mathfu/constants.h>
 #include <mathfu/matrix.h>

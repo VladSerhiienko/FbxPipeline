@@ -61,7 +61,7 @@ struct FileFb;
 struct SceneFb;
 
 enum EVersionFb {
-  EVersionFb_Value = 4,
+  EVersionFb_Value = 5,
   EVersionFb_MIN = EVersionFb_Value,
   EVersionFb_MAX = EVersionFb_Value
 };
@@ -2408,8 +2408,7 @@ struct NodeFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     VT_NAME_ID = 12,
     VT_CULLING_TYPE = 14,
     VT_CHILD_IDS = 16,
-    VT_MATERIAL_IDS = 18,
-    VT_ANIM_CURVE_IDS = 20
+    VT_ANIM_CURVE_IDS = 18
   };
   uint32_t id() const {
     return GetField<uint32_t>(VT_ID, 0);
@@ -2466,12 +2465,6 @@ struct NodeFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   flatbuffers::Vector<uint32_t> *mutable_child_ids() {
     return GetPointer<flatbuffers::Vector<uint32_t> *>(VT_CHILD_IDS);
   }
-  const flatbuffers::Vector<uint32_t> *material_ids() const {
-    return GetPointer<const flatbuffers::Vector<uint32_t> *>(VT_MATERIAL_IDS);
-  }
-  flatbuffers::Vector<uint32_t> *mutable_material_ids() {
-    return GetPointer<flatbuffers::Vector<uint32_t> *>(VT_MATERIAL_IDS);
-  }
   const flatbuffers::Vector<uint32_t> *anim_curve_ids() const {
     return GetPointer<const flatbuffers::Vector<uint32_t> *>(VT_ANIM_CURVE_IDS);
   }
@@ -2488,8 +2481,6 @@ struct NodeFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyField<uint8_t>(verifier, VT_CULLING_TYPE) &&
            VerifyOffset(verifier, VT_CHILD_IDS) &&
            verifier.Verify(child_ids()) &&
-           VerifyOffset(verifier, VT_MATERIAL_IDS) &&
-           verifier.Verify(material_ids()) &&
            VerifyOffset(verifier, VT_ANIM_CURVE_IDS) &&
            verifier.Verify(anim_curve_ids()) &&
            verifier.EndTable();
@@ -2520,9 +2511,6 @@ struct NodeFbBuilder {
   void add_child_ids(flatbuffers::Offset<flatbuffers::Vector<uint32_t>> child_ids) {
     fbb_.AddOffset(NodeFb::VT_CHILD_IDS, child_ids);
   }
-  void add_material_ids(flatbuffers::Offset<flatbuffers::Vector<uint32_t>> material_ids) {
-    fbb_.AddOffset(NodeFb::VT_MATERIAL_IDS, material_ids);
-  }
   void add_anim_curve_ids(flatbuffers::Offset<flatbuffers::Vector<uint32_t>> anim_curve_ids) {
     fbb_.AddOffset(NodeFb::VT_ANIM_CURVE_IDS, anim_curve_ids);
   }
@@ -2547,11 +2535,9 @@ inline flatbuffers::Offset<NodeFb> CreateNodeFb(
     uint32_t name_id = 0,
     ECullingTypeFb culling_type = ECullingTypeFb_CullingOff,
     flatbuffers::Offset<flatbuffers::Vector<uint32_t>> child_ids = 0,
-    flatbuffers::Offset<flatbuffers::Vector<uint32_t>> material_ids = 0,
     flatbuffers::Offset<flatbuffers::Vector<uint32_t>> anim_curve_ids = 0) {
   NodeFbBuilder builder_(_fbb);
   builder_.add_anim_curve_ids(anim_curve_ids);
-  builder_.add_material_ids(material_ids);
   builder_.add_child_ids(child_ids);
   builder_.add_name_id(name_id);
   builder_.add_camera_id(camera_id);
@@ -2571,7 +2557,6 @@ inline flatbuffers::Offset<NodeFb> CreateNodeFbDirect(
     uint32_t name_id = 0,
     ECullingTypeFb culling_type = ECullingTypeFb_CullingOff,
     const std::vector<uint32_t> *child_ids = nullptr,
-    const std::vector<uint32_t> *material_ids = nullptr,
     const std::vector<uint32_t> *anim_curve_ids = nullptr) {
   return apemodefb::CreateNodeFb(
       _fbb,
@@ -2582,7 +2567,6 @@ inline flatbuffers::Offset<NodeFb> CreateNodeFbDirect(
       name_id,
       culling_type,
       child_ids ? _fbb.CreateVector<uint32_t>(*child_ids) : 0,
-      material_ids ? _fbb.CreateVector<uint32_t>(*material_ids) : 0,
       anim_curve_ids ? _fbb.CreateVector<uint32_t>(*anim_curve_ids) : 0);
 }
 
@@ -2683,23 +2667,30 @@ inline flatbuffers::Offset<FileFb> CreateFileFbDirect(
 
 struct SceneFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   enum {
-    VT_TRANSFORMS = 4,
-    VT_NODES = 6,
-    VT_MESHES = 8,
-    VT_ANIM_STACKS = 10,
-    VT_ANIM_LAYERS = 12,
-    VT_ANIM_CURVES = 14,
-    VT_MATERIALS = 16,
-    VT_TEXTURES = 18,
-    VT_CAMERAS = 20,
-    VT_LIGHTS = 22,
-    VT_SKINS = 24,
-    VT_FILES = 26,
-    VT_BOOL_VALUES = 28,
-    VT_INT_VALUES = 30,
-    VT_FLOAT_VALUES = 32,
-    VT_STRING_VALUES = 34
+    VT_VERSION = 4,
+    VT_TRANSFORMS = 6,
+    VT_NODES = 8,
+    VT_MESHES = 10,
+    VT_ANIM_STACKS = 12,
+    VT_ANIM_LAYERS = 14,
+    VT_ANIM_CURVES = 16,
+    VT_MATERIALS = 18,
+    VT_TEXTURES = 20,
+    VT_CAMERAS = 22,
+    VT_LIGHTS = 24,
+    VT_SKINS = 26,
+    VT_FILES = 28,
+    VT_BOOL_VALUES = 30,
+    VT_INT_VALUES = 32,
+    VT_FLOAT_VALUES = 34,
+    VT_STRING_VALUES = 36
   };
+  EVersionFb version() const {
+    return static_cast<EVersionFb>(GetField<uint8_t>(VT_VERSION, 0));
+  }
+  bool mutate_version(EVersionFb _version) {
+    return SetField<uint8_t>(VT_VERSION, static_cast<uint8_t>(_version), 0);
+  }
   const flatbuffers::Vector<const TransformFb *> *transforms() const {
     return GetPointer<const flatbuffers::Vector<const TransformFb *> *>(VT_TRANSFORMS);
   }
@@ -2798,6 +2789,7 @@ struct SceneFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
+           VerifyField<uint8_t>(verifier, VT_VERSION) &&
            VerifyOffset(verifier, VT_TRANSFORMS) &&
            verifier.Verify(transforms()) &&
            VerifyOffset(verifier, VT_NODES) &&
@@ -2844,6 +2836,9 @@ struct SceneFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
 struct SceneFbBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
+  void add_version(EVersionFb version) {
+    fbb_.AddElement<uint8_t>(SceneFb::VT_VERSION, static_cast<uint8_t>(version), 0);
+  }
   void add_transforms(flatbuffers::Offset<flatbuffers::Vector<const TransformFb *>> transforms) {
     fbb_.AddOffset(SceneFb::VT_TRANSFORMS, transforms);
   }
@@ -2906,6 +2901,7 @@ struct SceneFbBuilder {
 
 inline flatbuffers::Offset<SceneFb> CreateSceneFb(
     flatbuffers::FlatBufferBuilder &_fbb,
+    EVersionFb version = static_cast<EVersionFb>(0),
     flatbuffers::Offset<flatbuffers::Vector<const TransformFb *>> transforms = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<NodeFb>>> nodes = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<MeshFb>>> meshes = 0,
@@ -2939,11 +2935,13 @@ inline flatbuffers::Offset<SceneFb> CreateSceneFb(
   builder_.add_meshes(meshes);
   builder_.add_nodes(nodes);
   builder_.add_transforms(transforms);
+  builder_.add_version(version);
   return builder_.Finish();
 }
 
 inline flatbuffers::Offset<SceneFb> CreateSceneFbDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
+    EVersionFb version = static_cast<EVersionFb>(0),
     const std::vector<const TransformFb *> *transforms = nullptr,
     const std::vector<flatbuffers::Offset<NodeFb>> *nodes = nullptr,
     const std::vector<flatbuffers::Offset<MeshFb>> *meshes = nullptr,
@@ -2962,6 +2960,7 @@ inline flatbuffers::Offset<SceneFb> CreateSceneFbDirect(
     const std::vector<flatbuffers::Offset<flatbuffers::String>> *string_values = nullptr) {
   return apemodefb::CreateSceneFb(
       _fbb,
+      version,
       transforms ? _fbb.CreateVector<const TransformFb *>(*transforms) : 0,
       nodes ? _fbb.CreateVector<flatbuffers::Offset<NodeFb>>(*nodes) : 0,
       meshes ? _fbb.CreateVector<flatbuffers::Offset<MeshFb>>(*meshes) : 0,
@@ -3003,7 +3002,7 @@ inline bool VerifySceneFbBuffer(
 }
 
 inline const char *SceneFbExtension() {
-  return "apemode";
+  return "fbxp";
 }
 
 inline void FinishSceneFbBuffer(
