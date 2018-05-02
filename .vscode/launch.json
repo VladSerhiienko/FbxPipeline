@@ -10,11 +10,17 @@
             "request": "launch",
             "program": "${workspaceFolder}/build_linux_x86_64/FbxPipelineLauncher",
             "args": [
-                "-i", "/home/user/vserhiienko/models_v3/warmonger_sword/source/Warmonger_Posed.fbx",
-                "-o", "/home/user/vserhiienko/models_v3/warmonger_sword.fbxp",
-                "-l", "/home/user/vserhiienko/models_v3/warmonger_sword.log.txt",
-                "-e", "/home/user/vserhiienko/models_v3/warmonger_sword/**",
-                "--script-input", "/home/user/vserhiienko/models_v3/warmonger_sword/scene.gltf",
+                "-i", "/home/user/vserhiienko/models_v3/rainier-ak-3d/source/rainier-ak-3d.fbx",
+                "-o", "/home/user/vserhiienko/models_v3/rainier-ak-3d.fbxp",
+                "-l", "/home/user/vserhiienko/models_v3/rainier-ak-3d.log.txt",
+                "-e", "/home/user/vserhiienko/models_v3/rainier-ak-3d/**",
+                "--script-input", "/home/user/vserhiienko/models_v3/rainier-ak-3d/scene.gltf",
+
+                // "-i", "/home/user/vserhiienko/models_v3/warmonger_sword/source/Warmonger_Posed.fbx",
+                // "-o", "/home/user/vserhiienko/models_v3/warmonger_sword.fbxp",
+                // "-l", "/home/user/vserhiienko/models_v3/warmonger_sword.log.txt",
+                // "-e", "/home/user/vserhiienko/models_v3/warmonger_sword/**",
+                // "--script-input", "/home/user/vserhiienko/models_v3/warmonger_sword/scene.gltf",
 
                 // "-i", "/home/user/vserhiienko/models_v2/dreadroamer_free/source/Zbot_Animation.fbx",
                 // "-o", "/home/user/vserhiienko/models_v2/dreadroamer.fbxp",
