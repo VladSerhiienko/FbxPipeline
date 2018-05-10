@@ -587,15 +587,6 @@ struct TControlPointSkinInfo {
 static_assert( sizeof( StaticVertex ) == sizeof( apemodefb::StaticVertexFb ), "Must match" );
 static_assert( sizeof( StaticSkinnedVertex ) == sizeof( apemodefb::StaticSkinnedVertexFb ), "Must match" );
 
-//
-// TODO: Add winding order parameter for each mesh.
-//
-
-template < typename TIndexType = int >
-struct TPolygonVertexOrder {
-    TIndexType indices[ 3 ] = {0, 2, 1}; // CCW
-    // TIndexType indices[ 3 ]  = {0, 1, 2}; // CW
-};
 
 /**
  * Initialize vertices with very basic properties like 'position', 'normal', 'tangent', 'texCoords'.
@@ -642,7 +633,7 @@ void InitializeVertices( FbxMesh*       mesh,
         // Having this array we can easily control polygon winding order.
         // Since mesh is triangular we can make it static [3] at compile-time.
         // for ( const uint32_t pvi : {0, 1, 2} ) {
-        for ( const uint32_t pvi : TPolygonVertexOrder< uint32_t >( ).indices ) {
+        for ( const uint32_t pvi : {0, 1, 2} ) {
             const uint32_t ci = (uint32_t) mesh->GetPolygonVertex( (int) pi, (int) pvi );
 
             const auto cp = mesh->GetControlPointAt( ci );
@@ -947,7 +938,7 @@ void ExportMesh( FbxNode*       pNode,
 
         uint32_t vertexIndex = 0;
         for ( int polygonIndex = 0; polygonIndex < pMesh->GetPolygonCount( ); ++polygonIndex ) {
-            for ( const int polygonVertexIndex : TPolygonVertexOrder< int >( ).indices ) {
+            for ( const int polygonVertexIndex : {0, 1, 2} ) {
 
                 const int controlPointIndex = pMesh->GetPolygonVertex( polygonIndex, polygonVertexIndex );
                 for ( BoneIndexType b = 0; b < ControlPointSkinInfo::kBoneCountPerControlPoint; ++b ) {
