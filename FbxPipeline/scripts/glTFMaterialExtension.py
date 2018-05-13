@@ -249,6 +249,12 @@ def gltf_export_materials(state, gltf_path):
 
         gltf_texture_index_to_texture_index = sync_textures(state, gltf_json)
         overrided_materials = list()
+        
+        for gltf_material_json in gltf_materials_json:
+            gltf_material_name = gltf_material_json["name"]
+            FbxPipeline.log_info("gltf material: {}.".format(gltf_material_name))
+            material_index = find_material_index_by_name(state, gltf_material_name)
+            FbxPipeline.log_info("gltf material index: {}.".format(material_index))
 
         for gltf_material_json in gltf_materials_json:
             gltf_material_name = gltf_material_json["name"]

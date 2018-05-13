@@ -109,8 +109,8 @@ void CalculateFaceNormals( TVertex* vertices, size_t vertexCount ) {
  * @param subsetPolies A mapping of material indices to polygon ranges (useful for knowing the basic structure).
  * @return True on success.
  **/
-template < typename TIndex >
 bool GetSubsets( FbxMesh* mesh, apemode::Mesh& m, std::vector< apemodefb::SubsetFb >& subsets ) {
+
     auto& s = apemode::State::Get( );
     s.console->info("Mesh \"{}\" has {} material(s) assigned.", mesh->GetNode( )->GetName( ), mesh->GetNode( )->GetMaterialCount( ) );
 
@@ -128,32 +128,20 @@ bool GetSubsets( FbxMesh* mesh, apemode::Mesh& m, std::vector< apemodefb::Subset
     }
 
     /* Print materials attached to a node. */
-    for ( auto k = 0; k < mesh->GetNode( )->GetMaterialCount( ); ++k ) {
+    for ( int k = 0; k < mesh->GetNode( )->GetMaterialCount( ); ++k ) {
         s.console->info( "\t#{} - \"{}\".", k, mesh->GetNode( )->GetMaterial( k )->GetName( ) );
     }
 
     struct MaterialMappingItem {
-        TIndex materialIndex;
-        TIndex polygonIndex;
+        uint32_t materialIndex;
+        uint32_t polygonIndex;
 
-        MaterialMappingItem( )
-            : materialIndex( 0 ), polygonIndex( 0 ) {
-        }
-
-        MaterialMappingItem( TIndex materialIndex, TIndex polygonIndex )
-            : materialIndex( materialIndex ), polygonIndex( polygonIndex ) {
-        }
-
-        MaterialMappingItem( const MaterialMappingItem& o )
-            : materialIndex( o.materialIndex ), polygonIndex( o.polygonIndex ) {
-        }
+        MaterialMappingItem( ) : materialIndex( 0 ), polygonIndex( 0 ) { }
+        MaterialMappingItem( uint32_t materialIndex, uint32_t polygonIndex ) : materialIndex( materialIndex ), polygonIndex( polygonIndex ) { }
+        MaterialMappingItem( const MaterialMappingItem& o ) : materialIndex( o.materialIndex ), polygonIndex( o.polygonIndex ) { }
     };
 
     std::vector< MaterialMappingItem > materialMapping;
-    std::vector< apemodefb::SubsetFb > subsetPolies;
-
-    subsets.reserve( mesh->GetNode( )->GetMaterialCount( ) );
-    subsetPolies.reserve( mesh->GetNode( )->GetMaterialCount( ) );
 
     /* Go though all the material elements and map them. */
     if ( const uint32_t mc = (uint32_t) mesh->GetElementMaterialCount( ) ) {
@@ -217,14 +205,14 @@ bool GetSubsets( FbxMesh* mesh, apemode::Mesh& m, std::vector< apemodefb::Subset
                                     break;
                                 }
 
-                                std::map< const FbxSurfaceMaterial*, TIndex > mappingDirectToIndex;
+                                std::map< const FbxSurfaceMaterial*, uint32_t > mappingDirectToIndex;
                                 for ( auto k = 0; k < mesh->GetNode( )->GetMaterialCount( ); ++k ) {
-                                    mappingDirectToIndex[ mesh->GetNode( )->GetMaterial( k ) ] = (TIndex) k;
+                                    mappingDirectToIndex[ mesh->GetNode( )->GetMaterial( k ) ] = uint32_t( k );
                                 }
 
                                 materialMapping.reserve( mesh->GetPolygonCount( ) );
                                 for ( uint32_t i = 0; i < (uint32_t) mesh->GetPolygonCount( ); ++i )
-                                    materialMapping.emplace_back( mappingDirectToIndex[ directArray->GetAt( i ) ], (TIndex) i );
+                                    materialMapping.emplace_back( mappingDirectToIndex[ directArray->GetAt( i ) ], uint32_t( i ) );
 
                             } break;
 
@@ -239,7 +227,7 @@ bool GetSubsets( FbxMesh* mesh, apemode::Mesh& m, std::vector< apemodefb::Subset
 
                                 materialMapping.reserve( mesh->GetPolygonCount( ) );
                                 for ( uint32_t i = 0; i < (uint32_t) mesh->GetPolygonCount( ); ++i )
-                                    materialMapping.emplace_back( (TIndex) indexArray->GetAt( i ), (TIndex)i );
+                                    materialMapping.emplace_back( uint32_t( indexArray->GetAt( i ) ), uint32_t( i ) );
 
                             } break;
 
@@ -273,106 +261,75 @@ bool GetSubsets( FbxMesh* mesh, apemode::Mesh& m, std::vector< apemodefb::Subset
     //                {10, 4}, {15, 1}, {17, 1}.
     //
 
-    auto sortByMaterialIndex = [&]( const MaterialMappingItem& a, const MaterialMappingItem& b ) {
-        return a.materialIndex < b.materialIndex;
+    // Sort materialMapping by material index, than by polygon index.
+    std::sort( materialMapping.begin( ), materialMapping.end( ), [&]( const MaterialMappingItem& a, const MaterialMappingItem& b ) {
+        return a.materialIndex != b.materialIndex ? a.materialIndex < b.materialIndex : a.polygonIndex < b.polygonIndex;
+    } );
+
+    struct MaterialPolygonRange {
+        uint32_t materialIndex;
+        uint32_t polygonIndex;
+        uint32_t polygonEndIndex;
     };
 
-    auto sortByPolygonIndex = [&]( const MaterialMappingItem& a, const MaterialMappingItem& b ) {
-        return a.polygonIndex < b.polygonIndex;
-    };
+    std::vector< MaterialPolygonRange > polygonRanges;
+    {
+        uint32_t currMaterialIndex = materialMapping[ 0 ].materialIndex;
+        uint32_t currPolygonIndex  = materialMapping[ 0 ].polygonIndex;
 
-    // Sort materialMapping by material index.
-    std::sort( materialMapping.begin( ), materialMapping.end( ), sortByMaterialIndex );
+        for ( uint32_t i = 1; i < materialMapping.size( ); ++i ) {
+            uint32_t materialIndex = materialMapping[ i ].materialIndex;
 
-    auto extractSubsetsFromRange = [&]( const uint32_t mii, const uint32_t ii, const uint32_t i ) {
-        uint32_t ki = ii;
-        TIndex k  = materialMapping[ ii ].polygonIndex;
+            if ( currMaterialIndex != materialIndex ) {
 
-        uint32_t j = ii;
-        for ( ; j < i; ++j ) {
-            const TIndex kk = materialMapping[ j ].polygonIndex;
-            if ( ( kk - k ) > 1 ) {
-                // s.console->info( "Break in {} - {} vs {}", j, k, kk );
+                MaterialPolygonRange materialPolygonRange;
 
-                // Process a case where there is a break in polygon indices.
-                s.console->info( "\tAdding subset: material #{}, polygon #{}, count {} ({} - {}).", mii, k, j - ki, ki, j - 1 );
-                subsetPolies.emplace_back( mii, ki, j - ki );
-                ki = j;
-                k  = kk;
+                materialPolygonRange.materialIndex   = currMaterialIndex;
+                materialPolygonRange.polygonIndex    = currPolygonIndex;
+                materialPolygonRange.polygonEndIndex =  materialMapping[ i - 1 ].polygonIndex;
+
+                polygonRanges.push_back( materialPolygonRange );
+                currMaterialIndex = materialIndex;
+                currPolygonIndex  = materialMapping[ i ].polygonIndex;
+
+            } else if ( ( materialMapping[ i ].polygonIndex - materialMapping[ i - 1 ].polygonIndex ) > 1 ) {
+
+                MaterialPolygonRange materialPolygonRange;
+
+                materialPolygonRange.materialIndex   = currMaterialIndex;
+                materialPolygonRange.polygonIndex    = currPolygonIndex;
+                materialPolygonRange.polygonEndIndex = materialMapping[ i - 1 ].polygonIndex;
+
+                polygonRanges.push_back( materialPolygonRange );
+                currMaterialIndex = materialIndex;
+                currPolygonIndex  = materialMapping[ i ].polygonIndex;
+
+            } else if ( i == materialMapping.size( ) - 1 ) {
+
+                MaterialPolygonRange materialPolygonRange;
+
+                materialPolygonRange.materialIndex   = currMaterialIndex;
+                materialPolygonRange.polygonIndex    = currPolygonIndex;
+                materialPolygonRange.polygonEndIndex = materialMapping[ i ].polygonIndex;
+
+                polygonRanges.push_back( materialPolygonRange );
             }
-
-            k = kk;
-        }
-
-        s.console->info( "\tAdding subset: material #{}, polygon #{}, count {} ({} - {}).", mii, k, j - ki, ki, j - 1 );
-        subsetPolies.emplace_back( mii, ki, j - ki );
-    };
-
-    uint32_t ii = 0;
-    TIndex mii = materialMapping.front( ).materialIndex;
-
-    uint32_t i  = 0;
-    const uint32_t ic = (uint32_t) materialMapping.size( );
-    for ( ; i < ic; ++i ) {
-        const TIndex mi = materialMapping[ i ].materialIndex;
-        if ( mi != mii ) {
-            s.console->info( "Material #{} has {} assigned polygons ({} - {}).", mii, i - ii, ii, i - 1 );
-
-            // Sort materialMapping by polygon index.
-            std::sort( materialMapping.data( ) + ii, materialMapping.data( ) + i, sortByPolygonIndex );
-            extractSubsetsFromRange( mii, ii, i );
-            ii  = i;
-            mii = mi;
         }
     }
 
-    s.console->info( "Material #{} has {} assigned polygons ({} - {}).", mii, i - ii, ii, i - 1 );
-    std::sort( materialMapping.data( ) + ii, materialMapping.data( ) + i, sortByPolygonIndex );
-    extractSubsetsFromRange( mii, ii, i );
+    subsets.reserve( polygonRanges.size( ) );
 
-    TIndex subsetStartIndex = 0;
-    TIndex subsetIndexCount = 0;
-    uint32_t materialIndex = (uint32_t) -1;
+    assert( polygonRanges.size( ) <= ( size_t )( mesh->GetNode( )->GetMaterialCount( ) ) );
+    for ( MaterialPolygonRange range : polygonRanges ) {
+        apemodefb::SubsetFb subsetFb( range.materialIndex, range.polygonIndex * 3, ( range.polygonEndIndex - range.polygonIndex + 1 ) * 3 );
+        subsets.push_back( subsetFb );
 
-    if ( !subsetPolies.empty( ) ) {
-        s.console->info( "Mesh index subsets from {} polygon ranges:", subsetPolies.size( ) );
+        apemode::State::Get( ).console->error( "\t+ subset: material {}, base_index {}, index_count {}.",
+                                               subsetFb.material_id( ),
+                                               subsetFb.base_index( ),
+                                               subsetFb.index_count( ) );
     }
 
-    for ( auto& sp : subsetPolies ) {
-        if ( materialIndex != sp.material_id( ) ) {
-            const TIndex indexCount = subsetIndexCount;
-
-            if ( materialIndex != (uint32_t) -1 ) {
-                const auto subsetLength = indexCount - subsetStartIndex;
-                subsets.emplace_back( materialIndex, (uint32_t)subsetStartIndex * 3, (uint32_t)subsetLength * 3 );
-
-                s.console->info( "\tMesh subset #{} for material #{} index range: [{}; {}].",
-                                 subsets.size( ) - 1,
-                                 materialIndex,
-                                 subsetStartIndex,
-                                 subsetLength );
-            }
-
-            materialIndex    = sp.material_id( );
-            subsetStartIndex = indexCount;
-        }
-
-        subsetIndexCount += sp.index_count( );
-    }
-
-    if ( !subsetPolies.empty( ) ) {
-        const TIndex indexCount = subsetIndexCount;
-        const auto subsetLength = indexCount - subsetStartIndex;
-        subsets.emplace_back( materialIndex, (uint32_t) subsetStartIndex * 3, (uint32_t) subsetLength * 3 );
-
-        s.console->info( "\tMesh subset #{} for material #{} index range: [{}; {}].",
-                         subsets.size( ) - 1,
-                         materialIndex,
-                         subsetStartIndex,
-                         subsetLength );
-    }
-
-    assert( subsets.size( ) <= ( size_t )( mesh->GetNode( )->GetMaterialCount( ) ) );
     std::sort( subsets.begin( ), subsets.end( ), [&]( apemodefb::SubsetFb const& a, apemodefb::SubsetFb const& b ) {
         return a.base_index( ) < b.base_index( );
     } );
@@ -951,7 +908,8 @@ void ExportMesh( FbxNode*       pNode,
         }
     }
 
-    GetSubsets< TIndex >( pMesh, m, m.subsets );
+    GetSubsets( pMesh, m, m.subsets );
+    //GetSubsets< TIndex >( pMesh, m, m.subsets );
 
     if ( m.subsets.empty( ) ) {
         /* Independently from GetSubsets implementation make sure there is at least one subset. */

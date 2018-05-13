@@ -352,7 +352,10 @@ bool apemode::State::Finalize( ) {
     std::vector< flatbuffers::Offset< apemodefb::MaterialFb > > materialOffsets;
     materialOffsets.reserve( materials.size( ) );
     for ( auto& material : materials ) {
-        console->info( "+ properties: {}, textures: {}", material.properties.size( ), material.textureProperties.size( ) );
+        console->info( "+ {} -> properties: {}, textures: {}",
+                       stringValues[ ValueId( material.nameId ).valueIndex ],
+                       material.properties.size( ),
+                       material.textureProperties.size( ) );
 
         auto propertiesOffset = builder.CreateVectorOfStructs( material.properties );
         auto texturesOffset = builder.CreateVectorOfStructs( material.textureProperties );

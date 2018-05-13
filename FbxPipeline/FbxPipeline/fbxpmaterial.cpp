@@ -53,6 +53,7 @@ void ExportMaterials( FbxScene* pScene ) {
             m.id = id;
             m.nameId = s.PushValue( material->GetName( ) );
 
+            assert( s.materialDict.find( materialId ) == s.materialDict.end( ) );
             s.materialDict[ materialId ] = id;
 
             s.console->info( "" );
