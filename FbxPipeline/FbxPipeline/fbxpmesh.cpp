@@ -109,46 +109,42 @@ void CalculateFaceNormals( TVertex* vertices, size_t vertexCount ) {
  * @param subsetPolies A mapping of material indices to polygon ranges (useful for knowing the basic structure).
  * @return True on success.
  **/
-bool GetSubsets( FbxMesh* mesh, apemode::Mesh& m, std::vector< apemodefb::SubsetFb >& subsets ) {
+bool GetSubsets( FbxMesh* pMeshFb, std::vector< apemodefb::SubsetFb >& subsetsFb ) {
 
     auto& s = apemode::State::Get( );
-    s.console->info("Mesh \"{}\" has {} material(s) assigned.", mesh->GetNode( )->GetName( ), mesh->GetNode( )->GetMaterialCount( ) );
+    s.console->info("Mesh \"{}\" has {} material(s) assigned.", pMeshFb->GetNode( )->GetName( ), pMeshFb->GetNode( )->GetMaterialCount( ) );
 
-    subsets.clear( );
+    subsetsFb.clear( );
 
     /* No submeshes */
-    if ( mesh->GetNode( )->GetMaterialCount( ) == 0 ) {
+    if ( pMeshFb->GetNode( )->GetMaterialCount( ) == 0 ) {
         return false;
     }
 
     /* Single submesh */
-    if ( mesh->GetNode( )->GetMaterialCount( ) == 1 ) {
-        subsets.emplace_back( 0, 0, mesh->GetPolygonCount( ) * 3 );
+    if ( pMeshFb->GetNode( )->GetMaterialCount( ) == 1 ) {
+        subsetsFb.emplace_back( 0, 0, pMeshFb->GetPolygonCount( ) * 3 );
         return true;
     }
 
     /* Print materials attached to a node. */
-    for ( int k = 0; k < mesh->GetNode( )->GetMaterialCount( ); ++k ) {
-        s.console->info( "\t#{} - \"{}\".", k, mesh->GetNode( )->GetMaterial( k )->GetName( ) );
+    for ( int k = 0; k < pMeshFb->GetNode( )->GetMaterialCount( ); ++k ) {
+        s.console->info( "\t#{} - \"{}\".", k, pMeshFb->GetNode( )->GetMaterial( k )->GetName( ) );
     }
 
     struct MaterialMappingItem {
-        uint32_t materialIndex;
-        uint32_t polygonIndex;
-
-        MaterialMappingItem( ) : materialIndex( 0 ), polygonIndex( 0 ) { }
-        MaterialMappingItem( uint32_t materialIndex, uint32_t polygonIndex ) : materialIndex( materialIndex ), polygonIndex( polygonIndex ) { }
-        MaterialMappingItem( const MaterialMappingItem& o ) : materialIndex( o.materialIndex ), polygonIndex( o.polygonIndex ) { }
+        uint32_t materialIndex = 0;
+        uint32_t polygonIndex = 0;
     };
 
     std::vector< MaterialMappingItem > materialMapping;
 
     /* Go though all the material elements and map them. */
-    if ( const uint32_t mc = (uint32_t) mesh->GetElementMaterialCount( ) ) {
-        s.console->info( "Mesh \"{}\" has {} material elements.", mesh->GetNode( )->GetName( ), mc );
+    if ( const uint32_t mc = (uint32_t) pMeshFb->GetElementMaterialCount( ) ) {
+        s.console->info( "Mesh \"{}\" has {} material elements.", pMeshFb->GetNode( )->GetName( ), mc );
 
         for ( uint32_t m = 0; m < mc; ++m ) {
-            if ( const auto materialElement = mesh->GetElementMaterial( m ) ) {
+            if ( const auto materialElement = pMeshFb->GetElementMaterial( m ) ) {
                 switch ( const auto mappingMode = materialElement->GetMappingMode( ) ) {
                     /* Case when there is a single entry in the material element arrays. */
                     case FbxLayerElement::eAllSame: {
@@ -162,10 +158,10 @@ bool GetSubsets( FbxMesh* mesh, apemode::Mesh& m, std::vector< apemodefb::Subset
                                     break;
                                 }
 
-                                for ( auto k = 0; k < mesh->GetNode( )->GetMaterialCount( ); ++k ) {
-                                    if ( mesh->GetNode( )->GetMaterial( k ) == directArray->GetAt( 0 ) ) {
+                                for ( auto k = 0; k < pMeshFb->GetNode( )->GetMaterialCount( ); ++k ) {
+                                    if ( pMeshFb->GetNode( )->GetMaterial( k ) == directArray->GetAt( 0 ) ) {
                                         /* Since the mapping mode is eAllSame, return here. */
-                                        subsets.emplace_back( k, 0, mesh->GetPolygonCount( ) * 3 );
+                                        subsetsFb.emplace_back( k, 0, pMeshFb->GetPolygonCount( ) * 3 );
                                         return true;
                                     }
                                 }
@@ -185,7 +181,7 @@ bool GetSubsets( FbxMesh* mesh, apemode::Mesh& m, std::vector< apemodefb::Subset
                                 }
 
                                 /* Since the mapping mode is eAllSame, return here. */
-                                subsets.emplace_back( indexArray->GetAt( 0 ), 0, mesh->GetPolygonCount( ) * 3 );
+                                subsetsFb.emplace_back( indexArray->GetAt( 0 ), 0, pMeshFb->GetPolygonCount( ) * 3 );
                                 return true;
                             } break;
 
@@ -206,14 +202,17 @@ bool GetSubsets( FbxMesh* mesh, apemode::Mesh& m, std::vector< apemodefb::Subset
                                 }
 
                                 std::map< const FbxSurfaceMaterial*, uint32_t > mappingDirectToIndex;
-                                for ( auto k = 0; k < mesh->GetNode( )->GetMaterialCount( ); ++k ) {
-                                    mappingDirectToIndex[ mesh->GetNode( )->GetMaterial( k ) ] = uint32_t( k );
+                                for ( auto k = 0; k < pMeshFb->GetNode( )->GetMaterialCount( ); ++k ) {
+                                    mappingDirectToIndex[ pMeshFb->GetNode( )->GetMaterial( k ) ] = uint32_t( k );
                                 }
 
-                                materialMapping.reserve( mesh->GetPolygonCount( ) );
-                                for ( uint32_t i = 0; i < (uint32_t) mesh->GetPolygonCount( ); ++i )
-                                    materialMapping.emplace_back( mappingDirectToIndex[ directArray->GetAt( i ) ], uint32_t( i ) );
-
+                                materialMapping.reserve( pMeshFb->GetPolygonCount( ) );
+                                for ( uint32_t i = 0; i < (uint32_t) pMeshFb->GetPolygonCount( ); ++i ) {
+                                    MaterialMappingItem materialMappingItem;
+                                    materialMappingItem.materialIndex = mappingDirectToIndex[ directArray->GetAt( i ) ];
+                                    materialMappingItem.polygonIndex  = uint32_t( i );
+                                    materialMapping.push_back( materialMappingItem );
+                                }
                             } break;
 
                             case FbxLayerElement::EReferenceMode::eIndex:
@@ -225,10 +224,13 @@ bool GetSubsets( FbxMesh* mesh, apemode::Mesh& m, std::vector< apemodefb::Subset
                                     break;
                                 }
 
-                                materialMapping.reserve( mesh->GetPolygonCount( ) );
-                                for ( uint32_t i = 0; i < (uint32_t) mesh->GetPolygonCount( ); ++i )
-                                    materialMapping.emplace_back( uint32_t( indexArray->GetAt( i ) ), uint32_t( i ) );
-
+                                materialMapping.reserve( pMeshFb->GetPolygonCount( ) );
+                                for ( uint32_t i = 0; i < (uint32_t) pMeshFb->GetPolygonCount( ); ++i ) {
+                                    MaterialMappingItem materialMappingItem;
+                                    materialMappingItem.materialIndex = uint32_t( indexArray->GetAt( i ) );
+                                    materialMappingItem.polygonIndex  = uint32_t( i );
+                                    materialMapping.push_back( materialMappingItem );
+                                }
                             } break;
 
                             default:
@@ -246,7 +248,7 @@ bool GetSubsets( FbxMesh* mesh, apemode::Mesh& m, std::vector< apemodefb::Subset
     }
 
     if ( materialMapping.empty( ) ) {
-        s.console->error( "Mesh \"{}\" has no correctly mapped materials (fallback to first one).", mesh->GetNode( )->GetName( ) );
+        s.console->error( "Mesh \"{}\" has no correctly mapped materials (fallback to first one).", pMeshFb->GetNode( )->GetName( ) );
         // Splitted meshes per material case, do not issue a debug break.
         return false;
     }
@@ -317,20 +319,20 @@ bool GetSubsets( FbxMesh* mesh, apemode::Mesh& m, std::vector< apemodefb::Subset
         }
     }
 
-    subsets.reserve( polygonRanges.size( ) );
+    subsetsFb.reserve( polygonRanges.size( ) );
 
-    assert( polygonRanges.size( ) <= ( size_t )( mesh->GetNode( )->GetMaterialCount( ) ) );
-    for ( MaterialPolygonRange range : polygonRanges ) {
+    assert( polygonRanges.size( ) <= ( size_t )( pMeshFb->GetNode( )->GetMaterialCount( ) ) );
+    for ( const MaterialPolygonRange range : polygonRanges ) {
         apemodefb::SubsetFb subsetFb( range.materialIndex, range.polygonIndex * 3, ( range.polygonEndIndex - range.polygonIndex + 1 ) * 3 );
-        subsets.push_back( subsetFb );
+        subsetsFb.push_back( subsetFb );
 
-        apemode::State::Get( ).console->error( "\t+ subset: material {}, base_index {}, index_count {}.",
-                                               subsetFb.material_id( ),
-                                               subsetFb.base_index( ),
-                                               subsetFb.index_count( ) );
+        s.console->error( "\t+ subset: #{} -> base_index {}, index_count {}.",
+                          subsetFb.material_id( ),
+                          subsetFb.base_index( ),
+                          subsetFb.index_count( ) );
     }
 
-    std::sort( subsets.begin( ), subsets.end( ), [&]( apemodefb::SubsetFb const& a, apemodefb::SubsetFb const& b ) {
+    std::sort( subsetsFb.begin( ), subsetsFb.end( ), [&]( const apemodefb::SubsetFb a, const apemodefb::SubsetFb b ) {
         return a.base_index( ) < b.base_index( );
     } );
 
@@ -908,7 +910,7 @@ void ExportMesh( FbxNode*       pNode,
         }
     }
 
-    GetSubsets( pMesh, m, m.subsets );
+    GetSubsets( pMesh, m.subsets );
     //GetSubsets< TIndex >( pMesh, m, m.subsets );
 
     if ( m.subsets.empty( ) ) {
