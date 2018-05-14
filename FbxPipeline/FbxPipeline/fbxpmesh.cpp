@@ -769,7 +769,9 @@ void Pack( const apemodefb::StaticSkinnedVertexFb* vertices,
            const mathfu::vec2                      texcoordsMin,
            const mathfu::vec2                      texcoordsMax );
 
-template < typename TIndex >
+enum class EVertexOrder { CW, CCW };
+
+template < typename TIndex, EVertexOrder TOrder = EVertexOrder::CCW >
 void ExportMesh( FbxNode*       pNode,
                  FbxMesh*       pMesh,
                  apemode::Node& n,
@@ -998,9 +1000,21 @@ void ExportMesh( FbxNode*       pNode,
 
     /* Fill indices. */
 
-    TIndex index = 0;
     m.indices.resize( vertexCount * sizeof( TIndex ) );
-    std::generate( (TIndex*) m.indices.data( ), ( (TIndex*) m.indices.data( ) ) + vertexCount, [&index] { return index++; } );
+    TIndex* indices = (TIndex*) m.indices.data( );
+
+    if ( TOrder == EVertexOrder::CCW )
+        for ( TIndex i = 0; i < vertexCount; i += 3 ) {
+            indices[ i + 0 ] = i + 0;
+            indices[ i + 1 ] = i + 2;
+            indices[ i + 2 ] = i + 1;
+        }
+    else
+        for ( TIndex i = 0; i < vertexCount; i += 3 ) {
+            indices[ i + 0 ] = i + 0;
+            indices[ i + 1 ] = i + 1;
+            indices[ i + 2 ] = i + 2;
+        }
 
     if ( std::is_same< TIndex, uint16_t >::value ) {
         m.indexType = apemodefb::EIndexTypeFb_UInt16;
