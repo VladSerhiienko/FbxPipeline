@@ -291,16 +291,16 @@ bool GetSubsets( FbxMesh* pMeshFb, std::vector< apemodefb::SubsetFb >& subsetsFb
     //          { material: 3, polygonIndex: 105 }
     //          {              ...               }
     //
-    // Ranges:  {                          ...                         }
-    //          { material: 1, polygonIndex: 100, polygonEndIndex: 102 }
-    //          { material: 2, polygonIndex: 103, polygonEndIndex: 104 }
-    //          {                          ...                         }
+    // Ranges:  {                          ...                          }
+    //          { material: 1, polygonIndex: 100, polygonLastIndex: 102 }
+    //          { material: 2, polygonIndex: 103, polygonLastIndex: 104 }
+    //          {                          ...                          }
     //
 
     struct MaterialPolygonRange {
         uint32_t materialIndex;
         uint32_t polygonIndex;
-        uint32_t polygonEndIndex;
+        uint32_t polygonLastIndex;
     };
 
     std::vector< MaterialPolygonRange > polygonRanges;
@@ -323,9 +323,9 @@ bool GetSubsets( FbxMesh* pMeshFb, std::vector< apemodefb::SubsetFb >& subsetsFb
 
                 MaterialPolygonRange materialPolygonRange;
 
-                materialPolygonRange.materialIndex   = currMaterialIndex;
-                materialPolygonRange.polygonIndex    = currPolygonIndex;
-                materialPolygonRange.polygonEndIndex =  materialMapping[ i - 1 ].polygonIndex;
+                materialPolygonRange.materialIndex    = currMaterialIndex;
+                materialPolygonRange.polygonIndex     = currPolygonIndex;
+                materialPolygonRange.polygonLastIndex = materialMapping[ i - 1 ].polygonIndex;
 
                 polygonRanges.push_back( materialPolygonRange );
                 currMaterialIndex = materialIndex;
@@ -343,9 +343,9 @@ bool GetSubsets( FbxMesh* pMeshFb, std::vector< apemodefb::SubsetFb >& subsetsFb
 
                 MaterialPolygonRange materialPolygonRange;
 
-                materialPolygonRange.materialIndex   = currMaterialIndex;
-                materialPolygonRange.polygonIndex    = currPolygonIndex;
-                materialPolygonRange.polygonEndIndex = materialMapping[ i - 1 ].polygonIndex;
+                materialPolygonRange.materialIndex    = currMaterialIndex;
+                materialPolygonRange.polygonIndex     = currPolygonIndex;
+                materialPolygonRange.polygonLastIndex = materialMapping[ i - 1 ].polygonIndex;
 
                 polygonRanges.push_back( materialPolygonRange );
                 currMaterialIndex = materialIndex;
@@ -362,9 +362,9 @@ bool GetSubsets( FbxMesh* pMeshFb, std::vector< apemodefb::SubsetFb >& subsetsFb
 
                 MaterialPolygonRange materialPolygonRange;
 
-                materialPolygonRange.materialIndex   = currMaterialIndex;
-                materialPolygonRange.polygonIndex    = currPolygonIndex;
-                materialPolygonRange.polygonEndIndex = materialMapping[ i ].polygonIndex;
+                materialPolygonRange.materialIndex    = currMaterialIndex;
+                materialPolygonRange.polygonIndex     = currPolygonIndex;
+                materialPolygonRange.polygonLastIndex = materialMapping[ i ].polygonIndex;
 
                 polygonRanges.push_back( materialPolygonRange );
             }
@@ -388,10 +388,10 @@ bool GetSubsets( FbxMesh* pMeshFb, std::vector< apemodefb::SubsetFb >& subsetsFb
 
     // Transform polygon ranges to index subsets
     //
-    // Ranges:  {                          ...                         }
-    //          { material: 1, polygonIndex: 100, polygonEndIndex: 102 }
-    //          { material: 2, polygonIndex: 103, polygonEndIndex: 104 }
-    //          {                          ...                         }
+    // Ranges:  {                          ...                          }
+    //          { material: 1, polygonIndex: 100, polygonLastIndex: 102 }
+    //          { material: 2, polygonIndex: 103, polygonLastIndex: 104 }
+    //          {                          ...                          }
     //
     // Subsets: {                ...                }
     //          { material: 1, index: 300, count: 9 }
@@ -402,7 +402,7 @@ bool GetSubsets( FbxMesh* pMeshFb, std::vector< apemodefb::SubsetFb >& subsetsFb
     // Fill subsets
     for ( const MaterialPolygonRange range : polygonRanges ) {
 
-        const uint32_t polygonCount = range.polygonEndIndex - range.polygonIndex + 1;
+        const uint32_t polygonCount = range.polygonLastIndex - range.polygonIndex + 1;
         const apemodefb::SubsetFb subsetFb( range.materialIndex, range.polygonIndex * 3, polygonCount * 3 );
         subsetsFb.push_back( subsetFb );
 
