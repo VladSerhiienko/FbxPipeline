@@ -23,11 +23,11 @@ before_script:
   - sudo apt-get -y install python3
 
 install:
-  - sudo wget -O fbx20181_1_fbxsdk_linux.tar.gz http://download.autodesk.com/us/fbx/2018/2018.1.1/fbx20181_1_fbxsdk_linux.tar.gz
-  - sudo tar -xf fbx20181_1_fbxsdk_linux.tar.gz
-  - sudo chmod ugo+x fbx20181_1_fbxsdk_linux
+  - sudo wget -O fbx20190_fbxsdk_linux.tar.gz http://download.autodesk.com/us/fbx/2019/2019.0/fbx20190_fbxsdk_linux.tar.gz
+  - sudo tar -xf fbx20190_fbxsdk_linux.tar.gz
+  - sudo chmod ugo+x fbx20190_fbxsdk_linux
   - sudo mkdir /home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk
-  - yes yes | sudo ./fbx20181_1_fbxsdk_linux /home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk
+  - yes yes | sudo ./fbx20190_fbxsdk_linux /home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk
 
 script:
   - export CC=/usr/bin/gcc-6
