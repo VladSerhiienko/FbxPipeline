@@ -73,7 +73,7 @@ def sync_textures(state, gltf_json):
             texture.swap_uv = False
             texture.wipe_mode = False
             texture.premultiplied_alpha = True
-            
+
             texture_index = state.push_texture(texture)
             gltf_texture_index_to_texture_index[gltf_texture_index] = texture_index
 
@@ -249,7 +249,7 @@ def gltf_export_materials(state, gltf_path):
 
         gltf_texture_index_to_texture_index = sync_textures(state, gltf_json)
         overrided_materials = list()
-        
+
         for gltf_material_json in gltf_materials_json:
             gltf_material_name = gltf_material_json["name"]
             FbxPipeline.log_info("gltf material: {}.".format(gltf_material_name))
@@ -260,10 +260,15 @@ def gltf_export_materials(state, gltf_path):
             gltf_material_name = gltf_material_json["name"]
             material_index = find_material_index_by_name(state, gltf_material_name)
 
+            if material_index == -1 and len(gltf_materials_json) == 1 and len(state.materials) == 1:
+                FbxPipeline.log_info("Failed to map gltf material {} to scene materials.".format(gltf_material_name))
+                FbxPipeline.log_info("By since the mapping is 1-to-1, gltf material {} is mapped to 0 slot.".format(gltf_material_name))
+                material_index = 0
+
             if material_index != -1:
                 overrided_materials.append(state.materials[material_index])
                 material = gltf_material_json_to_material(state, gltf_material_json, gltf_texture_index_to_texture_index)
-                # material.id = material_index
+                material.id = material_index
                 state.materials[material_index] = material
 
         for overrided_material in overrided_materials:
