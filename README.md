@@ -10,6 +10,7 @@
 
 **FbxPipeline** [![Build status](https://ci.appveyor.com/api/projects/status/lob4wuwoji3awkeq?svg=true)](https://ci.appveyor.com/project/VladSerhiienko/fbxpipeline) [![Build Status](https://travis-ci.org/VladSerhiienko/FbxPipeline.svg?branch=master)](https://travis-ci.org/VladSerhiienko/FbxPipeline) is the command line exporter for the *.FBX* files. It suits for the projects that already use or plan to use **flatbuffers** (Google's library for serialisation, https://google.github.io/flatbuffers/).
 
+
 ## The main advantages are:
  - No libraries needed except *flatbuffers*
  - Python Embedding (glTF plugin example)
@@ -20,6 +21,9 @@
  - Animation
  - Skinning
  - Free
+
+![alt text](https://github.com/VladSerhiienko/FbxPipeline/blob/master/docs/AK.PNG "AK")
+![alt text](https://github.com/VladSerhiienko/FbxPipeline/blob/master/docs/9mm.PNG "9mm")
 
 ## Features, that will be available soon:
  - Animation compression
