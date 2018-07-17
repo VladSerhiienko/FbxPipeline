@@ -10,7 +10,7 @@ var apemodefb = apemodefb || {};
  * @enum
  */
 apemodefb.EVersionFb = {
-  Value: 5
+  Value: 6
 };
 
 /**
@@ -1497,10 +1497,56 @@ apemodefb.AnimCurveFb.prototype.mutate_name_id = function(value) {
 };
 
 /**
+ * @returns {number}
+ */
+apemodefb.AnimCurveFb.prototype.animStackId = function() {
+  var offset = this.bb.__offset(this.bb_pos, 8);
+  return offset ? this.bb.readUint32(this.bb_pos + offset) : 0;
+};
+
+/**
+ * @param {number} value
+ * @returns {boolean}
+ */
+apemodefb.AnimCurveFb.prototype.mutate_anim_stack_id = function(value) {
+  var offset = this.bb.__offset(this.bb_pos, 8);
+
+  if (offset === 0) {
+    return false;
+  }
+
+  this.bb.writeUint32(this.bb_pos + offset, value);
+  return true;
+};
+
+/**
+ * @returns {number}
+ */
+apemodefb.AnimCurveFb.prototype.animLayerId = function() {
+  var offset = this.bb.__offset(this.bb_pos, 10);
+  return offset ? this.bb.readUint32(this.bb_pos + offset) : 0;
+};
+
+/**
+ * @param {number} value
+ * @returns {boolean}
+ */
+apemodefb.AnimCurveFb.prototype.mutate_anim_layer_id = function(value) {
+  var offset = this.bb.__offset(this.bb_pos, 10);
+
+  if (offset === 0) {
+    return false;
+  }
+
+  this.bb.writeUint32(this.bb_pos + offset, value);
+  return true;
+};
+
+/**
  * @returns {apemodefb.EAnimCurvePropertyFb}
  */
 apemodefb.AnimCurveFb.prototype.property = function() {
-  var offset = this.bb.__offset(this.bb_pos, 8);
+  var offset = this.bb.__offset(this.bb_pos, 12);
   return offset ? /** @type {apemodefb.EAnimCurvePropertyFb} */ (this.bb.readUint8(this.bb_pos + offset)) : apemodefb.EAnimCurvePropertyFb.LclTranslation;
 };
 
@@ -1509,7 +1555,7 @@ apemodefb.AnimCurveFb.prototype.property = function() {
  * @returns {boolean}
  */
 apemodefb.AnimCurveFb.prototype.mutate_property = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 8);
+  var offset = this.bb.__offset(this.bb_pos, 12);
 
   if (offset === 0) {
     return false;
@@ -1523,7 +1569,7 @@ apemodefb.AnimCurveFb.prototype.mutate_property = function(value) {
  * @returns {apemodefb.EAnimCurveChannelFb}
  */
 apemodefb.AnimCurveFb.prototype.channel = function() {
-  var offset = this.bb.__offset(this.bb_pos, 10);
+  var offset = this.bb.__offset(this.bb_pos, 14);
   return offset ? /** @type {apemodefb.EAnimCurveChannelFb} */ (this.bb.readUint8(this.bb_pos + offset)) : apemodefb.EAnimCurveChannelFb.X;
 };
 
@@ -1532,7 +1578,7 @@ apemodefb.AnimCurveFb.prototype.channel = function() {
  * @returns {boolean}
  */
 apemodefb.AnimCurveFb.prototype.mutate_channel = function(value) {
-  var offset = this.bb.__offset(this.bb_pos, 10);
+  var offset = this.bb.__offset(this.bb_pos, 14);
 
   if (offset === 0) {
     return false;
@@ -1548,7 +1594,7 @@ apemodefb.AnimCurveFb.prototype.mutate_channel = function(value) {
  * @returns {apemodefb.AnimCurveKeyFb}
  */
 apemodefb.AnimCurveFb.prototype.keys = function(index, obj) {
-  var offset = this.bb.__offset(this.bb_pos, 12);
+  var offset = this.bb.__offset(this.bb_pos, 16);
   return offset ? (obj || new apemodefb.AnimCurveKeyFb).__init(this.bb.__vector(this.bb_pos + offset) + index * 8, this.bb) : null;
 };
 
@@ -1556,7 +1602,7 @@ apemodefb.AnimCurveFb.prototype.keys = function(index, obj) {
  * @returns {number}
  */
 apemodefb.AnimCurveFb.prototype.keysLength = function() {
-  var offset = this.bb.__offset(this.bb_pos, 12);
+  var offset = this.bb.__offset(this.bb_pos, 16);
   return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
 };
 
@@ -1564,7 +1610,7 @@ apemodefb.AnimCurveFb.prototype.keysLength = function() {
  * @param {flatbuffers.Builder} builder
  */
 apemodefb.AnimCurveFb.startAnimCurveFb = function(builder) {
-  builder.startObject(5);
+  builder.startObject(7);
 };
 
 /**
@@ -1585,10 +1631,26 @@ apemodefb.AnimCurveFb.addNameId = function(builder, nameId) {
 
 /**
  * @param {flatbuffers.Builder} builder
+ * @param {number} animStackId
+ */
+apemodefb.AnimCurveFb.addAnimStackId = function(builder, animStackId) {
+  builder.addFieldInt32(2, animStackId, 0);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {number} animLayerId
+ */
+apemodefb.AnimCurveFb.addAnimLayerId = function(builder, animLayerId) {
+  builder.addFieldInt32(3, animLayerId, 0);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
  * @param {apemodefb.EAnimCurvePropertyFb} property
  */
 apemodefb.AnimCurveFb.addProperty = function(builder, property) {
-  builder.addFieldInt8(2, property, apemodefb.EAnimCurvePropertyFb.LclTranslation);
+  builder.addFieldInt8(4, property, apemodefb.EAnimCurvePropertyFb.LclTranslation);
 };
 
 /**
@@ -1596,7 +1658,7 @@ apemodefb.AnimCurveFb.addProperty = function(builder, property) {
  * @param {apemodefb.EAnimCurveChannelFb} channel
  */
 apemodefb.AnimCurveFb.addChannel = function(builder, channel) {
-  builder.addFieldInt8(3, channel, apemodefb.EAnimCurveChannelFb.X);
+  builder.addFieldInt8(5, channel, apemodefb.EAnimCurveChannelFb.X);
 };
 
 /**
@@ -1604,7 +1666,7 @@ apemodefb.AnimCurveFb.addChannel = function(builder, channel) {
  * @param {flatbuffers.Offset} keysOffset
  */
 apemodefb.AnimCurveFb.addKeys = function(builder, keysOffset) {
-  builder.addFieldOffset(4, keysOffset, 0);
+  builder.addFieldOffset(6, keysOffset, 0);
 };
 
 /**

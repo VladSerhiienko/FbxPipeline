@@ -61,7 +61,7 @@ struct FileFb;
 struct SceneFb;
 
 enum EVersionFb {
-  EVersionFb_Value = 5,
+  EVersionFb_Value = 6,
   EVersionFb_MIN = EVersionFb_Value,
   EVersionFb_MAX = EVersionFb_Value
 };
@@ -1877,9 +1877,11 @@ struct AnimCurveFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   enum {
     VT_ID = 4,
     VT_NAME_ID = 6,
-    VT_PROPERTY = 8,
-    VT_CHANNEL = 10,
-    VT_KEYS = 12
+    VT_ANIM_STACK_ID = 8,
+    VT_ANIM_LAYER_ID = 10,
+    VT_PROPERTY = 12,
+    VT_CHANNEL = 14,
+    VT_KEYS = 16
   };
   uint32_t id() const {
     return GetField<uint32_t>(VT_ID, 0);
@@ -1906,6 +1908,18 @@ struct AnimCurveFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
       return 0;
     }
   }
+  uint32_t anim_stack_id() const {
+    return GetField<uint32_t>(VT_ANIM_STACK_ID, 0);
+  }
+  bool mutate_anim_stack_id(uint32_t _anim_stack_id) {
+    return SetField<uint32_t>(VT_ANIM_STACK_ID, _anim_stack_id, 0);
+  }
+  uint32_t anim_layer_id() const {
+    return GetField<uint32_t>(VT_ANIM_LAYER_ID, 0);
+  }
+  bool mutate_anim_layer_id(uint32_t _anim_layer_id) {
+    return SetField<uint32_t>(VT_ANIM_LAYER_ID, _anim_layer_id, 0);
+  }
   EAnimCurvePropertyFb property() const {
     return static_cast<EAnimCurvePropertyFb>(GetField<uint8_t>(VT_PROPERTY, 0));
   }
@@ -1928,6 +1942,8 @@ struct AnimCurveFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     return VerifyTableStart(verifier) &&
            VerifyField<uint32_t>(verifier, VT_ID) &&
            VerifyField<uint32_t>(verifier, VT_NAME_ID) &&
+           VerifyField<uint32_t>(verifier, VT_ANIM_STACK_ID) &&
+           VerifyField<uint32_t>(verifier, VT_ANIM_LAYER_ID) &&
            VerifyField<uint8_t>(verifier, VT_PROPERTY) &&
            VerifyField<uint8_t>(verifier, VT_CHANNEL) &&
            VerifyOffset(verifier, VT_KEYS) &&
@@ -1944,6 +1960,12 @@ struct AnimCurveFbBuilder {
   }
   void add_name_id(uint32_t name_id) {
     fbb_.AddElement<uint32_t>(AnimCurveFb::VT_NAME_ID, name_id, 0);
+  }
+  void add_anim_stack_id(uint32_t anim_stack_id) {
+    fbb_.AddElement<uint32_t>(AnimCurveFb::VT_ANIM_STACK_ID, anim_stack_id, 0);
+  }
+  void add_anim_layer_id(uint32_t anim_layer_id) {
+    fbb_.AddElement<uint32_t>(AnimCurveFb::VT_ANIM_LAYER_ID, anim_layer_id, 0);
   }
   void add_property(EAnimCurvePropertyFb property) {
     fbb_.AddElement<uint8_t>(AnimCurveFb::VT_PROPERTY, static_cast<uint8_t>(property), 0);
@@ -1970,11 +1992,15 @@ inline flatbuffers::Offset<AnimCurveFb> CreateAnimCurveFb(
     flatbuffers::FlatBufferBuilder &_fbb,
     uint32_t id = 0,
     uint32_t name_id = 0,
+    uint32_t anim_stack_id = 0,
+    uint32_t anim_layer_id = 0,
     EAnimCurvePropertyFb property = EAnimCurvePropertyFb_LclTranslation,
     EAnimCurveChannelFb channel = EAnimCurveChannelFb_X,
     flatbuffers::Offset<flatbuffers::Vector<const AnimCurveKeyFb *>> keys = 0) {
   AnimCurveFbBuilder builder_(_fbb);
   builder_.add_keys(keys);
+  builder_.add_anim_layer_id(anim_layer_id);
+  builder_.add_anim_stack_id(anim_stack_id);
   builder_.add_name_id(name_id);
   builder_.add_id(id);
   builder_.add_channel(channel);
@@ -1986,6 +2012,8 @@ inline flatbuffers::Offset<AnimCurveFb> CreateAnimCurveFbDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
     uint32_t id = 0,
     uint32_t name_id = 0,
+    uint32_t anim_stack_id = 0,
+    uint32_t anim_layer_id = 0,
     EAnimCurvePropertyFb property = EAnimCurvePropertyFb_LclTranslation,
     EAnimCurveChannelFb channel = EAnimCurveChannelFb_X,
     const std::vector<const AnimCurveKeyFb *> *keys = nullptr) {
@@ -1993,6 +2021,8 @@ inline flatbuffers::Offset<AnimCurveFb> CreateAnimCurveFbDirect(
       _fbb,
       id,
       name_id,
+      anim_stack_id,
+      anim_layer_id,
       property,
       channel,
       keys ? _fbb.CreateVector<const AnimCurveKeyFb *>(*keys) : 0);
