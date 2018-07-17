@@ -2,7 +2,7 @@
 namespace apemodefb;
 
 enum EVersionFb : ubyte {
-    Value = 5
+    Value = 6
 }
 
 enum ECullingTypeFb : ubyte
@@ -203,6 +203,8 @@ struct AnimCurveKeyFb {
 table AnimCurveFb {
     id : uint;
     name_id : uint( key );
+    anim_stack_id : uint;
+    anim_layer_id : uint;
 	property : EAnimCurvePropertyFb;
 	channel : EAnimCurveChannelFb;
 	keys : [AnimCurveKeyFb];

@@ -335,6 +335,8 @@ bool apemode::State::Finalize( ) {
         apemodefb::AnimCurveFbBuilder curveBuilder( builder );
         curveBuilder.add_id( curve.id );
         curveBuilder.add_channel( curve.channel );
+        curveBuilder.add_anim_stack_id( curve.animStackId );
+        curveBuilder.add_anim_layer_id( curve.animLayerId );
         curveBuilder.add_property( curve.property );
         curveBuilder.add_name_id( curve.nameId );
         curveBuilder.add_keys( keysOffset );
