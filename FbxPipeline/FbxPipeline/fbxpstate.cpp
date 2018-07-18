@@ -343,8 +343,8 @@ bool apemode::State::Finalize( ) {
         curveOffsets.push_back( curveBuilder.Finish( ) );
     }
 
-    const auto curvesOffset = builder.CreateVector( curveOffsets );
-    console->info( "< Succeeded {} ", ToPrettySizeString( curvesOffset.o ) );
+    const auto animCurvesOffset = builder.CreateVector( curveOffsets );
+    console->info( "< Succeeded {} ", ToPrettySizeString( animCurvesOffset.o ) );
 
     //
     // Finalize materials
@@ -505,6 +505,8 @@ bool apemode::State::Finalize( ) {
     sceneBuilder.add_cameras( camerasOffset );
     sceneBuilder.add_lights( lightsOffset );
     sceneBuilder.add_anim_stacks( animStacksOffset );
+    sceneBuilder.add_anim_layers( animLayersOffset );
+    sceneBuilder.add_anim_curves( animCurvesOffset );
     sceneBuilder.add_version( apemodefb::EVersionFb::EVersionFb_Value );
 
     auto sceneOffset = sceneBuilder.Finish( );
