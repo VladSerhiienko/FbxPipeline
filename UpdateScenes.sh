@@ -1,5 +1,5 @@
 
-cd build_linux_x86_64
+cd build_linux_x86_64_gnu
 
 ./FbxPipelineLauncher -i "/home/user/vserhiienko/models/rainier-ak-3d/source/rainier-ak-3d.fbx" -o "/home/user/vserhiienko/models/rainier-ak-3ds.fbxp" -l "/home/user/vserhiienko/models/rainier-ak-3d.txt" -e "/home/user/vserhiienko/models/rainier-ak-3d/**" --script-file "glTFMaterialExtension.py" --script-input "/home/user/vserhiienko/models/rainier-ak-3d/scene.gltf"
 ./FbxPipelineLauncher -i "/home/user/vserhiienko/models/warmonger_sword/source/Warmonger_Posed.fbx" -o "/home/user/vserhiienko/models/warmonger_sword.fbxp" -l "/home/user/vserhiienko/models/warmonger_sword.txt" -e "/home/user/vserhiienko/models/warmonger_sword/**" --script-file "glTFMaterialExtension.py" --script-input "/home/user/vserhiienko/models/warmonger_sword/scene.gltf"

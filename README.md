@@ -67,7 +67,7 @@ cd <dev directory>
 git clone git@github.com:VladSerhiienko/FbxPipeline.git
 cd FbxPipeline
 cmake -Bbuild_linux_x86_64_gnu -H.
-make -C build_linux_x86_64
+make -C build_linux_x86_64_gnu
 ```
 
 ## How to build (Windows, PS + cmake + MSBuild): 

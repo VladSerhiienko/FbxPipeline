@@ -35,7 +35,7 @@ script:
   - gcc -v && g++ -v && cmake --version
   - sed -i 's,git@github.com:,https://github.com/,g' CMakeLists.txt
   - cmake -H. -Bbuild_linux_x86_64_gnu -DFBX_SDK_INCLUDE_DIR:STRING=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/include -DFBX_SDK_LIBRARY_DIR:STRING=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/lib
-  - cd build_linux_x86_64
+  - cd build_linux_x86_64_gnu
   - make
 
 notifications:

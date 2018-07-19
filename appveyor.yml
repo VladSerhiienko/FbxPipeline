@@ -20,7 +20,7 @@ install:
 before_build:
   - cmake -G "Visual Studio 15 2017 Win64" -Bbuild_windows_amd64_msvc -H.
 build:
-  project: build_windows_amd64/FbxPipeline.sln
+  project: build_windows_amd64_msvc/FbxPipeline.sln
   parallel: true
   verbosity: minimal
 notifications:
