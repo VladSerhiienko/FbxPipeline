@@ -1,39 +1,6 @@
 {
-    // See https://go.microsoft.com/fwlink/?LinkId=733558
-    // for the documentation about the tasks.json format
     "version": "2.0.0",
     "tasks": [
-        {
-            "label": "CMake/FbxPipeline(Debug/Ubuntu)",
-            "type": "shell",
-            "command": "cmake",
-            "args": [
-                "-DCMAKE_BUILD_TYPE=Debug",
-                "-B${workspaceFolder}/build_linux_x86_64",
-                "-H${workspaceFolder}"
-            ],
-            "options": {
-                "cwd": "${workspaceFolder}"
-            },
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
-        },
-        {
-            "label": "Build/FbxPipeline(Debug/Ubuntu)",
-            "type": "shell",
-            "command": "make",
-            "args": [],
-            "options": {
-                "cwd": "${workspaceFolder}/build_linux_x86_64"
-            },
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "dependsOn": [ "CMake/FbxPipeline(Debug/Ubuntu)"]
-        },
         {
             "label": "CMake/FbxPipeline(Windows/VS2017)",
             "type": "shell",
@@ -41,7 +8,7 @@
             "args": [
                 "-G",
                 "\"'Visual Studio 15 2017 Win64'\"",
-                "-B${workspaceFolder}/build_windows_amd64",
+                "-B${workspaceFolder}/build_windows_amd64_msvc",
                 "-H${workspaceFolder}"
             ],
             "options": {
@@ -51,6 +18,140 @@
                 "kind": "build",
                 "isDefault": true
             }
+        },
+        {
+            "label": "CMake/FbxPipeline(Linux/Makefile/GNU)",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "-H.", "-Bbuild_linux_x86_64_gnu"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "CMake/FbxPipeline(Linux/Makefile/Clang)",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "-H.", "-Bbuild_linux_x86_64_clang",
+                "-DCMAKE_C_COMPILER=/usr/bin/clang-5.0",
+                "-DCMAKE_CXX_COMPILER=/usr/bin/clang++-5.0",
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "CMake/FbxPipeline(Darwin/Makefile/AppleClang)",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "-H.", "-Bbuild_darwin_x86_64_appleclang",
+                // "-DCMAKE_C_COMPILER=/usr/local/Cellar/gcc\\@7/7.3.0/bin/gcc-7",
+                // "-DCMAKE_CXX_COMPILER=/usr/local/Cellar/gcc\\@7/7.3.0/bin/g++-7",
+                // "-DCMAKE_C_COMPILER=/usr/local/opt/llvm@5/bin/clang",
+                // "-DCMAKE_CXX_COMPILER=/usr/local/opt/llvm@5/bin/clang++",
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Make/FbxPipeline(Windows/VS2017/Debug)",
+            "type": "shell",
+            "command": "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/MSBuild/15.0/Bin/MSBuild.exe",
+            "args": [
+                "${workspaceFolder}/build_windows_amd64_msvc/FbxPipeline.sln",
+                "/m",
+                "/nologo",
+                "/verbosity:normal",  // "enum": ["quiet", "minimal", "normal", "detailed", "diagnostic"]
+                "/p:Configuration=Debug"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/build_windows_amd64_msvc"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "dependsOn": [
+                "CMake/FbxPipeline(Windows/VS2017)"
+            ]
+        },
+        {
+            "label": "Make/FbxPipeline(Windows/VS2017/Release)",
+            "type": "shell",
+            "command": "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/MSBuild/15.0/Bin/MSBuild.exe",
+            "args": [
+                "${workspaceFolder}/build_windows_amd64_msvc/FbxPipeline.sln",
+                "/m",
+                "/nologo",
+                "/verbosity:diagnostic",  // "enum": ["quiet", "minimal", "normal", "detailed", "diagnostic"]
+                "/p:Configuration=Release"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/build_windows_amd64_msvc"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "dependsOn": [
+                "CMake/FbxPipeline(Windows/VS2017)"
+            ]
+        },
+        {
+            "label": "Make/FbxPipeline(Darwin/Makefile/AppleClang)",
+            "type": "shell",
+            "command": "make",
+            "options": {
+                "cwd": "${workspaceFolder}/build_darwin_x86_64_appleclang"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "dependsOn": [ "CMake/FbxPipeline(Darwin/Makefile/AppleClang)"]
+        },
+        {
+            "label": "Make/FbxPipeline(Linux/Makefile/GNU)",
+            "type": "shell",
+            "command": "make",
+            "options": {
+                "cwd": "${workspaceFolder}/build_linux_x86_64_gnu"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "dependsOn": [ "CMake/FbxPipeline(Linux/Makefile/GNU)"]
+        },
+        {
+            "label": "Make/FbxPipeline(Linux/Makefile/Clang)",
+            "type": "shell",
+            "command": "make",
+            "options": {
+                "cwd": "${workspaceFolder}/build_linux_x86_64_clang"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "dependsOn": [ "CMake/FbxPipeline(Linux/Makefile/Clang)"]
         }
     ]
 }

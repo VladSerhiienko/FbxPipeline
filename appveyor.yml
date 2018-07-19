@@ -18,7 +18,7 @@ install:
   - ps: Start-Process -FilePath "python364.exe" /S -Wait
   - ps: cd ..
 before_build:
-  - cmake -G "Visual Studio 15 2017 Win64" -Bbuild_windows_amd64 -H.
+  - cmake -G "Visual Studio 15 2017 Win64" -Bbuild_windows_amd64_msvc -H.
 build:
   project: build_windows_amd64/FbxPipeline.sln
   parallel: true

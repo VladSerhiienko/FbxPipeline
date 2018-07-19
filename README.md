@@ -77,7 +77,7 @@ make -C build_linux_x86_64
 cd <dev directory>
 git clone git@github.com:VladSerhiienko/FbxPipeline.git
 cd FbxPipeline
-cmake -G "Visual Studio 14 2015 Win64" -Bbuild_windows_amd64 "-H."
+cmake -G "Visual Studio 14 2015 Win64" -Bbuild_windows_amd64_msvc "-H."
 & 'C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe' build_windows_amd64\FbxPipeline.sln /target:ALL_BUILD /p:Configuration=Debug
 ```
 
