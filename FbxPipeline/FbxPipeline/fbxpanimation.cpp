@@ -325,9 +325,8 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
             auto pAnimLayer = pAnimCurveTuple.pAnimLayer;
             auto keyCount   = pAnimCurve->KeyGetCount( );
 
-            s.animCurves.emplace_back( );
-
             uint32_t curveId = static_cast< uint32_t >( s.animCurves.size( ) );
+            s.animCurves.emplace_back( );
             n.curveIds.push_back( curveId );
 
             auto& curve       = s.animCurves.back( );
