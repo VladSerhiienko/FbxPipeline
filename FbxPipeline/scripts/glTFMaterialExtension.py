@@ -293,3 +293,4 @@ def gltf_export_materials(state, gltf_path):
         return
 
 FbxPipeline.register_extension(gltf_export_materials)
+

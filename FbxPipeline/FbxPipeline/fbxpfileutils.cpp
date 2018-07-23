@@ -1,7 +1,7 @@
 #include <fbxppch.h>
 #include <fbxpstate.h>
 
-#define _FbxPipeline_UnsafeFileReadWrite
+// #define _FbxPipeline_UnsafeFileReadWrite
 #if defined( _FbxPipeline_UnsafeFileReadWrite )
 #include <stdio.h>
 #endif
