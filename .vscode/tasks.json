@@ -57,6 +57,9 @@
             "command": "cmake",
             "args": [
                 "-H.", "-Bbuild_darwin_x86_64_appleclang",
+                "-DFBX_SDK_INCLUDE_DIR=/Applications/Autodesk/FBX SDK/2019.0/include",
+                "-DFBX_SDK_LIBRARY_DEBUG=/Applications/Autodesk/FBX SDK/2019.0/lib/clang/debug/libfbxsdk.a",
+                "-DFBX_SDK_LIBRARY_RELEASE=/Applications/Autodesk/FBX SDK/2019.0/lib/clang/release/libfbxsdk.a",
                 // "-DCMAKE_C_COMPILER=/usr/local/Cellar/gcc\\@7/7.3.0/bin/gcc-7",
                 // "-DCMAKE_CXX_COMPILER=/usr/local/Cellar/gcc\\@7/7.3.0/bin/g++-7",
                 // "-DCMAKE_C_COMPILER=/usr/local/opt/llvm@5/bin/clang",

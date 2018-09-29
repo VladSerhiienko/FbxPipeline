@@ -16,7 +16,6 @@
         "todo.formatting.enabled": true, // Enable markdown-like formatting
         
         // Controls the font size in pixels.
-        "editor.fontSize": 16,
         "files.associations": {
                 "array": "cpp",
                 "atomic": "cpp",

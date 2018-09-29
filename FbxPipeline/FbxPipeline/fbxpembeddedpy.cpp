@@ -1,6 +1,7 @@
 
 #include <fbxppch.h>
 #include <fbxpstate.h>
+#include <vector>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/embed.h>
@@ -44,39 +45,16 @@ PYBIND11_MAKE_OPAQUE( std::vector< apemodefb::TextureFb > );
 PYBIND11_MAKE_OPAQUE( std::vector< apemodefb::MaterialPropFb > );
 PYBIND11_MAKE_OPAQUE( std::vector< apemode::Material > );
 
-namespace apemodepy {
-
-    template < typename T >
-    void DefVectorClass( py::class_< std::vector< T > >& classDef ) {
-        classDef.def( py::init<>( ) )
-            .def( "clear", &std::vector< T >::clear )
-            .def( "size", []( const std::vector< T >& v ) { return v.size( ); } )
-            .def( "push_back", []( std::vector< T >& v, const T& x ) { v.push_back( x ); } )
-            .def( "__getitem__", []( const std::vector< T >& v, const size_t i ) { return v[ i ]; } )
-            .def( "__setitem__", []( std::vector< T >& v, const size_t i, const T& x ) { v[ i ] = x; } )
-            .def( "__len__", []( const std::vector< T >& v ) { return v.size( ); } )
-            .def( "__iter__", []( std::vector< T >& v ) { return py::make_iterator( v.begin( ), v.end( ) ); } );
-    }
-}
-
 void InitializePyModule( py::module & m ) {
     m.doc( ) = "python extension base for FbxPipeline";
 
-    py::class_< std::vector< bool > >                      boolVectorClass( m, "BoolVector" );
-    py::class_< std::vector< int32_t > >                   intVectorClass( m, "IntVector" );
-    py::class_< std::vector< float_t > >                   floatVectorClass( m, "FloatVector" );
-    py::class_< std::vector< std::string > >               stringVectorClass( m, "StringVector" );
-    py::class_< std::vector< apemode::Material > >         materialVectorClass( m, "MaterialVector" );
-    py::class_< std::vector< apemodefb::TextureFb > >      textureFbVectorClass( m, "TextureFbVector" );
-    py::class_< std::vector< apemodefb::MaterialPropFb > > materialPropFbVectorClass( m, "MaterialPropFbVector" );
-
-    apemodepy::DefVectorClass( boolVectorClass );
-    apemodepy::DefVectorClass( intVectorClass );
-    apemodepy::DefVectorClass( floatVectorClass );
-    apemodepy::DefVectorClass( stringVectorClass );
-    apemodepy::DefVectorClass( materialVectorClass );
-    apemodepy::DefVectorClass( textureFbVectorClass );
-    apemodepy::DefVectorClass( materialPropFbVectorClass );
+    py::bind_vector< std::vector< bool > >                      ( m, "BoolVector" );
+    py::bind_vector< std::vector< int32_t > >                   ( m, "IntVector" );
+    py::bind_vector< std::vector< float_t > >                   ( m, "FloatVector" );
+    py::bind_vector< std::vector< std::string > >               ( m, "StringVector" );
+    py::bind_vector< std::vector< apemode::Material > >         ( m, "MaterialVector" );
+    py::bind_vector< std::vector< apemodefb::TextureFb > >      ( m, "TextureFbVector" );
+    py::bind_vector< std::vector< apemodefb::MaterialPropFb > > ( m, "MaterialPropFbVector" );
 
     py::enum_< apemodefb::EValueTypeFb >( m, "EValueTypeFb" )
         .value( "Bool",     apemodefb::EValueTypeFb::EValueTypeFb_Bool )

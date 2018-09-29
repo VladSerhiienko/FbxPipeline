@@ -6,16 +6,24 @@
 #include <stdio.h>
 #endif
 
+#if __APPLE__
+#include <boost/filesystem.hpp>
+namespace std {
+    namespace filesystem = boost::filesystem;
+    // namespace filesystem = std::tr2::sys;
+}
+#else
 #include <experimental/filesystem>
 // #include <filesystem>
-#include <fstream>
-#include <iterator>
-#include <string>
-
 namespace std {
     namespace filesystem = std::experimental::filesystem::v1;
     // namespace filesystem = std::tr2::sys;
 }
+#endif
+
+#include <fstream>
+#include <iterator>
+#include <string>
 
 std::string CurrentDirectory( ) {
     return std::filesystem::current_path( ).string( );
