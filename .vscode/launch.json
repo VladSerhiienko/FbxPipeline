@@ -11,15 +11,15 @@
             "program": "${workspaceFolder}/build_darwin_x86_64_appleclang/FbxPipelineLauncher",
             "args": [
                 "-i", "/Users/vlad.serhiienko/Projects/Home/Models/rainier-ak-3d/source/rainier-ak-3d.fbx",
-                "-o", "/Users/vlad.serhiienko/Projects/Home/Models/rainier-ak-3d.fbxp",
-                "-l", "/Users/vlad.serhiienko/Projects/Home/Models/rainier-ak-3d.log.txt",
+                "-o", "/Users/vlad.serhiienko/Projects/Home/Models/FbxPipeline/rainier-ak-3d.fbxp",
+                "-l", "/Users/vlad.serhiienko/Projects/Home/Models/Logs/rainier-ak-3d.txt",
                 "-e", "/Users/vlad.serhiienko/Projects/Home/Models/rainier-ak-3d/**",
                 "--script-input", "/Users/vlad.serhiienko/Projects/Home/Models/rainier-ak-3d/scene.gltf",
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
-            "externalConsole": true,
+            "externalConsole": false,
             "MIMode": "lldb"
         }
     ]
