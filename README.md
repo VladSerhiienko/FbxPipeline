@@ -81,6 +81,20 @@ cmake -G "Visual Studio 14 2015 Win64" -Bbuild_windows_amd64_msvc "-H."
 & 'C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe' build_windows_amd64\FbxPipeline.sln /target:ALL_BUILD /p:Configuration=Debug
 ```
 
+## How to build (MacOS, terminal + cmake + make): 
+
+### PowerShell:
+```
+cd <dev directory>
+git clone git@github.com:VladSerhiienko/FbxPipeline.git
+cd FbxPipeline
+cmake -H. -Bbuild_darwin_x86_64_appleclang \
+-DFBX_SDK_INCLUDE_DIR=/Applications/Autodesk/FBX SDK/2019.0/include \
+-DFBX_SDK_LIBRARY_DEBUG=/Applications/Autodesk/FBX SDK/2019.0/lib/clang/debug/libfbxsdk.a \
+-DFBX_SDK_LIBRARY_RELEASE=/Applications/Autodesk/FBX SDK/2019.0/lib/clang/release/libfbxsdk.a
+make -C build_darwin_x86_64_appleclang
+```
+
 # License
 Licensed under the Apache License, Version 2.0 (the "License"); you may not
 use this file except in compliance with the License. You may obtain a copy of
