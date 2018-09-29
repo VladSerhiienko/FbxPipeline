@@ -5,52 +5,22 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(gdb) Launch",
+            "name": "(lldb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build_linux_x86_64/FbxPipelineLauncher",
+            "program": "${workspaceFolder}/build_darwin_x86_64_appleclang/FbxPipelineLauncher",
             "args": [
-                "-i", "/home/user/vserhiienko/models_v3/rainier-ak-3d/source/rainier-ak-3d.fbx",
-                "-o", "/home/user/vserhiienko/models_v3/rainier-ak-3d.fbxp",
-                "-l", "/home/user/vserhiienko/models_v3/rainier-ak-3d.log.txt",
-                "-e", "/home/user/vserhiienko/models_v3/rainier-ak-3d/**",
-                "--script-input", "/home/user/vserhiienko/models_v3/rainier-ak-3d/scene.gltf",
-
-                // "-i", "/home/user/vserhiienko/models_v3/warmonger_sword/source/Warmonger_Posed.fbx",
-                // "-o", "/home/user/vserhiienko/models_v3/warmonger_sword.fbxp",
-                // "-l", "/home/user/vserhiienko/models_v3/warmonger_sword.log.txt",
-                // "-e", "/home/user/vserhiienko/models_v3/warmonger_sword/**",
-                // "--script-input", "/home/user/vserhiienko/models_v3/warmonger_sword/scene.gltf",
-
-                // "-i", "/home/user/vserhiienko/models_v2/dreadroamer_free/source/Zbot_Animation.fbx",
-                // "-o", "/home/user/vserhiienko/models_v2/dreadroamer.fbxp",
-                // "-l", "/home/user/vserhiienko/models_v2/dreadroamer.log.txt",
-                // "-e", "/home/user/vserhiienko/models_v2/dreadroamer_free/**",
-                // "--script-input", "/home/user/vserhiienko/models_v2/dreadroamer_free/scene.gltf",
-                
-                // "-i", "/home/user/vserhiienko/models_v2/knight_artorias/source/Artorias.fbx.fbx",
-                // "-o", "/home/user/vserhiienko/models_v2/knight_artorias.fbxp",
-                // "-l", "/home/user/vserhiienko/models_v2/knight_artorias.log.txt",
-                // "-e", "/home/user/vserhiienko/models_v2/knight_artorias/**",
-
-                // "-i", "/home/user/vserhiienko/models/warcraft-draenei-fanart/source/untitled1.fbx",
-                // "-o", "/home/user/vserhiienko/models/warcraft-draenei-fanart.fbxp"
-
-                "-e", "/home/user/vserhiienko/FbxPipeline/build_linux_x86_64_gnu",
-                "--script-file", "glTFMaterialExtension.py"
+                "-i", "/Users/vlad.serhiienko/Projects/Home/Models/rainier-ak-3d/source/rainier-ak-3d.fbx",
+                "-o", "/Users/vlad.serhiienko/Projects/Home/Models/rainier-ak-3d.fbxp",
+                "-l", "/Users/vlad.serhiienko/Projects/Home/Models/rainier-ak-3d.log.txt",
+                "-e", "/Users/vlad.serhiienko/Projects/Home/Models/rainier-ak-3d/**",
+                "--script-input", "/Users/vlad.serhiienko/Projects/Home/Models/rainier-ak-3d/scene.gltf",
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": true,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ]
+            "MIMode": "lldb"
         }
     ]
 }

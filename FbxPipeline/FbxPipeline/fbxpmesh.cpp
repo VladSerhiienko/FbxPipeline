@@ -844,6 +844,9 @@ void ExportMesh( FbxNode*       pNode,
             const auto pWeights = pCluster->GetControlPointWeights( );
             const auto pIndices = pCluster->GetControlPointIndices( );
 
+            if (!indexCount)
+                continue;
+
             assert( 0 != indexCount );
             assert( nullptr != pWeights );
             assert( nullptr != pIndices );
