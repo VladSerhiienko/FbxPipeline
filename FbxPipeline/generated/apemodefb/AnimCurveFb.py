@@ -65,7 +65,7 @@ class AnimCurveFb(object):
         o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(16))
         if o != 0:
             x = self._tab.Vector(o)
-            x += flatbuffers.number_types.UOffsetTFlags.py_type(j) * 8
+            x += flatbuffers.number_types.UOffsetTFlags.py_type(j) * 20
             from .AnimCurveKeyFb import AnimCurveKeyFb
             obj = AnimCurveKeyFb()
             obj.Init(self._tab.Bytes, x)
@@ -87,5 +87,5 @@ def AnimCurveFbAddAnimLayerId(builder, animLayerId): builder.PrependUint32Slot(3
 def AnimCurveFbAddProperty(builder, property): builder.PrependUint8Slot(4, property, 0)
 def AnimCurveFbAddChannel(builder, channel): builder.PrependUint8Slot(5, channel, 0)
 def AnimCurveFbAddKeys(builder, keys): builder.PrependUOffsetTRelativeSlot(6, flatbuffers.number_types.UOffsetTFlags.py_type(keys), 0)
-def AnimCurveFbStartKeysVector(builder, numElems): return builder.StartVector(8, numElems, 4)
+def AnimCurveFbStartKeysVector(builder, numElems): return builder.StartVector(20, numElems, 4)
 def AnimCurveFbEnd(builder): return builder.EndObject()

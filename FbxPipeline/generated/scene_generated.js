@@ -1403,13 +1403,86 @@ apemodefb.AnimCurveKeyFb.prototype.mutate_value = function(value) {
 };
 
 /**
+ * @returns {number}
+ */
+apemodefb.AnimCurveKeyFb.prototype.arriveTangent = function() {
+  return this.bb.readFloat32(this.bb_pos + 8);
+};
+
+/**
+ * @param {number} value
+ * @returns {boolean}
+ */
+apemodefb.AnimCurveKeyFb.prototype.mutate_arriveTangent = function(value) {
+  var offset = this.bb.__offset(this.bb_pos, 8);
+
+  if (offset === 0) {
+    return false;
+  }
+
+  this.bb.writeFloat32(this.bb_pos + offset, value);
+  return true;
+};
+
+/**
+ * @returns {number}
+ */
+apemodefb.AnimCurveKeyFb.prototype.leaveTangent = function() {
+  return this.bb.readFloat32(this.bb_pos + 12);
+};
+
+/**
+ * @param {number} value
+ * @returns {boolean}
+ */
+apemodefb.AnimCurveKeyFb.prototype.mutate_leaveTangent = function(value) {
+  var offset = this.bb.__offset(this.bb_pos, 12);
+
+  if (offset === 0) {
+    return false;
+  }
+
+  this.bb.writeFloat32(this.bb_pos + offset, value);
+  return true;
+};
+
+/**
+ * @returns {apemodefb.EInterpolationModeFb}
+ */
+apemodefb.AnimCurveKeyFb.prototype.interpolationMode = function() {
+  return /** @type {apemodefb.EInterpolationModeFb} */ (this.bb.readUint8(this.bb_pos + 16));
+};
+
+/**
+ * @param {apemodefb.EInterpolationModeFb} value
+ * @returns {boolean}
+ */
+apemodefb.AnimCurveKeyFb.prototype.mutate_interpolationMode = function(value) {
+  var offset = this.bb.__offset(this.bb_pos, 16);
+
+  if (offset === 0) {
+    return false;
+  }
+
+  this.bb.writeUint8(this.bb_pos + offset, value);
+  return true;
+};
+
+/**
  * @param {flatbuffers.Builder} builder
  * @param {number} time
  * @param {number} value
+ * @param {number} arriveTangent
+ * @param {number} leaveTangent
+ * @param {apemodefb.EInterpolationModeFb} interpolationMode
  * @returns {flatbuffers.Offset}
  */
-apemodefb.AnimCurveKeyFb.createAnimCurveKeyFb = function(builder, time, value) {
-  builder.prep(4, 8);
+apemodefb.AnimCurveKeyFb.createAnimCurveKeyFb = function(builder, time, value, arriveTangent, leaveTangent, interpolationMode) {
+  builder.prep(4, 20);
+  builder.pad(3);
+  builder.writeInt8(interpolationMode);
+  builder.writeFloat32(leaveTangent);
+  builder.writeFloat32(arriveTangent);
   builder.writeFloat32(value);
   builder.writeFloat32(time);
   return builder.offset();
@@ -1595,7 +1668,7 @@ apemodefb.AnimCurveFb.prototype.mutate_channel = function(value) {
  */
 apemodefb.AnimCurveFb.prototype.keys = function(index, obj) {
   var offset = this.bb.__offset(this.bb_pos, 16);
-  return offset ? (obj || new apemodefb.AnimCurveKeyFb).__init(this.bb.__vector(this.bb_pos + offset) + index * 8, this.bb) : null;
+  return offset ? (obj || new apemodefb.AnimCurveKeyFb).__init(this.bb.__vector(this.bb_pos + offset) + index * 20, this.bb) : null;
 };
 
 /**
@@ -1674,7 +1747,7 @@ apemodefb.AnimCurveFb.addKeys = function(builder, keysOffset) {
  * @param {number} numElems
  */
 apemodefb.AnimCurveFb.startKeysVector = function(builder, numElems) {
-  builder.startVector(8, numElems, 4);
+  builder.startVector(20, numElems, 4);
 };
 
 /**

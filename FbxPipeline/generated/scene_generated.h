@@ -1121,14 +1121,24 @@ MANUALLY_ALIGNED_STRUCT(4) AnimCurveKeyFb FLATBUFFERS_FINAL_CLASS {
  private:
   float time_;
   float value_;
+  float arriveTangent_;
+  float leaveTangent_;
+  uint8_t interpolationMode_;
+  int8_t padding0__;  int16_t padding1__;
 
  public:
   AnimCurveKeyFb() {
     memset(this, 0, sizeof(AnimCurveKeyFb));
   }
-  AnimCurveKeyFb(float _time, float _value)
+  AnimCurveKeyFb(float _time, float _value, float _arriveTangent, float _leaveTangent, EInterpolationModeFb _interpolationMode)
       : time_(flatbuffers::EndianScalar(_time)),
-        value_(flatbuffers::EndianScalar(_value)) {
+        value_(flatbuffers::EndianScalar(_value)),
+        arriveTangent_(flatbuffers::EndianScalar(_arriveTangent)),
+        leaveTangent_(flatbuffers::EndianScalar(_leaveTangent)),
+        interpolationMode_(flatbuffers::EndianScalar(static_cast<uint8_t>(_interpolationMode))),
+        padding0__(0),
+        padding1__(0) {
+    (void)padding0__;    (void)padding1__;
   }
   float time() const {
     return flatbuffers::EndianScalar(time_);
@@ -1142,8 +1152,26 @@ MANUALLY_ALIGNED_STRUCT(4) AnimCurveKeyFb FLATBUFFERS_FINAL_CLASS {
   void mutate_value(float _value) {
     flatbuffers::WriteScalar(&value_, _value);
   }
+  float arriveTangent() const {
+    return flatbuffers::EndianScalar(arriveTangent_);
+  }
+  void mutate_arriveTangent(float _arriveTangent) {
+    flatbuffers::WriteScalar(&arriveTangent_, _arriveTangent);
+  }
+  float leaveTangent() const {
+    return flatbuffers::EndianScalar(leaveTangent_);
+  }
+  void mutate_leaveTangent(float _leaveTangent) {
+    flatbuffers::WriteScalar(&leaveTangent_, _leaveTangent);
+  }
+  EInterpolationModeFb interpolationMode() const {
+    return static_cast<EInterpolationModeFb>(flatbuffers::EndianScalar(interpolationMode_));
+  }
+  void mutate_interpolationMode(EInterpolationModeFb _interpolationMode) {
+    flatbuffers::WriteScalar(&interpolationMode_, static_cast<uint8_t>(_interpolationMode));
+  }
 };
-STRUCT_END(AnimCurveKeyFb, 8);
+STRUCT_END(AnimCurveKeyFb, 20);
 
 MANUALLY_ALIGNED_STRUCT(4) TextureFb FLATBUFFERS_FINAL_CLASS {
  private:

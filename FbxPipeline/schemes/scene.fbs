@@ -198,6 +198,9 @@ struct AnimLayerFb {
 struct AnimCurveKeyFb {
     time : float;
     value : float;
+    arriveTangent : float;
+    leaveTangent : float;
+	interpolationMode : EInterpolationModeFb;
 }
 
 table AnimCurveFb {

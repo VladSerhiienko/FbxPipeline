@@ -175,9 +175,6 @@ endif ()
 
 if (WIN32)
     set(CONFIGURATION_SUFFIX "/$(Configuration)")
-    set(FBX_SDK_INCLUDE_DIR "C:/Program Files/Autodesk/FBX/FBX SDK/2018.1.1/include" CACHE PATH "FBX SDK Include Directory")
-    set(FBX_SDK_LIBRARY_DEBUG "C:/Program Files/Autodesk/FBX/FBX SDK/2018.1.1/lib/vs2015/x64/debug/libfbxsdk-md.lib" CACHE PATH "FBX SDK Library")
-    set(FBX_SDK_LIBRARY_RELEASE "C:/Program Files/Autodesk/FBX/FBX SDK/2018.1.1/lib/vs2015/x64/release/libfbxsdk-md.lib" CACHE PATH "FBX SDK Library")
 else()
     add_definitions("-g")
     
@@ -190,15 +187,7 @@ else()
     endif ()
 
     set(CONFIGURATION_SUFFIX "")
-    set(FBX_SDK_INCLUDE_DIR "~/FbxSdk/include" CACHE PATH "FBX SDK Include Directory")
-    set(FBX_SDK_LIBRARY_DIR "~/FbxSdk/lib" CACHE PATH "FBX SDK Library Directory")
-    find_library( FBX_SDK_LIBRARY_RELEASE fbxsdk HINTS ${FBX_SDK_LIBRARY_DIR}/gcc4/x64/release ${FBX_SDK_LIBRARY_DIR}/clang/release )
-    set(FBX_SDK_LIBRARY_DEBUG ${FBX_SDK_LIBRARY_RELEASE} CACHE PATH "FBX SDK Library")
 endif()
-
-message(STATUS "FBX_SDK_INCLUDE_DIR = ${FBX_SDK_INCLUDE_DIR}")
-message(STATUS "FBX_SDK_LIBRARY_DEBUG = ${FBX_SDK_LIBRARY_DEBUG}")
-message(STATUS "FBX_SDK_LIBRARY_RELEASE = ${FBX_SDK_LIBRARY_RELEASE}")
 
 if (WIN32)
     add_custom_command(
