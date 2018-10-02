@@ -307,13 +307,15 @@ void InitializeSeachLocations( ) {
          *   > /c/path/to/model/ModelName/textures/diffuse.png, ...
          **/
 
-        std::string textureDirectorySketchfab = ReplaceSlashes( RealPath( ( inputDirectory + "/../textures" ) ) );
+        std::string textureDirectorySketchfab = inputDirectory + "/../textures";
         if ( DirectoryExists( textureDirectorySketchfab.c_str( ) ) ) {
+            textureDirectorySketchfab = ReplaceSlashes( RealPath( textureDirectorySketchfab ) );
             searchLocations.push_back( textureDirectorySketchfab + "/**" );
         } else {
             /* Model file could be additionally archived, and when unarchived could be placed in the directory. */
-            textureDirectorySketchfab = ReplaceSlashes( RealPath( ( inputDirectory + "/../../textures" ) ) );
+            textureDirectorySketchfab = inputDirectory + "/../../textures";
             if ( DirectoryExists( textureDirectorySketchfab.c_str( ) ) ) {
+                textureDirectorySketchfab = ReplaceSlashes( RealPath( textureDirectorySketchfab ) );
                 searchLocations.push_back( textureDirectorySketchfab + "/**" );
             }
         }

@@ -5,7 +5,18 @@
             "includePath": [
                 "/usr/include",
                 "/usr/local/include",
-                "${workspaceRoot}"
+                "${workspaceRoot}",
+                "/Applications/Autodesk/FBX SDK/2019.0/include",
+                "${workspaceRoot}/FbxPipeline",
+                "${workspaceRoot}/FbxPipeline/generated",
+                "${workspaceRoot}/FbxPipeline/FbxPipeline",
+                "${workspaceRoot}/dependencies/FbxPipeline",
+                "${workspaceRoot}/dependencies/flatbuffers/include",
+                "${workspaceRoot}/dependencies/cxxopts/include",
+                "${workspaceRoot}/dependencies/mathfu/include",
+                "${workspaceRoot}/dependencies/pybind11/include",
+                "${workspaceRoot}/dependencies/spdlog/include",
+                "${workspaceRoot}/dependencies/zlib"
             ],
             "defines": [],
             "intelliSenseMode": "clang-x64",
@@ -13,10 +24,21 @@
                 "path": [
                     "/usr/include",
                     "/usr/local/include",
-                    "${workspaceRoot}"
+                    "${workspaceRoot}",
+                    "/Applications/Autodesk/FBX SDK/2019.0/include",
+                    "${workspaceRoot}/FbxPipeline",
+                    "${workspaceRoot}/FbxPipeline/generated",
+                    "${workspaceRoot}/FbxPipeline/FbxPipeline",
+                    "${workspaceRoot}/dependencies/FbxPipeline",
+                    "${workspaceRoot}/dependencies/flatbuffers/include",
+                    "${workspaceRoot}/dependencies/cxxopts/include",
+                    "${workspaceRoot}/dependencies/mathfu/include",
+                    "${workspaceRoot}/dependencies/pybind11/include",
+                    "${workspaceRoot}/dependencies/spdlog/include",
+                    "${workspaceRoot}/dependencies/zlib"
                 ],
                 "limitSymbolsToIncludedHeaders": true,
-                "databaseFilename": ""
+                "databaseFilename": "${workspaceRoot}/.vscode/db"
             },
             "macFrameworkPath": [
                 "/System/Library/Frameworks",

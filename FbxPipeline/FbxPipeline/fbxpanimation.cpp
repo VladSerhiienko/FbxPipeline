@@ -323,211 +323,74 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
         if ( auto pAnimCurve = pAnimCurveTuple.pAnimCurve ) {
             auto pAnimStack = pAnimCurveTuple.pAnimStack;
             auto pAnimLayer = pAnimCurveTuple.pAnimLayer;
-            auto keyCount   = pAnimCurve->KeyGetCount( );
+            const int32_t keyCount   = pAnimCurve->KeyGetCount( );
 
             uint32_t curveId = static_cast< uint32_t >( s.animCurves.size( ) );
             s.animCurves.emplace_back( );
             n.curveIds.push_back( curveId );
 
-            auto& curve       = s.animCurves.back( );
-            curve.id          = curveId;
-            curve.nameId      = s.PushValue( pAnimCurve->GetName( ) );
-            curve.property    = pAnimCurveTuple.eAnimCurveProperty;
-            curve.channel     = pAnimCurveTuple.eAnimCurveChannel;
-            curve.animStackId = s.animStackDict[ pAnimStack->GetUniqueID( ) ];
-            curve.animLayerId = s.animLayerDict[ pAnimLayer->GetUniqueID( ) ];
-            curve.nodeId      = n.id;
+            apemode::AnimCurve& curve = s.animCurves.back( );
+            curve.id                  = curveId;
+            curve.nameId              = s.PushValue( pAnimCurve->GetName( ) );
+            curve.property            = pAnimCurveTuple.eAnimCurveProperty;
+            curve.channel             = pAnimCurveTuple.eAnimCurveChannel;
+            curve.animStackId         = s.animStackDict[ pAnimStack->GetUniqueID( ) ];
+            curve.animLayerId         = s.animLayerDict[ pAnimLayer->GetUniqueID( ) ];
+            curve.nodeId              = n.id;
 
             curve.keys.resize( keyCount );
 
             /* Constant and linear modes */
             for ( int i = 0; i < keyCount; ++i ) {
-                auto& key = curve.keys[ i ];
-                key.time  = (float) pAnimCurve->KeyGetTime( i ).GetMilliSeconds( );
-                key.value = pAnimCurve->KeyGetValue( i );
+                auto& key         = curve.keys[ i ];
+                key.time          = static_cast< float >( pAnimCurve->KeyGetTime( i ).GetSecondDouble( ) );
+                key.value         = pAnimCurve->KeyGetValue( i );
+                key.arriveTangent = 0;
+                key.leaveTangent  = 0;
 
                 switch ( pAnimCurve->KeyGetInterpolation( i ) ) {
-                    case FbxAnimCurveDef::eInterpolationConstant: {
-                        key.interpolationMode = apemodefb::EInterpolationModeFb_Const;
-                        switch ( pAnimCurve->KeyGetConstantMode( i ) ) {
-                            case FbxAnimCurveDef::eConstantStandard:
-                                break;
-
-                            case FbxAnimCurveDef::eConstantNext:
-                                /* There is at least one key ahead. */
-                                if ( i < ( pAnimCurve->KeyGetCount( ) - 1 ) )
-                                    key.value = pAnimCurve->KeyGetValue( i + 1 );
-                                break;
-                        }
-                    } break;
-
                     case FbxAnimCurveDef::eInterpolationLinear: {
                         key.interpolationMode = apemodefb::EInterpolationModeFb_Linear;
                     } break;
 
-                    case FbxAnimCurveDef::eInterpolationCubic: {
-                        /* Resampling */
-                        key.interpolationMode = apemodefb::EInterpolationModeFb_Linear;
-                        // key.interpolationMode = apemodefb::EInterpolationMode_Cubic;
-                    } break;
-                }
-            }
-
-            /* Cubic modes, calculate tangents */
-
-            /* TODO: Evaluate tangents externally without FBX.
-                     I want to have compact Hermite splines. */
-
-#if 0
-            /* Animation in FBX is fucked up. Just resampling the keys, sync where possible
-               Not sure how the handle those cases, what the fuck are weight and velocity properties. */
-
-            for ( int i = 0; i < keyCount; ++i ) {
-                switch ( pAnimCurve->KeyGetInterpolation( i ) ) {
-                    case FbxAnimCurveDef::eInterpolationCubic: {
-                        auto tangentMode = pAnimCurve->KeyGetTangentMode(i);
-                        switch ( pAnimCurve->KeyGetTangentMode( i ) ) {
-
-                            /* This case looks straightforward and correct */
-                            case FbxAnimCurveDef::eTangentTCB: {
-                                // https://en.wikipedia.org/wiki/Kochanek%E2%80%93Bartels_spline
-                                // http://cubic.org/docs/hermite.htm
-
-                                auto k1 = pAnimCurve->KeyGet( i );
-
-                                auto& kk0 = curve.keys[ i - 1 ];
-                                auto& kk1 = curve.keys[ i ];
-                                auto& kk2 = curve.keys[ i + 1 ];
-                                auto& kk3 = curve.keys[ i + 2 ];
-
-                                auto t = k1.GetDataFloat( FbxAnimCurveDef::eTCBTension );
-                                auto c = k1.GetDataFloat( FbxAnimCurveDef::eTCBContinuity );
-                                auto b = k1.GetDataFloat( FbxAnimCurveDef::eTCBBias );
-
-                                mathfu::vec2 p0 = {kk0.time, kk0.value};
-                                mathfu::vec2 p1 = {kk1.time, kk1.value};
-                                mathfu::vec2 p2 = {kk2.time, kk2.value};
-                                mathfu::vec2 p3 = {kk3.time, kk3.value};
-
-                                mathfu::vec2 d1 = ( p1 - p0 ) * ( 1 - t ) * ( 1 + b ) * ( 1 + c ) * 0.5f +
-                                                  ( p2 - p1 ) * ( 1 - t ) * ( 1 - b ) * ( 1 - c ) * 0.5f;
-
-                                mathfu::vec2 d2 = ( p2 - p1 ) * ( 1 - t ) * ( 1 + b ) * ( 1 - c ) * 0.5f +
-                                                  ( p3 - p2 ) * ( 1 - t ) * ( 1 - b ) * ( 1 + c ) * 0.5f;
-
-                                kk1.tangents[ 1 ][ 0 ] = d1.x;
-                                kk1.tangents[ 1 ][ 1 ] = d1.y;
-
-                                kk2.tangents[ 0 ][ 0 ] = d2.x;
-                                kk2.tangents[ 0 ][ 1 ] = d2.y;
-
-                            } break;
-
-                            /* TODO: Can be first or last key (will cause out of range reads) */
-                            case FbxAnimCurveDef::eTangentAuto: {
-                                // http://cubic.org/docs/hermite.htm
-
-                                auto k1 = pAnimCurve->KeyGet( i );
-
-                                auto& kk0 = curve.keys[ i - 1 ];
-                                auto& kk1 = curve.keys[ i ];
-                                auto& kk2 = curve.keys[ i + 1 ];
-
-                                mathfu::vec2 p0 = {kk0.time, kk0.value};
-                                mathfu::vec2 p2 = {kk2.time, kk2.value};
-
-                                float a = pAnimCurve->KeyGetRightAuto( i );
-                                mathfu::vec2 d1 = ( p2 - p0 ) * a;
-
-                                kk1.tangents[ 0 ][ 0 ] = d1.x;
-                                kk1.tangents[ 0 ][ 1 ] = d1.y;
-
-                                kk1.tangents[ 1 ][ 0 ] = d1.x;
-                                kk1.tangents[ 1 ][ 1 ] = d1.y;
-
-                            } break;
-
-                            case FbxAnimCurveDef::eTangentAutoBreak: {
-                                auto k1 = pAnimCurve->KeyGet( i );
-
-                                auto& kk0 = curve.keys[ i - 1 ];
-                                auto& kk1 = curve.keys[ i ];
-                                auto& kk2 = curve.keys[ i + 1 ];
-
-                                mathfu::vec2 p0 = {kk0.time, kk0.value};
-                                mathfu::vec2 p2 = {kk2.time, kk2.value};
-
-                                float a  = pAnimCurve->KeyGetLeftAuto( i );
-                                mathfu::vec2 d1 = ( p2 - p0 ) * a;
-
-                                kk1.tangents[ 1 ][ 0 ] = d1.x;
-                                kk1.tangents[ 1 ][ 1 ] = d1.y;
-                            } break;
-
-                            case FbxAnimCurveDef::eTangentUser: {
-                                bool bWeighted = pAnimCurve->KeyIsRightTangentWeighted( i );
-
-                                float d = pAnimCurve->KeyGetRightDerivative( i );
-                                float w = bWeighted ? pAnimCurve->KeyGetRightTangentWeight( i ) : 0.333f;
-
-                                auto& kk1 = curve.keys[ i ];
-                                auto& kk2 = curve.keys[ i + 1 ];
-
-                                float duration = kk2.time - kk1.time;
-                                float distance = kk2.value - kk1.value;
-
-                                /* Right */
-                                kk1.tangents[ 1 ][ 0 ] = w;
-                                kk1.tangents[ 1 ][ 1 ] = w * d;
-
-                                /* No break */
-                                kk1.tangents[ 0 ][ 0 ] = kk1.tangents[ 1 ][ 0 ];
-                                kk1.tangents[ 0 ][ 1 ] = kk1.tangents[ 1 ][ 1 ];
-
-                                /* Next left == Right */
-                                kk2.tangents[ 0 ][ 0 ] = kk1.tangents[ 1 ][ 0 ];
-                                kk2.tangents[ 0 ][ 1 ] = kk1.tangents[ 1 ][ 1 ];
-
-                            } break;
-
-                            case FbxAnimCurveDef::eTangentBreak:{
-                                bool  bWeighted = pAnimCurve->KeyIsRightTangentWeighted( i );
-
-                                float d = pAnimCurve->KeyGetRightDerivative( i );
-                                float w = bWeighted ? pAnimCurve->KeyGetRightTangentWeight( i ) : 0.333f;
-
-                                auto& kk1 = curve.keys[ i ];
-                                auto& kk2 = curve.keys[ i + 1 ];
-
-                                /* Right */
-                                kk1.tangents[ 1 ][ 0 ] = w;
-                                kk1.tangents[ 1 ][ 1 ] = w * d;
-
-                                /* Next left == Right */
-                                kk2.tangents[ 0 ][ 0 ] = kk1.tangents[ 1 ][ 0 ];
-                                kk2.tangents[ 0 ][ 1 ] = kk1.tangents[ 1 ][ 1 ];
-
-                            } break;
-
-                            case FbxAnimCurveDef::eTangentGenericBreak:
-                            case FbxAnimCurveDef::eTangentGenericClamp:
-                            case FbxAnimCurveDef::eTangentGenericTimeIndependent:
-                            case FbxAnimCurveDef::eTangentGenericClampProgressive:
-                                assert( false && "TODO" );
+                    case FbxAnimCurveDef::eInterpolationConstant: {
+                        key.interpolationMode = apemodefb::EInterpolationModeFb_Const;
+                        switch ( pAnimCurve->KeyGetConstantMode( i ) ) {
+                            case FbxAnimCurveDef::eConstantNext:
+                                if ( i < ( keyCount - 1 ) )
+                                    /* There is at least one key ahead. */
+                                    key.value = pAnimCurve->KeyGetValue( i + 1 );
+                                break;
+                            default:
                                 break;
                         }
+                    } break;
+                }
+            }
 
-                        /* Check if previous key is user key */
-                        /*if ( i && 0 != ( FbxAnimCurveDef::eTangentUser & pAnimCurve->KeyGetTangentMode( i - 1 ) ) ) {
-                            curve.keys[ i - 1 ].tangents[ 1 ][ 0 ] = curve.keys[ i ].tangents[ 0 ][ 0 ];
-                            curve.keys[ i - 1 ].tangents[ 1 ][ 1 ] = curve.keys[ i ].tangents[ 0 ][ 1 ];
-                        }*/
+            /* Cubic modes */
+            for ( int i = 0; i < keyCount; ++i ) {
+                auto& key = curve.keys[ i ];
+                switch ( pAnimCurve->KeyGetInterpolation( i ) ) {
+                    case FbxAnimCurveDef::eInterpolationCubic: {
+                        key.interpolationMode = apemodefb::EInterpolationModeFb_Cubic;
+
+                        const float leftTangent  = pAnimCurve->KeyGetLeftDerivative( i );
+                        const float rightTangent = pAnimCurve->KeyGetRightDerivative( i );
+
+                        if ( i > 0 ) {
+                            const auto& previousKey = curve.keys[ i - 1 ];
+                            key.arriveTangent = leftTangent * ( key.time - previousKey.time );
+                        }
+
+                        if ( i < ( keyCount - 1 ) ) {
+                            const auto& nextKey = curve.keys[ i + 1 ];
+                            key.leaveTangent    = rightTangent * ( nextKey.time - key.time );
+                        }
 
                     } break;
                 }
             }
-#endif
-
         }
     }
 }

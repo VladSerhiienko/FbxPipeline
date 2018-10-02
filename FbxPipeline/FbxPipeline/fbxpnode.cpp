@@ -107,6 +107,9 @@ void PreprocessMeshes( FbxScene* scene ) {
 void PreprocessAnimation( FbxScene* pScene ) {
     auto& s = apemode::State::Get( );
 
+    if (s.options[ "resample-framerate" ].count())
+        s.resampleFPS = s.options[ "resample-framerate" ].as< float >( );
+        
     int animStackCount = pScene->GetSrcObjectCount< FbxAnimStack >( );
 
     if ( animStackCount )

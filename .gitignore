@@ -262,6 +262,8 @@ paket-files/
 /FbxPipeline/assets/shaders/include
 
 build*/
-dbuild*/
 dependencies/
 .logs/
+.vscode/db*
+# .vscode/db-shm
+# .vscode/db-wal

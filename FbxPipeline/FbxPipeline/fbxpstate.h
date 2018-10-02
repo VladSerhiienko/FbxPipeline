@@ -9,7 +9,7 @@ inline void DebugBreak( ) {
 #endif
 
 #ifndef ARRAYSIZE
-#define ARRAYSIZE(arr) sizeof(arr) / sizeof(arr[0])
+#define ARRAYSIZE( arr ) sizeof( arr ) / sizeof( arr[ 0 ] )
 #endif
 
 namespace apemode {
@@ -37,7 +37,6 @@ namespace apemode {
      * const uint32_t valueIndex = ( packedId >> 8 ) & 0x0fff;
      **/
     struct FBXPIPELINE_API ValueId {
-
         uint32_t valueType : 8;
         uint32_t valueIndex : 24;
 
@@ -95,7 +94,8 @@ namespace apemode {
     struct FBXPIPELINE_API AnimCurveKey {
         float                           time;
         float                           value;
-        float                           tangents[ 2 ][ 2 ];
+        float                           arriveTangent;
+        float                           leaveTangent;
         apemodefb::EInterpolationModeFb interpolationMode;
     };
 
@@ -124,44 +124,45 @@ namespace apemode {
     };
 
     struct FBXPIPELINE_API State {
-        FbxManager*                            manager = nullptr;
-        FbxScene*                              scene   = nullptr;
-        std::string                            executableName;
-        std::shared_ptr< spdlog::logger >      console;
-        flatbuffers::FlatBufferBuilder         builder;
-        cxxopts::Options                       options;
-        std::string                            fileName;
-        std::string                            folderPath;
-        std::vector< Node >                    nodes;
-        std::vector< Material >                materials;
-        std::vector< File >                    embeddedFiles;
-        std::map< uint64_t, uint32_t >         nodeDict;
-        std::map< uint64_t, uint32_t >         textureDict;
-        std::map< uint64_t, uint32_t >         materialDict;
-        std::map< uint64_t, uint32_t >         animStackDict;
-        std::map< uint64_t, uint32_t >         animLayerDict;
-        std::vector< apemodefb::TransformFb >  transforms;
-        std::vector< apemodefb::TextureFb >    textures;
-        std::vector< apemodefb::CameraFb >     cameras;
-        std::vector< apemodefb::LightFb >      lights;
-        std::vector< Mesh >                    meshes;
-        std::vector< AnimStack >               animStacks;
-        std::vector< AnimLayer >               animLayers;
-        std::vector< AnimCurve >               animCurves;
-        std::vector< Skin >                    skins;
-        std::vector< std::string >             searchLocations;
-        std::vector< bool >                    boolValues;
-        std::vector< int32_t >                 intValues;
-        std::vector< float >                   floatValues;
-        std::vector< std::string >             stringValues;
+        FbxManager*                           manager = nullptr;
+        FbxScene*                             scene   = nullptr;
+        std::string                           executableName;
+        std::shared_ptr< spdlog::logger >     console;
+        flatbuffers::FlatBufferBuilder        builder;
+        cxxopts::Options                      options;
+        std::string                           fileName;
+        std::string                           folderPath;
+        std::vector< Node >                   nodes;
+        std::vector< Material >               materials;
+        std::vector< File >                   embeddedFiles;
+        std::map< uint64_t, uint32_t >        nodeDict;
+        std::map< uint64_t, uint32_t >        textureDict;
+        std::map< uint64_t, uint32_t >        materialDict;
+        std::map< uint64_t, uint32_t >        animStackDict;
+        std::map< uint64_t, uint32_t >        animLayerDict;
+        std::vector< apemodefb::TransformFb > transforms;
+        std::vector< apemodefb::TextureFb >   textures;
+        std::vector< apemodefb::CameraFb >    cameras;
+        std::vector< apemodefb::LightFb >     lights;
+        std::vector< Mesh >                   meshes;
+        std::vector< AnimStack >              animStacks;
+        std::vector< AnimLayer >              animLayers;
+        std::vector< AnimCurve >              animCurves;
+        std::vector< Skin >                   skins;
+        std::vector< std::string >            searchLocations;
+        std::vector< bool >                   boolValues;
+        std::vector< int32_t >                intValues;
+        std::vector< float >                  floatValues;
+        std::vector< std::string >            stringValues;
 
         std::vector< std::function< void( apemode::State*, std::string ) > > extensions;
 
-        float                                 resampleFPS            = 24.0f;
-        bool                                  reduceKeys             = false;
-        bool                                  reduceConstKeys        = false;
-        bool                                  propertyCurveSync      = true;
-        bool                                  legacyTriangulationSdk = false;
+        bool forceResampling         = false;
+        float resampleFPS            = 24.0f;
+        bool  reduceKeys             = false;
+        bool  reduceConstKeys        = false;
+        bool  propertyCurveSync      = true;
+        bool  legacyTriangulationSdk = false;
 
         State( );
         ~State( );
@@ -171,19 +172,19 @@ namespace apemode {
         bool Load( );
         bool Finalize( );
 
-        ValueId PushValue( const char * value );
-        ValueId PushValue( const std::string& value );
-        ValueId PushValue( const int32_t value );
-        ValueId PushValue( const float value );
-        ValueId PushValue( const float x, const float y );
-        ValueId PushValue( const float x, const float y, const float z );
-        ValueId PushValue( const float x, const float y, const float z, const float w );
-        ValueId PushValue( const bool value );
-        uint32_t PushValue( const apemodefb::TextureFb & value );
+        ValueId  PushValue( const char* value );
+        ValueId  PushValue( const std::string& value );
+        ValueId  PushValue( const int32_t value );
+        ValueId  PushValue( const float value );
+        ValueId  PushValue( const float x, const float y );
+        ValueId  PushValue( const float x, const float y, const float z );
+        ValueId  PushValue( const float x, const float y, const float z, const float w );
+        ValueId  PushValue( const bool value );
+        uint32_t PushValue( const apemodefb::TextureFb& value );
 
         uint32_t EmbedFile( const std::string fullPath );
 
         static State& Get( );
         static State& Main( int argc, const char**& argv );
     };
-}
+} // namespace apemode
