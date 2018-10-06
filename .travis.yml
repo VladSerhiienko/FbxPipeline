@@ -1,42 +1,73 @@
+language: cpp
 dist: trusty
 sudo: required
-language:
-  - cpp
-compiler:
-  - gcc
-addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - gcc-6
-      - g++-6
-      - cmake
 
-branches:
-  only:
-    - master
+os:
+  - linux
+    compiler:
+      - gcc
+      - clang
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+          - llvm-toolchain-trusty-5.0
+        packages:
+          - clang-5.0
+          - gcc-6
+          - g++-6
+          - cmake
+  - osx
+    osx_image: xcode9.4
 
 before_script:
-  - sudo apt-get install 
-  - sudo apt-get -qq update
-  - sudo apt-get -y install python3
-
+  - if [[ $TRAVIS_OS_NAME == "osx" ]]; then
+    brew update;
+    brew install cmake;
+    brew install python3;
+    fi
+  - if [[ $TRAVIS_OS_NAME == "linux" ]]; then
+    sudo apt-get install;
+    sudo apt-get -qq update;
+    sudo apt-get -y install python3;
+    fi
+  
 install:
-  - sudo wget -O fbx20190_fbxsdk_linux.tar.gz http://download.autodesk.com/us/fbx/2019/2019.0/fbx20190_fbxsdk_linux.tar.gz
-  - sudo tar -xf fbx20190_fbxsdk_linux.tar.gz
-  - sudo chmod ugo+x fbx20190_fbxsdk_linux
-  - sudo mkdir /home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk
-  - yes yes | sudo ./fbx20190_fbxsdk_linux /home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk
+  - if [[ $TRAVIS_OS_NAME == "osx" ]]; then
+    sudo wget http://download.autodesk.com/us/fbx/2019/2019.0/fbx20190_fbxsdk_clang_mac.pkg.tgz;
+    sudo tar -xf "fbx20190_fbxsdk_clang_mac.pkg.tgz";
+    sudo installer -pkg fbx20190_fbxsdk_clang_mac.pkg -target /;
+    fi
+  - if [[ $TRAVIS_OS_NAME == "linux" ]]; then
+    sudo wget -O fbx20190_fbxsdk_linux.tar.gz http://download.autodesk.com/us/fbx/2019/2019.0/fbx20190_fbxsdk_linux.tar.gz;
+    sudo tar -xf fbx20190_fbxsdk_linux.tar.gz;
+    sudo chmod ugo+x fbx20190_fbxsdk_linux;
+    sudo mkdir /home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk;
+    yes yes | sudo ./fbx20190_fbxsdk_linux /home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk;
+    fi
 
 script:
-  - export CC=/usr/bin/gcc-6
-  - export CXX=/usr/bin/g++-6
-  - gcc -v && g++ -v && cmake --version
-  - sed -i 's,git@github.com:,https://github.com/,g' CMakeLists.txt
-  - cmake -H. -Bbuild_linux_x86_64_gnu -DFBX_SDK_INCLUDE_DIR:STRING=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/include -DFBX_SDK_LIBRARY_DIR:STRING=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/lib
-  - cd build_linux_x86_64_gnu
-  - make
+  - cd src
+  - make all
+
+script:
+  - cmake --version;
+  - sed -i 's,git@github.com:,https://github.com/,g' CMakeLists.txt;
+  - if [[ $TRAVIS_OS_NAME == "osx" ]]; then
+    cmake -H. -Bbuild_darwin_x86_64_appleclang -DFBX_SDK_INCLUDE_DIR="/Applications/Autodesk/FBX SDK/2019.0/include"
+                                               -DFBX_SDK_LIBRARY_DEBUG="/Applications/Autodesk/FBX SDK/2019.0/lib/clang/debug/libfbxsdk.a"
+                                               -DFBX_SDK_LIBRARY_RELEASE="/Applications/Autodesk/FBX SDK/2019.0/lib/clang/release/libfbxsdk.a";
+    cd build_darwin_x86_64_appleclang;
+    fi
+  - if [[ $TRAVIS_OS_NAME == "linux" ]]; then
+    export CC=/usr/bin/gcc-6;
+    export CXX=/usr/bin/g++-6;
+    cmake -H. -Bbuild_linux_x86_64_gnu -DFBX_SDK_INCLUDE_DIR=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/include
+                                       -DFBX_SDK_LIBRARY_DEBUG=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/lib/gcc4/x64/debug/libfbxsdk.a
+                                       -DFBX_SDK_LIBRARY_RELEASE=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/lib/gcc4/x64/release/libfbxsdk.a;
+    cd build_linux_x86_64_gnu;
+    fi
+  - make;
 
 notifications:
   email:

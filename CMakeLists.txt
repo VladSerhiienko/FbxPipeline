@@ -14,6 +14,10 @@ set(BUILD_FOLDER_SUFFIX "build_${CMAKE_SYSTEM_NAME}_${CMAKE_SYSTEM_PROCESSOR}_${
 string(TOLOWER  ${BUILD_FOLDER_SUFFIX} BUILD_FOLDER_SUFFIX)
 message(STATUS "BUILD_FOLDER_SUFFIX = ${BUILD_FOLDER_SUFFIX}")
 
+message(STATUS "FBX_SDK_INCLUDE_DIR = ${FBX_SDK_INCLUDE_DIR}")
+message(STATUS "FBX_SDK_LIBRARY_DEBUG = ${FBX_SDK_LIBRARY_DEBUG}")
+message(STATUS "FBX_SDK_LIBRARY_RELEASE = ${FBX_SDK_LIBRARY_RELEASE}")
+
 if (FBX_SDK_INCLUDE_DIR STREQUAL "")
     message(FATAL_ERROR "FBXSDK not installed (FBX_SDK_INCLUDE_DIR not found).")
 elseif(FBX_SDK_LIBRARY_DEBUG STREQUAL "")
@@ -21,10 +25,6 @@ elseif(FBX_SDK_LIBRARY_DEBUG STREQUAL "")
 elseif(FBX_SDK_LIBRARY_RELEASE STREQUAL "")
     message(FATAL_ERROR "FBXSDK not installed (FBX_SDK_LIBRARY_RELEASE not found).")
 endif()
-
-message(STATUS "FBX_SDK_INCLUDE_DIR = ${FBX_SDK_INCLUDE_DIR}")
-message(STATUS "FBX_SDK_LIBRARY_DEBUG = ${FBX_SDK_LIBRARY_DEBUG}")
-message(STATUS "FBX_SDK_LIBRARY_RELEASE = ${FBX_SDK_LIBRARY_RELEASE}")
 
 if (APPLE)
     find_package(Boost COMPONENTS system filesystem REQUIRED)
@@ -173,20 +173,12 @@ if ( PYTHONLIBS_FOUND )
     message(STATUS "PYTHON_DIR = ${PYTHON_DIR}")
 endif ()
 
+set (CMAKE_CXX_STANDARD 11)
 if (WIN32)
     set(CONFIGURATION_SUFFIX "/$(Configuration)")
 else()
-    add_definitions("-g")
-    
-    if (CMAKE_VERSION VERSION_LESS "3.1")
-      if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
-      endif ()
-    else ()
-      set (CMAKE_CXX_STANDARD 11)
-    endif ()
-
     set(CONFIGURATION_SUFFIX "")
+    add_definitions("-g")
 endif()
 
 if (WIN32)
