@@ -24,8 +24,8 @@ matrix:
 before_script:
   - if [[ $TRAVIS_OS_NAME == "osx" ]]; then
     brew update;
-    brew install cmake;
-    brew install python3;
+    brew upgrade cmake;
+    brew upgrade python3;
     fi
   - if [[ $TRAVIS_OS_NAME == "linux" ]]; then
     sudo apt-get install;
