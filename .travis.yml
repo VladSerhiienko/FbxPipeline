@@ -37,9 +37,7 @@ install:
   - if [[ $TRAVIS_OS_NAME == "osx" ]]; then
     sudo wget http://download.autodesk.com/us/fbx/2019/2019.0/fbx20190_fbxsdk_clang_mac.pkg.tgz;
     sudo tar -xf fbx20190_fbxsdk_clang_mac.pkg.tgz;
-    ls -l;
-    ls fbx20190_fbxsdk_clang_mac.pkg -l;
-    sudo installer -pkg fbx20190_fbxsdk_clang_mac.pkg -target /;
+    sudo installer -pkg fbx20190_fbxsdk_clang_macos.pkg -target /;
     fi
   - if [[ $TRAVIS_OS_NAME == "linux" ]]; then
     sudo wget -O fbx20190_fbxsdk_linux.tar.gz http://download.autodesk.com/us/fbx/2019/2019.0/fbx20190_fbxsdk_linux.tar.gz;
