@@ -1413,7 +1413,7 @@ apemodefb.AnimCurveKeyFb.prototype.arriveTangent = function() {
  * @param {number} value
  * @returns {boolean}
  */
-apemodefb.AnimCurveKeyFb.prototype.mutate_arriveTangent = function(value) {
+apemodefb.AnimCurveKeyFb.prototype.mutate_arrive_tangent = function(value) {
   var offset = this.bb.__offset(this.bb_pos, 8);
 
   if (offset === 0) {
@@ -1435,7 +1435,7 @@ apemodefb.AnimCurveKeyFb.prototype.leaveTangent = function() {
  * @param {number} value
  * @returns {boolean}
  */
-apemodefb.AnimCurveKeyFb.prototype.mutate_leaveTangent = function(value) {
+apemodefb.AnimCurveKeyFb.prototype.mutate_leave_tangent = function(value) {
   var offset = this.bb.__offset(this.bb_pos, 12);
 
   if (offset === 0) {
@@ -1472,17 +1472,17 @@ apemodefb.AnimCurveKeyFb.prototype.mutate_interpolationMode = function(value) {
  * @param {flatbuffers.Builder} builder
  * @param {number} time
  * @param {number} value
- * @param {number} arriveTangent
- * @param {number} leaveTangent
+ * @param {number} arrive_tangent
+ * @param {number} leave_tangent
  * @param {apemodefb.EInterpolationModeFb} interpolationMode
  * @returns {flatbuffers.Offset}
  */
-apemodefb.AnimCurveKeyFb.createAnimCurveKeyFb = function(builder, time, value, arriveTangent, leaveTangent, interpolationMode) {
+apemodefb.AnimCurveKeyFb.createAnimCurveKeyFb = function(builder, time, value, arrive_tangent, leave_tangent, interpolationMode) {
   builder.prep(4, 20);
   builder.pad(3);
   builder.writeInt8(interpolationMode);
-  builder.writeFloat32(leaveTangent);
-  builder.writeFloat32(arriveTangent);
+  builder.writeFloat32(leave_tangent);
+  builder.writeFloat32(arrive_tangent);
   builder.writeFloat32(value);
   builder.writeFloat32(time);
   return builder.offset();

@@ -1121,8 +1121,8 @@ MANUALLY_ALIGNED_STRUCT(4) AnimCurveKeyFb FLATBUFFERS_FINAL_CLASS {
  private:
   float time_;
   float value_;
-  float arriveTangent_;
-  float leaveTangent_;
+  float arrive_tangent_;
+  float leave_tangent_;
   uint8_t interpolationMode_;
   int8_t padding0__;  int16_t padding1__;
 
@@ -1130,11 +1130,11 @@ MANUALLY_ALIGNED_STRUCT(4) AnimCurveKeyFb FLATBUFFERS_FINAL_CLASS {
   AnimCurveKeyFb() {
     memset(this, 0, sizeof(AnimCurveKeyFb));
   }
-  AnimCurveKeyFb(float _time, float _value, float _arriveTangent, float _leaveTangent, EInterpolationModeFb _interpolationMode)
+  AnimCurveKeyFb(float _time, float _value, float _arrive_tangent, float _leave_tangent, EInterpolationModeFb _interpolationMode)
       : time_(flatbuffers::EndianScalar(_time)),
         value_(flatbuffers::EndianScalar(_value)),
-        arriveTangent_(flatbuffers::EndianScalar(_arriveTangent)),
-        leaveTangent_(flatbuffers::EndianScalar(_leaveTangent)),
+        arrive_tangent_(flatbuffers::EndianScalar(_arrive_tangent)),
+        leave_tangent_(flatbuffers::EndianScalar(_leave_tangent)),
         interpolationMode_(flatbuffers::EndianScalar(static_cast<uint8_t>(_interpolationMode))),
         padding0__(0),
         padding1__(0) {
@@ -1152,17 +1152,17 @@ MANUALLY_ALIGNED_STRUCT(4) AnimCurveKeyFb FLATBUFFERS_FINAL_CLASS {
   void mutate_value(float _value) {
     flatbuffers::WriteScalar(&value_, _value);
   }
-  float arriveTangent() const {
-    return flatbuffers::EndianScalar(arriveTangent_);
+  float arrive_tangent() const {
+    return flatbuffers::EndianScalar(arrive_tangent_);
   }
-  void mutate_arriveTangent(float _arriveTangent) {
-    flatbuffers::WriteScalar(&arriveTangent_, _arriveTangent);
+  void mutate_arrive_tangent(float _arrive_tangent) {
+    flatbuffers::WriteScalar(&arrive_tangent_, _arrive_tangent);
   }
-  float leaveTangent() const {
-    return flatbuffers::EndianScalar(leaveTangent_);
+  float leave_tangent() const {
+    return flatbuffers::EndianScalar(leave_tangent_);
   }
-  void mutate_leaveTangent(float _leaveTangent) {
-    flatbuffers::WriteScalar(&leaveTangent_, _leaveTangent);
+  void mutate_leave_tangent(float _leave_tangent) {
+    flatbuffers::WriteScalar(&leave_tangent_, _leave_tangent);
   }
   EInterpolationModeFb interpolationMode() const {
     return static_cast<EInterpolationModeFb>(flatbuffers::EndianScalar(interpolationMode_));
