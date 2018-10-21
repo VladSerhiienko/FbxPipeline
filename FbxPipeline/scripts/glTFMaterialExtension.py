@@ -285,7 +285,7 @@ def gltf_export_materials(state, gltf_path):
                 state.materials[material_index] = material
 
         for overrided_material in overrided_materials:
-            overrided_material.id = state.materials.size()
+            overrided_material.id = len(state.materials)
             state.materials.append(overrided_material)
 
     else:
