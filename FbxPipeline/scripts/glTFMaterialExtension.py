@@ -248,7 +248,7 @@ def gltf_export_materials(state, gltf_path):
             return
 
         gltf_texture_index_to_texture_index = sync_textures(state, gltf_json)
-        overrided_materials = list()
+        # overrided_materials = list()
 
         for gltf_material_json in gltf_materials_json:
             gltf_material_name = gltf_material_json["name"]
@@ -279,14 +279,14 @@ def gltf_export_materials(state, gltf_path):
 
             if material_index != -1:
                 FbxPipeline.log_info("gltf material \"{}\" found.".format(gltf_material_name))
-                overrided_materials.append(state.materials[material_index])
+                # overrided_materials.append(state.materials[material_index])
                 material = gltf_material_json_to_material(state, gltf_material_json, gltf_texture_index_to_texture_index)
                 material.id = material_index
                 state.materials[material_index] = material
 
-        for overrided_material in overrided_materials:
-            overrided_material.id = len(state.materials)
-            state.materials.append(overrided_material)
+        # for overrided_material in overrided_materials:
+        #     overrided_material.id = len(state.materials)
+        #     state.materials.append(overrided_material)
 
     else:
         FbxPipeline.log_error("Path {} does not point to file or not a .gltf file.".format(gltf_path))

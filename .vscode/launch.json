@@ -10,10 +10,18 @@
             "request": "launch",
             "program": "${workspaceFolder}/build_darwin_x86_64_appleclang/FbxPipelineLauncher",
             "args": [
-                "-i", "/Users/vlad.serhiienko/Projects/Home/Models/boxes_animation_from_3dsmax18.FBX",
-                "-o", "/Users/vlad.serhiienko/Projects/Home/Models/boxes_animation_from_3dsmax18.fbxp",
-                "-l", "/Users/vlad.serhiienko/Projects/Home/Models/Logs/boxes_animation_from_3dsmax18.txt",
-                "--resample-framerate", "0",
+                // "-i", "/Users/vlad.serhiienko/Projects/Home/Models/boxes_animation_from_3dsmax18.FBX",
+                // "-o", "/Users/vlad.serhiienko/Projects/Home/Models/boxes_animation_from_3dsmax18.fbxp",
+                // "-l", "/Users/vlad.serhiienko/Projects/Home/Models/Logs/boxes_animation_from_3dsmax18.txt",
+                // "--resample-framerate", "0",
+
+                "-i",               "/Users/vlad.serhiienko/Projects/Home/Models/bristleback-dota-fan-art/source/bristleback-dota-fan-art.fbx",
+                "-o",               "/Users/vlad.serhiienko/Projects/Home/Models/FbxPipeline/bristleback.fbxp",
+                "-l",               "/Users/vlad.serhiienko/Projects/Home/Models/Logs/bristleback.txt",
+                "-e",               "/Users/vlad.serhiienko/Projects/Home/Models/bristleback-dota-fan-art/**",
+                "--script-file",    "glTFMaterialExtension.py",
+                "--script-input",   "/Users/vlad.serhiienko/Projects/Home/Models/bristleback-dota-fan-art/scene.gltf"
+
                 // "-i", "/Users/vlad.serhiienko/Projects/Home/Models/rainier-ak-3d/source/rainier-ak-3d.fbx",
                 // "-o", "/Users/vlad.serhiienko/Projects/Home/Models/FbxPipeline/rainier-ak-3d.fbxp",
                 // "-l", "/Users/vlad.serhiienko/Projects/Home/Models/Logs/rainier-ak-3d.txt",

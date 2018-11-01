@@ -69,6 +69,7 @@
                 "utility": "cpp",
                 "valarray": "cpp"
         },
+        "python.linting.enabled": false,
         
         // Controls the font family.
         // "editor.fontFamily": "'Ubuntu Mono'"

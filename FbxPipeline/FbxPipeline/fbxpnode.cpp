@@ -19,7 +19,6 @@ void ExportNodeAttributes( FbxNode* node, apemode::Node& n ) {
 
     ExportTransform( node, n );
     ExportAnimation( node, n );
-    ExportMesh( node, n, s.options[ "p" ].as< bool >( ), s.options[ "t" ].as< bool >( ) );
     ExportMaterials( node, n );
     ExportCamera( node, n );
     ExportLight( node, n );
@@ -58,6 +57,21 @@ uint32_t ExportNode( FbxNode* node ) {
 
     s.console->info( "Node {} is hidden", node->GetName( ) );
     return uint32_t( -1 );
+}
+
+void ExportMeshes( FbxNode* pFbxNode ) {
+    auto& s = apemode::State::Get( );
+
+    uint32_t nodeId = s.nodeDict[ pFbxNode->GetUniqueID( ) ];
+    apemode::Node& node = s.nodes[ nodeId ];
+    assert( node.fbxId == pFbxNode->GetUniqueID( ) );
+
+    ExportMesh( pFbxNode, node, s.options[ "p" ].as< bool >( ), s.options[ "t" ].as< bool >( ) );
+    if ( auto c = pFbxNode->GetChildCount( ) ) {
+        for ( auto i = 0; i < c; ++i ) {
+            ExportMeshes( pFbxNode->GetChild( i ) );
+        }
+    }
 }
 
 /**
@@ -172,20 +186,21 @@ void PreprocessAnimation( FbxScene* pScene ) {
 
 FBXPIPELINE_API void ExportScene( FbxScene* scene ) {
     auto& s = apemode::State::Get( );
-
-    PreprocessMeshes( scene );
-    PreprocessAnimation( scene );
+    InitializeSeachLocations( );
 
     // Pre-allocate nodes and attributes.
     s.nodes.reserve( (size_t) scene->GetNodeCount( ) );
     s.meshes.reserve( (size_t) scene->GetNodeCount( ) );
-
-    InitializeSeachLocations( );
 
     // We want shared materials, so export all the scene material first
     // and reference them from the node scope by their indices.
     ExportMaterials( scene );
 
     // Export nodes recursively.
+    PreprocessAnimation( scene );
     ExportNode( scene->GetRootNode( ) );
+
+    // Export meshes.
+    PreprocessMeshes( scene );
+    ExportMeshes( scene->GetRootNode( ) );
 }

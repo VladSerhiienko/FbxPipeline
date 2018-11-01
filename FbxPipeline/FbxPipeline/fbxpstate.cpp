@@ -378,26 +378,12 @@ bool apemode::State::Finalize( ) {
     //
 
     console->info( "> Skins" );
-    std::vector< uint32_t > tempLinkIndices;
     std::vector< flatbuffers::Offset< apemodefb::SkinFb > > skinOffsets;
     skinOffsets.reserve( skins.size( ) );
 
     std::transform( skins.begin( ), skins.end( ), std::back_inserter( skinOffsets ), [&]( const Skin& skin ) {
-        tempLinkIndices.clear( );
-        tempLinkIndices.reserve( skin.linkFbxIds.size( ) );
-
-        std::transform( skin.linkFbxIds.begin( ),
-                        skin.linkFbxIds.end( ),
-                        std::back_inserter( tempLinkIndices ),
-                        [&]( const uint64_t linkFbxId ) {
-                            auto nodeDictIt = nodeDict.find( linkFbxId );
-                            assert( nodeDictIt != nodeDict.end( ) );
-                            return nodeDictIt->second;
-                        } );
-
-        console->info( "+ link ids: {} ", skin.linkFbxIds.size( ) );
-
-        return apemodefb::CreateSkinFb( builder, skin.nameId, builder.CreateVector( tempLinkIndices ) );
+        console->info( "+ link ids: {} ", skin.linkIds.size( ) );
+        return apemodefb::CreateSkinFb( builder, skin.nameId, builder.CreateVector( skin.linkIds ) );
     } );
 
     auto skinsOffset = builder.CreateVector( skinOffsets );

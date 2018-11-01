@@ -176,6 +176,8 @@ endif ()
 set (CMAKE_CXX_STANDARD 11)
 if (WIN32)
     set(CONFIGURATION_SUFFIX "/$(Configuration)")
+elseif (APPLE)
+    set(CONFIGURATION_SUFFIX "/$CONFIGURATION")
 else()
     set(CONFIGURATION_SUFFIX "")
     add_definitions("-g")
@@ -272,7 +274,15 @@ foreach( fbxpipeline_script ${fbxpipeline_scripts} )
         POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
         ${fbxpipeline_script}
-        ${CMAKE_BINARY_DIR}${CONFIGURATION_SUFFIX}
+        ${CMAKE_BINARY_DIR}/Debug
+    )
+    add_custom_command(
+        TARGET
+        FbxPipeline
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${fbxpipeline_script}
+        ${CMAKE_BINARY_DIR}/Release
     )
 endforeach()
 
@@ -324,8 +334,8 @@ if (WIN32)
 elseif(APPLE)
     set(
         third_party_libs
-        ${zlib_binary_dir}/libz.a
-        ${flatbuffers_binary_dir}/libflatbuffers.a
+        ${zlib_binary_dir}${CONFIGURATION_SUFFIX}/libz.a
+        ${flatbuffers_binary_dir}${CONFIGURATION_SUFFIX}/libflatbuffers.a
         ${PYTHON_LIBRARY}
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}

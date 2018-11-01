@@ -47,7 +47,7 @@ void RunExtensionsOnFinalize( ) {
         for ( auto& scriptFile : scriptFiles ) {
             if ( FileExtension( scriptFile.c_str( ) ) == ".py" ) {
                 if ( ReadTxtFile( scriptFile.c_str( ), pythonFileContent, true ) ) {
-                    try {
+                    try { 
 
                         s.console->info( "Executing python script \"{}\" (size: {}) ... ", scriptFile, ToPrettySizeString( scriptFile.size( ) ) );
                         py::exec( pythonFileContent.c_str( ), py::globals() );

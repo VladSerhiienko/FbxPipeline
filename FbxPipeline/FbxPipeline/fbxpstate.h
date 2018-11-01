@@ -25,7 +25,7 @@ namespace apemode {
 
     struct FBXPIPELINE_API Skin {
         uint32_t                nameId = (uint64_t) 0;
-        std::vector< uint64_t > linkFbxIds;
+        std::vector< uint32_t > linkIds;
     };
 
     /**

@@ -543,24 +543,23 @@ struct StaticSkinnedVertex {
 };
 
 using BoneWeightType = float;
-using BoneIndexType = uint16_t;
-static const BoneIndexType sInvalidIndex = std::numeric_limits< BoneIndexType >::max( );
+static const uint32_t sInvalidIndex = uint32_t( -1 );
 
-enum EBoneCountPerControlPoint : BoneIndexType {
+enum EBoneCountPerControlPoint : uint32_t {
     eBoneCountPerControlPoint_4 = 4,
     eBoneCountPerControlPoint_8 = 8,
 };
 
-template < BoneIndexType TBoneCountPerControlPoint = eBoneCountPerControlPoint_4 >
+template < uint32_t TBoneCountPerControlPoint = eBoneCountPerControlPoint_4 >
 struct TControlPointSkinInfo {
 
-    static const BoneIndexType kBoneCountPerControlPoint = TBoneCountPerControlPoint;
+    static const uint32_t kBoneCountPerControlPoint = TBoneCountPerControlPoint;
 
     BoneWeightType weights[ kBoneCountPerControlPoint ];
-    BoneIndexType  indices[ kBoneCountPerControlPoint ];
+    uint32_t       indices[ kBoneCountPerControlPoint ];
 
     TControlPointSkinInfo( ) {
-        for ( BoneIndexType i = 0; i < kBoneCountPerControlPoint; ++i ) {
+        for ( uint32_t i = 0; i < kBoneCountPerControlPoint; ++i ) {
             weights[ i ] = 0.0f;
             indices[ i ] = sInvalidIndex;
         }
@@ -571,9 +570,9 @@ struct TControlPointSkinInfo {
      * @param index Bone index.
      * @return true of the bone was added, false otherwise.
      **/
-    bool AddBone( float weight, uint16_t index ) {
+    bool AddBone( float weight, uint32_t index ) {
 
-        for ( BoneIndexType i = 0; i < kBoneCountPerControlPoint; ++i ) {
+        for ( uint32_t i = 0; i < kBoneCountPerControlPoint; ++i ) {
             if ( indices[ i ] == sInvalidIndex ) {
                 weights[ i ] = weight;
                 indices[ i ] = index;
@@ -581,12 +580,20 @@ struct TControlPointSkinInfo {
             }
         }
 
-        for ( BoneIndexType i = 0; i < kBoneCountPerControlPoint; ++i ) {
-            if ( weights[ i ] < weight ) {
-                weights[ i ] = weight;
-                indices[ i ] = index;
-                return true;
+        uint32_t minIndex = 0;
+        float minWeight = weights[ 0 ];
+
+        for ( uint32_t i = 1; i < kBoneCountPerControlPoint; ++i ) {
+            if ( weights[ i ] < minWeight ) {
+                minIndex  = i;
+                minWeight = weights[ i ];
             }
+        }
+
+        if ( minWeight < weight ) {
+            weights[ minIndex ] = weight;
+            indices[ minIndex ] = index;
+            return true;
         }
 
         return false;
@@ -596,23 +603,25 @@ struct TControlPointSkinInfo {
      * @note Ensures the sum fo the weights is exactly one.
      *       Ensures the indices are valid (vertex packing will get zero or positive bone index).
      **/
-    void NormalizeWeights( ) {
-        for ( BoneIndexType i = 0; i < kBoneCountPerControlPoint; ++i ) {
+    void NormalizeWeights( uint32_t defaultIndex ) {
+        for ( uint32_t i = 0; i < kBoneCountPerControlPoint; ++i ) {
             if ( indices[ i ] == sInvalidIndex ) {
                 assert( 0.0f == weights[ i ] );
-                indices[ i ] = 0;
+                indices[ i ] = defaultIndex;
             }
         }
 
+        #if 0
         BoneWeightType totalWeight = BoneWeightType( 0 );
 
-        for ( BoneIndexType i = 0; i < kBoneCountPerControlPoint; ++i ) {
+        for ( uint32_t i = 0; i < kBoneCountPerControlPoint; ++i ) {
             totalWeight += weights[ i ];
         }
 
-        for ( BoneIndexType i = 0; i < kBoneCountPerControlPoint; ++i ) {
+        for ( uint32_t i = 0; i < kBoneCountPerControlPoint; ++i ) {
             weights[ i ] /= totalWeight;
         }
+        #endif
     }
 };
 
@@ -833,7 +842,7 @@ void ExportMesh( FbxNode*       pNode,
         s.skins.emplace_back( );
         auto& skin = s.skins.back( );
         skin.nameId = s.PushValue( pSkin->GetName( ) );
-        skin.linkFbxIds.reserve( clusterCount );
+        skin.linkIds.reserve( clusterCount );
 
         for ( auto i = 0; i < clusterCount; ++i ) {
 
@@ -851,12 +860,16 @@ void ExportMesh( FbxNode*       pNode,
             assert( nullptr != pWeights );
             assert( nullptr != pIndices );
 
+            assert( s.nodeDict.find( pCluster->GetLink( )->GetUniqueID( ) ) != s.nodeDict.end( ) );
+            const uint32_t linkNodeId = s.nodeDict[ pCluster->GetLink( )->GetUniqueID( ) ];
+
             for ( int j = 0; j < indexCount; ++j ) {
                 /* Assign bone (weight + index) for the control point. */
-                skinInfos[ pIndices[ j ] ].AddBone( (BoneWeightType) pWeights[ j ], (BoneIndexType) i );
+                skinInfos[ pIndices[ j ] ].AddBone( (BoneWeightType) pWeights[ j ], i );
+                // skinInfos[ pIndices[ j ] ].AddBone( (BoneWeightType) pWeights[ j ], linkNodeId );
             }
 
-            skin.linkFbxIds.push_back( pCluster->GetLink( )->GetUniqueID( ) );
+            skin.linkIds.push_back( linkNodeId );
 
             /* TODO: The bind pose matrix must be calculated in the application. */
 
@@ -884,6 +897,7 @@ void ExportMesh( FbxNode*       pNode,
                                                                              */
         }
 
+        #if 0
         std::set< BoneIndexType > uniqueUsedIndices;
 
         if ( pack ) {
@@ -965,16 +979,17 @@ void ExportMesh( FbxNode*       pNode,
                 }
             }
         }
+        #endif
 
         /* Normalize bone weights for each control point. */
 
         for ( auto& skinInfo : skinInfos ) {
-            skinInfo.NormalizeWeights( );
+            skinInfo.NormalizeWeights( 0 );
         }
 
         auto pSkinnedVertices = reinterpret_cast< StaticSkinnedVertex* >( m.vertices.data( ) );
         InitializeVertices( pMesh, m, pSkinnedVertices, vertexCount, positionMin, positionMax, texcoordMin, texcoordMax );
-
+ч
         /* Copy bone weights and indices to each skinned vertex. */
 
         uint32_t vertexIndex = 0;
@@ -982,7 +997,8 @@ void ExportMesh( FbxNode*       pNode,
             for ( const int polygonVertexIndex : {0, 1, 2} ) {
 
                 const int controlPointIndex = pMesh->GetPolygonVertex( polygonIndex, polygonVertexIndex );
-                for ( BoneIndexType b = 0; b < ControlPointSkinInfo::kBoneCountPerControlPoint; ++b ) {
+                for ( uint32_t b = 0; b < ControlPointSkinInfo::kBoneCountPerControlPoint; ++b ) {
+                    assert( skinInfos[ controlPointIndex ].indices[ b ] < skin.linkIds.size( ) );
                     pSkinnedVertices[ vertexIndex ].weights[ b ] = (float) skinInfos[ controlPointIndex ].weights[ b ];
                     pSkinnedVertices[ vertexIndex ].indices[ b ] = (float) skinInfos[ controlPointIndex ].indices[ b ];
                 }
