@@ -989,7 +989,7 @@ void ExportMesh( FbxNode*       pNode,
 
         auto pSkinnedVertices = reinterpret_cast< StaticSkinnedVertex* >( m.vertices.data( ) );
         InitializeVertices( pMesh, m, pSkinnedVertices, vertexCount, positionMin, positionMax, texcoordMin, texcoordMax );
-ч
+
         /* Copy bone weights and indices to each skinned vertex. */
 
         uint32_t vertexIndex = 0;
