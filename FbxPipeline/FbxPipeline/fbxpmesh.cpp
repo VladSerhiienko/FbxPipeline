@@ -655,6 +655,7 @@ struct TControlPointSkinInfo {
 
 static_assert( sizeof( StaticVertex ) == sizeof( apemodefb::StaticVertexFb ), "Must match" );
 static_assert( sizeof( StaticSkinnedVertex ) == sizeof( apemodefb::StaticSkinnedVertexFb ), "Must match" );
+static_assert( sizeof( StaticSkinned8Vertex ) == sizeof( apemodefb::StaticSkinned8VertexFb ), "Must match" );
 
 
 /**
@@ -1070,6 +1071,7 @@ void ExportMesh( FbxNode*       pNode,
                 }
             }
         } else {
+
             eVertexFmt   = apemodefb::EVertexFormatFb_StaticSkinned;
             vertexStride = skinnedVertexStride;
 
