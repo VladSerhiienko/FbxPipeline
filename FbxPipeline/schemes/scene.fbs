@@ -2,7 +2,7 @@
 namespace apemodefb;
 
 enum EVersionFb : ubyte {
-    Value = 6
+    Value = 7
 }
 
 enum ECullingTypeFb : ubyte
@@ -60,6 +60,7 @@ enum EPlanarMappingNormalFb : ubyte {
 enum EVertexFormatFb : ubyte {
     Static,
     StaticSkinned,
+    StaticSkinned8,
 	Packed,
 	PackedSkinned,
 }
@@ -173,6 +174,17 @@ struct StaticSkinnedVertexFb {
     uv : Vec2Fb;
     weights : Vec4Fb;
     indices : Vec4Fb;
+}
+
+struct StaticSkinned8VertexFb {
+    position : Vec3Fb;
+    normal : Vec3Fb;
+    tangent : Vec4Fb;
+    uv : Vec2Fb;
+    weights_0 : Vec4Fb;
+    weights_1 : Vec4Fb;
+    indices_0 : Vec4Fb;
+    indices_1 : Vec4Fb;
 }
 
 struct PackedSkinnedVertexFb {

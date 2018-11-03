@@ -22,6 +22,8 @@ struct PackedVertexFb;
 
 struct StaticSkinnedVertexFb;
 
+struct StaticSkinned8VertexFb;
+
 struct PackedSkinnedVertexFb;
 
 struct AnimStackFb;
@@ -61,7 +63,7 @@ struct FileFb;
 struct SceneFb;
 
 enum EVersionFb {
-  EVersionFb_Value = 6,
+  EVersionFb_Value = 7,
   EVersionFb_MIN = EVersionFb_Value,
   EVersionFb_MAX = EVersionFb_Value
 };
@@ -340,16 +342,18 @@ inline const char *EnumNameEPlanarMappingNormalFb(EPlanarMappingNormalFb e) {
 enum EVertexFormatFb {
   EVertexFormatFb_Static = 0,
   EVertexFormatFb_StaticSkinned = 1,
-  EVertexFormatFb_Packed = 2,
-  EVertexFormatFb_PackedSkinned = 3,
+  EVertexFormatFb_StaticSkinned8 = 2,
+  EVertexFormatFb_Packed = 3,
+  EVertexFormatFb_PackedSkinned = 4,
   EVertexFormatFb_MIN = EVertexFormatFb_Static,
   EVertexFormatFb_MAX = EVertexFormatFb_PackedSkinned
 };
 
-inline EVertexFormatFb (&EnumValuesEVertexFormatFb())[4] {
+inline EVertexFormatFb (&EnumValuesEVertexFormatFb())[5] {
   static EVertexFormatFb values[] = {
     EVertexFormatFb_Static,
     EVertexFormatFb_StaticSkinned,
+    EVertexFormatFb_StaticSkinned8,
     EVertexFormatFb_Packed,
     EVertexFormatFb_PackedSkinned
   };
@@ -360,6 +364,7 @@ inline const char **EnumNamesEVertexFormatFb() {
   static const char *names[] = {
     "Static",
     "StaticSkinned",
+    "StaticSkinned8",
     "Packed",
     "PackedSkinned",
     nullptr
@@ -978,6 +983,82 @@ MANUALLY_ALIGNED_STRUCT(4) StaticSkinnedVertexFb FLATBUFFERS_FINAL_CLASS {
   }
 };
 STRUCT_END(StaticSkinnedVertexFb, 80);
+
+MANUALLY_ALIGNED_STRUCT(4) StaticSkinned8VertexFb FLATBUFFERS_FINAL_CLASS {
+ private:
+  Vec3Fb position_;
+  Vec3Fb normal_;
+  Vec4Fb tangent_;
+  Vec2Fb uv_;
+  Vec4Fb weights_0_;
+  Vec4Fb weights_1_;
+  Vec4Fb indices_0_;
+  Vec4Fb indices_1_;
+
+ public:
+  StaticSkinned8VertexFb() {
+    memset(this, 0, sizeof(StaticSkinned8VertexFb));
+  }
+  StaticSkinned8VertexFb(const Vec3Fb &_position, const Vec3Fb &_normal, const Vec4Fb &_tangent, const Vec2Fb &_uv, const Vec4Fb &_weights_0, const Vec4Fb &_weights_1, const Vec4Fb &_indices_0, const Vec4Fb &_indices_1)
+      : position_(_position),
+        normal_(_normal),
+        tangent_(_tangent),
+        uv_(_uv),
+        weights_0_(_weights_0),
+        weights_1_(_weights_1),
+        indices_0_(_indices_0),
+        indices_1_(_indices_1) {
+  }
+  const Vec3Fb &position() const {
+    return position_;
+  }
+  Vec3Fb &mutable_position() {
+    return position_;
+  }
+  const Vec3Fb &normal() const {
+    return normal_;
+  }
+  Vec3Fb &mutable_normal() {
+    return normal_;
+  }
+  const Vec4Fb &tangent() const {
+    return tangent_;
+  }
+  Vec4Fb &mutable_tangent() {
+    return tangent_;
+  }
+  const Vec2Fb &uv() const {
+    return uv_;
+  }
+  Vec2Fb &mutable_uv() {
+    return uv_;
+  }
+  const Vec4Fb &weights_0() const {
+    return weights_0_;
+  }
+  Vec4Fb &mutable_weights_0() {
+    return weights_0_;
+  }
+  const Vec4Fb &weights_1() const {
+    return weights_1_;
+  }
+  Vec4Fb &mutable_weights_1() {
+    return weights_1_;
+  }
+  const Vec4Fb &indices_0() const {
+    return indices_0_;
+  }
+  Vec4Fb &mutable_indices_0() {
+    return indices_0_;
+  }
+  const Vec4Fb &indices_1() const {
+    return indices_1_;
+  }
+  Vec4Fb &mutable_indices_1() {
+    return indices_1_;
+  }
+};
+STRUCT_END(StaticSkinned8VertexFb, 112);
 
 MANUALLY_ALIGNED_STRUCT(4) PackedSkinnedVertexFb FLATBUFFERS_FINAL_CLASS {
  private:

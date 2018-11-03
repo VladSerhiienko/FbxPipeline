@@ -9,6 +9,7 @@ message(STATUS "CMAKE_SYSTEM_PROCESSOR = ${CMAKE_SYSTEM_PROCESSOR}")
 message(STATUS "CMAKE_SYSTEM = ${CMAKE_SYSTEM}")
 message(STATUS "CMAKE_SOURCE_DIR = ${CMAKE_SOURCE_DIR}")
 message(STATUS "CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}")
+message(STATUS "CMAKE_GENERATOR = ${CMAKE_GENERATOR}")
 
 set(BUILD_FOLDER_SUFFIX "build_${CMAKE_SYSTEM_NAME}_${CMAKE_SYSTEM_PROCESSOR}_${CMAKE_CXX_COMPILER_ID}")
 string(TOLOWER  ${BUILD_FOLDER_SUFFIX} BUILD_FOLDER_SUFFIX)
@@ -176,8 +177,10 @@ endif ()
 set (CMAKE_CXX_STANDARD 11)
 if (WIN32)
     set(CONFIGURATION_SUFFIX "/$(Configuration)")
-elseif (APPLE)
-    set(CONFIGURATION_SUFFIX "/$CONFIGURATION")
+elseif (APPLE AND "${CMAKE_GENERATOR}" STREQUAL "Xcode")
+    set(CONFIGURATION_SUFFIX "/Debug")
+    # TOFIX
+    # set(CONFIGURATION_SUFFIX "/$CONFIGURATION")
 else()
     set(CONFIGURATION_SUFFIX "")
     add_definitions("-g")
@@ -190,6 +193,16 @@ if (WIN32)
         COMMAND ${flatbuffers_binary_dir}${CONFIGURATION_SUFFIX}/flatc.exe -o ${CMAKE_SOURCE_DIR}/FbxPipeline/generated -c ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs --gen-mutable
         COMMAND ${flatbuffers_binary_dir}${CONFIGURATION_SUFFIX}/flatc.exe -o ${CMAKE_SOURCE_DIR}/FbxPipeline/generated -s ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs --gen-mutable
         COMMAND ${flatbuffers_binary_dir}${CONFIGURATION_SUFFIX}/flatc.exe -o ${CMAKE_SOURCE_DIR}/FbxPipeline/generated -p ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs --gen-mutable
+        COMMENT "Generating Headers From Schemes"
+        VERBATIM
+    )
+elseif (APPLE)
+    add_custom_command(
+        OUTPUT ${CMAKE_SOURCE_DIR}/FbxPipeline/generated/scene_generated.h
+        DEPENDS ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs
+        COMMAND ${flatbuffers_binary_dir}${CONFIGURATION_SUFFIX}/flatc -o ${CMAKE_SOURCE_DIR}/FbxPipeline/generated -c ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs --gen-mutable
+        COMMAND ${flatbuffers_binary_dir}${CONFIGURATION_SUFFIX}/flatc -o ${CMAKE_SOURCE_DIR}/FbxPipeline/generated -s ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs --gen-mutable
+        COMMAND ${flatbuffers_binary_dir}${CONFIGURATION_SUFFIX}/flatc -o ${CMAKE_SOURCE_DIR}/FbxPipeline/generated -p ${CMAKE_SOURCE_DIR}/FbxPipeline/schemes/scene.fbs --gen-mutable
         COMMENT "Generating Headers From Schemes"
         VERBATIM
     )

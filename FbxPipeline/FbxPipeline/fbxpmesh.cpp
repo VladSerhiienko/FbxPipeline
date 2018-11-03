@@ -2,6 +2,7 @@
 #include <fbxpstate.h>
 #include <fbxpnorm.h>
 #include <map>
+#include <array>
 
 /**
  * Helper function to calculate tangents when the tangent element layer is missing.
@@ -542,21 +543,36 @@ struct StaticSkinnedVertex {
     float indices[ 4 ];
 };
 
-using BoneWeightType = float;
+/**
+ * Helper structure to assign vertex property values
+ **/
+struct StaticSkinned8Vertex {
+    float position[ 3 ];
+    float normal[ 3 ];
+    float tangent[ 4 ];
+    float texCoords[ 2 ];
+    float weights_0[ 4 ];
+    float weights_1[ 4 ];
+    float indices_0[ 4 ];
+    float indices_1[ 4 ];
+};
+
 static const uint32_t sInvalidIndex = uint32_t( -1 );
 
 enum EBoneCountPerControlPoint : uint32_t {
     eBoneCountPerControlPoint_4 = 4,
     eBoneCountPerControlPoint_8 = 8,
+    eBoneCountPerControlPoint_16 = 16,
+    eMaxBoneCountPerControlPoint = eBoneCountPerControlPoint_16,
 };
 
-template < uint32_t TBoneCountPerControlPoint = eBoneCountPerControlPoint_4 >
+template < uint32_t TBoneCountPerControlPoint = eMaxBoneCountPerControlPoint >
 struct TControlPointSkinInfo {
 
     static const uint32_t kBoneCountPerControlPoint = TBoneCountPerControlPoint;
 
-    BoneWeightType weights[ kBoneCountPerControlPoint ];
-    uint32_t       indices[ kBoneCountPerControlPoint ];
+    std::array< float, kBoneCountPerControlPoint >    weights;
+    std::array< uint32_t, kBoneCountPerControlPoint > indices;
 
     TControlPointSkinInfo( ) {
         for ( uint32_t i = 0; i < kBoneCountPerControlPoint; ++i ) {
@@ -598,6 +614,14 @@ struct TControlPointSkinInfo {
 
         return false;
     }
+    
+    uint32_t GetUsedSlotCount() {
+        uint32_t usedSlotCount = 0;
+        for ( uint32_t i = 0; i < kBoneCountPerControlPoint; ++i ) {
+            usedSlotCount += ( indices[ i ] != sInvalidIndex );
+        }
+        return usedSlotCount;
+    }
 
     /** Prepares assigned bones for GPU skinning.
      * @note Ensures the sum fo the weights is exactly one.
@@ -612,7 +636,7 @@ struct TControlPointSkinInfo {
         }
 
         #if 0
-        BoneWeightType totalWeight = BoneWeightType( 0 );
+        float totalWeight = float( 0 );
 
         for ( uint32_t i = 0; i < kBoneCountPerControlPoint; ++i ) {
             totalWeight += weights[ i ];
@@ -792,10 +816,12 @@ void ExportMesh( FbxNode*       pNode,
 
     auto& s = apemode::State::Get( );
 
-    const uint16_t vertexStride                  = (uint16_t) sizeof( apemodefb::StaticVertexFb );
-    const uint32_t vertexBufferSize              = vertexCount * vertexStride;
+    const uint16_t staticVertexStride            = (uint16_t) sizeof( apemodefb::StaticVertexFb );
+    const uint32_t staticVertexBufferSize        = vertexCount * staticVertexStride;
     const uint16_t skinnedVertexStride           = (uint16_t) sizeof( apemodefb::StaticSkinnedVertexFb );
     const uint32_t skinnedVertexBufferSize       = vertexCount * skinnedVertexStride;
+    const uint16_t skinnedVertex8Stride          = (uint16_t) sizeof( apemodefb::StaticSkinned8VertexFb );
+    const uint32_t skinnedVertex8BufferSize      = vertexCount * skinnedVertex8Stride;
     const uint16_t packedVertexStride            = (uint16_t) sizeof( apemodefb::PackedVertexFb );
     const uint32_t packedVertexBufferSize        = vertexCount * packedVertexStride;
     const uint16_t packedSkinnedVertexStride     = (uint16_t) sizeof( apemodefb::PackedSkinnedVertexFb );
@@ -805,9 +831,14 @@ void ExportMesh( FbxNode*       pNode,
     mathfu::vec3 positionMax;
     mathfu::vec2 texcoordMin;
     mathfu::vec2 texcoordMax;
+    apemodefb::EVertexFormatFb eVertexFmt;
+    uint32_t vertexStride;
 
     if ( nullptr == pSkin ) {
-        m.vertices.resize( vertexBufferSize );
+        eVertexFmt = apemodefb::EVertexFormatFb_Static;
+        vertexStride = staticVertexStride;
+        
+        m.vertices.resize( staticVertexBufferSize );
         InitializeVertices( pMesh,
                             m,
                             reinterpret_cast< StaticVertex* >( m.vertices.data( ) ),
@@ -817,7 +848,6 @@ void ExportMesh( FbxNode*       pNode,
                             texcoordMin,
                             texcoordMax );
     } else {
-        m.vertices.resize( skinnedVertexBufferSize );
 
         /* Currently stick to 4 bones per vertex. */
         using ControlPointSkinInfo = TControlPointSkinInfo<>;
@@ -844,32 +874,33 @@ void ExportMesh( FbxNode*       pNode,
         skin.nameId = s.PushValue( pSkin->GetName( ) );
         skin.linkIds.reserve( clusterCount );
 
+        s.console->info( "\t Skin has {} clusters", clusterCount );
+
         for ( auto i = 0; i < clusterCount; ++i ) {
 
+            assert( i < clusterCount );
             const auto pCluster = pSkin->GetCluster( i );
-            assert( nullptr != pCluster );
+            assert( pCluster );
 
-            const auto indexCount = pCluster->GetControlPointIndicesCount( );
-            const auto pWeights = pCluster->GetControlPointWeights( );
-            const auto pIndices = pCluster->GetControlPointIndices( );
+            if ( const auto indexCount = pCluster->GetControlPointIndicesCount( ) ) {
+                assert( s.nodeDict.find( pCluster->GetLink( )->GetUniqueID( ) ) != s.nodeDict.end( ) );
+                const uint32_t linkNodeId = s.nodeDict[ pCluster->GetLink( )->GetUniqueID( ) ];
+                
+                const auto pWeights = pCluster->GetControlPointWeights( );
+                const auto pIndices = pCluster->GetControlPointIndices( );
+                
+                s.console->info( "\t Cluster #{} influences {} point(s)", i, indexCount );
 
-            if (!indexCount)
-                continue;
+                uint32_t boneIndex = skin.linkIds.size();
+                skin.linkIds.push_back( linkNodeId );
 
-            assert( 0 != indexCount );
-            assert( nullptr != pWeights );
-            assert( nullptr != pIndices );
-
-            assert( s.nodeDict.find( pCluster->GetLink( )->GetUniqueID( ) ) != s.nodeDict.end( ) );
-            const uint32_t linkNodeId = s.nodeDict[ pCluster->GetLink( )->GetUniqueID( ) ];
-
-            for ( int j = 0; j < indexCount; ++j ) {
-                /* Assign bone (weight + index) for the control point. */
-                skinInfos[ pIndices[ j ] ].AddBone( (BoneWeightType) pWeights[ j ], i );
-                // skinInfos[ pIndices[ j ] ].AddBone( (BoneWeightType) pWeights[ j ], linkNodeId );
+                for ( int j = 0; j < indexCount; ++j ) {
+                    /* Assign bone (weight + index) for the control point. */
+                    assert( pIndices[ j ] < pMesh->GetControlPointsCount( ) );
+                    skinInfos[ pIndices[ j ] ].AddBone( (float) pWeights[ j ], boneIndex );
+                    // s.console->debug( "\t [{}] += {} ({})", pIndices[ j ], boneIndex, pWeights[ j ] );
+                }
             }
-
-            skin.linkIds.push_back( linkNodeId );
 
             /* TODO: The bind pose matrix must be calculated in the application. */
 
@@ -980,6 +1011,25 @@ void ExportMesh( FbxNode*       pNode,
             }
         }
         #endif
+        
+        /* Report about used bone slots. */
+        
+        uint32_t maxBoneCount = 4;
+        {
+            std::map<uint32_t, uint32_t> boneCountToControlPointCountMap;
+            for ( uint32_t i = 0; i < skinInfos.size(); ++i ) {
+                ++boneCountToControlPointCountMap[skinInfos[i].GetUsedSlotCount()];
+            }
+            
+            s.console->info( "Used slots:" );
+            for (auto & p : boneCountToControlPointCountMap) {
+                s.console->info( "\t {} slots <- {} points ", p.first, p.second);
+            }
+
+            maxBoneCount = std::max( boneCountToControlPointCountMap.rbegin( )->first, maxBoneCount );
+            // maxBoneCount = std::min( eBoneCountPerControlPoint_8, maxBoneCount );
+        }
+
 
         /* Normalize bone weights for each control point. */
 
@@ -987,23 +1037,63 @@ void ExportMesh( FbxNode*       pNode,
             skinInfo.NormalizeWeights( 0 );
         }
 
-        auto pSkinnedVertices = reinterpret_cast< StaticSkinnedVertex* >( m.vertices.data( ) );
-        InitializeVertices( pMesh, m, pSkinnedVertices, vertexCount, positionMin, positionMax, texcoordMin, texcoordMax );
+        if ( maxBoneCount > eBoneCountPerControlPoint_4 ) {
+            eVertexFmt   = apemodefb::EVertexFormatFb_StaticSkinned8;
+            vertexStride = skinnedVertex8Stride;
+            
+            m.vertices.resize( skinnedVertex8BufferSize );
+            auto pSkinnedVertices = reinterpret_cast< StaticSkinned8Vertex* >( m.vertices.data( ) );
+            InitializeVertices( pMesh, m, pSkinnedVertices, vertexCount, positionMin, positionMax, texcoordMin, texcoordMax );
 
-        /* Copy bone weights and indices to each skinned vertex. */
+            /* Copy bone weights and indices to each skinned vertex. */
 
-        uint32_t vertexIndex = 0;
-        for ( int polygonIndex = 0; polygonIndex < pMesh->GetPolygonCount( ); ++polygonIndex ) {
-            for ( const int polygonVertexIndex : {0, 1, 2} ) {
+            uint32_t vertexIndex = 0;
+            for ( int polygonIndex = 0; polygonIndex < pMesh->GetPolygonCount( ); ++polygonIndex ) {
+                for ( const int polygonVertexIndex : {0, 1, 2} ) {
+                    const int   controlPointIndex = pMesh->GetPolygonVertex( polygonIndex, polygonVertexIndex );
+                    const auto& weights           = skinInfos[ controlPointIndex ].weights;
+                    const auto& indices           = skinInfos[ controlPointIndex ].indices;
 
-                const int controlPointIndex = pMesh->GetPolygonVertex( polygonIndex, polygonVertexIndex );
-                for ( uint32_t b = 0; b < ControlPointSkinInfo::kBoneCountPerControlPoint; ++b ) {
-                    assert( skinInfos[ controlPointIndex ].indices[ b ] < skin.linkIds.size( ) );
-                    pSkinnedVertices[ vertexIndex ].weights[ b ] = (float) skinInfos[ controlPointIndex ].weights[ b ];
-                    pSkinnedVertices[ vertexIndex ].indices[ b ] = (float) skinInfos[ controlPointIndex ].indices[ b ];
+                    for ( uint32_t b = 0; b < eBoneCountPerControlPoint_4; ++b ) {
+                        assert( indices[ b ] < skin.linkIds.size( ) );
+                        pSkinnedVertices[ vertexIndex ].weights_0[ b ] = (float) weights[ b ];
+                        pSkinnedVertices[ vertexIndex ].indices_0[ b ] = (float) indices[ b ];
+                    }
+                    
+                    for ( uint32_t b = 0; b < eBoneCountPerControlPoint_4; ++b ) {
+                        assert( indices[ eBoneCountPerControlPoint_4 + b ] < skin.linkIds.size( ) );
+                        pSkinnedVertices[ vertexIndex ].weights_1[ b ] = (float) weights[ eBoneCountPerControlPoint_4 + b ];
+                        pSkinnedVertices[ vertexIndex ].indices_1[ b ] = (float) indices[ eBoneCountPerControlPoint_4 + b ];
+                    }
+
+                    ++vertexIndex;
                 }
+            }
+        } else {
+            eVertexFmt   = apemodefb::EVertexFormatFb_StaticSkinned;
+            vertexStride = skinnedVertexStride;
 
-                ++vertexIndex;
+            m.vertices.resize( skinnedVertexBufferSize );
+            auto pSkinnedVertices = reinterpret_cast< StaticSkinnedVertex* >( m.vertices.data( ) );
+            InitializeVertices( pMesh, m, pSkinnedVertices, vertexCount, positionMin, positionMax, texcoordMin, texcoordMax );
+
+            /* Copy bone weights and indices to each skinned vertex. */
+
+            uint32_t vertexIndex = 0;
+            for ( int polygonIndex = 0; polygonIndex < pMesh->GetPolygonCount( ); ++polygonIndex ) {
+                for ( const int polygonVertexIndex : {0, 1, 2} ) {
+                    const int controlPointIndex = pMesh->GetPolygonVertex( polygonIndex, polygonVertexIndex );
+                    const auto& weights = skinInfos[ controlPointIndex ].weights;
+                    const auto& indices = skinInfos[ controlPointIndex ].indices;
+
+                    for ( uint32_t b = 0; b < eBoneCountPerControlPoint_4; ++b ) {
+                        assert( indices[ b ] < skin.linkIds.size( ) );
+                        pSkinnedVertices[ vertexIndex ].weights[ b ] = (float) weights[ b ];
+                        pSkinnedVertices[ vertexIndex ].indices[ b ] = (float) indices[ b ];
+                    }
+
+                    ++vertexIndex;
+                }
             }
         }
     }
@@ -1057,6 +1147,7 @@ void ExportMesh( FbxNode*       pNode,
     */
 
     if ( pack ) {
+        assert(false && "Broken");
         std::vector< uint8_t > vertices( std::move( m.vertices ) );
         if ( nullptr == pSkin ) {
             m.vertices.resize( packedVertexBufferSize );
@@ -1083,6 +1174,7 @@ void ExportMesh( FbxNode*       pNode,
     apemodefb::Vec3Fb bboxMax( positionMax.x, positionMax.y, positionMax.z );
 
     if ( pack ) {
+        assert(false && "Broken");
         auto const positionScale = positionMax - positionMin;
         auto const texcoordScale = texcoordMax - texcoordMin;
         apemodefb::Vec2Fb uvMin( texcoordMin.x, texcoordMin.y );
@@ -1108,9 +1200,7 @@ void ExportMesh( FbxNode*       pNode,
                                   submeshVertexStride           // vertex stride
         );
     } else {
-        const auto submeshVertexStride = nullptr != pSkin ? skinnedVertexStride : vertexStride;
-        const auto submeshVertexFormat = nullptr != pSkin ? apemodefb::EVertexFormatFb_StaticSkinned : apemodefb::EVertexFormatFb_Static;
-
+       
         m.submeshes.emplace_back( bboxMin,                             // bbox min
                                   bboxMax,                             // bbox max
                                   apemodefb::Vec3Fb( 0.0f, 0.0f, 0.0f ), // position offset
@@ -1123,8 +1213,8 @@ void ExportMesh( FbxNode*       pNode,
                                   0,                                   // index count
                                   0,                                   // base subset
                                   (uint32_t) m.subsets.size( ),        // subset count
-                                  submeshVertexFormat,                 // vertex format
-                                  submeshVertexStride                  // vertex stride
+                                  eVertexFmt,                 // vertex format
+                                  vertexStride                  // vertex stride
         );
     }
 }

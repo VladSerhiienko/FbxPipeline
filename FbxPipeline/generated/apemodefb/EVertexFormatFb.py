@@ -5,6 +5,7 @@
 class EVertexFormatFb(object):
     Static = 0
     StaticSkinned = 1
-    Packed = 2
-    PackedSkinned = 3
+    StaticSkinned8 = 2
+    Packed = 3
+    PackedSkinned = 4
 
