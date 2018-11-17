@@ -130,7 +130,7 @@ void BezierFitterFitSamples( FbxAnimCurve* pAnimCurve,
 }
 
 void BezierFitterFitSamples( FbxAnimCurve* pAnimCurve, int keyIndex, double& OutFittedBezier1, double& OutFittedBezier2 ) {
-    assert( pAnimCurve && ( i < ( pAnimCurve->KeyGetCount( ) - 1 ) ) );
+    assert( pAnimCurve && ( keyIndex < ( pAnimCurve->KeyGetCount( ) - 1 ) ) );
 
     auto& s = apemode::State::Get( );
     if ( FbxAnimCurve* pCopiedAnimCurve = FbxAnimCurve::Create( s.manager, "[FbxPipeline-Copy]" ) ) {
