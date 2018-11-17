@@ -94,8 +94,8 @@ namespace apemode {
     struct FBXPIPELINE_API AnimCurveKey {
         float                           time;
         float                           value;
-        float                           arriveTangent;
-        float                           leaveTangent;
+        float                           bez1;
+        float                           bez2;
         apemodefb::EInterpolationModeFb interpolationMode;
     };
 
@@ -157,12 +157,7 @@ namespace apemode {
 
         std::vector< std::function< void( apemode::State*, std::string ) > > extensions;
 
-        bool forceResampling         = false;
-        float resampleFPS            = 24.0f;
-        bool  reduceKeys             = false;
-        bool  reduceConstKeys        = false;
-        bool  propertyCurveSync      = true;
-        bool  legacyTriangulationSdk = false;
+        bool legacyTriangulationSdk = false;
 
         State( );
         ~State( );

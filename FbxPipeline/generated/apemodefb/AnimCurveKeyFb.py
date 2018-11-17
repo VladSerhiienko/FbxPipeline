@@ -14,20 +14,20 @@ class AnimCurveKeyFb(object):
     # AnimCurveKeyFb
     def Time(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(0))
     # AnimCurveKeyFb
-    def Value(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(4))
+    def ValueBez0Bez3(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(4))
     # AnimCurveKeyFb
-    def ArriveTangent(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(8))
+    def Bez1(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(8))
     # AnimCurveKeyFb
-    def LeaveTangent(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(12))
+    def Bez2(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(12))
     # AnimCurveKeyFb
     def InterpolationMode(self): return self._tab.Get(flatbuffers.number_types.Uint8Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(16))
 
-def CreateAnimCurveKeyFb(builder, time, value, arriveTangent, leaveTangent, interpolationMode):
+def CreateAnimCurveKeyFb(builder, time, valueBez0Bez3, bez1, bez2, interpolationMode):
     builder.Prep(4, 20)
     builder.Pad(3)
     builder.PrependUint8(interpolationMode)
-    builder.PrependFloat32(leaveTangent)
-    builder.PrependFloat32(arriveTangent)
-    builder.PrependFloat32(value)
+    builder.PrependFloat32(bez2)
+    builder.PrependFloat32(bez1)
+    builder.PrependFloat32(valueBez0Bez3)
     builder.PrependFloat32(time)
     return builder.Offset()

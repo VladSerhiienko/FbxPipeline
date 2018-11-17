@@ -10,7 +10,7 @@ var apemodefb = apemodefb || {};
  * @enum
  */
 apemodefb.EVersionFb = {
-  Value: 7
+  Value: 8
 };
 
 /**
@@ -1547,7 +1547,7 @@ apemodefb.AnimCurveKeyFb.prototype.mutate_time = function(value) {
 /**
  * @returns {number}
  */
-apemodefb.AnimCurveKeyFb.prototype.value = function() {
+apemodefb.AnimCurveKeyFb.prototype.valueBez0Bez3 = function() {
   return this.bb.readFloat32(this.bb_pos + 4);
 };
 
@@ -1555,7 +1555,7 @@ apemodefb.AnimCurveKeyFb.prototype.value = function() {
  * @param {number} value
  * @returns {boolean}
  */
-apemodefb.AnimCurveKeyFb.prototype.mutate_value = function(value) {
+apemodefb.AnimCurveKeyFb.prototype.mutate_value_bez0_bez3 = function(value) {
   var offset = this.bb.__offset(this.bb_pos, 4);
 
   if (offset === 0) {
@@ -1569,7 +1569,7 @@ apemodefb.AnimCurveKeyFb.prototype.mutate_value = function(value) {
 /**
  * @returns {number}
  */
-apemodefb.AnimCurveKeyFb.prototype.arriveTangent = function() {
+apemodefb.AnimCurveKeyFb.prototype.bez1 = function() {
   return this.bb.readFloat32(this.bb_pos + 8);
 };
 
@@ -1577,7 +1577,7 @@ apemodefb.AnimCurveKeyFb.prototype.arriveTangent = function() {
  * @param {number} value
  * @returns {boolean}
  */
-apemodefb.AnimCurveKeyFb.prototype.mutate_arrive_tangent = function(value) {
+apemodefb.AnimCurveKeyFb.prototype.mutate_bez1 = function(value) {
   var offset = this.bb.__offset(this.bb_pos, 8);
 
   if (offset === 0) {
@@ -1591,7 +1591,7 @@ apemodefb.AnimCurveKeyFb.prototype.mutate_arrive_tangent = function(value) {
 /**
  * @returns {number}
  */
-apemodefb.AnimCurveKeyFb.prototype.leaveTangent = function() {
+apemodefb.AnimCurveKeyFb.prototype.bez2 = function() {
   return this.bb.readFloat32(this.bb_pos + 12);
 };
 
@@ -1599,7 +1599,7 @@ apemodefb.AnimCurveKeyFb.prototype.leaveTangent = function() {
  * @param {number} value
  * @returns {boolean}
  */
-apemodefb.AnimCurveKeyFb.prototype.mutate_leave_tangent = function(value) {
+apemodefb.AnimCurveKeyFb.prototype.mutate_bez2 = function(value) {
   var offset = this.bb.__offset(this.bb_pos, 12);
 
   if (offset === 0) {
@@ -1621,7 +1621,7 @@ apemodefb.AnimCurveKeyFb.prototype.interpolationMode = function() {
  * @param {apemodefb.EInterpolationModeFb} value
  * @returns {boolean}
  */
-apemodefb.AnimCurveKeyFb.prototype.mutate_interpolationMode = function(value) {
+apemodefb.AnimCurveKeyFb.prototype.mutate_interpolation_mode = function(value) {
   var offset = this.bb.__offset(this.bb_pos, 16);
 
   if (offset === 0) {
@@ -1635,19 +1635,19 @@ apemodefb.AnimCurveKeyFb.prototype.mutate_interpolationMode = function(value) {
 /**
  * @param {flatbuffers.Builder} builder
  * @param {number} time
- * @param {number} value
- * @param {number} arrive_tangent
- * @param {number} leave_tangent
- * @param {apemodefb.EInterpolationModeFb} interpolationMode
+ * @param {number} value_bez0_bez3
+ * @param {number} bez1
+ * @param {number} bez2
+ * @param {apemodefb.EInterpolationModeFb} interpolation_mode
  * @returns {flatbuffers.Offset}
  */
-apemodefb.AnimCurveKeyFb.createAnimCurveKeyFb = function(builder, time, value, arrive_tangent, leave_tangent, interpolationMode) {
+apemodefb.AnimCurveKeyFb.createAnimCurveKeyFb = function(builder, time, value_bez0_bez3, bez1, bez2, interpolation_mode) {
   builder.prep(4, 20);
   builder.pad(3);
-  builder.writeInt8(interpolationMode);
-  builder.writeFloat32(leave_tangent);
-  builder.writeFloat32(arrive_tangent);
-  builder.writeFloat32(value);
+  builder.writeInt8(interpolation_mode);
+  builder.writeFloat32(bez2);
+  builder.writeFloat32(bez1);
+  builder.writeFloat32(value_bez0_bez3);
   builder.writeFloat32(time);
   return builder.offset();
 };

@@ -64,6 +64,25 @@ set(mathfu_source_dir ${SOURCE_DIR})
 message(STATUS "mathfu_source_dir = ${mathfu_source_dir}")
 
 ExternalProject_Add(
+    dlib
+    GIT_REPOSITORY "git@github.com:davisking/dlib.git"
+    SOURCE_DIR "${CMAKE_SOURCE_DIR}/dependencies/dlib"
+    GIT_TAG "master"
+    UPDATE_COMMAND ""
+    PATCH_COMMAND ""
+    CMAKE_ARGS ${default_cmake_args}
+    TEST_COMMAND ""
+    INSTALL_COMMAND ""
+)
+
+ExternalProject_Get_Property(dlib SOURCE_DIR)
+ExternalProject_Get_Property(dlib BINARY_DIR)
+set(dlib_source_dir ${SOURCE_DIR})
+set(dlib_binary_dir ${BINARY_DIR})
+message(STATUS "dlib_source_dir = ${dlib_source_dir}")
+message(STATUS "dlib_binary_dir = ${dlib_binary_dir}")
+
+ExternalProject_Add(
     cxxopts
     GIT_REPOSITORY "git@github.com:jarro2783/cxxopts.git"
     GIT_TAG "1_0"
@@ -226,6 +245,7 @@ add_library(
     ${CMAKE_SOURCE_DIR}/FbxPipeline/generated/scene_generated.h
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpnorm.h
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpstate.h
+    ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpbez.cpp
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpanimation.cpp
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpfileutils.cpp
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpmaterial.cpp
@@ -313,6 +333,7 @@ add_dependencies(
     zlib
     flatbuffers
     pybind11
+    dlib
 )
 
 target_include_directories(
@@ -321,6 +342,7 @@ target_include_directories(
     ${PYTHON_INCLUDE_DIR}
     ${CMAKE_SOURCE_DIR}/FbxPipeline/generated
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline
+    ${CMAKE_SOURCE_DIR}/dependencies/dlib
     ${CMAKE_SOURCE_DIR}/dependencies/cxxopts/include
     ${CMAKE_SOURCE_DIR}/dependencies/mathfu/include
     ${CMAKE_SOURCE_DIR}/dependencies/mathfu/dependencies/vectorial/include

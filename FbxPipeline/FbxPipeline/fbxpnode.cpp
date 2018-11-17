@@ -120,14 +120,10 @@ void PreprocessMeshes( FbxScene* scene ) {
 
 void PreprocessAnimation( FbxScene* pScene ) {
     auto& s = apemode::State::Get( );
-
-    if (s.options[ "resample-framerate" ].count())
-        s.resampleFPS = s.options[ "resample-framerate" ].as< float >( );
+    assert(pScene);
         
     int animStackCount = pScene->GetSrcObjectCount< FbxAnimStack >( );
-
-    if ( animStackCount )
-        s.console->info( "Scene has {} animation stacks:", animStackCount );
+    s.console->info( "Scene has {} animation stacks:", animStackCount );
 
     for ( int i = 0; i < animStackCount; i++ ) {
         FbxAnimStack* pAnimStack = pScene->GetSrcObject< FbxAnimStack >( i );

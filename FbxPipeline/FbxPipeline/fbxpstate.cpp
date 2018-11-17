@@ -327,7 +327,7 @@ bool apemode::State::Finalize( ) {
         tempCurveKeys.clear( );
         tempCurveKeys.reserve( curve.keys.size( ) );
         std::transform( curve.keys.begin( ), curve.keys.end( ), std::back_inserter( tempCurveKeys ), [&]( const AnimCurveKey& curveKey ) {
-            return apemodefb::AnimCurveKeyFb( curveKey.time, curveKey.value, curveKey.arriveTangent, curveKey.leaveTangent, curveKey.interpolationMode );
+            return apemodefb::AnimCurveKeyFb( curveKey.time, curveKey.value, curveKey.bez1, curveKey.bez2, curveKey.interpolationMode );
         } );
 
         auto keysOffset = builder.CreateVectorOfStructs( tempCurveKeys );

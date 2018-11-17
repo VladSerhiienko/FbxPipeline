@@ -63,7 +63,7 @@ struct FileFb;
 struct SceneFb;
 
 enum EVersionFb {
-  EVersionFb_Value = 7,
+  EVersionFb_Value = 8,
   EVersionFb_MIN = EVersionFb_Value,
   EVersionFb_MAX = EVersionFb_Value
 };
@@ -1201,22 +1201,22 @@ STRUCT_END(AnimLayerFb, 12);
 MANUALLY_ALIGNED_STRUCT(4) AnimCurveKeyFb FLATBUFFERS_FINAL_CLASS {
  private:
   float time_;
-  float value_;
-  float arrive_tangent_;
-  float leave_tangent_;
-  uint8_t interpolationMode_;
+  float value_bez0_bez3_;
+  float bez1_;
+  float bez2_;
+  uint8_t interpolation_mode_;
   int8_t padding0__;  int16_t padding1__;
 
  public:
   AnimCurveKeyFb() {
     memset(this, 0, sizeof(AnimCurveKeyFb));
   }
-  AnimCurveKeyFb(float _time, float _value, float _arrive_tangent, float _leave_tangent, EInterpolationModeFb _interpolationMode)
+  AnimCurveKeyFb(float _time, float _value_bez0_bez3, float _bez1, float _bez2, EInterpolationModeFb _interpolation_mode)
       : time_(flatbuffers::EndianScalar(_time)),
-        value_(flatbuffers::EndianScalar(_value)),
-        arrive_tangent_(flatbuffers::EndianScalar(_arrive_tangent)),
-        leave_tangent_(flatbuffers::EndianScalar(_leave_tangent)),
-        interpolationMode_(flatbuffers::EndianScalar(static_cast<uint8_t>(_interpolationMode))),
+        value_bez0_bez3_(flatbuffers::EndianScalar(_value_bez0_bez3)),
+        bez1_(flatbuffers::EndianScalar(_bez1)),
+        bez2_(flatbuffers::EndianScalar(_bez2)),
+        interpolation_mode_(flatbuffers::EndianScalar(static_cast<uint8_t>(_interpolation_mode))),
         padding0__(0),
         padding1__(0) {
     (void)padding0__;    (void)padding1__;
@@ -1227,29 +1227,29 @@ MANUALLY_ALIGNED_STRUCT(4) AnimCurveKeyFb FLATBUFFERS_FINAL_CLASS {
   void mutate_time(float _time) {
     flatbuffers::WriteScalar(&time_, _time);
   }
-  float value() const {
-    return flatbuffers::EndianScalar(value_);
+  float value_bez0_bez3() const {
+    return flatbuffers::EndianScalar(value_bez0_bez3_);
   }
-  void mutate_value(float _value) {
-    flatbuffers::WriteScalar(&value_, _value);
+  void mutate_value_bez0_bez3(float _value_bez0_bez3) {
+    flatbuffers::WriteScalar(&value_bez0_bez3_, _value_bez0_bez3);
   }
-  float arrive_tangent() const {
-    return flatbuffers::EndianScalar(arrive_tangent_);
+  float bez1() const {
+    return flatbuffers::EndianScalar(bez1_);
   }
-  void mutate_arrive_tangent(float _arrive_tangent) {
-    flatbuffers::WriteScalar(&arrive_tangent_, _arrive_tangent);
+  void mutate_bez1(float _bez1) {
+    flatbuffers::WriteScalar(&bez1_, _bez1);
   }
-  float leave_tangent() const {
-    return flatbuffers::EndianScalar(leave_tangent_);
+  float bez2() const {
+    return flatbuffers::EndianScalar(bez2_);
   }
-  void mutate_leave_tangent(float _leave_tangent) {
-    flatbuffers::WriteScalar(&leave_tangent_, _leave_tangent);
+  void mutate_bez2(float _bez2) {
+    flatbuffers::WriteScalar(&bez2_, _bez2);
   }
-  EInterpolationModeFb interpolationMode() const {
-    return static_cast<EInterpolationModeFb>(flatbuffers::EndianScalar(interpolationMode_));
+  EInterpolationModeFb interpolation_mode() const {
+    return static_cast<EInterpolationModeFb>(flatbuffers::EndianScalar(interpolation_mode_));
   }
-  void mutate_interpolationMode(EInterpolationModeFb _interpolationMode) {
-    flatbuffers::WriteScalar(&interpolationMode_, static_cast<uint8_t>(_interpolationMode));
+  void mutate_interpolation_mode(EInterpolationModeFb _interpolation_mode) {
+    flatbuffers::WriteScalar(&interpolation_mode_, static_cast<uint8_t>(_interpolation_mode));
   }
 };
 STRUCT_END(AnimCurveKeyFb, 20);

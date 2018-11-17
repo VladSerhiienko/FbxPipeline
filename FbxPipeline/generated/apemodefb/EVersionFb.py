@@ -3,5 +3,5 @@
 # namespace: apemodefb
 
 class EVersionFb(object):
-    Value = 7
+    Value = 8
 

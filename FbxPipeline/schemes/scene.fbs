@@ -2,7 +2,7 @@
 namespace apemodefb;
 
 enum EVersionFb : ubyte {
-    Value = 7
+    Value = 8
 }
 
 enum ECullingTypeFb : ubyte
@@ -209,10 +209,10 @@ struct AnimLayerFb {
 
 struct AnimCurveKeyFb {
     time : float;
-    value : float;
-    arrive_tangent : float;
-    leave_tangent : float;
-	interpolationMode : EInterpolationModeFb;
+    value_bez0_bez3 : float;
+    bez1 : float;
+    bez2 : float;
+	interpolation_mode : EInterpolationModeFb;
 }
 
 table AnimCurveFb {
