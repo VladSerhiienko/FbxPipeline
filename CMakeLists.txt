@@ -384,10 +384,9 @@ elseif(APPLE)
 else()
     set(
         third_party_libs
+        ${dlib_binary_dir}/dlib/libdlib.a
         ${zlib_binary_dir}/libz.a
         ${flatbuffers_binary_dir}/libflatbuffers.a
-        # debug ${dlib_binary_dir}${CONFIGURATION_SUFFIX}/libdlib19.16.99_debug_64bit.a
-        # optimized ${dlib_binary_dir}${CONFIGURATION_SUFFIX}/libdlib19.16.99_release_64bit.a
         ${PYTHON_LIBRARY}
         pthread
         stdc++fs
