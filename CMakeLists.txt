@@ -65,7 +65,7 @@ message(STATUS "mathfu_source_dir = ${mathfu_source_dir}")
 
 ExternalProject_Add(
     dlib
-    GIT_REPOSITORY "git@github.com:davisking/dlib.git"
+    GIT_REPOSITORY "git@github.com:VladSerhiienko/dlib.git"
     SOURCE_DIR "${CMAKE_SOURCE_DIR}/dependencies/dlib"
     GIT_TAG "master"
     UPDATE_COMMAND ""
@@ -357,10 +357,12 @@ target_include_directories(
 if (WIN32)
     set(
         third_party_libs
+        debug ${dlib_binary_dir}/dlib${CONFIGURATION_SUFFIX}/dlib19.16.99_debug_64bit_msvc1912.lib
         debug ${zlib_binary_dir}${CONFIGURATION_SUFFIX}/zlibstaticd.lib
         debug ${flatbuffers_binary_dir}${CONFIGURATION_SUFFIX}/flatbuffers.lib
         optimized ${zlib_binary_dir}${CONFIGURATION_SUFFIX}/zlibstatic.lib
         optimized ${flatbuffers_binary_dir}${CONFIGURATION_SUFFIX}/flatbuffers.lib
+        optimized ${dlib_binary_dir}/dlib${CONFIGURATION_SUFFIX}/dlib19.16.99_release_64bit_msvc1912.lib
         ${PYTHON_LIBRARY}
         winmm.lib
         imm32.lib
@@ -384,6 +386,8 @@ else()
         third_party_libs
         ${zlib_binary_dir}/libz.a
         ${flatbuffers_binary_dir}/libflatbuffers.a
+        # debug ${dlib_binary_dir}${CONFIGURATION_SUFFIX}/libdlib19.16.99_debug_64bit.a
+        # optimized ${dlib_binary_dir}${CONFIGURATION_SUFFIX}/libdlib19.16.99_release_64bit.a
         ${PYTHON_LIBRARY}
         pthread
         stdc++fs

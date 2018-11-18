@@ -614,7 +614,7 @@ struct TControlPointSkinInfo {
 
         return false;
     }
-    
+
     uint32_t GetUsedSlotCount() {
         uint32_t usedSlotCount = 0;
         for ( uint32_t i = 0; i < kBoneCountPerControlPoint; ++i ) {
@@ -838,7 +838,7 @@ void ExportMesh( FbxNode*       pNode,
     if ( nullptr == pSkin ) {
         eVertexFmt = apemodefb::EVertexFormatFb_Static;
         vertexStride = staticVertexStride;
-        
+
         m.vertices.resize( staticVertexBufferSize );
         InitializeVertices( pMesh,
                             m,
@@ -886,13 +886,13 @@ void ExportMesh( FbxNode*       pNode,
             if ( const auto indexCount = pCluster->GetControlPointIndicesCount( ) ) {
                 assert( s.nodeDict.find( pCluster->GetLink( )->GetUniqueID( ) ) != s.nodeDict.end( ) );
                 const uint32_t linkNodeId = s.nodeDict[ pCluster->GetLink( )->GetUniqueID( ) ];
-                
+
                 const auto pWeights = pCluster->GetControlPointWeights( );
                 const auto pIndices = pCluster->GetControlPointIndices( );
-                
+
                 s.console->info( "\t Cluster #{} influences {} point(s)", i, indexCount );
 
-                uint32_t boneIndex = skin.linkIds.size();
+                uint32_t boneIndex = (uint32_t)skin.linkIds.size();
                 skin.linkIds.push_back( linkNodeId );
 
                 for ( int j = 0; j < indexCount; ++j ) {
@@ -1012,16 +1012,16 @@ void ExportMesh( FbxNode*       pNode,
             }
         }
         #endif
-        
+
         /* Report about used bone slots. */
-        
+
         uint32_t maxBoneCount = 4;
         {
             std::map<uint32_t, uint32_t> boneCountToControlPointCountMap;
             for ( uint32_t i = 0; i < skinInfos.size(); ++i ) {
                 ++boneCountToControlPointCountMap[skinInfos[i].GetUsedSlotCount()];
             }
-            
+
             s.console->info( "Used slots:" );
             for (auto & p : boneCountToControlPointCountMap) {
                 s.console->info( "\t {} slots <- {} points ", p.first, p.second);
@@ -1041,7 +1041,7 @@ void ExportMesh( FbxNode*       pNode,
         if ( maxBoneCount > eBoneCountPerControlPoint_4 ) {
             eVertexFmt   = apemodefb::EVertexFormatFb_StaticSkinned8;
             vertexStride = skinnedVertex8Stride;
-            
+
             m.vertices.resize( skinnedVertex8BufferSize );
             auto pSkinnedVertices = reinterpret_cast< StaticSkinned8Vertex* >( m.vertices.data( ) );
             InitializeVertices( pMesh, m, pSkinnedVertices, vertexCount, positionMin, positionMax, texcoordMin, texcoordMax );
@@ -1060,7 +1060,7 @@ void ExportMesh( FbxNode*       pNode,
                         pSkinnedVertices[ vertexIndex ].weights_0[ b ] = (float) weights[ b ];
                         pSkinnedVertices[ vertexIndex ].indices_0[ b ] = (float) indices[ b ];
                     }
-                    
+
                     for ( uint32_t b = 0; b < eBoneCountPerControlPoint_4; ++b ) {
                         assert( indices[ eBoneCountPerControlPoint_4 + b ] < skin.linkIds.size( ) );
                         pSkinnedVertices[ vertexIndex ].weights_1[ b ] = (float) weights[ eBoneCountPerControlPoint_4 + b ];
@@ -1202,7 +1202,7 @@ void ExportMesh( FbxNode*       pNode,
                                   submeshVertexStride           // vertex stride
         );
     } else {
-       
+
         m.submeshes.emplace_back( bboxMin,                             // bbox min
                                   bboxMax,                             // bbox max
                                   apemodefb::Vec3Fb( 0.0f, 0.0f, 0.0f ), // position offset
