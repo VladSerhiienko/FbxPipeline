@@ -357,12 +357,12 @@ target_include_directories(
 if (WIN32)
     set(
         third_party_libs
-        debug ${dlib_binary_dir}/dlib${CONFIGURATION_SUFFIX}/dlib19.16.99_debug_64bit_msvc1912.lib
+        debug ${dlib_binary_dir}/dlib${CONFIGURATION_SUFFIX}/dlib.lib
         debug ${zlib_binary_dir}${CONFIGURATION_SUFFIX}/zlibstaticd.lib
         debug ${flatbuffers_binary_dir}${CONFIGURATION_SUFFIX}/flatbuffers.lib
         optimized ${zlib_binary_dir}${CONFIGURATION_SUFFIX}/zlibstatic.lib
         optimized ${flatbuffers_binary_dir}${CONFIGURATION_SUFFIX}/flatbuffers.lib
-        optimized ${dlib_binary_dir}/dlib${CONFIGURATION_SUFFIX}/dlib19.16.99_release_64bit_msvc1912.lib
+        optimized ${dlib_binary_dir}/dlib${CONFIGURATION_SUFFIX}/dlib.lib
         ${PYTHON_LIBRARY}
         winmm.lib
         imm32.lib
