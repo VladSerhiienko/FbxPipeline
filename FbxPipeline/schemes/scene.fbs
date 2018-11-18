@@ -12,6 +12,24 @@ enum ECullingTypeFb : ubyte
 	CullingOnCW
 }
 
+enum EInheritTypeFb : ubyte
+{
+	RrSs,
+	RSrs,
+	Rrs
+}
+
+enum ERotationOrderFb : ubyte
+{
+	EulerXYZ,
+	EulerXZY,
+	EulerYZX,
+	EulerYXZ,
+	EulerZXY,
+	EulerZYX,
+	EulerSphericXYZ
+}
+
 enum EWrapModeFb : ubyte {
     Repeat,
     Clamp
@@ -131,6 +149,12 @@ enum EValueTypeFb : ubyte {
 struct Vec2Fb {
     x : float;
     y : float;
+}
+
+struct Bool3Fb {
+    x : bool;
+    y : bool;
+    z : bool;
 }
 
 struct Vec3Fb {
@@ -296,6 +320,21 @@ struct TransformFb {
     geometric_scaling : Vec3Fb;
 }
 
+struct TransformLimitsFb {
+    translation_min_active : Bool3Fb;
+    translation_max_active : Bool3Fb;
+    rotation_min_active : Bool3Fb;
+    rotation_max_active: Bool3Fb;
+    scaling_min_active : Bool3Fb;
+    scaling_max_active : Bool3Fb;
+    translation_min : Vec3Fb;
+    translation_max : Vec3Fb;
+    rotation_min : Vec3Fb;
+    rotation_max: Vec3Fb;
+    scaling_min : Vec3Fb;
+    scaling_max : Vec3Fb;
+}
+
 table SkinFb {
     name_id : uint( key );
     links_ids : [uint];
@@ -352,8 +391,11 @@ table NodeFb {
     mesh_id : uint;
     light_id : uint;
     camera_id : uint;
+    transform_limits_id : uint;
     name_id : uint( key );
 	culling_type : ECullingTypeFb;
+	inherit_type : EInheritTypeFb;
+	rotation_order : ERotationOrderFb;
     child_ids : [uint];
     anim_curve_ids : [uint];
 }
@@ -368,6 +410,7 @@ table SceneFb {
 	version : EVersionFb;
 
     transforms : [TransformFb];
+    transforms_limits : [TransformLimitsFb];
     nodes : [NodeFb];
     meshes : [MeshFb];
     anim_stacks : [AnimStackFb];

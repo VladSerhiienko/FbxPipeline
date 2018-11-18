@@ -14,8 +14,15 @@ void ExportLight( FbxNode* node, apemode::Node& n );
 void ExportNodeAttributes( FbxNode* node, apemode::Node& n ) {
     auto& s = apemode::State::Get( );
 
-    n.cullingType = (apemodefb::ECullingTypeFb) node->mCullingType;
-    s.console->info( "Node \"{}\" has {} culling type.", node->GetName(), n.cullingType );
+    n.cullingType   = (apemodefb::ECullingTypeFb) node->mCullingType;
+    n.inheritType   = (apemodefb::EInheritTypeFb) node->InheritType.Get( );
+    n.rotationOrder = (apemodefb::ERotationOrderFb) node->RotationOrder.Get( );
+
+    s.console->info( "Node \"{}\" has culling: {}, inherit type: {}, rotation order: {}.",
+                     node->GetName( ),
+                     apemodefb::EnumNameECullingTypeFb( n.cullingType ),
+                     apemodefb::EnumNameEInheritTypeFb( n.inheritType ),
+                     apemodefb::EnumNameERotationOrderFb( n.rotationOrder ) );
 
     ExportTransform( node, n );
     ExportAnimation( node, n );
@@ -121,7 +128,7 @@ void PreprocessMeshes( FbxScene* scene ) {
 void PreprocessAnimation( FbxScene* pScene ) {
     auto& s = apemode::State::Get( );
     assert(pScene);
-        
+
     int animStackCount = pScene->GetSrcObjectCount< FbxAnimStack >( );
     s.console->info( "Scene has {} animation stacks:", animStackCount );
 

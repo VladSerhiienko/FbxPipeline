@@ -68,16 +68,19 @@ namespace apemode {
     };
 
     struct FBXPIPELINE_API Node {
-        apemodefb::ECullingTypeFb cullingType = apemodefb::ECullingTypeFb_CullingOff;
-        uint32_t                  id          = (uint32_t) -1;
-        uint64_t                  fbxId       = (uint64_t) 0;
-        uint32_t                  nameId      = (uint64_t) 0;
-        uint32_t                  meshId      = (uint32_t) -1;
-        uint32_t                  lightId     = (uint32_t) -1;
-        uint32_t                  cameraId    = (uint32_t) -1;
-        std::vector< uint32_t >   childIds;
-        std::vector< uint32_t >   materialIds;
-        std::vector< uint32_t >   curveIds;
+        apemodefb::ECullingTypeFb   cullingType       = apemodefb::ECullingTypeFb_CullingOff;
+        apemodefb::ERotationOrderFb rotationOrder     = apemodefb::ERotationOrderFb_EulerXYZ;
+        apemodefb::EInheritTypeFb   inheritType       = apemodefb::EInheritTypeFb_RSrs;
+        uint32_t                    id                = (uint32_t) -1;
+        uint64_t                    fbxId             = (uint64_t) 0;
+        uint32_t                    nameId            = (uint64_t) 0;
+        uint32_t                    meshId            = (uint32_t) -1;
+        uint32_t                    lightId           = (uint32_t) -1;
+        uint32_t                    cameraId          = (uint32_t) -1;
+        uint32_t                    transformLimitsId = (uint32_t) -1;
+        std::vector< uint32_t >     childIds;
+        std::vector< uint32_t >     materialIds;
+        std::vector< uint32_t >     curveIds;
     };
 
     struct FBXPIPELINE_API AnimStack {
@@ -124,36 +127,37 @@ namespace apemode {
     };
 
     struct FBXPIPELINE_API State {
-        FbxManager*                           manager = nullptr;
-        FbxScene*                             scene   = nullptr;
-        std::string                           executableName;
-        std::shared_ptr< spdlog::logger >     console;
-        flatbuffers::FlatBufferBuilder        builder;
-        cxxopts::Options                      options;
-        std::string                           fileName;
-        std::string                           folderPath;
-        std::vector< Node >                   nodes;
-        std::vector< Material >               materials;
-        std::vector< File >                   embeddedFiles;
-        std::map< uint64_t, uint32_t >        nodeDict;
-        std::map< uint64_t, uint32_t >        textureDict;
-        std::map< uint64_t, uint32_t >        materialDict;
-        std::map< uint64_t, uint32_t >        animStackDict;
-        std::map< uint64_t, uint32_t >        animLayerDict;
-        std::vector< apemodefb::TransformFb > transforms;
-        std::vector< apemodefb::TextureFb >   textures;
-        std::vector< apemodefb::CameraFb >    cameras;
-        std::vector< apemodefb::LightFb >     lights;
-        std::vector< Mesh >                   meshes;
-        std::vector< AnimStack >              animStacks;
-        std::vector< AnimLayer >              animLayers;
-        std::vector< AnimCurve >              animCurves;
-        std::vector< Skin >                   skins;
-        std::vector< std::string >            searchLocations;
-        std::vector< bool >                   boolValues;
-        std::vector< int32_t >                intValues;
-        std::vector< float >                  floatValues;
-        std::vector< std::string >            stringValues;
+        FbxManager*                                 manager = nullptr;
+        FbxScene*                                   scene   = nullptr;
+        std::string                                 executableName;
+        std::shared_ptr< spdlog::logger >           console;
+        flatbuffers::FlatBufferBuilder              builder;
+        cxxopts::Options                            options;
+        std::string                                 fileName;
+        std::string                                 folderPath;
+        std::vector< Node >                         nodes;
+        std::vector< Material >                     materials;
+        std::vector< File >                         embeddedFiles;
+        std::map< uint64_t, uint32_t >              nodeDict;
+        std::map< uint64_t, uint32_t >              textureDict;
+        std::map< uint64_t, uint32_t >              materialDict;
+        std::map< uint64_t, uint32_t >              animStackDict;
+        std::map< uint64_t, uint32_t >              animLayerDict;
+        std::vector< apemodefb::TransformFb >       transforms;
+        std::vector< apemodefb::TransformLimitsFb > transformLimits;
+        std::vector< apemodefb::TextureFb >         textures;
+        std::vector< apemodefb::CameraFb >          cameras;
+        std::vector< apemodefb::LightFb >           lights;
+        std::vector< Mesh >                         meshes;
+        std::vector< AnimStack >                    animStacks;
+        std::vector< AnimLayer >                    animLayers;
+        std::vector< AnimCurve >                    animCurves;
+        std::vector< Skin >                         skins;
+        std::vector< std::string >                  searchLocations;
+        std::vector< bool >                         boolValues;
+        std::vector< int32_t >                      intValues;
+        std::vector< float >                        floatValues;
+        std::vector< std::string >                  stringValues;
 
         std::vector< std::function< void( apemode::State*, std::string ) > > extensions;
 

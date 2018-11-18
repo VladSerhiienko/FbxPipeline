@@ -1202,21 +1202,20 @@ void ExportMesh( FbxNode*       pNode,
                                   submeshVertexStride           // vertex stride
         );
     } else {
-
-        m.submeshes.emplace_back( bboxMin,                             // bbox min
-                                  bboxMax,                             // bbox max
+        m.submeshes.emplace_back( bboxMin,                               // bbox min
+                                  bboxMax,                               // bbox max
                                   apemodefb::Vec3Fb( 0.0f, 0.0f, 0.0f ), // position offset
                                   apemodefb::Vec3Fb( 1.0f, 1.0f, 1.0f ), // position scale
                                   apemodefb::Vec2Fb( 0.0f, 0.0f ),       // uv offset
                                   apemodefb::Vec2Fb( 1.0f, 1.0f ),       // uv scale
-                                  0,                                   // base vertex
-                                  vertexCount,                         // vertex count
-                                  0,                                   // base index
-                                  0,                                   // index count
-                                  0,                                   // base subset
-                                  (uint32_t) m.subsets.size( ),        // subset count
-                                  eVertexFmt,                 // vertex format
-                                  vertexStride                  // vertex stride
+                                  0,                                     // base vertex
+                                  vertexCount,                           // vertex count
+                                  0,                                     // base index
+                                  0,                                     // index count
+                                  0,                                     // base subset
+                                  (uint32_t) m.subsets.size( ),          // subset count
+                                  eVertexFmt,                            // vertex format
+                                  vertexStride                           // vertex stride
         );
     }
 }

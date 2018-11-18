@@ -47,22 +47,43 @@ class NodeFb(object):
         return 0
 
     # NodeFb
-    def NameId(self):
+    def TransformLimitsId(self):
         o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(12))
         if o != 0:
             return self._tab.Get(flatbuffers.number_types.Uint32Flags, o + self._tab.Pos)
         return 0
 
     # NodeFb
-    def CullingType(self):
+    def NameId(self):
         o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(14))
+        if o != 0:
+            return self._tab.Get(flatbuffers.number_types.Uint32Flags, o + self._tab.Pos)
+        return 0
+
+    # NodeFb
+    def CullingType(self):
+        o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(16))
+        if o != 0:
+            return self._tab.Get(flatbuffers.number_types.Uint8Flags, o + self._tab.Pos)
+        return 0
+
+    # NodeFb
+    def InheritType(self):
+        o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(18))
+        if o != 0:
+            return self._tab.Get(flatbuffers.number_types.Uint8Flags, o + self._tab.Pos)
+        return 0
+
+    # NodeFb
+    def RotationOrder(self):
+        o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(20))
         if o != 0:
             return self._tab.Get(flatbuffers.number_types.Uint8Flags, o + self._tab.Pos)
         return 0
 
     # NodeFb
     def ChildIds(self, j):
-        o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(16))
+        o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(22))
         if o != 0:
             a = self._tab.Vector(o)
             return self._tab.Get(flatbuffers.number_types.Uint32Flags, a + flatbuffers.number_types.UOffsetTFlags.py_type(j * 4))
@@ -70,21 +91,21 @@ class NodeFb(object):
 
     # NodeFb
     def ChildIdsAsNumpy(self):
-        o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(16))
+        o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(22))
         if o != 0:
             return self._tab.GetVectorAsNumpy(flatbuffers.number_types.Uint32Flags, o)
         return 0
 
     # NodeFb
     def ChildIdsLength(self):
-        o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(16))
+        o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(22))
         if o != 0:
             return self._tab.VectorLen(o)
         return 0
 
     # NodeFb
     def AnimCurveIds(self, j):
-        o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(18))
+        o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(24))
         if o != 0:
             a = self._tab.Vector(o)
             return self._tab.Get(flatbuffers.number_types.Uint32Flags, a + flatbuffers.number_types.UOffsetTFlags.py_type(j * 4))
@@ -92,27 +113,30 @@ class NodeFb(object):
 
     # NodeFb
     def AnimCurveIdsAsNumpy(self):
-        o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(18))
+        o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(24))
         if o != 0:
             return self._tab.GetVectorAsNumpy(flatbuffers.number_types.Uint32Flags, o)
         return 0
 
     # NodeFb
     def AnimCurveIdsLength(self):
-        o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(18))
+        o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(24))
         if o != 0:
             return self._tab.VectorLen(o)
         return 0
 
-def NodeFbStart(builder): builder.StartObject(8)
+def NodeFbStart(builder): builder.StartObject(11)
 def NodeFbAddId(builder, id): builder.PrependUint32Slot(0, id, 0)
 def NodeFbAddMeshId(builder, meshId): builder.PrependUint32Slot(1, meshId, 0)
 def NodeFbAddLightId(builder, lightId): builder.PrependUint32Slot(2, lightId, 0)
 def NodeFbAddCameraId(builder, cameraId): builder.PrependUint32Slot(3, cameraId, 0)
-def NodeFbAddNameId(builder, nameId): builder.PrependUint32Slot(4, nameId, 0)
-def NodeFbAddCullingType(builder, cullingType): builder.PrependUint8Slot(5, cullingType, 0)
-def NodeFbAddChildIds(builder, childIds): builder.PrependUOffsetTRelativeSlot(6, flatbuffers.number_types.UOffsetTFlags.py_type(childIds), 0)
+def NodeFbAddTransformLimitsId(builder, transformLimitsId): builder.PrependUint32Slot(4, transformLimitsId, 0)
+def NodeFbAddNameId(builder, nameId): builder.PrependUint32Slot(5, nameId, 0)
+def NodeFbAddCullingType(builder, cullingType): builder.PrependUint8Slot(6, cullingType, 0)
+def NodeFbAddInheritType(builder, inheritType): builder.PrependUint8Slot(7, inheritType, 0)
+def NodeFbAddRotationOrder(builder, rotationOrder): builder.PrependUint8Slot(8, rotationOrder, 0)
+def NodeFbAddChildIds(builder, childIds): builder.PrependUOffsetTRelativeSlot(9, flatbuffers.number_types.UOffsetTFlags.py_type(childIds), 0)
 def NodeFbStartChildIdsVector(builder, numElems): return builder.StartVector(4, numElems, 4)
-def NodeFbAddAnimCurveIds(builder, animCurveIds): builder.PrependUOffsetTRelativeSlot(7, flatbuffers.number_types.UOffsetTFlags.py_type(animCurveIds), 0)
+def NodeFbAddAnimCurveIds(builder, animCurveIds): builder.PrependUOffsetTRelativeSlot(10, flatbuffers.number_types.UOffsetTFlags.py_type(animCurveIds), 0)
 def NodeFbStartAnimCurveIdsVector(builder, numElems): return builder.StartVector(4, numElems, 4)
 def NodeFbEnd(builder): return builder.EndObject()

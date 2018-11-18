@@ -10,6 +10,8 @@ namespace apemodefb {
 
 struct Vec2Fb;
 
+struct Bool3Fb;
+
 struct Vec3Fb;
 
 struct Vec4Fb;
@@ -43,6 +45,8 @@ struct SubsetFb;
 struct NameFb;
 
 struct TransformFb;
+
+struct TransformLimitsFb;
 
 struct SkinFb;
 
@@ -118,6 +122,82 @@ inline const char **EnumNamesECullingTypeFb() {
 inline const char *EnumNameECullingTypeFb(ECullingTypeFb e) {
   const size_t index = static_cast<int>(e);
   return EnumNamesECullingTypeFb()[index];
+}
+
+enum EInheritTypeFb {
+  EInheritTypeFb_RrSs = 0,
+  EInheritTypeFb_RSrs = 1,
+  EInheritTypeFb_Rrs = 2,
+  EInheritTypeFb_MIN = EInheritTypeFb_RrSs,
+  EInheritTypeFb_MAX = EInheritTypeFb_Rrs
+};
+
+inline EInheritTypeFb (&EnumValuesEInheritTypeFb())[3] {
+  static EInheritTypeFb values[] = {
+    EInheritTypeFb_RrSs,
+    EInheritTypeFb_RSrs,
+    EInheritTypeFb_Rrs
+  };
+  return values;
+}
+
+inline const char **EnumNamesEInheritTypeFb() {
+  static const char *names[] = {
+    "RrSs",
+    "RSrs",
+    "Rrs",
+    nullptr
+  };
+  return names;
+}
+
+inline const char *EnumNameEInheritTypeFb(EInheritTypeFb e) {
+  const size_t index = static_cast<int>(e);
+  return EnumNamesEInheritTypeFb()[index];
+}
+
+enum ERotationOrderFb {
+  ERotationOrderFb_EulerXYZ = 0,
+  ERotationOrderFb_EulerXZY = 1,
+  ERotationOrderFb_EulerYZX = 2,
+  ERotationOrderFb_EulerYXZ = 3,
+  ERotationOrderFb_EulerZXY = 4,
+  ERotationOrderFb_EulerZYX = 5,
+  ERotationOrderFb_EulerSphericXYZ = 6,
+  ERotationOrderFb_MIN = ERotationOrderFb_EulerXYZ,
+  ERotationOrderFb_MAX = ERotationOrderFb_EulerSphericXYZ
+};
+
+inline ERotationOrderFb (&EnumValuesERotationOrderFb())[7] {
+  static ERotationOrderFb values[] = {
+    ERotationOrderFb_EulerXYZ,
+    ERotationOrderFb_EulerXZY,
+    ERotationOrderFb_EulerYZX,
+    ERotationOrderFb_EulerYXZ,
+    ERotationOrderFb_EulerZXY,
+    ERotationOrderFb_EulerZYX,
+    ERotationOrderFb_EulerSphericXYZ
+  };
+  return values;
+}
+
+inline const char **EnumNamesERotationOrderFb() {
+  static const char *names[] = {
+    "EulerXYZ",
+    "EulerXZY",
+    "EulerYZX",
+    "EulerYXZ",
+    "EulerZXY",
+    "EulerZYX",
+    "EulerSphericXYZ",
+    nullptr
+  };
+  return names;
+}
+
+inline const char *EnumNameERotationOrderFb(ERotationOrderFb e) {
+  const size_t index = static_cast<int>(e);
+  return EnumNamesERotationOrderFb()[index];
 }
 
 enum EWrapModeFb {
@@ -711,6 +791,42 @@ MANUALLY_ALIGNED_STRUCT(4) Vec2Fb FLATBUFFERS_FINAL_CLASS {
   }
 };
 STRUCT_END(Vec2Fb, 8);
+
+MANUALLY_ALIGNED_STRUCT(1) Bool3Fb FLATBUFFERS_FINAL_CLASS {
+ private:
+  uint8_t x_;
+  uint8_t y_;
+  uint8_t z_;
+
+ public:
+  Bool3Fb() {
+    memset(this, 0, sizeof(Bool3Fb));
+  }
+  Bool3Fb(bool _x, bool _y, bool _z)
+      : x_(flatbuffers::EndianScalar(static_cast<uint8_t>(_x))),
+        y_(flatbuffers::EndianScalar(static_cast<uint8_t>(_y))),
+        z_(flatbuffers::EndianScalar(static_cast<uint8_t>(_z))) {
+  }
+  bool x() const {
+    return flatbuffers::EndianScalar(x_) != 0;
+  }
+  void mutate_x(bool _x) {
+    flatbuffers::WriteScalar(&x_, static_cast<uint8_t>(_x));
+  }
+  bool y() const {
+    return flatbuffers::EndianScalar(y_) != 0;
+  }
+  void mutate_y(bool _y) {
+    flatbuffers::WriteScalar(&y_, static_cast<uint8_t>(_y));
+  }
+  bool z() const {
+    return flatbuffers::EndianScalar(z_) != 0;
+  }
+  void mutate_z(bool _z) {
+    flatbuffers::WriteScalar(&z_, static_cast<uint8_t>(_z));
+  }
+};
+STRUCT_END(Bool3Fb, 3);
 
 MANUALLY_ALIGNED_STRUCT(4) Vec3Fb FLATBUFFERS_FINAL_CLASS {
  private:
@@ -1750,6 +1866,117 @@ MANUALLY_ALIGNED_STRUCT(4) TransformFb FLATBUFFERS_FINAL_CLASS {
 };
 STRUCT_END(TransformFb, 144);
 
+MANUALLY_ALIGNED_STRUCT(4) TransformLimitsFb FLATBUFFERS_FINAL_CLASS {
+ private:
+  Bool3Fb translation_min_active_;
+  Bool3Fb translation_max_active_;
+  Bool3Fb rotation_min_active_;
+  Bool3Fb rotation_max_active_;
+  Bool3Fb scaling_min_active_;
+  Bool3Fb scaling_max_active_;
+  int16_t padding0__;
+  Vec3Fb translation_min_;
+  Vec3Fb translation_max_;
+  Vec3Fb rotation_min_;
+  Vec3Fb rotation_max_;
+  Vec3Fb scaling_min_;
+  Vec3Fb scaling_max_;
+
+ public:
+  TransformLimitsFb() {
+    memset(this, 0, sizeof(TransformLimitsFb));
+  }
+  TransformLimitsFb(const Bool3Fb &_translation_min_active, const Bool3Fb &_translation_max_active, const Bool3Fb &_rotation_min_active, const Bool3Fb &_rotation_max_active, const Bool3Fb &_scaling_min_active, const Bool3Fb &_scaling_max_active, const Vec3Fb &_translation_min, const Vec3Fb &_translation_max, const Vec3Fb &_rotation_min, const Vec3Fb &_rotation_max, const Vec3Fb &_scaling_min, const Vec3Fb &_scaling_max)
+      : translation_min_active_(_translation_min_active),
+        translation_max_active_(_translation_max_active),
+        rotation_min_active_(_rotation_min_active),
+        rotation_max_active_(_rotation_max_active),
+        scaling_min_active_(_scaling_min_active),
+        scaling_max_active_(_scaling_max_active),
+        padding0__(0),
+        translation_min_(_translation_min),
+        translation_max_(_translation_max),
+        rotation_min_(_rotation_min),
+        rotation_max_(_rotation_max),
+        scaling_min_(_scaling_min),
+        scaling_max_(_scaling_max) {
+    (void)padding0__;
+  }
+  const Bool3Fb &translation_min_active() const {
+    return translation_min_active_;
+  }
+  Bool3Fb &mutable_translation_min_active() {
+    return translation_min_active_;
+  }
+  const Bool3Fb &translation_max_active() const {
+    return translation_max_active_;
+  }
+  Bool3Fb &mutable_translation_max_active() {
+    return translation_max_active_;
+  }
+  const Bool3Fb &rotation_min_active() const {
+    return rotation_min_active_;
+  }
+  Bool3Fb &mutable_rotation_min_active() {
+    return rotation_min_active_;
+  }
+  const Bool3Fb &rotation_max_active() const {
+    return rotation_max_active_;
+  }
+  Bool3Fb &mutable_rotation_max_active() {
+    return rotation_max_active_;
+  }
+  const Bool3Fb &scaling_min_active() const {
+    return scaling_min_active_;
+  }
+  Bool3Fb &mutable_scaling_min_active() {
+    return scaling_min_active_;
+  }
+  const Bool3Fb &scaling_max_active() const {
+    return scaling_max_active_;
+  }
+  Bool3Fb &mutable_scaling_max_active() {
+    return scaling_max_active_;
+  }
+  const Vec3Fb &translation_min() const {
+    return translation_min_;
+  }
+  Vec3Fb &mutable_translation_min() {
+    return translation_min_;
+  }
+  const Vec3Fb &translation_max() const {
+    return translation_max_;
+  }
+  Vec3Fb &mutable_translation_max() {
+    return translation_max_;
+  }
+  const Vec3Fb &rotation_min() const {
+    return rotation_min_;
+  }
+  Vec3Fb &mutable_rotation_min() {
+    return rotation_min_;
+  }
+  const Vec3Fb &rotation_max() const {
+    return rotation_max_;
+  }
+  Vec3Fb &mutable_rotation_max() {
+    return rotation_max_;
+  }
+  const Vec3Fb &scaling_min() const {
+    return scaling_min_;
+  }
+  Vec3Fb &mutable_scaling_min() {
+    return scaling_min_;
+  }
+  const Vec3Fb &scaling_max() const {
+    return scaling_max_;
+  }
+  Vec3Fb &mutable_scaling_max() {
+    return scaling_max_;
+  }
+};
+STRUCT_END(TransformLimitsFb, 92);
+
 MANUALLY_ALIGNED_STRUCT(4) MaterialPropFb FLATBUFFERS_FINAL_CLASS {
  private:
   uint32_t name_id_;
@@ -2544,10 +2771,13 @@ struct NodeFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     VT_MESH_ID = 6,
     VT_LIGHT_ID = 8,
     VT_CAMERA_ID = 10,
-    VT_NAME_ID = 12,
-    VT_CULLING_TYPE = 14,
-    VT_CHILD_IDS = 16,
-    VT_ANIM_CURVE_IDS = 18
+    VT_TRANSFORM_LIMITS_ID = 12,
+    VT_NAME_ID = 14,
+    VT_CULLING_TYPE = 16,
+    VT_INHERIT_TYPE = 18,
+    VT_ROTATION_ORDER = 20,
+    VT_CHILD_IDS = 22,
+    VT_ANIM_CURVE_IDS = 24
   };
   uint32_t id() const {
     return GetField<uint32_t>(VT_ID, 0);
@@ -2572,6 +2802,12 @@ struct NodeFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   }
   bool mutate_camera_id(uint32_t _camera_id) {
     return SetField<uint32_t>(VT_CAMERA_ID, _camera_id, 0);
+  }
+  uint32_t transform_limits_id() const {
+    return GetField<uint32_t>(VT_TRANSFORM_LIMITS_ID, 0);
+  }
+  bool mutate_transform_limits_id(uint32_t _transform_limits_id) {
+    return SetField<uint32_t>(VT_TRANSFORM_LIMITS_ID, _transform_limits_id, 0);
   }
   uint32_t name_id() const {
     return GetField<uint32_t>(VT_NAME_ID, 0);
@@ -2598,6 +2834,18 @@ struct NodeFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   bool mutate_culling_type(ECullingTypeFb _culling_type) {
     return SetField<uint8_t>(VT_CULLING_TYPE, static_cast<uint8_t>(_culling_type), 0);
   }
+  EInheritTypeFb inherit_type() const {
+    return static_cast<EInheritTypeFb>(GetField<uint8_t>(VT_INHERIT_TYPE, 0));
+  }
+  bool mutate_inherit_type(EInheritTypeFb _inherit_type) {
+    return SetField<uint8_t>(VT_INHERIT_TYPE, static_cast<uint8_t>(_inherit_type), 0);
+  }
+  ERotationOrderFb rotation_order() const {
+    return static_cast<ERotationOrderFb>(GetField<uint8_t>(VT_ROTATION_ORDER, 0));
+  }
+  bool mutate_rotation_order(ERotationOrderFb _rotation_order) {
+    return SetField<uint8_t>(VT_ROTATION_ORDER, static_cast<uint8_t>(_rotation_order), 0);
+  }
   const flatbuffers::Vector<uint32_t> *child_ids() const {
     return GetPointer<const flatbuffers::Vector<uint32_t> *>(VT_CHILD_IDS);
   }
@@ -2616,8 +2864,11 @@ struct NodeFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyField<uint32_t>(verifier, VT_MESH_ID) &&
            VerifyField<uint32_t>(verifier, VT_LIGHT_ID) &&
            VerifyField<uint32_t>(verifier, VT_CAMERA_ID) &&
+           VerifyField<uint32_t>(verifier, VT_TRANSFORM_LIMITS_ID) &&
            VerifyField<uint32_t>(verifier, VT_NAME_ID) &&
            VerifyField<uint8_t>(verifier, VT_CULLING_TYPE) &&
+           VerifyField<uint8_t>(verifier, VT_INHERIT_TYPE) &&
+           VerifyField<uint8_t>(verifier, VT_ROTATION_ORDER) &&
            VerifyOffset(verifier, VT_CHILD_IDS) &&
            verifier.Verify(child_ids()) &&
            VerifyOffset(verifier, VT_ANIM_CURVE_IDS) &&
@@ -2641,11 +2892,20 @@ struct NodeFbBuilder {
   void add_camera_id(uint32_t camera_id) {
     fbb_.AddElement<uint32_t>(NodeFb::VT_CAMERA_ID, camera_id, 0);
   }
+  void add_transform_limits_id(uint32_t transform_limits_id) {
+    fbb_.AddElement<uint32_t>(NodeFb::VT_TRANSFORM_LIMITS_ID, transform_limits_id, 0);
+  }
   void add_name_id(uint32_t name_id) {
     fbb_.AddElement<uint32_t>(NodeFb::VT_NAME_ID, name_id, 0);
   }
   void add_culling_type(ECullingTypeFb culling_type) {
     fbb_.AddElement<uint8_t>(NodeFb::VT_CULLING_TYPE, static_cast<uint8_t>(culling_type), 0);
+  }
+  void add_inherit_type(EInheritTypeFb inherit_type) {
+    fbb_.AddElement<uint8_t>(NodeFb::VT_INHERIT_TYPE, static_cast<uint8_t>(inherit_type), 0);
+  }
+  void add_rotation_order(ERotationOrderFb rotation_order) {
+    fbb_.AddElement<uint8_t>(NodeFb::VT_ROTATION_ORDER, static_cast<uint8_t>(rotation_order), 0);
   }
   void add_child_ids(flatbuffers::Offset<flatbuffers::Vector<uint32_t>> child_ids) {
     fbb_.AddOffset(NodeFb::VT_CHILD_IDS, child_ids);
@@ -2671,18 +2931,24 @@ inline flatbuffers::Offset<NodeFb> CreateNodeFb(
     uint32_t mesh_id = 0,
     uint32_t light_id = 0,
     uint32_t camera_id = 0,
+    uint32_t transform_limits_id = 0,
     uint32_t name_id = 0,
     ECullingTypeFb culling_type = ECullingTypeFb_CullingOff,
+    EInheritTypeFb inherit_type = EInheritTypeFb_RrSs,
+    ERotationOrderFb rotation_order = ERotationOrderFb_EulerXYZ,
     flatbuffers::Offset<flatbuffers::Vector<uint32_t>> child_ids = 0,
     flatbuffers::Offset<flatbuffers::Vector<uint32_t>> anim_curve_ids = 0) {
   NodeFbBuilder builder_(_fbb);
   builder_.add_anim_curve_ids(anim_curve_ids);
   builder_.add_child_ids(child_ids);
   builder_.add_name_id(name_id);
+  builder_.add_transform_limits_id(transform_limits_id);
   builder_.add_camera_id(camera_id);
   builder_.add_light_id(light_id);
   builder_.add_mesh_id(mesh_id);
   builder_.add_id(id);
+  builder_.add_rotation_order(rotation_order);
+  builder_.add_inherit_type(inherit_type);
   builder_.add_culling_type(culling_type);
   return builder_.Finish();
 }
@@ -2693,8 +2959,11 @@ inline flatbuffers::Offset<NodeFb> CreateNodeFbDirect(
     uint32_t mesh_id = 0,
     uint32_t light_id = 0,
     uint32_t camera_id = 0,
+    uint32_t transform_limits_id = 0,
     uint32_t name_id = 0,
     ECullingTypeFb culling_type = ECullingTypeFb_CullingOff,
+    EInheritTypeFb inherit_type = EInheritTypeFb_RrSs,
+    ERotationOrderFb rotation_order = ERotationOrderFb_EulerXYZ,
     const std::vector<uint32_t> *child_ids = nullptr,
     const std::vector<uint32_t> *anim_curve_ids = nullptr) {
   return apemodefb::CreateNodeFb(
@@ -2703,8 +2972,11 @@ inline flatbuffers::Offset<NodeFb> CreateNodeFbDirect(
       mesh_id,
       light_id,
       camera_id,
+      transform_limits_id,
       name_id,
       culling_type,
+      inherit_type,
+      rotation_order,
       child_ids ? _fbb.CreateVector<uint32_t>(*child_ids) : 0,
       anim_curve_ids ? _fbb.CreateVector<uint32_t>(*anim_curve_ids) : 0);
 }
@@ -2808,21 +3080,22 @@ struct SceneFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   enum {
     VT_VERSION = 4,
     VT_TRANSFORMS = 6,
-    VT_NODES = 8,
-    VT_MESHES = 10,
-    VT_ANIM_STACKS = 12,
-    VT_ANIM_LAYERS = 14,
-    VT_ANIM_CURVES = 16,
-    VT_MATERIALS = 18,
-    VT_TEXTURES = 20,
-    VT_CAMERAS = 22,
-    VT_LIGHTS = 24,
-    VT_SKINS = 26,
-    VT_FILES = 28,
-    VT_BOOL_VALUES = 30,
-    VT_INT_VALUES = 32,
-    VT_FLOAT_VALUES = 34,
-    VT_STRING_VALUES = 36
+    VT_TRANSFORMS_LIMITS = 8,
+    VT_NODES = 10,
+    VT_MESHES = 12,
+    VT_ANIM_STACKS = 14,
+    VT_ANIM_LAYERS = 16,
+    VT_ANIM_CURVES = 18,
+    VT_MATERIALS = 20,
+    VT_TEXTURES = 22,
+    VT_CAMERAS = 24,
+    VT_LIGHTS = 26,
+    VT_SKINS = 28,
+    VT_FILES = 30,
+    VT_BOOL_VALUES = 32,
+    VT_INT_VALUES = 34,
+    VT_FLOAT_VALUES = 36,
+    VT_STRING_VALUES = 38
   };
   EVersionFb version() const {
     return static_cast<EVersionFb>(GetField<uint8_t>(VT_VERSION, 0));
@@ -2835,6 +3108,12 @@ struct SceneFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   }
   flatbuffers::Vector<const TransformFb *> *mutable_transforms() {
     return GetPointer<flatbuffers::Vector<const TransformFb *> *>(VT_TRANSFORMS);
+  }
+  const flatbuffers::Vector<const TransformLimitsFb *> *transforms_limits() const {
+    return GetPointer<const flatbuffers::Vector<const TransformLimitsFb *> *>(VT_TRANSFORMS_LIMITS);
+  }
+  flatbuffers::Vector<const TransformLimitsFb *> *mutable_transforms_limits() {
+    return GetPointer<flatbuffers::Vector<const TransformLimitsFb *> *>(VT_TRANSFORMS_LIMITS);
   }
   const flatbuffers::Vector<flatbuffers::Offset<NodeFb>> *nodes() const {
     return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<NodeFb>> *>(VT_NODES);
@@ -2931,6 +3210,8 @@ struct SceneFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyField<uint8_t>(verifier, VT_VERSION) &&
            VerifyOffset(verifier, VT_TRANSFORMS) &&
            verifier.Verify(transforms()) &&
+           VerifyOffset(verifier, VT_TRANSFORMS_LIMITS) &&
+           verifier.Verify(transforms_limits()) &&
            VerifyOffset(verifier, VT_NODES) &&
            verifier.Verify(nodes()) &&
            verifier.VerifyVectorOfTables(nodes()) &&
@@ -2980,6 +3261,9 @@ struct SceneFbBuilder {
   }
   void add_transforms(flatbuffers::Offset<flatbuffers::Vector<const TransformFb *>> transforms) {
     fbb_.AddOffset(SceneFb::VT_TRANSFORMS, transforms);
+  }
+  void add_transforms_limits(flatbuffers::Offset<flatbuffers::Vector<const TransformLimitsFb *>> transforms_limits) {
+    fbb_.AddOffset(SceneFb::VT_TRANSFORMS_LIMITS, transforms_limits);
   }
   void add_nodes(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<NodeFb>>> nodes) {
     fbb_.AddOffset(SceneFb::VT_NODES, nodes);
@@ -3042,6 +3326,7 @@ inline flatbuffers::Offset<SceneFb> CreateSceneFb(
     flatbuffers::FlatBufferBuilder &_fbb,
     EVersionFb version = static_cast<EVersionFb>(0),
     flatbuffers::Offset<flatbuffers::Vector<const TransformFb *>> transforms = 0,
+    flatbuffers::Offset<flatbuffers::Vector<const TransformLimitsFb *>> transforms_limits = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<NodeFb>>> nodes = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<MeshFb>>> meshes = 0,
     flatbuffers::Offset<flatbuffers::Vector<const AnimStackFb *>> anim_stacks = 0,
@@ -3073,6 +3358,7 @@ inline flatbuffers::Offset<SceneFb> CreateSceneFb(
   builder_.add_anim_stacks(anim_stacks);
   builder_.add_meshes(meshes);
   builder_.add_nodes(nodes);
+  builder_.add_transforms_limits(transforms_limits);
   builder_.add_transforms(transforms);
   builder_.add_version(version);
   return builder_.Finish();
@@ -3082,6 +3368,7 @@ inline flatbuffers::Offset<SceneFb> CreateSceneFbDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
     EVersionFb version = static_cast<EVersionFb>(0),
     const std::vector<const TransformFb *> *transforms = nullptr,
+    const std::vector<const TransformLimitsFb *> *transforms_limits = nullptr,
     const std::vector<flatbuffers::Offset<NodeFb>> *nodes = nullptr,
     const std::vector<flatbuffers::Offset<MeshFb>> *meshes = nullptr,
     const std::vector<const AnimStackFb *> *anim_stacks = nullptr,
@@ -3101,6 +3388,7 @@ inline flatbuffers::Offset<SceneFb> CreateSceneFbDirect(
       _fbb,
       version,
       transforms ? _fbb.CreateVector<const TransformFb *>(*transforms) : 0,
+      transforms_limits ? _fbb.CreateVector<const TransformLimitsFb *>(*transforms_limits) : 0,
       nodes ? _fbb.CreateVector<flatbuffers::Offset<NodeFb>>(*nodes) : 0,
       meshes ? _fbb.CreateVector<flatbuffers::Offset<MeshFb>>(*meshes) : 0,
       anim_stacks ? _fbb.CreateVector<const AnimStackFb *>(*anim_stacks) : 0,

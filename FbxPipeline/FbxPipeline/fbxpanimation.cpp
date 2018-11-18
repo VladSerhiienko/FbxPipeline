@@ -1,7 +1,10 @@
 #include <fbxppch.h>
 #include <fbxpstate.h>
 
-void BezierFitterFitSamples( FbxAnimCurve* pAnimCurve, int i, double& OutFittedBezier1, double& OutFittedBezier2 );
+void BezierFitterFitSamples( FbxAnimCurve* pAnimCurve,
+                             int           keyIndex,
+                             double&       OutFittedBezier1,
+                             double&       OutFittedBezier2 );
 
 template < int TCurveCount >
 void ApplyFilter( FbxAnimCurveFilter* pFilter, FbxAnimCurve** ppCurves ) {
@@ -161,32 +164,38 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
     }
 
     float resampleFramerate = 0;
-    bool  reduceKeys   = true;
+    bool  reduceKeys        = true;
     bool  reduceConstKeys   = true;
     bool  propertyCurveSync = false;
 
-    if (s.options[ "resample-framerate" ].count())
+    if ( s.options[ "resample-framerate" ].count( ) ) {
         resampleFramerate = s.options[ "resample-framerate" ].as< float >( );
+        resampleFramerate = std::min( resampleFramerate, 180.0f );
+        resampleFramerate = std::max( resampleFramerate, 1.0f );
+    }
 
-    if (s.options[ "sync-keys" ].count())
+    if ( s.options[ "sync-keys" ].count( ) )
         propertyCurveSync = s.options[ "sync-keys" ].as< bool >( );
 
-    if (s.options[ "reduce-keys" ].count())
+    if ( s.options[ "reduce-keys" ].count( ) )
         reduceKeys = s.options[ "reduce-keys" ].as< bool >( );
 
-    if (s.options[ "reduce-const-keys" ].count())
+    if ( s.options[ "reduce-const-keys" ].count( ) )
         reduceConstKeys = s.options[ "reduce-const-keys" ].as< bool >( );
 
     FbxAnimCurveFilterResample           resample;
     FbxAnimCurveFilterGimbleKiller       gimbleKiller;
     FbxAnimCurveFilterKeySync            keySync;
-    FbxAnimCurveFilterKeyReducer         keyReducer;
     FbxAnimCurveFilterConstantKeyReducer constantKeyReducer;
+
+    FbxAnimCurveFilterKeyReducer keyReducer;
+    keyReducer.SetPrecision( 1e-8 );
 
     FbxTime periodTime;
     if ( resampleFramerate > 0.0f ) {
-        auto milliseconds = 1.0f / resampleFramerate * 1000.0f;
-        periodTime.SetMilliSeconds( (FbxLongLong) milliseconds );
+        const FbxLongLong milliseconds = FbxLongLong( 1000.0f / resampleFramerate );
+        periodTime.SetMilliSeconds( milliseconds );
+        resample.SetPeriodTime( periodTime );
     }
 
     for ( int i = 0; i < animCurves.size( ); i += 3 ) {
@@ -231,7 +240,7 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
                                          pAnimCurve->GetName( ),
                                          keyCount,
                                          pAnimCurve->KeyGetCount( ) );}
-                
+
                 }
             }
 
@@ -249,7 +258,7 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
                 case apemodefb::EAnimCurvePropertyFb_PostRotation:
                     ApplyFilter< 3 >( &gimbleKiller, pAnimChannels );
                     break;
-                    
+
                 default:
                     break;
             }
@@ -272,7 +281,6 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
                 assert( stopTime == pAnimChannels[ 1 ]->KeyGet( keyCount - 1 ).GetTime( ) );
                 assert( stopTime == pAnimChannels[ 2 ]->KeyGet( keyCount - 1 ).GetTime( ) );
 
-                resample.SetPeriodTime( periodTime );
                 resample.SetStartTime( startTime );
                 resample.SetStopTime( stopTime );
 
@@ -349,26 +357,27 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
             auto pAnimLayer = pAnimCurveTuple.pAnimLayer;
             const int32_t keyCount   = pAnimCurve->KeyGetCount( );
 
-            uint32_t curveId = static_cast< uint32_t >( s.animCurves.size( ) );
+            const uint32_t curveId = static_cast< uint32_t >( s.animCurves.size( ) );
             s.animCurves.emplace_back( );
             n.curveIds.push_back( curveId );
 
             apemode::AnimCurve& curve = s.animCurves.back( );
-            curve.id                  = curveId;
-            curve.nameId              = s.PushValue( pAnimCurve->GetName( ) );
-            curve.property            = pAnimCurveTuple.eAnimCurveProperty;
-            curve.channel             = pAnimCurveTuple.eAnimCurveChannel;
-            curve.animStackId         = s.animStackDict[ pAnimStack->GetUniqueID( ) ];
-            curve.animLayerId         = s.animLayerDict[ pAnimLayer->GetUniqueID( ) ];
-            curve.nodeId              = n.id;
+
+            curve.id          = curveId;
+            curve.nodeId      = n.id;
+            curve.nameId      = s.PushValue( pAnimCurve->GetName( ) );
+            curve.property    = pAnimCurveTuple.eAnimCurveProperty;
+            curve.channel     = pAnimCurveTuple.eAnimCurveChannel;
+            curve.animStackId = s.animStackDict[ pAnimStack->GetUniqueID( ) ];
+            curve.animLayerId = s.animLayerDict[ pAnimLayer->GetUniqueID( ) ];
 
             curve.keys.resize( keyCount );
 
             /* Constant and linear modes */
             for ( int i = 0; i < keyCount; ++i ) {
-                auto& key         = curve.keys[ i ];
-                key.time          = static_cast< float >( pAnimCurve->KeyGetTime( i ).GetSecondDouble( ) );
-                key.value         = pAnimCurve->KeyGetValue( i );
+                auto& key = curve.keys[ i ];
+                key.time  = static_cast< float >( pAnimCurve->KeyGetTime( i ).GetSecondDouble( ) );
+                key.value = pAnimCurve->KeyGetValue( i );
 
                 switch ( pAnimCurve->KeyGetInterpolation( i ) ) {
                     case FbxAnimCurveDef::eInterpolationLinear: {
@@ -378,47 +387,46 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
                     case FbxAnimCurveDef::eInterpolationConstant: {
                         key.interpolationMode = apemodefb::EInterpolationModeFb_Const;
                         switch ( pAnimCurve->KeyGetConstantMode( i ) ) {
-                            case FbxAnimCurveDef::eConstantNext:
-                                if ( i < ( keyCount - 1 ) )
+                            case FbxAnimCurveDef::eConstantNext: {
+                                if ( i < ( keyCount - 1 ) ) {
                                     /* There is at least one key ahead. */
                                     key.value = pAnimCurve->KeyGetValue( i + 1 );
-                                break;
-                            default:
-                                break;
+                                }
+                            } break;
+
+                            default: {
+                            } break;
                         }
                     } break;
-                    
+
                     case FbxAnimCurveDef::eInterpolationCubic: {
-                        if (resampleFramerate > 0) {
+                        if ( resampleFramerate > 0 ) {
                             key.interpolationMode = apemodefb::EInterpolationModeFb_Linear;
                         }
                     } break;
                 }
             }
 
-            /* Cubic modes */
-            if (resampleFramerate > 0) {
+            /* Cubic modes (only for original curve keys) */
+            if ( resampleFramerate < std::numeric_limits< float >::epsilon( ) ) {
                 for ( int i = 0; i < keyCount; ++i ) {
                     auto& key = curve.keys[ i ];
                     switch ( pAnimCurve->KeyGetInterpolation( i ) ) {
                         case FbxAnimCurveDef::eInterpolationCubic: {
-                            key.interpolationMode = apemodefb::EInterpolationModeFb_Cubic;
-                            key.bez1              = 0;
-                            key.bez2              = 0;
 
                             if ( i < ( keyCount - 1 ) ) {
-                                key.interpolationMode = apemodefb::EInterpolationModeFb_Cubic;
-
                                 double fittedBezier1 = 1, fittedBezier2 = 1;
                                 BezierFitterFitSamples( pAnimCurve, i, fittedBezier1, fittedBezier2 );
-                                key.bez1 = (float) fittedBezier1;
-                                key.bez2 = (float) fittedBezier2;
+
+                                key.bez1              = static_cast< float >( fittedBezier1 );
+                                key.bez2              = static_cast< float >( fittedBezier2 );
+                                key.interpolationMode = apemodefb::EInterpolationModeFb_Cubic;
                             } else {
                                 key.interpolationMode = apemodefb::EInterpolationModeFb_Const;
                             }
 
                         } break;
-                        
+
                         default: {
                         } break;
                     }

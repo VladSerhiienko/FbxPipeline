@@ -79,9 +79,9 @@ namespace BezierFitter {
                                 const double                       P3X,
                                 const double                       P3Y,
                                 std::vector< BezierFitterSample >& samples ) {
-        
+
         size_t sampleCount = 0;
-        
+
         int endIndex = startIndex;
         for ( int i = startIndex; i < pAnimCurve->KeyGetCount( ); ++i, ++sampleCount ) {
             const double time = pAnimCurve->KeyGetTime( i ).GetSecondDouble( );
