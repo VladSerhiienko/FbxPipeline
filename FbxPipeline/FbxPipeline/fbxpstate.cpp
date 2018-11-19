@@ -258,6 +258,14 @@ bool apemode::State::Finalize( ) {
     console->info( "< Succeeded {} ", ToPrettySizeString( transformsOffset.o ) );
 
     //
+    // Finalize transform limits
+    //
+
+    console->info( "> Transform Limits" );
+    const auto transformLimitsOffset = builder.CreateVectorOfStructs( transformLimits );
+    console->info( "< Succeeded {} ", ToPrettySizeString( transformLimitsOffset.o ) );
+
+    //
     // Finalize nodes
     //
 
@@ -280,6 +288,8 @@ bool apemode::State::Finalize( ) {
             nodeBuilder.add_camera_id( node.cameraId );
             nodeBuilder.add_light_id( node.lightId );
             nodeBuilder.add_culling_type( node.cullingType );
+            nodeBuilder.add_rotation_order( node.rotationOrder );
+            nodeBuilder.add_inherit_type( node.inheritType );
             nodeBuilder.add_mesh_id( node.meshId );
             nodeBuilder.add_child_ids( childIdsOffset );
             nodeBuilder.add_anim_curve_ids( curveIdsOffset );
@@ -482,6 +492,7 @@ bool apemode::State::Finalize( ) {
     sceneBuilder.add_int_values( intsOffset );
     sceneBuilder.add_bool_values( boolsOffset );
     sceneBuilder.add_transforms( transformsOffset );
+    sceneBuilder.add_transforms_limits( transformLimitsOffset );
     sceneBuilder.add_nodes( nodesOffset );
     sceneBuilder.add_meshes( meshesOffset );
     sceneBuilder.add_textures( texturesOffset );

@@ -164,8 +164,8 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
     }
 
     float resampleFramerate = 0;
-    bool  reduceKeys        = true;
     bool  reduceConstKeys   = true;
+    bool  reduceKeys        = false;
     bool  propertyCurveSync = false;
 
     if ( s.options[ "resample-framerate" ].count( ) ) {
@@ -418,8 +418,8 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
                                 double fittedBezier1 = 1, fittedBezier2 = 1;
                                 BezierFitterFitSamples( pAnimCurve, i, fittedBezier1, fittedBezier2 );
 
-                                key.bez1              = static_cast< float >( fittedBezier1 );
-                                key.bez2              = static_cast< float >( fittedBezier2 );
+                                key.bez1 = static_cast< float >( fittedBezier1 );
+                                key.bez2 = static_cast< float >( fittedBezier2 );
                                 key.interpolationMode = apemodefb::EInterpolationModeFb_Cubic;
                             } else {
                                 key.interpolationMode = apemodefb::EInterpolationModeFb_Const;

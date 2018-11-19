@@ -79,6 +79,7 @@ void PopulateTransformLimits( FbxNode* pFbxNode, apemode::Node & n ) {
          pFbxNode->RotationMinX.Get( ) || pFbxNode->RotationMinY.Get( ) || pFbxNode->RotationMinZ.Get( ) ||
          pFbxNode->ScalingMaxX.Get( ) || pFbxNode->ScalingMaxY.Get( ) || pFbxNode->ScalingMaxZ.Get( ) ||
          pFbxNode->ScalingMinX.Get( ) || pFbxNode->ScalingMinY.Get( ) || pFbxNode->ScalingMinZ.Get( ) ) {
+        
         auto& s = apemode::State::Get( );
         s.console->info( "Node \"{}\" has transform limits.", pFbxNode->GetName( ) );
 
@@ -90,23 +91,20 @@ void PopulateTransformLimits( FbxNode* pFbxNode, apemode::Node & n ) {
 }
 
 void ExportTransform( FbxNode* pFbxNode, apemode::Node & n ) {
-
     auto & s = apemode::State::Get( );
 
-    apemodefb::TransformFb transform( Cast( pFbxNode->LclTranslation.Get( ) ),
-                                      Cast( pFbxNode->RotationOffset.Get( ) ),
-                                      Cast( pFbxNode->RotationPivot.Get( ) ),
-                                      Cast( pFbxNode->PreRotation.Get( ) ),
-                                      Cast( pFbxNode->PostRotation.Get( ) ),
-                                      Cast( pFbxNode->LclRotation.Get( ) ),
-                                      Cast( pFbxNode->ScalingOffset.Get( ) ),
-                                      Cast( pFbxNode->ScalingPivot.Get( ) ),
-                                      Cast( pFbxNode->LclScaling.Get( ) ),
-                                      Cast( pFbxNode->GeometricTranslation.Get( ) ),
-                                      Cast( pFbxNode->GeometricRotation.Get( ) ),
-                                      Cast( pFbxNode->GeometricScaling.Get( ) ) );
-
-    s.transforms.push_back( transform );
+    s.transforms.emplace_back(    Cast( pFbxNode->LclTranslation.Get( ) ),
+                                  Cast( pFbxNode->RotationOffset.Get( ) ),
+                                  Cast( pFbxNode->RotationPivot.Get( ) ),
+                                  Cast( pFbxNode->PreRotation.Get( ) ),
+                                  Cast( pFbxNode->PostRotation.Get( ) ),
+                                  Cast( pFbxNode->LclRotation.Get( ) ),
+                                  Cast( pFbxNode->ScalingOffset.Get( ) ),
+                                  Cast( pFbxNode->ScalingPivot.Get( ) ),
+                                  Cast( pFbxNode->LclScaling.Get( ) ),
+                                  Cast( pFbxNode->GeometricTranslation.Get( ) ),
+                                  Cast( pFbxNode->GeometricRotation.Get( ) ),
+                                  Cast( pFbxNode->GeometricScaling.Get( ) ) );
 
     PopulateTransformLimits( pFbxNode, n );
 }

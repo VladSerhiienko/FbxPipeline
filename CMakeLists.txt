@@ -371,6 +371,7 @@ if (WIN32)
 elseif(APPLE)
     set(
         third_party_libs
+        ${dlib_binary_dir}/dlib${CONFIGURATION_SUFFIX}/libdlib.a
         ${zlib_binary_dir}${CONFIGURATION_SUFFIX}/libz.a
         ${flatbuffers_binary_dir}${CONFIGURATION_SUFFIX}/libflatbuffers.a
         ${PYTHON_LIBRARY}

@@ -87,11 +87,27 @@ def find_name_by_name_id(state, name_id):
     else:
         return ""
 
+def strip_all_special_characters(string_with_special_chars):
+    return "".join(e for e in string_with_special_chars if e.isalnum())
+
 def find_material_index_by_name(state, gltf_material_name):
     for material_index, material in enumerate(state.materials):
         material_name = find_name_by_name_id(state, material.name_id)
         if (material_name == gltf_material_name):
             return material_index
+    
+    stripped_gltf_material_name = strip_all_special_characters(gltf_material_name)
+    for material_index, material in enumerate(state.materials):
+        material_name = find_name_by_name_id(state, material.name_id)
+        if (stripped_gltf_material_name == strip_all_special_characters(material_name)):
+            return material_index
+    
+    lower_stripped_gltf_material_name = stripped_gltf_material_name.lower()
+    for material_index, material in enumerate(state.materials):
+        material_name = find_name_by_name_id(state, material.name_id)
+        if (lower_stripped_gltf_material_name == strip_all_special_characters(material_name).lower()):
+            return material_index
+    
     return -1
 
 def gltf_material_json_to_material(state, gltf_material_json, gltf_texture_index_to_texture_index):
@@ -256,6 +272,7 @@ def gltf_export_materials(state, gltf_path):
             material_index = find_material_index_by_name(state, gltf_material_name)
             FbxPipeline.log_info("gltf material index: {}.".format(material_index))
 
+        # deprecated loop
         for gltf_material_json in gltf_materials_json:
             gltf_material_name = gltf_material_json["name"]
             material_index = find_material_index_by_name(state, gltf_material_name)
@@ -268,8 +285,15 @@ def gltf_export_materials(state, gltf_path):
 
             if material_index == -1:
                 gltf_material_name_underscores = gltf_material_name.replace(' ', '_')
-                FbxPipeline.log_info("Trying to map gltf material \"{}\" (with underscores).".format(gltf_material_name_underscores))
+                FbxPipeline.log_info("Trying to map gltf material \"{}\" (w/ underscores).".format(gltf_material_name_underscores))
                 material_index = find_material_index_by_name(state, gltf_material_name_underscores)
+                FbxPipeline.log_info("gltf material index: {}.".format(material_index))
+
+            if material_index == -1:
+                gltf_material_name_underscores_and_wo_colons = gltf_material_name.replace(' ', '_')
+                gltf_material_name_underscores_and_wo_colons = gltf_material_name_underscores_and_wo_colons.replace(":", "")
+                FbxPipeline.log_info("Trying to map gltf material \"{}\" (w/ underscores, w/o colons).".format(gltf_material_name_underscores))
+                material_index = find_material_index_by_name(state, gltf_material_name_underscores_and_wo_colons)
                 FbxPipeline.log_info("gltf material index: {}.".format(material_index))
 
             if material_index == -1 and len(gltf_materials_json) == 1 and len(state.materials) == 1:
