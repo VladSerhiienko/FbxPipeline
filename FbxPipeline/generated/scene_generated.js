@@ -1591,7 +1591,7 @@ apemodefb.AnimLayerFb.prototype.mutate_anim_stack_id = function(value) {
 /**
  * @returns {number}
  */
-apemodefb.AnimLayerFb.prototype.nameId = function() {
+apemodefb.AnimLayerFb.prototype.animStackIdx = function() {
   return this.bb.readUint32(this.bb_pos + 8);
 };
 
@@ -1599,8 +1599,30 @@ apemodefb.AnimLayerFb.prototype.nameId = function() {
  * @param {number} value
  * @returns {boolean}
  */
-apemodefb.AnimLayerFb.prototype.mutate_name_id = function(value) {
+apemodefb.AnimLayerFb.prototype.mutate_anim_stack_idx = function(value) {
   var offset = this.bb.__offset(this.bb_pos, 8);
+
+  if (offset === 0) {
+    return false;
+  }
+
+  this.bb.writeUint32(this.bb_pos + offset, value);
+  return true;
+};
+
+/**
+ * @returns {number}
+ */
+apemodefb.AnimLayerFb.prototype.nameId = function() {
+  return this.bb.readUint32(this.bb_pos + 12);
+};
+
+/**
+ * @param {number} value
+ * @returns {boolean}
+ */
+apemodefb.AnimLayerFb.prototype.mutate_name_id = function(value) {
+  var offset = this.bb.__offset(this.bb_pos, 12);
 
   if (offset === 0) {
     return false;
@@ -1614,12 +1636,14 @@ apemodefb.AnimLayerFb.prototype.mutate_name_id = function(value) {
  * @param {flatbuffers.Builder} builder
  * @param {number} id
  * @param {number} anim_stack_id
+ * @param {number} anim_stack_idx
  * @param {number} name_id
  * @returns {flatbuffers.Offset}
  */
-apemodefb.AnimLayerFb.createAnimLayerFb = function(builder, id, anim_stack_id, name_id) {
-  builder.prep(4, 12);
+apemodefb.AnimLayerFb.createAnimLayerFb = function(builder, id, anim_stack_id, anim_stack_idx, name_id) {
+  builder.prep(4, 16);
   builder.writeInt32(name_id);
+  builder.writeInt32(anim_stack_idx);
   builder.writeInt32(anim_stack_id);
   builder.writeInt32(id);
   return builder.offset();
@@ -5596,7 +5620,7 @@ apemodefb.SceneFb.prototype.animStacksLength = function() {
  */
 apemodefb.SceneFb.prototype.animLayers = function(index, obj) {
   var offset = this.bb.__offset(this.bb_pos, 16);
-  return offset ? (obj || new apemodefb.AnimLayerFb).__init(this.bb.__vector(this.bb_pos + offset) + index * 12, this.bb) : null;
+  return offset ? (obj || new apemodefb.AnimLayerFb).__init(this.bb.__vector(this.bb_pos + offset) + index * 16, this.bb) : null;
 };
 
 /**
@@ -5960,7 +5984,7 @@ apemodefb.SceneFb.addAnimLayers = function(builder, animLayersOffset) {
  * @param {number} numElems
  */
 apemodefb.SceneFb.startAnimLayersVector = function(builder, numElems) {
-  builder.startVector(12, numElems, 4);
+  builder.startVector(16, numElems, 4);
 };
 
 /**

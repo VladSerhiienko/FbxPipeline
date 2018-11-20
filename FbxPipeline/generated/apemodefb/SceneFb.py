@@ -127,7 +127,7 @@ class SceneFb(object):
         o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(16))
         if o != 0:
             x = self._tab.Vector(o)
-            x += flatbuffers.number_types.UOffsetTFlags.py_type(j) * 12
+            x += flatbuffers.number_types.UOffsetTFlags.py_type(j) * 16
             from .AnimLayerFb import AnimLayerFb
             obj = AnimLayerFb()
             obj.Init(self._tab.Bytes, x)
@@ -372,7 +372,7 @@ def SceneFbStartMeshesVector(builder, numElems): return builder.StartVector(4, n
 def SceneFbAddAnimStacks(builder, animStacks): builder.PrependUOffsetTRelativeSlot(5, flatbuffers.number_types.UOffsetTFlags.py_type(animStacks), 0)
 def SceneFbStartAnimStacksVector(builder, numElems): return builder.StartVector(8, numElems, 4)
 def SceneFbAddAnimLayers(builder, animLayers): builder.PrependUOffsetTRelativeSlot(6, flatbuffers.number_types.UOffsetTFlags.py_type(animLayers), 0)
-def SceneFbStartAnimLayersVector(builder, numElems): return builder.StartVector(12, numElems, 4)
+def SceneFbStartAnimLayersVector(builder, numElems): return builder.StartVector(16, numElems, 4)
 def SceneFbAddAnimCurves(builder, animCurves): builder.PrependUOffsetTRelativeSlot(7, flatbuffers.number_types.UOffsetTFlags.py_type(animCurves), 0)
 def SceneFbStartAnimCurvesVector(builder, numElems): return builder.StartVector(4, numElems, 4)
 def SceneFbAddMaterials(builder, materials): builder.PrependUOffsetTRelativeSlot(8, flatbuffers.number_types.UOffsetTFlags.py_type(materials), 0)

@@ -228,6 +228,7 @@ struct AnimStackFb {
 struct AnimLayerFb {
     id : uint;
     anim_stack_id : uint;
+    anim_stack_idx : uint;
     name_id : uint( key );
 }
 

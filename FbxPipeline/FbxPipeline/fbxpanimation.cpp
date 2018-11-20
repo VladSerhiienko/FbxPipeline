@@ -355,12 +355,17 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
         if ( auto pAnimCurve = pAnimCurveTuple.pAnimCurve ) {
             auto pAnimStack = pAnimCurveTuple.pAnimStack;
             auto pAnimLayer = pAnimCurveTuple.pAnimLayer;
-            const int32_t keyCount   = pAnimCurve->KeyGetCount( );
+
+            const int32_t keyCount = pAnimCurve->KeyGetCount( );
+            if ( keyCount < 1 ) {
+                s.console->warn( "Skipped \"{}\" curve: no keys to serialize.", pAnimCurve->GetName( ) );
+                continue;
+            }
 
             const uint32_t curveId = static_cast< uint32_t >( s.animCurves.size( ) );
-            s.animCurves.emplace_back( );
             n.curveIds.push_back( curveId );
 
+            s.animCurves.emplace_back( );
             apemode::AnimCurve& curve = s.animCurves.back( );
 
             curve.id          = curveId;

@@ -16,11 +16,14 @@ class AnimLayerFb(object):
     # AnimLayerFb
     def AnimStackId(self): return self._tab.Get(flatbuffers.number_types.Uint32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(4))
     # AnimLayerFb
-    def NameId(self): return self._tab.Get(flatbuffers.number_types.Uint32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(8))
+    def AnimStackIdx(self): return self._tab.Get(flatbuffers.number_types.Uint32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(8))
+    # AnimLayerFb
+    def NameId(self): return self._tab.Get(flatbuffers.number_types.Uint32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(12))
 
-def CreateAnimLayerFb(builder, id, animStackId, nameId):
-    builder.Prep(4, 12)
+def CreateAnimLayerFb(builder, id, animStackId, animStackIdx, nameId):
+    builder.Prep(4, 16)
     builder.PrependUint32(nameId)
+    builder.PrependUint32(animStackIdx)
     builder.PrependUint32(animStackId)
     builder.PrependUint32(id)
     return builder.Offset()

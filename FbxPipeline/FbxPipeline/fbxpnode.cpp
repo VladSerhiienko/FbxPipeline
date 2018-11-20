@@ -152,7 +152,7 @@ void PreprocessAnimation( FbxScene* pScene ) {
         s.animStacks.back( ).nameId = s.PushValue( pAnimStack->GetName( ) );
         s.animStacks.back( ).id = animStackId;
 
-        int animLayerCount = pAnimStack->GetMemberCount< FbxAnimLayer >( );
+        const int animLayerCount = pAnimStack->GetMemberCount< FbxAnimLayer >( );
         s.console->info( "\t> Animation Stack #{} \"{}\" has {} layers ", i, pAnimStack->GetName( ), animLayerCount );
 
         for ( int j = 0; j < animLayerCount; j++ ) {
@@ -178,9 +178,10 @@ void PreprocessAnimation( FbxScene* pScene ) {
             s.animLayerDict[ pAnimLayer->GetUniqueID( ) ] = animLayerId;
 
             s.animLayers.emplace_back( );
-            s.animLayers.back( ).id = animLayerId;
-            s.animLayers.back( ).nameId = s.PushValue( pAnimLayer->GetName( ) );
-            s.animLayers.back( ).animStackId = animStackId;
+            s.animLayers.back( ).id           = animLayerId;
+            s.animLayers.back( ).animStackId  = animStackId;
+            s.animLayers.back( ).animStackIdx = uint32_t( j );
+            s.animLayers.back( ).nameId       = s.PushValue( pAnimLayer->GetName( ) );
 
             s.console->info( "\t\t> Animation Layer #{} \"{}\"", j, pAnimLayer->GetName( ) );
         }

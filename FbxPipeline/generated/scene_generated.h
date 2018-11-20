@@ -1275,15 +1275,17 @@ MANUALLY_ALIGNED_STRUCT(4) AnimLayerFb FLATBUFFERS_FINAL_CLASS {
  private:
   uint32_t id_;
   uint32_t anim_stack_id_;
+  uint32_t anim_stack_idx_;
   uint32_t name_id_;
 
  public:
   AnimLayerFb() {
     memset(this, 0, sizeof(AnimLayerFb));
   }
-  AnimLayerFb(uint32_t _id, uint32_t _anim_stack_id, uint32_t _name_id)
+  AnimLayerFb(uint32_t _id, uint32_t _anim_stack_id, uint32_t _anim_stack_idx, uint32_t _name_id)
       : id_(flatbuffers::EndianScalar(_id)),
         anim_stack_id_(flatbuffers::EndianScalar(_anim_stack_id)),
+        anim_stack_idx_(flatbuffers::EndianScalar(_anim_stack_idx)),
         name_id_(flatbuffers::EndianScalar(_name_id)) {
   }
   uint32_t id() const {
@@ -1297,6 +1299,12 @@ MANUALLY_ALIGNED_STRUCT(4) AnimLayerFb FLATBUFFERS_FINAL_CLASS {
   }
   void mutate_anim_stack_id(uint32_t _anim_stack_id) {
     flatbuffers::WriteScalar(&anim_stack_id_, _anim_stack_id);
+  }
+  uint32_t anim_stack_idx() const {
+    return flatbuffers::EndianScalar(anim_stack_idx_);
+  }
+  void mutate_anim_stack_idx(uint32_t _anim_stack_idx) {
+    flatbuffers::WriteScalar(&anim_stack_idx_, _anim_stack_idx);
   }
   uint32_t name_id() const {
     return flatbuffers::EndianScalar(name_id_);
@@ -1312,7 +1320,7 @@ MANUALLY_ALIGNED_STRUCT(4) AnimLayerFb FLATBUFFERS_FINAL_CLASS {
     return static_cast<int>(key > val) - static_cast<int>(key < val);
   }
 };
-STRUCT_END(AnimLayerFb, 12);
+STRUCT_END(AnimLayerFb, 16);
 
 MANUALLY_ALIGNED_STRUCT(4) AnimCurveKeyFb FLATBUFFERS_FINAL_CLASS {
  private:

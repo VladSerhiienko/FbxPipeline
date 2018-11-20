@@ -318,7 +318,7 @@ bool apemode::State::Finalize( ) {
     std::vector< apemodefb::AnimLayerFb > layers;
     stacks.reserve( animLayers.size( ) );
     std::transform( animLayers.begin( ), animLayers.end( ), std::back_inserter( layers ), [&]( const AnimLayer& animLayer ) {
-        return apemodefb::AnimLayerFb( animLayer.id, animLayer.animStackId, animLayer.nameId );
+        return apemodefb::AnimLayerFb( animLayer.id, animLayer.animStackId, animLayer.animStackIdx, animLayer.nameId );
     } );
 
     const auto animLayersOffset = builder.CreateVectorOfStructs( layers );

@@ -92,6 +92,7 @@ namespace apemode {
         uint32_t id;
         uint32_t nameId;
         uint32_t animStackId;
+        uint32_t animStackIdx;
     };
 
     struct FBXPIPELINE_API AnimCurveKey {
