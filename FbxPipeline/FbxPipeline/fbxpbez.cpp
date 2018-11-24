@@ -3,7 +3,7 @@
 
 namespace BezierFitter {
     using namespace dlib;
-    
+
     // dlib reference fo the solver:
     // http://dlib.net/least_squares_ex.cpp.html
 
@@ -114,7 +114,7 @@ bool BezierFitterFitSamples( FbxAnimCurve* pAnimCurve,
                              double&       BezP2Y ) {
     std::vector< BezierFitter::BezierFitterSample > samples;
     BezierFitter::ExtractSamples( pAnimCurve, startIndex, BezP0X, BezP0Y, BezP3X, BezP3Y, samples );
-    
+
     auto & s = apemode::State::Get( );
     if ( !samples.empty( ) ) {
         auto params = BezierFitter::SolveBezier( std::move( samples ) );
@@ -124,7 +124,7 @@ bool BezierFitterFitSamples( FbxAnimCurve* pAnimCurve,
         s.console->debug( "Solved Bezier: {} {}", BezP1Y, BezP2Y );
         return true;
     }
-    
+
     s.console->error("Failed to find the samples for fitting the Bezier control points.");
     return false;
 }
@@ -132,7 +132,7 @@ bool BezierFitterFitSamples( FbxAnimCurve* pAnimCurve,
 void BezierFitterFitSamples( FbxAnimCurve* pAnimCurve, int keyIndex, double& OutFittedBezier1, double& OutFittedBezier2 ) {
     assert( pAnimCurve && ( keyIndex < ( pAnimCurve->KeyGetCount( ) - 1 ) ) );
     auto& s = apemode::State::Get( );
-    
+
     const FbxString copiedCurveName = pAnimCurve->GetNameOnly() + " [FbxPipeline-Copy]";
     if ( FbxAnimCurve* pCopiedAnimCurve = FbxAnimCurve::Create( s.manager, copiedCurveName.Buffer() ) ) {
         pCopiedAnimCurve->CopyFrom( *pAnimCurve );
