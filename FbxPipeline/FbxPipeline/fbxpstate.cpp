@@ -62,8 +62,10 @@ std::shared_ptr< spdlog::logger > CreateLogger( spdlog::level::level_enum lvl, s
         std::make_shared< spdlog::sinks::msvc_sink_mt >( ),
         std::make_shared< spdlog::sinks::simple_file_sink_mt >( logFile )
 #else
-        std::make_shared< spdlog::sinks::stdout_sink_mt >( ),
-        std::make_shared< spdlog::sinks::simple_file_sink_mt >( logFile )
+        std::make_shared< spdlog::sinks::stdout_sink_st >( ),
+        std::make_shared< spdlog::sinks::simple_file_sink_st >( logFile )
+        // std::make_shared< spdlog::sinks::stdout_sink_mt >( ),
+        // std::make_shared< spdlog::sinks::simple_file_sink_mt >( logFile )
 #endif
     };
 
@@ -292,6 +294,7 @@ bool apemode::State::Finalize( ) {
             nodeBuilder.add_inherit_type( node.inheritType );
             nodeBuilder.add_mesh_id( node.meshId );
             nodeBuilder.add_child_ids( childIdsOffset );
+            nodeBuilder.add_transform_limits_id( node.transformLimitsId );
             nodeBuilder.add_anim_curve_ids( curveIdsOffset );
             nodeOffsets.push_back( nodeBuilder.Finish( ) );
         }

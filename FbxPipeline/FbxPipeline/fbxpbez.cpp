@@ -3,16 +3,19 @@
 
 namespace BezierFitter {
     using namespace dlib;
+    
+    // dlib reference fo the solver:
+    // http://dlib.net/least_squares_ex.cpp.html
 
     typedef matrix< double, 3, 1 >                 BezierFitterInput;  // double t, P0, P3;
     typedef matrix< double, 2, 1 >                 BezierFitterParams; // double P1, P2;
     typedef std::pair< BezierFitterInput, double > BezierFitterSample; // double t, P0, P3 + Bt;
 
-    inline double Sq( double v ) {
+    inline double Squared( double v ) {
         return v * v;
     }
 
-    inline double Cb( double v ) {
+    inline double Cubed( double v ) {
         return v * v * v;
     }
 
@@ -22,7 +25,7 @@ namespace BezierFitter {
         const double P1 = params( 0 );
         const double P2 = params( 1 );
         const double P3 = input( 2 );
-        return Cb( 1.0 - t ) * P0 + 3 * Sq( 1.0 - t ) * t * P1 + 3 * ( 1.0 - t ) * Sq( t ) * P2 + Cb( t ) * P3;
+        return Cubed( 1.0 - t ) * P0 + 3 * Squared( 1.0 - t ) * t * P1 + 3 * ( 1.0 - t ) * Squared( t ) * P2 + Cubed( t ) * P3;
     }
 
     inline double BezierFitterResidual( const BezierFitterSample input, const BezierFitterParams params ) {
@@ -34,8 +37,8 @@ namespace BezierFitter {
                                                               const BezierFitterParams params ) {
         const double       t = input.first( 0 );
         BezierFitterParams derivative;
-        derivative( 0 ) = 3 * Sq( 1.0 - t ) * t;
-        derivative( 1 ) = 3 * ( 1.0 - t ) * Sq( t );
+        derivative( 0 ) = 3 * Squared( 1.0 - t ) * t;
+        derivative( 1 ) = 3 * ( 1.0 - t ) * Squared( t );
         return derivative;
     }
 
@@ -73,26 +76,15 @@ namespace BezierFitter {
     }
 
     static void ExtractSamples( FbxAnimCurve*                      pAnimCurve,
-                                const int                          startIndex,
+                                const int                          /*startIndex*/,
                                 const double                       P0X,
                                 const double                       P0Y,
                                 const double                       P3X,
                                 const double                       P3Y,
                                 std::vector< BezierFitterSample >& samples ) {
 
-        size_t sampleCount = 0;
-
-        int endIndex = startIndex;
-        for ( int i = startIndex; i < pAnimCurve->KeyGetCount( ); ++i, ++sampleCount ) {
-            const double time = pAnimCurve->KeyGetTime( i ).GetSecondDouble( );
-            if ( time >= P3X ) {
-                endIndex = i;
-                break;
-            }
-        }
-
-        samples.reserve( sampleCount );
-        for ( int i = startIndex; i < endIndex; ++i ) {
+        // TODO: Scan only the relevan region, break the loop when the end time is reached.
+        for ( int i = 0; i < pAnimCurve->KeyGetCount(); ++i ) {
             const double time = pAnimCurve->KeyGetTime( i ).GetSecondDouble( );
 
             if ( time >= P0X && time <= P3X ) {
@@ -107,16 +99,12 @@ namespace BezierFitter {
 
                 samples.push_back( sample );
             }
-
-            if ( time >= P3X ) {
-                break;
-            }
         }
     }
 
 } // namespace BezierFitter
 
-void BezierFitterFitSamples( FbxAnimCurve* pAnimCurve,
+bool BezierFitterFitSamples( FbxAnimCurve* pAnimCurve,
                              const int     startIndex,
                              const double  BezP0X,
                              const double  BezP0Y,
@@ -126,14 +114,27 @@ void BezierFitterFitSamples( FbxAnimCurve* pAnimCurve,
                              double&       BezP2Y ) {
     std::vector< BezierFitter::BezierFitterSample > samples;
     BezierFitter::ExtractSamples( pAnimCurve, startIndex, BezP0X, BezP0Y, BezP3X, BezP3Y, samples );
-    BezierFitter::SolveBezier( std::move( samples ) );
+    
+    auto & s = apemode::State::Get( );
+    if ( !samples.empty( ) ) {
+        auto params = BezierFitter::SolveBezier( std::move( samples ) );
+        BezP1Y = params( 0 );
+        BezP2Y = params( 1 );
+        s.console->debug( "Samples taken: {}", samples.size( ) );
+        s.console->debug( "Solved Bezier: {} {}", BezP1Y, BezP2Y );
+        return true;
+    }
+    
+    s.console->error("Failed to find the samples for fitting the Bezier control points.");
+    return false;
 }
 
 void BezierFitterFitSamples( FbxAnimCurve* pAnimCurve, int keyIndex, double& OutFittedBezier1, double& OutFittedBezier2 ) {
     assert( pAnimCurve && ( keyIndex < ( pAnimCurve->KeyGetCount( ) - 1 ) ) );
-
     auto& s = apemode::State::Get( );
-    if ( FbxAnimCurve* pCopiedAnimCurve = FbxAnimCurve::Create( s.manager, "[FbxPipeline-Copy]" ) ) {
+    
+    const FbxString copiedCurveName = pAnimCurve->GetNameOnly() + " [FbxPipeline-Copy]";
+    if ( FbxAnimCurve* pCopiedAnimCurve = FbxAnimCurve::Create( s.manager, copiedCurveName.Buffer() ) ) {
         pCopiedAnimCurve->CopyFrom( *pAnimCurve );
 
         auto resampleStartTime = pAnimCurve->KeyGet( keyIndex ).GetTime( );
@@ -146,7 +147,6 @@ void BezierFitterFitSamples( FbxAnimCurve* pAnimCurve, int keyIndex, double& Out
         animCurveFilterResample.SetPeriodTime( resamplePeriodTime );
         animCurveFilterResample.SetStartTime( resampleStartTime );
         animCurveFilterResample.SetStopTime( resampleStopTime );
-
         animCurveFilterResample.Apply( *pCopiedAnimCurve );
 
         BezierFitterFitSamples( pCopiedAnimCurve,

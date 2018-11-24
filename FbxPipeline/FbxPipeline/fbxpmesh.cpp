@@ -901,32 +901,57 @@ void ExportMesh( FbxNode*       pNode,
                     skinInfos[ pIndices[ j ] ].AddBone( (float) pWeights[ j ], boneIndex );
                     // s.console->debug( "\t [{}] += {} ({})", pIndices[ j ], boneIndex, pWeights[ j ] );
                 }
+
+                /* TODO: The bind pose matrix must be calculated in the application. */
+
+                FbxAMatrix bindPoseMatrix;
+                pCluster->GetTransformLinkMatrix( bindPoseMatrix );
+                s.console->info( "\t TransformLinkMatrix (link node id = {}):", linkNodeId );
+                s.console->info( "\t\t {} {} {} {}",
+                                 (float) bindPoseMatrix.Get( 0, 0 ),
+                                 (float) bindPoseMatrix.Get( 0, 1 ),
+                                 (float) bindPoseMatrix.Get( 0, 2 ),
+                                 (float) bindPoseMatrix.Get( 0, 3 ) );
+                s.console->info( "\t\t {} {} {} {}",
+                                 (float) bindPoseMatrix.Get( 1, 0 ),
+                                 (float) bindPoseMatrix.Get( 1, 1 ),
+                                 (float) bindPoseMatrix.Get( 1, 2 ),
+                                 (float) bindPoseMatrix.Get( 1, 3 ) );
+                s.console->info( "\t\t {} {} {} {}",
+                                 (float) bindPoseMatrix.Get( 2, 0 ),
+                                 (float) bindPoseMatrix.Get( 2, 1 ),
+                                 (float) bindPoseMatrix.Get( 2, 2 ),
+                                 (float) bindPoseMatrix.Get( 2, 3 ) );
+                s.console->info( "\t\t {} {} {} {}",
+                                 (float) bindPoseMatrix.Get( 3, 0 ),
+                                 (float) bindPoseMatrix.Get( 3, 1 ),
+                                 (float) bindPoseMatrix.Get( 3, 2 ),
+                                 (float) bindPoseMatrix.Get( 3, 3 ) );
+
+                FbxAMatrix transformMatrix;
+                pCluster->GetTransformMatrix( transformMatrix );
+                s.console->info( "\t TransformMatrix (link node id = {}):", linkNodeId );
+                s.console->info( "\t\t {} {} {} {}",
+                                 (float) transformMatrix.Get( 0, 0 ),
+                                 (float) transformMatrix.Get( 0, 1 ),
+                                 (float) transformMatrix.Get( 0, 2 ),
+                                 (float) transformMatrix.Get( 0, 3 ) );
+                s.console->info( "\t\t {} {} {} {}",
+                                 (float) transformMatrix.Get( 1, 0 ),
+                                 (float) transformMatrix.Get( 1, 1 ),
+                                 (float) transformMatrix.Get( 1, 2 ),
+                                 (float) transformMatrix.Get( 1, 3 ) );
+                s.console->info( "\t\t {} {} {} {}",
+                                 (float) transformMatrix.Get( 2, 0 ),
+                                 (float) transformMatrix.Get( 2, 1 ),
+                                 (float) transformMatrix.Get( 2, 2 ),
+                                 (float) transformMatrix.Get( 2, 3 ) );
+                s.console->info( "\t\t {} {} {} {}",
+                                 (float) transformMatrix.Get( 3, 0 ),
+                                 (float) transformMatrix.Get( 3, 1 ),
+                                 (float) transformMatrix.Get( 3, 2 ),
+                                 (float) transformMatrix.Get( 3, 3 ) );
             }
-
-            /* TODO: The bind pose matrix must be calculated in the application. */
-
-            /*
-            FbxMatrix transformLinkMatrix;
-            pCluster->GetTransformLinkMatrix( transformLinkMatrix );
-            apemode::SkinLink skinLink;
-            skinLink.linkFbxId = pCluster->GetLink( )->GetUniqueID( );
-            skinLink.transformLinkMatrix = apemodefb::mat4( apemodefb::vec4( (float) transformLinkMatrix.Get( 0, 0 ),
-                                                                             (float) transformLinkMatrix.Get( 0, 1 ),
-                                                                             (float) transformLinkMatrix.Get( 0, 2 ),
-                                                                             (float) transformLinkMatrix.Get( 0, 3 ) ),
-                                                            apemodefb::vec4( (float) transformLinkMatrix.Get( 1, 0 ),
-                                                                             (float) transformLinkMatrix.Get( 1, 1 ),
-                                                                             (float) transformLinkMatrix.Get( 1, 2 ),
-                                                                             (float) transformLinkMatrix.Get( 1, 3 ) ),
-                                                            apemodefb::vec4( (float) transformLinkMatrix.Get( 2, 0 ),
-                                                                             (float) transformLinkMatrix.Get( 2, 1 ),
-                                                                             (float) transformLinkMatrix.Get( 2, 2 ),
-                                                                             (float) transformLinkMatrix.Get( 2, 3 ) ),
-                                                            apemodefb::vec4( (float) transformLinkMatrix.Get( 3, 0 ),
-                                                                             (float) transformLinkMatrix.Get( 3, 1 ),
-                                                                             (float) transformLinkMatrix.Get( 3, 2 ),
-                                                                             (float) transformLinkMatrix.Get( 3, 3 ) ) );
-                                                                             */
         }
 
         #if 0

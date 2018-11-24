@@ -11,18 +11,30 @@ void ExportAnimation( FbxNode* node, apemode::Node& n );
 void ExportCamera( FbxNode* node, apemode::Node& n );
 void ExportLight( FbxNode* node, apemode::Node& n );
 
+const char* GetPivotStateString( FbxNode::EPivotState eState ) {
+    return eState == FbxNode::ePivotActive ? "PivotActive" : "PivotReference";
+}
+const char* GetPivotSetString( FbxNode::EPivotSet eState ) {
+    return eState == FbxNode::eSourcePivot ? "SourcePivot" : "DestinationPivot";
+}
+
 void ExportNodeAttributes( FbxNode* node, apemode::Node& n ) {
     auto& s = apemode::State::Get( );
 
-    n.cullingType   = (apemodefb::ECullingTypeFb) node->mCullingType;
-    n.inheritType   = (apemodefb::EInheritTypeFb) node->InheritType.Get( );
-    n.rotationOrder = (apemodefb::ERotationOrderFb) node->RotationOrder.Get( );
+    n.cullingType = (apemodefb::ECullingTypeFb) node->mCullingType;
+    node->GetTransformationInheritType( (FbxTransform::EInheritType&) n.inheritType );
+    node->GetRotationOrder( FbxNode::eSourcePivot, (FbxEuler::EOrder&) n.rotationOrder );
 
-    s.console->info( "Node \"{}\" has culling: {}, inherit type: {}, rotation order: {}.",
-                     node->GetName( ),
-                     apemodefb::EnumNameECullingTypeFb( n.cullingType ),
-                     apemodefb::EnumNameEInheritTypeFb( n.inheritType ),
-                     apemodefb::EnumNameERotationOrderFb( n.rotationOrder ) );
+    // auto& pivots = node->GetPivots( );
+    FbxNode::EPivotState srcPivotState, dstPivotState;
+    node->GetPivotState( FbxNode::EPivotSet::eDestinationPivot, dstPivotState );
+    node->GetPivotState( FbxNode::EPivotSet::eSourcePivot, srcPivotState );
+
+    s.console->info( "\tCulling: {}", apemodefb::EnumNameECullingTypeFb( n.cullingType ) );
+    s.console->info( "\tInherit type: {}", apemodefb::EnumNameEInheritTypeFb( n.inheritType ) );
+    s.console->info( "\tRotation order: {}", apemodefb::EnumNameERotationOrderFb( n.rotationOrder ) );
+    s.console->info( "\tSrc pivot state: {}", GetPivotStateString( srcPivotState ) );
+    s.console->info( "\tDst pivot state: {}", GetPivotStateString( dstPivotState ) );
 
     ExportTransform( node, n );
     ExportAnimation( node, n );
@@ -36,7 +48,7 @@ uint32_t ExportNode( FbxNode* node ) {
 
     s.console->info( "" );
     s.console->info( "" );
-    s.console->info( "ExportNode: {}", node->GetName() );
+    s.console->info( "ExportNode: {}", node->GetName( ) );
 
     if ( false == node->GetObjectFlags( FbxObject::EObjectFlag::eHidden ) ) {
         const uint32_t nodeId = static_cast< uint32_t >( s.nodes.size( ) );

@@ -164,14 +164,14 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
     }
 
     float resampleFramerate = 0;
-    bool  reduceConstKeys   = true;
+    bool  reduceConstKeys   = false;
     bool  reduceKeys        = false;
     bool  propertyCurveSync = false;
 
     if ( s.options[ "resample-framerate" ].count( ) ) {
         resampleFramerate = s.options[ "resample-framerate" ].as< float >( );
         resampleFramerate = std::min( resampleFramerate, 180.0f );
-        resampleFramerate = std::max( resampleFramerate, 1.0f );
+        resampleFramerate = std::max( resampleFramerate, 0.0f );
     }
 
     if ( s.options[ "sync-keys" ].count( ) )
@@ -415,10 +415,10 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
             /* Cubic modes (only for original curve keys) */
             if ( resampleFramerate < std::numeric_limits< float >::epsilon( ) ) {
                 for ( int i = 0; i < keyCount; ++i ) {
-                    auto& key = curve.keys[ i ];
                     switch ( pAnimCurve->KeyGetInterpolation( i ) ) {
                         case FbxAnimCurveDef::eInterpolationCubic: {
 
+                            auto& key = curve.keys[ i ];
                             if ( i < ( keyCount - 1 ) ) {
                                 double fittedBezier1 = 1, fittedBezier2 = 1;
                                 BezierFitterFitSamples( pAnimCurve, i, fittedBezier1, fittedBezier2 );
