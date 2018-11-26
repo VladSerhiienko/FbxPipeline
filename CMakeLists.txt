@@ -299,6 +299,20 @@ file(
     ${CMAKE_SOURCE_DIR}/FbxPipeline/scripts/*
 )
 
+add_custom_command(
+    TARGET
+    FbxPipeline
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory
+    ${CMAKE_BINARY_DIR}/Debug
+)
+add_custom_command(
+    TARGET
+    FbxPipeline
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory
+    ${CMAKE_BINARY_DIR}/Release
+)
 foreach( fbxpipeline_script ${fbxpipeline_scripts} )
     message(STATUS "Adding ${fbxpipeline_script} to script directory")
     add_custom_command(

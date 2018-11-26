@@ -200,23 +200,26 @@ void PreprocessAnimation( FbxScene* pScene ) {
     }
 }
 
-FBXPIPELINE_API void ExportScene( FbxScene* scene ) {
+FBXPIPELINE_API void ExportScene( FbxScene* pScene ) {
     auto& s = apemode::State::Get( );
     InitializeSeachLocations( );
 
     // Pre-allocate nodes and attributes.
-    s.nodes.reserve( (size_t) scene->GetNodeCount( ) );
-    s.meshes.reserve( (size_t) scene->GetNodeCount( ) );
+    s.nodes.reserve( (size_t) pScene->GetNodeCount( ) );
+    s.meshes.reserve( (size_t) pScene->GetNodeCount( ) );
+
+    FbxAxisSystem::MayaYUp.ConvertScene( pScene );
+    //FbxAxisSystem::DirectX.ConvertScene( pScene );
 
     // We want shared materials, so export all the scene material first
     // and reference them from the node scope by their indices.
-    ExportMaterials( scene );
+    ExportMaterials( pScene );
 
     // Export nodes recursively.
-    PreprocessAnimation( scene );
-    ExportNode( scene->GetRootNode( ) );
+    PreprocessAnimation( pScene );
+    ExportNode( pScene->GetRootNode( ) );
 
     // Export meshes.
-    PreprocessMeshes( scene );
-    ExportMeshes( scene->GetRootNode( ) );
+    PreprocessMeshes( pScene );
+    ExportMeshes( pScene->GetRootNode( ) );
 }

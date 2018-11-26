@@ -2,7 +2,7 @@
 namespace apemodefb;
 
 enum EVersionFb : ubyte {
-    Value = 8
+    Value = 9
 }
 
 enum ECullingTypeFb : ubyte
@@ -339,6 +339,8 @@ struct TransformLimitsFb {
 table SkinFb {
     name_id : uint( key );
     links_ids : [uint];
+    transform_link_matrices : [Mat4Fb];
+    transform_matrices : [Mat4Fb];
 }
 
 table MeshFb {

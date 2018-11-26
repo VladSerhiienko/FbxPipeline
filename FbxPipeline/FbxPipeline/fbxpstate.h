@@ -23,9 +23,32 @@ namespace apemode {
         return const_cast< TMutable& >( v );
     }
 
+    inline apemodefb::Mat4Fb Cast( const FbxAMatrix m ) {
+        apemodefb::Mat4Fb mm;
+        mm.mutable_x( ).mutate_x( m.Buffer( )[ 0 ].Buffer( )[ 0 ] );
+        mm.mutable_x( ).mutate_y( m.Buffer( )[ 0 ].Buffer( )[ 1 ] );
+        mm.mutable_x( ).mutate_z( m.Buffer( )[ 0 ].Buffer( )[ 2 ] );
+        mm.mutable_x( ).mutate_w( m.Buffer( )[ 0 ].Buffer( )[ 3 ] );
+        mm.mutable_y( ).mutate_x( m.Buffer( )[ 1 ].Buffer( )[ 0 ] );
+        mm.mutable_y( ).mutate_y( m.Buffer( )[ 1 ].Buffer( )[ 1 ] );
+        mm.mutable_y( ).mutate_z( m.Buffer( )[ 1 ].Buffer( )[ 2 ] );
+        mm.mutable_y( ).mutate_w( m.Buffer( )[ 1 ].Buffer( )[ 3 ] );
+        mm.mutable_z( ).mutate_x( m.Buffer( )[ 2 ].Buffer( )[ 0 ] );
+        mm.mutable_z( ).mutate_y( m.Buffer( )[ 2 ].Buffer( )[ 1 ] );
+        mm.mutable_z( ).mutate_z( m.Buffer( )[ 2 ].Buffer( )[ 2 ] );
+        mm.mutable_z( ).mutate_w( m.Buffer( )[ 2 ].Buffer( )[ 3 ] );
+        mm.mutable_w( ).mutate_x( m.Buffer( )[ 3 ].Buffer( )[ 0 ] );
+        mm.mutable_w( ).mutate_y( m.Buffer( )[ 3 ].Buffer( )[ 1 ] );
+        mm.mutable_w( ).mutate_z( m.Buffer( )[ 3 ].Buffer( )[ 2 ] );
+        mm.mutable_w( ).mutate_w( m.Buffer( )[ 3 ].Buffer( )[ 3 ] );
+        return mm;
+    }
+
     struct FBXPIPELINE_API Skin {
-        uint32_t                nameId = (uint64_t) 0;
-        std::vector< uint32_t > linkIds;
+        uint32_t                         nameId = (uint64_t) 0;
+        std::vector< uint32_t >          linkIds;
+        std::vector< apemodefb::Mat4Fb > transformLinkMatrices;
+        std::vector< apemodefb::Mat4Fb > transformMatrices;
     };
 
     /**

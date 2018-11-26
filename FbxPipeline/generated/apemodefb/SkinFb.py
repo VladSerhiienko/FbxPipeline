@@ -47,8 +47,50 @@ class SkinFb(object):
             return self._tab.VectorLen(o)
         return 0
 
-def SkinFbStart(builder): builder.StartObject(2)
+    # SkinFb
+    def TransformLinkMatrices(self, j):
+        o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(8))
+        if o != 0:
+            x = self._tab.Vector(o)
+            x += flatbuffers.number_types.UOffsetTFlags.py_type(j) * 64
+            from .Mat4Fb import Mat4Fb
+            obj = Mat4Fb()
+            obj.Init(self._tab.Bytes, x)
+            return obj
+        return None
+
+    # SkinFb
+    def TransformLinkMatricesLength(self):
+        o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(8))
+        if o != 0:
+            return self._tab.VectorLen(o)
+        return 0
+
+    # SkinFb
+    def TransformMatrices(self, j):
+        o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(10))
+        if o != 0:
+            x = self._tab.Vector(o)
+            x += flatbuffers.number_types.UOffsetTFlags.py_type(j) * 64
+            from .Mat4Fb import Mat4Fb
+            obj = Mat4Fb()
+            obj.Init(self._tab.Bytes, x)
+            return obj
+        return None
+
+    # SkinFb
+    def TransformMatricesLength(self):
+        o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(10))
+        if o != 0:
+            return self._tab.VectorLen(o)
+        return 0
+
+def SkinFbStart(builder): builder.StartObject(4)
 def SkinFbAddNameId(builder, nameId): builder.PrependUint32Slot(0, nameId, 0)
 def SkinFbAddLinksIds(builder, linksIds): builder.PrependUOffsetTRelativeSlot(1, flatbuffers.number_types.UOffsetTFlags.py_type(linksIds), 0)
 def SkinFbStartLinksIdsVector(builder, numElems): return builder.StartVector(4, numElems, 4)
+def SkinFbAddTransformLinkMatrices(builder, transformLinkMatrices): builder.PrependUOffsetTRelativeSlot(2, flatbuffers.number_types.UOffsetTFlags.py_type(transformLinkMatrices), 0)
+def SkinFbStartTransformLinkMatricesVector(builder, numElems): return builder.StartVector(64, numElems, 4)
+def SkinFbAddTransformMatrices(builder, transformMatrices): builder.PrependUOffsetTRelativeSlot(3, flatbuffers.number_types.UOffsetTFlags.py_type(transformMatrices), 0)
+def SkinFbStartTransformMatricesVector(builder, numElems): return builder.StartVector(64, numElems, 4)
 def SkinFbEnd(builder): return builder.EndObject()

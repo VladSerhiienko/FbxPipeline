@@ -396,7 +396,11 @@ bool apemode::State::Finalize( ) {
 
     std::transform( skins.begin( ), skins.end( ), std::back_inserter( skinOffsets ), [&]( const Skin& skin ) {
         console->info( "+ link ids: {} ", skin.linkIds.size( ) );
-        return apemodefb::CreateSkinFb( builder, skin.nameId, builder.CreateVector( skin.linkIds ) );
+        return apemodefb::CreateSkinFb( builder,
+                                        skin.nameId,
+                                        builder.CreateVector( skin.linkIds ),
+                                        builder.CreateVectorOfStructs( skin.transformLinkMatrices ),
+                                        builder.CreateVectorOfStructs( skin.transformMatrices ) );
     } );
 
     auto skinsOffset = builder.CreateVector( skinOffsets );
