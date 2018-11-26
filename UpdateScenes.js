@@ -38,6 +38,7 @@ while (childDirectories.length > 0) {
 
 var commands = [];
 var commandArgExamples = [];
+
 if (process.platform == 'win32') {
     commands.push('cd ./build_windows_amd64_msvc/Release/');
 } else if (process.platform == 'darwin') {
@@ -46,11 +47,14 @@ if (process.platform == 'win32') {
     commands.push('cd build_linux_x86_64_gnu/Release');
 }
 
+commands.push('mkdir "' + modelsPath + splitter + 'FbxPipeline"');
+commands.push('mkdir "' + modelsPath + splitter + 'Logs"');
+
 fs.mkdirIfExistsSync = function (dir) {
     if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir);
-    }
-}
+    }``
+};
 
 if (process.platform == 'win32') {
     fs.mkdirIfExistsSync(modelsPath + '\\FbxPipeline');
@@ -67,7 +71,7 @@ sceneSrcFiles.forEach(function (sceneSrcFile) {
 
     if (sceneSrcDirectoryName === 'source') {
         var sceneBaseDirectory = path.dirname(sceneSrcDirectory);
-        var glTFSceneFile = sceneBaseDirectory + '\\scene.gltf';
+        var glTFSceneFile = sceneBaseDirectory + splitter + 'scene.gltf';
         if (fs.existsSync(glTFSceneFile)) {
             // var sceneName = path.parse(sceneSrcFile).name;
             var sceneName = path.parse(sceneBaseDirectory).name;
@@ -78,6 +82,9 @@ sceneSrcFiles.forEach(function (sceneSrcFile) {
             // -o "C:/Sources/Models/FbxPipeline/bristleback-dota-fan-art-cubic.fbxp" --resample-framerate 0
             // -l "C:/Sources/Models/Logs/bristleback-dota-fan-art-cubic.txt" -e "C:/Sources/Models/bristleback-dota-fan-art/**"
             // --script-file "glTFMaterialExtension.py" --script-input "C:/Sources/Models/bristleback-dota-fan-art/scene.gltf"
+
+            // --assets /Users/vlad.serhiienko/Projects/Home/Viewer/assets/** --scene
+            // /Users/vlad.serhiienko/Projects/Home/Models/FbxPipeline/bristleback-dota-fan-art.fbxp
 
             if (process.platform == 'win32') {
                 var currentCommandPS = '';
@@ -100,6 +107,7 @@ sceneSrcFiles.forEach(function (sceneSrcFile) {
                 currentCommandSH += ' --script-file glTFMaterialExtension.py';
                 currentCommandSH += ' --script-input "' + glTFSceneFile + '"';
                 commands.push(currentCommandSH);
+                commandArgExamples.push('--assets /Users/vlad.serhiienko/Projects/Home/Viewer/assets/** --scene "' + modelsPath + '/FbxPipeline/' + sceneName + '.fbxp"');
             }
         }
     }
@@ -110,4 +118,5 @@ if (process.platform == 'win32') {
     fs.writeFileSync("CommandArgExamples", commandArgExamples.join('\n'));
 } else {
     fs.writeFileSync("UpdateScenes.gen.sh", commands.join('\n'));
+    fs.writeFileSync("CommandArgExamples", commandArgExamples.join('\n'));
 }
