@@ -92,6 +92,7 @@ void PopulateTransformLimits( FbxNode* pFbxNode, apemode::Node& n ) {
 inline void LogIfNotEqual( const FbxVector4& v, const FbxVector4& compare, const char* name ) {
     if ( v == compare )
         return;
+
     auto& s = apemode::State::Get( );
     s.console->warn( "{}: ({} {} {})", name, v[ 0 ], v[ 1 ], v[ 2 ] );
 }
@@ -115,7 +116,7 @@ void ExportTransform( FbxNode* pFbxNode, apemode::Node& n ) {
     LOG_IF_NOT_EQUAL_OFFSET_PROPERTY( GeometricTranslation, kFbxZero );
     LOG_IF_NOT_EQUAL_OFFSET_PROPERTY( GeometricRotation, kFbxZero );
 #undef LOG_IF_NOT_EQUAL_OFFSET_PROPERTY
-    
+
 
     s.transforms.emplace_back( Cast( pFbxNode->LclTranslation.Get( ) ),
                                Cast( pFbxNode->GetRotationOffset( FbxNode::eSourcePivot ) ),
