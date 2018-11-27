@@ -19,6 +19,15 @@ enum EInheritTypeFb : ubyte
 	Rrs
 }
 
+enum ESkeletonTypeFb : ubyte
+{
+	Root,
+	Limb,
+	LimbNode,
+	Effector,
+	None,
+}
+
 enum ERotationOrderFb : ubyte
 {
 	EulerXYZ,
@@ -399,6 +408,7 @@ table NodeFb {
 	culling_type : ECullingTypeFb;
 	inherit_type : EInheritTypeFb;
 	rotation_order : ERotationOrderFb;
+	skeleton_type : ESkeletonTypeFb;
     child_ids : [uint];
     anim_curve_ids : [uint];
 }

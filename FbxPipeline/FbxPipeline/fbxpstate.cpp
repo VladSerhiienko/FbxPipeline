@@ -292,6 +292,7 @@ bool apemode::State::Finalize( ) {
             nodeBuilder.add_culling_type( node.cullingType );
             nodeBuilder.add_rotation_order( node.rotationOrder );
             nodeBuilder.add_inherit_type( node.inheritType );
+            nodeBuilder.add_skeleton_type( node.skeletonType );
             nodeBuilder.add_mesh_id( node.meshId );
             nodeBuilder.add_child_ids( childIdsOffset );
             nodeBuilder.add_transform_limits_id( node.transformLimitsId );

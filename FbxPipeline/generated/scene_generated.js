@@ -34,6 +34,17 @@ apemodefb.EInheritTypeFb = {
 /**
  * @enum
  */
+apemodefb.ESkeletonTypeFb = {
+  Root: 0,
+  Limb: 1,
+  LimbNode: 2,
+  Effector: 3,
+  None: 4
+};
+
+/**
+ * @enum
+ */
 apemodefb.ERotationOrderFb = {
   EulerXYZ: 0,
   EulerXZY: 1,
@@ -5163,11 +5174,34 @@ apemodefb.NodeFb.prototype.mutate_rotation_order = function(value) {
 };
 
 /**
+ * @returns {apemodefb.ESkeletonTypeFb}
+ */
+apemodefb.NodeFb.prototype.skeletonType = function() {
+  var offset = this.bb.__offset(this.bb_pos, 22);
+  return offset ? /** @type {apemodefb.ESkeletonTypeFb} */ (this.bb.readUint8(this.bb_pos + offset)) : apemodefb.ESkeletonTypeFb.Root;
+};
+
+/**
+ * @param {apemodefb.ESkeletonTypeFb} value
+ * @returns {boolean}
+ */
+apemodefb.NodeFb.prototype.mutate_skeleton_type = function(value) {
+  var offset = this.bb.__offset(this.bb_pos, 22);
+
+  if (offset === 0) {
+    return false;
+  }
+
+  this.bb.writeUint8(this.bb_pos + offset, value);
+  return true;
+};
+
+/**
  * @param {number} index
  * @returns {number}
  */
 apemodefb.NodeFb.prototype.childIds = function(index) {
-  var offset = this.bb.__offset(this.bb_pos, 22);
+  var offset = this.bb.__offset(this.bb_pos, 24);
   return offset ? this.bb.readUint32(this.bb.__vector(this.bb_pos + offset) + index * 4) : 0;
 };
 
@@ -5175,7 +5209,7 @@ apemodefb.NodeFb.prototype.childIds = function(index) {
  * @returns {number}
  */
 apemodefb.NodeFb.prototype.childIdsLength = function() {
-  var offset = this.bb.__offset(this.bb_pos, 22);
+  var offset = this.bb.__offset(this.bb_pos, 24);
   return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
 };
 
@@ -5183,7 +5217,7 @@ apemodefb.NodeFb.prototype.childIdsLength = function() {
  * @returns {Uint32Array}
  */
 apemodefb.NodeFb.prototype.childIdsArray = function() {
-  var offset = this.bb.__offset(this.bb_pos, 22);
+  var offset = this.bb.__offset(this.bb_pos, 24);
   return offset ? new Uint32Array(this.bb.bytes().buffer, this.bb.bytes().byteOffset + this.bb.__vector(this.bb_pos + offset), this.bb.__vector_len(this.bb_pos + offset)) : null;
 };
 
@@ -5192,7 +5226,7 @@ apemodefb.NodeFb.prototype.childIdsArray = function() {
  * @returns {number}
  */
 apemodefb.NodeFb.prototype.animCurveIds = function(index) {
-  var offset = this.bb.__offset(this.bb_pos, 24);
+  var offset = this.bb.__offset(this.bb_pos, 26);
   return offset ? this.bb.readUint32(this.bb.__vector(this.bb_pos + offset) + index * 4) : 0;
 };
 
@@ -5200,7 +5234,7 @@ apemodefb.NodeFb.prototype.animCurveIds = function(index) {
  * @returns {number}
  */
 apemodefb.NodeFb.prototype.animCurveIdsLength = function() {
-  var offset = this.bb.__offset(this.bb_pos, 24);
+  var offset = this.bb.__offset(this.bb_pos, 26);
   return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
 };
 
@@ -5208,7 +5242,7 @@ apemodefb.NodeFb.prototype.animCurveIdsLength = function() {
  * @returns {Uint32Array}
  */
 apemodefb.NodeFb.prototype.animCurveIdsArray = function() {
-  var offset = this.bb.__offset(this.bb_pos, 24);
+  var offset = this.bb.__offset(this.bb_pos, 26);
   return offset ? new Uint32Array(this.bb.bytes().buffer, this.bb.bytes().byteOffset + this.bb.__vector(this.bb_pos + offset), this.bb.__vector_len(this.bb_pos + offset)) : null;
 };
 
@@ -5216,7 +5250,7 @@ apemodefb.NodeFb.prototype.animCurveIdsArray = function() {
  * @param {flatbuffers.Builder} builder
  */
 apemodefb.NodeFb.startNodeFb = function(builder) {
-  builder.startObject(11);
+  builder.startObject(12);
 };
 
 /**
@@ -5293,10 +5327,18 @@ apemodefb.NodeFb.addRotationOrder = function(builder, rotationOrder) {
 
 /**
  * @param {flatbuffers.Builder} builder
+ * @param {apemodefb.ESkeletonTypeFb} skeletonType
+ */
+apemodefb.NodeFb.addSkeletonType = function(builder, skeletonType) {
+  builder.addFieldInt8(9, skeletonType, apemodefb.ESkeletonTypeFb.Root);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
  * @param {flatbuffers.Offset} childIdsOffset
  */
 apemodefb.NodeFb.addChildIds = function(builder, childIdsOffset) {
-  builder.addFieldOffset(9, childIdsOffset, 0);
+  builder.addFieldOffset(10, childIdsOffset, 0);
 };
 
 /**
@@ -5325,7 +5367,7 @@ apemodefb.NodeFb.startChildIdsVector = function(builder, numElems) {
  * @param {flatbuffers.Offset} animCurveIdsOffset
  */
 apemodefb.NodeFb.addAnimCurveIds = function(builder, animCurveIdsOffset) {
-  builder.addFieldOffset(10, animCurveIdsOffset, 0);
+  builder.addFieldOffset(11, animCurveIdsOffset, 0);
 };
 
 /**

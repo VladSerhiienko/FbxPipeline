@@ -2,6 +2,27 @@
 #include <fbxpstate.h>
 #include <queue>
 
+const char* GetPivotStateString( FbxNode::EPivotState eState ) {
+    return eState == FbxNode::ePivotActive ? "PivotActive" : "PivotReference";
+}
+const char* GetPivotSetString( FbxNode::EPivotSet eState ) {
+    return eState == FbxNode::eSourcePivot ? "SourcePivot" : "DestinationPivot";
+}
+const char* GetSkeletonTypeString( FbxSkeleton::EType eType ) {
+    switch ( eType ) {
+        case fbxsdk::FbxSkeleton::eRoot:
+            return "Root";
+        case fbxsdk::FbxSkeleton::eLimb:
+            return "Limb";
+        case fbxsdk::FbxSkeleton::eLimbNode:
+            return "LimbNode";
+        case fbxsdk::FbxSkeleton::eEffector:
+            return "Effector";
+        default:
+            return "<error>";
+    }
+}
+
 void InitializeSeachLocations( );
 void ExportMesh( FbxNode* node, apemode::Node& n, bool pack, bool optimize );
 void ExportMaterials( FbxScene* scene );
@@ -11,11 +32,13 @@ void ExportAnimation( FbxNode* node, apemode::Node& n );
 void ExportCamera( FbxNode* node, apemode::Node& n );
 void ExportLight( FbxNode* node, apemode::Node& n );
 
-const char* GetPivotStateString( FbxNode::EPivotState eState ) {
-    return eState == FbxNode::ePivotActive ? "PivotActive" : "PivotReference";
-}
-const char* GetPivotSetString( FbxNode::EPivotSet eState ) {
-    return eState == FbxNode::eSourcePivot ? "SourcePivot" : "DestinationPivot";
+
+void ExportSkeleton( FbxNode* node, apemode::Node& n ) {
+    if ( auto pSkeleton = node->GetSkeleton( ) ) {
+        auto& s = apemode::State::Get( );
+        s.console->info( "\tSkeleton: {} -> {}", node->GetName( ), GetSkeletonTypeString( pSkeleton->GetSkeletonType( ) ) );
+        n.skeletonType = apemodefb::ESkeletonTypeFb( pSkeleton->GetSkeletonType( ) );
+    }
 }
 
 void ExportNodeAttributes( FbxNode* node, apemode::Node& n ) {
@@ -91,6 +114,27 @@ void ExportMeshes( FbxNode* pFbxNode ) {
             ExportMeshes( pFbxNode->GetChild( i ) );
         }
     }
+}
+
+void ExportSkeletons( FbxNode* pFbxNode ) {
+    auto& s = apemode::State::Get( );
+
+    uint32_t nodeId = s.nodeDict[ pFbxNode->GetUniqueID( ) ];
+    apemode::Node& node = s.nodes[ nodeId ];
+    assert( node.fbxId == pFbxNode->GetUniqueID( ) );
+
+    ExportSkeleton( pFbxNode, node );
+    if ( auto c = pFbxNode->GetChildCount( ) ) {
+        for ( auto i = 0; i < c; ++i ) {
+            ExportSkeletons( pFbxNode->GetChild( i ) );
+        }
+    }
+}
+
+void ExportSkeletons( FbxScene* pScene ) {
+    auto& s = apemode::State::Get( );
+    s.console->info( "Skeleton: " );
+    ExportSkeletons( pScene->GetRootNode( ) );
 }
 
 /**
@@ -208,7 +252,7 @@ FBXPIPELINE_API void ExportScene( FbxScene* pScene ) {
     s.nodes.reserve( (size_t) pScene->GetNodeCount( ) );
     s.meshes.reserve( (size_t) pScene->GetNodeCount( ) );
 
-    FbxAxisSystem::MayaYUp.ConvertScene( pScene );
+    //FbxAxisSystem::MayaYUp.ConvertScene( pScene );
     //FbxAxisSystem::DirectX.ConvertScene( pScene );
 
     // We want shared materials, so export all the scene material first
@@ -218,6 +262,7 @@ FBXPIPELINE_API void ExportScene( FbxScene* pScene ) {
     // Export nodes recursively.
     PreprocessAnimation( pScene );
     ExportNode( pScene->GetRootNode( ) );
+    ExportSkeletons( pScene->GetRootNode( ) );
 
     // Export meshes.
     PreprocessMeshes( pScene );

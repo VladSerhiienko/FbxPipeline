@@ -94,9 +94,10 @@ namespace apemode {
         apemodefb::ECullingTypeFb   cullingType       = apemodefb::ECullingTypeFb_CullingOff;
         apemodefb::ERotationOrderFb rotationOrder     = apemodefb::ERotationOrderFb_EulerXYZ;
         apemodefb::EInheritTypeFb   inheritType       = apemodefb::EInheritTypeFb_RSrs;
+        apemodefb::ESkeletonTypeFb  skeletonType      = apemodefb::ESkeletonTypeFb_None;
         uint32_t                    id                = (uint32_t) -1;
         uint64_t                    fbxId             = (uint64_t) 0;
-        uint32_t                    nameId            = (uint64_t) 0;
+        uint32_t                    nameId            = (uint32_t) 0;
         uint32_t                    meshId            = (uint32_t) -1;
         uint32_t                    lightId           = (uint32_t) -1;
         uint32_t                    cameraId          = (uint32_t) -1;

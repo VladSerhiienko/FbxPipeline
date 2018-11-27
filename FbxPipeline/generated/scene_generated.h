@@ -156,6 +156,44 @@ inline const char *EnumNameEInheritTypeFb(EInheritTypeFb e) {
   return EnumNamesEInheritTypeFb()[index];
 }
 
+enum ESkeletonTypeFb {
+  ESkeletonTypeFb_Root = 0,
+  ESkeletonTypeFb_Limb = 1,
+  ESkeletonTypeFb_LimbNode = 2,
+  ESkeletonTypeFb_Effector = 3,
+  ESkeletonTypeFb_None = 4,
+  ESkeletonTypeFb_MIN = ESkeletonTypeFb_Root,
+  ESkeletonTypeFb_MAX = ESkeletonTypeFb_None
+};
+
+inline ESkeletonTypeFb (&EnumValuesESkeletonTypeFb())[5] {
+  static ESkeletonTypeFb values[] = {
+    ESkeletonTypeFb_Root,
+    ESkeletonTypeFb_Limb,
+    ESkeletonTypeFb_LimbNode,
+    ESkeletonTypeFb_Effector,
+    ESkeletonTypeFb_None
+  };
+  return values;
+}
+
+inline const char **EnumNamesESkeletonTypeFb() {
+  static const char *names[] = {
+    "Root",
+    "Limb",
+    "LimbNode",
+    "Effector",
+    "None",
+    nullptr
+  };
+  return names;
+}
+
+inline const char *EnumNameESkeletonTypeFb(ESkeletonTypeFb e) {
+  const size_t index = static_cast<int>(e);
+  return EnumNamesESkeletonTypeFb()[index];
+}
+
 enum ERotationOrderFb {
   ERotationOrderFb_EulerXYZ = 0,
   ERotationOrderFb_EulerXZY = 1,
@@ -2816,8 +2854,9 @@ struct NodeFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     VT_CULLING_TYPE = 16,
     VT_INHERIT_TYPE = 18,
     VT_ROTATION_ORDER = 20,
-    VT_CHILD_IDS = 22,
-    VT_ANIM_CURVE_IDS = 24
+    VT_SKELETON_TYPE = 22,
+    VT_CHILD_IDS = 24,
+    VT_ANIM_CURVE_IDS = 26
   };
   uint32_t id() const {
     return GetField<uint32_t>(VT_ID, 0);
@@ -2886,6 +2925,12 @@ struct NodeFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   bool mutate_rotation_order(ERotationOrderFb _rotation_order) {
     return SetField<uint8_t>(VT_ROTATION_ORDER, static_cast<uint8_t>(_rotation_order), 0);
   }
+  ESkeletonTypeFb skeleton_type() const {
+    return static_cast<ESkeletonTypeFb>(GetField<uint8_t>(VT_SKELETON_TYPE, 0));
+  }
+  bool mutate_skeleton_type(ESkeletonTypeFb _skeleton_type) {
+    return SetField<uint8_t>(VT_SKELETON_TYPE, static_cast<uint8_t>(_skeleton_type), 0);
+  }
   const flatbuffers::Vector<uint32_t> *child_ids() const {
     return GetPointer<const flatbuffers::Vector<uint32_t> *>(VT_CHILD_IDS);
   }
@@ -2909,6 +2954,7 @@ struct NodeFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyField<uint8_t>(verifier, VT_CULLING_TYPE) &&
            VerifyField<uint8_t>(verifier, VT_INHERIT_TYPE) &&
            VerifyField<uint8_t>(verifier, VT_ROTATION_ORDER) &&
+           VerifyField<uint8_t>(verifier, VT_SKELETON_TYPE) &&
            VerifyOffset(verifier, VT_CHILD_IDS) &&
            verifier.Verify(child_ids()) &&
            VerifyOffset(verifier, VT_ANIM_CURVE_IDS) &&
@@ -2947,6 +2993,9 @@ struct NodeFbBuilder {
   void add_rotation_order(ERotationOrderFb rotation_order) {
     fbb_.AddElement<uint8_t>(NodeFb::VT_ROTATION_ORDER, static_cast<uint8_t>(rotation_order), 0);
   }
+  void add_skeleton_type(ESkeletonTypeFb skeleton_type) {
+    fbb_.AddElement<uint8_t>(NodeFb::VT_SKELETON_TYPE, static_cast<uint8_t>(skeleton_type), 0);
+  }
   void add_child_ids(flatbuffers::Offset<flatbuffers::Vector<uint32_t>> child_ids) {
     fbb_.AddOffset(NodeFb::VT_CHILD_IDS, child_ids);
   }
@@ -2976,6 +3025,7 @@ inline flatbuffers::Offset<NodeFb> CreateNodeFb(
     ECullingTypeFb culling_type = ECullingTypeFb_CullingOff,
     EInheritTypeFb inherit_type = EInheritTypeFb_RrSs,
     ERotationOrderFb rotation_order = ERotationOrderFb_EulerXYZ,
+    ESkeletonTypeFb skeleton_type = ESkeletonTypeFb_Root,
     flatbuffers::Offset<flatbuffers::Vector<uint32_t>> child_ids = 0,
     flatbuffers::Offset<flatbuffers::Vector<uint32_t>> anim_curve_ids = 0) {
   NodeFbBuilder builder_(_fbb);
@@ -2987,6 +3037,7 @@ inline flatbuffers::Offset<NodeFb> CreateNodeFb(
   builder_.add_light_id(light_id);
   builder_.add_mesh_id(mesh_id);
   builder_.add_id(id);
+  builder_.add_skeleton_type(skeleton_type);
   builder_.add_rotation_order(rotation_order);
   builder_.add_inherit_type(inherit_type);
   builder_.add_culling_type(culling_type);
@@ -3004,6 +3055,7 @@ inline flatbuffers::Offset<NodeFb> CreateNodeFbDirect(
     ECullingTypeFb culling_type = ECullingTypeFb_CullingOff,
     EInheritTypeFb inherit_type = EInheritTypeFb_RrSs,
     ERotationOrderFb rotation_order = ERotationOrderFb_EulerXYZ,
+    ESkeletonTypeFb skeleton_type = ESkeletonTypeFb_Root,
     const std::vector<uint32_t> *child_ids = nullptr,
     const std::vector<uint32_t> *anim_curve_ids = nullptr) {
   return apemodefb::CreateNodeFb(
@@ -3017,6 +3069,7 @@ inline flatbuffers::Offset<NodeFb> CreateNodeFbDirect(
       culling_type,
       inherit_type,
       rotation_order,
+      skeleton_type,
       child_ids ? _fbb.CreateVector<uint32_t>(*child_ids) : 0,
       anim_curve_ids ? _fbb.CreateVector<uint32_t>(*anim_curve_ids) : 0);
 }
