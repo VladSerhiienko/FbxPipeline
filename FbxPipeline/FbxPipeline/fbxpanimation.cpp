@@ -152,7 +152,7 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
                 ss << "]";
             }
 
-            pAnimCurveComposite.pAnimCurve->SetName( ss.str( ).c_str( ) );
+            // pAnimCurveComposite.pAnimCurve->SetName( ss.str( ).c_str( ) );
             ss.str( "" );
             ss.clear( );
         }

@@ -97,6 +97,34 @@ inline void LogIfNotEqual( const FbxVector4& v, const FbxVector4& compare, const
     s.console->warn( "{}: ({} {} {})", name, v[ 0 ], v[ 1 ], v[ 2 ] );
 }
 
+void PrintGlobalTransform( FbxNode * pFbxNode ) {
+    auto& s = apemode::State::Get( );
+    
+    auto globalTransform = pFbxNode->EvaluateGlobalTransform();
+
+    s.console->info( "\t globalTransform:" );
+    s.console->info( "\t {} {} {} {}",
+                     (float) globalTransform.Get( 0, 0 ),
+                     (float) globalTransform.Get( 0, 1 ),
+                     (float) globalTransform.Get( 0, 2 ),
+                     (float) globalTransform.Get( 0, 3 ) );
+    s.console->info( "\t {} {} {} {}",
+                     (float) globalTransform.Get( 1, 0 ),
+                     (float) globalTransform.Get( 1, 1 ),
+                     (float) globalTransform.Get( 1, 2 ),
+                     (float) globalTransform.Get( 1, 3 ) );
+    s.console->info( "\t {} {} {} {}",
+                     (float) globalTransform.Get( 2, 0 ),
+                     (float) globalTransform.Get( 2, 1 ),
+                     (float) globalTransform.Get( 2, 2 ),
+                     (float) globalTransform.Get( 2, 3 ) );
+    s.console->info( "\t {} {} {} {}",
+                     (float) globalTransform.Get( 3, 0 ),
+                     (float) globalTransform.Get( 3, 1 ),
+                     (float) globalTransform.Get( 3, 2 ),
+                     (float) globalTransform.Get( 3, 3 ) );
+}
+
 void ExportTransform( FbxNode* pFbxNode, apemode::Node& n ) {
     auto& s = apemode::State::Get( );
 
@@ -117,6 +145,7 @@ void ExportTransform( FbxNode* pFbxNode, apemode::Node& n ) {
     LOG_IF_NOT_EQUAL_OFFSET_PROPERTY( GeometricRotation, kFbxZero );
 #undef LOG_IF_NOT_EQUAL_OFFSET_PROPERTY
 
+    PrintGlobalTransform(pFbxNode);
 
     s.transforms.emplace_back( Cast( pFbxNode->LclTranslation.Get( ) ),
                                Cast( pFbxNode->GetRotationOffset( FbxNode::eSourcePivot ) ),

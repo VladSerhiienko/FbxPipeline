@@ -11,15 +11,15 @@ const char* GetPivotSetString( FbxNode::EPivotSet eState ) {
 const char* GetSkeletonTypeString( FbxSkeleton::EType eType ) {
     switch ( eType ) {
         case fbxsdk::FbxSkeleton::eRoot:
-            return "Root";
+            return "FbxSkeleton.Root";
         case fbxsdk::FbxSkeleton::eLimb:
-            return "Limb";
+            return "FbxSkeleton.Limb";
         case fbxsdk::FbxSkeleton::eLimbNode:
-            return "LimbNode";
+            return "FbxSkeleton.LimbNode";
         case fbxsdk::FbxSkeleton::eEffector:
-            return "Effector";
+            return "FbxSkeleton.Effector";
         default:
-            return "<error>";
+            return "FbxSkeleton.ERROR";
     }
 }
 
@@ -198,7 +198,7 @@ void PreprocessAnimation( FbxScene* pScene ) {
             if ( animStackCount > 1 )
                 animStackName += std::to_string( i );
 
-            pAnimStack->SetName( animStackName.c_str( ) );
+            // pAnimStack->SetName( animStackName.c_str( ) );
         }
 
         const uint32_t animStackId = (uint32_t) s.animStacks.size( );
@@ -227,7 +227,7 @@ void PreprocessAnimation( FbxScene* pScene ) {
                     animLayerName += "]";
                 }
 
-                pAnimLayer->SetName( animLayerName.c_str( ) );
+                // pAnimLayer->SetName( animLayerName.c_str( ) );
             }
 
             const uint32_t animLayerId = (uint32_t) s.animLayers.size( );
