@@ -2,7 +2,7 @@
 namespace apemodefb;
 
 enum EVersionFb : ubyte {
-    Value = 9
+    Value = 10
 }
 
 enum ECullingTypeFb : ubyte
@@ -422,8 +422,10 @@ table FileFb {
 table SceneFb {
 	version : EVersionFb;
 
+	bbox_min : Vec3Fb;
+	bbox_max : Vec3Fb;
     transforms : [TransformFb];
-    transforms_limits : [TransformLimitsFb];
+    transform_limits : [TransformLimitsFb];
     nodes : [NodeFb];
     meshes : [MeshFb];
     anim_stacks : [AnimStackFb];

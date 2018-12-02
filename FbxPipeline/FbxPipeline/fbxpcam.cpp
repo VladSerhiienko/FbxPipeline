@@ -83,11 +83,11 @@ void ExportCamera( FbxNode* pNode, apemode::Node& n ) {
         auto& camera = s.cameras.back( );
 
         camera.mutate_id( cameraId );
-        apemode::Mutable( camera.mutable_aspect( ) ).mutate_x( width );
-        apemode::Mutable( camera.mutable_aspect( ) ).mutate_y( height );
-        apemode::Mutable( camera.mutable_up( ) ).mutate_x( (float) pCamera->UpVector.Get( )[ 0 ] );
-        apemode::Mutable( camera.mutable_up( ) ).mutate_y( (float) pCamera->UpVector.Get( )[ 1 ] );
-        apemode::Mutable( camera.mutable_up( ) ).mutate_z( (float) pCamera->UpVector.Get( )[ 2 ] );
+        camera.mutable_aspect( ).mutate_x( width );
+        camera.mutable_aspect( ).mutate_y( height );
+        camera.mutable_up( ).mutate_x( (float) pCamera->UpVector.Get( )[ 0 ] );
+        camera.mutable_up( ).mutate_y( (float) pCamera->UpVector.Get( )[ 1 ] );
+        camera.mutable_up( ).mutate_z( (float) pCamera->UpVector.Get( )[ 2 ] );
 
         if ( pCamera->GetName( ) && 0 != strlen( pCamera->GetName( ) ) )
             camera.mutate_name_id( s.PushValue( pCamera->GetName( ) ) );

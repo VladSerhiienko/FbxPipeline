@@ -1162,7 +1162,7 @@ void ExportMesh( FbxNode*       pNode,
     m.indices.resize( vertexCount * sizeof( TIndex ) );
     TIndex* indices = (TIndex*) m.indices.data( );
 
-    if ( TOrder == EVertexOrder::CCW )
+    if ( TOrder == EVertexOrder::CW )
         for ( TIndex i = 0; i < vertexCount; i += 3 ) {
             indices[ i + 0 ] = i + 0;
             indices[ i + 1 ] = i + 2;

@@ -16,9 +16,9 @@ void ExportLight(FbxNode* pNode, apemode::Node& n) {
         auto& light = s.lights.back( );
 
         light.mutate_id( lightId );
-        apemode::Mutable( light.mutable_color( ) ).mutate_x( (float) pLight->Color.Get( )[ 0 ] );
-        apemode::Mutable( light.mutable_color( ) ).mutate_y( (float) pLight->Color.Get( )[ 1 ] );
-        apemode::Mutable( light.mutable_color( ) ).mutate_z( (float) pLight->Color.Get( )[ 2 ] );
+        light.mutable_color( ).mutate_x( (float) pLight->Color.Get( )[ 0 ] );
+        light.mutable_color( ).mutate_y( (float) pLight->Color.Get( )[ 1 ] );
+        light.mutable_color( ).mutate_z( (float) pLight->Color.Get( )[ 2 ] );
         light.mutate_near_attenuation_start( (float) pLight->NearAttenuationStart.Get( ) );
         light.mutate_near_attenuation_end( (float) pLight->NearAttenuationEnd.Get( ) );
         light.mutate_far_attenuation_start( (float) pLight->FarAttenuationStart.Get( ) );

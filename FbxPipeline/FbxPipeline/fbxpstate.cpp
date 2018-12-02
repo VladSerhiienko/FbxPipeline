@@ -499,8 +499,10 @@ bool apemode::State::Finalize( ) {
     sceneBuilder.add_float_values( floatsOffset );
     sceneBuilder.add_int_values( intsOffset );
     sceneBuilder.add_bool_values( boolsOffset );
+    sceneBuilder.add_bbox_min( &bboxMin );
+    sceneBuilder.add_bbox_max( &bboxMax );
     sceneBuilder.add_transforms( transformsOffset );
-    sceneBuilder.add_transforms_limits( transformLimitsOffset );
+    sceneBuilder.add_transform_limits( transformLimitsOffset );
     sceneBuilder.add_nodes( nodesOffset );
     sceneBuilder.add_meshes( meshesOffset );
     sceneBuilder.add_textures( texturesOffset );
@@ -978,4 +980,25 @@ apemode::ValueId::operator uint32_t( ) const {
     const uint32_t valueIndex = (packed >> 8) & 0x0fff;
     return packed;
     */
+}
+
+apemodefb::Mat4Fb apemode::Cast( const FbxAMatrix m ) {
+    apemodefb::Mat4Fb mm;
+    mm.mutable_x( ).mutate_x( (float) m.Buffer( )[ 0 ].Buffer( )[ 0 ] );
+    mm.mutable_x( ).mutate_y( (float) m.Buffer( )[ 0 ].Buffer( )[ 1 ] );
+    mm.mutable_x( ).mutate_z( (float) m.Buffer( )[ 0 ].Buffer( )[ 2 ] );
+    mm.mutable_x( ).mutate_w( (float) m.Buffer( )[ 0 ].Buffer( )[ 3 ] );
+    mm.mutable_y( ).mutate_x( (float) m.Buffer( )[ 1 ].Buffer( )[ 0 ] );
+    mm.mutable_y( ).mutate_y( (float) m.Buffer( )[ 1 ].Buffer( )[ 1 ] );
+    mm.mutable_y( ).mutate_z( (float) m.Buffer( )[ 1 ].Buffer( )[ 2 ] );
+    mm.mutable_y( ).mutate_w( (float) m.Buffer( )[ 1 ].Buffer( )[ 3 ] );
+    mm.mutable_z( ).mutate_x( (float) m.Buffer( )[ 2 ].Buffer( )[ 0 ] );
+    mm.mutable_z( ).mutate_y( (float) m.Buffer( )[ 2 ].Buffer( )[ 1 ] );
+    mm.mutable_z( ).mutate_z( (float) m.Buffer( )[ 2 ].Buffer( )[ 2 ] );
+    mm.mutable_z( ).mutate_w( (float) m.Buffer( )[ 2 ].Buffer( )[ 3 ] );
+    mm.mutable_w( ).mutate_x( (float) m.Buffer( )[ 3 ].Buffer( )[ 0 ] );
+    mm.mutable_w( ).mutate_y( (float) m.Buffer( )[ 3 ].Buffer( )[ 1 ] );
+    mm.mutable_w( ).mutate_z( (float) m.Buffer( )[ 3 ].Buffer( )[ 2 ] );
+    mm.mutable_w( ).mutate_w( (float) m.Buffer( )[ 3 ].Buffer( )[ 3 ] );
+    return mm;
 }

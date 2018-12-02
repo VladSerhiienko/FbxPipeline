@@ -67,7 +67,7 @@ struct FileFb;
 struct SceneFb;
 
 enum EVersionFb {
-  EVersionFb_Value = 9,
+  EVersionFb_Value = 10,
   EVersionFb_MIN = EVersionFb_Value,
   EVersionFb_MAX = EVersionFb_Value
 };
@@ -3172,23 +3172,25 @@ inline flatbuffers::Offset<FileFb> CreateFileFbDirect(
 struct SceneFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   enum {
     VT_VERSION = 4,
-    VT_TRANSFORMS = 6,
-    VT_TRANSFORMS_LIMITS = 8,
-    VT_NODES = 10,
-    VT_MESHES = 12,
-    VT_ANIM_STACKS = 14,
-    VT_ANIM_LAYERS = 16,
-    VT_ANIM_CURVES = 18,
-    VT_MATERIALS = 20,
-    VT_TEXTURES = 22,
-    VT_CAMERAS = 24,
-    VT_LIGHTS = 26,
-    VT_SKINS = 28,
-    VT_FILES = 30,
-    VT_BOOL_VALUES = 32,
-    VT_INT_VALUES = 34,
-    VT_FLOAT_VALUES = 36,
-    VT_STRING_VALUES = 38
+    VT_BBOX_MIN = 6,
+    VT_BBOX_MAX = 8,
+    VT_TRANSFORMS = 10,
+    VT_TRANSFORM_LIMITS = 12,
+    VT_NODES = 14,
+    VT_MESHES = 16,
+    VT_ANIM_STACKS = 18,
+    VT_ANIM_LAYERS = 20,
+    VT_ANIM_CURVES = 22,
+    VT_MATERIALS = 24,
+    VT_TEXTURES = 26,
+    VT_CAMERAS = 28,
+    VT_LIGHTS = 30,
+    VT_SKINS = 32,
+    VT_FILES = 34,
+    VT_BOOL_VALUES = 36,
+    VT_INT_VALUES = 38,
+    VT_FLOAT_VALUES = 40,
+    VT_STRING_VALUES = 42
   };
   EVersionFb version() const {
     return static_cast<EVersionFb>(GetField<uint8_t>(VT_VERSION, 0));
@@ -3196,17 +3198,29 @@ struct SceneFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   bool mutate_version(EVersionFb _version) {
     return SetField<uint8_t>(VT_VERSION, static_cast<uint8_t>(_version), 0);
   }
+  const Vec3Fb *bbox_min() const {
+    return GetStruct<const Vec3Fb *>(VT_BBOX_MIN);
+  }
+  Vec3Fb *mutable_bbox_min() {
+    return GetStruct<Vec3Fb *>(VT_BBOX_MIN);
+  }
+  const Vec3Fb *bbox_max() const {
+    return GetStruct<const Vec3Fb *>(VT_BBOX_MAX);
+  }
+  Vec3Fb *mutable_bbox_max() {
+    return GetStruct<Vec3Fb *>(VT_BBOX_MAX);
+  }
   const flatbuffers::Vector<const TransformFb *> *transforms() const {
     return GetPointer<const flatbuffers::Vector<const TransformFb *> *>(VT_TRANSFORMS);
   }
   flatbuffers::Vector<const TransformFb *> *mutable_transforms() {
     return GetPointer<flatbuffers::Vector<const TransformFb *> *>(VT_TRANSFORMS);
   }
-  const flatbuffers::Vector<const TransformLimitsFb *> *transforms_limits() const {
-    return GetPointer<const flatbuffers::Vector<const TransformLimitsFb *> *>(VT_TRANSFORMS_LIMITS);
+  const flatbuffers::Vector<const TransformLimitsFb *> *transform_limits() const {
+    return GetPointer<const flatbuffers::Vector<const TransformLimitsFb *> *>(VT_TRANSFORM_LIMITS);
   }
-  flatbuffers::Vector<const TransformLimitsFb *> *mutable_transforms_limits() {
-    return GetPointer<flatbuffers::Vector<const TransformLimitsFb *> *>(VT_TRANSFORMS_LIMITS);
+  flatbuffers::Vector<const TransformLimitsFb *> *mutable_transform_limits() {
+    return GetPointer<flatbuffers::Vector<const TransformLimitsFb *> *>(VT_TRANSFORM_LIMITS);
   }
   const flatbuffers::Vector<flatbuffers::Offset<NodeFb>> *nodes() const {
     return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<NodeFb>> *>(VT_NODES);
@@ -3301,10 +3315,12 @@ struct SceneFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<uint8_t>(verifier, VT_VERSION) &&
+           VerifyField<Vec3Fb>(verifier, VT_BBOX_MIN) &&
+           VerifyField<Vec3Fb>(verifier, VT_BBOX_MAX) &&
            VerifyOffset(verifier, VT_TRANSFORMS) &&
            verifier.Verify(transforms()) &&
-           VerifyOffset(verifier, VT_TRANSFORMS_LIMITS) &&
-           verifier.Verify(transforms_limits()) &&
+           VerifyOffset(verifier, VT_TRANSFORM_LIMITS) &&
+           verifier.Verify(transform_limits()) &&
            VerifyOffset(verifier, VT_NODES) &&
            verifier.Verify(nodes()) &&
            verifier.VerifyVectorOfTables(nodes()) &&
@@ -3352,11 +3368,17 @@ struct SceneFbBuilder {
   void add_version(EVersionFb version) {
     fbb_.AddElement<uint8_t>(SceneFb::VT_VERSION, static_cast<uint8_t>(version), 0);
   }
+  void add_bbox_min(const Vec3Fb *bbox_min) {
+    fbb_.AddStruct(SceneFb::VT_BBOX_MIN, bbox_min);
+  }
+  void add_bbox_max(const Vec3Fb *bbox_max) {
+    fbb_.AddStruct(SceneFb::VT_BBOX_MAX, bbox_max);
+  }
   void add_transforms(flatbuffers::Offset<flatbuffers::Vector<const TransformFb *>> transforms) {
     fbb_.AddOffset(SceneFb::VT_TRANSFORMS, transforms);
   }
-  void add_transforms_limits(flatbuffers::Offset<flatbuffers::Vector<const TransformLimitsFb *>> transforms_limits) {
-    fbb_.AddOffset(SceneFb::VT_TRANSFORMS_LIMITS, transforms_limits);
+  void add_transform_limits(flatbuffers::Offset<flatbuffers::Vector<const TransformLimitsFb *>> transform_limits) {
+    fbb_.AddOffset(SceneFb::VT_TRANSFORM_LIMITS, transform_limits);
   }
   void add_nodes(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<NodeFb>>> nodes) {
     fbb_.AddOffset(SceneFb::VT_NODES, nodes);
@@ -3418,8 +3440,10 @@ struct SceneFbBuilder {
 inline flatbuffers::Offset<SceneFb> CreateSceneFb(
     flatbuffers::FlatBufferBuilder &_fbb,
     EVersionFb version = static_cast<EVersionFb>(0),
+    const Vec3Fb *bbox_min = 0,
+    const Vec3Fb *bbox_max = 0,
     flatbuffers::Offset<flatbuffers::Vector<const TransformFb *>> transforms = 0,
-    flatbuffers::Offset<flatbuffers::Vector<const TransformLimitsFb *>> transforms_limits = 0,
+    flatbuffers::Offset<flatbuffers::Vector<const TransformLimitsFb *>> transform_limits = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<NodeFb>>> nodes = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<MeshFb>>> meshes = 0,
     flatbuffers::Offset<flatbuffers::Vector<const AnimStackFb *>> anim_stacks = 0,
@@ -3451,8 +3475,10 @@ inline flatbuffers::Offset<SceneFb> CreateSceneFb(
   builder_.add_anim_stacks(anim_stacks);
   builder_.add_meshes(meshes);
   builder_.add_nodes(nodes);
-  builder_.add_transforms_limits(transforms_limits);
+  builder_.add_transform_limits(transform_limits);
   builder_.add_transforms(transforms);
+  builder_.add_bbox_max(bbox_max);
+  builder_.add_bbox_min(bbox_min);
   builder_.add_version(version);
   return builder_.Finish();
 }
@@ -3460,8 +3486,10 @@ inline flatbuffers::Offset<SceneFb> CreateSceneFb(
 inline flatbuffers::Offset<SceneFb> CreateSceneFbDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
     EVersionFb version = static_cast<EVersionFb>(0),
+    const Vec3Fb *bbox_min = 0,
+    const Vec3Fb *bbox_max = 0,
     const std::vector<const TransformFb *> *transforms = nullptr,
-    const std::vector<const TransformLimitsFb *> *transforms_limits = nullptr,
+    const std::vector<const TransformLimitsFb *> *transform_limits = nullptr,
     const std::vector<flatbuffers::Offset<NodeFb>> *nodes = nullptr,
     const std::vector<flatbuffers::Offset<MeshFb>> *meshes = nullptr,
     const std::vector<const AnimStackFb *> *anim_stacks = nullptr,
@@ -3480,8 +3508,10 @@ inline flatbuffers::Offset<SceneFb> CreateSceneFbDirect(
   return apemodefb::CreateSceneFb(
       _fbb,
       version,
+      bbox_min,
+      bbox_max,
       transforms ? _fbb.CreateVector<const TransformFb *>(*transforms) : 0,
-      transforms_limits ? _fbb.CreateVector<const TransformLimitsFb *>(*transforms_limits) : 0,
+      transform_limits ? _fbb.CreateVector<const TransformLimitsFb *>(*transform_limits) : 0,
       nodes ? _fbb.CreateVector<flatbuffers::Offset<NodeFb>>(*nodes) : 0,
       meshes ? _fbb.CreateVector<flatbuffers::Offset<MeshFb>>(*meshes) : 0,
       anim_stacks ? _fbb.CreateVector<const AnimStackFb *>(*anim_stacks) : 0,

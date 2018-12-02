@@ -10,7 +10,7 @@ var apemodefb = apemodefb || {};
  * @enum
  */
 apemodefb.EVersionFb = {
-  Value: 9
+  Value: 10
 };
 
 /**
@@ -5634,12 +5634,30 @@ apemodefb.SceneFb.prototype.mutate_version = function(value) {
 };
 
 /**
+ * @param {apemodefb.Vec3Fb=} obj
+ * @returns {apemodefb.Vec3Fb|null}
+ */
+apemodefb.SceneFb.prototype.bboxMin = function(obj) {
+  var offset = this.bb.__offset(this.bb_pos, 6);
+  return offset ? (obj || new apemodefb.Vec3Fb).__init(this.bb_pos + offset, this.bb) : null;
+};
+
+/**
+ * @param {apemodefb.Vec3Fb=} obj
+ * @returns {apemodefb.Vec3Fb|null}
+ */
+apemodefb.SceneFb.prototype.bboxMax = function(obj) {
+  var offset = this.bb.__offset(this.bb_pos, 8);
+  return offset ? (obj || new apemodefb.Vec3Fb).__init(this.bb_pos + offset, this.bb) : null;
+};
+
+/**
  * @param {number} index
  * @param {apemodefb.TransformFb=} obj
  * @returns {apemodefb.TransformFb}
  */
 apemodefb.SceneFb.prototype.transforms = function(index, obj) {
-  var offset = this.bb.__offset(this.bb_pos, 6);
+  var offset = this.bb.__offset(this.bb_pos, 10);
   return offset ? (obj || new apemodefb.TransformFb).__init(this.bb.__vector(this.bb_pos + offset) + index * 144, this.bb) : null;
 };
 
@@ -5647,7 +5665,7 @@ apemodefb.SceneFb.prototype.transforms = function(index, obj) {
  * @returns {number}
  */
 apemodefb.SceneFb.prototype.transformsLength = function() {
-  var offset = this.bb.__offset(this.bb_pos, 6);
+  var offset = this.bb.__offset(this.bb_pos, 10);
   return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
 };
 
@@ -5656,16 +5674,16 @@ apemodefb.SceneFb.prototype.transformsLength = function() {
  * @param {apemodefb.TransformLimitsFb=} obj
  * @returns {apemodefb.TransformLimitsFb}
  */
-apemodefb.SceneFb.prototype.transformsLimits = function(index, obj) {
-  var offset = this.bb.__offset(this.bb_pos, 8);
+apemodefb.SceneFb.prototype.transformLimits = function(index, obj) {
+  var offset = this.bb.__offset(this.bb_pos, 12);
   return offset ? (obj || new apemodefb.TransformLimitsFb).__init(this.bb.__vector(this.bb_pos + offset) + index * 92, this.bb) : null;
 };
 
 /**
  * @returns {number}
  */
-apemodefb.SceneFb.prototype.transformsLimitsLength = function() {
-  var offset = this.bb.__offset(this.bb_pos, 8);
+apemodefb.SceneFb.prototype.transformLimitsLength = function() {
+  var offset = this.bb.__offset(this.bb_pos, 12);
   return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
 };
 
@@ -5675,7 +5693,7 @@ apemodefb.SceneFb.prototype.transformsLimitsLength = function() {
  * @returns {apemodefb.NodeFb}
  */
 apemodefb.SceneFb.prototype.nodes = function(index, obj) {
-  var offset = this.bb.__offset(this.bb_pos, 10);
+  var offset = this.bb.__offset(this.bb_pos, 14);
   return offset ? (obj || new apemodefb.NodeFb).__init(this.bb.__indirect(this.bb.__vector(this.bb_pos + offset) + index * 4), this.bb) : null;
 };
 
@@ -5683,7 +5701,7 @@ apemodefb.SceneFb.prototype.nodes = function(index, obj) {
  * @returns {number}
  */
 apemodefb.SceneFb.prototype.nodesLength = function() {
-  var offset = this.bb.__offset(this.bb_pos, 10);
+  var offset = this.bb.__offset(this.bb_pos, 14);
   return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
 };
 
@@ -5693,7 +5711,7 @@ apemodefb.SceneFb.prototype.nodesLength = function() {
  * @returns {apemodefb.MeshFb}
  */
 apemodefb.SceneFb.prototype.meshes = function(index, obj) {
-  var offset = this.bb.__offset(this.bb_pos, 12);
+  var offset = this.bb.__offset(this.bb_pos, 16);
   return offset ? (obj || new apemodefb.MeshFb).__init(this.bb.__indirect(this.bb.__vector(this.bb_pos + offset) + index * 4), this.bb) : null;
 };
 
@@ -5701,7 +5719,7 @@ apemodefb.SceneFb.prototype.meshes = function(index, obj) {
  * @returns {number}
  */
 apemodefb.SceneFb.prototype.meshesLength = function() {
-  var offset = this.bb.__offset(this.bb_pos, 12);
+  var offset = this.bb.__offset(this.bb_pos, 16);
   return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
 };
 
@@ -5711,7 +5729,7 @@ apemodefb.SceneFb.prototype.meshesLength = function() {
  * @returns {apemodefb.AnimStackFb}
  */
 apemodefb.SceneFb.prototype.animStacks = function(index, obj) {
-  var offset = this.bb.__offset(this.bb_pos, 14);
+  var offset = this.bb.__offset(this.bb_pos, 18);
   return offset ? (obj || new apemodefb.AnimStackFb).__init(this.bb.__vector(this.bb_pos + offset) + index * 8, this.bb) : null;
 };
 
@@ -5719,7 +5737,7 @@ apemodefb.SceneFb.prototype.animStacks = function(index, obj) {
  * @returns {number}
  */
 apemodefb.SceneFb.prototype.animStacksLength = function() {
-  var offset = this.bb.__offset(this.bb_pos, 14);
+  var offset = this.bb.__offset(this.bb_pos, 18);
   return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
 };
 
@@ -5729,7 +5747,7 @@ apemodefb.SceneFb.prototype.animStacksLength = function() {
  * @returns {apemodefb.AnimLayerFb}
  */
 apemodefb.SceneFb.prototype.animLayers = function(index, obj) {
-  var offset = this.bb.__offset(this.bb_pos, 16);
+  var offset = this.bb.__offset(this.bb_pos, 20);
   return offset ? (obj || new apemodefb.AnimLayerFb).__init(this.bb.__vector(this.bb_pos + offset) + index * 16, this.bb) : null;
 };
 
@@ -5737,7 +5755,7 @@ apemodefb.SceneFb.prototype.animLayers = function(index, obj) {
  * @returns {number}
  */
 apemodefb.SceneFb.prototype.animLayersLength = function() {
-  var offset = this.bb.__offset(this.bb_pos, 16);
+  var offset = this.bb.__offset(this.bb_pos, 20);
   return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
 };
 
@@ -5747,7 +5765,7 @@ apemodefb.SceneFb.prototype.animLayersLength = function() {
  * @returns {apemodefb.AnimCurveFb}
  */
 apemodefb.SceneFb.prototype.animCurves = function(index, obj) {
-  var offset = this.bb.__offset(this.bb_pos, 18);
+  var offset = this.bb.__offset(this.bb_pos, 22);
   return offset ? (obj || new apemodefb.AnimCurveFb).__init(this.bb.__indirect(this.bb.__vector(this.bb_pos + offset) + index * 4), this.bb) : null;
 };
 
@@ -5755,7 +5773,7 @@ apemodefb.SceneFb.prototype.animCurves = function(index, obj) {
  * @returns {number}
  */
 apemodefb.SceneFb.prototype.animCurvesLength = function() {
-  var offset = this.bb.__offset(this.bb_pos, 18);
+  var offset = this.bb.__offset(this.bb_pos, 22);
   return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
 };
 
@@ -5765,7 +5783,7 @@ apemodefb.SceneFb.prototype.animCurvesLength = function() {
  * @returns {apemodefb.MaterialFb}
  */
 apemodefb.SceneFb.prototype.materials = function(index, obj) {
-  var offset = this.bb.__offset(this.bb_pos, 20);
+  var offset = this.bb.__offset(this.bb_pos, 24);
   return offset ? (obj || new apemodefb.MaterialFb).__init(this.bb.__indirect(this.bb.__vector(this.bb_pos + offset) + index * 4), this.bb) : null;
 };
 
@@ -5773,7 +5791,7 @@ apemodefb.SceneFb.prototype.materials = function(index, obj) {
  * @returns {number}
  */
 apemodefb.SceneFb.prototype.materialsLength = function() {
-  var offset = this.bb.__offset(this.bb_pos, 20);
+  var offset = this.bb.__offset(this.bb_pos, 24);
   return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
 };
 
@@ -5783,7 +5801,7 @@ apemodefb.SceneFb.prototype.materialsLength = function() {
  * @returns {apemodefb.TextureFb}
  */
 apemodefb.SceneFb.prototype.textures = function(index, obj) {
-  var offset = this.bb.__offset(this.bb_pos, 22);
+  var offset = this.bb.__offset(this.bb_pos, 26);
   return offset ? (obj || new apemodefb.TextureFb).__init(this.bb.__vector(this.bb_pos + offset) + index * 72, this.bb) : null;
 };
 
@@ -5791,7 +5809,7 @@ apemodefb.SceneFb.prototype.textures = function(index, obj) {
  * @returns {number}
  */
 apemodefb.SceneFb.prototype.texturesLength = function() {
-  var offset = this.bb.__offset(this.bb_pos, 22);
+  var offset = this.bb.__offset(this.bb_pos, 26);
   return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
 };
 
@@ -5801,7 +5819,7 @@ apemodefb.SceneFb.prototype.texturesLength = function() {
  * @returns {apemodefb.CameraFb}
  */
 apemodefb.SceneFb.prototype.cameras = function(index, obj) {
-  var offset = this.bb.__offset(this.bb_pos, 24);
+  var offset = this.bb.__offset(this.bb_pos, 28);
   return offset ? (obj || new apemodefb.CameraFb).__init(this.bb.__vector(this.bb_pos + offset) + index * 28, this.bb) : null;
 };
 
@@ -5809,7 +5827,7 @@ apemodefb.SceneFb.prototype.cameras = function(index, obj) {
  * @returns {number}
  */
 apemodefb.SceneFb.prototype.camerasLength = function() {
-  var offset = this.bb.__offset(this.bb_pos, 24);
+  var offset = this.bb.__offset(this.bb_pos, 28);
   return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
 };
 
@@ -5819,7 +5837,7 @@ apemodefb.SceneFb.prototype.camerasLength = function() {
  * @returns {apemodefb.LightFb}
  */
 apemodefb.SceneFb.prototype.lights = function(index, obj) {
-  var offset = this.bb.__offset(this.bb_pos, 26);
+  var offset = this.bb.__offset(this.bb_pos, 30);
   return offset ? (obj || new apemodefb.LightFb).__init(this.bb.__vector(this.bb_pos + offset) + index * 64, this.bb) : null;
 };
 
@@ -5827,7 +5845,7 @@ apemodefb.SceneFb.prototype.lights = function(index, obj) {
  * @returns {number}
  */
 apemodefb.SceneFb.prototype.lightsLength = function() {
-  var offset = this.bb.__offset(this.bb_pos, 26);
+  var offset = this.bb.__offset(this.bb_pos, 30);
   return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
 };
 
@@ -5837,7 +5855,7 @@ apemodefb.SceneFb.prototype.lightsLength = function() {
  * @returns {apemodefb.SkinFb}
  */
 apemodefb.SceneFb.prototype.skins = function(index, obj) {
-  var offset = this.bb.__offset(this.bb_pos, 28);
+  var offset = this.bb.__offset(this.bb_pos, 32);
   return offset ? (obj || new apemodefb.SkinFb).__init(this.bb.__indirect(this.bb.__vector(this.bb_pos + offset) + index * 4), this.bb) : null;
 };
 
@@ -5845,7 +5863,7 @@ apemodefb.SceneFb.prototype.skins = function(index, obj) {
  * @returns {number}
  */
 apemodefb.SceneFb.prototype.skinsLength = function() {
-  var offset = this.bb.__offset(this.bb_pos, 28);
+  var offset = this.bb.__offset(this.bb_pos, 32);
   return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
 };
 
@@ -5855,7 +5873,7 @@ apemodefb.SceneFb.prototype.skinsLength = function() {
  * @returns {apemodefb.FileFb}
  */
 apemodefb.SceneFb.prototype.files = function(index, obj) {
-  var offset = this.bb.__offset(this.bb_pos, 30);
+  var offset = this.bb.__offset(this.bb_pos, 34);
   return offset ? (obj || new apemodefb.FileFb).__init(this.bb.__indirect(this.bb.__vector(this.bb_pos + offset) + index * 4), this.bb) : null;
 };
 
@@ -5863,7 +5881,7 @@ apemodefb.SceneFb.prototype.files = function(index, obj) {
  * @returns {number}
  */
 apemodefb.SceneFb.prototype.filesLength = function() {
-  var offset = this.bb.__offset(this.bb_pos, 30);
+  var offset = this.bb.__offset(this.bb_pos, 34);
   return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
 };
 
@@ -5872,7 +5890,7 @@ apemodefb.SceneFb.prototype.filesLength = function() {
  * @returns {boolean}
  */
 apemodefb.SceneFb.prototype.boolValues = function(index) {
-  var offset = this.bb.__offset(this.bb_pos, 32);
+  var offset = this.bb.__offset(this.bb_pos, 36);
   return offset ? !!this.bb.readInt8(this.bb.__vector(this.bb_pos + offset) + index) : false;
 };
 
@@ -5880,7 +5898,7 @@ apemodefb.SceneFb.prototype.boolValues = function(index) {
  * @returns {number}
  */
 apemodefb.SceneFb.prototype.boolValuesLength = function() {
-  var offset = this.bb.__offset(this.bb_pos, 32);
+  var offset = this.bb.__offset(this.bb_pos, 36);
   return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
 };
 
@@ -5888,7 +5906,7 @@ apemodefb.SceneFb.prototype.boolValuesLength = function() {
  * @returns {Int8Array}
  */
 apemodefb.SceneFb.prototype.boolValuesArray = function() {
-  var offset = this.bb.__offset(this.bb_pos, 32);
+  var offset = this.bb.__offset(this.bb_pos, 36);
   return offset ? new Int8Array(this.bb.bytes().buffer, this.bb.bytes().byteOffset + this.bb.__vector(this.bb_pos + offset), this.bb.__vector_len(this.bb_pos + offset)) : null;
 };
 
@@ -5897,7 +5915,7 @@ apemodefb.SceneFb.prototype.boolValuesArray = function() {
  * @returns {number}
  */
 apemodefb.SceneFb.prototype.intValues = function(index) {
-  var offset = this.bb.__offset(this.bb_pos, 34);
+  var offset = this.bb.__offset(this.bb_pos, 38);
   return offset ? this.bb.readInt32(this.bb.__vector(this.bb_pos + offset) + index * 4) : 0;
 };
 
@@ -5905,7 +5923,7 @@ apemodefb.SceneFb.prototype.intValues = function(index) {
  * @returns {number}
  */
 apemodefb.SceneFb.prototype.intValuesLength = function() {
-  var offset = this.bb.__offset(this.bb_pos, 34);
+  var offset = this.bb.__offset(this.bb_pos, 38);
   return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
 };
 
@@ -5913,7 +5931,7 @@ apemodefb.SceneFb.prototype.intValuesLength = function() {
  * @returns {Int32Array}
  */
 apemodefb.SceneFb.prototype.intValuesArray = function() {
-  var offset = this.bb.__offset(this.bb_pos, 34);
+  var offset = this.bb.__offset(this.bb_pos, 38);
   return offset ? new Int32Array(this.bb.bytes().buffer, this.bb.bytes().byteOffset + this.bb.__vector(this.bb_pos + offset), this.bb.__vector_len(this.bb_pos + offset)) : null;
 };
 
@@ -5922,7 +5940,7 @@ apemodefb.SceneFb.prototype.intValuesArray = function() {
  * @returns {number}
  */
 apemodefb.SceneFb.prototype.floatValues = function(index) {
-  var offset = this.bb.__offset(this.bb_pos, 36);
+  var offset = this.bb.__offset(this.bb_pos, 40);
   return offset ? this.bb.readFloat32(this.bb.__vector(this.bb_pos + offset) + index * 4) : 0;
 };
 
@@ -5930,7 +5948,7 @@ apemodefb.SceneFb.prototype.floatValues = function(index) {
  * @returns {number}
  */
 apemodefb.SceneFb.prototype.floatValuesLength = function() {
-  var offset = this.bb.__offset(this.bb_pos, 36);
+  var offset = this.bb.__offset(this.bb_pos, 40);
   return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
 };
 
@@ -5938,7 +5956,7 @@ apemodefb.SceneFb.prototype.floatValuesLength = function() {
  * @returns {Float32Array}
  */
 apemodefb.SceneFb.prototype.floatValuesArray = function() {
-  var offset = this.bb.__offset(this.bb_pos, 36);
+  var offset = this.bb.__offset(this.bb_pos, 40);
   return offset ? new Float32Array(this.bb.bytes().buffer, this.bb.bytes().byteOffset + this.bb.__vector(this.bb_pos + offset), this.bb.__vector_len(this.bb_pos + offset)) : null;
 };
 
@@ -5948,7 +5966,7 @@ apemodefb.SceneFb.prototype.floatValuesArray = function() {
  * @returns {string|Uint8Array}
  */
 apemodefb.SceneFb.prototype.stringValues = function(index, optionalEncoding) {
-  var offset = this.bb.__offset(this.bb_pos, 38);
+  var offset = this.bb.__offset(this.bb_pos, 42);
   return offset ? this.bb.__string(this.bb.__vector(this.bb_pos + offset) + index * 4, optionalEncoding) : null;
 };
 
@@ -5956,7 +5974,7 @@ apemodefb.SceneFb.prototype.stringValues = function(index, optionalEncoding) {
  * @returns {number}
  */
 apemodefb.SceneFb.prototype.stringValuesLength = function() {
-  var offset = this.bb.__offset(this.bb_pos, 38);
+  var offset = this.bb.__offset(this.bb_pos, 42);
   return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
 };
 
@@ -5964,7 +5982,7 @@ apemodefb.SceneFb.prototype.stringValuesLength = function() {
  * @param {flatbuffers.Builder} builder
  */
 apemodefb.SceneFb.startSceneFb = function(builder) {
-  builder.startObject(18);
+  builder.startObject(20);
 };
 
 /**
@@ -5977,10 +5995,26 @@ apemodefb.SceneFb.addVersion = function(builder, version) {
 
 /**
  * @param {flatbuffers.Builder} builder
+ * @param {flatbuffers.Offset} bboxMinOffset
+ */
+apemodefb.SceneFb.addBboxMin = function(builder, bboxMinOffset) {
+  builder.addFieldStruct(1, bboxMinOffset, 0);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {flatbuffers.Offset} bboxMaxOffset
+ */
+apemodefb.SceneFb.addBboxMax = function(builder, bboxMaxOffset) {
+  builder.addFieldStruct(2, bboxMaxOffset, 0);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
  * @param {flatbuffers.Offset} transformsOffset
  */
 apemodefb.SceneFb.addTransforms = function(builder, transformsOffset) {
-  builder.addFieldOffset(1, transformsOffset, 0);
+  builder.addFieldOffset(3, transformsOffset, 0);
 };
 
 /**
@@ -5993,17 +6027,17 @@ apemodefb.SceneFb.startTransformsVector = function(builder, numElems) {
 
 /**
  * @param {flatbuffers.Builder} builder
- * @param {flatbuffers.Offset} transformsLimitsOffset
+ * @param {flatbuffers.Offset} transformLimitsOffset
  */
-apemodefb.SceneFb.addTransformsLimits = function(builder, transformsLimitsOffset) {
-  builder.addFieldOffset(2, transformsLimitsOffset, 0);
+apemodefb.SceneFb.addTransformLimits = function(builder, transformLimitsOffset) {
+  builder.addFieldOffset(4, transformLimitsOffset, 0);
 };
 
 /**
  * @param {flatbuffers.Builder} builder
  * @param {number} numElems
  */
-apemodefb.SceneFb.startTransformsLimitsVector = function(builder, numElems) {
+apemodefb.SceneFb.startTransformLimitsVector = function(builder, numElems) {
   builder.startVector(92, numElems, 4);
 };
 
@@ -6012,7 +6046,7 @@ apemodefb.SceneFb.startTransformsLimitsVector = function(builder, numElems) {
  * @param {flatbuffers.Offset} nodesOffset
  */
 apemodefb.SceneFb.addNodes = function(builder, nodesOffset) {
-  builder.addFieldOffset(3, nodesOffset, 0);
+  builder.addFieldOffset(5, nodesOffset, 0);
 };
 
 /**
@@ -6041,7 +6075,7 @@ apemodefb.SceneFb.startNodesVector = function(builder, numElems) {
  * @param {flatbuffers.Offset} meshesOffset
  */
 apemodefb.SceneFb.addMeshes = function(builder, meshesOffset) {
-  builder.addFieldOffset(4, meshesOffset, 0);
+  builder.addFieldOffset(6, meshesOffset, 0);
 };
 
 /**
@@ -6070,7 +6104,7 @@ apemodefb.SceneFb.startMeshesVector = function(builder, numElems) {
  * @param {flatbuffers.Offset} animStacksOffset
  */
 apemodefb.SceneFb.addAnimStacks = function(builder, animStacksOffset) {
-  builder.addFieldOffset(5, animStacksOffset, 0);
+  builder.addFieldOffset(7, animStacksOffset, 0);
 };
 
 /**
@@ -6086,7 +6120,7 @@ apemodefb.SceneFb.startAnimStacksVector = function(builder, numElems) {
  * @param {flatbuffers.Offset} animLayersOffset
  */
 apemodefb.SceneFb.addAnimLayers = function(builder, animLayersOffset) {
-  builder.addFieldOffset(6, animLayersOffset, 0);
+  builder.addFieldOffset(8, animLayersOffset, 0);
 };
 
 /**
@@ -6102,7 +6136,7 @@ apemodefb.SceneFb.startAnimLayersVector = function(builder, numElems) {
  * @param {flatbuffers.Offset} animCurvesOffset
  */
 apemodefb.SceneFb.addAnimCurves = function(builder, animCurvesOffset) {
-  builder.addFieldOffset(7, animCurvesOffset, 0);
+  builder.addFieldOffset(9, animCurvesOffset, 0);
 };
 
 /**
@@ -6131,7 +6165,7 @@ apemodefb.SceneFb.startAnimCurvesVector = function(builder, numElems) {
  * @param {flatbuffers.Offset} materialsOffset
  */
 apemodefb.SceneFb.addMaterials = function(builder, materialsOffset) {
-  builder.addFieldOffset(8, materialsOffset, 0);
+  builder.addFieldOffset(10, materialsOffset, 0);
 };
 
 /**
@@ -6160,7 +6194,7 @@ apemodefb.SceneFb.startMaterialsVector = function(builder, numElems) {
  * @param {flatbuffers.Offset} texturesOffset
  */
 apemodefb.SceneFb.addTextures = function(builder, texturesOffset) {
-  builder.addFieldOffset(9, texturesOffset, 0);
+  builder.addFieldOffset(11, texturesOffset, 0);
 };
 
 /**
@@ -6176,7 +6210,7 @@ apemodefb.SceneFb.startTexturesVector = function(builder, numElems) {
  * @param {flatbuffers.Offset} camerasOffset
  */
 apemodefb.SceneFb.addCameras = function(builder, camerasOffset) {
-  builder.addFieldOffset(10, camerasOffset, 0);
+  builder.addFieldOffset(12, camerasOffset, 0);
 };
 
 /**
@@ -6192,7 +6226,7 @@ apemodefb.SceneFb.startCamerasVector = function(builder, numElems) {
  * @param {flatbuffers.Offset} lightsOffset
  */
 apemodefb.SceneFb.addLights = function(builder, lightsOffset) {
-  builder.addFieldOffset(11, lightsOffset, 0);
+  builder.addFieldOffset(13, lightsOffset, 0);
 };
 
 /**
@@ -6208,7 +6242,7 @@ apemodefb.SceneFb.startLightsVector = function(builder, numElems) {
  * @param {flatbuffers.Offset} skinsOffset
  */
 apemodefb.SceneFb.addSkins = function(builder, skinsOffset) {
-  builder.addFieldOffset(12, skinsOffset, 0);
+  builder.addFieldOffset(14, skinsOffset, 0);
 };
 
 /**
@@ -6237,7 +6271,7 @@ apemodefb.SceneFb.startSkinsVector = function(builder, numElems) {
  * @param {flatbuffers.Offset} filesOffset
  */
 apemodefb.SceneFb.addFiles = function(builder, filesOffset) {
-  builder.addFieldOffset(13, filesOffset, 0);
+  builder.addFieldOffset(15, filesOffset, 0);
 };
 
 /**
@@ -6266,7 +6300,7 @@ apemodefb.SceneFb.startFilesVector = function(builder, numElems) {
  * @param {flatbuffers.Offset} boolValuesOffset
  */
 apemodefb.SceneFb.addBoolValues = function(builder, boolValuesOffset) {
-  builder.addFieldOffset(14, boolValuesOffset, 0);
+  builder.addFieldOffset(16, boolValuesOffset, 0);
 };
 
 /**
@@ -6295,7 +6329,7 @@ apemodefb.SceneFb.startBoolValuesVector = function(builder, numElems) {
  * @param {flatbuffers.Offset} intValuesOffset
  */
 apemodefb.SceneFb.addIntValues = function(builder, intValuesOffset) {
-  builder.addFieldOffset(15, intValuesOffset, 0);
+  builder.addFieldOffset(17, intValuesOffset, 0);
 };
 
 /**
@@ -6324,7 +6358,7 @@ apemodefb.SceneFb.startIntValuesVector = function(builder, numElems) {
  * @param {flatbuffers.Offset} floatValuesOffset
  */
 apemodefb.SceneFb.addFloatValues = function(builder, floatValuesOffset) {
-  builder.addFieldOffset(16, floatValuesOffset, 0);
+  builder.addFieldOffset(18, floatValuesOffset, 0);
 };
 
 /**
@@ -6353,7 +6387,7 @@ apemodefb.SceneFb.startFloatValuesVector = function(builder, numElems) {
  * @param {flatbuffers.Offset} stringValuesOffset
  */
 apemodefb.SceneFb.addStringValues = function(builder, stringValuesOffset) {
-  builder.addFieldOffset(17, stringValuesOffset, 0);
+  builder.addFieldOffset(19, stringValuesOffset, 0);
 };
 
 /**

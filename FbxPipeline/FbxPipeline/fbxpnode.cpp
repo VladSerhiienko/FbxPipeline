@@ -198,7 +198,7 @@ void PreprocessAnimation( FbxScene* pScene ) {
             if ( animStackCount > 1 )
                 animStackName += std::to_string( i );
 
-            // pAnimStack->SetName( animStackName.c_str( ) );
+            pAnimStack->SetName( animStackName.c_str( ) );
         }
 
         const uint32_t animStackId = (uint32_t) s.animStacks.size( );
@@ -227,7 +227,7 @@ void PreprocessAnimation( FbxScene* pScene ) {
                     animLayerName += "]";
                 }
 
-                // pAnimLayer->SetName( animLayerName.c_str( ) );
+                 pAnimLayer->SetName( animLayerName.c_str( ) );
             }
 
             const uint32_t animLayerId = (uint32_t) s.animLayers.size( );
@@ -244,6 +244,87 @@ void PreprocessAnimation( FbxScene* pScene ) {
     }
 }
 
+struct AxisSystem {
+    enum EAxis { eXAxis, eYAxis, eZAxis };
+    struct AxisDef {
+        EAxis mAxis;
+        int   mSign;
+    };
+
+    virtual ~AxisSystem() = default;
+    AxisDef mUpVector{eYAxis, -1};
+    AxisDef mFrontVector{eZAxis, +1};
+    AxisDef mCoorSystem{eXAxis, -1};
+};
+
+void PrintAxisSystem( const AxisSystem& axisSystem ) {
+    const char* sz[] = {"X", "Y", "Z"};
+
+    auto& s = apemode::State::Get( );
+    s.console->error( "\t\tFront={}{} Up={}{} CoordSystem={}{} ",
+                      axisSystem.mFrontVector.mSign >= 0 ? "+" : "-",
+                      sz[ axisSystem.mFrontVector.mAxis ],
+                      axisSystem.mUpVector.mSign >= 0 ? "+" : "-",
+                      sz[ axisSystem.mUpVector.mAxis ],
+                      axisSystem.mCoorSystem.mSign >= 0 ? "+" : "-",
+                      sz[ axisSystem.mCoorSystem.mAxis ] );
+}
+
+void PrintAxisSystem( const FbxAxisSystem& axisSystem ) {
+    PrintAxisSystem( reinterpret_cast< const AxisSystem& >( axisSystem ) );
+}
+
+void ExportAxisSystem( FbxScene* pScene ) {
+    auto& s = apemode::State::Get( );
+    s.console->info( "\tCurrent axis system:" );
+    PrintAxisSystem( pScene->GetGlobalSettings( ).GetAxisSystem( ) );
+    s.console->info( "\tDirectX axis system:" );
+    PrintAxisSystem( FbxAxisSystem::DirectX );
+    s.console->info( "\tOpenGL axis system:" );
+    PrintAxisSystem( FbxAxisSystem::OpenGL );
+    s.console->info( "\tMayaYUp axis system:" );
+    PrintAxisSystem( FbxAxisSystem::MayaYUp );
+    s.console->info( "\tMayaZUp axis system:" );
+    PrintAxisSystem( FbxAxisSystem::MayaZUp );
+    s.console->info( "\tLightwave axis system:" );
+    PrintAxisSystem( FbxAxisSystem::Lightwave );
+    s.console->info( "\tMax axis system:" );
+    PrintAxisSystem( FbxAxisSystem::Max );
+    s.console->info( "\tMotionBuilder axis system:" );
+    PrintAxisSystem( FbxAxisSystem::Motionbuilder );
+
+    s.console->error( "\tConverting to viewer axis system ..." );
+    // TODO: Check for the current axis system, and switch to Viewer's.
+    auto rootScaling = pScene->GetRootNode( )->LclScaling.Get( );
+    rootScaling[ 2 ] *= -1;
+    pScene->GetRootNode( )->LclScaling.Set( rootScaling );
+    s.console->error( "\tDone" );
+}
+
+void ExportBoundingBox( FbxScene* pScene ) {
+    auto&      s = apemode::State::Get( );
+    FbxVector4 bboxMin, bboxMax, bboxCenter;
+    s.console->error( "\tCalculating the bounding box (bind pose) ..." );
+    if ( pScene->ComputeBoundingBoxMinMaxCenter( bboxMin, bboxMax, bboxCenter ) ) {
+        s.bboxMin.mutate_x( (float) bboxMin[ 0 ] );
+        s.bboxMin.mutate_y( (float) bboxMin[ 1 ] );
+        s.bboxMin.mutate_z( (float) bboxMin[ 2 ] );
+        s.bboxMax.mutate_x( (float) bboxMax[ 0 ] );
+        s.bboxMax.mutate_y( (float) bboxMax[ 1 ] );
+        s.bboxMax.mutate_z( (float) bboxMax[ 2 ] );
+
+        s.console->info( "\tBounding box: {} {} {} <-> {} {} {}",
+                         s.bboxMin.x( ),
+                         s.bboxMin.y( ),
+                         s.bboxMin.z( ),
+                         s.bboxMax.x( ),
+                         s.bboxMax.y( ),
+                         s.bboxMax.z( ) );
+    } else {
+        s.console->error( "\tBounding box: failed to calculate" );
+    }
+}
+
 FBXPIPELINE_API void ExportScene( FbxScene* pScene ) {
     auto& s = apemode::State::Get( );
     InitializeSeachLocations( );
@@ -252,8 +333,8 @@ FBXPIPELINE_API void ExportScene( FbxScene* pScene ) {
     s.nodes.reserve( (size_t) pScene->GetNodeCount( ) );
     s.meshes.reserve( (size_t) pScene->GetNodeCount( ) );
 
-    //FbxAxisSystem::MayaYUp.ConvertScene( pScene );
-    //FbxAxisSystem::DirectX.ConvertScene( pScene );
+    ExportAxisSystem( pScene );
+    ExportBoundingBox( pScene );
 
     // We want shared materials, so export all the scene material first
     // and reference them from the node scope by their indices.
