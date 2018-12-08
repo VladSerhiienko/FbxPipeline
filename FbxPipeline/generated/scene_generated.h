@@ -67,7 +67,7 @@ struct FileFb;
 struct SceneFb;
 
 enum EVersionFb {
-  EVersionFb_Value = 10,
+  EVersionFb_Value = 11,
   EVersionFb_MIN = EVersionFb_Value,
   EVersionFb_MAX = EVersionFb_Value
 };
@@ -2494,8 +2494,7 @@ struct SkinFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   enum {
     VT_NAME_ID = 4,
     VT_LINKS_IDS = 6,
-    VT_TRANSFORM_LINK_MATRICES = 8,
-    VT_TRANSFORM_MATRICES = 10
+    VT_INV_BIND_POSE_MATRICES = 8
   };
   uint32_t name_id() const {
     return GetField<uint32_t>(VT_NAME_ID, 0);
@@ -2522,27 +2521,19 @@ struct SkinFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   flatbuffers::Vector<uint32_t> *mutable_links_ids() {
     return GetPointer<flatbuffers::Vector<uint32_t> *>(VT_LINKS_IDS);
   }
-  const flatbuffers::Vector<const Mat4Fb *> *transform_link_matrices() const {
-    return GetPointer<const flatbuffers::Vector<const Mat4Fb *> *>(VT_TRANSFORM_LINK_MATRICES);
+  const flatbuffers::Vector<const Mat4Fb *> *inv_bind_pose_matrices() const {
+    return GetPointer<const flatbuffers::Vector<const Mat4Fb *> *>(VT_INV_BIND_POSE_MATRICES);
   }
-  flatbuffers::Vector<const Mat4Fb *> *mutable_transform_link_matrices() {
-    return GetPointer<flatbuffers::Vector<const Mat4Fb *> *>(VT_TRANSFORM_LINK_MATRICES);
-  }
-  const flatbuffers::Vector<const Mat4Fb *> *transform_matrices() const {
-    return GetPointer<const flatbuffers::Vector<const Mat4Fb *> *>(VT_TRANSFORM_MATRICES);
-  }
-  flatbuffers::Vector<const Mat4Fb *> *mutable_transform_matrices() {
-    return GetPointer<flatbuffers::Vector<const Mat4Fb *> *>(VT_TRANSFORM_MATRICES);
+  flatbuffers::Vector<const Mat4Fb *> *mutable_inv_bind_pose_matrices() {
+    return GetPointer<flatbuffers::Vector<const Mat4Fb *> *>(VT_INV_BIND_POSE_MATRICES);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<uint32_t>(verifier, VT_NAME_ID) &&
            VerifyOffset(verifier, VT_LINKS_IDS) &&
            verifier.Verify(links_ids()) &&
-           VerifyOffset(verifier, VT_TRANSFORM_LINK_MATRICES) &&
-           verifier.Verify(transform_link_matrices()) &&
-           VerifyOffset(verifier, VT_TRANSFORM_MATRICES) &&
-           verifier.Verify(transform_matrices()) &&
+           VerifyOffset(verifier, VT_INV_BIND_POSE_MATRICES) &&
+           verifier.Verify(inv_bind_pose_matrices()) &&
            verifier.EndTable();
   }
 };
@@ -2556,11 +2547,8 @@ struct SkinFbBuilder {
   void add_links_ids(flatbuffers::Offset<flatbuffers::Vector<uint32_t>> links_ids) {
     fbb_.AddOffset(SkinFb::VT_LINKS_IDS, links_ids);
   }
-  void add_transform_link_matrices(flatbuffers::Offset<flatbuffers::Vector<const Mat4Fb *>> transform_link_matrices) {
-    fbb_.AddOffset(SkinFb::VT_TRANSFORM_LINK_MATRICES, transform_link_matrices);
-  }
-  void add_transform_matrices(flatbuffers::Offset<flatbuffers::Vector<const Mat4Fb *>> transform_matrices) {
-    fbb_.AddOffset(SkinFb::VT_TRANSFORM_MATRICES, transform_matrices);
+  void add_inv_bind_pose_matrices(flatbuffers::Offset<flatbuffers::Vector<const Mat4Fb *>> inv_bind_pose_matrices) {
+    fbb_.AddOffset(SkinFb::VT_INV_BIND_POSE_MATRICES, inv_bind_pose_matrices);
   }
   explicit SkinFbBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
@@ -2578,11 +2566,9 @@ inline flatbuffers::Offset<SkinFb> CreateSkinFb(
     flatbuffers::FlatBufferBuilder &_fbb,
     uint32_t name_id = 0,
     flatbuffers::Offset<flatbuffers::Vector<uint32_t>> links_ids = 0,
-    flatbuffers::Offset<flatbuffers::Vector<const Mat4Fb *>> transform_link_matrices = 0,
-    flatbuffers::Offset<flatbuffers::Vector<const Mat4Fb *>> transform_matrices = 0) {
+    flatbuffers::Offset<flatbuffers::Vector<const Mat4Fb *>> inv_bind_pose_matrices = 0) {
   SkinFbBuilder builder_(_fbb);
-  builder_.add_transform_matrices(transform_matrices);
-  builder_.add_transform_link_matrices(transform_link_matrices);
+  builder_.add_inv_bind_pose_matrices(inv_bind_pose_matrices);
   builder_.add_links_ids(links_ids);
   builder_.add_name_id(name_id);
   return builder_.Finish();
@@ -2592,14 +2578,12 @@ inline flatbuffers::Offset<SkinFb> CreateSkinFbDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
     uint32_t name_id = 0,
     const std::vector<uint32_t> *links_ids = nullptr,
-    const std::vector<const Mat4Fb *> *transform_link_matrices = nullptr,
-    const std::vector<const Mat4Fb *> *transform_matrices = nullptr) {
+    const std::vector<const Mat4Fb *> *inv_bind_pose_matrices = nullptr) {
   return apemodefb::CreateSkinFb(
       _fbb,
       name_id,
       links_ids ? _fbb.CreateVector<uint32_t>(*links_ids) : 0,
-      transform_link_matrices ? _fbb.CreateVector<const Mat4Fb *>(*transform_link_matrices) : 0,
-      transform_matrices ? _fbb.CreateVector<const Mat4Fb *>(*transform_matrices) : 0);
+      inv_bind_pose_matrices ? _fbb.CreateVector<const Mat4Fb *>(*inv_bind_pose_matrices) : 0);
 }
 
 struct MeshFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {

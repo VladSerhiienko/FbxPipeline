@@ -400,8 +400,7 @@ bool apemode::State::Finalize( ) {
         return apemodefb::CreateSkinFb( builder,
                                         skin.nameId,
                                         builder.CreateVector( skin.linkIds ),
-                                        builder.CreateVectorOfStructs( skin.transformLinkMatrices ),
-                                        builder.CreateVectorOfStructs( skin.transformMatrices ) );
+                                        builder.CreateVectorOfStructs( skin.invBindPoseMatrices ) );
     } );
 
     auto skinsOffset = builder.CreateVector( skinOffsets );

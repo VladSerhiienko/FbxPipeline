@@ -480,6 +480,18 @@ TElementValue GetElementValue( const TElementLayer* pElementLayer,
     }
 }
 
+// https://forums.autodesk.com/t5/fbx-forum/useful-things-you-might-want-to-know-about-fbxsdk/td-p/4821177
+FbxAMatrix GetGeometricTransformation( FbxNode* pFbxNode ) {
+    assert( pFbxNode );
+    if ( pFbxNode ) {
+        const FbxVector4 lT = pFbxNode->GetGeometricTranslation( FbxNode::eSourcePivot );
+        const FbxVector4 lR = pFbxNode->GetGeometricRotation( FbxNode::eSourcePivot );
+        const FbxVector4 lS = pFbxNode->GetGeometricScaling( FbxNode::eSourcePivot );
+
+        return FbxAMatrix( lT, lR, lS );
+    }
+}
+
 /**
  * Returns nullptr in case element layer has unsupported properties or is null.
  **/
@@ -923,10 +935,43 @@ void ExportMesh( FbxNode*       pNode,
                     // s.console->debug( "\t [{}] += {} ({})", pIndices[ j ], boneIndex, pWeights[ j ] );
                 }
 
-                /* TODO: The bind pose matrix must be calculated in the application. */
-
+                FbxAMatrix invBindPoseMatrix;
                 FbxAMatrix bindPoseMatrix;
+                FbxAMatrix transformMatrix;
+                FbxAMatrix geometricMatrix;
                 pCluster->GetTransformLinkMatrix( bindPoseMatrix );
+                pCluster->GetTransformMatrix( transformMatrix );
+
+                geometricMatrix = GetGeometricTransformation( pMesh->GetNode( ) );
+                invBindPoseMatrix = bindPoseMatrix.Inverse( ) * transformMatrix * geometricMatrix;
+                skin.invBindPoseMatrices.push_back( apemode::Cast( invBindPoseMatrix ) );
+
+                // skin.transformLinkMatrices.push_back( apemode::Cast( bindPoseMatrix ) );
+                // skin.transformMatrices.push_back( apemode::Cast( transformMatrix ) );
+
+#if 0
+                s.console->info( "\t InvBindPoseMatrix (link node id = {}):", linkNodeId );
+                s.console->info( "\t\t {} {} {} {}",
+                                 (float) invBindPoseMatrix.Get( 0, 0 ),
+                                 (float) invBindPoseMatrix.Get( 0, 1 ),
+                                 (float) invBindPoseMatrix.Get( 0, 2 ),
+                                 (float) invBindPoseMatrix.Get( 0, 3 ) );
+                s.console->info( "\t\t {} {} {} {}",
+                                 (float) invBindPoseMatrix.Get( 1, 0 ),
+                                 (float) invBindPoseMatrix.Get( 1, 1 ),
+                                 (float) invBindPoseMatrix.Get( 1, 2 ),
+                                 (float) invBindPoseMatrix.Get( 1, 3 ) );
+                s.console->info( "\t\t {} {} {} {}",
+                                 (float) invBindPoseMatrix.Get( 2, 0 ),
+                                 (float) invBindPoseMatrix.Get( 2, 1 ),
+                                 (float) invBindPoseMatrix.Get( 2, 2 ),
+                                 (float) invBindPoseMatrix.Get( 2, 3 ) );
+                s.console->info( "\t\t {} {} {} {}",
+                                 (float) invBindPoseMatrix.Get( 3, 0 ),
+                                 (float) invBindPoseMatrix.Get( 3, 1 ),
+                                 (float) invBindPoseMatrix.Get( 3, 2 ),
+                                 (float) invBindPoseMatrix.Get( 3, 3 ) );
+
                 s.console->info( "\t TransformLinkMatrix (link node id = {}):", linkNodeId );
                 s.console->info( "\t\t {} {} {} {}",
                                  (float) bindPoseMatrix.Get( 0, 0 ),
@@ -949,10 +994,6 @@ void ExportMesh( FbxNode*       pNode,
                                  (float) bindPoseMatrix.Get( 3, 2 ),
                                  (float) bindPoseMatrix.Get( 3, 3 ) );
 
-                skin.transformLinkMatrices.push_back( apemode::Cast( bindPoseMatrix ) );
-
-                FbxAMatrix transformMatrix;
-                pCluster->GetTransformMatrix( transformMatrix );
                 s.console->info( "\t TransformMatrix (link node id = {}):", linkNodeId );
                 s.console->info( "\t\t {} {} {} {}",
                                  (float) transformMatrix.Get( 0, 0 ),
@@ -974,8 +1015,7 @@ void ExportMesh( FbxNode*       pNode,
                                  (float) transformMatrix.Get( 3, 1 ),
                                  (float) transformMatrix.Get( 3, 2 ),
                                  (float) transformMatrix.Get( 3, 3 ) );
-
-                skin.transformMatrices.push_back( apemode::Cast( transformMatrix ) );
+#endif
             }
         }
 

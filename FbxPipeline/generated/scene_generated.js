@@ -10,7 +10,7 @@ var apemodefb = apemodefb || {};
  * @enum
  */
 apemodefb.EVersionFb = {
-  Value: 10
+  Value: 11
 };
 
 /**
@@ -3763,7 +3763,7 @@ apemodefb.SkinFb.prototype.linksIdsArray = function() {
  * @param {apemodefb.Mat4Fb=} obj
  * @returns {apemodefb.Mat4Fb}
  */
-apemodefb.SkinFb.prototype.transformLinkMatrices = function(index, obj) {
+apemodefb.SkinFb.prototype.invBindPoseMatrices = function(index, obj) {
   var offset = this.bb.__offset(this.bb_pos, 8);
   return offset ? (obj || new apemodefb.Mat4Fb).__init(this.bb.__vector(this.bb_pos + offset) + index * 64, this.bb) : null;
 };
@@ -3771,26 +3771,8 @@ apemodefb.SkinFb.prototype.transformLinkMatrices = function(index, obj) {
 /**
  * @returns {number}
  */
-apemodefb.SkinFb.prototype.transformLinkMatricesLength = function() {
+apemodefb.SkinFb.prototype.invBindPoseMatricesLength = function() {
   var offset = this.bb.__offset(this.bb_pos, 8);
-  return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
-};
-
-/**
- * @param {number} index
- * @param {apemodefb.Mat4Fb=} obj
- * @returns {apemodefb.Mat4Fb}
- */
-apemodefb.SkinFb.prototype.transformMatrices = function(index, obj) {
-  var offset = this.bb.__offset(this.bb_pos, 10);
-  return offset ? (obj || new apemodefb.Mat4Fb).__init(this.bb.__vector(this.bb_pos + offset) + index * 64, this.bb) : null;
-};
-
-/**
- * @returns {number}
- */
-apemodefb.SkinFb.prototype.transformMatricesLength = function() {
-  var offset = this.bb.__offset(this.bb_pos, 10);
   return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
 };
 
@@ -3798,7 +3780,7 @@ apemodefb.SkinFb.prototype.transformMatricesLength = function() {
  * @param {flatbuffers.Builder} builder
  */
 apemodefb.SkinFb.startSkinFb = function(builder) {
-  builder.startObject(4);
+  builder.startObject(3);
 };
 
 /**
@@ -3840,33 +3822,17 @@ apemodefb.SkinFb.startLinksIdsVector = function(builder, numElems) {
 
 /**
  * @param {flatbuffers.Builder} builder
- * @param {flatbuffers.Offset} transformLinkMatricesOffset
+ * @param {flatbuffers.Offset} invBindPoseMatricesOffset
  */
-apemodefb.SkinFb.addTransformLinkMatrices = function(builder, transformLinkMatricesOffset) {
-  builder.addFieldOffset(2, transformLinkMatricesOffset, 0);
+apemodefb.SkinFb.addInvBindPoseMatrices = function(builder, invBindPoseMatricesOffset) {
+  builder.addFieldOffset(2, invBindPoseMatricesOffset, 0);
 };
 
 /**
  * @param {flatbuffers.Builder} builder
  * @param {number} numElems
  */
-apemodefb.SkinFb.startTransformLinkMatricesVector = function(builder, numElems) {
-  builder.startVector(64, numElems, 4);
-};
-
-/**
- * @param {flatbuffers.Builder} builder
- * @param {flatbuffers.Offset} transformMatricesOffset
- */
-apemodefb.SkinFb.addTransformMatrices = function(builder, transformMatricesOffset) {
-  builder.addFieldOffset(3, transformMatricesOffset, 0);
-};
-
-/**
- * @param {flatbuffers.Builder} builder
- * @param {number} numElems
- */
-apemodefb.SkinFb.startTransformMatricesVector = function(builder, numElems) {
+apemodefb.SkinFb.startInvBindPoseMatricesVector = function(builder, numElems) {
   builder.startVector(64, numElems, 4);
 };
 
