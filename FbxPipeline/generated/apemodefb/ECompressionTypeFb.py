@@ -2,8 +2,7 @@
 
 # namespace: apemodefb
 
-class EIndexTypeFb(object):
-    UInt16 = 0
-    UInt32 = 1
-    Count = 2
+class ECompressionTypeFb(object):
+    None = 0
+    GoogleDraco3D = 1
 

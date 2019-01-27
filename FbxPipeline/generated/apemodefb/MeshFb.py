@@ -45,7 +45,7 @@ class MeshFb(object):
         o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(6))
         if o != 0:
             x = self._tab.Vector(o)
-            x += flatbuffers.number_types.UOffsetTFlags.py_type(j) * 88
+            x += flatbuffers.number_types.UOffsetTFlags.py_type(j) * 48
             from .SubmeshFb import SubmeshFb
             obj = SubmeshFb()
             obj.Init(self._tab.Bytes, x)
@@ -118,7 +118,7 @@ def MeshFbStart(builder): builder.StartObject(6)
 def MeshFbAddVertices(builder, vertices): builder.PrependUOffsetTRelativeSlot(0, flatbuffers.number_types.UOffsetTFlags.py_type(vertices), 0)
 def MeshFbStartVerticesVector(builder, numElems): return builder.StartVector(1, numElems, 1)
 def MeshFbAddSubmeshes(builder, submeshes): builder.PrependUOffsetTRelativeSlot(1, flatbuffers.number_types.UOffsetTFlags.py_type(submeshes), 0)
-def MeshFbStartSubmeshesVector(builder, numElems): return builder.StartVector(88, numElems, 4)
+def MeshFbStartSubmeshesVector(builder, numElems): return builder.StartVector(48, numElems, 4)
 def MeshFbAddSubsets(builder, subsets): builder.PrependUOffsetTRelativeSlot(2, flatbuffers.number_types.UOffsetTFlags.py_type(subsets), 0)
 def MeshFbStartSubsetsVector(builder, numElems): return builder.StartVector(12, numElems, 4)
 def MeshFbAddIndices(builder, indices): builder.PrependUOffsetTRelativeSlot(3, flatbuffers.number_types.UOffsetTFlags.py_type(indices), 0)

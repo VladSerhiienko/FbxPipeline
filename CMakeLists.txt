@@ -11,8 +11,9 @@ message(STATUS "CMAKE_SOURCE_DIR = ${CMAKE_SOURCE_DIR}")
 message(STATUS "CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}")
 message(STATUS "CMAKE_GENERATOR = ${CMAKE_GENERATOR}")
 
-set(BUILD_FOLDER_SUFFIX "build_${CMAKE_SYSTEM_NAME}_${CMAKE_SYSTEM_PROCESSOR}_${CMAKE_CXX_COMPILER_ID}")
+set(BUILD_FOLDER_SUFFIX "build_${CMAKE_SYSTEM_NAME}_${CMAKE_SYSTEM_PROCESSOR}_${CMAKE_CXX_COMPILER_ID}_${CMAKE_GENERATOR}")
 string(TOLOWER  ${BUILD_FOLDER_SUFFIX} BUILD_FOLDER_SUFFIX)
+string(REPLACE " " "_" BUILD_FOLDER_SUFFIX ${BUILD_FOLDER_SUFFIX} )
 message(STATUS "BUILD_FOLDER_SUFFIX = ${BUILD_FOLDER_SUFFIX}")
 
 message(STATUS "FBX_SDK_INCLUDE_DIR = ${FBX_SDK_INCLUDE_DIR}")
@@ -81,6 +82,25 @@ set(dlib_source_dir ${SOURCE_DIR})
 set(dlib_binary_dir ${BINARY_DIR})
 message(STATUS "dlib_source_dir = ${dlib_source_dir}")
 message(STATUS "dlib_binary_dir = ${dlib_binary_dir}")
+
+ExternalProject_Add(
+    draco
+    GIT_REPOSITORY "git@github.com:google/draco.git"
+    SOURCE_DIR "${CMAKE_SOURCE_DIR}/dependencies/draco"
+    GIT_TAG "1.3.4"
+    UPDATE_COMMAND ""
+    PATCH_COMMAND ""
+    CMAKE_ARGS ${default_cmake_args}
+    TEST_COMMAND ""
+    INSTALL_COMMAND ""
+)
+
+ExternalProject_Get_Property(draco SOURCE_DIR)
+ExternalProject_Get_Property(draco BINARY_DIR)
+set(draco_source_dir ${SOURCE_DIR})
+set(draco_binary_dir ${BINARY_DIR})
+message(STATUS "draco_source_dir = ${draco_source_dir}")
+message(STATUS "draco_binary_dir = ${draco_binary_dir}")
 
 ExternalProject_Add(
     cxxopts
@@ -255,7 +275,7 @@ add_library(
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpmesh.cpp
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpmeshopt.cpp
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpnode.cpp
-    ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxppacking.cpp
+    # ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxppacking.cpp
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxppch.cpp
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpstate.cpp
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxptransform.cpp
@@ -331,6 +351,14 @@ foreach( fbxpipeline_script ${fbxpipeline_scripts} )
         ${fbxpipeline_script}
         ${CMAKE_BINARY_DIR}/Release
     )
+    add_custom_command(
+        TARGET
+        FbxPipeline
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${fbxpipeline_script}
+        ${CMAKE_BINARY_DIR}
+    )
 endforeach()
 
 target_compile_definitions(
@@ -348,6 +376,7 @@ add_dependencies(
     flatbuffers
     pybind11
     dlib
+    draco
 )
 
 target_include_directories(
@@ -357,6 +386,8 @@ target_include_directories(
     ${CMAKE_SOURCE_DIR}/FbxPipeline/generated
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline
     ${CMAKE_SOURCE_DIR}/dependencies/dlib
+    ${CMAKE_SOURCE_DIR}/dependencies/draco/src
+    ${draco_binary_dir}
     ${CMAKE_SOURCE_DIR}/dependencies/cxxopts/include
     ${CMAKE_SOURCE_DIR}/dependencies/mathfu/include
     ${CMAKE_SOURCE_DIR}/dependencies/mathfu/dependencies/vectorial/include
@@ -374,9 +405,9 @@ if (WIN32)
         debug ${dlib_binary_dir}/dlib${CONFIGURATION_SUFFIX}/dlib.lib
         debug ${zlib_binary_dir}${CONFIGURATION_SUFFIX}/zlibstaticd.lib
         debug ${flatbuffers_binary_dir}${CONFIGURATION_SUFFIX}/flatbuffers.lib
+        optimized ${dlib_binary_dir}/dlib${CONFIGURATION_SUFFIX}/dlib.lib
         optimized ${zlib_binary_dir}${CONFIGURATION_SUFFIX}/zlibstatic.lib
         optimized ${flatbuffers_binary_dir}${CONFIGURATION_SUFFIX}/flatbuffers.lib
-        optimized ${dlib_binary_dir}/dlib${CONFIGURATION_SUFFIX}/dlib.lib
         ${PYTHON_LIBRARY}
         winmm.lib
         imm32.lib
@@ -386,6 +417,8 @@ elseif(APPLE)
     set(
         third_party_libs
         ${dlib_binary_dir}/dlib${CONFIGURATION_SUFFIX}/libdlib.a
+        ${draco_binary_dir}${CONFIGURATION_SUFFIX}/libdraco.a
+        ${draco_binary_dir}${CONFIGURATION_SUFFIX}/libdracoenc.a
         ${zlib_binary_dir}${CONFIGURATION_SUFFIX}/libz.a
         ${flatbuffers_binary_dir}${CONFIGURATION_SUFFIX}/libflatbuffers.a
         ${PYTHON_LIBRARY}
@@ -399,7 +432,9 @@ elseif(APPLE)
 else()
     set(
         third_party_libs
-        ${dlib_binary_dir}/dlib/libdlib.a
+        ${dlib_binary_dir}/dlib/libdlib .a
+        ${draco_binary_dir}/libbraco.a
+        ${draco_binary_dir}/libbracoenc.a
         ${zlib_binary_dir}/libz.a
         ${flatbuffers_binary_dir}/libflatbuffers.a
         ${PYTHON_LIBRARY}

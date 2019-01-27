@@ -2,7 +2,7 @@
 namespace apemodefb;
 
 enum EVersionFb : ubyte {
-    Value = 11
+    Value = 12
 }
 
 enum ECullingTypeFb : ubyte
@@ -86,17 +86,16 @@ enum EPlanarMappingNormalFb : ubyte {
 
 enum EVertexFormatFb : ubyte {
     Static,
+    StaticQTangent,
     StaticSkinned,
     StaticSkinned8,
-	Packed,
-	PackedSkinned,
+    StaticSkinnedQTangent,
+    StaticSkinned8QTangent,
 }
 
 enum EIndexTypeFb : ubyte {
 	UInt16,
-	UInt16Compressed,
 	UInt32,
-	UInt32Compressed,
 	Count,
 }
 
@@ -145,6 +144,11 @@ enum EAreaLightTypeFb : ubyte {
 	Sphere,
 }
 
+enum ECompressionTypeFb : ubyte {
+    None,
+    GoogleDraco3D
+}
+
 enum EValueTypeFb : ubyte {
 	Bool,
     Int,
@@ -179,6 +183,18 @@ struct Vec4Fb {
     w : float;
 }
 
+struct QuatFb {
+    s : float;
+    nx : float;
+    ny : float;
+    nz : float;
+}
+
+struct DualQuatFb {
+    x : QuatFb;
+    y : QuatFb;
+}
+
 struct Mat4Fb {
     x : Vec4Fb;
     y : Vec4Fb;
@@ -193,11 +209,10 @@ struct StaticVertexFb {
     uv : Vec2Fb;
 }
 
-struct PackedVertexFb {
-    position : uint;
-    normal : uint;
-    tangent : uint;
-    uv : uint;
+struct StaticVertexQTangentFb {
+    position : Vec3Fb;
+    qtangent : QuatFb;
+    uv : Vec2Fb;
 }
 
 struct StaticSkinnedVertexFb {
@@ -220,13 +235,22 @@ struct StaticSkinned8VertexFb {
     indices_1 : Vec4Fb;
 }
 
-struct PackedSkinnedVertexFb {
-    position : uint;
-    normal : uint;
-    tangent : uint;
-    uv : uint;
-    weights : uint;
-    indices : uint;
+struct StaticSkinnedVertexQTangentFb {
+    position : Vec3Fb;
+    qtangent : QuatFb;
+    uv : Vec2Fb;
+    weights : Vec4Fb;
+    indices : Vec4Fb;
+}
+
+struct StaticSkinned8VertexQTangentFb {
+    position : Vec3Fb;
+    qtangent : QuatFb;
+    uv : Vec2Fb;
+    weights_0 : Vec4Fb;
+    weights_1 : Vec4Fb;
+    indices_0 : Vec4Fb;
+    indices_1 : Vec4Fb;
 }
 
 struct AnimStackFb {
@@ -290,10 +314,6 @@ struct TextureFb {
 struct SubmeshFb {
 	bbox_min : Vec3Fb;
 	bbox_max : Vec3Fb;
-	position_offset : Vec3Fb;
-	position_scale : Vec3Fb;
-	uv_offset : Vec2Fb;
-	uv_scale : Vec2Fb;
     base_vertex : uint;
     vertex_count : uint;
     base_index : uint;
@@ -301,7 +321,7 @@ struct SubmeshFb {
     base_subset : ushort;
     subset_count : ushort;
     vertex_format : EVertexFormatFb;
-    vertex_stride : ushort;
+    compression_type : ECompressionTypeFb;
 }
 
 struct SubsetFb {

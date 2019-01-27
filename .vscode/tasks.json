@@ -59,7 +59,7 @@
             "type": "shell",
             "command": "cmake",
             "args": [
-                "-H.", "-Bbuild_darwin_x86_64_appleclang",
+                "-H.", "-Bbuild_darwin_x86_64_appleclang_unix_makefiles",
                 "-DFBX_SDK_INCLUDE_DIR=/Applications/Autodesk/FBX SDK/2019.0/include",
                 "-DFBX_SDK_LIBRARY_DEBUG=/Applications/Autodesk/FBX SDK/2019.0/lib/clang/debug/libfbxsdk.a",
                 "-DFBX_SDK_LIBRARY_RELEASE=/Applications/Autodesk/FBX SDK/2019.0/lib/clang/release/libfbxsdk.a",
@@ -82,7 +82,7 @@
             "command": "cmake",
             "args": [
                 "-G", "Xcode",
-                "-H.", "-Bbuild_darwin_x86_64_appleclang",
+                "-H.", "-Bbuild_darwin_x86_64_appleclang_xcode",
                 "-DFBX_SDK_INCLUDE_DIR=/Applications/Autodesk/FBX SDK/2019.0/include",
                 "-DFBX_SDK_LIBRARY_DEBUG=/Applications/Autodesk/FBX SDK/2019.0/lib/clang/debug/libfbxsdk.a",
                 "-DFBX_SDK_LIBRARY_RELEASE=/Applications/Autodesk/FBX SDK/2019.0/lib/clang/release/libfbxsdk.a",

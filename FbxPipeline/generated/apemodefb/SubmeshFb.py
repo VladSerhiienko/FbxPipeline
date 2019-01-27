@@ -22,46 +22,26 @@ class SubmeshFb(object):
         return obj
 
     # SubmeshFb
-    def PositionOffset(self, obj):
-        obj.Init(self._tab.Bytes, self._tab.Pos + 24)
-        return obj
+    def BaseVertex(self): return self._tab.Get(flatbuffers.number_types.Uint32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(24))
+    # SubmeshFb
+    def VertexCount(self): return self._tab.Get(flatbuffers.number_types.Uint32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(28))
+    # SubmeshFb
+    def BaseIndex(self): return self._tab.Get(flatbuffers.number_types.Uint32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(32))
+    # SubmeshFb
+    def IndexCount(self): return self._tab.Get(flatbuffers.number_types.Uint32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(36))
+    # SubmeshFb
+    def BaseSubset(self): return self._tab.Get(flatbuffers.number_types.Uint16Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(40))
+    # SubmeshFb
+    def SubsetCount(self): return self._tab.Get(flatbuffers.number_types.Uint16Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(42))
+    # SubmeshFb
+    def VertexFormat(self): return self._tab.Get(flatbuffers.number_types.Uint8Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(44))
+    # SubmeshFb
+    def CompressionType(self): return self._tab.Get(flatbuffers.number_types.Uint8Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(45))
 
-    # SubmeshFb
-    def PositionScale(self, obj):
-        obj.Init(self._tab.Bytes, self._tab.Pos + 36)
-        return obj
-
-    # SubmeshFb
-    def UvOffset(self, obj):
-        obj.Init(self._tab.Bytes, self._tab.Pos + 48)
-        return obj
-
-    # SubmeshFb
-    def UvScale(self, obj):
-        obj.Init(self._tab.Bytes, self._tab.Pos + 56)
-        return obj
-
-    # SubmeshFb
-    def BaseVertex(self): return self._tab.Get(flatbuffers.number_types.Uint32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(64))
-    # SubmeshFb
-    def VertexCount(self): return self._tab.Get(flatbuffers.number_types.Uint32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(68))
-    # SubmeshFb
-    def BaseIndex(self): return self._tab.Get(flatbuffers.number_types.Uint32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(72))
-    # SubmeshFb
-    def IndexCount(self): return self._tab.Get(flatbuffers.number_types.Uint32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(76))
-    # SubmeshFb
-    def BaseSubset(self): return self._tab.Get(flatbuffers.number_types.Uint16Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(80))
-    # SubmeshFb
-    def SubsetCount(self): return self._tab.Get(flatbuffers.number_types.Uint16Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(82))
-    # SubmeshFb
-    def VertexFormat(self): return self._tab.Get(flatbuffers.number_types.Uint8Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(84))
-    # SubmeshFb
-    def VertexStride(self): return self._tab.Get(flatbuffers.number_types.Uint16Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(86))
-
-def CreateSubmeshFb(builder, bbox_min_x, bbox_min_y, bbox_min_z, bbox_max_x, bbox_max_y, bbox_max_z, position_offset_x, position_offset_y, position_offset_z, position_scale_x, position_scale_y, position_scale_z, uv_offset_x, uv_offset_y, uv_scale_x, uv_scale_y, baseVertex, vertexCount, baseIndex, indexCount, baseSubset, subsetCount, vertexFormat, vertexStride):
-    builder.Prep(4, 88)
-    builder.PrependUint16(vertexStride)
-    builder.Pad(1)
+def CreateSubmeshFb(builder, bbox_min_x, bbox_min_y, bbox_min_z, bbox_max_x, bbox_max_y, bbox_max_z, baseVertex, vertexCount, baseIndex, indexCount, baseSubset, subsetCount, vertexFormat, compressionType):
+    builder.Prep(4, 48)
+    builder.Pad(2)
+    builder.PrependUint8(compressionType)
     builder.PrependUint8(vertexFormat)
     builder.PrependUint16(subsetCount)
     builder.PrependUint16(baseSubset)
@@ -69,20 +49,6 @@ def CreateSubmeshFb(builder, bbox_min_x, bbox_min_y, bbox_min_z, bbox_max_x, bbo
     builder.PrependUint32(baseIndex)
     builder.PrependUint32(vertexCount)
     builder.PrependUint32(baseVertex)
-    builder.Prep(4, 8)
-    builder.PrependFloat32(uv_scale_y)
-    builder.PrependFloat32(uv_scale_x)
-    builder.Prep(4, 8)
-    builder.PrependFloat32(uv_offset_y)
-    builder.PrependFloat32(uv_offset_x)
-    builder.Prep(4, 12)
-    builder.PrependFloat32(position_scale_z)
-    builder.PrependFloat32(position_scale_y)
-    builder.PrependFloat32(position_scale_x)
-    builder.Prep(4, 12)
-    builder.PrependFloat32(position_offset_z)
-    builder.PrependFloat32(position_offset_y)
-    builder.PrependFloat32(position_offset_x)
     builder.Prep(4, 12)
     builder.PrependFloat32(bbox_max_z)
     builder.PrependFloat32(bbox_max_y)

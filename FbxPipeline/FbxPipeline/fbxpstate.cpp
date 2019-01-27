@@ -48,12 +48,12 @@ std::shared_ptr< spdlog::logger > CreateLogger( spdlog::level::level_enum lvl, s
         std::replace( curentTimeStr.begin( ), curentTimeStr.end( ), ':', '-' );
 
         auto logsDirectory = CurrentDirectory( ) + "/.logs";
-        logsDirectory = ResolveFullPath( logsDirectory.c_str( ) );
         MakeDirectory( logsDirectory.c_str( ) );
+        logsDirectory = ResolveFullPath( logsDirectory.c_str( ) );
 
         // logFile = ResolveFullPath( ( logsDirectory + "/fbxp-" + curentTimeStr ).c_str( ) );
         logFile = logsDirectory + "/fbxp-" + curentTimeStr + ".fbxp-log.txt";
-        logFile = ResolveFullPath( logFile.c_str( ) );
+        // logFile = ResolveFullPath( logFile.c_str( ) );
     }
 
     std::vector< spdlog::sink_ptr > sinks {
@@ -127,6 +127,8 @@ apemode::State::State( ) : options( GetExecutable( ) ) {
     options.add_options( "main" )( "reduce-keys", "Reduce the keys in the animation curves.", cxxopts::value< bool >( ) );
     options.add_options( "main" )( "reduce-const-keys", "Reduce constant keys in the animation curves.", cxxopts::value< bool >( ) );
     options.add_options( "main" )( "resample-framerate", "Frame rate at which animation curves will be resampled (60 - default, 0 - disable).", cxxopts::value< float >( ) );
+    options.add_options( "main" )( "mesh-compression", "Compression method.", cxxopts::value< std::string >( ) );
+    options.add_options( "main" )( "tangent-frame-format", "Tangent frame format.", cxxopts::value< std::string >( ) );
 }
 
 apemode::State::~State( ) {
@@ -979,6 +981,19 @@ apemode::ValueId::operator uint32_t( ) const {
     const uint32_t valueIndex = (packed >> 8) & 0x0fff;
     return packed;
     */
+}
+
+apemodefb::DualQuatFb apemode::Cast(const FbxDualQuaternion dq) {
+    apemodefb::DualQuatFb DQ;
+    DQ.mutable_x( ).mutate_s( (float) dq.GetFirstQuaternion().Buffer( )[ 3 ] );
+    DQ.mutable_x( ).mutate_nx( (float) dq.GetFirstQuaternion().Buffer( )[ 0 ] );
+    DQ.mutable_x( ).mutate_ny( (float) dq.GetFirstQuaternion().Buffer( )[ 1 ] );
+    DQ.mutable_x( ).mutate_nz( (float) dq.GetFirstQuaternion().Buffer( )[ 2 ] );
+    DQ.mutable_y( ).mutate_s( (float) dq.GetSecondQuaternion().Buffer( )[ 3 ] );
+    DQ.mutable_y( ).mutate_nx( (float) dq.GetSecondQuaternion().Buffer( )[ 0 ] );
+    DQ.mutable_y( ).mutate_ny( (float) dq.GetSecondQuaternion().Buffer( )[ 1 ] );
+    DQ.mutable_y( ).mutate_nz( (float) dq.GetSecondQuaternion().Buffer( )[ 2 ] );
+    return DQ;
 }
 
 apemodefb::Mat4Fb apemode::Cast( const FbxAMatrix m ) {

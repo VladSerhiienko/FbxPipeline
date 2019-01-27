@@ -16,17 +16,23 @@ struct Vec3Fb;
 
 struct Vec4Fb;
 
+struct QuatFb;
+
+struct DualQuatFb;
+
 struct Mat4Fb;
 
 struct StaticVertexFb;
 
-struct PackedVertexFb;
+struct StaticVertexQTangentFb;
 
 struct StaticSkinnedVertexFb;
 
 struct StaticSkinned8VertexFb;
 
-struct PackedSkinnedVertexFb;
+struct StaticSkinnedVertexQTangentFb;
+
+struct StaticSkinned8VertexQTangentFb;
 
 struct AnimStackFb;
 
@@ -67,7 +73,7 @@ struct FileFb;
 struct SceneFb;
 
 enum EVersionFb {
-  EVersionFb_Value = 11,
+  EVersionFb_Value = 12,
   EVersionFb_MIN = EVersionFb_Value,
   EVersionFb_MAX = EVersionFb_Value
 };
@@ -459,21 +465,23 @@ inline const char *EnumNameEPlanarMappingNormalFb(EPlanarMappingNormalFb e) {
 
 enum EVertexFormatFb {
   EVertexFormatFb_Static = 0,
-  EVertexFormatFb_StaticSkinned = 1,
-  EVertexFormatFb_StaticSkinned8 = 2,
-  EVertexFormatFb_Packed = 3,
-  EVertexFormatFb_PackedSkinned = 4,
+  EVertexFormatFb_StaticQTangent = 1,
+  EVertexFormatFb_StaticSkinned = 2,
+  EVertexFormatFb_StaticSkinned8 = 3,
+  EVertexFormatFb_StaticSkinnedQTangent = 4,
+  EVertexFormatFb_StaticSkinned8QTangent = 5,
   EVertexFormatFb_MIN = EVertexFormatFb_Static,
-  EVertexFormatFb_MAX = EVertexFormatFb_PackedSkinned
+  EVertexFormatFb_MAX = EVertexFormatFb_StaticSkinned8QTangent
 };
 
-inline EVertexFormatFb (&EnumValuesEVertexFormatFb())[5] {
+inline EVertexFormatFb (&EnumValuesEVertexFormatFb())[6] {
   static EVertexFormatFb values[] = {
     EVertexFormatFb_Static,
+    EVertexFormatFb_StaticQTangent,
     EVertexFormatFb_StaticSkinned,
     EVertexFormatFb_StaticSkinned8,
-    EVertexFormatFb_Packed,
-    EVertexFormatFb_PackedSkinned
+    EVertexFormatFb_StaticSkinnedQTangent,
+    EVertexFormatFb_StaticSkinned8QTangent
   };
   return values;
 }
@@ -481,10 +489,11 @@ inline EVertexFormatFb (&EnumValuesEVertexFormatFb())[5] {
 inline const char **EnumNamesEVertexFormatFb() {
   static const char *names[] = {
     "Static",
+    "StaticQTangent",
     "StaticSkinned",
     "StaticSkinned8",
-    "Packed",
-    "PackedSkinned",
+    "StaticSkinnedQTangent",
+    "StaticSkinned8QTangent",
     nullptr
   };
   return names;
@@ -497,20 +506,16 @@ inline const char *EnumNameEVertexFormatFb(EVertexFormatFb e) {
 
 enum EIndexTypeFb {
   EIndexTypeFb_UInt16 = 0,
-  EIndexTypeFb_UInt16Compressed = 1,
-  EIndexTypeFb_UInt32 = 2,
-  EIndexTypeFb_UInt32Compressed = 3,
-  EIndexTypeFb_Count = 4,
+  EIndexTypeFb_UInt32 = 1,
+  EIndexTypeFb_Count = 2,
   EIndexTypeFb_MIN = EIndexTypeFb_UInt16,
   EIndexTypeFb_MAX = EIndexTypeFb_Count
 };
 
-inline EIndexTypeFb (&EnumValuesEIndexTypeFb())[5] {
+inline EIndexTypeFb (&EnumValuesEIndexTypeFb())[3] {
   static EIndexTypeFb values[] = {
     EIndexTypeFb_UInt16,
-    EIndexTypeFb_UInt16Compressed,
     EIndexTypeFb_UInt32,
-    EIndexTypeFb_UInt32Compressed,
     EIndexTypeFb_Count
   };
   return values;
@@ -519,9 +524,7 @@ inline EIndexTypeFb (&EnumValuesEIndexTypeFb())[5] {
 inline const char **EnumNamesEIndexTypeFb() {
   static const char *names[] = {
     "UInt16",
-    "UInt16Compressed",
     "UInt32",
-    "UInt32Compressed",
     "Count",
     nullptr
   };
@@ -758,6 +761,35 @@ inline const char *EnumNameEAreaLightTypeFb(EAreaLightTypeFb e) {
   return EnumNamesEAreaLightTypeFb()[index];
 }
 
+enum ECompressionTypeFb {
+  ECompressionTypeFb_None = 0,
+  ECompressionTypeFb_GoogleDraco3D = 1,
+  ECompressionTypeFb_MIN = ECompressionTypeFb_None,
+  ECompressionTypeFb_MAX = ECompressionTypeFb_GoogleDraco3D
+};
+
+inline ECompressionTypeFb (&EnumValuesECompressionTypeFb())[2] {
+  static ECompressionTypeFb values[] = {
+    ECompressionTypeFb_None,
+    ECompressionTypeFb_GoogleDraco3D
+  };
+  return values;
+}
+
+inline const char **EnumNamesECompressionTypeFb() {
+  static const char *names[] = {
+    "None",
+    "GoogleDraco3D",
+    nullptr
+  };
+  return names;
+}
+
+inline const char *EnumNameECompressionTypeFb(ECompressionTypeFb e) {
+  const size_t index = static_cast<int>(e);
+  return EnumNamesECompressionTypeFb()[index];
+}
+
 enum EValueTypeFb {
   EValueTypeFb_Bool = 0,
   EValueTypeFb_Int = 1,
@@ -946,6 +978,78 @@ MANUALLY_ALIGNED_STRUCT(4) Vec4Fb FLATBUFFERS_FINAL_CLASS {
 };
 STRUCT_END(Vec4Fb, 16);
 
+MANUALLY_ALIGNED_STRUCT(4) QuatFb FLATBUFFERS_FINAL_CLASS {
+ private:
+  float s_;
+  float nx_;
+  float ny_;
+  float nz_;
+
+ public:
+  QuatFb() {
+    memset(this, 0, sizeof(QuatFb));
+  }
+  QuatFb(float _s, float _nx, float _ny, float _nz)
+      : s_(flatbuffers::EndianScalar(_s)),
+        nx_(flatbuffers::EndianScalar(_nx)),
+        ny_(flatbuffers::EndianScalar(_ny)),
+        nz_(flatbuffers::EndianScalar(_nz)) {
+  }
+  float s() const {
+    return flatbuffers::EndianScalar(s_);
+  }
+  void mutate_s(float _s) {
+    flatbuffers::WriteScalar(&s_, _s);
+  }
+  float nx() const {
+    return flatbuffers::EndianScalar(nx_);
+  }
+  void mutate_nx(float _nx) {
+    flatbuffers::WriteScalar(&nx_, _nx);
+  }
+  float ny() const {
+    return flatbuffers::EndianScalar(ny_);
+  }
+  void mutate_ny(float _ny) {
+    flatbuffers::WriteScalar(&ny_, _ny);
+  }
+  float nz() const {
+    return flatbuffers::EndianScalar(nz_);
+  }
+  void mutate_nz(float _nz) {
+    flatbuffers::WriteScalar(&nz_, _nz);
+  }
+};
+STRUCT_END(QuatFb, 16);
+
+MANUALLY_ALIGNED_STRUCT(4) DualQuatFb FLATBUFFERS_FINAL_CLASS {
+ private:
+  QuatFb x_;
+  QuatFb y_;
+
+ public:
+  DualQuatFb() {
+    memset(this, 0, sizeof(DualQuatFb));
+  }
+  DualQuatFb(const QuatFb &_x, const QuatFb &_y)
+      : x_(_x),
+        y_(_y) {
+  }
+  const QuatFb &x() const {
+    return x_;
+  }
+  QuatFb &mutable_x() {
+    return x_;
+  }
+  const QuatFb &y() const {
+    return y_;
+  }
+  QuatFb &mutable_y() {
+    return y_;
+  }
+};
+STRUCT_END(DualQuatFb, 32);
+
 MANUALLY_ALIGNED_STRUCT(4) Mat4Fb FLATBUFFERS_FINAL_CLASS {
  private:
   Vec4Fb x_;
@@ -1034,49 +1138,41 @@ MANUALLY_ALIGNED_STRUCT(4) StaticVertexFb FLATBUFFERS_FINAL_CLASS {
 };
 STRUCT_END(StaticVertexFb, 48);
 
-MANUALLY_ALIGNED_STRUCT(4) PackedVertexFb FLATBUFFERS_FINAL_CLASS {
+MANUALLY_ALIGNED_STRUCT(4) StaticVertexQTangentFb FLATBUFFERS_FINAL_CLASS {
  private:
-  uint32_t position_;
-  uint32_t normal_;
-  uint32_t tangent_;
-  uint32_t uv_;
+  Vec3Fb position_;
+  QuatFb qtangent_;
+  Vec2Fb uv_;
 
  public:
-  PackedVertexFb() {
-    memset(this, 0, sizeof(PackedVertexFb));
+  StaticVertexQTangentFb() {
+    memset(this, 0, sizeof(StaticVertexQTangentFb));
   }
-  PackedVertexFb(uint32_t _position, uint32_t _normal, uint32_t _tangent, uint32_t _uv)
-      : position_(flatbuffers::EndianScalar(_position)),
-        normal_(flatbuffers::EndianScalar(_normal)),
-        tangent_(flatbuffers::EndianScalar(_tangent)),
-        uv_(flatbuffers::EndianScalar(_uv)) {
+  StaticVertexQTangentFb(const Vec3Fb &_position, const QuatFb &_qtangent, const Vec2Fb &_uv)
+      : position_(_position),
+        qtangent_(_qtangent),
+        uv_(_uv) {
   }
-  uint32_t position() const {
-    return flatbuffers::EndianScalar(position_);
+  const Vec3Fb &position() const {
+    return position_;
   }
-  void mutate_position(uint32_t _position) {
-    flatbuffers::WriteScalar(&position_, _position);
+  Vec3Fb &mutable_position() {
+    return position_;
   }
-  uint32_t normal() const {
-    return flatbuffers::EndianScalar(normal_);
+  const QuatFb &qtangent() const {
+    return qtangent_;
   }
-  void mutate_normal(uint32_t _normal) {
-    flatbuffers::WriteScalar(&normal_, _normal);
+  QuatFb &mutable_qtangent() {
+    return qtangent_;
   }
-  uint32_t tangent() const {
-    return flatbuffers::EndianScalar(tangent_);
+  const Vec2Fb &uv() const {
+    return uv_;
   }
-  void mutate_tangent(uint32_t _tangent) {
-    flatbuffers::WriteScalar(&tangent_, _tangent);
-  }
-  uint32_t uv() const {
-    return flatbuffers::EndianScalar(uv_);
-  }
-  void mutate_uv(uint32_t _uv) {
-    flatbuffers::WriteScalar(&uv_, _uv);
+  Vec2Fb &mutable_uv() {
+    return uv_;
   }
 };
-STRUCT_END(PackedVertexFb, 16);
+STRUCT_END(StaticVertexQTangentFb, 36);
 
 MANUALLY_ALIGNED_STRUCT(4) StaticSkinnedVertexFb FLATBUFFERS_FINAL_CLASS {
  private:
@@ -1214,65 +1310,125 @@ MANUALLY_ALIGNED_STRUCT(4) StaticSkinned8VertexFb FLATBUFFERS_FINAL_CLASS {
 };
 STRUCT_END(StaticSkinned8VertexFb, 112);
 
-MANUALLY_ALIGNED_STRUCT(4) PackedSkinnedVertexFb FLATBUFFERS_FINAL_CLASS {
+MANUALLY_ALIGNED_STRUCT(4) StaticSkinnedVertexQTangentFb FLATBUFFERS_FINAL_CLASS {
  private:
-  uint32_t position_;
-  uint32_t normal_;
-  uint32_t tangent_;
-  uint32_t uv_;
-  uint32_t weights_;
-  uint32_t indices_;
+  Vec3Fb position_;
+  QuatFb qtangent_;
+  Vec2Fb uv_;
+  Vec4Fb weights_;
+  Vec4Fb indices_;
 
  public:
-  PackedSkinnedVertexFb() {
-    memset(this, 0, sizeof(PackedSkinnedVertexFb));
+  StaticSkinnedVertexQTangentFb() {
+    memset(this, 0, sizeof(StaticSkinnedVertexQTangentFb));
   }
-  PackedSkinnedVertexFb(uint32_t _position, uint32_t _normal, uint32_t _tangent, uint32_t _uv, uint32_t _weights, uint32_t _indices)
-      : position_(flatbuffers::EndianScalar(_position)),
-        normal_(flatbuffers::EndianScalar(_normal)),
-        tangent_(flatbuffers::EndianScalar(_tangent)),
-        uv_(flatbuffers::EndianScalar(_uv)),
-        weights_(flatbuffers::EndianScalar(_weights)),
-        indices_(flatbuffers::EndianScalar(_indices)) {
+  StaticSkinnedVertexQTangentFb(const Vec3Fb &_position, const QuatFb &_qtangent, const Vec2Fb &_uv, const Vec4Fb &_weights, const Vec4Fb &_indices)
+      : position_(_position),
+        qtangent_(_qtangent),
+        uv_(_uv),
+        weights_(_weights),
+        indices_(_indices) {
   }
-  uint32_t position() const {
-    return flatbuffers::EndianScalar(position_);
+  const Vec3Fb &position() const {
+    return position_;
   }
-  void mutate_position(uint32_t _position) {
-    flatbuffers::WriteScalar(&position_, _position);
+  Vec3Fb &mutable_position() {
+    return position_;
   }
-  uint32_t normal() const {
-    return flatbuffers::EndianScalar(normal_);
+  const QuatFb &qtangent() const {
+    return qtangent_;
   }
-  void mutate_normal(uint32_t _normal) {
-    flatbuffers::WriteScalar(&normal_, _normal);
+  QuatFb &mutable_qtangent() {
+    return qtangent_;
   }
-  uint32_t tangent() const {
-    return flatbuffers::EndianScalar(tangent_);
+  const Vec2Fb &uv() const {
+    return uv_;
   }
-  void mutate_tangent(uint32_t _tangent) {
-    flatbuffers::WriteScalar(&tangent_, _tangent);
+  Vec2Fb &mutable_uv() {
+    return uv_;
   }
-  uint32_t uv() const {
-    return flatbuffers::EndianScalar(uv_);
+  const Vec4Fb &weights() const {
+    return weights_;
   }
-  void mutate_uv(uint32_t _uv) {
-    flatbuffers::WriteScalar(&uv_, _uv);
+  Vec4Fb &mutable_weights() {
+    return weights_;
   }
-  uint32_t weights() const {
-    return flatbuffers::EndianScalar(weights_);
+  const Vec4Fb &indices() const {
+    return indices_;
   }
-  void mutate_weights(uint32_t _weights) {
-    flatbuffers::WriteScalar(&weights_, _weights);
-  }
-  uint32_t indices() const {
-    return flatbuffers::EndianScalar(indices_);
-  }
-  void mutate_indices(uint32_t _indices) {
-    flatbuffers::WriteScalar(&indices_, _indices);
+  Vec4Fb &mutable_indices() {
+    return indices_;
   }
 };
-STRUCT_END(PackedSkinnedVertexFb, 24);
+STRUCT_END(StaticSkinnedVertexQTangentFb, 68);
+
+MANUALLY_ALIGNED_STRUCT(4) StaticSkinned8VertexQTangentFb FLATBUFFERS_FINAL_CLASS {
+ private:
+  Vec3Fb position_;
+  QuatFb qtangent_;
+  Vec2Fb uv_;
+  Vec4Fb weights_0_;
+  Vec4Fb weights_1_;
+  Vec4Fb indices_0_;
+  Vec4Fb indices_1_;
+
+ public:
+  StaticSkinned8VertexQTangentFb() {
+    memset(this, 0, sizeof(StaticSkinned8VertexQTangentFb));
+  }
+  StaticSkinned8VertexQTangentFb(const Vec3Fb &_position, const QuatFb &_qtangent, const Vec2Fb &_uv, const Vec4Fb &_weights_0, const Vec4Fb &_weights_1, const Vec4Fb &_indices_0, const Vec4Fb &_indices_1)
+      : position_(_position),
+        qtangent_(_qtangent),
+        uv_(_uv),
+        weights_0_(_weights_0),
+        weights_1_(_weights_1),
+        indices_0_(_indices_0),
+        indices_1_(_indices_1) {
+  }
+  const Vec3Fb &position() const {
+    return position_;
+  }
+  Vec3Fb &mutable_position() {
+    return position_;
+  }
+  const QuatFb &qtangent() const {
+    return qtangent_;
+  }
+  QuatFb &mutable_qtangent() {
+    return qtangent_;
+  }
+  const Vec2Fb &uv() const {
+    return uv_;
+  }
+  Vec2Fb &mutable_uv() {
+    return uv_;
+  }
+  const Vec4Fb &weights_0() const {
+    return weights_0_;
+  }
+  Vec4Fb &mutable_weights_0() {
+    return weights_0_;
+  }
+  const Vec4Fb &weights_1() const {
+    return weights_1_;
+  }
+  Vec4Fb &mutable_weights_1() {
+    return weights_1_;
+  }
+  const Vec4Fb &indices_0() const {
+    return indices_0_;
+  }
+  Vec4Fb &mutable_indices_0() {
+    return indices_0_;
+  }
+  const Vec4Fb &indices_1() const {
+    return indices_1_;
+  }
+  Vec4Fb &mutable_indices_1() {
+    return indices_1_;
+  }
+};
+STRUCT_END(StaticSkinned8VertexQTangentFb, 100);
 
 MANUALLY_ALIGNED_STRUCT(4) AnimStackFb FLATBUFFERS_FINAL_CLASS {
  private:
@@ -1645,10 +1801,6 @@ MANUALLY_ALIGNED_STRUCT(4) SubmeshFb FLATBUFFERS_FINAL_CLASS {
  private:
   Vec3Fb bbox_min_;
   Vec3Fb bbox_max_;
-  Vec3Fb position_offset_;
-  Vec3Fb position_scale_;
-  Vec2Fb uv_offset_;
-  Vec2Fb uv_scale_;
   uint32_t base_vertex_;
   uint32_t vertex_count_;
   uint32_t base_index_;
@@ -1656,20 +1808,16 @@ MANUALLY_ALIGNED_STRUCT(4) SubmeshFb FLATBUFFERS_FINAL_CLASS {
   uint16_t base_subset_;
   uint16_t subset_count_;
   uint8_t vertex_format_;
-  int8_t padding0__;
-  uint16_t vertex_stride_;
+  uint8_t compression_type_;
+  int16_t padding0__;
 
  public:
   SubmeshFb() {
     memset(this, 0, sizeof(SubmeshFb));
   }
-  SubmeshFb(const Vec3Fb &_bbox_min, const Vec3Fb &_bbox_max, const Vec3Fb &_position_offset, const Vec3Fb &_position_scale, const Vec2Fb &_uv_offset, const Vec2Fb &_uv_scale, uint32_t _base_vertex, uint32_t _vertex_count, uint32_t _base_index, uint32_t _index_count, uint16_t _base_subset, uint16_t _subset_count, EVertexFormatFb _vertex_format, uint16_t _vertex_stride)
+  SubmeshFb(const Vec3Fb &_bbox_min, const Vec3Fb &_bbox_max, uint32_t _base_vertex, uint32_t _vertex_count, uint32_t _base_index, uint32_t _index_count, uint16_t _base_subset, uint16_t _subset_count, EVertexFormatFb _vertex_format, ECompressionTypeFb _compression_type)
       : bbox_min_(_bbox_min),
         bbox_max_(_bbox_max),
-        position_offset_(_position_offset),
-        position_scale_(_position_scale),
-        uv_offset_(_uv_offset),
-        uv_scale_(_uv_scale),
         base_vertex_(flatbuffers::EndianScalar(_base_vertex)),
         vertex_count_(flatbuffers::EndianScalar(_vertex_count)),
         base_index_(flatbuffers::EndianScalar(_base_index)),
@@ -1677,8 +1825,8 @@ MANUALLY_ALIGNED_STRUCT(4) SubmeshFb FLATBUFFERS_FINAL_CLASS {
         base_subset_(flatbuffers::EndianScalar(_base_subset)),
         subset_count_(flatbuffers::EndianScalar(_subset_count)),
         vertex_format_(flatbuffers::EndianScalar(static_cast<uint8_t>(_vertex_format))),
-        padding0__(0),
-        vertex_stride_(flatbuffers::EndianScalar(_vertex_stride)) {
+        compression_type_(flatbuffers::EndianScalar(static_cast<uint8_t>(_compression_type))),
+        padding0__(0) {
     (void)padding0__;
   }
   const Vec3Fb &bbox_min() const {
@@ -1692,30 +1840,6 @@ MANUALLY_ALIGNED_STRUCT(4) SubmeshFb FLATBUFFERS_FINAL_CLASS {
   }
   Vec3Fb &mutable_bbox_max() {
     return bbox_max_;
-  }
-  const Vec3Fb &position_offset() const {
-    return position_offset_;
-  }
-  Vec3Fb &mutable_position_offset() {
-    return position_offset_;
-  }
-  const Vec3Fb &position_scale() const {
-    return position_scale_;
-  }
-  Vec3Fb &mutable_position_scale() {
-    return position_scale_;
-  }
-  const Vec2Fb &uv_offset() const {
-    return uv_offset_;
-  }
-  Vec2Fb &mutable_uv_offset() {
-    return uv_offset_;
-  }
-  const Vec2Fb &uv_scale() const {
-    return uv_scale_;
-  }
-  Vec2Fb &mutable_uv_scale() {
-    return uv_scale_;
   }
   uint32_t base_vertex() const {
     return flatbuffers::EndianScalar(base_vertex_);
@@ -1759,14 +1883,14 @@ MANUALLY_ALIGNED_STRUCT(4) SubmeshFb FLATBUFFERS_FINAL_CLASS {
   void mutate_vertex_format(EVertexFormatFb _vertex_format) {
     flatbuffers::WriteScalar(&vertex_format_, static_cast<uint8_t>(_vertex_format));
   }
-  uint16_t vertex_stride() const {
-    return flatbuffers::EndianScalar(vertex_stride_);
+  ECompressionTypeFb compression_type() const {
+    return static_cast<ECompressionTypeFb>(flatbuffers::EndianScalar(compression_type_));
   }
-  void mutate_vertex_stride(uint16_t _vertex_stride) {
-    flatbuffers::WriteScalar(&vertex_stride_, _vertex_stride);
+  void mutate_compression_type(ECompressionTypeFb _compression_type) {
+    flatbuffers::WriteScalar(&compression_type_, static_cast<uint8_t>(_compression_type));
   }
 };
-STRUCT_END(SubmeshFb, 88);
+STRUCT_END(SubmeshFb, 48);
 
 MANUALLY_ALIGNED_STRUCT(4) SubsetFb FLATBUFFERS_FINAL_CLASS {
  private:

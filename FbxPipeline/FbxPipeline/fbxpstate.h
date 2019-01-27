@@ -15,11 +15,13 @@ inline void DebugBreak( ) {
 namespace apemode {
 
     apemodefb::Mat4Fb Cast(const FbxAMatrix m);
+    apemodefb::DualQuatFb Cast(const FbxDualQuaternion dq);
 
     struct FBXPIPELINE_API Skin {
         uint32_t                         nameId = (uint64_t) 0;
         std::vector< uint32_t >          linkIds;
         std::vector< apemodefb::Mat4Fb > invBindPoseMatrices;
+        std::vector< apemodefb::DualQuatFb > invBindPoseDualQuats;
         // std::vector< apemodefb::Mat4Fb > transformLinkMatrices;
         // std::vector< apemodefb::Mat4Fb > transformMatrices;
     };
