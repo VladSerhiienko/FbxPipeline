@@ -7,6 +7,8 @@ void ExportLight(FbxNode* pNode, apemode::Node& n) {
         switch ( pLight->LightType.Get( ) ) {
             case FbxLight::eVolume:
                 return;
+            default:
+                break;
         }
 
         uint32_t lightId = (uint32_t) s.lights.size( );
@@ -49,6 +51,12 @@ void ExportLight(FbxNode* pNode, apemode::Node& n) {
                         light.mutate_area_light_type( apemodefb::EAreaLightTypeFb_Sphere );
                         break;
                 } break;
+            case FbxLight::eVolume:
+                assert(false);
+                break;
+            default:
+                assert(false);
+                break;
         }
 
         if ( pLight->GetName( ) && 0 != strlen( pLight->GetName( ) ) )

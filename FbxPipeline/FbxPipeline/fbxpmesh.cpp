@@ -12,23 +12,94 @@
 #include <draco/compression/decode.h>
 
 /**
- * Helper function to calculate tangents when the tangent element layer is missing.
- * Can be used in multiple threads.
- * http://gamedev.stackexchange.com/a/68617/39505
+ * Helper structure to assign vertex property values
  **/
-template < typename TVertex >
-void CalculateTangents( TVertex* vertices, size_t vertexCount ) {
+struct StaticVertex {
+    mathfu::vec3 position;
+    mathfu::vec3 normal;
+    mathfu::vec4 tangent;
+    mathfu::vec2 texCoords;
+};
+
+template <typename T>
+void AssertValidVec3(T values) {
+    assert( !isnan( values[0] ) && !isnan( values[1] ) && !isnan( values[2] ) );
+    assert( !isinf( values[0] ) && !isinf( values[1] ) && !isinf( values[2] ) );
+}
+
+bool CalculateTangentsNoUVs( StaticVertex* vertices, size_t vertexCount ) {
     std::vector< mathfu::vec3 > tan;
     tan.resize( vertexCount * 2 );
-    memset( tan.data( ), 0, sizeof( mathfu::vec3 ) * vertexCount * 2 );
 
     auto tan1 = tan.data( );
     auto tan2 = tan1 + vertexCount;
 
     for ( size_t i = 0; i < vertexCount; i += 3 ) {
-        const TVertex v0 = vertices[ i + 0 ];
-        const TVertex v1 = vertices[ i + 1 ];
-        const TVertex v2 = vertices[ i + 2 ];
+        const StaticVertex v0 = vertices[ i + 0 ];
+        const StaticVertex v1 = vertices[ i + 1 ];
+        const StaticVertex v2 = vertices[ i + 2 ];
+        
+        mathfu::vec3 e1 = v1.position - v0.position;
+        mathfu::vec3 e2 = v2.position - v0.position;
+        e1.Normalize();
+        e2.Normalize();
+        
+        AssertValidVec3(e1);
+        AssertValidVec3(e2);
+        
+        tan1[ i + 0 ] = e1;
+        tan1[ i + 1 ] = e1;
+        tan1[ i + 2 ] = e1;
+
+        tan2[ i + 0 ] = e2;
+        tan2[ i + 1 ] = e2;
+        tan2[ i + 2 ] = e2;
+    }
+
+    bool result = true;
+
+    for ( size_t i = 0; i < vertexCount; i += 1 ) {
+        StaticVertex& v = vertices[ i ];
+        v.tangent = mathfu::kZeros4f;
+        v.tangent.w = 1;
+        
+        const auto n = v.normal.Normalized();
+        mathfu::vec3 t = tan1[ i ];
+        AssertValidVec3(n);
+        AssertValidVec3(t);
+
+        const bool isOk = n.Length() && t.Length();
+        result &= isOk;
+        if ( isOk ) {
+            mathfu::vec3 tt = mathfu::normalize( t - n * mathfu::dot( n, t ) );
+            AssertValidVec3(tt);
+
+            v.tangent[ 0 ] = tt.x;
+            v.tangent[ 1 ] = tt.y;
+            v.tangent[ 2 ] = tt.z;
+            v.tangent[ 3 ] = ( mathfu::dot( mathfu::cross( n, t ), tan2[ i ] ) < 0 ) ? -1.0f : 1.0f;
+        }
+    }
+    
+    return result;
+}
+
+/**
+ * Helper function to calculate tangents when the tangent element layer is missing.
+ * Can be used in multiple threads.
+ * http://gamedev.stackexchange.com/a/68617/39505
+ **/
+bool CalculateTangents( StaticVertex* vertices, size_t vertexCount ) {
+    std::vector< mathfu::vec3 > tan;
+    tan.resize( vertexCount * 2 );
+
+    auto tan1 = tan.data( );
+    auto tan2 = tan1 + vertexCount;
+
+    for ( size_t i = 0; i < vertexCount; i += 3 ) {
+        const StaticVertex v0 = vertices[ i + 0 ];
+        const StaticVertex v1 = vertices[ i + 1 ];
+        const StaticVertex v2 = vertices[ i + 2 ];
 
         const float x1 = v1.position[ 0 ] - v0.position[ 0 ];
         const float x2 = v2.position[ 0 ] - v0.position[ 0 ];
@@ -42,35 +113,48 @@ void CalculateTangents( TVertex* vertices, size_t vertexCount ) {
         const float t1 = v1.texCoords[ 1 ] - v0.texCoords[ 1 ];
         const float t2 = v2.texCoords[ 1 ] - v0.texCoords[ 1 ];
 
-        const float r = 1.0f / ( s1 * t2 - s2 * t1 );
+        const float r = 1.0f / ( ( s1 * t2 - s2 * t1 ) + std::numeric_limits<float>::epsilon( ) );
         const mathfu::vec3 sdir( ( t2 * x1 - t1 * x2 ) * r, ( t2 * y1 - t1 * y2 ) * r, ( t2 * z1 - t1 * z2 ) * r );
         const mathfu::vec3 tdir( ( s1 * x2 - s2 * x1 ) * r, ( s1 * y2 - s2 * y1 ) * r, ( s1 * z2 - s2 * z1 ) * r );
 
-        // assert( !isnan( sdir.x ) && !isnan( sdir.y ) && !isnan( sdir.z ) );
-        // assert( !isnan( tdir.x ) && !isnan( tdir.y ) && !isnan( tdir.z ) );
+        AssertValidVec3(sdir);
+        AssertValidVec3(tdir);
 
-        tan1[ i + 0 ] += sdir;
-        tan1[ i + 1 ] += sdir;
-        tan1[ i + 2 ] += sdir;
+        tan1[ i + 0 ] = sdir;
+        tan1[ i + 1 ] = sdir;
+        tan1[ i + 2 ] = sdir;
 
-        tan2[ i + 0 ] += tdir;
-        tan2[ i + 1 ] += tdir;
-        tan2[ i + 2 ] += tdir;
+        tan2[ i + 0 ] = tdir;
+        tan2[ i + 1 ] = tdir;
+        tan2[ i + 2 ] = tdir;
     }
+
+    bool result = true;
 
     for ( size_t i = 0; i < vertexCount; i += 1 ) {
-        TVertex& v = vertices[ i ];
-        const auto n = mathfu::vec3( v.normal[ 0 ], v.normal[ 1 ], v.normal[ 2 ] );
-        const auto t = tan1[ i ];
+        StaticVertex& v = vertices[ i ];
+        v.tangent = mathfu::kZeros4f;
+        v.tangent.w = 1;
+        
+        const auto n = v.normal.Normalized();
+        mathfu::vec3 t = tan1[ i ];
+        AssertValidVec3(n);
+        AssertValidVec3(t);
 
-        mathfu::vec3 tt = mathfu::normalize( t - n * mathfu::dot( n, t ) );
-        // assert( !isnan( tt.x ) && !isnan( tt.y ) && !isnan( tt.z ) );
+        const bool isOk = n.Length() && t.Length();
+        result &= isOk;
+        if ( isOk ) {
+            mathfu::vec3 tt = mathfu::normalize( t - n * mathfu::dot( n, t ) );
+            AssertValidVec3(tt);
 
-        v.tangent[ 0 ]  = tt.x;
-        v.tangent[ 1 ]  = tt.y;
-        v.tangent[ 2 ]  = tt.z;
-        v.tangent[ 3 ]  = ( mathfu::dot( mathfu::cross( n, t ), tan2[ i ] ) < 0 ) ? -1.0f : 1.0f;
+            v.tangent[ 0 ]  = tt.x;
+            v.tangent[ 1 ]  = tt.y;
+            v.tangent[ 2 ]  = tt.z;
+            v.tangent[ 3 ]  = ( mathfu::dot( mathfu::cross( n, t ), tan2[ i ] ) < 0 ) ? -1.0f : 1.0f;
+        }
     }
+    
+    return result;
 }
 
 /**
@@ -78,17 +162,21 @@ void CalculateTangents( TVertex* vertices, size_t vertexCount ) {
  * Fast and usable results, however incorrect.
  * TODO: Implement vertex normal calculations.
  **/
-template < typename TVertex >
-void CalculateFaceNormals( TVertex* vertices, size_t vertexCount ) {
+void CalculateFaceNormals( StaticVertex* vertices, size_t vertexCount ) {
     for ( size_t i = 0; i < vertexCount; i += 3 ) {
-        TVertex& v0 = vertices[ i + 0 ];
-        TVertex& v1 = vertices[ i + 1 ];
-        TVertex& v2 = vertices[ i + 2 ];
+        StaticVertex& v0 = vertices[ i + 0 ];
+        StaticVertex& v1 = vertices[ i + 1 ];
+        StaticVertex& v2 = vertices[ i + 2 ];
 
         const mathfu::vec3 p0( v0.position );
         const mathfu::vec3 p1( v1.position );
         const mathfu::vec3 p2( v2.position );
         const mathfu::vec3 n( mathfu::normalize( mathfu::cross( p1 - p0, p2 - p0 ) ) );
+
+        AssertValidVec3(p0);
+        AssertValidVec3(p1);
+        AssertValidVec3(p2);
+        AssertValidVec3(n);
 
         v0.normal[ 0 ] = n.x;
         v0.normal[ 1 ] = n.y;
@@ -545,16 +633,6 @@ const TElementLayer* VerifyElementLayer( const TElementLayer* pElementLayer ) {
 /**
  * Helper structure to assign vertex property values
  **/
-struct StaticVertex {
-    mathfu::vec3 position;
-    mathfu::vec3 normal;
-    mathfu::vec4 tangent;
-    mathfu::vec2 texCoords;
-};
-
-/**
- * Helper structure to assign vertex property values
- **/
 struct StaticVertexQTangent {
     mathfu::vec3 position;
     mathfu::vec4 qtangent;
@@ -701,22 +779,33 @@ struct TControlPointSkinInfo {
 //static_assert( sizeof( StaticSkinnedVertex ) == sizeof( apemodefb::StaticSkinnedVertexFb ), "Must match" );
 //static_assert( sizeof( StaticSkinned8Vertex ) == sizeof( apemodefb::StaticSkinned8VertexFb ), "Must match" );
 
+bool IsValidNormal(FbxVector4 values) {
+    if ((isnan(values[0]) || isinf(values[0]))
+        || (isnan(values[1]) || isinf(values[1]))
+        || (isnan(values[2]) || isinf(values[2]))) {
+        return false;
+    }
+    
+    const double length = values.Length();
+    if (length < std::numeric_limits<float>::epsilon()) {
+        return false;
+    }
+
+    return true;
+}
+
+struct VertexInitializationResult {
+    bool bValidTangents = false;
+};
 
 /**
  * Initialize vertices with very basic properties like 'position', 'normal', 'tangent', 'texCoords'.
  * Calculate mesh position and texcoord min max values.
  **/
-//template < typename TVertex >
-void InitializeVertices( FbxMesh*       mesh,
-                         apemode::Mesh& m,
-                         StaticVertex*  vertices,
-                         size_t         vertexCount,
-                         mathfu::vec3&  positionMin,
-                         mathfu::vec3&  positionMax,
-                         mathfu::vec2&  texcoordMin,
-                         mathfu::vec2&  texcoordMax ) {
-
+VertexInitializationResult InitializeVertices( FbxMesh* mesh, apemode::Mesh& m, StaticVertex* vertices, size_t vertexCount ) {
     auto& s = apemode::State::Get( );
+    
+    VertexInitializationResult result;
 
     const uint32_t cc = (uint32_t) mesh->GetControlPointsCount( );
     const uint32_t pc = (uint32_t) mesh->GetPolygonCount( );
@@ -724,6 +813,11 @@ void InitializeVertices( FbxMesh*       mesh,
     s.console->info( "Mesh \"{}\" has {} control points.", mesh->GetNode( )->GetName( ), cc );
     s.console->info( "Mesh \"{}\" has {} polygons.", mesh->GetNode( )->GetName( ), pc );
 
+    mathfu::vec3 positionMin;
+    mathfu::vec3 positionMax;
+    mathfu::vec2 texcoordMin;
+    mathfu::vec2 texcoordMax;
+    
     positionMin.x = std::numeric_limits< float >::max( );
     positionMin.y = std::numeric_limits< float >::max( );
     positionMin.z = std::numeric_limits< float >::max( );
@@ -737,8 +831,8 @@ void InitializeVertices( FbxMesh*       mesh,
     texcoordMax.y = std::numeric_limits< float >::min( );
 
     const auto uve = VerifyElementLayer( mesh->GetElementUV( ) );
-    const auto ne  = VerifyElementLayer( mesh->GetElementNormal( ) );
-    const auto te  = VerifyElementLayer( mesh->GetElementTangent( ) );
+    auto ne  = VerifyElementLayer( mesh->GetElementNormal( ) );
+    auto te  = VerifyElementLayer( mesh->GetElementTangent( ) );
 
     uint32_t vi = 0;
     for ( uint32_t pi = 0; pi < pc; ++pi ) {
@@ -752,8 +846,27 @@ void InitializeVertices( FbxMesh*       mesh,
 
             const auto cp = mesh->GetControlPointAt( ci );
             const auto uv = GetElementValue< FbxGeometryElementUV, FbxVector2 >( uve, ci, vi, pi );
-            const auto n  = GetElementValue< FbxGeometryElementNormal, FbxVector4 >( ne, ci, vi, pi );
-            const auto t  = GetElementValue< FbxGeometryElementTangent, FbxVector4 >( te, ci, vi, pi );
+            FbxVector4 n  = GetElementValue< FbxGeometryElementNormal, FbxVector4 >( ne, ci, vi, pi );
+            FbxVector4 t  = GetElementValue< FbxGeometryElementTangent, FbxVector4 >( te, ci, vi, pi );
+            
+            n.Normalize();
+            t.Normalize();
+            
+            AssertValidVec3(cp);
+            AssertValidVec3(n);
+            AssertValidVec3(t);
+            AssertValidVec3(uv);
+            
+            if (ne && !IsValidNormal(n)) {
+                ne = nullptr;
+                s.console->warn( "Mesh \"{}\" has invalid normals", mesh->GetNode( )->GetName( ) );
+                s.console->warn( "Mesh \"{}\" will have generated normals", mesh->GetNode( )->GetName( ) );
+            }
+            if (te && !IsValidNormal(t)) {
+                te = nullptr;
+                s.console->warn( "Mesh \"{}\" has invalid tangents", mesh->GetNode( )->GetName( ) );
+                s.console->warn( "Mesh \"{}\" will have generated tangents", mesh->GetNode( )->GetName( ) );
+            }
 
             auto& vvii          = vertices[ vi ];
             vvii.position[ 0 ]  = (float) cp[ 0 ];
@@ -768,7 +881,7 @@ void InitializeVertices( FbxMesh*       mesh,
             vvii.tangent[ 3 ]   = (float) t[ 3 ];
             vvii.texCoords[ 0 ] = (float) uv[ 0 ];
             vvii.texCoords[ 1 ] = (float) uv[ 1 ];
-
+            
             assert( !isnan( (float) cp[ 0 ] ) && !isnan( (float) cp[ 1 ] ) && !isnan( (float) cp[ 2 ] ) );
             assert( !isnan( (float) n[ 0 ] ) && !isnan( (float) n[ 1 ] ) && !isnan( (float) n[ 2 ] ) );
             assert( !isnan( (float) t[ 0 ] ) && !isnan( (float) t[ 1 ] ) && !isnan( (float) t[ 2 ] ) && !isnan( (float) t[ 3 ] ) );
@@ -785,23 +898,6 @@ void InitializeVertices( FbxMesh*       mesh,
             texcoordMin.y = std::min( texcoordMin.y, (float) uv[ 1 ] );
             texcoordMax.x = std::max( texcoordMax.x, (float) uv[ 0 ] );
             texcoordMax.y = std::max( texcoordMax.y, (float) uv[ 1 ] );
-            
-            const mathfu::vec3 nn = vvii.normal.Normalized();
-            const mathfu::vec3 tt = vvii.tangent.xyz().Normalized();
-            const mathfu::vec3 ttt = mathfu::normalize( tt - nn * mathfu::dot( nn, tt ) );
-            
-            vvii.normal[ 0 ]    = (float) nn.x;
-            vvii.normal[ 1 ]    = (float) nn.y;
-            vvii.normal[ 2 ]    = (float) nn.z;
-            vvii.tangent[ 0 ]   = (float) ttt.x;
-            vvii.tangent[ 1 ]   = (float) ttt.y;
-            vvii.tangent[ 2 ]   = (float) ttt.z;
-            
-            if (vvii.tangent[ 3 ] < 0.0) {
-                vvii.tangent[ 3 ] = -1.0f;
-            } else {
-                vvii.tangent[ 3 ] = +1.0f;
-            }
 
             ++vi;
         }
@@ -826,13 +922,58 @@ void InitializeVertices( FbxMesh*       mesh,
         CalculateFaceNormals( vertices, vertexCount );
     }
 
-    if ( nullptr == te && nullptr != uve ) {
+    result.bValidTangents = te != nullptr;
+    if ( !te && uve ) {
         s.console->warn( "Mesh \"{}\" does not have tangent geometry layer.",
                          mesh->GetNode( )->GetName( ) );
 
         // Calculate tangents ourselves if UVs are available.
-        CalculateTangents( vertices, vertexCount );
+        result.bValidTangents = CalculateTangents( vertices, vertexCount );
+    } else if ( !te && !uve ) {
+        s.console->warn( "Mesh \"{}\" does not have tangent and texcoords geometry layers.",
+                         mesh->GetNode( )->GetName( ) );
+
+        // Calculate tangents ourselves if UVs are available.
+        result.bValidTangents = CalculateTangentsNoUVs( vertices, vertexCount );
     }
+    
+    if (result.bValidTangents && te) {
+        for (uint32_t i = 0; i < vertexCount; ++i) {
+            StaticVertex& vvii = vertices[ i ];
+            
+            const mathfu::vec3 nn = vvii.normal.Normalized();
+            const mathfu::vec3 tt = vvii.tangent.xyz().Normalized();
+            const mathfu::vec3 ttt = mathfu::normalize( tt - nn * mathfu::dot( nn, tt ) );
+            AssertValidVec3(nn);
+            AssertValidVec3(tt);
+            AssertValidVec3(ttt);
+            
+            vvii.normal[ 0 ] = nn.x;
+            vvii.normal[ 1 ] = nn.y;
+            vvii.normal[ 2 ] = nn.z;
+            
+            vvii.tangent[ 0 ] = ttt.x;
+            vvii.tangent[ 1 ] = ttt.y;
+            vvii.tangent[ 2 ] = ttt.z;
+        
+            if (vvii.tangent[ 3 ] < 0.0) {
+                vvii.tangent[ 3 ] = -1.0f;
+            } else {
+                vvii.tangent[ 3 ] = +1.0f;
+            }
+        }
+    } else {
+        for (uint32_t i = 0; i < vertexCount; ++i) {
+            StaticVertex& vvii = vertices[ i ];
+            const mathfu::vec3 nn = vvii.normal.Normalized();
+            
+            vvii.normal[ 0 ] = nn.x;
+            vvii.normal[ 1 ] = nn.y;
+            vvii.normal[ 2 ] = nn.z;
+        }
+    }
+    
+    return result;
 }
 
 //
@@ -910,10 +1051,11 @@ void ExportMesh( FbxNode*       pNode,
         m.indexType = apemodefb::EIndexTypeFb_UInt16;
     } else {
         const bool isUint32 = std::is_same< TIndex, uint32_t >::value;
-        assert(isUint32 && "Caught unexpected index type.");
+        assert( isUint32 && "Caught unexpected index type." );
         m.indexType = apemodefb::EIndexTypeFb_UInt32;
+        (void)isUint32;
     }
-    
+
     /* Fill subsets. */
 
     GetSubsets( pMesh, m.subsets );
@@ -922,82 +1064,81 @@ void ExportMesh( FbxNode*       pNode,
         const uint32_t materialId = pMesh->GetNode( )->GetMaterialCount( ) > 0 ? 0 : uint32_t( -1 );
         m.subsets.push_back( apemodefb::SubsetFb( materialId, 0, vertexCount ) );
     }
-    
-    mathfu::vec3 positionMin;
-    mathfu::vec3 positionMax;
-    mathfu::vec2 texcoordMin;
-    mathfu::vec2 texcoordMax;
-    std::vector<StaticVertex> vertices;
-    vertices.resize(vertexCount);
-    InitializeVertices( pMesh,
-                        m,
-                        vertices.data(),
-                        vertexCount,
-                        positionMin,
-                        positionMax,
-                        texcoordMin,
-                        texcoordMax );
-    
-    std::vector<mathfu::quat> qtangents;
-    if (s.options["tangent-frame-format"].count()) {
-        assert(s.options["tangent-frame-format"].as<std::string>() == "quat-float");
-    
-        qtangents.resize(vertexCount);
+
+    std::vector< StaticVertex > vertices;
+    vertices.resize( vertexCount );
+    auto initResult = InitializeVertices( pMesh, m, vertices.data( ), vertexCount );
+
+    std::vector< mathfu::quat > qtangents;
+    if ( initResult.bValidTangents && s.options[ "tangent-frame-format" ].count( ) ) {
+        assert( s.options[ "tangent-frame-format" ].as< std::string >( ) == "quat-float" );
+
+        qtangents.resize( vertexCount );
         for ( uint32_t i = 0; i < vertexCount; ++i ) {
-            const mathfu::vec3 n (vertices[i].normal);
-            const mathfu::vec3 t (vertices[i].tangent.xyz());
-            const mathfu::vec3 b (mathfu::cross(n, t));
-            const mathfu::mat3 m (t.x, t.y, t.z, b.x, b.y, b.z, n.x, n.y, n.z);
-            mathfu::quat q (mathfu::quat::FromMatrix(m).Normalized());
-            
-            if (q.scalar() < 0.0f) {
-                q = mathfu::quat(-q.scalar(), -q.vector());
-            }
-            
-            const float reflection = vertices[i].tangent.w;
-            if (reflection < 0.0f) {
-                q = mathfu::quat(-q.scalar(), -q.vector());
-            }
-            
-            const float bias = float(1.0 / (pow(2.0, 15.0) - 1.0));
-            if (q.scalar() < bias) {
-                float s = q.scalar();
-                mathfu::vec3 v = q.vector();
+            const mathfu::vec3 n( vertices[ i ].normal );
+            const mathfu::vec3 t( vertices[ i ].tangent.xyz( ) );
+            const mathfu::vec3 b( mathfu::cross( n, t ) );
+            const mathfu::mat3 m( t.x, t.y, t.z, b.x, b.y, b.z, n.x, n.y, n.z );
+
+            mathfu::quat q( mathfu::quat::FromMatrix( m ).Normalized( ) );
+
+            // TODO: Should be in use for packing it into ints
+            //       because the sign will be lost.
+            const float bias = float( 1.0 / ( pow( 2.0, 15.0 ) - 1.0 ) );
+            if ( q.scalar( ) < bias ) {
+                float s = q.scalar( );
+                mathfu::vec3 v = q.vector( );
                 s = bias;
-                v *= sqrt(1.0 - bias * bias);
-                q = mathfu::quat(s, v).Normalized();
-                assert(q.scalar() == s);
-                assert(q.vector() == v);
+                v *= sqrt( 1.0 - bias * bias );
+                q = mathfu::quat( s, v ).Normalized( );
+            }
+
+            if ( q.scalar( ) < 0.0f ) {
+                q = mathfu::quat( -q.scalar( ), -q.vector( ) );
+            }
+
+            const float reflection = vertices[ i ].tangent.w;
+            if ( reflection < 0.0f ) {
+                q = mathfu::quat( -q.scalar( ), -q.vector( ) );
             }
             
-            qtangents[i] = q;
+            q = q.Normalized( );
+            
+            assert( !isnan( q.scalar( ) ) );
+            assert( !isnan( q.vector( ).x ) );
+            assert( !isnan( q.vector( ).y ) );
+            assert( !isnan( q.vector( ).z ) );
+            assert( !isinf( q.scalar( ) ) );
+            assert( !isinf( q.vector( ).x ) );
+            assert( !isinf( q.vector( ).y ) );
+            assert( !isinf( q.vector( ).z ) );
+
+            qtangents[ i ] = q;
         }
     }
-    
+
     using ControlPointSkinInfo = TControlPointSkinInfo<>;
-    
-    EBoneCountPerControlPoint boneCount = EBoneCountPerControlPoint(0);
+
+    EBoneCountPerControlPoint           boneCount = EBoneCountPerControlPoint( 0 );
     std::vector< ControlPointSkinInfo > skinInfos;
-    
-    if (pSkin) {
+
+    if ( pSkin ) {
         /* Allocate skin info for each control point. */
         /* Populate skin info for each control point. */
-        
+
         skinInfos.resize( pMesh->GetControlPointsCount( ) );
 
-        m.skinId = uint32_t(s.skins.size( ));
+        m.skinId = uint32_t( s.skins.size( ) );
 
         s.skins.emplace_back( );
-        auto& skin = s.skins.back( );
+        auto& skin  = s.skins.back( );
         skin.nameId = s.PushValue( pSkin->GetName( ) );
-        
-        
+
         const int clusterCount = pSkin->GetClusterCount( );
         s.console->info( "\t Skin has {} clusters", clusterCount );
-        
+
         skin.linkIds.reserve( clusterCount );
         for ( int i = 0; i < clusterCount; ++i ) {
-
             assert( i < clusterCount );
             const auto pCluster = pSkin->GetCluster( i );
             assert( pCluster );
@@ -1011,7 +1152,7 @@ void ExportMesh( FbxNode*       pNode,
 
                 s.console->info( "\t Cluster #{} influences {} point(s)", i, indexCount );
 
-                uint32_t boneIndex = (uint32_t)skin.linkIds.size();
+                uint32_t boneIndex = (uint32_t) skin.linkIds.size( );
                 skin.linkIds.push_back( linkNodeId );
 
                 for ( int j = 0; j < indexCount; ++j ) {
@@ -1027,35 +1168,38 @@ void ExportMesh( FbxNode*       pNode,
                 const FbxAMatrix geometricMatrix = GetGeometricTransformation( pMesh->GetNode( ) );
                 const FbxAMatrix invBindPoseMatrix = bindPoseMatrix.Inverse( ) * transformMatrix * geometricMatrix;
                 skin.invBindPoseMatrices.push_back( apemode::Cast( invBindPoseMatrix ) );
-                
+
                 // TODO: Scaling can't be included into dual quaternions.
                 // const FbxVector4 S = invBindPoseMatrix.GetS();
-                
-                const FbxVector4 T = invBindPoseMatrix.GetT();
-                const FbxQuaternion Q = invBindPoseMatrix.GetQ();
-                const FbxDualQuaternion DQ(Q, T);
+
+                const FbxVector4 T = invBindPoseMatrix.GetT( );
+                const FbxQuaternion Q = invBindPoseMatrix.GetQ( );
+
+                const FbxDualQuaternion DQ( Q, T );
                 skin.invBindPoseDualQuats.push_back( apemode::Cast( DQ ) );
             }
         }
 
         /* Report about used bone slots. */
         uint32_t maxBoneCount = 4;
+        boneCount = eBoneCountPerControlPoint_4;
         {
-            std::map<uint32_t, uint32_t> boneCountToControlPointCountMap;
-            for ( uint32_t i = 0; i < skinInfos.size(); ++i ) {
-                ++boneCountToControlPointCountMap[skinInfos[i].GetUsedSlotCount()];
+            std::map< uint32_t, uint32_t > boneCountToControlPointCountMap;
+            for ( uint32_t i = 0; i < skinInfos.size( ); ++i ) {
+                ++boneCountToControlPointCountMap[ skinInfos[ i ].GetUsedSlotCount( ) ];
             }
 
             s.console->info( "Used slots:" );
-            for (auto & p : boneCountToControlPointCountMap) {
-                s.console->info( "\t {} slots <- {} points ", p.first, p.second);
+            for ( auto& p : boneCountToControlPointCountMap ) {
+                s.console->info( "\t {} slots <- {} points ", p.first, p.second );
             }
 
             maxBoneCount = std::max( boneCountToControlPointCountMap.rbegin( )->first, maxBoneCount );
-            s.console->info( "\t max bones <- {}", maxBoneCount);
+            s.console->info( "\t max bones <- {}", maxBoneCount );
         }
-        
-        if (maxBoneCount > eBoneCountPerControlPoint_4) {
+
+
+        if ( maxBoneCount > eBoneCountPerControlPoint_4 ) {
             boneCount = eBoneCountPerControlPoint_8;
         }
 
@@ -1064,85 +1208,88 @@ void ExportMesh( FbxNode*       pNode,
             skinInfo.NormalizeWeights( maxBoneCount, 0 );
         }
     }
-    
+
     size_t stride = 0;
     size_t strideUnskinned = 0;
     apemodefb::EVertexFormatFb eVertexFmt;
-    
-    if (skinInfos.empty()) {
-        if (qtangents.empty()) {
-            stride = sizeof(apemodefb::StaticVertexFb);
+
+    if ( skinInfos.empty( ) ) {
+        if ( qtangents.empty( ) ) {
+            stride = sizeof( apemodefb::StaticVertexFb );
             eVertexFmt = apemodefb::EVertexFormatFb_Static;
         } else {
-            stride = sizeof(apemodefb::StaticVertexQTangentFb);
+            stride = sizeof( apemodefb::StaticVertexQTangentFb );
             eVertexFmt = apemodefb::EVertexFormatFb_StaticQTangent;
         }
         strideUnskinned = stride;
     } else {
-        assert(boneCount == eBoneCountPerControlPoint_4 || boneCount == eBoneCountPerControlPoint_8);
-        if (qtangents.empty()) {
-            strideUnskinned = sizeof(apemodefb::StaticVertexFb);
-            switch (boneCount) {
-            case eBoneCountPerControlPoint_4:
-                stride = sizeof(apemodefb::StaticSkinnedVertexFb);
-            eVertexFmt = apemodefb::EVertexFormatFb_StaticSkinned;
-                break;
-            case eBoneCountPerControlPoint_8:
-                stride = sizeof(apemodefb::StaticSkinned8VertexFb);
-            eVertexFmt = apemodefb::EVertexFormatFb_StaticSkinned8;
-                break;
+        assert( boneCount == eBoneCountPerControlPoint_4 || boneCount == eBoneCountPerControlPoint_8 );
+        if ( qtangents.empty( ) ) {
+            strideUnskinned = sizeof( apemodefb::StaticVertexFb );
+            switch ( boneCount ) {
+                case eBoneCountPerControlPoint_4:
+                    stride = sizeof( apemodefb::StaticSkinnedVertexFb );
+                    eVertexFmt = apemodefb::EVertexFormatFb_StaticSkinned;
+                    break;
+                case eBoneCountPerControlPoint_8:
+                    stride = sizeof( apemodefb::StaticSkinned8VertexFb );
+                    eVertexFmt = apemodefb::EVertexFormatFb_StaticSkinned8;
+                    break;
             }
         } else {
-            strideUnskinned = sizeof(apemodefb::StaticVertexQTangentFb);
-            switch (boneCount) {
-            case eBoneCountPerControlPoint_4:
-                stride = sizeof(apemodefb::StaticSkinnedVertexQTangentFb);
-            eVertexFmt = apemodefb::EVertexFormatFb_StaticSkinnedQTangent;
-                break;
-            case eBoneCountPerControlPoint_8:
-                stride = sizeof(apemodefb::StaticSkinned8VertexQTangentFb);
-            eVertexFmt = apemodefb::EVertexFormatFb_StaticSkinned8QTangent;
-                break;
+            strideUnskinned = sizeof( apemodefb::StaticVertexQTangentFb );
+            switch ( boneCount ) {
+                case eBoneCountPerControlPoint_4:
+                    stride = sizeof( apemodefb::StaticSkinnedVertexQTangentFb );
+                    eVertexFmt = apemodefb::EVertexFormatFb_StaticSkinnedQTangent;
+                    break;
+                case eBoneCountPerControlPoint_8:
+                    stride = sizeof( apemodefb::StaticSkinned8VertexQTangentFb );
+                    eVertexFmt = apemodefb::EVertexFormatFb_StaticSkinned8QTangent;
+                    break;
             }
         }
     }
-    
-    assert(stride == 0);
-    m.vertices.resize(stride * vertexCount);
-    
-    if (qtangents.empty()) {
+
+    assert( stride != 0 );
+    m.vertices.resize( stride * vertexCount );
+
+    if ( !qtangents.empty( ) ) {
         for ( uint32_t i = 0; i < vertexCount; ++i ) {
-            auto& dst = *reinterpret_cast<apemodefb::StaticVertexQTangentFb*>(m.vertices.data() + stride * i);
-            dst.mutable_position().mutate_x(vertices[i].position.x);
-            dst.mutable_position().mutate_y(vertices[i].position.y);
-            dst.mutable_position().mutate_z(vertices[i].position.z);
-            dst.mutable_uv().mutate_x(vertices[i].texCoords.x);
-            dst.mutable_uv().mutate_y(vertices[i].texCoords.y);
-            dst.mutable_qtangent().mutate_s(qtangents[i].scalar());
-            dst.mutable_qtangent().mutate_nx(qtangents[i].vector().x);
-            dst.mutable_qtangent().mutate_ny(qtangents[i].vector().y);
-            dst.mutable_qtangent().mutate_nz(qtangents[i].vector().z);
+            assert( ( stride * i ) < m.vertices.size( ) );
+            auto& dst = *reinterpret_cast< apemodefb::StaticVertexQTangentFb* >( m.vertices.data( ) + stride * i );
+            dst.mutable_position( ).mutate_x( vertices[ i ].position.x );
+            dst.mutable_position( ).mutate_y( vertices[ i ].position.y );
+            dst.mutable_position( ).mutate_z( vertices[ i ].position.z );
+            dst.mutable_uv( ).mutate_x( vertices[ i ].texCoords.x );
+            dst.mutable_uv( ).mutate_y( vertices[ i ].texCoords.y );
+            dst.mutable_qtangent( ).mutate_s( qtangents[ i ].scalar( ) );
+            dst.mutable_qtangent( ).mutate_nx( qtangents[ i ].vector( ).x );
+            dst.mutable_qtangent( ).mutate_ny( qtangents[ i ].vector( ).y );
+            dst.mutable_qtangent( ).mutate_nz( qtangents[ i ].vector( ).z );
         }
     } else {
         for ( uint32_t i = 0; i < vertexCount; ++i ) {
-            auto& dst = *reinterpret_cast<apemodefb::StaticVertexFb*>(m.vertices.data() + stride * i);
-            dst.mutable_position().mutate_x(vertices[i].position.x);
-            dst.mutable_position().mutate_y(vertices[i].position.y);
-            dst.mutable_position().mutate_z(vertices[i].position.z);
-            dst.mutable_uv().mutate_x(vertices[i].texCoords.x);
-            dst.mutable_uv().mutate_y(vertices[i].texCoords.y);
-            dst.mutable_normal().mutate_x(vertices[i].normal.x);
-            dst.mutable_normal().mutate_y(vertices[i].normal.y);
-            dst.mutable_normal().mutate_z(vertices[i].normal.z);
-            dst.mutable_tangent().mutate_x(vertices[i].tangent.x);
-            dst.mutable_tangent().mutate_y(vertices[i].tangent.y);
-            dst.mutable_tangent().mutate_z(vertices[i].tangent.z);
-            dst.mutable_tangent().mutate_w(vertices[i].tangent.w);
+            assert( ( stride * i ) < m.vertices.size( ) );
+            auto& dst = *reinterpret_cast< apemodefb::StaticVertexFb* >( m.vertices.data( ) + stride * i );
+            dst.mutable_position( ).mutate_x( vertices[ i ].position.x );
+            dst.mutable_position( ).mutate_y( vertices[ i ].position.y );
+            dst.mutable_position( ).mutate_z( vertices[ i ].position.z );
+            dst.mutable_uv( ).mutate_x( vertices[ i ].texCoords.x );
+            dst.mutable_uv( ).mutate_y( vertices[ i ].texCoords.y );
+            dst.mutable_normal( ).mutate_x( vertices[ i ].normal.x );
+            dst.mutable_normal( ).mutate_y( vertices[ i ].normal.y );
+            dst.mutable_normal( ).mutate_z( vertices[ i ].normal.z );
+            dst.mutable_tangent( ).mutate_x( vertices[ i ].tangent.x );
+            dst.mutable_tangent( ).mutate_y( vertices[ i ].tangent.y );
+            dst.mutable_tangent( ).mutate_z( vertices[ i ].tangent.z );
+            dst.mutable_tangent( ).mutate_w( vertices[ i ].tangent.w );
         }
     }
-    
+
     if (!skinInfos.empty()) {
         auto & skin = s.skins[m.skinId];
+        (void)skin;
     
         uint32_t vertexIndex = 0;
         for ( int polygonIndex = 0; polygonIndex < pMesh->GetPolygonCount( ); ++polygonIndex ) {
@@ -1160,23 +1307,23 @@ void ExportMesh( FbxNode*       pNode,
                 indices_1 : Vec4Fb;
                 */
 
-                float* dst = reinterpret_cast<float*>(m.vertices.data() + stride * vertexIndex + strideUnskinned);
+                float* dst = reinterpret_cast< float* >( m.vertices.data( ) + stride * vertexIndex + strideUnskinned );
                 for ( uint32_t b = 0; b < eBoneCountPerControlPoint_4; ++b ) {
-                    dst[b] = weightsIndices[ b ].weight;
-                    
+                    dst[ b ] = weightsIndices[ b ].weight;
+
                     assert( weightsIndices[ b ].index < skin.linkIds.size( ) );
-                    if (boneCount == eBoneCountPerControlPoint_4) {
-                        dst[eBoneCountPerControlPoint_4 + b] = float(weightsIndices[ b ].index);
+                    if ( boneCount == eBoneCountPerControlPoint_4 ) {
+                        dst[ eBoneCountPerControlPoint_4 + b ] = float( weightsIndices[ b ].index );
                     } else {
-                        assert(boneCount == eBoneCountPerControlPoint_8);
-                        dst[eBoneCountPerControlPoint_4 * 2 + b] = float(weightsIndices[ b ].index);
+                        assert( boneCount == eBoneCountPerControlPoint_8 );
+                        dst[ eBoneCountPerControlPoint_4 * 2 + b ] = float( weightsIndices[ b ].index );
                     }
                 }
-                
-                if (boneCount == eBoneCountPerControlPoint_8) {
+
+                if ( boneCount == eBoneCountPerControlPoint_8 ) {
                     for ( uint32_t b = 0; b < eBoneCountPerControlPoint_4; ++b ) {
-                        dst[eBoneCountPerControlPoint_4 + b] = weightsIndices[ eBoneCountPerControlPoint_4 + b ].weight;
-                        dst[eBoneCountPerControlPoint_4 * 3 + b] = float(weightsIndices[ eBoneCountPerControlPoint_4 + b ].index);
+                        dst[ eBoneCountPerControlPoint_4 + b ] = weightsIndices[ eBoneCountPerControlPoint_4 + b ].weight;
+                        dst[ eBoneCountPerControlPoint_4 * 3 + b ] = float( weightsIndices[ eBoneCountPerControlPoint_4 + b ].index );
                     }
                 }
 
@@ -1186,131 +1333,140 @@ void ExportMesh( FbxNode*       pNode,
     }
     
     apemodefb::ECompressionTypeFb eCompressionType = apemodefb::ECompressionTypeFb_None;
-    
-    const std::string meshCompression = s.options["mesh-compression"].as<std::string>();
-    if (meshCompression != "none") {
-        switch (eVertexFmt) {
-        case apemodefb::EVertexFormatFb_Static:
-        case apemodefb::EVertexFormatFb_StaticQTangent: {
-        
-            draco::MeshEncoderMethod encoderMethod = draco::MESH_EDGEBREAKER_ENCODING;
-            if (meshCompression != "draco-edgebreaker") {
-                assert(meshCompression == "draco-esequential");
-                encoderMethod = draco::MESH_SEQUENTIAL_ENCODING;
-            }
-            
-            draco::Encoder encoder;
-            auto options = draco::EncoderOptionsBase<draco::GeometryAttribute::Type>::CreateDefaultOptions();
-            options.SetGlobalBool("split_mesh_on_seams", false);
-            
-            encoder.Reset(options);
-            encoder.SetEncodingMethod(encoderMethod);
-            encoder.SetSpeedOptions(-1, -1);
-            encoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, 8);
-            encoder.SetAttributeQuantization(draco::GeometryAttribute::TEX_COORD, 8);
-            encoder.SetAttributeQuantization(draco::GeometryAttribute::NORMAL, 8);
-            
-            draco::TriangleSoupMeshBuilder builder;
-            assert(vertexCount % 3 == 0);
-            builder.Start(vertexCount / 3);
-            
-            if (eVertexFmt == apemodefb::EVertexFormatFb_Static) {
-                const int positionAttributeIndex = builder.AddAttribute(draco::GeometryAttribute::Type::POSITION, 3, draco::DataType::DT_FLOAT32);
-                const int normalAttributeIndex = builder.AddAttribute(draco::GeometryAttribute::Type::NORMAL, 3, draco::DataType::DT_FLOAT32);
-                const int tangentAttributeIndex = builder.AddAttribute(draco::GeometryAttribute::Type::NORMAL, 3, draco::DataType::DT_FLOAT32);
-                const int reflectionAttributeIndex = builder.AddAttribute(draco::GeometryAttribute::Type::GENERIC, 1, draco::DataType::DT_FLOAT32);
-                const int texCoordAttributeIndex = builder.AddAttribute(draco::GeometryAttribute::Type::TEX_COORD, 2, draco::DataType::DT_FLOAT32);
-                
-                auto pVertices = reinterpret_cast<const apemodefb::StaticVertexFb *>(m.vertices.data());
-                for (uint32_t i = 0; i < vertexCount; i += 3) {
-                    const draco::FaceIndex faceIndex = draco::FaceIndex(i / 3);
-                    
-                    builder.SetAttributeValuesForFace(positionAttributeIndex, faceIndex,
-                                                      reinterpret_cast<const float*>(&pVertices[i + 0].position()),
-                                                      reinterpret_cast<const float*>(&pVertices[i + 1].position()),
-                                                      reinterpret_cast<const float*>(&pVertices[i + 2].position()));
-                    builder.SetAttributeValuesForFace(normalAttributeIndex, faceIndex,
-                                                      reinterpret_cast<const float*>(&pVertices[i + 0].normal()),
-                                                      reinterpret_cast<const float*>(&pVertices[i + 1].normal()),
-                                                      reinterpret_cast<const float*>(&pVertices[i + 2].normal()));
-                    builder.SetAttributeValuesForFace(tangentAttributeIndex, faceIndex,
-                                                      reinterpret_cast<const float*>(&pVertices[i + 0].tangent()),
-                                                      reinterpret_cast<const float*>(&pVertices[i + 1].tangent()),
-                                                      reinterpret_cast<const float*>(&pVertices[i + 2].tangent()));
-                    builder.SetAttributeValuesForFace(reflectionAttributeIndex, faceIndex,
-                                                      reinterpret_cast<const float*>(&pVertices[i + 0].tangent()) + 3,
-                                                      reinterpret_cast<const float*>(&pVertices[i + 1].tangent()) + 3,
-                                                      reinterpret_cast<const float*>(&pVertices[i + 2].tangent()) + 3);
-                    builder.SetAttributeValuesForFace(texCoordAttributeIndex, faceIndex,
-                                                      reinterpret_cast<const float*>(&pVertices[i + 0].uv()),
-                                                      reinterpret_cast<const float*>(&pVertices[i + 1].uv()),
-                                                      reinterpret_cast<const float*>(&pVertices[i + 2].uv()));
+
+    const std::string& meshCompression = s.options[ "mesh-compression" ].as< std::string >( );
+    if ( s.options[ "mesh-compression" ].count() && meshCompression != "none" ) {
+        switch ( eVertexFmt ) {
+            case apemodefb::EVertexFormatFb_Static:
+            case apemodefb::EVertexFormatFb_StaticQTangent: {
+                draco::MeshEncoderMethod encoderMethod = draco::MESH_EDGEBREAKER_ENCODING;
+                if ( meshCompression != "draco-edgebreaker" ) {
+                    assert( meshCompression == "draco-esequential" );
+                    encoderMethod = draco::MESH_SEQUENTIAL_ENCODING;
                 }
-            } else {
-            
-                assert(eVertexFmt == apemodefb::EVertexFormatFb_StaticQTangent);
-                const int positionAttributeIndex = builder.AddAttribute(draco::GeometryAttribute::Type::POSITION, 3, draco::DataType::DT_FLOAT32);
-                const int qtangentAttributeIndex = builder.AddAttribute(draco::GeometryAttribute::Type::GENERIC, 4, draco::DataType::DT_FLOAT32);
-                const int texCoordAttributeIndex = builder.AddAttribute(draco::GeometryAttribute::Type::TEX_COORD, 2, draco::DataType::DT_FLOAT32);
-                
-                auto pVertices = reinterpret_cast<const apemodefb::StaticVertexQTangentFb *>(m.vertices.data());
-                for (uint32_t i = 0; i < vertexCount; i += 3) {
-                    const draco::FaceIndex faceIndex = draco::FaceIndex(i / 3);
-                    
-                    builder.SetAttributeValuesForFace(positionAttributeIndex, faceIndex,
-                                                      reinterpret_cast<const float*>(&pVertices[i + 0].position()),
-                                                      reinterpret_cast<const float*>(&pVertices[i + 1].position()),
-                                                      reinterpret_cast<const float*>(&pVertices[i + 2].position()));
-                    builder.SetAttributeValuesForFace(qtangentAttributeIndex, faceIndex,
-                                                      reinterpret_cast<const float*>(&pVertices[i + 0].qtangent()),
-                                                      reinterpret_cast<const float*>(&pVertices[i + 1].qtangent()),
-                                                      reinterpret_cast<const float*>(&pVertices[i + 2].qtangent()));
-                    builder.SetAttributeValuesForFace(texCoordAttributeIndex, faceIndex,
-                                                      reinterpret_cast<const float*>(&pVertices[i + 0].uv()),
-                                                      reinterpret_cast<const float*>(&pVertices[i + 1].uv()),
-                                                      reinterpret_cast<const float*>(&pVertices[i + 2].uv()));
-                }
-            }
-        
-            if (auto finalizedMesh = builder.Finalize()) {
-                draco::MeshCleanup cleanup;
-                cleanup(finalizedMesh.get(), draco::MeshCleanupOptions());
-            
-                s.console->info("Starting draco encoding ...");
-                draco::EncoderBuffer encoderBuffer;
-                const draco::Status encoderStatus = encoder.EncodeMeshToBuffer(*finalizedMesh.get(), &encoderBuffer);
-                if (encoderStatus.code() == draco::Status::OK) {
-                
-                    s.console->info("Succeeded: {} -> {}, {}%",
-                        ToPrettySizeString(m.vertices.size()),
-                        ToPrettySizeString(encoderBuffer.size()),
-                        (100.0f * encoderBuffer.size() / m.vertices.size()));
-                    
-                    eCompressionType = apemodefb::ECompressionTypeFb_GoogleDraco3D;
-                    m.vertices.resize(encoderBuffer.size());
-                    memcpy(m.vertices.data(), encoderBuffer.data(), encoderBuffer.size());
-                    
-                    decltype(m.indices) emptyIndices;
-                    m.indices.swap(emptyIndices);
+
+                draco::Encoder encoder;
+                auto           options = draco::EncoderOptionsBase< draco::GeometryAttribute::Type >::CreateDefaultOptions( );
+                options.SetGlobalBool( "split_mesh_on_seams", false );
+
+                encoder.Reset( options );
+                encoder.SetEncodingMethod( encoderMethod );
+                encoder.SetSpeedOptions( -1, -1 );
+                encoder.SetAttributeQuantization( draco::GeometryAttribute::POSITION, 8 );
+                encoder.SetAttributeQuantization( draco::GeometryAttribute::TEX_COORD, 8 );
+                encoder.SetAttributeQuantization( draco::GeometryAttribute::GENERIC, 8 );
+                encoder.SetAttributeQuantization( draco::GeometryAttribute::NORMAL, 8 );
+
+                draco::TriangleSoupMeshBuilder builder;
+                assert( vertexCount % 3 == 0 );
+                builder.Start( vertexCount / 3 );
+
+                // clang-format off
+                if ( eVertexFmt == apemodefb::EVertexFormatFb_Static ) {
+                    const int positionAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::POSITION, 3, draco::DataType::DT_FLOAT32 );
+                    const int normalAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::NORMAL, 3, draco::DataType::DT_FLOAT32 );
+                    const int tangentAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::NORMAL, 3, draco::DataType::DT_FLOAT32 );
+                    const int reflectionAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::GENERIC, 1, draco::DataType::DT_FLOAT32 );
+                    const int texCoordAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::TEX_COORD, 2, draco::DataType::DT_FLOAT32 );
+
+                    auto pVertices = reinterpret_cast< const apemodefb::StaticVertexFb* >( m.vertices.data( ) );
+                    for ( uint32_t i = 0; i < vertexCount; i += 3 ) {
+                        const draco::FaceIndex faceIndex = draco::FaceIndex( i / 3 );
+
+                        builder.SetAttributeValuesForFace( positionAttributeIndex,
+                                                           faceIndex,
+                                                           reinterpret_cast< const float* >( &pVertices[ i + 0 ].position( ) ),
+                                                           reinterpret_cast< const float* >( &pVertices[ i + 1 ].position( ) ),
+                                                           reinterpret_cast< const float* >( &pVertices[ i + 2 ].position( ) ) );
+                        builder.SetAttributeValuesForFace( normalAttributeIndex,
+                                                           faceIndex,
+                                                           reinterpret_cast< const float* >( &pVertices[ i + 0 ].normal( ) ),
+                                                           reinterpret_cast< const float* >( &pVertices[ i + 1 ].normal( ) ),
+                                                           reinterpret_cast< const float* >( &pVertices[ i + 2 ].normal( ) ) );
+                        builder.SetAttributeValuesForFace( tangentAttributeIndex,
+                                                           faceIndex,
+                                                           reinterpret_cast< const float* >( &pVertices[ i + 0 ].tangent( ) ),
+                                                           reinterpret_cast< const float* >( &pVertices[ i + 1 ].tangent( ) ),
+                                                           reinterpret_cast< const float* >( &pVertices[ i + 2 ].tangent( ) ) );
+                        builder.SetAttributeValuesForFace( reflectionAttributeIndex,
+                                                           faceIndex,
+                                                           reinterpret_cast< const float* >( &pVertices[ i + 0 ].tangent( ) ) + 3,
+                                                           reinterpret_cast< const float* >( &pVertices[ i + 1 ].tangent( ) ) + 3,
+                                                           reinterpret_cast< const float* >( &pVertices[ i + 2 ].tangent( ) ) + 3 );
+                        builder.SetAttributeValuesForFace( texCoordAttributeIndex,
+                                                           faceIndex,
+                                                           reinterpret_cast< const float* >( &pVertices[ i + 0 ].uv( ) ),
+                                                           reinterpret_cast< const float* >( &pVertices[ i + 1 ].uv( ) ),
+                                                           reinterpret_cast< const float* >( &pVertices[ i + 2 ].uv( ) ) );
+                    }
                 } else {
-                    s.console->info("Failed: code = {}, error = {}", int(encoderStatus.code()), encoderStatus.error_msg());
+                    assert( eVertexFmt == apemodefb::EVertexFormatFb_StaticQTangent );
+                    const int positionAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::POSITION, 3, draco::DataType::DT_FLOAT32 );
+                    const int qtangentAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::GENERIC, 4, draco::DataType::DT_FLOAT32 );
+                    const int texCoordAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::TEX_COORD, 2, draco::DataType::DT_FLOAT32 );
+
+                    auto pVertices = reinterpret_cast< const apemodefb::StaticVertexQTangentFb* >( m.vertices.data( ) );
+                    for ( uint32_t i = 0; i < vertexCount; i += 3 ) {
+                        const draco::FaceIndex faceIndex = draco::FaceIndex( i / 3 );
+
+                        builder.SetAttributeValuesForFace( positionAttributeIndex,
+                                                           faceIndex,
+                                                           reinterpret_cast< const float* >( &pVertices[ i + 0 ].position( ) ),
+                                                           reinterpret_cast< const float* >( &pVertices[ i + 1 ].position( ) ),
+                                                           reinterpret_cast< const float* >( &pVertices[ i + 2 ].position( ) ) );
+                        builder.SetAttributeValuesForFace( qtangentAttributeIndex,
+                                                           faceIndex,
+                                                           reinterpret_cast< const float* >( &pVertices[ i + 0 ].qtangent( ) ),
+                                                           reinterpret_cast< const float* >( &pVertices[ i + 1 ].qtangent( ) ),
+                                                           reinterpret_cast< const float* >( &pVertices[ i + 2 ].qtangent( ) ) );
+                        builder.SetAttributeValuesForFace( texCoordAttributeIndex,
+                                                           faceIndex,
+                                                           reinterpret_cast< const float* >( &pVertices[ i + 0 ].uv( ) ),
+                                                           reinterpret_cast< const float* >( &pVertices[ i + 1 ].uv( ) ),
+                                                           reinterpret_cast< const float* >( &pVertices[ i + 2 ].uv( ) ) );
+                    }
                 }
-            }
-        } break;
-        default:
-            break;
+                // clang-format on
+
+                if ( auto finalizedMesh = builder.Finalize( ) ) {
+                    draco::MeshCleanup cleanup;
+                    s.console->info( "Starting draco cleanup ..." );
+                    if ( cleanup( finalizedMesh.get( ), draco::MeshCleanupOptions( ) ) ) {
+                        s.console->info( "Succeeded" );
+                    } else {
+                        s.console->info( "Failed" );
+                    }
+
+                    s.console->info( "Starting draco encoding ..." );
+                    draco::EncoderBuffer encoderBuffer;
+                    const draco::Status  encoderStatus = encoder.EncodeMeshToBuffer( *finalizedMesh.get( ), &encoderBuffer );
+                    if ( encoderStatus.code( ) == draco::Status::OK ) {
+                        s.console->info( "Succeeded: {} -> {}, {}%",
+                                         ToPrettySizeString( m.vertices.size( ) ),
+                                         ToPrettySizeString( encoderBuffer.size( ) ),
+                                         ( 100.0f * encoderBuffer.size( ) / m.vertices.size( ) ) );
+
+                        eCompressionType = apemodefb::ECompressionTypeFb_GoogleDraco3D;
+                        m.vertices.resize( encoderBuffer.size( ) );
+                        memcpy( m.vertices.data( ), encoderBuffer.data( ), encoderBuffer.size( ) );
+
+                        decltype( m.indices ) emptyIndices;
+                        m.indices.swap( emptyIndices );
+                    } else {
+                        s.console->info( "Failed: code = {}, error = {}", int( encoderStatus.code( ) ), encoderStatus.error_msg( ) );
+                    }
+                }
+            } break;
+            default:
+                break;
         }
     }
     
-    apemodefb::Vec3Fb bboxMin( positionMin.x, positionMin.y, positionMin.z );
-    apemodefb::Vec3Fb bboxMax( positionMax.x, positionMax.y, positionMax.z );
+    const apemodefb::Vec3Fb bboxMin( m.positionMin.x(), m.positionMin.y(), m.positionMin.z() );
+    const apemodefb::Vec3Fb bboxMax( m.positionMax.x(), m.positionMax.y(), m.positionMax.z() );
 
     m.submeshes.emplace_back( bboxMin,                               // bbox min
                               bboxMax,                               // bbox max
-//                              apemodefb::Vec3Fb( 0.0f, 0.0f, 0.0f ), // position offset
-//                              apemodefb::Vec3Fb( 1.0f, 1.0f, 1.0f ), // position scale
-//                              apemodefb::Vec2Fb( 0.0f, 0.0f ),       // uv offset
-//                              apemodefb::Vec2Fb( 1.0f, 1.0f ),       // uv scale
                               0,                                     // base vertex
                               vertexCount,                           // vertex count
                               0,                                     // base index
@@ -1318,8 +1474,7 @@ void ExportMesh( FbxNode*       pNode,
                               0,                                     // base subset
                               (uint32_t) m.subsets.size( ),          // subset count
                               eVertexFmt,                            // vertex format
-//                              stride,                          // vertex stride
-                              eCompressionType
+                              eCompressionType                       // compression
     );
 }
 

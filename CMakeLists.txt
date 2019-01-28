@@ -416,11 +416,18 @@ if (WIN32)
 elseif(APPLE)
     set(
         third_party_libs
-        ${dlib_binary_dir}/dlib${CONFIGURATION_SUFFIX}/libdlib.a
-        ${draco_binary_dir}${CONFIGURATION_SUFFIX}/libdraco.a
-        ${draco_binary_dir}${CONFIGURATION_SUFFIX}/libdracoenc.a
-        ${zlib_binary_dir}${CONFIGURATION_SUFFIX}/libz.a
-        ${flatbuffers_binary_dir}${CONFIGURATION_SUFFIX}/libflatbuffers.a
+        debug ${dlib_binary_dir}/dlib/Debug/libdlib.a
+        debug ${draco_binary_dir}/Debug/libdraco.a
+        debug ${draco_binary_dir}/Debug/libdracoenc.a
+        debug ${zlib_binary_dir}/Debug/libz.a
+        debug ${flatbuffers_binary_dir}/Debug/libflatbuffers.a
+
+        optimized ${dlib_binary_dir}/dlib/Release/libdlib.a
+        optimized ${draco_binary_dir}/Release/libdraco.a
+        optimized ${draco_binary_dir}/Release/libdracoenc.a
+        optimized ${zlib_binary_dir}/Release/libz.a
+        optimized ${flatbuffers_binary_dir}/Release/libflatbuffers.a
+
         ${PYTHON_LIBRARY}
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}

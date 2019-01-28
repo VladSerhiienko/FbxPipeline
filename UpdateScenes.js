@@ -37,12 +37,15 @@ while (childDirectories.length > 0) {
 }
 
 var commands = [];
+var commandsQt = [];
+var commandsDrc = [];
+var commandsDrcQt = [];
 var commandArgExamples = [];
 
 if (process.platform == 'win32') {
     commands.push('cd ./build_windows_amd64_msvc/Release/');
 } else if (process.platform == 'darwin') {
-    commands.push('cd build_darwin_x86_64_appleclang/Release');
+    commands.push('cd build_darwin_x86_64_appleclang_xcode/Release');
 } else {
     commands.push('cd build_linux_x86_64_gnu/Release');
 }
@@ -85,38 +88,54 @@ sceneSrcFiles.forEach(function (sceneSrcFile) {
 
             // --assets /Users/vlad.serhiienko/Projects/Home/Viewer/assets/** --scene
             // /Users/vlad.serhiienko/Projects/Home/Models/FbxPipeline/bristleback-dota-fan-art.fbxp
-
+            
+            var currentCommand = '';
             if (process.platform == 'win32') {
-                var currentCommandPS = '';
-                currentCommandPS += 'FbxPipelineLauncher.exe';
-                currentCommandPS += ' -i "' + sceneSrcFile + '"';
-                currentCommandPS += ' -o "' + modelsPath + '\\FbxPipeline\\' + sceneName + '.fbxp"';
-                currentCommandPS += ' -l "' + modelsPath + '\\Logs\\' + sceneName + '.txt"';
-                currentCommandPS += ' -e "' + sceneBaseDirectory + '/**"';
-                currentCommandPS += ' --script-file glTFMaterialExtension.py';
-                currentCommandPS += ' --script-input "' + glTFSceneFile + '"';
-                commands.push(currentCommandPS);
+                currentCommand += 'FbxPipelineLauncher.exe';
+                currentCommand += ' -i "' + sceneSrcFile + '"';
+                currentCommand += ' -o "' + modelsPath + '\\FbxPipeline\\' + sceneName + '.fbxp"';
+                currentCommand += ' -l "' + modelsPath + '\\Logs\\' + sceneName + '.txt"';
+                currentCommand += ' -e "' + sceneBaseDirectory + '/**"';
+                currentCommand += ' --script-file glTFMaterialExtension.py';
+                currentCommand += ' --script-input "' + glTFSceneFile + '"';
+                commands.push(currentCommand);
                 commandArgExamples.push('--assets "..\\..\\assets\\**" --scene "' + modelsPath + '\\FbxPipeline\\' + sceneName + '.fbxp"');
+
             } else {
-                var currentCommandSH = '';
-                currentCommandSH += './FbxPipelineLauncher';
-                currentCommandSH += ' -i "' + sceneSrcFile + '"';
-                currentCommandSH += ' -o "' + modelsPath + '/FbxPipeline/' + sceneName + '.fbxp"';
-                currentCommandSH += ' -l "' + modelsPath + '/Logs/' + sceneName + '.txt"';
-                currentCommandSH += ' -e "' + sceneBaseDirectory + '/**"';
-                currentCommandSH += ' --script-file glTFMaterialExtension.py';
-                currentCommandSH += ' --script-input "' + glTFSceneFile + '"';
-                commands.push(currentCommandSH);
+                currentCommand += './FbxPipelineLauncher';
+                currentCommand += ' -i "' + sceneSrcFile + '"';
+                currentCommand += ' -o "' + modelsPath + '/FbxPipeline/' + sceneName + '.fbxp"';
+                currentCommand += ' -l "' + modelsPath + '/Logs/' + sceneName + '.txt"';
+                currentCommand += ' -e "' + sceneBaseDirectory + '/**"';
+                currentCommand += ' --script-file glTFMaterialExtension.py';
+                currentCommand += ' --script-input "' + glTFSceneFile + '"';
+                commands.push(currentCommand);
                 commandArgExamples.push('--assets /Users/vlad.serhiienko/Projects/Home/Viewer/assets/** --scene "' + modelsPath + '/FbxPipeline/' + sceneName + '.fbxp"');
             }
+
+            var currentCommandQt = currentCommand;
+            currentCommandQt += ' --tangent-frame-format quat-float';
+            commandsQt.push(currentCommandQt);
+
+            var currentCommandDrc = currentCommand;
+            currentCommandDrc += ' --mesh-compression draco-edgebreaker';
+            commandsDrc.push(currentCommandQt);
+
+            var currentCommandDrcQt = currentCommandDrc;
+            currentCommandDrcQt += ' --tangent-frame-format quat-float';
+            commandsDrcQt.push(currentCommandQt);
         }
     }
 });
 
+var execExt = 'sh';
+
 if (process.platform == 'win32') {
-    fs.writeFileSync("UpdateScenes.gen.bat", commands.join('\n'));
-    fs.writeFileSync("CommandArgExamples", commandArgExamples.join('\n'));
-} else {
-    fs.writeFileSync("UpdateScenes.gen.sh", commands.join('\n'));
-    fs.writeFileSync("CommandArgExamples", commandArgExamples.join('\n'));
+    execExt = 'bat';
 }
+
+fs.writeFileSync("UpdateScenes.gen." + execExt, commands.join('\n'));
+fs.writeFileSync("UpdateScenesQt.gen." + execExt, commandsQt.join('\n'));
+fs.writeFileSync("UpdateScenesDrc.gen." + execExt, commandsDrc.join('\n'));
+fs.writeFileSync("UpdateScenesDrcQt.gen." + execExt, commandsDrcQt.join('\n'));
+fs.writeFileSync("CommandArgExamples", commandArgExamples.join('\n'));
