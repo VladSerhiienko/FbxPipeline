@@ -4,6 +4,10 @@
 #include <map>
 #include <array>
 
+#ifdef ERROR
+#undef ERROR
+#endif
+
 #include <draco/mesh/mesh.h>
 #include <draco/mesh/mesh_cleanup.h>
 #include <draco/mesh/triangle_soup_mesh_builder.h>
@@ -38,15 +42,15 @@ bool CalculateTangentsNoUVs( StaticVertex* vertices, size_t vertexCount ) {
         const StaticVertex v0 = vertices[ i + 0 ];
         const StaticVertex v1 = vertices[ i + 1 ];
         const StaticVertex v2 = vertices[ i + 2 ];
-        
+
         mathfu::vec3 e1 = v1.position - v0.position;
         mathfu::vec3 e2 = v2.position - v0.position;
         e1.Normalize();
         e2.Normalize();
-        
+
         AssertValidVec3(e1);
         AssertValidVec3(e2);
-        
+
         tan1[ i + 0 ] = e1;
         tan1[ i + 1 ] = e1;
         tan1[ i + 2 ] = e1;
@@ -62,7 +66,7 @@ bool CalculateTangentsNoUVs( StaticVertex* vertices, size_t vertexCount ) {
         StaticVertex& v = vertices[ i ];
         v.tangent = mathfu::kZeros4f;
         v.tangent.w = 1;
-        
+
         const auto n = v.normal.Normalized();
         mathfu::vec3 t = tan1[ i ];
         AssertValidVec3(n);
@@ -80,7 +84,7 @@ bool CalculateTangentsNoUVs( StaticVertex* vertices, size_t vertexCount ) {
             v.tangent[ 3 ] = ( mathfu::dot( mathfu::cross( n, t ), tan2[ i ] ) < 0 ) ? -1.0f : 1.0f;
         }
     }
-    
+
     return result;
 }
 
@@ -135,7 +139,7 @@ bool CalculateTangents( StaticVertex* vertices, size_t vertexCount ) {
         StaticVertex& v = vertices[ i ];
         v.tangent = mathfu::kZeros4f;
         v.tangent.w = 1;
-        
+
         const auto n = v.normal.Normalized();
         mathfu::vec3 t = tan1[ i ];
         AssertValidVec3(n);
@@ -153,7 +157,7 @@ bool CalculateTangents( StaticVertex* vertices, size_t vertexCount ) {
             v.tangent[ 3 ]  = ( mathfu::dot( mathfu::cross( n, t ), tan2[ i ] ) < 0 ) ? -1.0f : 1.0f;
         }
     }
-    
+
     return result;
 }
 
@@ -785,7 +789,7 @@ bool IsValidNormal(FbxVector4 values) {
         || (isnan(values[2]) || isinf(values[2]))) {
         return false;
     }
-    
+
     const double length = values.Length();
     if (length < std::numeric_limits<float>::epsilon()) {
         return false;
@@ -804,7 +808,7 @@ struct VertexInitializationResult {
  **/
 VertexInitializationResult InitializeVertices( FbxMesh* mesh, apemode::Mesh& m, StaticVertex* vertices, size_t vertexCount ) {
     auto& s = apemode::State::Get( );
-    
+
     VertexInitializationResult result;
 
     const uint32_t cc = (uint32_t) mesh->GetControlPointsCount( );
@@ -817,7 +821,7 @@ VertexInitializationResult InitializeVertices( FbxMesh* mesh, apemode::Mesh& m, 
     mathfu::vec3 positionMax;
     mathfu::vec2 texcoordMin;
     mathfu::vec2 texcoordMax;
-    
+
     positionMin.x = std::numeric_limits< float >::max( );
     positionMin.y = std::numeric_limits< float >::max( );
     positionMin.z = std::numeric_limits< float >::max( );
@@ -848,15 +852,15 @@ VertexInitializationResult InitializeVertices( FbxMesh* mesh, apemode::Mesh& m, 
             const auto uv = GetElementValue< FbxGeometryElementUV, FbxVector2 >( uve, ci, vi, pi );
             FbxVector4 n  = GetElementValue< FbxGeometryElementNormal, FbxVector4 >( ne, ci, vi, pi );
             FbxVector4 t  = GetElementValue< FbxGeometryElementTangent, FbxVector4 >( te, ci, vi, pi );
-            
+
             n.Normalize();
             t.Normalize();
-            
+
             AssertValidVec3(cp);
             AssertValidVec3(n);
             AssertValidVec3(t);
             AssertValidVec3(uv);
-            
+
             if (ne && !IsValidNormal(n)) {
                 ne = nullptr;
                 s.console->warn( "Mesh \"{}\" has invalid normals", mesh->GetNode( )->GetName( ) );
@@ -881,7 +885,7 @@ VertexInitializationResult InitializeVertices( FbxMesh* mesh, apemode::Mesh& m, 
             vvii.tangent[ 3 ]   = (float) t[ 3 ];
             vvii.texCoords[ 0 ] = (float) uv[ 0 ];
             vvii.texCoords[ 1 ] = (float) uv[ 1 ];
-            
+
             assert( !isnan( (float) cp[ 0 ] ) && !isnan( (float) cp[ 1 ] ) && !isnan( (float) cp[ 2 ] ) );
             assert( !isnan( (float) n[ 0 ] ) && !isnan( (float) n[ 1 ] ) && !isnan( (float) n[ 2 ] ) );
             assert( !isnan( (float) t[ 0 ] ) && !isnan( (float) t[ 1 ] ) && !isnan( (float) t[ 2 ] ) && !isnan( (float) t[ 3 ] ) );
@@ -936,26 +940,26 @@ VertexInitializationResult InitializeVertices( FbxMesh* mesh, apemode::Mesh& m, 
         // Calculate tangents ourselves if UVs are available.
         result.bValidTangents = CalculateTangentsNoUVs( vertices, vertexCount );
     }
-    
+
     if (result.bValidTangents && te) {
         for (uint32_t i = 0; i < vertexCount; ++i) {
             StaticVertex& vvii = vertices[ i ];
-            
+
             const mathfu::vec3 nn = vvii.normal.Normalized();
             const mathfu::vec3 tt = vvii.tangent.xyz().Normalized();
             const mathfu::vec3 ttt = mathfu::normalize( tt - nn * mathfu::dot( nn, tt ) );
             AssertValidVec3(nn);
             AssertValidVec3(tt);
             AssertValidVec3(ttt);
-            
+
             vvii.normal[ 0 ] = nn.x;
             vvii.normal[ 1 ] = nn.y;
             vvii.normal[ 2 ] = nn.z;
-            
+
             vvii.tangent[ 0 ] = ttt.x;
             vvii.tangent[ 1 ] = ttt.y;
             vvii.tangent[ 2 ] = ttt.z;
-        
+
             if (vvii.tangent[ 3 ] < 0.0) {
                 vvii.tangent[ 3 ] = -1.0f;
             } else {
@@ -966,13 +970,13 @@ VertexInitializationResult InitializeVertices( FbxMesh* mesh, apemode::Mesh& m, 
         for (uint32_t i = 0; i < vertexCount; ++i) {
             StaticVertex& vvii = vertices[ i ];
             const mathfu::vec3 nn = vvii.normal.Normalized();
-            
+
             vvii.normal[ 0 ] = nn.x;
             vvii.normal[ 1 ] = nn.y;
             vvii.normal[ 2 ] = nn.z;
         }
     }
-    
+
     return result;
 }
 
@@ -1089,7 +1093,7 @@ void ExportMesh( FbxNode*       pNode,
                 float s = q.scalar( );
                 mathfu::vec3 v = q.vector( );
                 s = bias;
-                v *= sqrt( 1.0 - bias * bias );
+                v *= sqrt( 1.0f - bias * bias );
                 q = mathfu::quat( s, v ).Normalized( );
             }
 
@@ -1101,9 +1105,9 @@ void ExportMesh( FbxNode*       pNode,
             if ( reflection < 0.0f ) {
                 q = mathfu::quat( -q.scalar( ), -q.vector( ) );
             }
-            
+
             q = q.Normalized( );
-            
+
             assert( !isnan( q.scalar( ) ) );
             assert( !isnan( q.vector( ).x ) );
             assert( !isnan( q.vector( ).y ) );
@@ -1290,17 +1294,17 @@ void ExportMesh( FbxNode*       pNode,
     if (!skinInfos.empty()) {
         auto & skin = s.skins[m.skinId];
         (void)skin;
-    
+
         uint32_t vertexIndex = 0;
         for ( int polygonIndex = 0; polygonIndex < pMesh->GetPolygonCount( ); ++polygonIndex ) {
             for ( const int polygonVertexIndex : {0, 1, 2} ) {
                 const int controlPointIndex = pMesh->GetPolygonVertex( polygonIndex, polygonVertexIndex );
                 const auto& weightsIndices = skinInfos[ controlPointIndex ].weights;
-                
+
                 /*
                 weights_0 : Vec4Fb;
                 indices_0 : Vec4Fb;
-                
+
                 weights_0 : Vec4Fb;
                 weights_1 : Vec4Fb;
                 indices_0 : Vec4Fb;
@@ -1331,7 +1335,7 @@ void ExportMesh( FbxNode*       pNode,
             }
         }
     }
-    
+
     apemodefb::ECompressionTypeFb eCompressionType = apemodefb::ECompressionTypeFb_None;
 
     const std::string& meshCompression = s.options[ "mesh-compression" ].as< std::string >( );
@@ -1461,7 +1465,7 @@ void ExportMesh( FbxNode*       pNode,
                 break;
         }
     }
-    
+
     const apemodefb::Vec3Fb bboxMin( m.positionMin.x(), m.positionMin.y(), m.positionMin.z() );
     const apemodefb::Vec3Fb bboxMax( m.positionMax.x(), m.positionMax.y(), m.positionMax.z() );
 

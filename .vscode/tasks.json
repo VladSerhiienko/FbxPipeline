@@ -8,7 +8,7 @@
             "args": [
                 "-G",
                 "\"'Visual Studio 15 2017 Win64'\"",
-                "-B${workspaceFolder}/build_windows_amd64_msvc",
+                "-B${workspaceFolder}/build_windows_amd64_msvc_visual_studio_15_2017_win64",
                 "-H${workspaceFolder}",
                 "-DFBX_SDK_INCLUDE_DIR=C:/Program Files/Autodesk/FBX/FBX SDK/2018.1.1/include",
                 "-DFBX_SDK_LIBRARY_DEBUG=C:/Program Files/Autodesk/FBX/FBX SDK/2018.1.1/lib/vs2015/x64/debug/libfbxsdk-md.lib",

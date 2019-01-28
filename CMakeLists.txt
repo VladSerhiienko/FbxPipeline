@@ -405,9 +405,15 @@ if (WIN32)
         debug ${dlib_binary_dir}/dlib${CONFIGURATION_SUFFIX}/dlib.lib
         debug ${zlib_binary_dir}${CONFIGURATION_SUFFIX}/zlibstaticd.lib
         debug ${flatbuffers_binary_dir}${CONFIGURATION_SUFFIX}/flatbuffers.lib
+        debug ${draco_binary_dir}${CONFIGURATION_SUFFIX}/draco.lib
+        debug ${draco_binary_dir}${CONFIGURATION_SUFFIX}/dracoenc.lib
+
         optimized ${dlib_binary_dir}/dlib${CONFIGURATION_SUFFIX}/dlib.lib
         optimized ${zlib_binary_dir}${CONFIGURATION_SUFFIX}/zlibstatic.lib
         optimized ${flatbuffers_binary_dir}${CONFIGURATION_SUFFIX}/flatbuffers.lib
+        optimized ${draco_binary_dir}${CONFIGURATION_SUFFIX}/draco.lib
+        optimized ${draco_binary_dir}${CONFIGURATION_SUFFIX}/dracoenc.lib
+
         ${PYTHON_LIBRARY}
         winmm.lib
         imm32.lib
