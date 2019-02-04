@@ -22,6 +22,9 @@ def sync_textures(state, gltf_json):
     FbxPipeline.log_info("sync_textures ...")
     gltf_texture_index_to_texture_index = dict()
 
+    if ("textures" in gltf_json) == False:
+        return gltf_texture_index_to_texture_index
+
     gltf_textures_json = gltf_json["textures"]
     for gltf_texture_index, gltf_texture_json in enumerate(gltf_textures_json):
         gltf_image_index = gltf_texture_json["source"]

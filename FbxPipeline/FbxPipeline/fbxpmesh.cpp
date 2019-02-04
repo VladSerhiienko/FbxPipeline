@@ -15,14 +15,30 @@
 #include <draco/compression/encode.h>
 #include <draco/compression/decode.h>
 
+namespace mathfu {
+    using dvec2 = mathfu::Vector<double, 2>;
+    using dvec3 = mathfu::Vector<double, 3>;
+    using dvec4 = mathfu::Vector<double, 4>;
+    
+    vec2 to_float(dvec2 v) {
+        return {(float)v[0], (float)v[1]};
+    }
+    vec3 to_float(dvec3 v) {
+        return {(float)v[0], (float)v[1], (float)v[2]};
+    }
+    vec4 to_float(dvec4 v) {
+        return {(float)v[0], (float)v[1], (float)v[2], (float)v[3]};
+    }
+}
+
 /**
  * Helper structure to assign vertex property values
  **/
 struct StaticVertex {
-    mathfu::vec3 position;
-    mathfu::vec3 normal;
-    mathfu::vec4 tangent;
-    mathfu::vec2 texCoords;
+    mathfu::dvec3 position;
+    mathfu::dvec3 normal;
+    mathfu::dvec4 tangent;
+    mathfu::dvec2 texCoords;
 };
 
 template <typename T>
@@ -32,7 +48,7 @@ void AssertValidVec3(T values) {
 }
 
 bool CalculateTangentsNoUVs( StaticVertex* vertices, size_t vertexCount ) {
-    std::vector< mathfu::vec3 > tan;
+    std::vector< mathfu::dvec3 > tan;
     tan.resize( vertexCount * 2 );
 
     auto tan1 = tan.data( );
@@ -43,8 +59,8 @@ bool CalculateTangentsNoUVs( StaticVertex* vertices, size_t vertexCount ) {
         const StaticVertex v1 = vertices[ i + 1 ];
         const StaticVertex v2 = vertices[ i + 2 ];
 
-        mathfu::vec3 e1 = v1.position - v0.position;
-        mathfu::vec3 e2 = v2.position - v0.position;
+        mathfu::dvec3 e1 = v1.position - v0.position;
+        mathfu::dvec3 e2 = v2.position - v0.position;
         e1.Normalize();
         e2.Normalize();
 
@@ -64,18 +80,18 @@ bool CalculateTangentsNoUVs( StaticVertex* vertices, size_t vertexCount ) {
 
     for ( size_t i = 0; i < vertexCount; i += 1 ) {
         StaticVertex& v = vertices[ i ];
-        v.tangent = mathfu::kZeros4f;
+        v.tangent = mathfu::kZeros4d;
         v.tangent.w = 1;
 
         const auto n = v.normal.Normalized();
-        mathfu::vec3 t = tan1[ i ];
+        mathfu::dvec3 t = tan1[ i ];
         AssertValidVec3(n);
         AssertValidVec3(t);
 
         const bool isOk = n.Length() && t.Length();
         result &= isOk;
         if ( isOk ) {
-            mathfu::vec3 tt = mathfu::normalize( t - n * mathfu::dot( n, t ) );
+            mathfu::dvec3 tt = mathfu::normalize( t - n * mathfu::dot( n, t ) );
             AssertValidVec3(tt);
 
             v.tangent[ 0 ] = tt.x;
@@ -94,7 +110,7 @@ bool CalculateTangentsNoUVs( StaticVertex* vertices, size_t vertexCount ) {
  * http://gamedev.stackexchange.com/a/68617/39505
  **/
 bool CalculateTangents( StaticVertex* vertices, size_t vertexCount ) {
-    std::vector< mathfu::vec3 > tan;
+    std::vector< mathfu::dvec3 > tan;
     tan.resize( vertexCount * 2 );
 
     auto tan1 = tan.data( );
@@ -105,21 +121,21 @@ bool CalculateTangents( StaticVertex* vertices, size_t vertexCount ) {
         const StaticVertex v1 = vertices[ i + 1 ];
         const StaticVertex v2 = vertices[ i + 2 ];
 
-        const float x1 = v1.position[ 0 ] - v0.position[ 0 ];
-        const float x2 = v2.position[ 0 ] - v0.position[ 0 ];
-        const float y1 = v1.position[ 1 ] - v0.position[ 1 ];
-        const float y2 = v2.position[ 1 ] - v0.position[ 1 ];
-        const float z1 = v1.position[ 2 ] - v0.position[ 2 ];
-        const float z2 = v2.position[ 2 ] - v0.position[ 2 ];
+        const auto x1 = v1.position[ 0 ] - v0.position[ 0 ];
+        const auto x2 = v2.position[ 0 ] - v0.position[ 0 ];
+        const auto y1 = v1.position[ 1 ] - v0.position[ 1 ];
+        const auto y2 = v2.position[ 1 ] - v0.position[ 1 ];
+        const auto z1 = v1.position[ 2 ] - v0.position[ 2 ];
+        const auto z2 = v2.position[ 2 ] - v0.position[ 2 ];
 
-        const float s1 = v1.texCoords[ 0 ] - v0.texCoords[ 0 ];
-        const float s2 = v2.texCoords[ 0 ] - v0.texCoords[ 0 ];
-        const float t1 = v1.texCoords[ 1 ] - v0.texCoords[ 1 ];
-        const float t2 = v2.texCoords[ 1 ] - v0.texCoords[ 1 ];
+        const auto s1 = v1.texCoords[ 0 ] - v0.texCoords[ 0 ];
+        const auto s2 = v2.texCoords[ 0 ] - v0.texCoords[ 0 ];
+        const auto t1 = v1.texCoords[ 1 ] - v0.texCoords[ 1 ];
+        const auto t2 = v2.texCoords[ 1 ] - v0.texCoords[ 1 ];
 
-        const float r = 1.0f / ( ( s1 * t2 - s2 * t1 ) + std::numeric_limits<float>::epsilon( ) );
-        const mathfu::vec3 sdir( ( t2 * x1 - t1 * x2 ) * r, ( t2 * y1 - t1 * y2 ) * r, ( t2 * z1 - t1 * z2 ) * r );
-        const mathfu::vec3 tdir( ( s1 * x2 - s2 * x1 ) * r, ( s1 * y2 - s2 * y1 ) * r, ( s1 * z2 - s2 * z1 ) * r );
+        const auto r = 1.0f / ( ( s1 * t2 - s2 * t1 ) + std::numeric_limits<float>::epsilon( ) );
+        const mathfu::dvec3 sdir( ( t2 * x1 - t1 * x2 ) * r, ( t2 * y1 - t1 * y2 ) * r, ( t2 * z1 - t1 * z2 ) * r );
+        const mathfu::dvec3 tdir( ( s1 * x2 - s2 * x1 ) * r, ( s1 * y2 - s2 * y1 ) * r, ( s1 * z2 - s2 * z1 ) * r );
 
         AssertValidVec3(sdir);
         AssertValidVec3(tdir);
@@ -137,18 +153,19 @@ bool CalculateTangents( StaticVertex* vertices, size_t vertexCount ) {
 
     for ( size_t i = 0; i < vertexCount; i += 1 ) {
         StaticVertex& v = vertices[ i ];
-        v.tangent = mathfu::kZeros4f;
+        v.tangent = mathfu::kZeros4d;
         v.tangent.w = 1;
 
-        const auto n = v.normal.Normalized();
-        mathfu::vec3 t = tan1[ i ];
+        mathfu::dvec3 n = v.normal;
+        mathfu::dvec3 t = tan1[ i ];
         AssertValidVec3(n);
         AssertValidVec3(t);
 
-        const bool isOk = n.Length() && t.Length();
+        const bool isOk = n.LengthSquared() && t.LengthSquared();
         result &= isOk;
         if ( isOk ) {
-            mathfu::vec3 tt = mathfu::normalize( t - n * mathfu::dot( n, t ) );
+            n = n.Normalized();
+            mathfu::dvec3 tt = mathfu::normalize( t - n * mathfu::dot( n, t ) );
             AssertValidVec3(tt);
 
             v.tangent[ 0 ]  = tt.x;
@@ -172,16 +189,22 @@ void CalculateFaceNormals( StaticVertex* vertices, size_t vertexCount ) {
         StaticVertex& v1 = vertices[ i + 1 ];
         StaticVertex& v2 = vertices[ i + 2 ];
 
-        const mathfu::vec3 p0( v0.position );
-        const mathfu::vec3 p1( v1.position );
-        const mathfu::vec3 p2( v2.position );
-        const mathfu::vec3 n( mathfu::normalize( mathfu::cross( p1 - p0, p2 - p0 ) ) );
-
+        const mathfu::dvec3 p0( v0.position );
+        const mathfu::dvec3 p1( v1.position );
+        const mathfu::dvec3 p2( v2.position );
+        mathfu::dvec3 n( mathfu::cross( p1 - p0, p2 - p0 ) );
+        
         AssertValidVec3(p0);
         AssertValidVec3(p1);
         AssertValidVec3(p2);
         AssertValidVec3(n);
-
+        
+        if ( n.LengthSquared() > std::numeric_limits<float>::epsilon() ) {
+            const mathfu::dvec3 nn( n.Normalized() );
+            AssertValidVec3(n);
+            n = nn;
+        }
+        
         v0.normal[ 0 ] = n.x;
         v0.normal[ 1 ] = n.y;
         v0.normal[ 2 ] = n.z;
@@ -945,9 +968,9 @@ VertexInitializationResult InitializeVertices( FbxMesh* mesh, apemode::Mesh& m, 
         for (uint32_t i = 0; i < vertexCount; ++i) {
             StaticVertex& vvii = vertices[ i ];
 
-            const mathfu::vec3 nn = vvii.normal.Normalized();
-            const mathfu::vec3 tt = vvii.tangent.xyz().Normalized();
-            const mathfu::vec3 ttt = mathfu::normalize( tt - nn * mathfu::dot( nn, tt ) );
+            const mathfu::dvec3 nn = vvii.normal.Normalized();
+            const mathfu::dvec3 tt = vvii.tangent.xyz().Normalized();
+            const mathfu::dvec3 ttt = mathfu::normalize( tt - nn * mathfu::dot( nn, tt ) );
             AssertValidVec3(nn);
             AssertValidVec3(tt);
             AssertValidVec3(ttt);
@@ -969,7 +992,7 @@ VertexInitializationResult InitializeVertices( FbxMesh* mesh, apemode::Mesh& m, 
     } else {
         for (uint32_t i = 0; i < vertexCount; ++i) {
             StaticVertex& vvii = vertices[ i ];
-            const mathfu::vec3 nn = vvii.normal.Normalized();
+            const mathfu::dvec3 nn = vvii.normal.Normalized();
 
             vvii.normal[ 0 ] = nn.x;
             vvii.normal[ 1 ] = nn.y;
@@ -1079,9 +1102,9 @@ void ExportMesh( FbxNode*       pNode,
 
         qtangents.resize( vertexCount );
         for ( uint32_t i = 0; i < vertexCount; ++i ) {
-            const mathfu::vec3 n( vertices[ i ].normal );
-            const mathfu::vec3 t( vertices[ i ].tangent.xyz( ) );
-            const mathfu::vec3 b( mathfu::cross( n, t ) );
+            const mathfu::dvec3 n( vertices[ i ].normal );
+            const mathfu::dvec3 t( vertices[ i ].tangent.xyz( ) );
+            const mathfu::dvec3 b( mathfu::cross( n, t ) );
             const mathfu::mat3 m( t.x, t.y, t.z, b.x, b.y, b.z, n.x, n.y, n.z );
 
             mathfu::quat q( mathfu::quat::FromMatrix( m ).Normalized( ) );
@@ -1339,7 +1362,7 @@ void ExportMesh( FbxNode*       pNode,
     apemodefb::ECompressionTypeFb eCompressionType = apemodefb::ECompressionTypeFb_None;
 
     const std::string& meshCompression = s.options[ "mesh-compression" ].as< std::string >( );
-    if ( s.options[ "mesh-compression" ].count() && meshCompression != "none" ) {
+    if ( m.subsets.size( ) == 1 && s.options[ "mesh-compression" ].count() && meshCompression != "none" ) {
         switch ( eVertexFmt ) {
             case apemodefb::EVertexFormatFb_Static:
             case apemodefb::EVertexFormatFb_StaticQTangent: {
@@ -1350,13 +1373,14 @@ void ExportMesh( FbxNode*       pNode,
                 }
 
                 draco::Encoder encoder;
-                auto           options = draco::EncoderOptionsBase< draco::GeometryAttribute::Type >::CreateDefaultOptions( );
+                
+                auto options = draco::EncoderOptionsBase< draco::GeometryAttribute::Type >::CreateDefaultOptions( );
                 options.SetGlobalBool( "split_mesh_on_seams", false );
 
                 encoder.Reset( options );
                 encoder.SetEncodingMethod( encoderMethod );
                 encoder.SetSpeedOptions( -1, -1 );
-                encoder.SetAttributeQuantization( draco::GeometryAttribute::POSITION, 8 );
+                encoder.SetAttributeQuantization( draco::GeometryAttribute::POSITION, 16 );
                 encoder.SetAttributeQuantization( draco::GeometryAttribute::TEX_COORD, 8 );
                 encoder.SetAttributeQuantization( draco::GeometryAttribute::GENERIC, 8 );
                 encoder.SetAttributeQuantization( draco::GeometryAttribute::NORMAL, 8 );
@@ -1366,7 +1390,11 @@ void ExportMesh( FbxNode*       pNode,
                 builder.Start( vertexCount / 3 );
 
                 // clang-format off
+                auto populatingStartTime = std::chrono::high_resolution_clock::now();
+                s.console->info( "Starting draco population ..." );
+                
                 if ( eVertexFmt == apemodefb::EVertexFormatFb_Static ) {
+                    
                     const int positionAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::POSITION, 3, draco::DataType::DT_FLOAT32 );
                     const int normalAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::NORMAL, 3, draco::DataType::DT_FLOAT32 );
                     const int tangentAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::NORMAL, 3, draco::DataType::DT_FLOAT32 );
@@ -1403,6 +1431,7 @@ void ExportMesh( FbxNode*       pNode,
                                                            reinterpret_cast< const float* >( &pVertices[ i + 1 ].uv( ) ),
                                                            reinterpret_cast< const float* >( &pVertices[ i + 2 ].uv( ) ) );
                     }
+                    
                 } else {
                     assert( eVertexFmt == apemodefb::EVertexFormatFb_StaticQTangent );
                     const int positionAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::POSITION, 3, draco::DataType::DT_FLOAT32 );
@@ -1431,31 +1460,47 @@ void ExportMesh( FbxNode*       pNode,
                     }
                 }
                 // clang-format on
+            
+                auto populatingEndTime = std::chrono::high_resolution_clock::now();
+                std::chrono::duration<double> populatingDuration = populatingEndTime - populatingStartTime;
+                s.console->info( "Draco populating succeeded: {}, took {}s", vertexCount, populatingDuration.count() );
 
+                s.console->info( "Starting draco mesh finalization ..." );
+                auto finalizingStartTime = std::chrono::high_resolution_clock::now();
+                
                 if ( auto finalizedMesh = builder.Finalize( ) ) {
-                    draco::MeshCleanup cleanup;
-                    s.console->info( "Starting draco cleanup ..." );
-                    if ( cleanup( finalizedMesh.get( ), draco::MeshCleanupOptions( ) ) ) {
-                        s.console->info( "Succeeded" );
-                    } else {
-                        s.console->info( "Failed" );
-                    }
+                    auto finalizingEndTime = std::chrono::high_resolution_clock::now();
+                    std::chrono::duration<double> finalizingDuration = finalizingEndTime - finalizingStartTime;
+                    s.console->info( "Draco finalization succeeded: {}, took {}s", vertexCount, finalizingDuration.count() );
+
+//                    s.console->info( "Starting draco cleanup ..." );
+                    auto encodingStartTime = std::chrono::high_resolution_clock::now();
+//
+//                    draco::MeshCleanup cleanup;
+//                    if ( cleanup( finalizedMesh.get( ), draco::MeshCleanupOptions( ) ) ) {
+//                        s.console->info( "Succeeded" );
+//                    } else {
+//                        s.console->info( "Failed" );
+//                    }
 
                     s.console->info( "Starting draco encoding ..." );
+                    
                     draco::EncoderBuffer encoderBuffer;
                     const draco::Status  encoderStatus = encoder.EncodeMeshToBuffer( *finalizedMesh.get( ), &encoderBuffer );
                     if ( encoderStatus.code( ) == draco::Status::OK ) {
-                        s.console->info( "Succeeded: {} -> {}, {}%",
+                        auto encodingEndTime = std::chrono::high_resolution_clock::now();
+                        std::chrono::duration<double> encodingDuration = encodingEndTime - encodingStartTime;
+                        s.console->info( "Draco encoding succeeded: {} -> {}, {}%, {}, took {}s",
                                          ToPrettySizeString( m.vertices.size( ) ),
                                          ToPrettySizeString( encoderBuffer.size( ) ),
-                                         ( 100.0f * encoderBuffer.size( ) / m.vertices.size( ) ) );
+                                         ( 100.0f * encoderBuffer.size( ) / m.vertices.size( ) ),
+                                         vertexCount,
+                                         encodingDuration.count() );
 
                         eCompressionType = apemodefb::ECompressionTypeFb_GoogleDraco3D;
                         m.vertices.resize( encoderBuffer.size( ) );
                         memcpy( m.vertices.data( ), encoderBuffer.data( ), encoderBuffer.size( ) );
-
-                        decltype( m.indices ) emptyIndices;
-                        m.indices.swap( emptyIndices );
+                        decltype( m.indices )( ).swap( m.indices );
                     } else {
                         s.console->info( "Failed: code = {}, error = {}", int( encoderStatus.code( ) ), encoderStatus.error_msg( ) );
                     }
