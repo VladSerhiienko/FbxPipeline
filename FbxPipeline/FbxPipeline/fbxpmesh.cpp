@@ -19,6 +19,9 @@ namespace mathfu {
     using dvec2 = mathfu::Vector<double, 2>;
     using dvec3 = mathfu::Vector<double, 3>;
     using dvec4 = mathfu::Vector<double, 4>;
+    using dmat3 = mathfu::Matrix<double, 3, 3>;
+    using dmat4 = mathfu::Matrix<double, 4, 4>;
+    using dquat = mathfu::Quaternion<double>;
     
     vec2 to_float(dvec2 v) {
         return {(float)v[0], (float)v[1]};
@@ -41,10 +44,17 @@ struct StaticVertex {
     mathfu::dvec2 texCoords;
 };
 
-template <typename T>
-void AssertValidVec3(T values) {
-    assert( !isnan( values[0] ) && !isnan( values[1] ) && !isnan( values[2] ) );
-    assert( !isinf( values[0] ) && !isinf( values[1] ) && !isinf( values[2] ) );
+template < typename T >
+void AssertValidFloat( T value ) {
+    assert( !isnan( value ) );
+    assert( !isinf( value ) );
+}
+
+template < typename T >
+void AssertValidVec3( T values ) {
+    AssertValidFloat( values[ 0 ] );
+    AssertValidFloat( values[ 1 ] );
+    AssertValidFloat( values[ 2 ] );
 }
 
 bool CalculateTangentsNoUVs( StaticVertex* vertices, size_t vertexCount ) {
@@ -669,28 +679,28 @@ struct StaticVertexQTangent {
 /**
  * Helper structure to assign vertex property values
  **/
-struct StaticSkinnedVertex {
-    mathfu::vec3 position;
-    mathfu::vec3 normal;
-    mathfu::vec4 tangent;
-    mathfu::vec2 texCoords;
-    mathfu::vec4 weights;
-    mathfu::vec4 indices;
-};
+//struct StaticSkinnedVertex {
+//    mathfu::vec3 position;
+//    mathfu::vec3 normal;
+//    mathfu::vec4 tangent;
+//    mathfu::vec2 texCoords;
+//    mathfu::vec4 weights;
+//    mathfu::vec4 indices;
+//};
 
 /**
  * Helper structure to assign vertex property values
  **/
-struct StaticSkinned8Vertex {
-    mathfu::vec3 position;
-    mathfu::vec3 normal;
-    mathfu::vec4 tangent;
-    mathfu::vec2 texCoords;
-    mathfu::vec4 weights_0;
-    mathfu::vec4 weights_1;
-    mathfu::vec4 indices_0;
-    mathfu::vec4 indices_1;
-};
+//struct StaticSkinned8Vertex {
+//    mathfu::vec3 position;
+//    mathfu::vec3 normal;
+//    mathfu::vec4 tangent;
+//    mathfu::vec2 texCoords;
+//    mathfu::vec4 weights_0;
+//    mathfu::vec4 weights_1;
+//    mathfu::vec4 indices_0;
+//    mathfu::vec4 indices_1;
+//};
 
 static const uint32_t sInvalidIndex = uint32_t( -1 );
 
@@ -895,19 +905,19 @@ VertexInitializationResult InitializeVertices( FbxMesh* mesh, apemode::Mesh& m, 
                 s.console->warn( "Mesh \"{}\" will have generated tangents", mesh->GetNode( )->GetName( ) );
             }
 
-            auto& vvii          = vertices[ vi ];
-            vvii.position[ 0 ]  = (float) cp[ 0 ];
-            vvii.position[ 1 ]  = (float) cp[ 1 ];
-            vvii.position[ 2 ]  = (float) cp[ 2 ];
-            vvii.normal[ 0 ]    = (float) n[ 0 ];
-            vvii.normal[ 1 ]    = (float) n[ 1 ];
-            vvii.normal[ 2 ]    = (float) n[ 2 ];
-            vvii.tangent[ 0 ]   = (float) t[ 0 ];
-            vvii.tangent[ 1 ]   = (float) t[ 1 ];
-            vvii.tangent[ 2 ]   = (float) t[ 2 ];
-            vvii.tangent[ 3 ]   = (float) t[ 3 ];
-            vvii.texCoords[ 0 ] = (float) uv[ 0 ];
-            vvii.texCoords[ 1 ] = (float) uv[ 1 ];
+            StaticVertex& vvii  = vertices[ vi ];
+            vvii.position[ 0 ]  = cp[ 0 ];
+            vvii.position[ 1 ]  = cp[ 1 ];
+            vvii.position[ 2 ]  = cp[ 2 ];
+            vvii.normal[ 0 ]    = n[ 0 ];
+            vvii.normal[ 1 ]    = n[ 1 ];
+            vvii.normal[ 2 ]    = n[ 2 ];
+            vvii.tangent[ 0 ]   = t[ 0 ];
+            vvii.tangent[ 1 ]   = t[ 1 ];
+            vvii.tangent[ 2 ]   = t[ 2 ];
+            vvii.tangent[ 3 ]   = t[ 3 ];
+            vvii.texCoords[ 0 ] = uv[ 0 ];
+            vvii.texCoords[ 1 ] = uv[ 1 ];
 
             assert( !isnan( (float) cp[ 0 ] ) && !isnan( (float) cp[ 1 ] ) && !isnan( (float) cp[ 2 ] ) );
             assert( !isnan( (float) n[ 0 ] ) && !isnan( (float) n[ 1 ] ) && !isnan( (float) n[ 2 ] ) );
@@ -1008,8 +1018,8 @@ VertexInitializationResult InitializeVertices( FbxMesh* mesh, apemode::Mesh& m, 
 //
 
 std::string ToPrettySizeString( size_t size );
-void Optimize32( apemode::Mesh& mesh, apemodefb::StaticVertexFb const* vertices, uint32_t & vertexCount, uint32_t vertexStride );
-void Optimize16( apemode::Mesh& mesh, apemodefb::StaticVertexFb const* vertices, uint32_t & vertexCount, uint32_t vertexStride );
+// void Optimize32( apemode::Mesh& mesh, apemodefb::StaticVertexFb const* vertices, uint32_t & vertexCount, uint32_t vertexStride );
+// void Optimize16( apemode::Mesh& mesh, apemodefb::StaticVertexFb const* vertices, uint32_t & vertexCount, uint32_t vertexStride );
 
 //
 // See implementation in fbxpmeshpacking.cpp.
@@ -1032,6 +1042,68 @@ void Optimize16( apemode::Mesh& mesh, apemodefb::StaticVertexFb const* vertices,
 //           const mathfu::vec3                      positionMax,
 //           const mathfu::vec2                      texcoordsMin,
 //           const mathfu::vec2                      texcoordsMax );
+
+// http://jcgt.org/published/0003/02/01/paper.pdf
+// Assume normalized input on +Z hemisphere.
+// Output is on [-1, 1].
+mathfu::dvec2 ToHemioct(mathfu::dvec3 v) {
+    // Project the hemisphere onto the hemi-octahedron,
+    // and then into the xy plane
+    mathfu::dvec2 p = v.xy() * (1.0 / (abs(v.x) + abs(v.y) + v.z));
+    // Rotate and scale the center diamond to the unit square
+    return mathfu::dvec2(p.x + p.y, p.x - p.y);
+}
+
+mathfu::dvec3 FromHemioct(mathfu::dvec2 e) {
+    // Rotate and scale the unit square back to the center diamond
+    mathfu::dvec2 temp = mathfu::dvec2(e.x + e.y, e.x - e.y) * 0.5;
+    mathfu::dvec3 v = mathfu::dvec3(temp, 1.0 - abs(temp.x) - abs(temp.y));
+    return normalize(v);
+}
+
+mathfu::dquat GetQTangent(mathfu::dvec3 normal, mathfu::dvec3 tangent, double reflection) {
+    assert(reflection != 0.0);
+
+    const mathfu::dvec3 bitangent( mathfu::cross( normal, tangent ) );
+    mathfu::dmat3 tangentFrame( tangent.x, tangent.y, tangent.z,
+                                normal.x, normal.y, normal.z,
+                                bitangent.x, bitangent.y, bitangent.z );
+
+    mathfu::dquat q( mathfu::dquat::FromMatrix( tangentFrame ) );
+    q.Normalize();
+
+    // TODO: Should be in use for packing it into ints
+    //       because the sign will be lost.
+    const double bias = 1.0 / ( pow( 2.0, 15.0 ) - 1.0 );
+    if ( q.scalar( ) < bias ) {
+        float s = q.scalar( );
+        mathfu::dvec3 v = q.vector( );
+        s = bias;
+        v *= sqrt( 1.0 - bias * bias );
+        q = mathfu::dquat( s, v );
+        q.Normalize();
+    }
+
+    if ( q.scalar( ) < 0.0 ) {
+        q = mathfu::dquat( -q.scalar( ), -q.vector( ) );
+        q.Normalize();
+    }
+
+    if ( reflection < 0.0 ) {
+        q = mathfu::dquat( -q.scalar( ), -q.vector( ) );
+        q.Normalize();
+    }
+
+    AssertValidFloat( q.scalar( ) );
+    AssertValidVec3( q.vector( ) );
+    
+    tangentFrame = q.ToMatrix( );
+    assert(mathfu::dot(tangentFrame.GetColumn(0), tangentFrame.GetColumn(1)) < std::numeric_limits< float >::epsilon());
+    assert(mathfu::dot(tangentFrame.GetColumn(1), tangentFrame.GetColumn(2)) < std::numeric_limits< float >::epsilon());
+    assert(mathfu::dot(tangentFrame.GetColumn(0), tangentFrame.GetColumn(2)) < std::numeric_limits< float >::epsilon());
+
+    return q;
+}
 
 enum class EVertexOrder { CW, CCW };
 
@@ -1096,51 +1168,24 @@ void ExportMesh( FbxNode*       pNode,
     vertices.resize( vertexCount );
     auto initResult = InitializeVertices( pMesh, m, vertices.data( ), vertexCount );
 
-    std::vector< mathfu::quat > qtangents;
+    std::vector< mathfu::dquat > qtangents;
     if ( initResult.bValidTangents && s.options[ "tangent-frame-format" ].count( ) ) {
         assert( s.options[ "tangent-frame-format" ].as< std::string >( ) == "quat-float" );
 
         qtangents.resize( vertexCount );
         for ( uint32_t i = 0; i < vertexCount; ++i ) {
-            const mathfu::dvec3 n( vertices[ i ].normal );
-            const mathfu::dvec3 t( vertices[ i ].tangent.xyz( ) );
-            const mathfu::dvec3 b( mathfu::cross( n, t ) );
-            const mathfu::mat3 m( t.x, t.y, t.z, b.x, b.y, b.z, n.x, n.y, n.z );
-
-            mathfu::quat q( mathfu::quat::FromMatrix( m ).Normalized( ) );
-
-            // TODO: Should be in use for packing it into ints
-            //       because the sign will be lost.
-            const float bias = float( 1.0 / ( pow( 2.0, 15.0 ) - 1.0 ) );
-            if ( q.scalar( ) < bias ) {
-                float s = q.scalar( );
-                mathfu::vec3 v = q.vector( );
-                s = bias;
-                v *= sqrt( 1.0f - bias * bias );
-                q = mathfu::quat( s, v ).Normalized( );
+            mathfu::dvec3 n( vertices[ i ].normal );
+            mathfu::dvec3 t( vertices[ i ].tangent.xyz( ) );
+            
+            if ( n.Length( ) < std::numeric_limits< float >::epsilon( ) ||
+                 t.Length( ) < std::numeric_limits< float >::epsilon( ) ) {
+                continue;
             }
-
-            if ( q.scalar( ) < 0.0f ) {
-                q = mathfu::quat( -q.scalar( ), -q.vector( ) );
-            }
-
-            const float reflection = vertices[ i ].tangent.w;
-            if ( reflection < 0.0f ) {
-                q = mathfu::quat( -q.scalar( ), -q.vector( ) );
-            }
-
-            q = q.Normalized( );
-
-            assert( !isnan( q.scalar( ) ) );
-            assert( !isnan( q.vector( ).x ) );
-            assert( !isnan( q.vector( ).y ) );
-            assert( !isnan( q.vector( ).z ) );
-            assert( !isinf( q.scalar( ) ) );
-            assert( !isinf( q.vector( ).x ) );
-            assert( !isinf( q.vector( ).y ) );
-            assert( !isinf( q.vector( ).z ) );
-
-            qtangents[ i ] = q;
+            
+            n.Normalize( );
+            t.Normalize( );
+        
+            qtangents[ i ] = GetQTangent( n, t, vertices[ i ].tangent.w );
         }
     }
 
@@ -1199,8 +1244,8 @@ void ExportMesh( FbxNode*       pNode,
                 // TODO: Scaling can't be included into dual quaternions.
                 // const FbxVector4 S = invBindPoseMatrix.GetS();
 
-                const FbxVector4 T = invBindPoseMatrix.GetT( );
                 const FbxQuaternion Q = invBindPoseMatrix.GetQ( );
+                const FbxVector4 T = invBindPoseMatrix.GetT( );
 
                 const FbxDualQuaternion DQ( Q, T );
                 skin.invBindPoseDualQuats.push_back( apemode::Cast( DQ ) );
@@ -1558,7 +1603,6 @@ void ExportMesh( FbxNode* node, apemode::Node& n, bool pack, bool optimize ) {
             }
 
             if ( const uint32_t vertexCount = mesh->GetPolygonCount( ) * 3 ) {
-
                 n.meshId = (uint32_t) s.meshes.size( );
                 s.meshes.emplace_back( );
                 apemode::Mesh& m = s.meshes.back( );
