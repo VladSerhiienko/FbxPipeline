@@ -64,13 +64,16 @@ class AnimCurveFb(object):
     def Keys(self, j):
         o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(16))
         if o != 0:
-            x = self._tab.Vector(o)
-            x += flatbuffers.number_types.UOffsetTFlags.py_type(j) * 20
-            from .AnimCurveKeyFb import AnimCurveKeyFb
-            obj = AnimCurveKeyFb()
-            obj.Init(self._tab.Bytes, x)
-            return obj
-        return None
+            a = self._tab.Vector(o)
+            return self._tab.Get(flatbuffers.number_types.Uint8Flags, a + flatbuffers.number_types.UOffsetTFlags.py_type(j * 1))
+        return 0
+
+    # AnimCurveFb
+    def KeysAsNumpy(self):
+        o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(16))
+        if o != 0:
+            return self._tab.GetVectorAsNumpy(flatbuffers.number_types.Uint8Flags, o)
+        return 0
 
     # AnimCurveFb
     def KeysLength(self):
@@ -79,7 +82,21 @@ class AnimCurveFb(object):
             return self._tab.VectorLen(o)
         return 0
 
-def AnimCurveFbStart(builder): builder.StartObject(7)
+    # AnimCurveFb
+    def KeyType(self):
+        o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(18))
+        if o != 0:
+            return self._tab.Get(flatbuffers.number_types.Uint8Flags, o + self._tab.Pos)
+        return 0
+
+    # AnimCurveFb
+    def CompressionType(self):
+        o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(20))
+        if o != 0:
+            return self._tab.Get(flatbuffers.number_types.Uint8Flags, o + self._tab.Pos)
+        return 0
+
+def AnimCurveFbStart(builder): builder.StartObject(9)
 def AnimCurveFbAddId(builder, id): builder.PrependUint32Slot(0, id, 0)
 def AnimCurveFbAddNameId(builder, nameId): builder.PrependUint32Slot(1, nameId, 0)
 def AnimCurveFbAddAnimStackId(builder, animStackId): builder.PrependUint32Slot(2, animStackId, 0)
@@ -87,5 +104,7 @@ def AnimCurveFbAddAnimLayerId(builder, animLayerId): builder.PrependUint32Slot(3
 def AnimCurveFbAddProperty(builder, property): builder.PrependUint8Slot(4, property, 0)
 def AnimCurveFbAddChannel(builder, channel): builder.PrependUint8Slot(5, channel, 0)
 def AnimCurveFbAddKeys(builder, keys): builder.PrependUOffsetTRelativeSlot(6, flatbuffers.number_types.UOffsetTFlags.py_type(keys), 0)
-def AnimCurveFbStartKeysVector(builder, numElems): return builder.StartVector(20, numElems, 4)
+def AnimCurveFbStartKeysVector(builder, numElems): return builder.StartVector(1, numElems, 1)
+def AnimCurveFbAddKeyType(builder, keyType): builder.PrependUint8Slot(7, keyType, 0)
+def AnimCurveFbAddCompressionType(builder, compressionType): builder.PrependUint8Slot(8, compressionType, 0)
 def AnimCurveFbEnd(builder): return builder.EndObject()

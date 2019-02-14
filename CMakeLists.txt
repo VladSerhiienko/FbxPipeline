@@ -157,6 +157,23 @@ message(STATUS "flatbuffers_source_dir = ${flatbuffers_source_dir}")
 message(STATUS "flatbuffers_binary_dir = ${flatbuffers_binary_dir}")
 
 ExternalProject_Add(
+    json
+    GIT_REPOSITORY "git@github.com:nlohmann/json.git"
+    GIT_TAG "master"
+    SOURCE_DIR "${CMAKE_SOURCE_DIR}/dependencies/json"
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+    INSTALL_COMMAND ""
+    UPDATE_COMMAND ""
+    PATCH_COMMAND ""
+    LOG_DOWNLOAD ON
+)
+
+ExternalProject_Get_Property(json SOURCE_DIR)
+set(json_source_dir ${SOURCE_DIR})
+message(STATUS "json_source_dir = ${json_source_dir}")
+
+ExternalProject_Add(
     zlib
     GIT_REPOSITORY "git@github.com:madler/zlib.git"
     GIT_TAG "master"
@@ -377,6 +394,7 @@ add_dependencies(
     pybind11
     dlib
     draco
+    json
 )
 
 target_include_directories(

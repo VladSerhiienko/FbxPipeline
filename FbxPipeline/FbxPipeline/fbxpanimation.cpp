@@ -1,5 +1,6 @@
 #include <fbxppch.h>
 #include <fbxpstate.h>
+#include <draco/animation/keyframe_animation_encoder.h>
 
 void BezierFitterFitSamples( FbxAnimCurve* pAnimCurve,
                              int           keyIndex,
@@ -163,6 +164,7 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
                          pAnimCurveComposite.pAnimCurve->KeyGetCount( ) );
     }
 
+    bool  shouldResample    = false;
     float resampleFramerate = 0;
     bool  reduceConstKeys   = false;
     bool  reduceKeys        = false;
@@ -172,6 +174,7 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
         resampleFramerate = s.options[ "resample-framerate" ].as< float >( );
         resampleFramerate = std::min( resampleFramerate, 180.0f );
         resampleFramerate = std::max( resampleFramerate, 0.0f );
+        shouldResample = resampleFramerate > std::numeric_limits< float >::epsilon( );
     }
 
     if ( s.options[ "sync-keys" ].count( ) )
@@ -192,7 +195,7 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
     keyReducer.SetPrecision( 1e-8 );
 
     FbxTime periodTime;
-    if ( resampleFramerate > 0.0f ) {
+    if ( shouldResample ) {
         const FbxLongLong milliseconds = FbxLongLong( 1000.0f / resampleFramerate );
         periodTime.SetMilliSeconds( milliseconds );
         resample.SetPeriodTime( periodTime );
@@ -264,7 +267,7 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
             }
         }
 
-        if ( resampleFramerate > 0.0f ) {
+        if ( shouldResample ) {
             if ( availableCurves == 3 && propertyCurveSync ) {
                 /* Resample property */
                 /* NOTE: After sync start time, stop time and key count must be the same. */
@@ -350,7 +353,11 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
     }
 
     s.animCurves.reserve( s.animCurves.size( ) + animCurves.size( ) );
-
+    
+    
+    const std::string& animCompression = s.options[ "anim-compression" ].as< std::string >( );
+    const bool shouldCompress = animCompression != "draco";
+    
     for ( auto pAnimCurveTuple : animCurves ) {
         if ( auto pAnimCurve = pAnimCurveTuple.pAnimCurve ) {
             auto pAnimStack = pAnimCurveTuple.pAnimStack;
@@ -375,67 +382,153 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
             curve.channel     = pAnimCurveTuple.eAnimCurveChannel;
             curve.animStackId = s.animStackDict[ pAnimStack->GetUniqueID( ) ];
             curve.animLayerId = s.animLayerDict[ pAnimLayer->GetUniqueID( ) ];
+            curve.compressionType = apemodefb::ECompressionTypeFb_None;
 
-            curve.keys.resize( keyCount );
-
-            /* Constant and linear modes */
-            for ( int i = 0; i < keyCount; ++i ) {
-                auto& key = curve.keys[ i ];
-                key.time  = static_cast< float >( pAnimCurve->KeyGetTime( i ).GetSecondDouble( ) );
-                key.value = pAnimCurve->KeyGetValue( i );
-
-                switch ( pAnimCurve->KeyGetInterpolation( i ) ) {
-                    case FbxAnimCurveDef::eInterpolationLinear: {
-                        key.interpolationMode = apemodefb::EInterpolationModeFb_Linear;
-                    } break;
-
-                    case FbxAnimCurveDef::eInterpolationConstant: {
-                        key.interpolationMode = apemodefb::EInterpolationModeFb_Const;
-                        switch ( pAnimCurve->KeyGetConstantMode( i ) ) {
-                            case FbxAnimCurveDef::eConstantNext: {
-                                if ( i < ( keyCount - 1 ) ) {
-                                    /* There is at least one key ahead. */
-                                    key.value = pAnimCurve->KeyGetValue( i + 1 );
-                                }
-                            } break;
-
-                            default: {
-                            } break;
-                        }
-                    } break;
-
-                    case FbxAnimCurveDef::eInterpolationCubic: {
-                        if ( resampleFramerate > 0 ) {
-                            key.interpolationMode = apemodefb::EInterpolationModeFb_Linear;
-                        }
-                    } break;
-                }
-            }
-
-            /* Cubic modes (only for original curve keys) */
-            if ( resampleFramerate < std::numeric_limits< float >::epsilon( ) ) {
+            if ( shouldResample ) {
+                curve.keyType = apemodefb::EAnimCurveKeyTypeFb_Resampled;
+                curve.keys.resize( keyCount * sizeof( apemodefb::AnimCurveResampledKeyFb ) );
+                auto dstKeys = reinterpret_cast< apemodefb::AnimCurveResampledKeyFb* >( curve.keys.data( ) );
                 for ( int i = 0; i < keyCount; ++i ) {
+                    auto& key = dstKeys[ i ];
+                    key.mutate_time( static_cast< float >( pAnimCurve->KeyGetTime( i ).GetSecondDouble( ) ) );
+                    key.mutate_value( pAnimCurve->KeyGetValue( i ) );
+                }
+            } else {
+                curve.keyType = apemodefb::EAnimCurveKeyTypeFb_Cubic;
+                curve.keys.resize( keyCount * sizeof( apemodefb::AnimCurveCubicKeyFb ) );
+                auto dstKeys = reinterpret_cast<apemodefb::AnimCurveCubicKeyFb*>(curve.keys.data());
+
+                /* Constant and linear modes */
+                for ( int i = 0; i < keyCount; ++i ) {
+                    auto& key = dstKeys[ i ];
+                    key.mutate_time( static_cast< float >( pAnimCurve->KeyGetTime( i ).GetSecondDouble( ) ) );
+                    key.mutate_value_bez0_bez3( pAnimCurve->KeyGetValue( i ) );
+
                     switch ( pAnimCurve->KeyGetInterpolation( i ) ) {
-                        case FbxAnimCurveDef::eInterpolationCubic: {
-
-                            auto& key = curve.keys[ i ];
-                            if ( i < ( keyCount - 1 ) ) {
-                                double fittedBezier1 = 1, fittedBezier2 = 1;
-                                BezierFitterFitSamples( pAnimCurve, i, fittedBezier1, fittedBezier2 );
-
-                                key.bez1 = static_cast< float >( fittedBezier1 );
-                                key.bez2 = static_cast< float >( fittedBezier2 );
-                                key.interpolationMode = apemodefb::EInterpolationModeFb_Cubic;
-                            } else {
-                                key.interpolationMode = apemodefb::EInterpolationModeFb_Const;
-                            }
-
+                        case FbxAnimCurveDef::eInterpolationLinear: {
+                            key.mutate_interpolation_mode( apemodefb::EInterpolationModeFb_Linear );
                         } break;
 
-                        default: {
+                        case FbxAnimCurveDef::eInterpolationConstant: {
+                            key.mutate_interpolation_mode( apemodefb::EInterpolationModeFb_Const );
+                            switch ( pAnimCurve->KeyGetConstantMode( i ) ) {
+                                case FbxAnimCurveDef::eConstantNext: {
+                                    if ( i < ( keyCount - 1 ) ) {
+                                        /* There is at least one key ahead. */
+                                        key.mutate_value_bez0_bez3( pAnimCurve->KeyGetValue( i + 1 ) );
+                                    }
+                                } break;
+
+                                default: {
+                                } break;
+                            }
+                        } break;
+
+                        case FbxAnimCurveDef::eInterpolationCubic: {
+                            if ( shouldResample ) {
+                                key.mutate_interpolation_mode( apemodefb::EInterpolationModeFb_Linear );
+                            }
                         } break;
                     }
                 }
+
+                /* Cubic modes (only for original curve keys) */
+                if ( !shouldResample ) {
+                    for ( int i = 0; i < keyCount; ++i ) {
+                        switch ( pAnimCurve->KeyGetInterpolation( i ) ) {
+                            case FbxAnimCurveDef::eInterpolationCubic: {
+                                auto& key = dstKeys[ i ];
+                                if ( i < ( keyCount - 1 ) ) {
+                                    double fittedBezier1 = 1, fittedBezier2 = 1;
+                                    BezierFitterFitSamples( pAnimCurve, i, fittedBezier1, fittedBezier2 );
+
+                                    key.mutate_bez1( static_cast< float >( fittedBezier1 ) );
+                                    key.mutate_bez2( static_cast< float >( fittedBezier2 ) );
+                                    key.mutate_interpolation_mode( apemodefb::EInterpolationModeFb_Cubic );
+                                } else {
+                                    key.mutate_interpolation_mode( apemodefb::EInterpolationModeFb_Const );
+                                }
+
+                            } break;
+
+                            default: { } break;
+                        }
+                    }
+                }
+            }
+            
+            if (shouldCompress) {
+                using DracoTimeType = draco::KeyframeAnimation::TimestampType;
+
+                struct DracoResampledKeyType {
+                    float _1;
+                };
+                struct DracoCubicKeyType {
+                    float _1, _2, _3;
+                };
+
+                draco::Status                   encoderStatus;
+                draco::EncoderBuffer            encoderBuffer;
+                draco::KeyframeAnimation        keyframeAnimation;
+                draco::KeyframeAnimationEncoder keyframeEncoder;
+                
+                auto options = draco::EncoderOptionsBase< int32_t >::CreateDefaultOptions( );
+
+                switch ( curve.keyType ) {
+                    case apemodefb::EAnimCurveKeyTypeFb_Resampled: {
+                        std::vector< DracoTimeType > keyTimes;
+                        std::vector< DracoResampledKeyType > keyValues;
+                        
+                        keyTimes.resize( keyCount );
+                        keyValues.resize( keyCount );
+
+                        auto dstKeys = reinterpret_cast< apemodefb::AnimCurveResampledKeyFb* >( curve.keys.data( ) );
+                        for ( int i = 0; i < keyCount; ++i ) {
+                            keyTimes[ i ]     = dstKeys[ i ].time( );
+                            keyValues[ i ]._1 = dstKeys[ i ].value( );
+                        }
+
+                        keyframeAnimation.SetTimestamps( keyTimes );
+                        keyframeAnimation.AddKeyframes( draco::DataType::DT_FLOAT32, 1, keyValues );
+                        encoderStatus = keyframeEncoder.EncodeKeyframeAnimation( keyframeAnimation, options, &encoderBuffer );
+
+                    } break;
+                    case apemodefb::EAnimCurveKeyTypeFb_Cubic: {
+                        std::vector< DracoTimeType >     keyTimes;
+                        std::vector< DracoCubicKeyType > keyValues;
+                        std::vector< int8_t >            keyInterpolations;
+                        
+                        keyTimes.resize( keyCount );
+                        keyValues.resize( keyCount );
+                        keyInterpolations.resize( keyCount );
+
+                        auto dstKeys = reinterpret_cast< apemodefb::AnimCurveCubicKeyFb* >( curve.keys.data( ) );
+                        for ( int i = 0; i < keyCount; ++i ) {
+                            keyTimes[ i ]          = dstKeys[ i ].time( );
+                            keyValues[ i ]._1      = dstKeys[ i ].value_bez0_bez3( );
+                            keyValues[ i ]._2      = dstKeys[ i ].bez1( );
+                            keyValues[ i ]._3      = dstKeys[ i ].bez2( );
+                            keyInterpolations[ i ] = dstKeys[ i ].interpolation_mode( );
+                        }
+
+                        keyframeAnimation.SetTimestamps( keyTimes );
+                        keyframeAnimation.AddKeyframes( draco::DataType::DT_FLOAT32, 3, keyValues );
+                        keyframeAnimation.AddKeyframes( draco::DataType::DT_INT8, 1, keyInterpolations );
+                        encoderStatus = keyframeEncoder.EncodeKeyframeAnimation( keyframeAnimation, options, &encoderBuffer );
+
+                    } break;
+
+                    default: { } break;
+                }
+
+                if ( encoderStatus.code( ) != draco::Status::Code::OK ) {
+                    s.console->error( "Failed to encode animation with draco." );
+                } else {
+                    curve.keys.resize( encoderBuffer.size( ) );
+                    memcpy( curve.keys.data( ), encoderBuffer.data( ), encoderBuffer.size( ) );
+                    curve.compressionType = apemodefb::ECompressionTypeFb_GoogleDraco3D;
+                }
+
             }
         }
     }

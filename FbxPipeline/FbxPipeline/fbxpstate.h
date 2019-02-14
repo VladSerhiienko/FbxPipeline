@@ -110,7 +110,9 @@ namespace apemode {
         uint32_t                        nameId;
         apemodefb::EAnimCurvePropertyFb property;
         apemodefb::EAnimCurveChannelFb  channel;
-        std::vector< AnimCurveKey >     keys;
+        apemodefb::EAnimCurveKeyTypeFb  keyType;
+        apemodefb::ECompressionTypeFb   compressionType;
+        std::vector< uint8_t >          keys;
     };
 
     struct FBXPIPELINE_API Material {

@@ -2,8 +2,7 @@
 
 # namespace: apemodefb
 
-class EVertexFormatFb(object):
-    Default = 0
-    Skinned = 1
-    FatSkinned = 2
+class EAnimCurveKeyTypeFb(object):
+    Resampled = 0
+    Cubic = 1
 

@@ -22,23 +22,19 @@ struct DualQuatFb;
 
 struct Mat4Fb;
 
-struct StaticVertexFb;
+struct DefaultVertexFb;
 
-struct StaticVertexQTangentFb;
+struct SkinnedVertexFb;
 
-struct StaticSkinnedVertexFb;
-
-struct StaticSkinned8VertexFb;
-
-struct StaticSkinnedVertexQTangentFb;
-
-struct StaticSkinned8VertexQTangentFb;
+struct FatSkinnedVertexFb;
 
 struct AnimStackFb;
 
 struct AnimLayerFb;
 
-struct AnimCurveKeyFb;
+struct AnimCurveResampledKeyFb;
+
+struct AnimCurveCubicKeyFb;
 
 struct AnimCurveFb;
 
@@ -463,79 +459,6 @@ inline const char *EnumNameEPlanarMappingNormalFb(EPlanarMappingNormalFb e) {
   return EnumNamesEPlanarMappingNormalFb()[index];
 }
 
-enum EVertexFormatFb {
-  EVertexFormatFb_Static = 0,
-  EVertexFormatFb_StaticQTangent = 1,
-  EVertexFormatFb_StaticSkinned = 2,
-  EVertexFormatFb_StaticSkinned8 = 3,
-  EVertexFormatFb_StaticSkinnedQTangent = 4,
-  EVertexFormatFb_StaticSkinned8QTangent = 5,
-  EVertexFormatFb_MIN = EVertexFormatFb_Static,
-  EVertexFormatFb_MAX = EVertexFormatFb_StaticSkinned8QTangent
-};
-
-inline EVertexFormatFb (&EnumValuesEVertexFormatFb())[6] {
-  static EVertexFormatFb values[] = {
-    EVertexFormatFb_Static,
-    EVertexFormatFb_StaticQTangent,
-    EVertexFormatFb_StaticSkinned,
-    EVertexFormatFb_StaticSkinned8,
-    EVertexFormatFb_StaticSkinnedQTangent,
-    EVertexFormatFb_StaticSkinned8QTangent
-  };
-  return values;
-}
-
-inline const char **EnumNamesEVertexFormatFb() {
-  static const char *names[] = {
-    "Static",
-    "StaticQTangent",
-    "StaticSkinned",
-    "StaticSkinned8",
-    "StaticSkinnedQTangent",
-    "StaticSkinned8QTangent",
-    nullptr
-  };
-  return names;
-}
-
-inline const char *EnumNameEVertexFormatFb(EVertexFormatFb e) {
-  const size_t index = static_cast<int>(e);
-  return EnumNamesEVertexFormatFb()[index];
-}
-
-enum EIndexTypeFb {
-  EIndexTypeFb_UInt16 = 0,
-  EIndexTypeFb_UInt32 = 1,
-  EIndexTypeFb_Count = 2,
-  EIndexTypeFb_MIN = EIndexTypeFb_UInt16,
-  EIndexTypeFb_MAX = EIndexTypeFb_Count
-};
-
-inline EIndexTypeFb (&EnumValuesEIndexTypeFb())[3] {
-  static EIndexTypeFb values[] = {
-    EIndexTypeFb_UInt16,
-    EIndexTypeFb_UInt32,
-    EIndexTypeFb_Count
-  };
-  return values;
-}
-
-inline const char **EnumNamesEIndexTypeFb() {
-  static const char *names[] = {
-    "UInt16",
-    "UInt32",
-    "Count",
-    nullptr
-  };
-  return names;
-}
-
-inline const char *EnumNameEIndexTypeFb(EIndexTypeFb e) {
-  const size_t index = static_cast<int>(e);
-  return EnumNamesEIndexTypeFb()[index];
-}
-
 enum EMaterialPropTypeFb {
   EMaterialPropTypeFb_Bool = 0,
   EMaterialPropTypeFb_Float = 1,
@@ -834,6 +757,99 @@ inline const char *EnumNameEValueTypeFb(EValueTypeFb e) {
   return EnumNamesEValueTypeFb()[index];
 }
 
+enum EVertexFormatFb {
+  EVertexFormatFb_Default = 0,
+  EVertexFormatFb_Skinned = 1,
+  EVertexFormatFb_FatSkinned = 2,
+  EVertexFormatFb_MIN = EVertexFormatFb_Default,
+  EVertexFormatFb_MAX = EVertexFormatFb_FatSkinned
+};
+
+inline EVertexFormatFb (&EnumValuesEVertexFormatFb())[3] {
+  static EVertexFormatFb values[] = {
+    EVertexFormatFb_Default,
+    EVertexFormatFb_Skinned,
+    EVertexFormatFb_FatSkinned
+  };
+  return values;
+}
+
+inline const char **EnumNamesEVertexFormatFb() {
+  static const char *names[] = {
+    "Default",
+    "Skinned",
+    "FatSkinned",
+    nullptr
+  };
+  return names;
+}
+
+inline const char *EnumNameEVertexFormatFb(EVertexFormatFb e) {
+  const size_t index = static_cast<int>(e);
+  return EnumNamesEVertexFormatFb()[index];
+}
+
+enum EIndexTypeFb {
+  EIndexTypeFb_UInt16 = 0,
+  EIndexTypeFb_UInt32 = 1,
+  EIndexTypeFb_Count = 2,
+  EIndexTypeFb_MIN = EIndexTypeFb_UInt16,
+  EIndexTypeFb_MAX = EIndexTypeFb_Count
+};
+
+inline EIndexTypeFb (&EnumValuesEIndexTypeFb())[3] {
+  static EIndexTypeFb values[] = {
+    EIndexTypeFb_UInt16,
+    EIndexTypeFb_UInt32,
+    EIndexTypeFb_Count
+  };
+  return values;
+}
+
+inline const char **EnumNamesEIndexTypeFb() {
+  static const char *names[] = {
+    "UInt16",
+    "UInt32",
+    "Count",
+    nullptr
+  };
+  return names;
+}
+
+inline const char *EnumNameEIndexTypeFb(EIndexTypeFb e) {
+  const size_t index = static_cast<int>(e);
+  return EnumNamesEIndexTypeFb()[index];
+}
+
+enum EAnimCurveKeyTypeFb {
+  EAnimCurveKeyTypeFb_Resampled = 0,
+  EAnimCurveKeyTypeFb_Cubic = 1,
+  EAnimCurveKeyTypeFb_MIN = EAnimCurveKeyTypeFb_Resampled,
+  EAnimCurveKeyTypeFb_MAX = EAnimCurveKeyTypeFb_Cubic
+};
+
+inline EAnimCurveKeyTypeFb (&EnumValuesEAnimCurveKeyTypeFb())[2] {
+  static EAnimCurveKeyTypeFb values[] = {
+    EAnimCurveKeyTypeFb_Resampled,
+    EAnimCurveKeyTypeFb_Cubic
+  };
+  return values;
+}
+
+inline const char **EnumNamesEAnimCurveKeyTypeFb() {
+  static const char *names[] = {
+    "Resampled",
+    "Cubic",
+    nullptr
+  };
+  return names;
+}
+
+inline const char *EnumNameEAnimCurveKeyTypeFb(EAnimCurveKeyTypeFb e) {
+  const size_t index = static_cast<int>(e);
+  return EnumNamesEAnimCurveKeyTypeFb()[index];
+}
+
 MANUALLY_ALIGNED_STRUCT(4) Vec2Fb FLATBUFFERS_FINAL_CLASS {
  private:
   float x_;
@@ -1094,40 +1110,30 @@ MANUALLY_ALIGNED_STRUCT(4) Mat4Fb FLATBUFFERS_FINAL_CLASS {
 };
 STRUCT_END(Mat4Fb, 64);
 
-MANUALLY_ALIGNED_STRUCT(4) StaticVertexFb FLATBUFFERS_FINAL_CLASS {
+MANUALLY_ALIGNED_STRUCT(4) DefaultVertexFb FLATBUFFERS_FINAL_CLASS {
  private:
   Vec3Fb position_;
-  Vec3Fb normal_;
-  Vec4Fb tangent_;
   Vec2Fb uv_;
+  uint32_t vertex_index_color_RGB_;
+  float color_alpha_;
+  QuatFb qtangent_;
 
  public:
-  StaticVertexFb() {
-    memset(this, 0, sizeof(StaticVertexFb));
+  DefaultVertexFb() {
+    memset(this, 0, sizeof(DefaultVertexFb));
   }
-  StaticVertexFb(const Vec3Fb &_position, const Vec3Fb &_normal, const Vec4Fb &_tangent, const Vec2Fb &_uv)
+  DefaultVertexFb(const Vec3Fb &_position, const Vec2Fb &_uv, uint32_t _vertex_index_color_RGB, float _color_alpha, const QuatFb &_qtangent)
       : position_(_position),
-        normal_(_normal),
-        tangent_(_tangent),
-        uv_(_uv) {
+        uv_(_uv),
+        vertex_index_color_RGB_(flatbuffers::EndianScalar(_vertex_index_color_RGB)),
+        color_alpha_(flatbuffers::EndianScalar(_color_alpha)),
+        qtangent_(_qtangent) {
   }
   const Vec3Fb &position() const {
     return position_;
   }
   Vec3Fb &mutable_position() {
     return position_;
-  }
-  const Vec3Fb &normal() const {
-    return normal_;
-  }
-  Vec3Fb &mutable_normal() {
-    return normal_;
-  }
-  const Vec4Fb &tangent() const {
-    return tangent_;
-  }
-  Vec4Fb &mutable_tangent() {
-    return tangent_;
   }
   const Vec2Fb &uv() const {
     return uv_;
@@ -1135,29 +1141,17 @@ MANUALLY_ALIGNED_STRUCT(4) StaticVertexFb FLATBUFFERS_FINAL_CLASS {
   Vec2Fb &mutable_uv() {
     return uv_;
   }
-};
-STRUCT_END(StaticVertexFb, 48);
-
-MANUALLY_ALIGNED_STRUCT(4) StaticVertexQTangentFb FLATBUFFERS_FINAL_CLASS {
- private:
-  Vec3Fb position_;
-  QuatFb qtangent_;
-  Vec2Fb uv_;
-
- public:
-  StaticVertexQTangentFb() {
-    memset(this, 0, sizeof(StaticVertexQTangentFb));
+  uint32_t vertex_index_color_RGB() const {
+    return flatbuffers::EndianScalar(vertex_index_color_RGB_);
   }
-  StaticVertexQTangentFb(const Vec3Fb &_position, const QuatFb &_qtangent, const Vec2Fb &_uv)
-      : position_(_position),
-        qtangent_(_qtangent),
-        uv_(_uv) {
+  void mutate_vertex_index_color_RGB(uint32_t _vertex_index_color_RGB) {
+    flatbuffers::WriteScalar(&vertex_index_color_RGB_, _vertex_index_color_RGB);
   }
-  const Vec3Fb &position() const {
-    return position_;
+  float color_alpha() const {
+    return flatbuffers::EndianScalar(color_alpha_);
   }
-  Vec3Fb &mutable_position() {
-    return position_;
+  void mutate_color_alpha(float _color_alpha) {
+    flatbuffers::WriteScalar(&color_alpha_, _color_alpha);
   }
   const QuatFb &qtangent() const {
     return qtangent_;
@@ -1165,270 +1159,64 @@ MANUALLY_ALIGNED_STRUCT(4) StaticVertexQTangentFb FLATBUFFERS_FINAL_CLASS {
   QuatFb &mutable_qtangent() {
     return qtangent_;
   }
-  const Vec2Fb &uv() const {
-    return uv_;
-  }
-  Vec2Fb &mutable_uv() {
-    return uv_;
-  }
 };
-STRUCT_END(StaticVertexQTangentFb, 36);
+STRUCT_END(DefaultVertexFb, 44);
 
-MANUALLY_ALIGNED_STRUCT(4) StaticSkinnedVertexFb FLATBUFFERS_FINAL_CLASS {
+MANUALLY_ALIGNED_STRUCT(4) SkinnedVertexFb FLATBUFFERS_FINAL_CLASS {
  private:
-  Vec3Fb position_;
-  Vec3Fb normal_;
-  Vec4Fb tangent_;
-  Vec2Fb uv_;
-  Vec4Fb weights_;
-  Vec4Fb indices_;
+  DefaultVertexFb vertex_;
+  Vec4Fb bone_indices_weights_;
 
  public:
-  StaticSkinnedVertexFb() {
-    memset(this, 0, sizeof(StaticSkinnedVertexFb));
+  SkinnedVertexFb() {
+    memset(this, 0, sizeof(SkinnedVertexFb));
   }
-  StaticSkinnedVertexFb(const Vec3Fb &_position, const Vec3Fb &_normal, const Vec4Fb &_tangent, const Vec2Fb &_uv, const Vec4Fb &_weights, const Vec4Fb &_indices)
-      : position_(_position),
-        normal_(_normal),
-        tangent_(_tangent),
-        uv_(_uv),
-        weights_(_weights),
-        indices_(_indices) {
+  SkinnedVertexFb(const DefaultVertexFb &_vertex, const Vec4Fb &_bone_indices_weights)
+      : vertex_(_vertex),
+        bone_indices_weights_(_bone_indices_weights) {
   }
-  const Vec3Fb &position() const {
-    return position_;
+  const DefaultVertexFb &vertex() const {
+    return vertex_;
   }
-  Vec3Fb &mutable_position() {
-    return position_;
+  DefaultVertexFb &mutable_vertex() {
+    return vertex_;
   }
-  const Vec3Fb &normal() const {
-    return normal_;
+  const Vec4Fb &bone_indices_weights() const {
+    return bone_indices_weights_;
   }
-  Vec3Fb &mutable_normal() {
-    return normal_;
-  }
-  const Vec4Fb &tangent() const {
-    return tangent_;
-  }
-  Vec4Fb &mutable_tangent() {
-    return tangent_;
-  }
-  const Vec2Fb &uv() const {
-    return uv_;
-  }
-  Vec2Fb &mutable_uv() {
-    return uv_;
-  }
-  const Vec4Fb &weights() const {
-    return weights_;
-  }
-  Vec4Fb &mutable_weights() {
-    return weights_;
-  }
-  const Vec4Fb &indices() const {
-    return indices_;
-  }
-  Vec4Fb &mutable_indices() {
-    return indices_;
+  Vec4Fb &mutable_bone_indices_weights() {
+    return bone_indices_weights_;
   }
 };
-STRUCT_END(StaticSkinnedVertexFb, 80);
+STRUCT_END(SkinnedVertexFb, 60);
 
-MANUALLY_ALIGNED_STRUCT(4) StaticSkinned8VertexFb FLATBUFFERS_FINAL_CLASS {
+MANUALLY_ALIGNED_STRUCT(4) FatSkinnedVertexFb FLATBUFFERS_FINAL_CLASS {
  private:
-  Vec3Fb position_;
-  Vec3Fb normal_;
-  Vec4Fb tangent_;
-  Vec2Fb uv_;
-  Vec4Fb weights_0_;
-  Vec4Fb weights_1_;
-  Vec4Fb indices_0_;
-  Vec4Fb indices_1_;
+  SkinnedVertexFb skinned_vertex_;
+  Vec4Fb extra_bone_indices_weights_;
 
  public:
-  StaticSkinned8VertexFb() {
-    memset(this, 0, sizeof(StaticSkinned8VertexFb));
+  FatSkinnedVertexFb() {
+    memset(this, 0, sizeof(FatSkinnedVertexFb));
   }
-  StaticSkinned8VertexFb(const Vec3Fb &_position, const Vec3Fb &_normal, const Vec4Fb &_tangent, const Vec2Fb &_uv, const Vec4Fb &_weights_0, const Vec4Fb &_weights_1, const Vec4Fb &_indices_0, const Vec4Fb &_indices_1)
-      : position_(_position),
-        normal_(_normal),
-        tangent_(_tangent),
-        uv_(_uv),
-        weights_0_(_weights_0),
-        weights_1_(_weights_1),
-        indices_0_(_indices_0),
-        indices_1_(_indices_1) {
+  FatSkinnedVertexFb(const SkinnedVertexFb &_skinned_vertex, const Vec4Fb &_extra_bone_indices_weights)
+      : skinned_vertex_(_skinned_vertex),
+        extra_bone_indices_weights_(_extra_bone_indices_weights) {
   }
-  const Vec3Fb &position() const {
-    return position_;
+  const SkinnedVertexFb &skinned_vertex() const {
+    return skinned_vertex_;
   }
-  Vec3Fb &mutable_position() {
-    return position_;
+  SkinnedVertexFb &mutable_skinned_vertex() {
+    return skinned_vertex_;
   }
-  const Vec3Fb &normal() const {
-    return normal_;
+  const Vec4Fb &extra_bone_indices_weights() const {
+    return extra_bone_indices_weights_;
   }
-  Vec3Fb &mutable_normal() {
-    return normal_;
-  }
-  const Vec4Fb &tangent() const {
-    return tangent_;
-  }
-  Vec4Fb &mutable_tangent() {
-    return tangent_;
-  }
-  const Vec2Fb &uv() const {
-    return uv_;
-  }
-  Vec2Fb &mutable_uv() {
-    return uv_;
-  }
-  const Vec4Fb &weights_0() const {
-    return weights_0_;
-  }
-  Vec4Fb &mutable_weights_0() {
-    return weights_0_;
-  }
-  const Vec4Fb &weights_1() const {
-    return weights_1_;
-  }
-  Vec4Fb &mutable_weights_1() {
-    return weights_1_;
-  }
-  const Vec4Fb &indices_0() const {
-    return indices_0_;
-  }
-  Vec4Fb &mutable_indices_0() {
-    return indices_0_;
-  }
-  const Vec4Fb &indices_1() const {
-    return indices_1_;
-  }
-  Vec4Fb &mutable_indices_1() {
-    return indices_1_;
+  Vec4Fb &mutable_extra_bone_indices_weights() {
+    return extra_bone_indices_weights_;
   }
 };
-STRUCT_END(StaticSkinned8VertexFb, 112);
-
-MANUALLY_ALIGNED_STRUCT(4) StaticSkinnedVertexQTangentFb FLATBUFFERS_FINAL_CLASS {
- private:
-  Vec3Fb position_;
-  QuatFb qtangent_;
-  Vec2Fb uv_;
-  Vec4Fb weights_;
-  Vec4Fb indices_;
-
- public:
-  StaticSkinnedVertexQTangentFb() {
-    memset(this, 0, sizeof(StaticSkinnedVertexQTangentFb));
-  }
-  StaticSkinnedVertexQTangentFb(const Vec3Fb &_position, const QuatFb &_qtangent, const Vec2Fb &_uv, const Vec4Fb &_weights, const Vec4Fb &_indices)
-      : position_(_position),
-        qtangent_(_qtangent),
-        uv_(_uv),
-        weights_(_weights),
-        indices_(_indices) {
-  }
-  const Vec3Fb &position() const {
-    return position_;
-  }
-  Vec3Fb &mutable_position() {
-    return position_;
-  }
-  const QuatFb &qtangent() const {
-    return qtangent_;
-  }
-  QuatFb &mutable_qtangent() {
-    return qtangent_;
-  }
-  const Vec2Fb &uv() const {
-    return uv_;
-  }
-  Vec2Fb &mutable_uv() {
-    return uv_;
-  }
-  const Vec4Fb &weights() const {
-    return weights_;
-  }
-  Vec4Fb &mutable_weights() {
-    return weights_;
-  }
-  const Vec4Fb &indices() const {
-    return indices_;
-  }
-  Vec4Fb &mutable_indices() {
-    return indices_;
-  }
-};
-STRUCT_END(StaticSkinnedVertexQTangentFb, 68);
-
-MANUALLY_ALIGNED_STRUCT(4) StaticSkinned8VertexQTangentFb FLATBUFFERS_FINAL_CLASS {
- private:
-  Vec3Fb position_;
-  QuatFb qtangent_;
-  Vec2Fb uv_;
-  Vec4Fb weights_0_;
-  Vec4Fb weights_1_;
-  Vec4Fb indices_0_;
-  Vec4Fb indices_1_;
-
- public:
-  StaticSkinned8VertexQTangentFb() {
-    memset(this, 0, sizeof(StaticSkinned8VertexQTangentFb));
-  }
-  StaticSkinned8VertexQTangentFb(const Vec3Fb &_position, const QuatFb &_qtangent, const Vec2Fb &_uv, const Vec4Fb &_weights_0, const Vec4Fb &_weights_1, const Vec4Fb &_indices_0, const Vec4Fb &_indices_1)
-      : position_(_position),
-        qtangent_(_qtangent),
-        uv_(_uv),
-        weights_0_(_weights_0),
-        weights_1_(_weights_1),
-        indices_0_(_indices_0),
-        indices_1_(_indices_1) {
-  }
-  const Vec3Fb &position() const {
-    return position_;
-  }
-  Vec3Fb &mutable_position() {
-    return position_;
-  }
-  const QuatFb &qtangent() const {
-    return qtangent_;
-  }
-  QuatFb &mutable_qtangent() {
-    return qtangent_;
-  }
-  const Vec2Fb &uv() const {
-    return uv_;
-  }
-  Vec2Fb &mutable_uv() {
-    return uv_;
-  }
-  const Vec4Fb &weights_0() const {
-    return weights_0_;
-  }
-  Vec4Fb &mutable_weights_0() {
-    return weights_0_;
-  }
-  const Vec4Fb &weights_1() const {
-    return weights_1_;
-  }
-  Vec4Fb &mutable_weights_1() {
-    return weights_1_;
-  }
-  const Vec4Fb &indices_0() const {
-    return indices_0_;
-  }
-  Vec4Fb &mutable_indices_0() {
-    return indices_0_;
-  }
-  const Vec4Fb &indices_1() const {
-    return indices_1_;
-  }
-  Vec4Fb &mutable_indices_1() {
-    return indices_1_;
-  }
-};
-STRUCT_END(StaticSkinned8VertexQTangentFb, 100);
+STRUCT_END(FatSkinnedVertexFb, 76);
 
 MANUALLY_ALIGNED_STRUCT(4) AnimStackFb FLATBUFFERS_FINAL_CLASS {
  private:
@@ -1516,7 +1304,35 @@ MANUALLY_ALIGNED_STRUCT(4) AnimLayerFb FLATBUFFERS_FINAL_CLASS {
 };
 STRUCT_END(AnimLayerFb, 16);
 
-MANUALLY_ALIGNED_STRUCT(4) AnimCurveKeyFb FLATBUFFERS_FINAL_CLASS {
+MANUALLY_ALIGNED_STRUCT(4) AnimCurveResampledKeyFb FLATBUFFERS_FINAL_CLASS {
+ private:
+  float time_;
+  float value_;
+
+ public:
+  AnimCurveResampledKeyFb() {
+    memset(this, 0, sizeof(AnimCurveResampledKeyFb));
+  }
+  AnimCurveResampledKeyFb(float _time, float _value)
+      : time_(flatbuffers::EndianScalar(_time)),
+        value_(flatbuffers::EndianScalar(_value)) {
+  }
+  float time() const {
+    return flatbuffers::EndianScalar(time_);
+  }
+  void mutate_time(float _time) {
+    flatbuffers::WriteScalar(&time_, _time);
+  }
+  float value() const {
+    return flatbuffers::EndianScalar(value_);
+  }
+  void mutate_value(float _value) {
+    flatbuffers::WriteScalar(&value_, _value);
+  }
+};
+STRUCT_END(AnimCurveResampledKeyFb, 8);
+
+MANUALLY_ALIGNED_STRUCT(4) AnimCurveCubicKeyFb FLATBUFFERS_FINAL_CLASS {
  private:
   float time_;
   float value_bez0_bez3_;
@@ -1526,10 +1342,10 @@ MANUALLY_ALIGNED_STRUCT(4) AnimCurveKeyFb FLATBUFFERS_FINAL_CLASS {
   int8_t padding0__;  int16_t padding1__;
 
  public:
-  AnimCurveKeyFb() {
-    memset(this, 0, sizeof(AnimCurveKeyFb));
+  AnimCurveCubicKeyFb() {
+    memset(this, 0, sizeof(AnimCurveCubicKeyFb));
   }
-  AnimCurveKeyFb(float _time, float _value_bez0_bez3, float _bez1, float _bez2, EInterpolationModeFb _interpolation_mode)
+  AnimCurveCubicKeyFb(float _time, float _value_bez0_bez3, float _bez1, float _bez2, EInterpolationModeFb _interpolation_mode)
       : time_(flatbuffers::EndianScalar(_time)),
         value_bez0_bez3_(flatbuffers::EndianScalar(_value_bez0_bez3)),
         bez1_(flatbuffers::EndianScalar(_bez1)),
@@ -1570,7 +1386,7 @@ MANUALLY_ALIGNED_STRUCT(4) AnimCurveKeyFb FLATBUFFERS_FINAL_CLASS {
     flatbuffers::WriteScalar(&interpolation_mode_, static_cast<uint8_t>(_interpolation_mode));
   }
 };
-STRUCT_END(AnimCurveKeyFb, 20);
+STRUCT_END(AnimCurveCubicKeyFb, 20);
 
 MANUALLY_ALIGNED_STRUCT(4) TextureFb FLATBUFFERS_FINAL_CLASS {
  private:
@@ -2387,7 +2203,9 @@ struct AnimCurveFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     VT_ANIM_LAYER_ID = 10,
     VT_PROPERTY = 12,
     VT_CHANNEL = 14,
-    VT_KEYS = 16
+    VT_KEYS = 16,
+    VT_KEY_TYPE = 18,
+    VT_COMPRESSION_TYPE = 20
   };
   uint32_t id() const {
     return GetField<uint32_t>(VT_ID, 0);
@@ -2438,11 +2256,23 @@ struct AnimCurveFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   bool mutate_channel(EAnimCurveChannelFb _channel) {
     return SetField<uint8_t>(VT_CHANNEL, static_cast<uint8_t>(_channel), 0);
   }
-  const flatbuffers::Vector<const AnimCurveKeyFb *> *keys() const {
-    return GetPointer<const flatbuffers::Vector<const AnimCurveKeyFb *> *>(VT_KEYS);
+  const flatbuffers::Vector<uint8_t> *keys() const {
+    return GetPointer<const flatbuffers::Vector<uint8_t> *>(VT_KEYS);
   }
-  flatbuffers::Vector<const AnimCurveKeyFb *> *mutable_keys() {
-    return GetPointer<flatbuffers::Vector<const AnimCurveKeyFb *> *>(VT_KEYS);
+  flatbuffers::Vector<uint8_t> *mutable_keys() {
+    return GetPointer<flatbuffers::Vector<uint8_t> *>(VT_KEYS);
+  }
+  EAnimCurveKeyTypeFb key_type() const {
+    return static_cast<EAnimCurveKeyTypeFb>(GetField<uint8_t>(VT_KEY_TYPE, 0));
+  }
+  bool mutate_key_type(EAnimCurveKeyTypeFb _key_type) {
+    return SetField<uint8_t>(VT_KEY_TYPE, static_cast<uint8_t>(_key_type), 0);
+  }
+  ECompressionTypeFb compression_type() const {
+    return static_cast<ECompressionTypeFb>(GetField<uint8_t>(VT_COMPRESSION_TYPE, 0));
+  }
+  bool mutate_compression_type(ECompressionTypeFb _compression_type) {
+    return SetField<uint8_t>(VT_COMPRESSION_TYPE, static_cast<uint8_t>(_compression_type), 0);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
@@ -2454,6 +2284,8 @@ struct AnimCurveFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyField<uint8_t>(verifier, VT_CHANNEL) &&
            VerifyOffset(verifier, VT_KEYS) &&
            verifier.Verify(keys()) &&
+           VerifyField<uint8_t>(verifier, VT_KEY_TYPE) &&
+           VerifyField<uint8_t>(verifier, VT_COMPRESSION_TYPE) &&
            verifier.EndTable();
   }
 };
@@ -2479,8 +2311,14 @@ struct AnimCurveFbBuilder {
   void add_channel(EAnimCurveChannelFb channel) {
     fbb_.AddElement<uint8_t>(AnimCurveFb::VT_CHANNEL, static_cast<uint8_t>(channel), 0);
   }
-  void add_keys(flatbuffers::Offset<flatbuffers::Vector<const AnimCurveKeyFb *>> keys) {
+  void add_keys(flatbuffers::Offset<flatbuffers::Vector<uint8_t>> keys) {
     fbb_.AddOffset(AnimCurveFb::VT_KEYS, keys);
+  }
+  void add_key_type(EAnimCurveKeyTypeFb key_type) {
+    fbb_.AddElement<uint8_t>(AnimCurveFb::VT_KEY_TYPE, static_cast<uint8_t>(key_type), 0);
+  }
+  void add_compression_type(ECompressionTypeFb compression_type) {
+    fbb_.AddElement<uint8_t>(AnimCurveFb::VT_COMPRESSION_TYPE, static_cast<uint8_t>(compression_type), 0);
   }
   explicit AnimCurveFbBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
@@ -2502,13 +2340,17 @@ inline flatbuffers::Offset<AnimCurveFb> CreateAnimCurveFb(
     uint32_t anim_layer_id = 0,
     EAnimCurvePropertyFb property = EAnimCurvePropertyFb_LclTranslation,
     EAnimCurveChannelFb channel = EAnimCurveChannelFb_X,
-    flatbuffers::Offset<flatbuffers::Vector<const AnimCurveKeyFb *>> keys = 0) {
+    flatbuffers::Offset<flatbuffers::Vector<uint8_t>> keys = 0,
+    EAnimCurveKeyTypeFb key_type = EAnimCurveKeyTypeFb_Resampled,
+    ECompressionTypeFb compression_type = ECompressionTypeFb_None) {
   AnimCurveFbBuilder builder_(_fbb);
   builder_.add_keys(keys);
   builder_.add_anim_layer_id(anim_layer_id);
   builder_.add_anim_stack_id(anim_stack_id);
   builder_.add_name_id(name_id);
   builder_.add_id(id);
+  builder_.add_compression_type(compression_type);
+  builder_.add_key_type(key_type);
   builder_.add_channel(channel);
   builder_.add_property(property);
   return builder_.Finish();
@@ -2522,7 +2364,9 @@ inline flatbuffers::Offset<AnimCurveFb> CreateAnimCurveFbDirect(
     uint32_t anim_layer_id = 0,
     EAnimCurvePropertyFb property = EAnimCurvePropertyFb_LclTranslation,
     EAnimCurveChannelFb channel = EAnimCurveChannelFb_X,
-    const std::vector<const AnimCurveKeyFb *> *keys = nullptr) {
+    const std::vector<uint8_t> *keys = nullptr,
+    EAnimCurveKeyTypeFb key_type = EAnimCurveKeyTypeFb_Resampled,
+    ECompressionTypeFb compression_type = ECompressionTypeFb_None) {
   return apemodefb::CreateAnimCurveFb(
       _fbb,
       id,
@@ -2531,7 +2375,9 @@ inline flatbuffers::Offset<AnimCurveFb> CreateAnimCurveFbDirect(
       anim_layer_id,
       property,
       channel,
-      keys ? _fbb.CreateVector<const AnimCurveKeyFb *>(*keys) : 0);
+      keys ? _fbb.CreateVector<uint8_t>(*keys) : 0,
+      key_type,
+      compression_type);
 }
 
 struct NameFb FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {

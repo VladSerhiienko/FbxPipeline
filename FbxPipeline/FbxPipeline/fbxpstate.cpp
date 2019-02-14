@@ -127,8 +127,9 @@ apemode::State::State( ) : options( GetExecutable( ) ) {
     options.add_options( "main" )( "reduce-keys", "Reduce the keys in the animation curves.", cxxopts::value< bool >( ) );
     options.add_options( "main" )( "reduce-const-keys", "Reduce constant keys in the animation curves.", cxxopts::value< bool >( ) );
     options.add_options( "main" )( "resample-framerate", "Frame rate at which animation curves will be resampled (60 - default, 0 - disable).", cxxopts::value< float >( ) );
-    options.add_options( "main" )( "mesh-compression", "Compression method.", cxxopts::value< std::string >( ) );
-    options.add_options( "main" )( "tangent-frame-format", "Tangent frame format.", cxxopts::value< std::string >( ) );
+    options.add_options( "main" )( "mesh-compression", "Mesh compression method.", cxxopts::value< std::string >( ) );
+    options.add_options( "main" )( "anim-compression", "Anim compression method.", cxxopts::value< std::string >( ) );
+    options.add_options( "main" )( "enable-fat-skinned-vertices", "Enables skinned vertices with 8 bones.", cxxopts::value< bool >( ) );
 }
 
 apemode::State::~State( ) {
@@ -331,7 +332,7 @@ bool apemode::State::Finalize( ) {
     console->info( "< Succeeded {} ", ToPrettySizeString( animLayersOffset.o ) );
 
     console->info( "> AnimCurves" );
-    std::vector< apemodefb::AnimCurveKeyFb > tempCurveKeys;
+    
     std::vector< flatbuffers::Offset< apemodefb::AnimCurveFb > > curveOffsets;
     curveOffsets.reserve( animCurves.size( ) );
     for ( auto& curve : animCurves ) {
@@ -340,13 +341,7 @@ bool apemode::State::Finalize( ) {
                        apemodefb::EnumNameEAnimCurvePropertyFb( curve.property ),
                        apemodefb::EnumNameEAnimCurveChannelFb( curve.channel ) );
 
-        tempCurveKeys.clear( );
-        tempCurveKeys.reserve( curve.keys.size( ) );
-        std::transform( curve.keys.begin( ), curve.keys.end( ), std::back_inserter( tempCurveKeys ), [&]( const AnimCurveKey& curveKey ) {
-            return apemodefb::AnimCurveKeyFb( curveKey.time, curveKey.value, curveKey.bez1, curveKey.bez2, curveKey.interpolationMode );
-        } );
-
-        auto keysOffset = builder.CreateVectorOfStructs( tempCurveKeys );
+        auto keysOffset = builder.CreateVector(curve.keys);
 
         apemodefb::AnimCurveFbBuilder curveBuilder( builder );
         curveBuilder.add_id( curve.id );
@@ -356,6 +351,8 @@ bool apemode::State::Finalize( ) {
         curveBuilder.add_property( curve.property );
         curveBuilder.add_name_id( curve.nameId );
         curveBuilder.add_keys( keysOffset );
+        curveBuilder.add_key_type(curve.keyType);
+        curveBuilder.add_compression_type(curve.compressionType);
         curveOffsets.push_back( curveBuilder.Finish( ) );
     }
 

@@ -121,27 +121,6 @@ apemodefb.EPlanarMappingNormalFb = {
 /**
  * @enum
  */
-apemodefb.EVertexFormatFb = {
-  Static: 0,
-  StaticQTangent: 1,
-  StaticSkinned: 2,
-  StaticSkinned8: 3,
-  StaticSkinnedQTangent: 4,
-  StaticSkinned8QTangent: 5
-};
-
-/**
- * @enum
- */
-apemodefb.EIndexTypeFb = {
-  UInt16: 0,
-  UInt32: 1,
-  Count: 2
-};
-
-/**
- * @enum
- */
 apemodefb.EMaterialPropTypeFb = {
   Bool: 0,
   Float: 1,
@@ -223,6 +202,32 @@ apemodefb.EValueTypeFb = {
   Float3: 4,
   Float4: 5,
   String: 6
+};
+
+/**
+ * @enum
+ */
+apemodefb.EVertexFormatFb = {
+  Default: 0,
+  Skinned: 1,
+  FatSkinned: 2
+};
+
+/**
+ * @enum
+ */
+apemodefb.EIndexTypeFb = {
+  UInt16: 0,
+  UInt32: 1,
+  Count: 2
+};
+
+/**
+ * @enum
+ */
+apemodefb.EAnimCurveKeyTypeFb = {
+  Resampled: 0,
+  Cubic: 1
 };
 
 /**
@@ -959,7 +964,7 @@ apemodefb.Mat4Fb.createMat4Fb = function(builder, x_x, x_y, x_z, x_w, y_x, y_y, 
 /**
  * @constructor
  */
-apemodefb.StaticVertexFb = function() {
+apemodefb.DefaultVertexFb = function() {
   /**
    * @type {flatbuffers.ByteBuffer}
    */
@@ -974,9 +979,9 @@ apemodefb.StaticVertexFb = function() {
 /**
  * @param {number} i
  * @param {flatbuffers.ByteBuffer} bb
- * @returns {apemodefb.StaticVertexFb}
+ * @returns {apemodefb.DefaultVertexFb}
  */
-apemodefb.StaticVertexFb.prototype.__init = function(i, bb) {
+apemodefb.DefaultVertexFb.prototype.__init = function(i, bb) {
   this.bb_pos = i;
   this.bb = bb;
   return this;
@@ -986,119 +991,68 @@ apemodefb.StaticVertexFb.prototype.__init = function(i, bb) {
  * @param {apemodefb.Vec3Fb=} obj
  * @returns {apemodefb.Vec3Fb|null}
  */
-apemodefb.StaticVertexFb.prototype.position = function(obj) {
+apemodefb.DefaultVertexFb.prototype.position = function(obj) {
   return (obj || new apemodefb.Vec3Fb).__init(this.bb_pos, this.bb);
-};
-
-/**
- * @param {apemodefb.Vec3Fb=} obj
- * @returns {apemodefb.Vec3Fb|null}
- */
-apemodefb.StaticVertexFb.prototype.normal = function(obj) {
-  return (obj || new apemodefb.Vec3Fb).__init(this.bb_pos + 12, this.bb);
-};
-
-/**
- * @param {apemodefb.Vec4Fb=} obj
- * @returns {apemodefb.Vec4Fb|null}
- */
-apemodefb.StaticVertexFb.prototype.tangent = function(obj) {
-  return (obj || new apemodefb.Vec4Fb).__init(this.bb_pos + 24, this.bb);
 };
 
 /**
  * @param {apemodefb.Vec2Fb=} obj
  * @returns {apemodefb.Vec2Fb|null}
  */
-apemodefb.StaticVertexFb.prototype.uv = function(obj) {
-  return (obj || new apemodefb.Vec2Fb).__init(this.bb_pos + 40, this.bb);
+apemodefb.DefaultVertexFb.prototype.uv = function(obj) {
+  return (obj || new apemodefb.Vec2Fb).__init(this.bb_pos + 12, this.bb);
 };
 
 /**
- * @param {flatbuffers.Builder} builder
- * @param {number} position_x
- * @param {number} position_y
- * @param {number} position_z
- * @param {number} normal_x
- * @param {number} normal_y
- * @param {number} normal_z
- * @param {number} tangent_x
- * @param {number} tangent_y
- * @param {number} tangent_z
- * @param {number} tangent_w
- * @param {number} uv_x
- * @param {number} uv_y
- * @returns {flatbuffers.Offset}
+ * @returns {number}
  */
-apemodefb.StaticVertexFb.createStaticVertexFb = function(builder, position_x, position_y, position_z, normal_x, normal_y, normal_z, tangent_x, tangent_y, tangent_z, tangent_w, uv_x, uv_y) {
-  builder.prep(4, 48);
-  builder.prep(4, 8);
-  builder.writeFloat32(uv_y);
-  builder.writeFloat32(uv_x);
-  builder.prep(4, 16);
-  builder.writeFloat32(tangent_w);
-  builder.writeFloat32(tangent_z);
-  builder.writeFloat32(tangent_y);
-  builder.writeFloat32(tangent_x);
-  builder.prep(4, 12);
-  builder.writeFloat32(normal_z);
-  builder.writeFloat32(normal_y);
-  builder.writeFloat32(normal_x);
-  builder.prep(4, 12);
-  builder.writeFloat32(position_z);
-  builder.writeFloat32(position_y);
-  builder.writeFloat32(position_x);
-  return builder.offset();
+apemodefb.DefaultVertexFb.prototype.vertexIndexColorRGB = function() {
+  return this.bb.readUint32(this.bb_pos + 20);
 };
 
 /**
- * @constructor
+ * @param {number} value
+ * @returns {boolean}
  */
-apemodefb.StaticVertexQTangentFb = function() {
-  /**
-   * @type {flatbuffers.ByteBuffer}
-   */
-  this.bb = null;
+apemodefb.DefaultVertexFb.prototype.mutate_vertex_index_color_RGB = function(value) {
+  var offset = this.bb.__offset(this.bb_pos, 20);
 
-  /**
-   * @type {number}
-   */
-  this.bb_pos = 0;
+  if (offset === 0) {
+    return false;
+  }
+
+  this.bb.writeUint32(this.bb_pos + offset, value);
+  return true;
 };
 
 /**
- * @param {number} i
- * @param {flatbuffers.ByteBuffer} bb
- * @returns {apemodefb.StaticVertexQTangentFb}
+ * @returns {number}
  */
-apemodefb.StaticVertexQTangentFb.prototype.__init = function(i, bb) {
-  this.bb_pos = i;
-  this.bb = bb;
-  return this;
+apemodefb.DefaultVertexFb.prototype.colorAlpha = function() {
+  return this.bb.readFloat32(this.bb_pos + 24);
 };
 
 /**
- * @param {apemodefb.Vec3Fb=} obj
- * @returns {apemodefb.Vec3Fb|null}
+ * @param {number} value
+ * @returns {boolean}
  */
-apemodefb.StaticVertexQTangentFb.prototype.position = function(obj) {
-  return (obj || new apemodefb.Vec3Fb).__init(this.bb_pos, this.bb);
+apemodefb.DefaultVertexFb.prototype.mutate_color_alpha = function(value) {
+  var offset = this.bb.__offset(this.bb_pos, 24);
+
+  if (offset === 0) {
+    return false;
+  }
+
+  this.bb.writeFloat32(this.bb_pos + offset, value);
+  return true;
 };
 
 /**
  * @param {apemodefb.QuatFb=} obj
  * @returns {apemodefb.QuatFb|null}
  */
-apemodefb.StaticVertexQTangentFb.prototype.qtangent = function(obj) {
-  return (obj || new apemodefb.QuatFb).__init(this.bb_pos + 12, this.bb);
-};
-
-/**
- * @param {apemodefb.Vec2Fb=} obj
- * @returns {apemodefb.Vec2Fb|null}
- */
-apemodefb.StaticVertexQTangentFb.prototype.uv = function(obj) {
-  return (obj || new apemodefb.Vec2Fb).__init(this.bb_pos + 28, this.bb);
+apemodefb.DefaultVertexFb.prototype.qtangent = function(obj) {
+  return (obj || new apemodefb.QuatFb).__init(this.bb_pos + 28, this.bb);
 };
 
 /**
@@ -1106,24 +1060,28 @@ apemodefb.StaticVertexQTangentFb.prototype.uv = function(obj) {
  * @param {number} position_x
  * @param {number} position_y
  * @param {number} position_z
+ * @param {number} uv_x
+ * @param {number} uv_y
+ * @param {number} vertex_index_color_RGB
+ * @param {number} color_alpha
  * @param {number} qtangent_s
  * @param {number} qtangent_nx
  * @param {number} qtangent_ny
  * @param {number} qtangent_nz
- * @param {number} uv_x
- * @param {number} uv_y
  * @returns {flatbuffers.Offset}
  */
-apemodefb.StaticVertexQTangentFb.createStaticVertexQTangentFb = function(builder, position_x, position_y, position_z, qtangent_s, qtangent_nx, qtangent_ny, qtangent_nz, uv_x, uv_y) {
-  builder.prep(4, 36);
-  builder.prep(4, 8);
-  builder.writeFloat32(uv_y);
-  builder.writeFloat32(uv_x);
+apemodefb.DefaultVertexFb.createDefaultVertexFb = function(builder, position_x, position_y, position_z, uv_x, uv_y, vertex_index_color_RGB, color_alpha, qtangent_s, qtangent_nx, qtangent_ny, qtangent_nz) {
+  builder.prep(4, 44);
   builder.prep(4, 16);
   builder.writeFloat32(qtangent_nz);
   builder.writeFloat32(qtangent_ny);
   builder.writeFloat32(qtangent_nx);
   builder.writeFloat32(qtangent_s);
+  builder.writeFloat32(color_alpha);
+  builder.writeInt32(vertex_index_color_RGB);
+  builder.prep(4, 8);
+  builder.writeFloat32(uv_y);
+  builder.writeFloat32(uv_x);
   builder.prep(4, 12);
   builder.writeFloat32(position_z);
   builder.writeFloat32(position_y);
@@ -1134,7 +1092,7 @@ apemodefb.StaticVertexQTangentFb.createStaticVertexQTangentFb = function(builder
 /**
  * @constructor
  */
-apemodefb.StaticSkinnedVertexFb = function() {
+apemodefb.SkinnedVertexFb = function() {
   /**
    * @type {flatbuffers.ByteBuffer}
    */
@@ -1149,121 +1107,78 @@ apemodefb.StaticSkinnedVertexFb = function() {
 /**
  * @param {number} i
  * @param {flatbuffers.ByteBuffer} bb
- * @returns {apemodefb.StaticSkinnedVertexFb}
+ * @returns {apemodefb.SkinnedVertexFb}
  */
-apemodefb.StaticSkinnedVertexFb.prototype.__init = function(i, bb) {
+apemodefb.SkinnedVertexFb.prototype.__init = function(i, bb) {
   this.bb_pos = i;
   this.bb = bb;
   return this;
 };
 
 /**
- * @param {apemodefb.Vec3Fb=} obj
- * @returns {apemodefb.Vec3Fb|null}
+ * @param {apemodefb.DefaultVertexFb=} obj
+ * @returns {apemodefb.DefaultVertexFb|null}
  */
-apemodefb.StaticSkinnedVertexFb.prototype.position = function(obj) {
-  return (obj || new apemodefb.Vec3Fb).__init(this.bb_pos, this.bb);
-};
-
-/**
- * @param {apemodefb.Vec3Fb=} obj
- * @returns {apemodefb.Vec3Fb|null}
- */
-apemodefb.StaticSkinnedVertexFb.prototype.normal = function(obj) {
-  return (obj || new apemodefb.Vec3Fb).__init(this.bb_pos + 12, this.bb);
+apemodefb.SkinnedVertexFb.prototype.vertex = function(obj) {
+  return (obj || new apemodefb.DefaultVertexFb).__init(this.bb_pos, this.bb);
 };
 
 /**
  * @param {apemodefb.Vec4Fb=} obj
  * @returns {apemodefb.Vec4Fb|null}
  */
-apemodefb.StaticSkinnedVertexFb.prototype.tangent = function(obj) {
-  return (obj || new apemodefb.Vec4Fb).__init(this.bb_pos + 24, this.bb);
-};
-
-/**
- * @param {apemodefb.Vec2Fb=} obj
- * @returns {apemodefb.Vec2Fb|null}
- */
-apemodefb.StaticSkinnedVertexFb.prototype.uv = function(obj) {
-  return (obj || new apemodefb.Vec2Fb).__init(this.bb_pos + 40, this.bb);
-};
-
-/**
- * @param {apemodefb.Vec4Fb=} obj
- * @returns {apemodefb.Vec4Fb|null}
- */
-apemodefb.StaticSkinnedVertexFb.prototype.weights = function(obj) {
-  return (obj || new apemodefb.Vec4Fb).__init(this.bb_pos + 48, this.bb);
-};
-
-/**
- * @param {apemodefb.Vec4Fb=} obj
- * @returns {apemodefb.Vec4Fb|null}
- */
-apemodefb.StaticSkinnedVertexFb.prototype.indices = function(obj) {
-  return (obj || new apemodefb.Vec4Fb).__init(this.bb_pos + 64, this.bb);
+apemodefb.SkinnedVertexFb.prototype.boneIndicesWeights = function(obj) {
+  return (obj || new apemodefb.Vec4Fb).__init(this.bb_pos + 44, this.bb);
 };
 
 /**
  * @param {flatbuffers.Builder} builder
- * @param {number} position_x
- * @param {number} position_y
- * @param {number} position_z
- * @param {number} normal_x
- * @param {number} normal_y
- * @param {number} normal_z
- * @param {number} tangent_x
- * @param {number} tangent_y
- * @param {number} tangent_z
- * @param {number} tangent_w
- * @param {number} uv_x
- * @param {number} uv_y
- * @param {number} weights_x
- * @param {number} weights_y
- * @param {number} weights_z
- * @param {number} weights_w
- * @param {number} indices_x
- * @param {number} indices_y
- * @param {number} indices_z
- * @param {number} indices_w
+ * @param {number} vertex_position_x
+ * @param {number} vertex_position_y
+ * @param {number} vertex_position_z
+ * @param {number} vertex_uv_x
+ * @param {number} vertex_uv_y
+ * @param {number} vertex_vertex_index_color_RGB
+ * @param {number} vertex_color_alpha
+ * @param {number} vertex_qtangent_s
+ * @param {number} vertex_qtangent_nx
+ * @param {number} vertex_qtangent_ny
+ * @param {number} vertex_qtangent_nz
+ * @param {number} bone_indices_weights_x
+ * @param {number} bone_indices_weights_y
+ * @param {number} bone_indices_weights_z
+ * @param {number} bone_indices_weights_w
  * @returns {flatbuffers.Offset}
  */
-apemodefb.StaticSkinnedVertexFb.createStaticSkinnedVertexFb = function(builder, position_x, position_y, position_z, normal_x, normal_y, normal_z, tangent_x, tangent_y, tangent_z, tangent_w, uv_x, uv_y, weights_x, weights_y, weights_z, weights_w, indices_x, indices_y, indices_z, indices_w) {
-  builder.prep(4, 80);
+apemodefb.SkinnedVertexFb.createSkinnedVertexFb = function(builder, vertex_position_x, vertex_position_y, vertex_position_z, vertex_uv_x, vertex_uv_y, vertex_vertex_index_color_RGB, vertex_color_alpha, vertex_qtangent_s, vertex_qtangent_nx, vertex_qtangent_ny, vertex_qtangent_nz, bone_indices_weights_x, bone_indices_weights_y, bone_indices_weights_z, bone_indices_weights_w) {
+  builder.prep(4, 60);
   builder.prep(4, 16);
-  builder.writeFloat32(indices_w);
-  builder.writeFloat32(indices_z);
-  builder.writeFloat32(indices_y);
-  builder.writeFloat32(indices_x);
+  builder.writeFloat32(bone_indices_weights_w);
+  builder.writeFloat32(bone_indices_weights_z);
+  builder.writeFloat32(bone_indices_weights_y);
+  builder.writeFloat32(bone_indices_weights_x);
+  builder.prep(4, 44);
   builder.prep(4, 16);
-  builder.writeFloat32(weights_w);
-  builder.writeFloat32(weights_z);
-  builder.writeFloat32(weights_y);
-  builder.writeFloat32(weights_x);
+  builder.writeFloat32(vertex_qtangent_nz);
+  builder.writeFloat32(vertex_qtangent_ny);
+  builder.writeFloat32(vertex_qtangent_nx);
+  builder.writeFloat32(vertex_qtangent_s);
+  builder.writeFloat32(vertex_color_alpha);
+  builder.writeInt32(vertex_vertex_index_color_RGB);
   builder.prep(4, 8);
-  builder.writeFloat32(uv_y);
-  builder.writeFloat32(uv_x);
-  builder.prep(4, 16);
-  builder.writeFloat32(tangent_w);
-  builder.writeFloat32(tangent_z);
-  builder.writeFloat32(tangent_y);
-  builder.writeFloat32(tangent_x);
+  builder.writeFloat32(vertex_uv_y);
+  builder.writeFloat32(vertex_uv_x);
   builder.prep(4, 12);
-  builder.writeFloat32(normal_z);
-  builder.writeFloat32(normal_y);
-  builder.writeFloat32(normal_x);
-  builder.prep(4, 12);
-  builder.writeFloat32(position_z);
-  builder.writeFloat32(position_y);
-  builder.writeFloat32(position_x);
+  builder.writeFloat32(vertex_position_z);
+  builder.writeFloat32(vertex_position_y);
+  builder.writeFloat32(vertex_position_x);
   return builder.offset();
 };
 
 /**
  * @constructor
  */
-apemodefb.StaticSkinned8VertexFb = function() {
+apemodefb.FatSkinnedVertexFb = function() {
   /**
    * @type {flatbuffers.ByteBuffer}
    */
@@ -1278,410 +1193,81 @@ apemodefb.StaticSkinned8VertexFb = function() {
 /**
  * @param {number} i
  * @param {flatbuffers.ByteBuffer} bb
- * @returns {apemodefb.StaticSkinned8VertexFb}
+ * @returns {apemodefb.FatSkinnedVertexFb}
  */
-apemodefb.StaticSkinned8VertexFb.prototype.__init = function(i, bb) {
+apemodefb.FatSkinnedVertexFb.prototype.__init = function(i, bb) {
   this.bb_pos = i;
   this.bb = bb;
   return this;
 };
 
 /**
- * @param {apemodefb.Vec3Fb=} obj
- * @returns {apemodefb.Vec3Fb|null}
+ * @param {apemodefb.SkinnedVertexFb=} obj
+ * @returns {apemodefb.SkinnedVertexFb|null}
  */
-apemodefb.StaticSkinned8VertexFb.prototype.position = function(obj) {
-  return (obj || new apemodefb.Vec3Fb).__init(this.bb_pos, this.bb);
-};
-
-/**
- * @param {apemodefb.Vec3Fb=} obj
- * @returns {apemodefb.Vec3Fb|null}
- */
-apemodefb.StaticSkinned8VertexFb.prototype.normal = function(obj) {
-  return (obj || new apemodefb.Vec3Fb).__init(this.bb_pos + 12, this.bb);
+apemodefb.FatSkinnedVertexFb.prototype.skinnedVertex = function(obj) {
+  return (obj || new apemodefb.SkinnedVertexFb).__init(this.bb_pos, this.bb);
 };
 
 /**
  * @param {apemodefb.Vec4Fb=} obj
  * @returns {apemodefb.Vec4Fb|null}
  */
-apemodefb.StaticSkinned8VertexFb.prototype.tangent = function(obj) {
-  return (obj || new apemodefb.Vec4Fb).__init(this.bb_pos + 24, this.bb);
-};
-
-/**
- * @param {apemodefb.Vec2Fb=} obj
- * @returns {apemodefb.Vec2Fb|null}
- */
-apemodefb.StaticSkinned8VertexFb.prototype.uv = function(obj) {
-  return (obj || new apemodefb.Vec2Fb).__init(this.bb_pos + 40, this.bb);
-};
-
-/**
- * @param {apemodefb.Vec4Fb=} obj
- * @returns {apemodefb.Vec4Fb|null}
- */
-apemodefb.StaticSkinned8VertexFb.prototype.weights0 = function(obj) {
-  return (obj || new apemodefb.Vec4Fb).__init(this.bb_pos + 48, this.bb);
-};
-
-/**
- * @param {apemodefb.Vec4Fb=} obj
- * @returns {apemodefb.Vec4Fb|null}
- */
-apemodefb.StaticSkinned8VertexFb.prototype.weights1 = function(obj) {
-  return (obj || new apemodefb.Vec4Fb).__init(this.bb_pos + 64, this.bb);
-};
-
-/**
- * @param {apemodefb.Vec4Fb=} obj
- * @returns {apemodefb.Vec4Fb|null}
- */
-apemodefb.StaticSkinned8VertexFb.prototype.indices0 = function(obj) {
-  return (obj || new apemodefb.Vec4Fb).__init(this.bb_pos + 80, this.bb);
-};
-
-/**
- * @param {apemodefb.Vec4Fb=} obj
- * @returns {apemodefb.Vec4Fb|null}
- */
-apemodefb.StaticSkinned8VertexFb.prototype.indices1 = function(obj) {
-  return (obj || new apemodefb.Vec4Fb).__init(this.bb_pos + 96, this.bb);
+apemodefb.FatSkinnedVertexFb.prototype.extraBoneIndicesWeights = function(obj) {
+  return (obj || new apemodefb.Vec4Fb).__init(this.bb_pos + 60, this.bb);
 };
 
 /**
  * @param {flatbuffers.Builder} builder
- * @param {number} position_x
- * @param {number} position_y
- * @param {number} position_z
- * @param {number} normal_x
- * @param {number} normal_y
- * @param {number} normal_z
- * @param {number} tangent_x
- * @param {number} tangent_y
- * @param {number} tangent_z
- * @param {number} tangent_w
- * @param {number} uv_x
- * @param {number} uv_y
- * @param {number} weights_0_x
- * @param {number} weights_0_y
- * @param {number} weights_0_z
- * @param {number} weights_0_w
- * @param {number} weights_1_x
- * @param {number} weights_1_y
- * @param {number} weights_1_z
- * @param {number} weights_1_w
- * @param {number} indices_0_x
- * @param {number} indices_0_y
- * @param {number} indices_0_z
- * @param {number} indices_0_w
- * @param {number} indices_1_x
- * @param {number} indices_1_y
- * @param {number} indices_1_z
- * @param {number} indices_1_w
+ * @param {number} skinned_vertex_vertex_position_x
+ * @param {number} skinned_vertex_vertex_position_y
+ * @param {number} skinned_vertex_vertex_position_z
+ * @param {number} skinned_vertex_vertex_uv_x
+ * @param {number} skinned_vertex_vertex_uv_y
+ * @param {number} skinned_vertex_vertex_vertex_index_color_RGB
+ * @param {number} skinned_vertex_vertex_color_alpha
+ * @param {number} skinned_vertex_vertex_qtangent_s
+ * @param {number} skinned_vertex_vertex_qtangent_nx
+ * @param {number} skinned_vertex_vertex_qtangent_ny
+ * @param {number} skinned_vertex_vertex_qtangent_nz
+ * @param {number} skinned_vertex_bone_indices_weights_x
+ * @param {number} skinned_vertex_bone_indices_weights_y
+ * @param {number} skinned_vertex_bone_indices_weights_z
+ * @param {number} skinned_vertex_bone_indices_weights_w
+ * @param {number} extra_bone_indices_weights_x
+ * @param {number} extra_bone_indices_weights_y
+ * @param {number} extra_bone_indices_weights_z
+ * @param {number} extra_bone_indices_weights_w
  * @returns {flatbuffers.Offset}
  */
-apemodefb.StaticSkinned8VertexFb.createStaticSkinned8VertexFb = function(builder, position_x, position_y, position_z, normal_x, normal_y, normal_z, tangent_x, tangent_y, tangent_z, tangent_w, uv_x, uv_y, weights_0_x, weights_0_y, weights_0_z, weights_0_w, weights_1_x, weights_1_y, weights_1_z, weights_1_w, indices_0_x, indices_0_y, indices_0_z, indices_0_w, indices_1_x, indices_1_y, indices_1_z, indices_1_w) {
-  builder.prep(4, 112);
+apemodefb.FatSkinnedVertexFb.createFatSkinnedVertexFb = function(builder, skinned_vertex_vertex_position_x, skinned_vertex_vertex_position_y, skinned_vertex_vertex_position_z, skinned_vertex_vertex_uv_x, skinned_vertex_vertex_uv_y, skinned_vertex_vertex_vertex_index_color_RGB, skinned_vertex_vertex_color_alpha, skinned_vertex_vertex_qtangent_s, skinned_vertex_vertex_qtangent_nx, skinned_vertex_vertex_qtangent_ny, skinned_vertex_vertex_qtangent_nz, skinned_vertex_bone_indices_weights_x, skinned_vertex_bone_indices_weights_y, skinned_vertex_bone_indices_weights_z, skinned_vertex_bone_indices_weights_w, extra_bone_indices_weights_x, extra_bone_indices_weights_y, extra_bone_indices_weights_z, extra_bone_indices_weights_w) {
+  builder.prep(4, 76);
   builder.prep(4, 16);
-  builder.writeFloat32(indices_1_w);
-  builder.writeFloat32(indices_1_z);
-  builder.writeFloat32(indices_1_y);
-  builder.writeFloat32(indices_1_x);
+  builder.writeFloat32(extra_bone_indices_weights_w);
+  builder.writeFloat32(extra_bone_indices_weights_z);
+  builder.writeFloat32(extra_bone_indices_weights_y);
+  builder.writeFloat32(extra_bone_indices_weights_x);
+  builder.prep(4, 60);
   builder.prep(4, 16);
-  builder.writeFloat32(indices_0_w);
-  builder.writeFloat32(indices_0_z);
-  builder.writeFloat32(indices_0_y);
-  builder.writeFloat32(indices_0_x);
+  builder.writeFloat32(skinned_vertex_bone_indices_weights_w);
+  builder.writeFloat32(skinned_vertex_bone_indices_weights_z);
+  builder.writeFloat32(skinned_vertex_bone_indices_weights_y);
+  builder.writeFloat32(skinned_vertex_bone_indices_weights_x);
+  builder.prep(4, 44);
   builder.prep(4, 16);
-  builder.writeFloat32(weights_1_w);
-  builder.writeFloat32(weights_1_z);
-  builder.writeFloat32(weights_1_y);
-  builder.writeFloat32(weights_1_x);
-  builder.prep(4, 16);
-  builder.writeFloat32(weights_0_w);
-  builder.writeFloat32(weights_0_z);
-  builder.writeFloat32(weights_0_y);
-  builder.writeFloat32(weights_0_x);
+  builder.writeFloat32(skinned_vertex_vertex_qtangent_nz);
+  builder.writeFloat32(skinned_vertex_vertex_qtangent_ny);
+  builder.writeFloat32(skinned_vertex_vertex_qtangent_nx);
+  builder.writeFloat32(skinned_vertex_vertex_qtangent_s);
+  builder.writeFloat32(skinned_vertex_vertex_color_alpha);
+  builder.writeInt32(skinned_vertex_vertex_vertex_index_color_RGB);
   builder.prep(4, 8);
-  builder.writeFloat32(uv_y);
-  builder.writeFloat32(uv_x);
-  builder.prep(4, 16);
-  builder.writeFloat32(tangent_w);
-  builder.writeFloat32(tangent_z);
-  builder.writeFloat32(tangent_y);
-  builder.writeFloat32(tangent_x);
+  builder.writeFloat32(skinned_vertex_vertex_uv_y);
+  builder.writeFloat32(skinned_vertex_vertex_uv_x);
   builder.prep(4, 12);
-  builder.writeFloat32(normal_z);
-  builder.writeFloat32(normal_y);
-  builder.writeFloat32(normal_x);
-  builder.prep(4, 12);
-  builder.writeFloat32(position_z);
-  builder.writeFloat32(position_y);
-  builder.writeFloat32(position_x);
-  return builder.offset();
-};
-
-/**
- * @constructor
- */
-apemodefb.StaticSkinnedVertexQTangentFb = function() {
-  /**
-   * @type {flatbuffers.ByteBuffer}
-   */
-  this.bb = null;
-
-  /**
-   * @type {number}
-   */
-  this.bb_pos = 0;
-};
-
-/**
- * @param {number} i
- * @param {flatbuffers.ByteBuffer} bb
- * @returns {apemodefb.StaticSkinnedVertexQTangentFb}
- */
-apemodefb.StaticSkinnedVertexQTangentFb.prototype.__init = function(i, bb) {
-  this.bb_pos = i;
-  this.bb = bb;
-  return this;
-};
-
-/**
- * @param {apemodefb.Vec3Fb=} obj
- * @returns {apemodefb.Vec3Fb|null}
- */
-apemodefb.StaticSkinnedVertexQTangentFb.prototype.position = function(obj) {
-  return (obj || new apemodefb.Vec3Fb).__init(this.bb_pos, this.bb);
-};
-
-/**
- * @param {apemodefb.QuatFb=} obj
- * @returns {apemodefb.QuatFb|null}
- */
-apemodefb.StaticSkinnedVertexQTangentFb.prototype.qtangent = function(obj) {
-  return (obj || new apemodefb.QuatFb).__init(this.bb_pos + 12, this.bb);
-};
-
-/**
- * @param {apemodefb.Vec2Fb=} obj
- * @returns {apemodefb.Vec2Fb|null}
- */
-apemodefb.StaticSkinnedVertexQTangentFb.prototype.uv = function(obj) {
-  return (obj || new apemodefb.Vec2Fb).__init(this.bb_pos + 28, this.bb);
-};
-
-/**
- * @param {apemodefb.Vec4Fb=} obj
- * @returns {apemodefb.Vec4Fb|null}
- */
-apemodefb.StaticSkinnedVertexQTangentFb.prototype.weights = function(obj) {
-  return (obj || new apemodefb.Vec4Fb).__init(this.bb_pos + 36, this.bb);
-};
-
-/**
- * @param {apemodefb.Vec4Fb=} obj
- * @returns {apemodefb.Vec4Fb|null}
- */
-apemodefb.StaticSkinnedVertexQTangentFb.prototype.indices = function(obj) {
-  return (obj || new apemodefb.Vec4Fb).__init(this.bb_pos + 52, this.bb);
-};
-
-/**
- * @param {flatbuffers.Builder} builder
- * @param {number} position_x
- * @param {number} position_y
- * @param {number} position_z
- * @param {number} qtangent_s
- * @param {number} qtangent_nx
- * @param {number} qtangent_ny
- * @param {number} qtangent_nz
- * @param {number} uv_x
- * @param {number} uv_y
- * @param {number} weights_x
- * @param {number} weights_y
- * @param {number} weights_z
- * @param {number} weights_w
- * @param {number} indices_x
- * @param {number} indices_y
- * @param {number} indices_z
- * @param {number} indices_w
- * @returns {flatbuffers.Offset}
- */
-apemodefb.StaticSkinnedVertexQTangentFb.createStaticSkinnedVertexQTangentFb = function(builder, position_x, position_y, position_z, qtangent_s, qtangent_nx, qtangent_ny, qtangent_nz, uv_x, uv_y, weights_x, weights_y, weights_z, weights_w, indices_x, indices_y, indices_z, indices_w) {
-  builder.prep(4, 68);
-  builder.prep(4, 16);
-  builder.writeFloat32(indices_w);
-  builder.writeFloat32(indices_z);
-  builder.writeFloat32(indices_y);
-  builder.writeFloat32(indices_x);
-  builder.prep(4, 16);
-  builder.writeFloat32(weights_w);
-  builder.writeFloat32(weights_z);
-  builder.writeFloat32(weights_y);
-  builder.writeFloat32(weights_x);
-  builder.prep(4, 8);
-  builder.writeFloat32(uv_y);
-  builder.writeFloat32(uv_x);
-  builder.prep(4, 16);
-  builder.writeFloat32(qtangent_nz);
-  builder.writeFloat32(qtangent_ny);
-  builder.writeFloat32(qtangent_nx);
-  builder.writeFloat32(qtangent_s);
-  builder.prep(4, 12);
-  builder.writeFloat32(position_z);
-  builder.writeFloat32(position_y);
-  builder.writeFloat32(position_x);
-  return builder.offset();
-};
-
-/**
- * @constructor
- */
-apemodefb.StaticSkinned8VertexQTangentFb = function() {
-  /**
-   * @type {flatbuffers.ByteBuffer}
-   */
-  this.bb = null;
-
-  /**
-   * @type {number}
-   */
-  this.bb_pos = 0;
-};
-
-/**
- * @param {number} i
- * @param {flatbuffers.ByteBuffer} bb
- * @returns {apemodefb.StaticSkinned8VertexQTangentFb}
- */
-apemodefb.StaticSkinned8VertexQTangentFb.prototype.__init = function(i, bb) {
-  this.bb_pos = i;
-  this.bb = bb;
-  return this;
-};
-
-/**
- * @param {apemodefb.Vec3Fb=} obj
- * @returns {apemodefb.Vec3Fb|null}
- */
-apemodefb.StaticSkinned8VertexQTangentFb.prototype.position = function(obj) {
-  return (obj || new apemodefb.Vec3Fb).__init(this.bb_pos, this.bb);
-};
-
-/**
- * @param {apemodefb.QuatFb=} obj
- * @returns {apemodefb.QuatFb|null}
- */
-apemodefb.StaticSkinned8VertexQTangentFb.prototype.qtangent = function(obj) {
-  return (obj || new apemodefb.QuatFb).__init(this.bb_pos + 12, this.bb);
-};
-
-/**
- * @param {apemodefb.Vec2Fb=} obj
- * @returns {apemodefb.Vec2Fb|null}
- */
-apemodefb.StaticSkinned8VertexQTangentFb.prototype.uv = function(obj) {
-  return (obj || new apemodefb.Vec2Fb).__init(this.bb_pos + 28, this.bb);
-};
-
-/**
- * @param {apemodefb.Vec4Fb=} obj
- * @returns {apemodefb.Vec4Fb|null}
- */
-apemodefb.StaticSkinned8VertexQTangentFb.prototype.weights0 = function(obj) {
-  return (obj || new apemodefb.Vec4Fb).__init(this.bb_pos + 36, this.bb);
-};
-
-/**
- * @param {apemodefb.Vec4Fb=} obj
- * @returns {apemodefb.Vec4Fb|null}
- */
-apemodefb.StaticSkinned8VertexQTangentFb.prototype.weights1 = function(obj) {
-  return (obj || new apemodefb.Vec4Fb).__init(this.bb_pos + 52, this.bb);
-};
-
-/**
- * @param {apemodefb.Vec4Fb=} obj
- * @returns {apemodefb.Vec4Fb|null}
- */
-apemodefb.StaticSkinned8VertexQTangentFb.prototype.indices0 = function(obj) {
-  return (obj || new apemodefb.Vec4Fb).__init(this.bb_pos + 68, this.bb);
-};
-
-/**
- * @param {apemodefb.Vec4Fb=} obj
- * @returns {apemodefb.Vec4Fb|null}
- */
-apemodefb.StaticSkinned8VertexQTangentFb.prototype.indices1 = function(obj) {
-  return (obj || new apemodefb.Vec4Fb).__init(this.bb_pos + 84, this.bb);
-};
-
-/**
- * @param {flatbuffers.Builder} builder
- * @param {number} position_x
- * @param {number} position_y
- * @param {number} position_z
- * @param {number} qtangent_s
- * @param {number} qtangent_nx
- * @param {number} qtangent_ny
- * @param {number} qtangent_nz
- * @param {number} uv_x
- * @param {number} uv_y
- * @param {number} weights_0_x
- * @param {number} weights_0_y
- * @param {number} weights_0_z
- * @param {number} weights_0_w
- * @param {number} weights_1_x
- * @param {number} weights_1_y
- * @param {number} weights_1_z
- * @param {number} weights_1_w
- * @param {number} indices_0_x
- * @param {number} indices_0_y
- * @param {number} indices_0_z
- * @param {number} indices_0_w
- * @param {number} indices_1_x
- * @param {number} indices_1_y
- * @param {number} indices_1_z
- * @param {number} indices_1_w
- * @returns {flatbuffers.Offset}
- */
-apemodefb.StaticSkinned8VertexQTangentFb.createStaticSkinned8VertexQTangentFb = function(builder, position_x, position_y, position_z, qtangent_s, qtangent_nx, qtangent_ny, qtangent_nz, uv_x, uv_y, weights_0_x, weights_0_y, weights_0_z, weights_0_w, weights_1_x, weights_1_y, weights_1_z, weights_1_w, indices_0_x, indices_0_y, indices_0_z, indices_0_w, indices_1_x, indices_1_y, indices_1_z, indices_1_w) {
-  builder.prep(4, 100);
-  builder.prep(4, 16);
-  builder.writeFloat32(indices_1_w);
-  builder.writeFloat32(indices_1_z);
-  builder.writeFloat32(indices_1_y);
-  builder.writeFloat32(indices_1_x);
-  builder.prep(4, 16);
-  builder.writeFloat32(indices_0_w);
-  builder.writeFloat32(indices_0_z);
-  builder.writeFloat32(indices_0_y);
-  builder.writeFloat32(indices_0_x);
-  builder.prep(4, 16);
-  builder.writeFloat32(weights_1_w);
-  builder.writeFloat32(weights_1_z);
-  builder.writeFloat32(weights_1_y);
-  builder.writeFloat32(weights_1_x);
-  builder.prep(4, 16);
-  builder.writeFloat32(weights_0_w);
-  builder.writeFloat32(weights_0_z);
-  builder.writeFloat32(weights_0_y);
-  builder.writeFloat32(weights_0_x);
-  builder.prep(4, 8);
-  builder.writeFloat32(uv_y);
-  builder.writeFloat32(uv_x);
-  builder.prep(4, 16);
-  builder.writeFloat32(qtangent_nz);
-  builder.writeFloat32(qtangent_ny);
-  builder.writeFloat32(qtangent_nx);
-  builder.writeFloat32(qtangent_s);
-  builder.prep(4, 12);
-  builder.writeFloat32(position_z);
-  builder.writeFloat32(position_y);
-  builder.writeFloat32(position_x);
+  builder.writeFloat32(skinned_vertex_vertex_position_z);
+  builder.writeFloat32(skinned_vertex_vertex_position_y);
+  builder.writeFloat32(skinned_vertex_vertex_position_x);
   return builder.offset();
 };
 
@@ -1902,7 +1488,7 @@ apemodefb.AnimLayerFb.createAnimLayerFb = function(builder, id, anim_stack_id, a
 /**
  * @constructor
  */
-apemodefb.AnimCurveKeyFb = function() {
+apemodefb.AnimCurveResampledKeyFb = function() {
   /**
    * @type {flatbuffers.ByteBuffer}
    */
@@ -1917,9 +1503,9 @@ apemodefb.AnimCurveKeyFb = function() {
 /**
  * @param {number} i
  * @param {flatbuffers.ByteBuffer} bb
- * @returns {apemodefb.AnimCurveKeyFb}
+ * @returns {apemodefb.AnimCurveResampledKeyFb}
  */
-apemodefb.AnimCurveKeyFb.prototype.__init = function(i, bb) {
+apemodefb.AnimCurveResampledKeyFb.prototype.__init = function(i, bb) {
   this.bb_pos = i;
   this.bb = bb;
   return this;
@@ -1928,7 +1514,7 @@ apemodefb.AnimCurveKeyFb.prototype.__init = function(i, bb) {
 /**
  * @returns {number}
  */
-apemodefb.AnimCurveKeyFb.prototype.time = function() {
+apemodefb.AnimCurveResampledKeyFb.prototype.time = function() {
   return this.bb.readFloat32(this.bb_pos);
 };
 
@@ -1936,7 +1522,7 @@ apemodefb.AnimCurveKeyFb.prototype.time = function() {
  * @param {number} value
  * @returns {boolean}
  */
-apemodefb.AnimCurveKeyFb.prototype.mutate_time = function(value) {
+apemodefb.AnimCurveResampledKeyFb.prototype.mutate_time = function(value) {
   var offset = this.bb.__offset(this.bb_pos, 0);
 
   if (offset === 0) {
@@ -1950,7 +1536,7 @@ apemodefb.AnimCurveKeyFb.prototype.mutate_time = function(value) {
 /**
  * @returns {number}
  */
-apemodefb.AnimCurveKeyFb.prototype.valueBez0Bez3 = function() {
+apemodefb.AnimCurveResampledKeyFb.prototype.value = function() {
   return this.bb.readFloat32(this.bb_pos + 4);
 };
 
@@ -1958,7 +1544,90 @@ apemodefb.AnimCurveKeyFb.prototype.valueBez0Bez3 = function() {
  * @param {number} value
  * @returns {boolean}
  */
-apemodefb.AnimCurveKeyFb.prototype.mutate_value_bez0_bez3 = function(value) {
+apemodefb.AnimCurveResampledKeyFb.prototype.mutate_value = function(value) {
+  var offset = this.bb.__offset(this.bb_pos, 4);
+
+  if (offset === 0) {
+    return false;
+  }
+
+  this.bb.writeFloat32(this.bb_pos + offset, value);
+  return true;
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {number} time
+ * @param {number} value
+ * @returns {flatbuffers.Offset}
+ */
+apemodefb.AnimCurveResampledKeyFb.createAnimCurveResampledKeyFb = function(builder, time, value) {
+  builder.prep(4, 8);
+  builder.writeFloat32(value);
+  builder.writeFloat32(time);
+  return builder.offset();
+};
+
+/**
+ * @constructor
+ */
+apemodefb.AnimCurveCubicKeyFb = function() {
+  /**
+   * @type {flatbuffers.ByteBuffer}
+   */
+  this.bb = null;
+
+  /**
+   * @type {number}
+   */
+  this.bb_pos = 0;
+};
+
+/**
+ * @param {number} i
+ * @param {flatbuffers.ByteBuffer} bb
+ * @returns {apemodefb.AnimCurveCubicKeyFb}
+ */
+apemodefb.AnimCurveCubicKeyFb.prototype.__init = function(i, bb) {
+  this.bb_pos = i;
+  this.bb = bb;
+  return this;
+};
+
+/**
+ * @returns {number}
+ */
+apemodefb.AnimCurveCubicKeyFb.prototype.time = function() {
+  return this.bb.readFloat32(this.bb_pos);
+};
+
+/**
+ * @param {number} value
+ * @returns {boolean}
+ */
+apemodefb.AnimCurveCubicKeyFb.prototype.mutate_time = function(value) {
+  var offset = this.bb.__offset(this.bb_pos, 0);
+
+  if (offset === 0) {
+    return false;
+  }
+
+  this.bb.writeFloat32(this.bb_pos + offset, value);
+  return true;
+};
+
+/**
+ * @returns {number}
+ */
+apemodefb.AnimCurveCubicKeyFb.prototype.valueBez0Bez3 = function() {
+  return this.bb.readFloat32(this.bb_pos + 4);
+};
+
+/**
+ * @param {number} value
+ * @returns {boolean}
+ */
+apemodefb.AnimCurveCubicKeyFb.prototype.mutate_value_bez0_bez3 = function(value) {
   var offset = this.bb.__offset(this.bb_pos, 4);
 
   if (offset === 0) {
@@ -1972,7 +1641,7 @@ apemodefb.AnimCurveKeyFb.prototype.mutate_value_bez0_bez3 = function(value) {
 /**
  * @returns {number}
  */
-apemodefb.AnimCurveKeyFb.prototype.bez1 = function() {
+apemodefb.AnimCurveCubicKeyFb.prototype.bez1 = function() {
   return this.bb.readFloat32(this.bb_pos + 8);
 };
 
@@ -1980,7 +1649,7 @@ apemodefb.AnimCurveKeyFb.prototype.bez1 = function() {
  * @param {number} value
  * @returns {boolean}
  */
-apemodefb.AnimCurveKeyFb.prototype.mutate_bez1 = function(value) {
+apemodefb.AnimCurveCubicKeyFb.prototype.mutate_bez1 = function(value) {
   var offset = this.bb.__offset(this.bb_pos, 8);
 
   if (offset === 0) {
@@ -1994,7 +1663,7 @@ apemodefb.AnimCurveKeyFb.prototype.mutate_bez1 = function(value) {
 /**
  * @returns {number}
  */
-apemodefb.AnimCurveKeyFb.prototype.bez2 = function() {
+apemodefb.AnimCurveCubicKeyFb.prototype.bez2 = function() {
   return this.bb.readFloat32(this.bb_pos + 12);
 };
 
@@ -2002,7 +1671,7 @@ apemodefb.AnimCurveKeyFb.prototype.bez2 = function() {
  * @param {number} value
  * @returns {boolean}
  */
-apemodefb.AnimCurveKeyFb.prototype.mutate_bez2 = function(value) {
+apemodefb.AnimCurveCubicKeyFb.prototype.mutate_bez2 = function(value) {
   var offset = this.bb.__offset(this.bb_pos, 12);
 
   if (offset === 0) {
@@ -2016,7 +1685,7 @@ apemodefb.AnimCurveKeyFb.prototype.mutate_bez2 = function(value) {
 /**
  * @returns {apemodefb.EInterpolationModeFb}
  */
-apemodefb.AnimCurveKeyFb.prototype.interpolationMode = function() {
+apemodefb.AnimCurveCubicKeyFb.prototype.interpolationMode = function() {
   return /** @type {apemodefb.EInterpolationModeFb} */ (this.bb.readUint8(this.bb_pos + 16));
 };
 
@@ -2024,7 +1693,7 @@ apemodefb.AnimCurveKeyFb.prototype.interpolationMode = function() {
  * @param {apemodefb.EInterpolationModeFb} value
  * @returns {boolean}
  */
-apemodefb.AnimCurveKeyFb.prototype.mutate_interpolation_mode = function(value) {
+apemodefb.AnimCurveCubicKeyFb.prototype.mutate_interpolation_mode = function(value) {
   var offset = this.bb.__offset(this.bb_pos, 16);
 
   if (offset === 0) {
@@ -2044,7 +1713,7 @@ apemodefb.AnimCurveKeyFb.prototype.mutate_interpolation_mode = function(value) {
  * @param {apemodefb.EInterpolationModeFb} interpolation_mode
  * @returns {flatbuffers.Offset}
  */
-apemodefb.AnimCurveKeyFb.createAnimCurveKeyFb = function(builder, time, value_bez0_bez3, bez1, bez2, interpolation_mode) {
+apemodefb.AnimCurveCubicKeyFb.createAnimCurveCubicKeyFb = function(builder, time, value_bez0_bez3, bez1, bez2, interpolation_mode) {
   builder.prep(4, 20);
   builder.pad(3);
   builder.writeInt8(interpolation_mode);
@@ -2230,12 +1899,11 @@ apemodefb.AnimCurveFb.prototype.mutate_channel = function(value) {
 
 /**
  * @param {number} index
- * @param {apemodefb.AnimCurveKeyFb=} obj
- * @returns {apemodefb.AnimCurveKeyFb}
+ * @returns {number}
  */
-apemodefb.AnimCurveFb.prototype.keys = function(index, obj) {
+apemodefb.AnimCurveFb.prototype.keys = function(index) {
   var offset = this.bb.__offset(this.bb_pos, 16);
-  return offset ? (obj || new apemodefb.AnimCurveKeyFb).__init(this.bb.__vector(this.bb_pos + offset) + index * 20, this.bb) : null;
+  return offset ? this.bb.readUint8(this.bb.__vector(this.bb_pos + offset) + index) : 0;
 };
 
 /**
@@ -2247,10 +1915,64 @@ apemodefb.AnimCurveFb.prototype.keysLength = function() {
 };
 
 /**
+ * @returns {Uint8Array}
+ */
+apemodefb.AnimCurveFb.prototype.keysArray = function() {
+  var offset = this.bb.__offset(this.bb_pos, 16);
+  return offset ? new Uint8Array(this.bb.bytes().buffer, this.bb.bytes().byteOffset + this.bb.__vector(this.bb_pos + offset), this.bb.__vector_len(this.bb_pos + offset)) : null;
+};
+
+/**
+ * @returns {apemodefb.EAnimCurveKeyTypeFb}
+ */
+apemodefb.AnimCurveFb.prototype.keyType = function() {
+  var offset = this.bb.__offset(this.bb_pos, 18);
+  return offset ? /** @type {apemodefb.EAnimCurveKeyTypeFb} */ (this.bb.readUint8(this.bb_pos + offset)) : apemodefb.EAnimCurveKeyTypeFb.Resampled;
+};
+
+/**
+ * @param {apemodefb.EAnimCurveKeyTypeFb} value
+ * @returns {boolean}
+ */
+apemodefb.AnimCurveFb.prototype.mutate_key_type = function(value) {
+  var offset = this.bb.__offset(this.bb_pos, 18);
+
+  if (offset === 0) {
+    return false;
+  }
+
+  this.bb.writeUint8(this.bb_pos + offset, value);
+  return true;
+};
+
+/**
+ * @returns {apemodefb.ECompressionTypeFb}
+ */
+apemodefb.AnimCurveFb.prototype.compressionType = function() {
+  var offset = this.bb.__offset(this.bb_pos, 20);
+  return offset ? /** @type {apemodefb.ECompressionTypeFb} */ (this.bb.readUint8(this.bb_pos + offset)) : apemodefb.ECompressionTypeFb.None;
+};
+
+/**
+ * @param {apemodefb.ECompressionTypeFb} value
+ * @returns {boolean}
+ */
+apemodefb.AnimCurveFb.prototype.mutate_compression_type = function(value) {
+  var offset = this.bb.__offset(this.bb_pos, 20);
+
+  if (offset === 0) {
+    return false;
+  }
+
+  this.bb.writeUint8(this.bb_pos + offset, value);
+  return true;
+};
+
+/**
  * @param {flatbuffers.Builder} builder
  */
 apemodefb.AnimCurveFb.startAnimCurveFb = function(builder) {
-  builder.startObject(7);
+  builder.startObject(9);
 };
 
 /**
@@ -2311,10 +2033,39 @@ apemodefb.AnimCurveFb.addKeys = function(builder, keysOffset) {
 
 /**
  * @param {flatbuffers.Builder} builder
+ * @param {Array.<number>} data
+ * @returns {flatbuffers.Offset}
+ */
+apemodefb.AnimCurveFb.createKeysVector = function(builder, data) {
+  builder.startVector(1, data.length, 1);
+  for (var i = data.length - 1; i >= 0; i--) {
+    builder.addInt8(data[i]);
+  }
+  return builder.endVector();
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
  * @param {number} numElems
  */
 apemodefb.AnimCurveFb.startKeysVector = function(builder, numElems) {
-  builder.startVector(20, numElems, 4);
+  builder.startVector(1, numElems, 1);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {apemodefb.EAnimCurveKeyTypeFb} keyType
+ */
+apemodefb.AnimCurveFb.addKeyType = function(builder, keyType) {
+  builder.addFieldInt8(7, keyType, apemodefb.EAnimCurveKeyTypeFb.Resampled);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {apemodefb.ECompressionTypeFb} compressionType
+ */
+apemodefb.AnimCurveFb.addCompressionType = function(builder, compressionType) {
+  builder.addFieldInt8(8, compressionType, apemodefb.ECompressionTypeFb.None);
 };
 
 /**

@@ -84,21 +84,6 @@ enum EPlanarMappingNormalFb : ubyte {
     PlanarNormalZ
 }
 
-enum EVertexFormatFb : ubyte {
-    Static,
-    StaticQTangent,
-    StaticSkinned,
-    StaticSkinned8,
-    StaticSkinnedQTangent,
-    StaticSkinned8QTangent,
-}
-
-enum EIndexTypeFb : ubyte {
-	UInt16,
-	UInt32,
-	Count,
-}
-
 enum EMaterialPropTypeFb : ubyte {
 	Bool,
 	Float,
@@ -202,55 +187,34 @@ struct Mat4Fb {
     w : Vec4Fb;
 }
 
-struct StaticVertexFb {
-    position : Vec3Fb;
-    normal : Vec3Fb;
-    tangent : Vec4Fb;
-    uv : Vec2Fb;
+enum EVertexFormatFb : ubyte {
+    Default,
+    Skinned,
+    FatSkinned,
 }
 
-struct StaticVertexQTangentFb {
+enum EIndexTypeFb : ubyte {
+	UInt16,
+	UInt32,
+	Count,
+}
+
+struct DefaultVertexFb {
     position : Vec3Fb;
+    uv : Vec2Fb;
+    vertex_index_color_RGB : uint;
+    color_alpha : float;
     qtangent : QuatFb;
-    uv : Vec2Fb;
 }
 
-struct StaticSkinnedVertexFb {
-    position : Vec3Fb;
-    normal : Vec3Fb;
-    tangent : Vec4Fb;
-    uv : Vec2Fb;
-    weights : Vec4Fb;
-    indices : Vec4Fb;
+struct SkinnedVertexFb {
+    vertex : DefaultVertexFb;
+    bone_indices_weights : Vec4Fb;
 }
 
-struct StaticSkinned8VertexFb {
-    position : Vec3Fb;
-    normal : Vec3Fb;
-    tangent : Vec4Fb;
-    uv : Vec2Fb;
-    weights_0 : Vec4Fb;
-    weights_1 : Vec4Fb;
-    indices_0 : Vec4Fb;
-    indices_1 : Vec4Fb;
-}
-
-struct StaticSkinnedVertexQTangentFb {
-    position : Vec3Fb;
-    qtangent : QuatFb;
-    uv : Vec2Fb;
-    weights : Vec4Fb;
-    indices : Vec4Fb;
-}
-
-struct StaticSkinned8VertexQTangentFb {
-    position : Vec3Fb;
-    qtangent : QuatFb;
-    uv : Vec2Fb;
-    weights_0 : Vec4Fb;
-    weights_1 : Vec4Fb;
-    indices_0 : Vec4Fb;
-    indices_1 : Vec4Fb;
+struct FatSkinnedVertexFb {
+    skinned_vertex : SkinnedVertexFb;
+    extra_bone_indices_weights : Vec4Fb;
 }
 
 struct AnimStackFb {
@@ -265,12 +229,22 @@ struct AnimLayerFb {
     name_id : uint( key );
 }
 
-struct AnimCurveKeyFb {
+struct AnimCurveResampledKeyFb {
+    time : float;
+    value : float;
+}
+
+struct AnimCurveCubicKeyFb {
     time : float;
     value_bez0_bez3 : float;
     bez1 : float;
     bez2 : float;
 	interpolation_mode : EInterpolationModeFb;
+}
+
+enum EAnimCurveKeyTypeFb : ubyte {
+	Resampled,
+	Cubic,
 }
 
 table AnimCurveFb {
@@ -280,7 +254,9 @@ table AnimCurveFb {
     anim_layer_id : uint;
 	property : EAnimCurvePropertyFb;
 	channel : EAnimCurveChannelFb;
-	keys : [AnimCurveKeyFb];
+	keys : [ubyte];
+    key_type : EAnimCurveKeyTypeFb;
+    compression_type : ECompressionTypeFb;
 }
 
 struct TextureFb {
