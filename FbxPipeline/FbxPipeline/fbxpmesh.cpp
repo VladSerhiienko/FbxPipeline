@@ -11,9 +11,8 @@
 #include <draco/mesh/mesh.h>
 #include <draco/mesh/mesh_cleanup.h>
 #include <draco/mesh/triangle_soup_mesh_builder.h>
-
 #include <draco/compression/encode.h>
-#include <draco/compression/decode.h>
+#include <draco/compression/expert_encode.h>
 
 namespace mathfu {
     using dvec2 = mathfu::Vector< double, 2 >;
@@ -291,7 +290,7 @@ bool GetSubsets( FbxMesh* pMeshFb, std::vector< apemodefb::SubsetFb >& subsetsFb
                             case FbxLayerElement::EReferenceMode::eDirect: {
                                 const auto directArray = materialElement->mDirectArray;
                                 /* There must be at least 1 material. */
-                                if ( directArray && directArray->GetCount( ) < 1 ) {
+                                if ( !directArray || directArray->GetCount( ) < 1 ) {
                                     s.console->error( "Material element {} has no indices, skipped.", m );
                                     DebugBreak( );
                                     break;
@@ -313,7 +312,7 @@ bool GetSubsets( FbxMesh* pMeshFb, std::vector< apemodefb::SubsetFb >& subsetsFb
                             case FbxLayerElement::EReferenceMode::eIndexToDirect: {
                                 const auto indexArray = materialElement->mIndexArray;
                                 /* There must be at least 1 material index. */
-                                if ( indexArray && indexArray->GetCount( ) < 1 ) {
+                                if ( !indexArray || indexArray->GetCount( ) < 1 ) {
                                     s.console->error( "Material element {} has no indices, skipped.", m );
                                     DebugBreak( );
                                     break;
@@ -750,6 +749,10 @@ struct TControlPointSkinInfo {
      * @return true of the bone was added, false otherwise.
      **/
     bool AddBone( float weight, uint32_t index ) {
+        if (weight < std::numeric_limits<float>::epsilon()) {
+            return false;
+        }
+    
         for ( uint32_t i = 0; i < kBoneCountPerControlPoint; ++i ) {
             if ( weights[ i ].index == index ) {
                 weights[ i ].weight += weight;
@@ -825,21 +828,28 @@ struct TControlPointSkinInfo {
             totalWeight += weights[ i ].weight;
         }
 
-        assert( totalWeight <= 1.0f );
-
         std::array< float, TBoneCount > compiled;
         for ( uint32_t i = 0; i < TBoneCount; ++i ) {
             compiled[ i ] = weights[ i ].index;
         }
 
-        if ( weights[ 0 ].weight == 1.0f ) {
-            compiled[ 0 ] += totalWeight * 0.5f;
+        if ( weights[ 0 ].weight >= 0.99f ) {
+            float halfWeight = totalWeight * 0.5f;
+            assert( halfWeight < 1.0f );
+            
+            compiled[ 0 ] += halfWeight;
             compiled[ 1 ] = compiled[ 0 ];
+            assert( uint32_t( compiled[ 0 ] ) == weights[ 0 ].index );
+            assert( uint32_t( compiled[ 1 ] ) == weights[ 0 ].index );
         } else {
             for ( uint32_t i = 0; i < TBoneCount; ++i ) {
+                assert( weights[ i ].weight < 1.0f );
                 compiled[ i ] += weights[ i ].weight;
+                assert( uint32_t( compiled[ i ] ) == weights[ i ].index );
             }
         }
+        
+        return compiled;
     }
 };
 
@@ -1108,43 +1118,43 @@ mathfu::dvec3 FromHemioct(mathfu::dvec2 e) {
     return normalize(v);
 }
 
-mathfu::dquat GetQTangent(mathfu::dvec3 normal, mathfu::dvec3 tangent, double reflection) {
+mathfu::dquat GetQTangent(const mathfu::dvec3 normal, const mathfu::dvec3 tangent, double reflection) {
     assert(reflection != 0.0);
-
-    const mathfu::dvec3 bitangent( mathfu::cross( normal, tangent ) );
-    mathfu::dmat3 tangentFrame( tangent.x, tangent.y, tangent.z,
-                                normal.x, normal.y, normal.z,
+    
+    // https://bitbucket.org/sinbad/ogre/src/18ebdbed2edc61d30927869c7fb0cf3ae5697f0a/OgreMain/src/OgreSubMesh2.cpp?at=v2-1&fileviewer=file-view-default#OgreSubMesh2.cpp-988
+    const mathfu::dvec3 bitangent( mathfu::cross( normal, tangent ).Normalized( ) );
+    AssertValidVec3( bitangent );
+    
+    mathfu::dmat3 tangentFrame( normal.x, normal.y, normal.z,
+                                tangent.x, tangent.y, tangent.z,
                                 bitangent.x, bitangent.y, bitangent.z );
 
-    mathfu::dquat q( mathfu::dquat::FromMatrix( tangentFrame ) );
+    mathfu::dquat q = mathfu::dquat::FromMatrix( tangentFrame );
     q.Normalize();
 
+    if ( q.scalar( ) < 0.0 ) {
+        q = mathfu::dquat( -q.scalar( ), -q.vector( ) );
+    }
+
     // TODO: Should be in use for packing it into ints
-    //       because the sign will be lost.
-    const double bias = 1.0 / ( pow( 2.0, 15.0 ) - 1.0 );
+    //       because the "-" sign will be lost.
+    const double bias = 1.0 / 32767.0; // ( pow( 2.0, 15.0 ) - 1.0 );
     if ( q.scalar( ) < bias ) {
-        float s = q.scalar( );
-        mathfu::dvec3 v = q.vector( );
-        s = bias;
-        v *= sqrt( 1.0 - bias * bias );
-        q = mathfu::dquat( s, v );
-        q.Normalize();
+        auto normFactor = sqrt( 1.0 - bias * bias );
+        q = mathfu::dquat( bias, q.vector() * normFactor );
     }
 
     if ( q.scalar( ) < 0.0 ) {
         q = mathfu::dquat( -q.scalar( ), -q.vector( ) );
-        q.Normalize();
     }
 
     if ( reflection < 0.0 ) {
         q = mathfu::dquat( -q.scalar( ), -q.vector( ) );
-        q.Normalize();
     }
 
     AssertValidFloat( q.scalar( ) );
     AssertValidVec3( q.vector( ) );
     
-    tangentFrame = q.ToMatrix( );
     assert(mathfu::dot(tangentFrame.GetColumn(0), tangentFrame.GetColumn(1)) < std::numeric_limits< float >::epsilon());
     assert(mathfu::dot(tangentFrame.GetColumn(1), tangentFrame.GetColumn(2)) < std::numeric_limits< float >::epsilon());
     assert(mathfu::dot(tangentFrame.GetColumn(0), tangentFrame.GetColumn(2)) < std::numeric_limits< float >::epsilon());
@@ -1324,124 +1334,166 @@ void ExportMesh( FbxNode*       pNode,
             skinInfo.NormalizeWeights( maxBoneCount, 0 );
         }
     }
-
-    size_t stride = 0;
-    size_t strideUnskinned = 0;
-    apemodefb::EVertexFormatFb eVertexFmt;
     
-    strideUnskinned = sizeof( apemodefb::DefaultVertexFb );
-    if ( skinInfos.empty( ) ) {
-        stride = sizeof( apemodefb::DefaultVertexFb );
-        eVertexFmt = apemodefb::EVertexFormatFb_Default;
-    } else {
-        assert( boneCount == eBoneCountPerControlPoint_4 ||
-                boneCount == eBoneCountPerControlPoint_8 );
-
-        switch ( boneCount ) {
-        case eBoneCountPerControlPoint_4:
-            stride = sizeof( apemodefb::SkinnedVertexFb );
-            eVertexFmt = apemodefb::EVertexFormatFb_Skinned;
-            break;
-        case eBoneCountPerControlPoint_8:
-            stride = sizeof( apemodefb::FatSkinnedVertexFb );
-            eVertexFmt = apemodefb::EVertexFormatFb_FatSkinned;
-            break;
-        }
-    }
+    apemodefb::EVertexFormatFb eVertexFmt = apemodefb::EVertexFormatFb(-1);
     
-    assert( stride != 0 );
-    m.vertices.resize( stride * vertexCount );
-
-    for ( uint32_t i = 0; i < vertexCount; ++i ) {
-        union {
-            struct {
-                uint8_t i;
-                uint8_t r;
-                uint8_t g;
-                uint8_t b;
-            };
-
-            uint32_t irgb;
-        } p;
-
-        p.i = uint8_t( i % 3 );
-        p.r = uint8_t( vertices[ i ].color.x * 255.0 );
-        p.g = uint8_t( vertices[ i ].color.y * 255.0 );
-        p.b = uint8_t( vertices[ i ].color.z * 255.0 );
-
-        float alpha = float( vertices[ i ].color.w );
-
-        assert( ( stride * i ) < m.vertices.size( ) );
-        auto& dst = *reinterpret_cast< apemodefb::DefaultVertexFb* >( m.vertices.data( ) + stride * i );
+    apemodefb::ECompressionTypeFb eCompressionType = apemodefb::ECompressionTypeFb_None;
+    const std::string& meshCompression = s.options[ "mesh-compression" ].as< std::string >( );
+    if ( m.subsets.size( ) == 1 && s.options[ "mesh-compression" ].count() && meshCompression != "none" ) {
+        size_t stride = 0;
+        size_t strideUnskinned = 0;
         
-        dst.mutable_position( ).mutate_x( vertices[ i ].position.x );
-        dst.mutable_position( ).mutate_y( vertices[ i ].position.y );
-        dst.mutable_position( ).mutate_z( vertices[ i ].position.z );
-        dst.mutate_vertex_index_color_RGB( p.irgb );
-        dst.mutate_color_alpha( alpha );
-        dst.mutable_uv( ).mutate_x( vertices[ i ].texCoords.x );
-        dst.mutable_uv( ).mutate_y( vertices[ i ].texCoords.y );
-        dst.mutable_qtangent( ).mutate_s( qtangents[ i ].scalar( ) );
-        dst.mutable_qtangent( ).mutate_nx( qtangents[ i ].vector( ).x );
-        dst.mutable_qtangent( ).mutate_ny( qtangents[ i ].vector( ).y );
-        dst.mutable_qtangent( ).mutate_nz( qtangents[ i ].vector( ).z );
-    }
-
-    if ( !skinInfos.empty( ) ) {
-        // auto & skin = s.skins[ m.skinId ];
-        for ( uint32_t i = 0; i < vertexCount; ++i ) {
-            auto controlPointIndex = vertices[ i ].controlPointIndex;
-            auto& skinInfo = skinInfos[ controlPointIndex ];
-            
+        strideUnskinned = sizeof( apemodefb::DecompressedVertexFb );
+        if ( skinInfos.empty( ) ) {
+            stride = sizeof( apemodefb::DecompressedVertexFb );
+            eVertexFmt = apemodefb::EVertexFormatFb_Decompressed;
+        } else {
             assert( boneCount == eBoneCountPerControlPoint_4 ||
                     boneCount == eBoneCountPerControlPoint_8 );
 
             switch ( boneCount ) {
-            case eBoneCountPerControlPoint_4: {
-                const auto weightsIndices = skinInfo.Compile< eBoneCountPerControlPoint_4 >( );
-                auto dst = reinterpret_cast< apemodefb::SkinnedVertexFb* >( m.vertices.data( ) + stride * i );
-                dst->mutable_bone_indices_weights( ).mutate_x( weightsIndices[ 0 ] );
-                dst->mutable_bone_indices_weights( ).mutate_y( weightsIndices[ 1 ] );
-                dst->mutable_bone_indices_weights( ).mutate_z( weightsIndices[ 2 ] );
-                dst->mutable_bone_indices_weights( ).mutate_w( weightsIndices[ 3 ] );
-            } break;
-            case eBoneCountPerControlPoint_8: {
-                const auto weightsIndices = skinInfo.Compile< eBoneCountPerControlPoint_8 >( );
-                auto dst = reinterpret_cast< apemodefb::FatSkinnedVertexFb* >( m.vertices.data( ) + stride * i );
-                dst->mutable_skinned_vertex( ).mutable_bone_indices_weights( ).mutate_x( weightsIndices[ 0 ] );
-                dst->mutable_skinned_vertex( ).mutable_bone_indices_weights( ).mutate_y( weightsIndices[ 1 ] );
-                dst->mutable_skinned_vertex( ).mutable_bone_indices_weights( ).mutate_z( weightsIndices[ 2 ] );
-                dst->mutable_skinned_vertex( ).mutable_bone_indices_weights( ).mutate_w( weightsIndices[ 3 ] );
-                dst->mutable_extra_bone_indices_weights( ).mutate_x( weightsIndices[ 4 ] );
-                dst->mutable_extra_bone_indices_weights( ).mutate_y( weightsIndices[ 5 ] );
-                dst->mutable_extra_bone_indices_weights( ).mutate_z( weightsIndices[ 6 ] );
-                dst->mutable_extra_bone_indices_weights( ).mutate_w( weightsIndices[ 7 ] );
-            } break;
+            case eBoneCountPerControlPoint_4:
+                stride = sizeof( apemodefb::DecompressedSkinnedVertexFb );
+                eVertexFmt = apemodefb::EVertexFormatFb_DecompressedSkinned;
+                break;
+            case eBoneCountPerControlPoint_8:
+                stride = sizeof( apemodefb::DecompressedFatSkinnedVertexFb );
+                eVertexFmt = apemodefb::EVertexFormatFb_DecompressedFatSkinned;
+                break;
             }
         }
-    }
+        
+        assert( stride != 0 );
+        m.vertices.resize( stride * vertexCount );
 
-    apemodefb::ECompressionTypeFb eCompressionType = apemodefb::ECompressionTypeFb_None;
+        for ( uint32_t i = 0; i < vertexCount; ++i ) {
+            union {
+                struct {
+                    uint8_t reflection : 4;
+                    uint8_t index : 4;
+                };
 
-    const std::string& meshCompression = s.options[ "mesh-compression" ].as< std::string >( );
-    if ( m.subsets.size( ) == 1 && s.options[ "mesh-compression" ].count() && meshCompression != "none" ) {
+                uint8_t reflection_index;
+            } p;
+
+
+            assert( ( stride * i ) < m.vertices.size( ) );
+            auto& dst = *reinterpret_cast< apemodefb::DecompressedVertexFb* >( m.vertices.data( ) + stride * i );
+
+            dst.mutable_position( ).mutate_x( vertices[ i ].position.x );
+            dst.mutable_position( ).mutate_y( vertices[ i ].position.y );
+            dst.mutable_position( ).mutate_z( vertices[ i ].position.z );
+            dst.mutable_uv( ).mutate_x( vertices[ i ].texCoords.x );
+            dst.mutable_uv( ).mutate_y( vertices[ i ].texCoords.y );
+
+            dst.mutable_normal( ).mutate_x( vertices[ i ].normal.x );
+            dst.mutable_normal( ).mutate_y( vertices[ i ].normal.y );
+            dst.mutable_normal( ).mutate_z( vertices[ i ].normal.z );
+            dst.mutable_tangent( ).mutate_x( vertices[ i ].tangent.x );
+            dst.mutable_tangent( ).mutate_y( vertices[ i ].tangent.y );
+            dst.mutable_tangent( ).mutate_z( vertices[ i ].tangent.z );
+            
+//            auto normalHemioct  = ToHemioct( vertices[ i ].normal );
+//            auto tangentHemioct = ToHemioct( vertices[ i ].tangent.xyz( ) );
+//            dst.mutable_normal_hemioct( ).mutate_x( normalHemioct.x );
+//            dst.mutable_normal_hemioct( ).mutate_y( normalHemioct.y );
+//            dst.mutable_tangent_hemioct( ).mutate_x( tangentHemioct.x );
+//            dst.mutable_tangent_hemioct( ).mutate_y( tangentHemioct.y );
+
+            dst.mutable_color( ).mutate_x( vertices[ i ].color.x );
+            dst.mutable_color( ).mutate_y( vertices[ i ].color.y );
+            dst.mutable_color( ).mutate_z( vertices[ i ].color.z );
+            dst.mutable_color( ).mutate_w( vertices[ i ].color.w );
+
+            p.reflection = uint8_t( vertices[i].tangent.w >= 0 ? 1 : 0 );
+            p.index = uint8_t( i % 3 );
+            dst.mutate_reflection_index_packed( p.reflection_index );
+        }
+
+        if ( !skinInfos.empty( ) ) {
+            union {
+                struct {
+                    uint8_t _0;
+                    uint8_t _1;
+                    uint8_t _2;
+                    uint8_t _3;
+                };
+
+                uint32_t _0123;
+            } joint_index_packer;
+
+            // auto & skin = s.skins[ m.skinId ];
+            for ( uint32_t i = 0; i < vertexCount; ++i ) {
+                auto controlPointIndex = vertices[ i ].controlPointIndex;
+                auto& skinInfo = skinInfos[ controlPointIndex ];
+                
+                assert( boneCount == eBoneCountPerControlPoint_4 ||
+                        boneCount == eBoneCountPerControlPoint_8 );
+
+                switch ( boneCount ) {
+                    case eBoneCountPerControlPoint_4: {
+                        assert( skinInfo.weights[ 0 ].index < 255 );
+                        assert( skinInfo.weights[ 1 ].index < 255 );
+                        assert( skinInfo.weights[ 2 ].index < 255 );
+                        assert( skinInfo.weights[ 3 ].index < 255 );
+                        
+                        joint_index_packer._0 = skinInfo.weights[ 0 ].index;
+                        joint_index_packer._1 = skinInfo.weights[ 1 ].index;
+                        joint_index_packer._2 = skinInfo.weights[ 2 ].index;
+                        joint_index_packer._3 = skinInfo.weights[ 3 ].index;
+
+                        assert( ( stride * i ) < m.vertices.size( ) );
+                        auto dst = reinterpret_cast< apemodefb::DecompressedSkinnedVertexFb* >( m.vertices.data( ) + stride * i );
+                        dst->mutate_joint_indices( joint_index_packer._0123 );
+                        dst->mutable_joint_weights( ).mutate_x( skinInfo.weights[ 0 ].weight );
+                        dst->mutable_joint_weights( ).mutate_y( skinInfo.weights[ 1 ].weight );
+                        dst->mutable_joint_weights( ).mutate_z( skinInfo.weights[ 2 ].weight );
+                        dst->mutable_joint_weights( ).mutate_w( skinInfo.weights[ 4 ].weight );
+                        
+                    } break;
+                    case eBoneCountPerControlPoint_8: {
+                        assert( ( stride * i ) < m.vertices.size( ) );
+                        auto dst = reinterpret_cast< apemodefb::DecompressedFatSkinnedVertexFb* >( m.vertices.data( ) + stride * i );
+
+                        assert( skinInfo.weights[ 0 ].index < 255 );
+                        assert( skinInfo.weights[ 1 ].index < 255 );
+                        assert( skinInfo.weights[ 2 ].index < 255 );
+                        assert( skinInfo.weights[ 3 ].index < 255 );
+                        assert( skinInfo.weights[ 4 ].index < 255 );
+                        assert( skinInfo.weights[ 5 ].index < 255 );
+                        assert( skinInfo.weights[ 6 ].index < 255 );
+                        assert( skinInfo.weights[ 7 ].index < 255 );
+
+                        joint_index_packer._0 = skinInfo.weights[ 0 ].index;
+                        joint_index_packer._1 = skinInfo.weights[ 1 ].index;
+                        joint_index_packer._2 = skinInfo.weights[ 2 ].index;
+                        joint_index_packer._3 = skinInfo.weights[ 3 ].index;
+                        dst->mutable_decompressed_skinned( ).mutate_joint_indices( joint_index_packer._0123 );
+                        dst->mutable_decompressed_skinned( ).mutable_joint_weights( ).mutate_x( skinInfo.weights[ 0 ].weight );
+                        dst->mutable_decompressed_skinned( ).mutable_joint_weights( ).mutate_y( skinInfo.weights[ 1 ].weight );
+                        dst->mutable_decompressed_skinned( ).mutable_joint_weights( ).mutate_z( skinInfo.weights[ 2 ].weight );
+                        dst->mutable_decompressed_skinned( ).mutable_joint_weights( ).mutate_w( skinInfo.weights[ 3 ].weight );
+
+                        joint_index_packer._0 = skinInfo.weights[ 4 ].index;
+                        joint_index_packer._1 = skinInfo.weights[ 5 ].index;
+                        joint_index_packer._2 = skinInfo.weights[ 6 ].index;
+                        joint_index_packer._3 = skinInfo.weights[ 7 ].index;
+                        dst->mutate_extra_joint_indices( joint_index_packer._0123 );
+                        dst->mutable_extra_joint_weights( ).mutate_x( skinInfo.weights[ 4 ].weight );
+                        dst->mutable_extra_joint_weights( ).mutate_y( skinInfo.weights[ 5 ].weight );
+                        dst->mutable_extra_joint_weights( ).mutate_z( skinInfo.weights[ 6 ].weight );
+                        dst->mutable_extra_joint_weights( ).mutate_w( skinInfo.weights[ 7 ].weight );
+                        
+                    } break;
+                }
+            }
+        }
+        
         draco::MeshEncoderMethod encoderMethod = draco::MESH_EDGEBREAKER_ENCODING;
         if ( meshCompression != "draco-edgebreaker" ) {
             assert( meshCompression == "draco-esequential" );
             encoderMethod = draco::MESH_SEQUENTIAL_ENCODING;
         }
-        
-        draco::Encoder encoder;
-        auto options = draco::EncoderOptionsBase< draco::GeometryAttribute::Type >::CreateDefaultOptions( );
-        options.SetGlobalBool( "split_mesh_on_seams", false );
-        
-        encoder.Reset( options );
-        encoder.SetEncodingMethod( encoderMethod );
-        encoder.SetSpeedOptions( -1, -1 );
-        encoder.SetAttributeQuantization( draco::GeometryAttribute::POSITION, 16 );
-        encoder.SetAttributeQuantization( draco::GeometryAttribute::TEX_COORD, 16 );
-        encoder.SetAttributeQuantization( draco::GeometryAttribute::GENERIC, 16 );
-        encoder.SetAttributeQuantization( draco::GeometryAttribute::NORMAL, 8 );
         
         draco::TriangleSoupMeshBuilder builder;
         assert( vertexCount % 3 == 0 );
@@ -1449,107 +1501,215 @@ void ExportMesh( FbxNode*       pNode,
         
         const int positionAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::POSITION, 3, draco::DataType::DT_FLOAT32 );
         const int uvAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::TEX_COORD, 2, draco::DataType::DT_FLOAT32 );
-        const int irgbAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::GENERIC, 1, draco::DataType::DT_UINT32 );
-        const int alphaAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::GENERIC, 1, draco::DataType::DT_FLOAT32 );
-        const int qtangentAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::GENERIC, 4, draco::DataType::DT_FLOAT32 );
-        int boneAttributeIndex = -1;
-        int extraBoneAttributeIndex = -1;
+        const int normalAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::NORMAL, 3, draco::DataType::DT_FLOAT32 );
+        const int tangentAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::NORMAL, 3, draco::DataType::DT_FLOAT32 );
+        const int colorAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::COLOR, 4, draco::DataType::DT_FLOAT32 );
+        const int reflectionIndexAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::GENERIC, 1, draco::DataType::DT_UINT8 );
+        int jointIndicesAttributeIndex = -1;
+        int jointWeightsAttributeIndex = -1;
+        int extraJointIndicesAttributeIndex = -1;
+        int extraJointWeightsAttributeIndex = -1;
+        
+        auto jointIndicesType = draco::GeometryAttribute::Type::GENERIC;
+        auto jointIndicesComponentCount = 4;
+        auto jointIndicesDataType = draco::DT_UINT8;
+        auto jointIndicesQuantizationBits = 8;
+        
+        auto jointWeightsType = draco::GeometryAttribute::Type::COLOR;
+        auto jointWeightsComponentCount = 4;
+        auto jointWeightsDataType = draco::DT_FLOAT32;
+        auto jointWeightsQuantizationBits = 16;
         
         switch ( eVertexFmt ) {
-        case apemodefb::EVertexFormatFb_Default:
+        case apemodefb::EVertexFormatFb_Decompressed:
             break;
-        case apemodefb::EVertexFormatFb_Skinned:
-            boneAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::GENERIC, 4, draco::DataType::DT_FLOAT32 );
+        case apemodefb::EVertexFormatFb_DecompressedSkinned:
+            jointIndicesAttributeIndex = builder.AddAttribute( jointIndicesType, jointIndicesComponentCount, jointIndicesDataType );
+            jointWeightsAttributeIndex = builder.AddAttribute( jointWeightsType, jointWeightsComponentCount, jointWeightsDataType );
             break;
-        case apemodefb::EVertexFormatFb_FatSkinned:
-            extraBoneAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::GENERIC, 4, draco::DataType::DT_FLOAT32 );
+        case apemodefb::EVertexFormatFb_DecompressedFatSkinned:
+            jointIndicesAttributeIndex = builder.AddAttribute( jointIndicesType, jointIndicesComponentCount, jointIndicesDataType );
+            jointWeightsAttributeIndex = builder.AddAttribute( jointWeightsType, jointWeightsComponentCount, jointWeightsDataType );
+            extraJointIndicesAttributeIndex = builder.AddAttribute( jointIndicesType, jointIndicesComponentCount, jointIndicesDataType );
+            extraJointWeightsAttributeIndex = builder.AddAttribute( jointWeightsType, jointWeightsComponentCount, jointWeightsDataType );
+            break;
+        default:
+            assert(false);
             break;
         }
         
         for ( uint32_t i = 0; i < vertexCount; i += 3 ) {
             const draco::FaceIndex faceIndex = draco::FaceIndex( i / 3 );
-            auto dst = reinterpret_cast< apemodefb::DefaultVertexFb* >( m.vertices.data( ) + stride * i );
-        
-            const auto irgb0 = dst[ i + 0 ].vertex_index_color_RGB( );
-            const auto irgb1 = dst[ i + 1 ].vertex_index_color_RGB( );
-            const auto irgb2 = dst[ i + 2 ].vertex_index_color_RGB( );
-            const auto alpha0 = dst[ i + 0 ].color_alpha( );
-            const auto alpha1 = dst[ i + 1 ].color_alpha( );
-            const auto alpha2 = dst[ i + 2 ].color_alpha( );
+            apemodefb::DecompressedVertexFb* dst[3] = { reinterpret_cast< apemodefb::DecompressedVertexFb* >( m.vertices.data( ) + stride * ( i + 0 ) )
+                                                      , reinterpret_cast< apemodefb::DecompressedVertexFb* >( m.vertices.data( ) + stride * ( i + 1 ) )
+                                                      , reinterpret_cast< apemodefb::DecompressedVertexFb* >( m.vertices.data( ) + stride * ( i + 2 ) ) };
 
             builder.SetAttributeValuesForFace( positionAttributeIndex,
                                                faceIndex,
-                                               reinterpret_cast< const float* >( &dst[ i + 0 ].position( ) ),
-                                               reinterpret_cast< const float* >( &dst[ i + 1 ].position( ) ),
-                                               reinterpret_cast< const float* >( &dst[ i + 2 ].position( ) ) );
+                                               reinterpret_cast< const float* >( &dst[ 0 ]->position( ) ),
+                                               reinterpret_cast< const float* >( &dst[ 1 ]->position( ) ),
+                                               reinterpret_cast< const float* >( &dst[ 2 ]->position( ) ) );
             builder.SetAttributeValuesForFace( uvAttributeIndex,
                                                faceIndex,
-                                               reinterpret_cast< const float* >( &dst[ i + 0 ].uv( ) ),
-                                               reinterpret_cast< const float* >( &dst[ i + 1 ].uv( ) ),
-                                               reinterpret_cast< const float* >( &dst[ i + 2 ].uv( ) ) );
-            builder.SetAttributeValuesForFace( irgbAttributeIndex,
+                                               reinterpret_cast< const float* >( &dst[ 0 ]->uv( ) ),
+                                               reinterpret_cast< const float* >( &dst[ 1 ]->uv( ) ),
+                                               reinterpret_cast< const float* >( &dst[ 2 ]->uv( ) ) );
+            builder.SetAttributeValuesForFace( normalAttributeIndex,
                                                faceIndex,
-                                               reinterpret_cast< const float* >( &irgb0 ),
-                                               reinterpret_cast< const float* >( &irgb1 ),
-                                               reinterpret_cast< const float* >( &irgb2 ) );
-            builder.SetAttributeValuesForFace( alphaAttributeIndex,
+                                               reinterpret_cast< const float* >( &dst[ 0 ]->normal( ) ),
+                                               reinterpret_cast< const float* >( &dst[ 1 ]->normal( ) ),
+                                               reinterpret_cast< const float* >( &dst[ 2 ]->normal( ) ) );
+            builder.SetAttributeValuesForFace( tangentAttributeIndex,
                                                faceIndex,
-                                               reinterpret_cast< const float* >( &alpha0 ),
-                                               reinterpret_cast< const float* >( &alpha1 ),
-                                               reinterpret_cast< const float* >( &alpha2 ) );
-            builder.SetAttributeValuesForFace( qtangentAttributeIndex,
+                                               reinterpret_cast< const float* >( &dst[ 0 ]->tangent( ) ),
+                                               reinterpret_cast< const float* >( &dst[ 1 ]->tangent( ) ),
+                                               reinterpret_cast< const float* >( &dst[ 2 ]->tangent( ) ) );
+            builder.SetAttributeValuesForFace( colorAttributeIndex,
                                                faceIndex,
-                                               reinterpret_cast< const float* >( &dst[ i + 0 ].qtangent( ) ),
-                                               reinterpret_cast< const float* >( &dst[ i + 1 ].qtangent( ) ),
-                                               reinterpret_cast< const float* >( &dst[ i + 2 ].qtangent( ) ) );
+                                               reinterpret_cast< const float* >( &dst[ 0 ]->color( ) ),
+                                               reinterpret_cast< const float* >( &dst[ 1 ]->color( ) ),
+                                               reinterpret_cast< const float* >( &dst[ 2 ]->color( ) ) );
+            
+            const uint8_t r0 = uint8_t( dst[ 0 ]->reflection_index_packed( ) );
+            const uint8_t r1 = uint8_t( dst[ 1 ]->reflection_index_packed( ) );
+            const uint8_t r2 = uint8_t( dst[ 2 ]->reflection_index_packed( ) );
+            builder.SetAttributeValuesForFace( reflectionIndexAttributeIndex,
+                                               faceIndex,
+                                               reinterpret_cast< const float* >( &r0 ),
+                                               reinterpret_cast< const float* >( &r1 ),
+                                               reinterpret_cast< const float* >( &r2 ) );
        
             switch ( eVertexFmt ) {
-            case apemodefb::EVertexFormatFb_Default:
+            case apemodefb::EVertexFormatFb_Decompressed:
                 break;
-            case apemodefb::EVertexFormatFb_Skinned: {
-                auto skinnedDst = reinterpret_cast< apemodefb::SkinnedVertexFb* >( dst );
-                builder.SetAttributeValuesForFace( boneAttributeIndex,
+            case apemodefb::EVertexFormatFb_DecompressedSkinned: {
+                apemodefb::DecompressedSkinnedVertexFb* skinnedDst[3] =
+                { reinterpret_cast< apemodefb::DecompressedSkinnedVertexFb* >( dst[ 0 ] ),
+                  reinterpret_cast< apemodefb::DecompressedSkinnedVertexFb* >( dst[ 1 ] ),
+                  reinterpret_cast< apemodefb::DecompressedSkinnedVertexFb* >( dst[ 2 ] ) };
+                
+                const auto j0 = skinnedDst[ 0 ]->joint_indices( );
+                const auto j1 = skinnedDst[ 1 ]->joint_indices( );
+                const auto j2 = skinnedDst[ 2 ]->joint_indices( );
+                builder.SetAttributeValuesForFace( jointIndicesAttributeIndex,
                                                    faceIndex,
-                                                   reinterpret_cast< const float* >( &skinnedDst[ i + 0 ].bone_indices_weights( ) ),
-                                                   reinterpret_cast< const float* >( &skinnedDst[ i + 1 ].bone_indices_weights( ) ),
-                                                   reinterpret_cast< const float* >( &skinnedDst[ i + 2 ].bone_indices_weights( ) ) );
-            } break;
-            case apemodefb::EVertexFormatFb_FatSkinned: {
-                auto skinnedDst = reinterpret_cast< apemodefb::FatSkinnedVertexFb* >( dst );
-                builder.SetAttributeValuesForFace( extraBoneAttributeIndex,
+                                                   reinterpret_cast< const float* >( &j0 ),
+                                                   reinterpret_cast< const float* >( &j1 ),
+                                                   reinterpret_cast< const float* >( &j2 ) );
+                builder.SetAttributeValuesForFace( jointWeightsAttributeIndex,
                                                    faceIndex,
-                                                   reinterpret_cast< const float* >( &skinnedDst[ i + 0 ].extra_bone_indices_weights( ) ),
-                                                   reinterpret_cast< const float* >( &skinnedDst[ i + 1 ].extra_bone_indices_weights( ) ),
-                                                   reinterpret_cast< const float* >( &skinnedDst[ i + 2 ].extra_bone_indices_weights( ) ) );
+                                                   reinterpret_cast< const float* >( &skinnedDst[ 0 ]->joint_weights( ) ),
+                                                   reinterpret_cast< const float* >( &skinnedDst[ 1 ]->joint_weights( ) ),
+                                                   reinterpret_cast< const float* >( &skinnedDst[ 2 ]->joint_weights( ) ) );
             } break;
+            case apemodefb::EVertexFormatFb_DecompressedFatSkinned: {
+                apemodefb::DecompressedFatSkinnedVertexFb* skinnedDst[3] =
+                { reinterpret_cast< apemodefb::DecompressedFatSkinnedVertexFb* >( dst[ 0 ] ),
+                  reinterpret_cast< apemodefb::DecompressedFatSkinnedVertexFb* >( dst[ 1 ] ),
+                  reinterpret_cast< apemodefb::DecompressedFatSkinnedVertexFb* >( dst[ 2 ] ) };
+                
+                const auto j0 = skinnedDst[ 0 ]->decompressed_skinned( ).joint_indices( );
+                const auto j1 = skinnedDst[ 1 ]->decompressed_skinned( ).joint_indices( );
+                const auto j2 = skinnedDst[ 2 ]->decompressed_skinned( ).joint_indices( );
+                builder.SetAttributeValuesForFace( jointIndicesAttributeIndex,
+                                                   faceIndex,
+                                                   reinterpret_cast< const float* >( &j0 ),
+                                                   reinterpret_cast< const float* >( &j1 ),
+                                                   reinterpret_cast< const float* >( &j2 ) );
+                builder.SetAttributeValuesForFace( jointWeightsAttributeIndex,
+                                                   faceIndex,
+                                                   reinterpret_cast< const float* >( &skinnedDst[ 0 ]->decompressed_skinned( ).joint_weights( ) ),
+                                                   reinterpret_cast< const float* >( &skinnedDst[ 1 ]->decompressed_skinned( ).joint_weights( ) ),
+                                                   reinterpret_cast< const float* >( &skinnedDst[ 2 ]->decompressed_skinned( ).joint_weights( ) ) );
+
+                const auto ej0 = skinnedDst[ 0 ]->extra_joint_indices( );
+                const auto ej1 = skinnedDst[ 1 ]->extra_joint_indices( );
+                const auto ej2 = skinnedDst[ 2 ]->extra_joint_indices( );
+                builder.SetAttributeValuesForFace( extraJointIndicesAttributeIndex,
+                                                   faceIndex,
+                                                   reinterpret_cast< const float* >( &ej0 ),
+                                                   reinterpret_cast< const float* >( &ej1 ),
+                                                   reinterpret_cast< const float* >( &ej2 ) );
+                builder.SetAttributeValuesForFace( extraJointWeightsAttributeIndex,
+                                                   faceIndex,
+                                                   reinterpret_cast< const float* >( &skinnedDst[ 0 ]->extra_joint_weights( ) ),
+                                                   reinterpret_cast< const float* >( &skinnedDst[ 1 ]->extra_joint_weights( ) ),
+                                                   reinterpret_cast< const float* >( &skinnedDst[ 2 ]->extra_joint_weights( ) ) );
+            } break;
+            default:
+                assert(false);
+                break;
             }
         }
         
+        apemode::Stopwatch sw;
         s.console->info( "Starting draco mesh finalization ..." );
         if ( auto finalizedMesh = builder.Finalize( ) ) {
             s.console->info( "Draco mesh finalization succeeded." );
             s.console->info( "Starting draco encoding ..." );
             
-//            draco::MeshCleanup cleanup;
-//            if ( cleanup( finalizedMesh.get( ), draco::MeshCleanupOptions( ) ) ) {
-//                s.console->info( "Succeeded" );
-//            } else {
-//                s.console->info( "Failed" );
-//            }
+            #if 0
+            draco::MeshCleanup cleanup;
+            if ( cleanup( finalizedMesh.get( ), draco::MeshCleanupOptions( ) ) ) {
+                s.console->info( "Succeeded" );
+            } else {
+                s.console->info( "Failed" );
+            }
+            #endif
 
-            auto encodingStartTime = std::chrono::high_resolution_clock::now( );
-
-            draco::EncoderBuffer encoderBuffer;
-            const draco::Status  encoderStatus = encoder.EncodeMeshToBuffer( *finalizedMesh.get( ), &encoderBuffer );
+            draco::EncoderBuffer encoderBuffer{};
+            
+            draco::ExpertEncoder encoder( *finalizedMesh.get( ) );
+            encoder.Reset( draco::ExpertEncoder::OptionsType::CreateDefaultOptions( ) );
+            encoder.SetEncodingMethod( encoderMethod );
+            encoder.SetSpeedOptions( -1, -1 );
+            encoder.SetAttributeQuantization(positionAttributeIndex, 16);
+            encoder.SetAttributeQuantization(uvAttributeIndex, 16);
+            encoder.SetAttributeQuantization(normalAttributeIndex, 8);
+            encoder.SetAttributeQuantization(tangentAttributeIndex, 8);
+            encoder.SetAttributeQuantization(colorAttributeIndex, 8);
+            encoder.SetAttributeQuantization(reflectionIndexAttributeIndex, 8);
+            
+            if (jointIndicesAttributeIndex != -1) {
+                assert( jointWeightsAttributeIndex != -1 );
+                if (jointIndicesQuantizationBits != -1)
+                    encoder.SetAttributeQuantization(jointIndicesAttributeIndex, jointIndicesQuantizationBits);
+                if (jointWeightsQuantizationBits != -1)
+                    encoder.SetAttributeQuantization(jointWeightsAttributeIndex, jointWeightsQuantizationBits);
+            }
+            if (extraJointIndicesAttributeIndex != -1) {
+                assert( extraJointWeightsAttributeIndex != -1 );
+                if (jointIndicesQuantizationBits != -1)
+                    encoder.SetAttributeQuantization(extraJointIndicesAttributeIndex, jointIndicesQuantizationBits);
+                if (jointWeightsQuantizationBits != -1)
+                    encoder.SetAttributeQuantization(extraJointWeightsAttributeIndex, jointWeightsQuantizationBits);
+            }
+        
+//            auto options = draco::EncoderOptionsBase< draco::GeometryAttribute::Type >::CreateDefaultOptions( );
+//            options.SetGlobalBool( "split_mesh_on_seams", false );
+//            draco::Encoder encoder;
+//            encoder.Reset( options );
+//            encoder.SetEncodingMethod( encoderMethod );
+//            encoder.SetSpeedOptions( -1, -1 );
+//            encoder.SetAttributeQuantization( draco::GeometryAttribute::POSITION, 16 );
+//            encoder.SetAttributeQuantization( draco::GeometryAttribute::TEX_COORD, 16 );
+//            encoder.SetAttributeQuantization( draco::GeometryAttribute::GENERIC, 30 );
+//            encoder.SetAttributeQuantization( draco::GeometryAttribute::NORMAL, 8 );
+//            const draco::Status encoderStatus = encoder.EncodeMeshToBuffer( *finalizedMesh.get( ), &encoderBuffer );
+        
+            const draco::Status encoderStatus = encoder.EncodeToBuffer( &encoderBuffer );
             if ( encoderStatus.code( ) == draco::Status::OK ) {
-                auto encodingEndTime  = std::chrono::high_resolution_clock::now( );
-                std::chrono::duration< double > encodingDuration = encodingEndTime - encodingStartTime;
-                s.console->info( "Draco encoding succeeded: {} -> {}, {}%, {}, took {}s",
-                                 ToPrettySizeString( m.vertices.size( ) ),
-                                 ToPrettySizeString( encoderBuffer.size( ) ),
-                                 ( 100.0f * encoderBuffer.size( ) / m.vertices.size( ) ),
+                size_t originalVertexSize = vertexCount * ( 4 * 3 + 4 * 2 + 6 * 4 + 4 * 4 );
+            
+                s.console->info( "DME\t{}\t{}\t{}%\t{}\t{}\t{}",
+                                 originalVertexSize, // m.vertices.size( ),
+                                 encoderBuffer.size( ),
+                                 // ToPrettySizeString( m.vertices.size( ) ),
+                                 // ToPrettySizeString( encoderBuffer.size( ) ),
+                                 ( 100.0f * encoderBuffer.size( ) / originalVertexSize ), // m.vertices.size( ) ),
                                  vertexCount,
-                                 encodingDuration.count( ) );
+                                 apemodefb::EnumNameEVertexFormatFb(eVertexFmt),
+                                 sw.ElapsedSeconds( ) );
 
                 eCompressionType = apemodefb::ECompressionTypeFb_GoogleDraco3D;
                 m.vertices.resize( encoderBuffer.size( ) );
@@ -1557,10 +1717,110 @@ void ExportMesh( FbxNode*       pNode,
                 decltype( m.indices )( ).swap( m.indices );
             } else {
                 s.console->info( "Failed: code = {}, error = {}", int( encoderStatus.code( ) ), encoderStatus.error_msg( ) );
+                assert( false );
+                exit(-1);
+            }
+        }
+    } else {
+        size_t stride = 0;
+        size_t strideUnskinned = 0;
+        
+        strideUnskinned = sizeof( apemodefb::DefaultVertexFb );
+        if ( skinInfos.empty( ) ) {
+            stride = sizeof( apemodefb::DefaultVertexFb );
+            eVertexFmt = apemodefb::EVertexFormatFb_Default;
+        } else {
+            assert( boneCount == eBoneCountPerControlPoint_4 ||
+                    boneCount == eBoneCountPerControlPoint_8 );
+
+            switch ( boneCount ) {
+            case eBoneCountPerControlPoint_4:
+                stride = sizeof( apemodefb::SkinnedVertexFb );
+                eVertexFmt = apemodefb::EVertexFormatFb_Skinned;
+                break;
+            case eBoneCountPerControlPoint_8:
+                stride = sizeof( apemodefb::FatSkinnedVertexFb );
+                eVertexFmt = apemodefb::EVertexFormatFb_FatSkinned;
+                break;
+            }
+        }
+        
+        assert( stride != 0 );
+        m.vertices.resize( stride * vertexCount );
+
+        for ( uint32_t i = 0; i < vertexCount; ++i ) {
+            union {
+                struct {
+                    uint8_t i;
+                    uint8_t r;
+                    uint8_t g;
+                    uint8_t b;
+                };
+
+                uint32_t irgb;
+            } p;
+
+            p.i = uint8_t( i % 3 );
+            p.r = uint8_t( vertices[ i ].color.x * 255.0 );
+            p.g = uint8_t( vertices[ i ].color.y * 255.0 );
+            p.b = uint8_t( vertices[ i ].color.z * 255.0 );
+
+            float alpha = float( vertices[ i ].color.w );
+
+            assert( ( stride * i ) < m.vertices.size( ) );
+            auto& dst = *reinterpret_cast< apemodefb::DefaultVertexFb* >( m.vertices.data( ) + stride * i );
+            
+            dst.mutable_position( ).mutate_x( vertices[ i ].position.x );
+            dst.mutable_position( ).mutate_y( vertices[ i ].position.y );
+            dst.mutable_position( ).mutate_z( vertices[ i ].position.z );
+            dst.mutate_index_color_RGB( p.irgb );
+            dst.mutate_color_alpha( alpha );
+            dst.mutable_uv( ).mutate_x( vertices[ i ].texCoords.x );
+            dst.mutable_uv( ).mutate_y( vertices[ i ].texCoords.y );
+            dst.mutable_qtangent( ).mutate_nx( qtangents[ i ].vector( ).x );
+            dst.mutable_qtangent( ).mutate_ny( qtangents[ i ].vector( ).y );
+            dst.mutable_qtangent( ).mutate_nz( qtangents[ i ].vector( ).z );
+            dst.mutable_qtangent( ).mutate_s( qtangents[ i ].scalar( ) );
+        }
+
+        if ( !skinInfos.empty( ) ) {
+            // auto & skin = s.skins[ m.skinId ];
+            for ( uint32_t i = 0; i < vertexCount; ++i ) {
+                auto controlPointIndex = vertices[ i ].controlPointIndex;
+                auto& skinInfo = skinInfos[ controlPointIndex ];
+                
+                assert( boneCount == eBoneCountPerControlPoint_4 ||
+                        boneCount == eBoneCountPerControlPoint_8 );
+
+                switch ( boneCount ) {
+                case eBoneCountPerControlPoint_4: {
+                    const auto compiledWeightsIndices = skinInfo.Compile< eBoneCountPerControlPoint_4 >( );
+                    
+                    auto dst = reinterpret_cast< apemodefb::SkinnedVertexFb* >( m.vertices.data( ) + stride * i );
+                    dst->mutable_joint_indices_weights( ).mutate_x( compiledWeightsIndices[ 0 ] );
+                    dst->mutable_joint_indices_weights( ).mutate_y( compiledWeightsIndices[ 1 ] );
+                    dst->mutable_joint_indices_weights( ).mutate_z( compiledWeightsIndices[ 2 ] );
+                    dst->mutable_joint_indices_weights( ).mutate_w( compiledWeightsIndices[ 3 ] );
+                } break;
+                case eBoneCountPerControlPoint_8: {
+                    const auto compiledWeightsIndices = skinInfo.Compile< eBoneCountPerControlPoint_8 >( );
+                    
+                    auto dst = reinterpret_cast< apemodefb::FatSkinnedVertexFb* >( m.vertices.data( ) + stride * i );
+                    dst->mutable_skinned_vertex( ).mutable_joint_indices_weights( ).mutate_x( compiledWeightsIndices[ 0 ] );
+                    dst->mutable_skinned_vertex( ).mutable_joint_indices_weights( ).mutate_y( compiledWeightsIndices[ 1 ] );
+                    dst->mutable_skinned_vertex( ).mutable_joint_indices_weights( ).mutate_z( compiledWeightsIndices[ 2 ] );
+                    dst->mutable_skinned_vertex( ).mutable_joint_indices_weights( ).mutate_w( compiledWeightsIndices[ 3 ] );
+                    dst->mutable_extra_joint_indices_weights( ).mutate_x( compiledWeightsIndices[ 4 ] );
+                    dst->mutable_extra_joint_indices_weights( ).mutate_y( compiledWeightsIndices[ 5 ] );
+                    dst->mutable_extra_joint_indices_weights( ).mutate_z( compiledWeightsIndices[ 6 ] );
+                    dst->mutable_extra_joint_indices_weights( ).mutate_w( compiledWeightsIndices[ 7 ] );
+                } break;
+                }
             }
         }
     }
 
+    assert( eVertexFmt != apemodefb::EVertexFormatFb( -1 ) );
     const apemodefb::Vec3Fb bboxMin( m.positionMin.x(), m.positionMin.y(), m.positionMin.z() );
     const apemodefb::Vec3Fb bboxMax( m.positionMax.x(), m.positionMax.y(), m.positionMax.z() );
 

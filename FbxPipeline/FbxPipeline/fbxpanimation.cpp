@@ -27,6 +27,9 @@ void ApplyFilter( FbxAnimCurveFilter* pFilter, FbxAnimCurve** ppCurves ) {
     }
 }
 
+
+std::string ToPrettySizeString( size_t size );
+
 struct FbxAnimLayerComposite {
     FbxAnimLayer* pAnimLayer;
     FbxAnimStack* pAnimStack;
@@ -354,9 +357,8 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
 
     s.animCurves.reserve( s.animCurves.size( ) + animCurves.size( ) );
     
-    
     const std::string& animCompression = s.options[ "anim-compression" ].as< std::string >( );
-    const bool shouldCompress = animCompression != "draco";
+    const bool shouldCompress = animCompression == "draco-keyframe-animation";
     
     for ( auto pAnimCurveTuple : animCurves ) {
         if ( auto pAnimCurve = pAnimCurveTuple.pAnimCurve ) {
@@ -456,16 +458,10 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
                     }
                 }
             }
-            
-            if (shouldCompress) {
-                using DracoTimeType = draco::KeyframeAnimation::TimestampType;
 
-                struct DracoResampledKeyType {
-                    float _1;
-                };
-                struct DracoCubicKeyType {
-                    float _1, _2, _3;
-                };
+            apemode::Stopwatch sw;
+            if ( shouldCompress && keyCount > 2 ) {
+                using DracoTimeType = draco::KeyframeAnimation::TimestampType;
 
                 draco::Status                   encoderStatus;
                 draco::EncoderBuffer            encoderBuffer;
@@ -477,43 +473,47 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
                 switch ( curve.keyType ) {
                     case apemodefb::EAnimCurveKeyTypeFb_Resampled: {
                         std::vector< DracoTimeType > keyTimes;
-                        std::vector< DracoResampledKeyType > keyValues;
+                        std::vector< float > keyValues;
                         
                         keyTimes.resize( keyCount );
                         keyValues.resize( keyCount );
 
                         auto dstKeys = reinterpret_cast< apemodefb::AnimCurveResampledKeyFb* >( curve.keys.data( ) );
                         for ( int i = 0; i < keyCount; ++i ) {
-                            keyTimes[ i ]     = dstKeys[ i ].time( );
-                            keyValues[ i ]._1 = dstKeys[ i ].value( );
+                            keyTimes[ i ]  = dstKeys[ i ].time( );
+                            keyValues[ i ] = dstKeys[ i ].value( );
                         }
 
                         keyframeAnimation.SetTimestamps( keyTimes );
                         keyframeAnimation.AddKeyframes( draco::DataType::DT_FLOAT32, 1, keyValues );
+                        
+                        // s.console->error( "Starting draco keyframe encoding: {} resampled keys", keyCount );
                         encoderStatus = keyframeEncoder.EncodeKeyframeAnimation( keyframeAnimation, options, &encoderBuffer );
 
                     } break;
                     case apemodefb::EAnimCurveKeyTypeFb_Cubic: {
-                        std::vector< DracoTimeType >     keyTimes;
-                        std::vector< DracoCubicKeyType > keyValues;
-                        std::vector< int8_t >            keyInterpolations;
+                        std::vector< DracoTimeType > keyTimes;
+                        std::vector< float >         keyValues;
+                        std::vector< int8_t >        keyInterpolations;
                         
                         keyTimes.resize( keyCount );
-                        keyValues.resize( keyCount );
+                        keyValues.resize( keyCount * 3 );
                         keyInterpolations.resize( keyCount );
 
                         auto dstKeys = reinterpret_cast< apemodefb::AnimCurveCubicKeyFb* >( curve.keys.data( ) );
                         for ( int i = 0; i < keyCount; ++i ) {
                             keyTimes[ i ]          = dstKeys[ i ].time( );
-                            keyValues[ i ]._1      = dstKeys[ i ].value_bez0_bez3( );
-                            keyValues[ i ]._2      = dstKeys[ i ].bez1( );
-                            keyValues[ i ]._3      = dstKeys[ i ].bez2( );
+                            keyValues[ i * 3 + 0 ] = dstKeys[ i ].value_bez0_bez3( );
+                            keyValues[ i * 3 + 1 ] = dstKeys[ i ].bez1( );
+                            keyValues[ i * 3 + 2 ] = dstKeys[ i ].bez2( );
                             keyInterpolations[ i ] = dstKeys[ i ].interpolation_mode( );
                         }
 
                         keyframeAnimation.SetTimestamps( keyTimes );
                         keyframeAnimation.AddKeyframes( draco::DataType::DT_FLOAT32, 3, keyValues );
                         keyframeAnimation.AddKeyframes( draco::DataType::DT_INT8, 1, keyInterpolations );
+                        
+                        // s.console->error( "Starting draco keyframe encoding: {} cubic keys", keyCount );
                         encoderStatus = keyframeEncoder.EncodeKeyframeAnimation( keyframeAnimation, options, &encoderBuffer );
 
                     } break;
@@ -522,13 +522,24 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
                 }
 
                 if ( encoderStatus.code( ) != draco::Status::Code::OK ) {
-                    s.console->error( "Failed to encode animation with draco." );
+                    s.console->error( "Draco keyframe encoding failed: {}", encoderStatus.error_msg( ) );
                 } else {
+                    size_t originalSize = sizeof( apemodefb::AnimCurveCubicKeyFb ) * keyCount;
+
+                    s.console->error( "KFE\t{}\t{}\t{}%\t{}\tKF_{}\t{}",
+                                      originalSize ,
+                                      encoderBuffer.size( ),
+                                     // ToPrettySizeString( originalSize ),
+                                     // ToPrettySizeString( encoderBuffer.size( ) ),
+                                      100.0f * encoderBuffer.size( ) / originalSize,
+                                      keyCount,
+                                      apemodefb::EnumNameEAnimCurveKeyTypeFb( apemodefb::EAnimCurveKeyTypeFb_Cubic ),
+                                      sw.ElapsedSeconds( ) );
+
                     curve.keys.resize( encoderBuffer.size( ) );
                     memcpy( curve.keys.data( ), encoderBuffer.data( ), encoderBuffer.size( ) );
                     curve.compressionType = apemodefb::ECompressionTypeFb_GoogleDraco3D;
                 }
-
             }
         }
     }

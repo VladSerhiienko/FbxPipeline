@@ -22,24 +22,24 @@ class DefaultVertexFb(object):
         return obj
 
     # DefaultVertexFb
-    def VertexIndexColorRGB(self): return self._tab.Get(flatbuffers.number_types.Uint32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(20))
-    # DefaultVertexFb
-    def ColorAlpha(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(24))
-    # DefaultVertexFb
     def Qtangent(self, obj):
-        obj.Init(self._tab.Bytes, self._tab.Pos + 28)
+        obj.Init(self._tab.Bytes, self._tab.Pos + 20)
         return obj
 
+    # DefaultVertexFb
+    def IndexColorRGB(self): return self._tab.Get(flatbuffers.number_types.Uint32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(36))
+    # DefaultVertexFb
+    def ColorAlpha(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(40))
 
-def CreateDefaultVertexFb(builder, position_x, position_y, position_z, uv_x, uv_y, vertexIndexColorRGB, colorAlpha, qtangent_s, qtangent_nx, qtangent_ny, qtangent_nz):
+def CreateDefaultVertexFb(builder, position_x, position_y, position_z, uv_x, uv_y, qtangent_nx, qtangent_ny, qtangent_nz, qtangent_s, indexColorRGB, colorAlpha):
     builder.Prep(4, 44)
+    builder.PrependFloat32(colorAlpha)
+    builder.PrependUint32(indexColorRGB)
     builder.Prep(4, 16)
+    builder.PrependFloat32(qtangent_s)
     builder.PrependFloat32(qtangent_nz)
     builder.PrependFloat32(qtangent_ny)
     builder.PrependFloat32(qtangent_nx)
-    builder.PrependFloat32(qtangent_s)
-    builder.PrependFloat32(colorAlpha)
-    builder.PrependUint32(vertexIndexColorRGB)
     builder.Prep(4, 8)
     builder.PrependFloat32(uv_y)
     builder.PrependFloat32(uv_x)

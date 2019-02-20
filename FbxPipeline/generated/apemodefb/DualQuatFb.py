@@ -22,16 +22,16 @@ class DualQuatFb(object):
         return obj
 
 
-def CreateDualQuatFb(builder, x_s, x_nx, x_ny, x_nz, y_s, y_nx, y_ny, y_nz):
+def CreateDualQuatFb(builder, x_nx, x_ny, x_nz, x_s, y_nx, y_ny, y_nz, y_s):
     builder.Prep(4, 32)
     builder.Prep(4, 16)
+    builder.PrependFloat32(y_s)
     builder.PrependFloat32(y_nz)
     builder.PrependFloat32(y_ny)
     builder.PrependFloat32(y_nx)
-    builder.PrependFloat32(y_s)
     builder.Prep(4, 16)
+    builder.PrependFloat32(x_s)
     builder.PrependFloat32(x_nz)
     builder.PrependFloat32(x_ny)
     builder.PrependFloat32(x_nx)
-    builder.PrependFloat32(x_s)
     return builder.Offset()

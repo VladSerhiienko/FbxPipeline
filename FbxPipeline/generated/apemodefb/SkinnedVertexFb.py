@@ -17,26 +17,26 @@ class SkinnedVertexFb(object):
         return obj
 
     # SkinnedVertexFb
-    def BoneIndicesWeights(self, obj):
+    def JointIndicesWeights(self, obj):
         obj.Init(self._tab.Bytes, self._tab.Pos + 44)
         return obj
 
 
-def CreateSkinnedVertexFb(builder, vertex_position_x, vertex_position_y, vertex_position_z, vertex_uv_x, vertex_uv_y, vertex_vertexIndexColorRGB, vertex_colorAlpha, vertex_qtangent_s, vertex_qtangent_nx, vertex_qtangent_ny, vertex_qtangent_nz, bone_indices_weights_x, bone_indices_weights_y, bone_indices_weights_z, bone_indices_weights_w):
+def CreateSkinnedVertexFb(builder, vertex_position_x, vertex_position_y, vertex_position_z, vertex_uv_x, vertex_uv_y, vertex_qtangent_nx, vertex_qtangent_ny, vertex_qtangent_nz, vertex_qtangent_s, vertex_indexColorRGB, vertex_colorAlpha, joint_indices_weights_x, joint_indices_weights_y, joint_indices_weights_z, joint_indices_weights_w):
     builder.Prep(4, 60)
     builder.Prep(4, 16)
-    builder.PrependFloat32(bone_indices_weights_w)
-    builder.PrependFloat32(bone_indices_weights_z)
-    builder.PrependFloat32(bone_indices_weights_y)
-    builder.PrependFloat32(bone_indices_weights_x)
+    builder.PrependFloat32(joint_indices_weights_w)
+    builder.PrependFloat32(joint_indices_weights_z)
+    builder.PrependFloat32(joint_indices_weights_y)
+    builder.PrependFloat32(joint_indices_weights_x)
     builder.Prep(4, 44)
+    builder.PrependFloat32(vertex_colorAlpha)
+    builder.PrependUint32(vertex_indexColorRGB)
     builder.Prep(4, 16)
+    builder.PrependFloat32(vertex_qtangent_s)
     builder.PrependFloat32(vertex_qtangent_nz)
     builder.PrependFloat32(vertex_qtangent_ny)
     builder.PrependFloat32(vertex_qtangent_nx)
-    builder.PrependFloat32(vertex_qtangent_s)
-    builder.PrependFloat32(vertex_colorAlpha)
-    builder.PrependUint32(vertex_vertexIndexColorRGB)
     builder.Prep(4, 8)
     builder.PrependFloat32(vertex_uv_y)
     builder.PrependFloat32(vertex_uv_x)

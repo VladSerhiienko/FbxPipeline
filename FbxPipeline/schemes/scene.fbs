@@ -169,10 +169,10 @@ struct Vec4Fb {
 }
 
 struct QuatFb {
-    s : float;
     nx : float;
     ny : float;
     nz : float;
+    s : float;
 }
 
 struct DualQuatFb {
@@ -188,6 +188,9 @@ struct Mat4Fb {
 }
 
 enum EVertexFormatFb : ubyte {
+    Decompressed,
+    DecompressedSkinned,
+    DecompressedFatSkinned,
     Default,
     Skinned,
     FatSkinned,
@@ -199,22 +202,43 @@ enum EIndexTypeFb : ubyte {
 	Count,
 }
 
+struct DecompressedVertexFb {
+    position : Vec3Fb;
+    uv : Vec2Fb;
+    normal : Vec3Fb;
+    tangent : Vec3Fb;
+    reflection_index_packed : uint;
+    color : Vec4Fb;
+}
+
+struct DecompressedSkinnedVertexFb {
+    decompressed : DecompressedVertexFb;
+    joint_indices : uint;
+    joint_weights : Vec4Fb;
+}
+
+struct DecompressedFatSkinnedVertexFb {
+    decompressed_skinned : DecompressedSkinnedVertexFb;
+    extra_joint_indices : uint;
+    extra_joint_weights : Vec4Fb;
+}
+
 struct DefaultVertexFb {
     position : Vec3Fb;
     uv : Vec2Fb;
-    vertex_index_color_RGB : uint;
-    color_alpha : float;
     qtangent : QuatFb;
+    index_color_RGB : uint;
+    color_alpha : float;
 }
 
 struct SkinnedVertexFb {
     vertex : DefaultVertexFb;
-    bone_indices_weights : Vec4Fb;
+    joint_indices_weights : Vec4Fb;
 }
 
 struct FatSkinnedVertexFb {
     skinned_vertex : SkinnedVertexFb;
-    extra_bone_indices_weights : Vec4Fb;
+    extra_joint_indices_weights : Vec4Fb;
 }
 
 struct AnimStackFb {

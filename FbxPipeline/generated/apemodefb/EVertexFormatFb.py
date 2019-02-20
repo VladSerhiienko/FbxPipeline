@@ -3,7 +3,10 @@
 # namespace: apemodefb
 
 class EVertexFormatFb(object):
-    Default = 0
-    Skinned = 1
-    FatSkinned = 2
+    Decompressed = 0
+    DecompressedSkinned = 1
+    DecompressedFatSkinned = 2
+    Default = 3
+    Skinned = 4
+    FatSkinned = 5
 

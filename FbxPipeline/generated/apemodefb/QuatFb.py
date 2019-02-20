@@ -12,18 +12,18 @@ class QuatFb(object):
         self._tab = flatbuffers.table.Table(buf, pos)
 
     # QuatFb
-    def S(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(0))
+    def Nx(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(0))
     # QuatFb
-    def Nx(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(4))
+    def Ny(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(4))
     # QuatFb
-    def Ny(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(8))
+    def Nz(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(8))
     # QuatFb
-    def Nz(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(12))
+    def S(self): return self._tab.Get(flatbuffers.number_types.Float32Flags, self._tab.Pos + flatbuffers.number_types.UOffsetTFlags.py_type(12))
 
-def CreateQuatFb(builder, s, nx, ny, nz):
+def CreateQuatFb(builder, nx, ny, nz, s):
     builder.Prep(4, 16)
+    builder.PrependFloat32(s)
     builder.PrependFloat32(nz)
     builder.PrependFloat32(ny)
     builder.PrependFloat32(nx)
-    builder.PrependFloat32(s)
     return builder.Offset()

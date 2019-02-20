@@ -413,7 +413,7 @@ bool apemode::State::Finalize( ) {
     std::vector< flatbuffers::Offset< apemodefb::MeshFb > > meshOffsets;
     meshOffsets.reserve( meshes.size( ) );
     for ( auto& mesh : meshes ) {
-        console->info( "+ subsets ({}): {}, vertex count: {}, vertex bytes: {}, vertex format: {} ",
+        console->info( "+ subsets ({}): {}, vertex count: {}, vertex bytes: {}", //, vertex format: {} ",
                        mesh.subsets.size( ),
                        ToString( mesh.subsets ),
                        mesh.submeshes[ 0 ].vertex_count( ),
@@ -540,7 +540,7 @@ bool apemode::State::Finalize( ) {
         MakeDirectory( outputFolder.c_str( ) );
     }
 
-    console->info( "> Saving" );
+    console->info( "> Saving to: {}", output.c_str( ) );
     if ( flatbuffers::SaveFile( output.c_str( ), (const char*) builder.GetBufferPointer( ), (size_t) builder.GetSize( ), true ) ) {
         console->info( "+ {} ({}, {}) ", ToPrettySizeString( builder.GetSize( ) ), builder.GetSize( ), ResolveFullPath( output.c_str( ) ) );
         console->info( "< Succeeded" );

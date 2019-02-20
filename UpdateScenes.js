@@ -37,31 +37,23 @@ while (childDirectories.length > 0) {
 }
 
 var commands = [];
-var commandsQt = [];
 var commandsDrc = [];
-var commandsDrcQt = [];
 var commandArgExamples = [];
 
 if (process.platform == 'win32') {
     commands.push('cd ./build_windows_amd64_msvc/Release/');
 } else if (process.platform == 'darwin') {
     commands.push('cd build_darwin_x86_64_appleclang_xcode/Release');
-    commandsQt.push('cd build_darwin_x86_64_appleclang_xcode/Release');
     commandsDrc.push('cd build_darwin_x86_64_appleclang_xcode/Release');
-    commandsDrcQt.push('cd build_darwin_x86_64_appleclang_xcode/Release');
 } else {
     commands.push('cd build_linux_x86_64_gnu/Release');
 }
 
 commands.push('mkdir "' + modelsPath + splitter + 'FbxPipeline"');
-commandsQt.push('mkdir "' + modelsPath + splitter + 'FbxPipelineQt"');
 commandsDrc.push('mkdir "' + modelsPath + splitter + 'FbxPipelineDrc"');
-commandsDrcQt.push('mkdir "' + modelsPath + splitter + 'FbxPipelineDrcQt"');
 
 commands.push('mkdir "' + modelsPath + splitter + 'Logs"');
-commandsQt.push('mkdir "' + modelsPath + splitter + 'LogsQt"');
 commandsDrc.push('mkdir "' + modelsPath + splitter + 'LogsDrc"');
-commandsDrcQt.push('mkdir "' + modelsPath + splitter + 'LogsDrcQt"');
 
 fs.mkdirIfExistsSync = function (dir) {
     if (!fs.existsSync(dir)) {
@@ -70,14 +62,10 @@ fs.mkdirIfExistsSync = function (dir) {
 };
 
 fs.mkdirIfExistsSync(modelsPath + splitter + 'FbxPipeline');
-fs.mkdirIfExistsSync(modelsPath + splitter + 'FbxPipelineQt');
 fs.mkdirIfExistsSync(modelsPath + splitter + 'FbxPipelineDrc');
-fs.mkdirIfExistsSync(modelsPath + splitter + 'FbxPipelineDrcQt');
 
 fs.mkdirIfExistsSync(modelsPath + splitter + 'Logs');
-fs.mkdirIfExistsSync(modelsPath + splitter + 'LogsQt');
 fs.mkdirIfExistsSync(modelsPath + splitter + 'LogsDrc');
-fs.mkdirIfExistsSync(modelsPath + splitter + 'LogsDrcQt');
 
 function getSketchfabCommand(sceneSrcFile, sceneName, modelsPath, sceneBaseDirectory, glTFSceneFile, outDirSuffix) {
     var currentCommand = '';
@@ -139,17 +127,10 @@ sceneSrcFiles.forEach(function (sceneSrcFile) {
             var currentCommand = getSketchfabCommand(sceneSrcFile, sceneName, modelsPath, sceneBaseDirectory, glTFSceneFile, '');
             commands.push(currentCommand);
 
-            var currentCommandQt = getSketchfabCommand(sceneSrcFile, sceneName, modelsPath, sceneBaseDirectory, glTFSceneFile, 'Qt');
-            currentCommandQt += ' --tangent-frame-format quat-float';
-            commandsQt.push(currentCommandQt);
-
             var currentCommandDrc = getSketchfabCommand(sceneSrcFile, sceneName, modelsPath, sceneBaseDirectory, glTFSceneFile, 'Drc');
             currentCommandDrc += ' --mesh-compression draco-edgebreaker';
+            currentCommandDrc += ' --anim-compression draco-keyframe-animation';
             commandsDrc.push(currentCommandDrc);
-
-            var currentCommandDrcQt = getSketchfabCommand(sceneSrcFile, sceneName, modelsPath, sceneBaseDirectory, glTFSceneFile, 'DrcQt');
-            currentCommandDrcQt += ' --tangent-frame-format quat-float';
-            commandsDrcQt.push(currentCommandDrcQt);
         }
     }
 });
@@ -160,8 +141,6 @@ if (process.platform == 'win32') {
     execExt = 'bat';
 }
 
-fs.writeFileSync("ExportScenes.gen." + execExt, commands.join('\n'));
-fs.writeFileSync("ExportScenesQt.gen." + execExt, commandsQt.join('\n'));
-fs.writeFileSync("ExportScenesDrc.gen." + execExt, commandsDrc.join('\n'));
-fs.writeFileSync("ExportScenesDrcQt.gen." + execExt, commandsDrcQt.join('\n'));
+fs.writeFileSync("ExportScenes." + execExt, commands.join('\n'));
+fs.writeFileSync("ExportScenesDrc." + execExt, commandsDrc.join('\n'));
 fs.writeFileSync("CommandArgExamples", commandArgExamples.join('\n'));

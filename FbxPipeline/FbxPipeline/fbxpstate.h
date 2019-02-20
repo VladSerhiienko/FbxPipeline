@@ -13,6 +13,16 @@ inline void DebugBreak( ) {
 #endif
 
 namespace apemode {
+    struct Stopwatch {
+        std::chrono::high_resolution_clock::time_point a{};
+        Stopwatch() { Start(); }
+        void Start() { a = std::chrono::high_resolution_clock::now(); }
+        double ElapsedSeconds() {
+            const auto b = std::chrono::high_resolution_clock::now( );
+            const std::chrono::duration< double > d = b - a;
+            return d.count();
+        }
+    };
 
     apemodefb::Mat4Fb Cast(const FbxAMatrix m);
     apemodefb::DualQuatFb Cast(const FbxDualQuaternion dq);
@@ -116,8 +126,8 @@ namespace apemode {
     };
 
     struct FBXPIPELINE_API Material {
-        uint32_t                                 id;
-        uint32_t                                 nameId;
+        uint32_t                                 id     = (uint32_t) -1;
+        uint32_t                                 nameId = (uint32_t) -1;
         std::vector< apemodefb::MaterialPropFb > properties;
         std::vector< apemodefb::MaterialPropFb > textureProperties;
     };

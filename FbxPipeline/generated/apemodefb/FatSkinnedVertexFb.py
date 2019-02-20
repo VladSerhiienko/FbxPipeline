@@ -17,32 +17,32 @@ class FatSkinnedVertexFb(object):
         return obj
 
     # FatSkinnedVertexFb
-    def ExtraBoneIndicesWeights(self, obj):
+    def ExtraJointIndicesWeights(self, obj):
         obj.Init(self._tab.Bytes, self._tab.Pos + 60)
         return obj
 
 
-def CreateFatSkinnedVertexFb(builder, skinned_vertex_vertex_position_x, skinned_vertex_vertex_position_y, skinned_vertex_vertex_position_z, skinned_vertex_vertex_uv_x, skinned_vertex_vertex_uv_y, skinned_vertex_vertex_vertexIndexColorRGB, skinned_vertex_vertex_colorAlpha, skinned_vertex_vertex_qtangent_s, skinned_vertex_vertex_qtangent_nx, skinned_vertex_vertex_qtangent_ny, skinned_vertex_vertex_qtangent_nz, skinned_vertex_bone_indices_weights_x, skinned_vertex_bone_indices_weights_y, skinned_vertex_bone_indices_weights_z, skinned_vertex_bone_indices_weights_w, extra_bone_indices_weights_x, extra_bone_indices_weights_y, extra_bone_indices_weights_z, extra_bone_indices_weights_w):
+def CreateFatSkinnedVertexFb(builder, skinned_vertex_vertex_position_x, skinned_vertex_vertex_position_y, skinned_vertex_vertex_position_z, skinned_vertex_vertex_uv_x, skinned_vertex_vertex_uv_y, skinned_vertex_vertex_qtangent_nx, skinned_vertex_vertex_qtangent_ny, skinned_vertex_vertex_qtangent_nz, skinned_vertex_vertex_qtangent_s, skinned_vertex_vertex_indexColorRGB, skinned_vertex_vertex_colorAlpha, skinned_vertex_joint_indices_weights_x, skinned_vertex_joint_indices_weights_y, skinned_vertex_joint_indices_weights_z, skinned_vertex_joint_indices_weights_w, extra_joint_indices_weights_x, extra_joint_indices_weights_y, extra_joint_indices_weights_z, extra_joint_indices_weights_w):
     builder.Prep(4, 76)
     builder.Prep(4, 16)
-    builder.PrependFloat32(extra_bone_indices_weights_w)
-    builder.PrependFloat32(extra_bone_indices_weights_z)
-    builder.PrependFloat32(extra_bone_indices_weights_y)
-    builder.PrependFloat32(extra_bone_indices_weights_x)
+    builder.PrependFloat32(extra_joint_indices_weights_w)
+    builder.PrependFloat32(extra_joint_indices_weights_z)
+    builder.PrependFloat32(extra_joint_indices_weights_y)
+    builder.PrependFloat32(extra_joint_indices_weights_x)
     builder.Prep(4, 60)
     builder.Prep(4, 16)
-    builder.PrependFloat32(skinned_vertex_bone_indices_weights_w)
-    builder.PrependFloat32(skinned_vertex_bone_indices_weights_z)
-    builder.PrependFloat32(skinned_vertex_bone_indices_weights_y)
-    builder.PrependFloat32(skinned_vertex_bone_indices_weights_x)
+    builder.PrependFloat32(skinned_vertex_joint_indices_weights_w)
+    builder.PrependFloat32(skinned_vertex_joint_indices_weights_z)
+    builder.PrependFloat32(skinned_vertex_joint_indices_weights_y)
+    builder.PrependFloat32(skinned_vertex_joint_indices_weights_x)
     builder.Prep(4, 44)
+    builder.PrependFloat32(skinned_vertex_vertex_colorAlpha)
+    builder.PrependUint32(skinned_vertex_vertex_indexColorRGB)
     builder.Prep(4, 16)
+    builder.PrependFloat32(skinned_vertex_vertex_qtangent_s)
     builder.PrependFloat32(skinned_vertex_vertex_qtangent_nz)
     builder.PrependFloat32(skinned_vertex_vertex_qtangent_ny)
     builder.PrependFloat32(skinned_vertex_vertex_qtangent_nx)
-    builder.PrependFloat32(skinned_vertex_vertex_qtangent_s)
-    builder.PrependFloat32(skinned_vertex_vertex_colorAlpha)
-    builder.PrependUint32(skinned_vertex_vertex_vertexIndexColorRGB)
     builder.Prep(4, 8)
     builder.PrependFloat32(skinned_vertex_vertex_uv_y)
     builder.PrependFloat32(skinned_vertex_vertex_uv_x)
