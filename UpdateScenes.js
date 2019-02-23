@@ -41,7 +41,8 @@ var commandsDrc = [];
 var commandArgExamples = [];
 
 if (process.platform == 'win32') {
-    commands.push('cd ./build_windows_amd64_msvc/Release/');
+    commands.push('cd ./build_msvc_visual_studio_15_2017_win64/Release/');
+    commandsDrc.push('cd ./build_msvc_visual_studio_15_2017_win64/Release/');
 } else if (process.platform == 'darwin') {
     commands.push('cd build_darwin_x86_64_appleclang_xcode/Release');
     commandsDrc.push('cd build_darwin_x86_64_appleclang_xcode/Release');

@@ -8,7 +8,7 @@
             "args": [
                 "-G",
                 "\"'Visual Studio 15 2017 Win64'\"",
-                "-B${workspaceFolder}/build_windows_amd64_msvc_visual_studio_15_2017_win64",
+                "-B${workspaceFolder}/build_msvc_visual_studio_15_2017_win64",
                 "-H${workspaceFolder}",
                 "-DFBX_SDK_INCLUDE_DIR=C:/Program Files/Autodesk/FBX/FBX SDK/2018.1.1/include",
                 "-DFBX_SDK_LIBRARY_DEBUG=C:/Program Files/Autodesk/FBX/FBX SDK/2018.1.1/lib/vs2015/x64/debug/libfbxsdk-md.lib",
@@ -104,14 +104,14 @@
             "type": "shell",
             "command": "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/MSBuild/15.0/Bin/MSBuild.exe",
             "args": [
-                "${workspaceFolder}/build_windows_amd64_msvc/FbxPipeline.sln",
+                "${workspaceFolder}/build_msvc_visual_studio_15_2017_win64/FbxPipeline.sln",
                 "/m",
                 "/nologo",
                 "/verbosity:normal",  // "enum": ["quiet", "minimal", "normal", "detailed", "diagnostic"]
                 "/p:Configuration=Debug"
             ],
             "options": {
-                "cwd": "${workspaceFolder}/build_windows_amd64_msvc"
+                "cwd": "${workspaceFolder}/build_msvc_visual_studio_15_2017_win64"
             },
             "group": {
                 "kind": "build",
@@ -126,14 +126,14 @@
             "type": "shell",
             "command": "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/MSBuild/15.0/Bin/MSBuild.exe",
             "args": [
-                "${workspaceFolder}/build_windows_amd64_msvc/FbxPipeline.sln",
+                "${workspaceFolder}/build_msvc_visual_studio_15_2017_win64/FbxPipeline.sln",
                 "/m",
                 "/nologo",
                 "/verbosity:diagnostic",  // "enum": ["quiet", "minimal", "normal", "detailed", "diagnostic"]
                 "/p:Configuration=Release"
             ],
             "options": {
-                "cwd": "${workspaceFolder}/build_windows_amd64_msvc"
+                "cwd": "${workspaceFolder}/build_msvc_visual_studio_15_2017_win64"
             },
             "group": {
                 "kind": "build",
