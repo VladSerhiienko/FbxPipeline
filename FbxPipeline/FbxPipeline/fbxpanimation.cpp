@@ -1,6 +1,9 @@
 #include <fbxppch.h>
 #include <fbxpstate.h>
+#include <draco/compression/encode.h>
+#include <draco/compression/expert_encode.h>
 #include <draco/animation/keyframe_animation_encoder.h>
+#include <draco/point_cloud/point_cloud_builder.h>
 
 void BezierFitterFitSamples( FbxAnimCurve* pAnimCurve,
                              int           keyIndex,
@@ -461,10 +464,44 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
 
             apemode::Stopwatch sw;
             if ( shouldCompress && keyCount > 2 ) {
-                using DracoTimeType = draco::KeyframeAnimation::TimestampType;
 
-                draco::Status                   encoderStatus;
-                draco::EncoderBuffer            encoderBuffer;
+                draco::Status encoderStatus;
+                draco::EncoderBuffer encoderBuffer;
+                
+                draco::PointCloudBuilder animPointCloudBuilder;
+                animPointCloudBuilder.Start( keyCount );
+                const int keyValuesAttributeIndex = animPointCloudBuilder.AddAttribute(draco::GeometryAttribute::POSITION, 3, draco::DT_FLOAT32);
+                const int keyTimeAttributeIndex = animPointCloudBuilder.AddAttribute(draco::GeometryAttribute::GENERIC, 1, draco::DT_FLOAT32);
+                const int keyTypeAttributeIndex = animPointCloudBuilder.AddAttribute(draco::GeometryAttribute::GENERIC, 1, draco::DT_UINT8);
+                
+                
+                for ( uint32_t i = 0; i < keyCount; ++i ) {
+                    const draco::PointIndex pointIndex {i};
+                    const auto keys = reinterpret_cast< const apemodefb::AnimCurveCubicKeyFb* >( curve.keys.data( ) );
+                    
+                    const float values[3] = {keys[i].value_bez0_bez3(), keys[i].bez1(), keys[i].bez2()};
+                    const float time[1] = { keys[i].time() };
+                    const uint8_t type[1] = { (uint8_t) keys[i].interpolation_mode() };
+                    
+                    animPointCloudBuilder.SetAttributeValueForPoint(keyValuesAttributeIndex, pointIndex, values);
+                    animPointCloudBuilder.SetAttributeValueForPoint(keyTimeAttributeIndex, pointIndex, time);
+                    animPointCloudBuilder.SetAttributeValueForPoint(keyTypeAttributeIndex, pointIndex, type);
+                }
+                
+                std::unique_ptr<draco::PointCloud> animPointCloud = animPointCloudBuilder.Finalize( false );
+                draco::ExpertEncoder encoder( *animPointCloud );
+                
+                encoder.Reset( draco::ExpertEncoder::OptionsType::CreateDefaultOptions( ) );
+                encoder.SetEncodingMethod( draco::POINT_CLOUD_KD_TREE_ENCODING );
+                encoder.SetSpeedOptions( -1, -1 );
+                encoder.SetAttributeQuantization( keyValuesAttributeIndex, 16 );
+                encoder.SetAttributeQuantization( keyTimeAttributeIndex, 16 );
+                encoder.SetAttributeQuantization( keyTypeAttributeIndex, 8 );
+                
+                encoderStatus = encoder.EncodeToBuffer( &encoderBuffer );
+                
+                #if 0
+                using DracoTimeType = draco::KeyframeAnimation::TimestampType;
                 draco::KeyframeAnimation        keyframeAnimation;
                 draco::KeyframeAnimationEncoder keyframeEncoder;
                 
@@ -520,20 +557,25 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
 
                     default: { } break;
                 }
+                #endif
 
                 if ( encoderStatus.code( ) != draco::Status::Code::OK ) {
                     s.console->error( "Draco keyframe encoding failed: {}", encoderStatus.error_msg( ) );
-                } else {
-                    size_t originalSize = sizeof( apemodefb::AnimCurveCubicKeyFb ) * keyCount;
-
-                    s.console->error( "KFE\t{}\t{}\t{}%\t{}\tKF_{}\t{}",
-                                      originalSize ,
+                } else if ( curve.keys.size( ) <= encoderBuffer.size( ) ) {
+                    s.console->error( "Draco keyframe encoding is inefficient: original {} ({}) vs encoded {} ({})",
+                                      curve.keys.size( ),
                                       encoderBuffer.size( ),
-                                     // ToPrettySizeString( originalSize ),
-                                     // ToPrettySizeString( encoderBuffer.size( ) ),
-                                      100.0f * encoderBuffer.size( ) / originalSize,
+                                      ToPrettySizeString( curve.keys.size( ) ),
+                                      ToPrettySizeString( encoderBuffer.size( ) ) );
+                } else {
+                    s.console->info(  "DracoKeyframeAnimEncoding\t{}\t{}\t{}\t{}\t{}%\t{}\tKF_{}\t{}",
+                                      curve.keys.size( ) ,
+                                      encoderBuffer.size( ),
+                                      ToPrettySizeString( curve.keys.size( ) ),
+                                      ToPrettySizeString( encoderBuffer.size( ) ),
+                                      100.0f * encoderBuffer.size( ) / curve.keys.size( ),
                                       keyCount,
-                                      apemodefb::EnumNameEAnimCurveKeyTypeFb( apemodefb::EAnimCurveKeyTypeFb_Cubic ),
+                                      apemodefb::EnumNameEAnimCurveKeyTypeFb( curve.keyType ),
                                       sw.ElapsedSeconds( ) );
 
                     curve.keys.resize( encoderBuffer.size( ) );

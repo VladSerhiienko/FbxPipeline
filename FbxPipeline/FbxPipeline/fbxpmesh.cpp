@@ -8,6 +8,8 @@
 #undef ERROR
 #endif
 
+//#define APEMODE_DECOMPRESSED_QTANGENTS
+
 #include <draco/mesh/mesh.h>
 #include <draco/mesh/mesh_cleanup.h>
 #include <draco/mesh/triangle_soup_mesh_builder.h>
@@ -175,10 +177,19 @@ bool CalculateTangents( StaticVertex* vertices, size_t vertexCount ) {
         AssertValidVec3( n );
         AssertValidVec3( t );
 
-        const bool isOk = n.LengthSquared() && t.LengthSquared();
+        bool isOk = n.LengthSquared() && t.LengthSquared();
         result &= isOk;
+        
+        
         if ( isOk ) {
-            n = n.Normalized( );
+            n.Normalize( );
+            t.Normalize( );
+            isOk &= n != t;
+        }
+        
+        if ( isOk ) {
+            n.Normalize( );
+            t.Normalize( );
             mathfu::dvec3 tt = mathfu::normalize( t - n * mathfu::dot( n, t ) );
             AssertValidVec3( tt );
 
@@ -1144,10 +1155,6 @@ mathfu::dquat GetQTangent(const mathfu::dvec3 normal, const mathfu::dvec3 tangen
         q = mathfu::dquat( bias, q.vector() * normFactor );
     }
 
-    if ( q.scalar( ) < 0.0 ) {
-        q = mathfu::dquat( -q.scalar( ), -q.vector( ) );
-    }
-
     if ( reflection < 0.0 ) {
         q = mathfu::dquat( -q.scalar( ), -q.vector( ) );
     }
@@ -1234,6 +1241,7 @@ void ExportMesh( FbxNode*       pNode,
         
         if ( n.Length( ) < std::numeric_limits< float >::epsilon( ) ||
              t.Length( ) < std::numeric_limits< float >::epsilon( ) ) {
+            qtangents[ i ] = mathfu::dquat::identity;
             continue;
         }
         
@@ -1385,20 +1393,27 @@ void ExportMesh( FbxNode*       pNode,
             dst.mutable_position( ).mutate_z( vertices[ i ].position.z );
             dst.mutable_uv( ).mutate_x( vertices[ i ].texCoords.x );
             dst.mutable_uv( ).mutate_y( vertices[ i ].texCoords.y );
+           
+//            auto normalHemioct = ToHemioct( vertices[ i ].normal );
+//            auto tangentHemioct = ToHemioct( vertices[ i ].tangent.xyz( ) );
+//            dst.mutable_normal_hemioct( ).mutate_x( normalHemioct.x );
+//            dst.mutable_normal_hemioct( ).mutate_y( normalHemioct.y );
+//            dst.mutable_tangent_hemioct( ).mutate_x( tangentHemioct.x );
+//            dst.mutable_tangent_hemioct( ).mutate_y( tangentHemioct.y );
 
+            #ifndef APEMODE_DECOMPRESSED_QTANGENTS
             dst.mutable_normal( ).mutate_x( vertices[ i ].normal.x );
             dst.mutable_normal( ).mutate_y( vertices[ i ].normal.y );
             dst.mutable_normal( ).mutate_z( vertices[ i ].normal.z );
             dst.mutable_tangent( ).mutate_x( vertices[ i ].tangent.x );
             dst.mutable_tangent( ).mutate_y( vertices[ i ].tangent.y );
             dst.mutable_tangent( ).mutate_z( vertices[ i ].tangent.z );
-            
-//            auto normalHemioct  = ToHemioct( vertices[ i ].normal );
-//            auto tangentHemioct = ToHemioct( vertices[ i ].tangent.xyz( ) );
-//            dst.mutable_normal_hemioct( ).mutate_x( normalHemioct.x );
-//            dst.mutable_normal_hemioct( ).mutate_y( normalHemioct.y );
-//            dst.mutable_tangent_hemioct( ).mutate_x( tangentHemioct.x );
-//            dst.mutable_tangent_hemioct( ).mutate_y( tangentHemioct.y );
+            #else
+            dst.mutable_qtangent( ).mutate_s( qtangents[ i ].scalar( ) );
+            dst.mutable_qtangent( ).mutate_nx( qtangents[ i ].vector( ).x );
+            dst.mutable_qtangent( ).mutate_ny( qtangents[ i ].vector( ).y );
+            dst.mutable_qtangent( ).mutate_nz( qtangents[ i ].vector( ).z );
+            #endif
 
             dst.mutable_color( ).mutate_x( vertices[ i ].color.x );
             dst.mutable_color( ).mutate_y( vertices[ i ].color.y );
@@ -1501,8 +1516,12 @@ void ExportMesh( FbxNode*       pNode,
         
         const int positionAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::POSITION, 3, draco::DataType::DT_FLOAT32 );
         const int uvAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::TEX_COORD, 2, draco::DataType::DT_FLOAT32 );
+        #ifndef APEMODE_DECOMPRESSED_QTANGENTS
         const int normalAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::NORMAL, 3, draco::DataType::DT_FLOAT32 );
         const int tangentAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::NORMAL, 3, draco::DataType::DT_FLOAT32 );
+        #else
+        const int qtangentAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::COLOR, 4, draco::DataType::DT_FLOAT32 );
+        #endif
         const int colorAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::COLOR, 4, draco::DataType::DT_FLOAT32 );
         const int reflectionIndexAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::GENERIC, 1, draco::DataType::DT_UINT8 );
         int jointIndicesAttributeIndex = -1;
@@ -1544,6 +1563,7 @@ void ExportMesh( FbxNode*       pNode,
                                                       , reinterpret_cast< apemodefb::DecompressedVertexFb* >( m.vertices.data( ) + stride * ( i + 1 ) )
                                                       , reinterpret_cast< apemodefb::DecompressedVertexFb* >( m.vertices.data( ) + stride * ( i + 2 ) ) };
 
+            
             builder.SetAttributeValuesForFace( positionAttributeIndex,
                                                faceIndex,
                                                reinterpret_cast< const float* >( &dst[ 0 ]->position( ) ),
@@ -1554,6 +1574,7 @@ void ExportMesh( FbxNode*       pNode,
                                                reinterpret_cast< const float* >( &dst[ 0 ]->uv( ) ),
                                                reinterpret_cast< const float* >( &dst[ 1 ]->uv( ) ),
                                                reinterpret_cast< const float* >( &dst[ 2 ]->uv( ) ) );
+            #ifndef APEMODE_DECOMPRESSED_QTANGENTS
             builder.SetAttributeValuesForFace( normalAttributeIndex,
                                                faceIndex,
                                                reinterpret_cast< const float* >( &dst[ 0 ]->normal( ) ),
@@ -1564,6 +1585,23 @@ void ExportMesh( FbxNode*       pNode,
                                                reinterpret_cast< const float* >( &dst[ 0 ]->tangent( ) ),
                                                reinterpret_cast< const float* >( &dst[ 1 ]->tangent( ) ),
                                                reinterpret_cast< const float* >( &dst[ 2 ]->tangent( ) ) );
+            #else
+            apemodefb::QuatFb q[3] = { dst[ 0 ]->qtangent()
+                                     , dst[ 1 ]->qtangent()
+                                     , dst[ 2 ]->qtangent() };
+            
+            for (auto& qq : q) {
+                qq.mutate_s(qq.s() * 0.5f + 0.5f);
+                qq.mutate_nx(qq.nx() * 0.5f + 0.5f);
+                qq.mutate_ny(qq.ny() * 0.5f + 0.5f);
+                qq.mutate_nz(qq.nz() * 0.5f + 0.5f);
+            }
+            builder.SetAttributeValuesForFace( qtangentAttributeIndex,
+                                               faceIndex,
+                                               reinterpret_cast< const float* >( &q[ 0 ] ),
+                                               reinterpret_cast< const float* >( &q[ 1 ] ),
+                                               reinterpret_cast< const float* >( &q[ 2 ] ) );
+            #endif
             builder.SetAttributeValuesForFace( colorAttributeIndex,
                                                faceIndex,
                                                reinterpret_cast< const float* >( &dst[ 0 ]->color( ) ),
@@ -1665,8 +1703,12 @@ void ExportMesh( FbxNode*       pNode,
             encoder.SetSpeedOptions( -1, -1 );
             encoder.SetAttributeQuantization(positionAttributeIndex, 16);
             encoder.SetAttributeQuantization(uvAttributeIndex, 16);
+            #ifndef APEMODE_DECOMPRESSED_QTANGENTS
             encoder.SetAttributeQuantization(normalAttributeIndex, 8);
             encoder.SetAttributeQuantization(tangentAttributeIndex, 8);
+            #else
+            encoder.SetAttributeQuantization(qtangentAttributeIndex, 16);
+            #endif
             encoder.SetAttributeQuantization(colorAttributeIndex, 8);
             encoder.SetAttributeQuantization(reflectionIndexAttributeIndex, 8);
             
@@ -1701,11 +1743,11 @@ void ExportMesh( FbxNode*       pNode,
             if ( encoderStatus.code( ) == draco::Status::OK ) {
                 size_t originalVertexSize = vertexCount * ( 4 * 3 + 4 * 2 + 6 * 4 + 4 * 4 );
             
-                s.console->info( "DME\t{}\t{}\t{}%\t{}\t{}\t{}",
-                                 originalVertexSize, // m.vertices.size( ),
+                s.console->info( "DracoMeshEncoding\t{}\t{}\t{}\t{}\t{}%\t{}\tDVF_{}\t{}",
+                                 m.vertices.size( ),
                                  encoderBuffer.size( ),
-                                 // ToPrettySizeString( m.vertices.size( ) ),
-                                 // ToPrettySizeString( encoderBuffer.size( ) ),
+                                 ToPrettySizeString( m.vertices.size( ) ),
+                                 ToPrettySizeString( encoderBuffer.size( ) ),
                                  ( 100.0f * encoderBuffer.size( ) / originalVertexSize ), // m.vertices.size( ) ),
                                  vertexCount,
                                  apemodefb::EnumNameEVertexFormatFb(eVertexFmt),
