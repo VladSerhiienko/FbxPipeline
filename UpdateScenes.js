@@ -38,23 +38,28 @@ while (childDirectories.length > 0) {
 
 var commands = [];
 var commandsDrc = [];
+var commandsRegDrc = [];
 var commandArgExamples = [];
 
 if (process.platform == 'win32') {
     commands.push('cd ./build_msvc_visual_studio_15_2017_win64/Release/');
     commandsDrc.push('cd ./build_msvc_visual_studio_15_2017_win64/Release/');
+    commandsRegDrc.push('cd ./build_msvc_visual_studio_15_2017_win64/Release/');
 } else if (process.platform == 'darwin') {
     commands.push('cd build_darwin_x86_64_appleclang_xcode/Release');
     commandsDrc.push('cd build_darwin_x86_64_appleclang_xcode/Release');
+    commandsRegDrc.push('cd build_darwin_x86_64_appleclang_xcode/Release');
 } else {
     commands.push('cd build_linux_x86_64_gnu/Release');
 }
 
 commands.push('mkdir "' + modelsPath + splitter + 'FbxPipeline"');
 commandsDrc.push('mkdir "' + modelsPath + splitter + 'FbxPipelineDrc"');
+commandsRegDrc.push('mkdir "' + modelsPath + splitter + 'FbxPipelineDrc"');
 
 commands.push('mkdir "' + modelsPath + splitter + 'Logs"');
 commandsDrc.push('mkdir "' + modelsPath + splitter + 'LogsDrc"');
+commandsRegDrc.push('mkdir "' + modelsPath + splitter + 'LogsDrc"');
 
 fs.mkdirIfExistsSync = function (dir) {
     if (!fs.existsSync(dir)) {
@@ -68,6 +73,27 @@ fs.mkdirIfExistsSync(modelsPath + splitter + 'FbxPipelineDrc');
 fs.mkdirIfExistsSync(modelsPath + splitter + 'Logs');
 fs.mkdirIfExistsSync(modelsPath + splitter + 'LogsDrc');
 
+
+function getRegularCommand(sceneSrcFile, sceneName, modelsPath, sceneBaseDirectory, outDirSuffix) {
+    var currentCommand = '';
+    if (process.platform == 'win32') {
+        currentCommand += 'FbxPipelineLauncher.exe';
+        currentCommand += ' -i "' + sceneSrcFile + '"';
+        currentCommand += ' -o "' + modelsPath + '\\FbxPipeline' + outDirSuffix + '\\' + sceneName + '.fbxp"';
+        currentCommand += ' -l "' + modelsPath + '\\Logs' + outDirSuffix + '\\' + sceneName + '.txt"';
+
+    } else {
+        currentCommand += './FbxPipelineLauncher';
+        currentCommand += ' -i "' + sceneSrcFile + '"';
+        currentCommand += ' -o "' + modelsPath + '/FbxPipeline' + outDirSuffix + '/' + sceneName + '.fbxp"';
+        currentCommand += ' -l "' + modelsPath + '/Logs' + outDirSuffix + '/' + sceneName + '.txt"';
+    }
+
+    if (sceneBaseDirectory !== "")
+        currentCommand += ' -e "' + sceneBaseDirectory + '/**"';
+    return currentCommand;
+}
+
 function getSketchfabCommand(sceneSrcFile, sceneName, modelsPath, sceneBaseDirectory, glTFSceneFile, outDirSuffix) {
     var currentCommand = '';
     if (process.platform == 'win32') {
@@ -75,24 +101,17 @@ function getSketchfabCommand(sceneSrcFile, sceneName, modelsPath, sceneBaseDirec
         currentCommand += ' -i "' + sceneSrcFile + '"';
         currentCommand += ' -o "' + modelsPath + '\\FbxPipeline' + outDirSuffix + '\\' + sceneName + '.fbxp"';
         currentCommand += ' -l "' + modelsPath + '\\Logs' + outDirSuffix + '\\' + sceneName + '.txt"';
-        currentCommand += ' -e "' + sceneBaseDirectory + '/**"';
-        currentCommand += ' --script-file glTFMaterialExtension.py';
-        currentCommand += ' --script-input "' + glTFSceneFile + '"';
-        // commands.push(currentCommand);
-        // commandArgExamples.push('--assets "..\\..\\assets\\**" --scene "' + modelsPath + '\\FbxPipeline\\' + sceneName + '.fbxp"');
 
     } else {
         currentCommand += './FbxPipelineLauncher';
         currentCommand += ' -i "' + sceneSrcFile + '"';
         currentCommand += ' -o "' + modelsPath + '/FbxPipeline' + outDirSuffix + '/' + sceneName + '.fbxp"';
         currentCommand += ' -l "' + modelsPath + '/Logs' + outDirSuffix + '/' + sceneName + '.txt"';
-        currentCommand += ' -e "' + sceneBaseDirectory + '/**"';
-        currentCommand += ' --script-file glTFMaterialExtension.py';
-        currentCommand += ' --script-input "' + glTFSceneFile + '"';
-        // commands.push(currentCommand);
-        // commandArgExamples.push('--assets /Users/vlad.serhiienko/Projects/Home/Viewer/assets/** --scene "' + modelsPath + '/FbxPipeline/' + sceneName + '.fbxp"');
     }
 
+    currentCommand += ' -e "' + sceneBaseDirectory + '/**"';
+    currentCommand += ' --script-file glTFMaterialExtension.py';
+    currentCommand += ' --script-input "' + glTFSceneFile + '"';
     return currentCommand;
 }
 
@@ -133,6 +152,13 @@ sceneSrcFiles.forEach(function (sceneSrcFile) {
             currentCommandDrc += ' --anim-compression draco-keyframe-animation';
             commandsDrc.push(currentCommandDrc);
         }
+    } else {
+        var sceneName = path.parse(sceneSrcFile).name;
+        console.log('Adding jile: ' + sceneName);
+        var currentCommandDrc = getRegularCommand(sceneSrcFile, sceneName, modelsPath, sceneSrcDirectory, 'Drc');
+        currentCommandDrc += ' --mesh-compression draco-edgebreaker';
+        currentCommandDrc += ' --anim-compression draco-keyframe-animation';
+        commandsRegDrc.push(currentCommandDrc);
     }
 });
 
@@ -144,4 +170,5 @@ if (process.platform == 'win32') {
 
 fs.writeFileSync("ExportScenes." + execExt, commands.join('\n'));
 fs.writeFileSync("ExportScenesDrc." + execExt, commandsDrc.join('\n'));
+fs.writeFileSync("ExportScenesRegDrc." + execExt, commandsRegDrc.join('\n'));
 fs.writeFileSync("CommandArgExamples", commandArgExamples.join('\n'));

@@ -1,5 +1,10 @@
 #include <fbxppch.h>
 #include <fbxpstate.h>
+
+#ifdef ERROR
+#undef ERROR
+#endif
+
 #include <draco/compression/encode.h>
 #include <draco/compression/expert_encode.h>
 #include <draco/animation/keyframe_animation_encoder.h>
@@ -359,10 +364,10 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
     }
 
     s.animCurves.reserve( s.animCurves.size( ) + animCurves.size( ) );
-    
+
     const std::string& animCompression = s.options[ "anim-compression" ].as< std::string >( );
     const bool shouldCompress = animCompression == "draco-keyframe-animation";
-    
+
     for ( auto pAnimCurveTuple : animCurves ) {
         if ( auto pAnimCurve = pAnimCurveTuple.pAnimCurve ) {
             auto pAnimStack = pAnimCurveTuple.pAnimStack;
@@ -467,51 +472,51 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
 
                 draco::Status encoderStatus;
                 draco::EncoderBuffer encoderBuffer;
-                
+
                 draco::PointCloudBuilder animPointCloudBuilder;
                 animPointCloudBuilder.Start( keyCount );
                 const int keyValuesAttributeIndex = animPointCloudBuilder.AddAttribute(draco::GeometryAttribute::POSITION, 3, draco::DT_FLOAT32);
                 const int keyTimeAttributeIndex = animPointCloudBuilder.AddAttribute(draco::GeometryAttribute::GENERIC, 1, draco::DT_FLOAT32);
                 const int keyTypeAttributeIndex = animPointCloudBuilder.AddAttribute(draco::GeometryAttribute::GENERIC, 1, draco::DT_UINT8);
-                
-                
+
+
                 for ( uint32_t i = 0; i < keyCount; ++i ) {
                     const draco::PointIndex pointIndex {i};
                     const auto keys = reinterpret_cast< const apemodefb::AnimCurveCubicKeyFb* >( curve.keys.data( ) );
-                    
+
                     const float values[3] = {keys[i].value_bez0_bez3(), keys[i].bez1(), keys[i].bez2()};
                     const float time[1] = { keys[i].time() };
                     const uint8_t type[1] = { (uint8_t) keys[i].interpolation_mode() };
-                    
+
                     animPointCloudBuilder.SetAttributeValueForPoint(keyValuesAttributeIndex, pointIndex, values);
                     animPointCloudBuilder.SetAttributeValueForPoint(keyTimeAttributeIndex, pointIndex, time);
                     animPointCloudBuilder.SetAttributeValueForPoint(keyTypeAttributeIndex, pointIndex, type);
                 }
-                
+
                 std::unique_ptr<draco::PointCloud> animPointCloud = animPointCloudBuilder.Finalize( false );
                 draco::ExpertEncoder encoder( *animPointCloud );
-                
+
                 encoder.Reset( draco::ExpertEncoder::OptionsType::CreateDefaultOptions( ) );
                 encoder.SetEncodingMethod( draco::POINT_CLOUD_KD_TREE_ENCODING );
                 encoder.SetSpeedOptions( -1, -1 );
                 encoder.SetAttributeQuantization( keyValuesAttributeIndex, 16 );
                 encoder.SetAttributeQuantization( keyTimeAttributeIndex, 16 );
                 encoder.SetAttributeQuantization( keyTypeAttributeIndex, 8 );
-                
+
                 encoderStatus = encoder.EncodeToBuffer( &encoderBuffer );
-                
+
                 #if 0
                 using DracoTimeType = draco::KeyframeAnimation::TimestampType;
                 draco::KeyframeAnimation        keyframeAnimation;
                 draco::KeyframeAnimationEncoder keyframeEncoder;
-                
+
                 auto options = draco::EncoderOptionsBase< int32_t >::CreateDefaultOptions( );
 
                 switch ( curve.keyType ) {
                     case apemodefb::EAnimCurveKeyTypeFb_Resampled: {
                         std::vector< DracoTimeType > keyTimes;
                         std::vector< float > keyValues;
-                        
+
                         keyTimes.resize( keyCount );
                         keyValues.resize( keyCount );
 
@@ -523,7 +528,7 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
 
                         keyframeAnimation.SetTimestamps( keyTimes );
                         keyframeAnimation.AddKeyframes( draco::DataType::DT_FLOAT32, 1, keyValues );
-                        
+
                         // s.console->error( "Starting draco keyframe encoding: {} resampled keys", keyCount );
                         encoderStatus = keyframeEncoder.EncodeKeyframeAnimation( keyframeAnimation, options, &encoderBuffer );
 
@@ -532,7 +537,7 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
                         std::vector< DracoTimeType > keyTimes;
                         std::vector< float >         keyValues;
                         std::vector< int8_t >        keyInterpolations;
-                        
+
                         keyTimes.resize( keyCount );
                         keyValues.resize( keyCount * 3 );
                         keyInterpolations.resize( keyCount );
@@ -549,7 +554,7 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
                         keyframeAnimation.SetTimestamps( keyTimes );
                         keyframeAnimation.AddKeyframes( draco::DataType::DT_FLOAT32, 3, keyValues );
                         keyframeAnimation.AddKeyframes( draco::DataType::DT_INT8, 1, keyInterpolations );
-                        
+
                         // s.console->error( "Starting draco keyframe encoding: {} cubic keys", keyCount );
                         encoderStatus = keyframeEncoder.EncodeKeyframeAnimation( keyframeAnimation, options, &encoderBuffer );
 

@@ -179,14 +179,14 @@ bool CalculateTangents( StaticVertex* vertices, size_t vertexCount ) {
 
         bool isOk = n.LengthSquared() && t.LengthSquared();
         result &= isOk;
-        
-        
+
+
         if ( isOk ) {
             n.Normalize( );
             t.Normalize( );
             isOk &= n != t;
         }
-        
+
         if ( isOk ) {
             n.Normalize( );
             t.Normalize( );
@@ -603,7 +603,8 @@ template < typename TElementLayer, typename TElementValue >
 TElementValue GetElementValue( const TElementLayer* pElementLayer,
                                uint32_t             controlPointIndex,
                                uint32_t             vertexIndex,
-                               uint32_t             polygonIndex ) {
+                               uint32_t             polygonIndex,
+                               TElementValue        defaultValue = TElementValue( ) ) {
     if ( nullptr == pElementLayer )
         return TElementValue( );
 
@@ -623,13 +624,10 @@ TElementValue GetElementValue( const TElementLayer* pElementLayer,
                 pElementLayer->GetName( ) );
 
             DebugBreak( );
-            
-            if constexpr (std::is_same<TElementValue, FbxColor>::value) {
-                return FbxColor(1.0, 1.0, 1.0, 1.0);
-            }
-            
-            return TElementValue( );
+            break;
     }
+
+    return defaultValue;
 }
 
 // https://forums.autodesk.com/t5/fbx-forum/useful-things-you-might-want-to-know-about-fbxsdk/td-p/4821177
@@ -763,7 +761,7 @@ struct TControlPointSkinInfo {
         if (weight < std::numeric_limits<float>::epsilon()) {
             return false;
         }
-    
+
         for ( uint32_t i = 0; i < kBoneCountPerControlPoint; ++i ) {
             if ( weights[ i ].index == index ) {
                 weights[ i ].weight += weight;
@@ -847,7 +845,7 @@ struct TControlPointSkinInfo {
         if ( weights[ 0 ].weight >= 0.99f ) {
             float halfWeight = totalWeight * 0.5f;
             assert( halfWeight < 1.0f );
-            
+
             compiled[ 0 ] += halfWeight;
             compiled[ 1 ] = compiled[ 0 ];
             assert( uint32_t( compiled[ 0 ] ) == weights[ 0 ].index );
@@ -859,7 +857,7 @@ struct TControlPointSkinInfo {
                 assert( uint32_t( compiled[ i ] ) == weights[ i ].index );
             }
         }
-        
+
         return compiled;
     }
 };
@@ -942,7 +940,7 @@ VertexInitializationResult InitializeVertices( FbxMesh* mesh, apemode::Mesh& m, 
             const auto uv = GetElementValue< FbxGeometryElementUV, FbxVector2 >( uve, ci, vi, pi );
             FbxVector4 n  = GetElementValue< FbxGeometryElementNormal, FbxVector4 >( ne, ci, vi, pi );
             FbxVector4 t  = GetElementValue< FbxGeometryElementTangent, FbxVector4 >( te, ci, vi, pi );
-            FbxColor c    = GetElementValue< FbxGeometryElementVertexColor, FbxColor >( ce, ci, vi, pi );
+            FbxColor c    = GetElementValue< FbxGeometryElementVertexColor, FbxColor >( ce, ci, vi, pi, FbxColor( 1, 1, 1, 1 ) );
 
             n.Normalize();
             t.Normalize();
@@ -1131,11 +1129,11 @@ mathfu::dvec3 FromHemioct(mathfu::dvec2 e) {
 
 mathfu::dquat GetQTangent(const mathfu::dvec3 normal, const mathfu::dvec3 tangent, double reflection) {
     assert(reflection != 0.0);
-    
+
     // https://bitbucket.org/sinbad/ogre/src/18ebdbed2edc61d30927869c7fb0cf3ae5697f0a/OgreMain/src/OgreSubMesh2.cpp?at=v2-1&fileviewer=file-view-default#OgreSubMesh2.cpp-988
     const mathfu::dvec3 bitangent( mathfu::cross( normal, tangent ).Normalized( ) );
     AssertValidVec3( bitangent );
-    
+
     mathfu::dmat3 tangentFrame( normal.x, normal.y, normal.z,
                                 tangent.x, tangent.y, tangent.z,
                                 bitangent.x, bitangent.y, bitangent.z );
@@ -1161,7 +1159,7 @@ mathfu::dquat GetQTangent(const mathfu::dvec3 normal, const mathfu::dvec3 tangen
 
     AssertValidFloat( q.scalar( ) );
     AssertValidVec3( q.vector( ) );
-    
+
     assert(mathfu::dot(tangentFrame.GetColumn(0), tangentFrame.GetColumn(1)) < std::numeric_limits< float >::epsilon());
     assert(mathfu::dot(tangentFrame.GetColumn(1), tangentFrame.GetColumn(2)) < std::numeric_limits< float >::epsilon());
     assert(mathfu::dot(tangentFrame.GetColumn(0), tangentFrame.GetColumn(2)) < std::numeric_limits< float >::epsilon());
@@ -1238,16 +1236,16 @@ void ExportMesh( FbxNode*       pNode,
     for ( uint32_t i = 0; i < vertexCount; ++i ) {
         mathfu::dvec3 n( vertices[ i ].normal );
         mathfu::dvec3 t( vertices[ i ].tangent.xyz( ) );
-        
+
         if ( n.Length( ) < std::numeric_limits< float >::epsilon( ) ||
              t.Length( ) < std::numeric_limits< float >::epsilon( ) ) {
             qtangents[ i ] = mathfu::dquat::identity;
             continue;
         }
-        
+
         n.Normalize( );
         t.Normalize( );
-    
+
         qtangents[ i ] = GetQTangent( n, t, vertices[ i ].tangent.w );
     }
 
@@ -1342,15 +1340,15 @@ void ExportMesh( FbxNode*       pNode,
             skinInfo.NormalizeWeights( maxBoneCount, 0 );
         }
     }
-    
+
     apemodefb::EVertexFormatFb eVertexFmt = apemodefb::EVertexFormatFb(-1);
-    
+
     apemodefb::ECompressionTypeFb eCompressionType = apemodefb::ECompressionTypeFb_None;
     const std::string& meshCompression = s.options[ "mesh-compression" ].as< std::string >( );
     if ( m.subsets.size( ) == 1 && s.options[ "mesh-compression" ].count() && meshCompression != "none" ) {
         size_t stride = 0;
         size_t strideUnskinned = 0;
-        
+
         strideUnskinned = sizeof( apemodefb::DecompressedVertexFb );
         if ( skinInfos.empty( ) ) {
             stride = sizeof( apemodefb::DecompressedVertexFb );
@@ -1370,7 +1368,7 @@ void ExportMesh( FbxNode*       pNode,
                 break;
             }
         }
-        
+
         assert( stride != 0 );
         m.vertices.resize( stride * vertexCount );
 
@@ -1393,7 +1391,7 @@ void ExportMesh( FbxNode*       pNode,
             dst.mutable_position( ).mutate_z( vertices[ i ].position.z );
             dst.mutable_uv( ).mutate_x( vertices[ i ].texCoords.x );
             dst.mutable_uv( ).mutate_y( vertices[ i ].texCoords.y );
-           
+
 //            auto normalHemioct = ToHemioct( vertices[ i ].normal );
 //            auto tangentHemioct = ToHemioct( vertices[ i ].tangent.xyz( ) );
 //            dst.mutable_normal_hemioct( ).mutate_x( normalHemioct.x );
@@ -1441,7 +1439,7 @@ void ExportMesh( FbxNode*       pNode,
             for ( uint32_t i = 0; i < vertexCount; ++i ) {
                 auto controlPointIndex = vertices[ i ].controlPointIndex;
                 auto& skinInfo = skinInfos[ controlPointIndex ];
-                
+
                 assert( boneCount == eBoneCountPerControlPoint_4 ||
                         boneCount == eBoneCountPerControlPoint_8 );
 
@@ -1451,7 +1449,7 @@ void ExportMesh( FbxNode*       pNode,
                         assert( skinInfo.weights[ 1 ].index < 255 );
                         assert( skinInfo.weights[ 2 ].index < 255 );
                         assert( skinInfo.weights[ 3 ].index < 255 );
-                        
+
                         joint_index_packer._0 = skinInfo.weights[ 0 ].index;
                         joint_index_packer._1 = skinInfo.weights[ 1 ].index;
                         joint_index_packer._2 = skinInfo.weights[ 2 ].index;
@@ -1464,7 +1462,7 @@ void ExportMesh( FbxNode*       pNode,
                         dst->mutable_joint_weights( ).mutate_y( skinInfo.weights[ 1 ].weight );
                         dst->mutable_joint_weights( ).mutate_z( skinInfo.weights[ 2 ].weight );
                         dst->mutable_joint_weights( ).mutate_w( skinInfo.weights[ 4 ].weight );
-                        
+
                     } break;
                     case eBoneCountPerControlPoint_8: {
                         assert( ( stride * i ) < m.vertices.size( ) );
@@ -1498,22 +1496,22 @@ void ExportMesh( FbxNode*       pNode,
                         dst->mutable_extra_joint_weights( ).mutate_y( skinInfo.weights[ 5 ].weight );
                         dst->mutable_extra_joint_weights( ).mutate_z( skinInfo.weights[ 6 ].weight );
                         dst->mutable_extra_joint_weights( ).mutate_w( skinInfo.weights[ 7 ].weight );
-                        
+
                     } break;
                 }
             }
         }
-        
+
         draco::MeshEncoderMethod encoderMethod = draco::MESH_EDGEBREAKER_ENCODING;
         if ( meshCompression != "draco-edgebreaker" ) {
             assert( meshCompression == "draco-esequential" );
             encoderMethod = draco::MESH_SEQUENTIAL_ENCODING;
         }
-        
+
         draco::TriangleSoupMeshBuilder builder;
         assert( vertexCount % 3 == 0 );
         builder.Start( vertexCount / 3 );
-        
+
         const int positionAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::POSITION, 3, draco::DataType::DT_FLOAT32 );
         const int uvAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::TEX_COORD, 2, draco::DataType::DT_FLOAT32 );
         #ifndef APEMODE_DECOMPRESSED_QTANGENTS
@@ -1528,17 +1526,17 @@ void ExportMesh( FbxNode*       pNode,
         int jointWeightsAttributeIndex = -1;
         int extraJointIndicesAttributeIndex = -1;
         int extraJointWeightsAttributeIndex = -1;
-        
+
         auto jointIndicesType = draco::GeometryAttribute::Type::GENERIC;
         auto jointIndicesComponentCount = 4;
         auto jointIndicesDataType = draco::DT_UINT8;
         auto jointIndicesQuantizationBits = 8;
-        
+
         auto jointWeightsType = draco::GeometryAttribute::Type::COLOR;
         auto jointWeightsComponentCount = 4;
         auto jointWeightsDataType = draco::DT_FLOAT32;
         auto jointWeightsQuantizationBits = 16;
-        
+
         switch ( eVertexFmt ) {
         case apemodefb::EVertexFormatFb_Decompressed:
             break;
@@ -1556,14 +1554,14 @@ void ExportMesh( FbxNode*       pNode,
             assert(false);
             break;
         }
-        
+
         for ( uint32_t i = 0; i < vertexCount; i += 3 ) {
             const draco::FaceIndex faceIndex = draco::FaceIndex( i / 3 );
             apemodefb::DecompressedVertexFb* dst[3] = { reinterpret_cast< apemodefb::DecompressedVertexFb* >( m.vertices.data( ) + stride * ( i + 0 ) )
                                                       , reinterpret_cast< apemodefb::DecompressedVertexFb* >( m.vertices.data( ) + stride * ( i + 1 ) )
                                                       , reinterpret_cast< apemodefb::DecompressedVertexFb* >( m.vertices.data( ) + stride * ( i + 2 ) ) };
 
-            
+
             builder.SetAttributeValuesForFace( positionAttributeIndex,
                                                faceIndex,
                                                reinterpret_cast< const float* >( &dst[ 0 ]->position( ) ),
@@ -1589,7 +1587,7 @@ void ExportMesh( FbxNode*       pNode,
             apemodefb::QuatFb q[3] = { dst[ 0 ]->qtangent()
                                      , dst[ 1 ]->qtangent()
                                      , dst[ 2 ]->qtangent() };
-            
+
             for (auto& qq : q) {
                 qq.mutate_s(qq.s() * 0.5f + 0.5f);
                 qq.mutate_nx(qq.nx() * 0.5f + 0.5f);
@@ -1607,7 +1605,7 @@ void ExportMesh( FbxNode*       pNode,
                                                reinterpret_cast< const float* >( &dst[ 0 ]->color( ) ),
                                                reinterpret_cast< const float* >( &dst[ 1 ]->color( ) ),
                                                reinterpret_cast< const float* >( &dst[ 2 ]->color( ) ) );
-            
+
             const uint8_t r0 = uint8_t( dst[ 0 ]->reflection_index_packed( ) );
             const uint8_t r1 = uint8_t( dst[ 1 ]->reflection_index_packed( ) );
             const uint8_t r2 = uint8_t( dst[ 2 ]->reflection_index_packed( ) );
@@ -1616,7 +1614,7 @@ void ExportMesh( FbxNode*       pNode,
                                                reinterpret_cast< const float* >( &r0 ),
                                                reinterpret_cast< const float* >( &r1 ),
                                                reinterpret_cast< const float* >( &r2 ) );
-       
+
             switch ( eVertexFmt ) {
             case apemodefb::EVertexFormatFb_Decompressed:
                 break;
@@ -1625,7 +1623,7 @@ void ExportMesh( FbxNode*       pNode,
                 { reinterpret_cast< apemodefb::DecompressedSkinnedVertexFb* >( dst[ 0 ] ),
                   reinterpret_cast< apemodefb::DecompressedSkinnedVertexFb* >( dst[ 1 ] ),
                   reinterpret_cast< apemodefb::DecompressedSkinnedVertexFb* >( dst[ 2 ] ) };
-                
+
                 const auto j0 = skinnedDst[ 0 ]->joint_indices( );
                 const auto j1 = skinnedDst[ 1 ]->joint_indices( );
                 const auto j2 = skinnedDst[ 2 ]->joint_indices( );
@@ -1645,7 +1643,7 @@ void ExportMesh( FbxNode*       pNode,
                 { reinterpret_cast< apemodefb::DecompressedFatSkinnedVertexFb* >( dst[ 0 ] ),
                   reinterpret_cast< apemodefb::DecompressedFatSkinnedVertexFb* >( dst[ 1 ] ),
                   reinterpret_cast< apemodefb::DecompressedFatSkinnedVertexFb* >( dst[ 2 ] ) };
-                
+
                 const auto j0 = skinnedDst[ 0 ]->decompressed_skinned( ).joint_indices( );
                 const auto j1 = skinnedDst[ 1 ]->decompressed_skinned( ).joint_indices( );
                 const auto j2 = skinnedDst[ 2 ]->decompressed_skinned( ).joint_indices( );
@@ -1679,13 +1677,13 @@ void ExportMesh( FbxNode*       pNode,
                 break;
             }
         }
-        
+
         apemode::Stopwatch sw;
         s.console->info( "Starting draco mesh finalization ..." );
         if ( auto finalizedMesh = builder.Finalize( ) ) {
             s.console->info( "Draco mesh finalization succeeded." );
             s.console->info( "Starting draco encoding ..." );
-            
+
             #if 0
             draco::MeshCleanup cleanup;
             if ( cleanup( finalizedMesh.get( ), draco::MeshCleanupOptions( ) ) ) {
@@ -1696,7 +1694,7 @@ void ExportMesh( FbxNode*       pNode,
             #endif
 
             draco::EncoderBuffer encoderBuffer{};
-            
+
             draco::ExpertEncoder encoder( *finalizedMesh.get( ) );
             encoder.Reset( draco::ExpertEncoder::OptionsType::CreateDefaultOptions( ) );
             encoder.SetEncodingMethod( encoderMethod );
@@ -1711,7 +1709,7 @@ void ExportMesh( FbxNode*       pNode,
             #endif
             encoder.SetAttributeQuantization(colorAttributeIndex, 8);
             encoder.SetAttributeQuantization(reflectionIndexAttributeIndex, 8);
-            
+
             if (jointIndicesAttributeIndex != -1) {
                 assert( jointWeightsAttributeIndex != -1 );
                 if (jointIndicesQuantizationBits != -1)
@@ -1726,7 +1724,7 @@ void ExportMesh( FbxNode*       pNode,
                 if (jointWeightsQuantizationBits != -1)
                     encoder.SetAttributeQuantization(extraJointWeightsAttributeIndex, jointWeightsQuantizationBits);
             }
-        
+
 //            auto options = draco::EncoderOptionsBase< draco::GeometryAttribute::Type >::CreateDefaultOptions( );
 //            options.SetGlobalBool( "split_mesh_on_seams", false );
 //            draco::Encoder encoder;
@@ -1738,11 +1736,11 @@ void ExportMesh( FbxNode*       pNode,
 //            encoder.SetAttributeQuantization( draco::GeometryAttribute::GENERIC, 30 );
 //            encoder.SetAttributeQuantization( draco::GeometryAttribute::NORMAL, 8 );
 //            const draco::Status encoderStatus = encoder.EncodeMeshToBuffer( *finalizedMesh.get( ), &encoderBuffer );
-        
+
             const draco::Status encoderStatus = encoder.EncodeToBuffer( &encoderBuffer );
             if ( encoderStatus.code( ) == draco::Status::OK ) {
                 size_t originalVertexSize = vertexCount * ( 4 * 3 + 4 * 2 + 6 * 4 + 4 * 4 );
-            
+
                 s.console->info( "DracoMeshEncoding\t{}\t{}\t{}\t{}\t{}%\t{}\tDVF_{}\t{}",
                                  m.vertices.size( ),
                                  encoderBuffer.size( ),
@@ -1766,7 +1764,7 @@ void ExportMesh( FbxNode*       pNode,
     } else {
         size_t stride = 0;
         size_t strideUnskinned = 0;
-        
+
         strideUnskinned = sizeof( apemodefb::DefaultVertexFb );
         if ( skinInfos.empty( ) ) {
             stride = sizeof( apemodefb::DefaultVertexFb );
@@ -1786,7 +1784,7 @@ void ExportMesh( FbxNode*       pNode,
                 break;
             }
         }
-        
+
         assert( stride != 0 );
         m.vertices.resize( stride * vertexCount );
 
@@ -1811,7 +1809,7 @@ void ExportMesh( FbxNode*       pNode,
 
             assert( ( stride * i ) < m.vertices.size( ) );
             auto& dst = *reinterpret_cast< apemodefb::DefaultVertexFb* >( m.vertices.data( ) + stride * i );
-            
+
             dst.mutable_position( ).mutate_x( vertices[ i ].position.x );
             dst.mutable_position( ).mutate_y( vertices[ i ].position.y );
             dst.mutable_position( ).mutate_z( vertices[ i ].position.z );
@@ -1830,14 +1828,14 @@ void ExportMesh( FbxNode*       pNode,
             for ( uint32_t i = 0; i < vertexCount; ++i ) {
                 auto controlPointIndex = vertices[ i ].controlPointIndex;
                 auto& skinInfo = skinInfos[ controlPointIndex ];
-                
+
                 assert( boneCount == eBoneCountPerControlPoint_4 ||
                         boneCount == eBoneCountPerControlPoint_8 );
 
                 switch ( boneCount ) {
                 case eBoneCountPerControlPoint_4: {
                     const auto compiledWeightsIndices = skinInfo.Compile< eBoneCountPerControlPoint_4 >( );
-                    
+
                     auto dst = reinterpret_cast< apemodefb::SkinnedVertexFb* >( m.vertices.data( ) + stride * i );
                     dst->mutable_joint_indices_weights( ).mutate_x( compiledWeightsIndices[ 0 ] );
                     dst->mutable_joint_indices_weights( ).mutate_y( compiledWeightsIndices[ 1 ] );
@@ -1846,7 +1844,7 @@ void ExportMesh( FbxNode*       pNode,
                 } break;
                 case eBoneCountPerControlPoint_8: {
                     const auto compiledWeightsIndices = skinInfo.Compile< eBoneCountPerControlPoint_8 >( );
-                    
+
                     auto dst = reinterpret_cast< apemodefb::FatSkinnedVertexFb* >( m.vertices.data( ) + stride * i );
                     dst->mutable_skinned_vertex( ).mutable_joint_indices_weights( ).mutate_x( compiledWeightsIndices[ 0 ] );
                     dst->mutable_skinned_vertex( ).mutable_joint_indices_weights( ).mutate_y( compiledWeightsIndices[ 1 ] );
