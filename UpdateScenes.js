@@ -46,9 +46,9 @@ if (process.platform == 'win32') {
     commandsDrc.push('cd ./build_msvc_visual_studio_15_2017_win64/Release/');
     commandsRegDrc.push('cd ./build_msvc_visual_studio_15_2017_win64/Release/');
 } else if (process.platform == 'darwin') {
-    commands.push('cd build_darwin_x86_64_appleclang_xcode/Release');
-    commandsDrc.push('cd build_darwin_x86_64_appleclang_xcode/Release');
-    commandsRegDrc.push('cd build_darwin_x86_64_appleclang_xcode/Release');
+    commands.push('cd build_appleclang_xcode/Release');
+    commandsDrc.push('cd build_appleclang_xcode/Release');
+    commandsRegDrc.push('cd build_appleclang_xcode/Release');
 } else {
     commands.push('cd build_linux_x86_64_gnu/Release');
 }
@@ -154,7 +154,7 @@ sceneSrcFiles.forEach(function (sceneSrcFile) {
         }
     } else {
         var sceneName = path.parse(sceneSrcFile).name;
-        console.log('Adding jile: ' + sceneName);
+        console.log('Adding file: ' + sceneName);
         var currentCommandDrc = getRegularCommand(sceneSrcFile, sceneName, modelsPath, sceneSrcDirectory, 'Drc');
         currentCommandDrc += ' --mesh-compression draco-edgebreaker';
         currentCommandDrc += ' --anim-compression draco-keyframe-animation';

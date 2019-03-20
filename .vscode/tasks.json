@@ -8,8 +8,9 @@
             "args": [
                 "-G",
                 "\"'Visual Studio 15 2017 Win64'\"",
-                "-B${workspaceFolder}/build_msvc_visual_studio_15_2017_win64",
+                "-B${workspaceFolder}/build_msvc",
                 "-H${workspaceFolder}",
+                "-DBUILD_FOLDER_SUFFIX:STRING=build_msvc",
                 "-DFBX_SDK_INCLUDE_DIR=C:/Program Files/Autodesk/FBX/FBX SDK/2018.1.1/include",
                 "-DFBX_SDK_LIBRARY_DEBUG=C:/Program Files/Autodesk/FBX/FBX SDK/2018.1.1/lib/vs2015/x64/debug/libfbxsdk-md.lib",
                 "-DFBX_SDK_LIBRARY_RELEASE=C:/Program Files/Autodesk/FBX/FBX SDK/2018.1.1/lib/vs2015/x64/release/libfbxsdk-md.lib",
@@ -82,7 +83,7 @@
             "command": "cmake",
             "args": [
                 "-G", "Xcode",
-                "-H.", "-Bbuild_darwin_x86_64_appleclang_xcode",
+                "-H.", "-Bbuild_appleclang_xcode",
                 "-DFBX_SDK_INCLUDE_DIR=/Applications/Autodesk/FBX SDK/2019.0/include",
                 "-DFBX_SDK_LIBRARY_DEBUG=/Applications/Autodesk/FBX SDK/2019.0/lib/clang/debug/libfbxsdk.a",
                 "-DFBX_SDK_LIBRARY_RELEASE=/Applications/Autodesk/FBX SDK/2019.0/lib/clang/release/libfbxsdk.a",
@@ -104,14 +105,14 @@
             "type": "shell",
             "command": "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/MSBuild/15.0/Bin/MSBuild.exe",
             "args": [
-                "${workspaceFolder}/build_msvc_visual_studio_15_2017_win64/FbxPipeline.sln",
+                "${workspaceFolder}/build_msvc/FbxPipeline.sln",
                 "/m",
                 "/nologo",
                 "/verbosity:normal",  // "enum": ["quiet", "minimal", "normal", "detailed", "diagnostic"]
                 "/p:Configuration=Debug"
             ],
             "options": {
-                "cwd": "${workspaceFolder}/build_msvc_visual_studio_15_2017_win64"
+                "cwd": "${workspaceFolder}/build_msvc"
             },
             "group": {
                 "kind": "build",
@@ -126,14 +127,14 @@
             "type": "shell",
             "command": "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/MSBuild/15.0/Bin/MSBuild.exe",
             "args": [
-                "${workspaceFolder}/build_msvc_visual_studio_15_2017_win64/FbxPipeline.sln",
+                "${workspaceFolder}/build_msvc/FbxPipeline.sln",
                 "/m",
                 "/nologo",
                 "/verbosity:diagnostic",  // "enum": ["quiet", "minimal", "normal", "detailed", "diagnostic"]
                 "/p:Configuration=Release"
             ],
             "options": {
-                "cwd": "${workspaceFolder}/build_msvc_visual_studio_15_2017_win64"
+                "cwd": "${workspaceFolder}/build_msvc"
             },
             "group": {
                 "kind": "build",

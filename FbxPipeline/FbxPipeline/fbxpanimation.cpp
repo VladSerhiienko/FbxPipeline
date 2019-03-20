@@ -565,23 +565,26 @@ void ExportAnimation( FbxNode* pNode, apemode::Node& n ) {
                 #endif
 
                 if ( encoderStatus.code( ) != draco::Status::Code::OK ) {
-                    s.console->error( "Draco keyframe encoding failed: {}", encoderStatus.error_msg( ) );
+                    s.console->error( "Keyframe encoding failed: {}", encoderStatus.error_msg( ) );
                 } else if ( curve.keys.size( ) <= encoderBuffer.size( ) ) {
-                    s.console->error( "Draco keyframe encoding is inefficient: original {} ({}) vs encoded {} ({})",
+                    s.console->error( "Keyframe encoding is inefficient: original {} ({}) vs encoded {} ({})",
                                       curve.keys.size( ),
                                       encoderBuffer.size( ),
                                       ToPrettySizeString( curve.keys.size( ) ),
                                       ToPrettySizeString( encoderBuffer.size( ) ) );
                 } else {
-                    s.console->info(  "DracoKeyframeAnimEncoding\t{}\t{}\t{}\t{}\t{}%\t{}\tKF_{}\t{}",
-                                      curve.keys.size( ) ,
-                                      encoderBuffer.size( ),
-                                      ToPrettySizeString( curve.keys.size( ) ),
-                                      ToPrettySizeString( encoderBuffer.size( ) ),
-                                      100.0f * encoderBuffer.size( ) / curve.keys.size( ),
-                                      keyCount,
-                                      apemodefb::EnumNameEAnimCurveKeyTypeFb( curve.keyType ),
-                                      sw.ElapsedSeconds( ) );
+                    s.console->info(
+                        "Encoded keyframe animation: {} -> {}, ({} -> {}), "
+                        "compression: {}% ({}x), keys: {}, format: {}, dt: {} seconds",
+                        curve.keys.size( ),
+                        encoderBuffer.size( ),
+                        ToPrettySizeString( curve.keys.size( ) ),
+                        ToPrettySizeString( encoderBuffer.size( ) ),
+                        ( 100.0f * encoderBuffer.size( ) / curve.keys.size( ) ),
+                        ( 1.0f * curve.keys.size( ) / encoderBuffer.size( ) ),
+                        keyCount,
+                        apemodefb::EnumNameEAnimCurveKeyTypeFb( curve.keyType ),
+                        sw.ElapsedSeconds( ) );
 
                     curve.keys.resize( encoderBuffer.size( ) );
                     memcpy( curve.keys.data( ), encoderBuffer.data( ), encoderBuffer.size( ) );

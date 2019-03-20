@@ -16,6 +16,8 @@
 #include <draco/compression/encode.h>
 #include <draco/compression/expert_encode.h>
 
+#include <zstd.h>
+
 namespace mathfu {
     using dvec2 = mathfu::Vector< double, 2 >;
     using dvec3 = mathfu::Vector< double, 3 >;
@@ -824,8 +826,11 @@ struct TControlPointSkinInfo {
             totalWeight += weights[ i ].weight;
         }
 
-        for ( uint32_t i = 0; i < bonesPerVertex; ++i ) {
-            weights[ i ].weight /= totalWeight;
+        if ( totalWeight > std::numeric_limits<float>::epsilon( ) ) {
+            for ( uint32_t i = 0; i < bonesPerVertex; ++i ) {
+                weights[ i ].weight /= totalWeight;
+                AssertValidFloat( weights[ i ].weight );
+            }
         }
     }
 
@@ -833,6 +838,7 @@ struct TControlPointSkinInfo {
     std::array< float, TBoneCount > Compile( ) {
         float totalWeight = float( 0 );
         for ( uint32_t i = 0; i < TBoneCount; ++i ) {
+            AssertValidFloat( weights[ i ].weight );
             assert( weights[ i ].weight <= 1.0f );
             totalWeight += weights[ i ].weight;
         }
@@ -1167,6 +1173,70 @@ mathfu::dquat GetQTangent(const mathfu::dvec3 normal, const mathfu::dvec3 tangen
     return q;
 }
 
+struct EncodingVertexLayout {
+    int positionAttributeIndex          = -1;
+    int uvAttributeIndex                = -1;
+    int normalAttributeIndex            = -1;
+    int tangentAttributeIndex           = -1;
+    int colorAttributeIndex             = -1;
+    int reflectionAttributeIndex        = -1;
+    int jointIndicesAttributeIndex      = -1;
+    int jointWeightsAttributeIndex      = -1;
+    int extraJointIndicesAttributeIndex = -1;
+    int extraJointWeightsAttributeIndex = -1;
+};
+
+struct EncodingProfile {
+    int positionQuantizationBits     = 16;
+    int uvQuantizationBits           = 16;
+    int normalQuantizationBits       = 8;
+    int colorQuantizationBits        = 8;
+    int reflectionQuantizationBits   = 4;
+    int jointIndicesQuantizationBits = 8;
+    int jointWeightsQuantizationBits = 16;
+};
+
+void ConfigureEncoder( draco::ExpertEncoder& encoder, EncodingVertexLayout a, EncodingProfile encodingProfile ) {
+    encoder.SetAttributeQuantization( a.positionAttributeIndex, encodingProfile.positionQuantizationBits );
+    encoder.SetAttributeQuantization( a.uvAttributeIndex, encodingProfile.uvQuantizationBits );
+    encoder.SetAttributeQuantization( a.normalAttributeIndex, encodingProfile.normalQuantizationBits );
+    encoder.SetAttributeQuantization( a.tangentAttributeIndex, encodingProfile.normalQuantizationBits );
+    encoder.SetAttributeQuantization( a.colorAttributeIndex, encodingProfile.colorQuantizationBits );
+    encoder.SetAttributeQuantization( a.reflectionAttributeIndex, encodingProfile.reflectionQuantizationBits );
+
+    if ( a.jointIndicesAttributeIndex != -1 ) {
+        assert( a.jointWeightsAttributeIndex != -1 );
+
+        if ( encodingProfile.jointIndicesQuantizationBits != -1 )
+            encoder.SetAttributeQuantization( a.jointIndicesAttributeIndex, encodingProfile.jointIndicesQuantizationBits );
+            
+        if ( encodingProfile.jointWeightsQuantizationBits != -1 )
+            encoder.SetAttributeQuantization( a.jointWeightsAttributeIndex, encodingProfile.jointWeightsQuantizationBits );
+
+        if ( a.extraJointIndicesAttributeIndex != -1 ) {
+            assert( a.extraJointWeightsAttributeIndex != -1 );
+
+            if ( encodingProfile.jointIndicesQuantizationBits != -1 )
+                encoder.SetAttributeQuantization( a.extraJointIndicesAttributeIndex,
+                                                  encodingProfile.jointIndicesQuantizationBits );
+
+            if ( encodingProfile.jointWeightsQuantizationBits != -1 )
+                encoder.SetAttributeQuantization( a.extraJointWeightsAttributeIndex,
+                                                  encodingProfile.jointWeightsQuantizationBits );
+        }
+    }
+}
+
+void ReportZstdCompressionRatio(const void* pSrc, size_t srcSize, size_t& zstdSize, double& elapsedTime, int compressionLevel = ZSTD_maxCLevel()) {
+    size_t compressedSize = ZSTD_compressBound(srcSize);
+    std::vector<char> compressed;
+    compressed.resize(compressedSize);
+    
+    apemode::Stopwatch sw{};
+    zstdSize = ZSTD_compress(compressed.data(), compressedSize, pSrc, srcSize, compressionLevel);
+    elapsedTime = sw.ElapsedSeconds();
+}
+
 enum class EVertexOrder { CW, CCW };
 
 template < typename TIndex, EVertexOrder TOrder = EVertexOrder::CCW >
@@ -1392,26 +1462,12 @@ void ExportMesh( FbxNode*       pNode,
             dst.mutable_uv( ).mutate_x( vertices[ i ].texCoords.x );
             dst.mutable_uv( ).mutate_y( vertices[ i ].texCoords.y );
 
-//            auto normalHemioct = ToHemioct( vertices[ i ].normal );
-//            auto tangentHemioct = ToHemioct( vertices[ i ].tangent.xyz( ) );
-//            dst.mutable_normal_hemioct( ).mutate_x( normalHemioct.x );
-//            dst.mutable_normal_hemioct( ).mutate_y( normalHemioct.y );
-//            dst.mutable_tangent_hemioct( ).mutate_x( tangentHemioct.x );
-//            dst.mutable_tangent_hemioct( ).mutate_y( tangentHemioct.y );
-
-            #ifndef APEMODE_DECOMPRESSED_QTANGENTS
             dst.mutable_normal( ).mutate_x( vertices[ i ].normal.x );
             dst.mutable_normal( ).mutate_y( vertices[ i ].normal.y );
             dst.mutable_normal( ).mutate_z( vertices[ i ].normal.z );
             dst.mutable_tangent( ).mutate_x( vertices[ i ].tangent.x );
             dst.mutable_tangent( ).mutate_y( vertices[ i ].tangent.y );
             dst.mutable_tangent( ).mutate_z( vertices[ i ].tangent.z );
-            #else
-            dst.mutable_qtangent( ).mutate_s( qtangents[ i ].scalar( ) );
-            dst.mutable_qtangent( ).mutate_nx( qtangents[ i ].vector( ).x );
-            dst.mutable_qtangent( ).mutate_ny( qtangents[ i ].vector( ).y );
-            dst.mutable_qtangent( ).mutate_nz( qtangents[ i ].vector( ).z );
-            #endif
 
             dst.mutable_color( ).mutate_x( vertices[ i ].color.x );
             dst.mutable_color( ).mutate_y( vertices[ i ].color.y );
@@ -1502,53 +1558,41 @@ void ExportMesh( FbxNode*       pNode,
             }
         }
 
-        draco::MeshEncoderMethod encoderMethod = draco::MESH_EDGEBREAKER_ENCODING;
-        if ( meshCompression != "draco-edgebreaker" ) {
-            assert( meshCompression == "draco-esequential" );
-            encoderMethod = draco::MESH_SEQUENTIAL_ENCODING;
-        }
-
         draco::TriangleSoupMeshBuilder builder;
         assert( vertexCount % 3 == 0 );
         builder.Start( vertexCount / 3 );
+        
+        EncodingVertexLayout mapping;
 
-        const int positionAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::POSITION, 3, draco::DataType::DT_FLOAT32 );
-        const int uvAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::TEX_COORD, 2, draco::DataType::DT_FLOAT32 );
-        #ifndef APEMODE_DECOMPRESSED_QTANGENTS
-        const int normalAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::NORMAL, 3, draco::DataType::DT_FLOAT32 );
-        const int tangentAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::NORMAL, 3, draco::DataType::DT_FLOAT32 );
-        #else
-        const int qtangentAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::COLOR, 4, draco::DataType::DT_FLOAT32 );
-        #endif
-        const int colorAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::COLOR, 4, draco::DataType::DT_FLOAT32 );
-        const int reflectionIndexAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::GENERIC, 1, draco::DataType::DT_UINT8 );
-        int jointIndicesAttributeIndex = -1;
-        int jointWeightsAttributeIndex = -1;
-        int extraJointIndicesAttributeIndex = -1;
-        int extraJointWeightsAttributeIndex = -1;
-
+        mapping.positionAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::POSITION, 3, draco::DataType::DT_FLOAT32 );
+        mapping.uvAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::TEX_COORD, 2, draco::DataType::DT_FLOAT32 );
+        mapping.normalAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::NORMAL, 3, draco::DataType::DT_FLOAT32 );
+        mapping.tangentAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::NORMAL, 3, draco::DataType::DT_FLOAT32 );
+        mapping.colorAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::COLOR, 4, draco::DataType::DT_FLOAT32 );
+        mapping.reflectionAttributeIndex = builder.AddAttribute( draco::GeometryAttribute::Type::GENERIC, 1, draco::DataType::DT_UINT8 );
+        
         auto jointIndicesType = draco::GeometryAttribute::Type::GENERIC;
         auto jointIndicesComponentCount = 4;
         auto jointIndicesDataType = draco::DT_UINT8;
-        auto jointIndicesQuantizationBits = 8;
 
         auto jointWeightsType = draco::GeometryAttribute::Type::COLOR;
         auto jointWeightsComponentCount = 4;
         auto jointWeightsDataType = draco::DT_FLOAT32;
-        auto jointWeightsQuantizationBits = 16;
+        
+        EncodingProfile encodingProfile{};
 
         switch ( eVertexFmt ) {
         case apemodefb::EVertexFormatFb_Decompressed:
             break;
         case apemodefb::EVertexFormatFb_DecompressedSkinned:
-            jointIndicesAttributeIndex = builder.AddAttribute( jointIndicesType, jointIndicesComponentCount, jointIndicesDataType );
-            jointWeightsAttributeIndex = builder.AddAttribute( jointWeightsType, jointWeightsComponentCount, jointWeightsDataType );
+            mapping.jointIndicesAttributeIndex = builder.AddAttribute( jointIndicesType, jointIndicesComponentCount, jointIndicesDataType );
+            mapping.jointWeightsAttributeIndex = builder.AddAttribute( jointWeightsType, jointWeightsComponentCount, jointWeightsDataType );
             break;
         case apemodefb::EVertexFormatFb_DecompressedFatSkinned:
-            jointIndicesAttributeIndex = builder.AddAttribute( jointIndicesType, jointIndicesComponentCount, jointIndicesDataType );
-            jointWeightsAttributeIndex = builder.AddAttribute( jointWeightsType, jointWeightsComponentCount, jointWeightsDataType );
-            extraJointIndicesAttributeIndex = builder.AddAttribute( jointIndicesType, jointIndicesComponentCount, jointIndicesDataType );
-            extraJointWeightsAttributeIndex = builder.AddAttribute( jointWeightsType, jointWeightsComponentCount, jointWeightsDataType );
+            mapping.jointIndicesAttributeIndex = builder.AddAttribute( jointIndicesType, jointIndicesComponentCount, jointIndicesDataType );
+            mapping.jointWeightsAttributeIndex = builder.AddAttribute( jointWeightsType, jointWeightsComponentCount, jointWeightsDataType );
+            mapping.extraJointIndicesAttributeIndex = builder.AddAttribute( jointIndicesType, jointIndicesComponentCount, jointIndicesDataType );
+            mapping.extraJointWeightsAttributeIndex = builder.AddAttribute( jointWeightsType, jointWeightsComponentCount, jointWeightsDataType );
             break;
         default:
             assert(false);
@@ -1562,45 +1606,29 @@ void ExportMesh( FbxNode*       pNode,
                                                       , reinterpret_cast< apemodefb::DecompressedVertexFb* >( m.vertices.data( ) + stride * ( i + 2 ) ) };
 
 
-            builder.SetAttributeValuesForFace( positionAttributeIndex,
+            builder.SetAttributeValuesForFace( mapping.positionAttributeIndex,
                                                faceIndex,
                                                reinterpret_cast< const float* >( &dst[ 0 ]->position( ) ),
                                                reinterpret_cast< const float* >( &dst[ 1 ]->position( ) ),
                                                reinterpret_cast< const float* >( &dst[ 2 ]->position( ) ) );
-            builder.SetAttributeValuesForFace( uvAttributeIndex,
+            builder.SetAttributeValuesForFace( mapping.uvAttributeIndex,
                                                faceIndex,
                                                reinterpret_cast< const float* >( &dst[ 0 ]->uv( ) ),
                                                reinterpret_cast< const float* >( &dst[ 1 ]->uv( ) ),
                                                reinterpret_cast< const float* >( &dst[ 2 ]->uv( ) ) );
-            #ifndef APEMODE_DECOMPRESSED_QTANGENTS
-            builder.SetAttributeValuesForFace( normalAttributeIndex,
+            
+            builder.SetAttributeValuesForFace( mapping.normalAttributeIndex,
                                                faceIndex,
                                                reinterpret_cast< const float* >( &dst[ 0 ]->normal( ) ),
                                                reinterpret_cast< const float* >( &dst[ 1 ]->normal( ) ),
                                                reinterpret_cast< const float* >( &dst[ 2 ]->normal( ) ) );
-            builder.SetAttributeValuesForFace( tangentAttributeIndex,
+            builder.SetAttributeValuesForFace( mapping.tangentAttributeIndex,
                                                faceIndex,
                                                reinterpret_cast< const float* >( &dst[ 0 ]->tangent( ) ),
                                                reinterpret_cast< const float* >( &dst[ 1 ]->tangent( ) ),
                                                reinterpret_cast< const float* >( &dst[ 2 ]->tangent( ) ) );
-            #else
-            apemodefb::QuatFb q[3] = { dst[ 0 ]->qtangent()
-                                     , dst[ 1 ]->qtangent()
-                                     , dst[ 2 ]->qtangent() };
-
-            for (auto& qq : q) {
-                qq.mutate_s(qq.s() * 0.5f + 0.5f);
-                qq.mutate_nx(qq.nx() * 0.5f + 0.5f);
-                qq.mutate_ny(qq.ny() * 0.5f + 0.5f);
-                qq.mutate_nz(qq.nz() * 0.5f + 0.5f);
-            }
-            builder.SetAttributeValuesForFace( qtangentAttributeIndex,
-                                               faceIndex,
-                                               reinterpret_cast< const float* >( &q[ 0 ] ),
-                                               reinterpret_cast< const float* >( &q[ 1 ] ),
-                                               reinterpret_cast< const float* >( &q[ 2 ] ) );
-            #endif
-            builder.SetAttributeValuesForFace( colorAttributeIndex,
+            
+            builder.SetAttributeValuesForFace( mapping.colorAttributeIndex,
                                                faceIndex,
                                                reinterpret_cast< const float* >( &dst[ 0 ]->color( ) ),
                                                reinterpret_cast< const float* >( &dst[ 1 ]->color( ) ),
@@ -1609,7 +1637,7 @@ void ExportMesh( FbxNode*       pNode,
             const uint8_t r0 = uint8_t( dst[ 0 ]->reflection_index_packed( ) );
             const uint8_t r1 = uint8_t( dst[ 1 ]->reflection_index_packed( ) );
             const uint8_t r2 = uint8_t( dst[ 2 ]->reflection_index_packed( ) );
-            builder.SetAttributeValuesForFace( reflectionIndexAttributeIndex,
+            builder.SetAttributeValuesForFace( mapping.reflectionAttributeIndex,
                                                faceIndex,
                                                reinterpret_cast< const float* >( &r0 ),
                                                reinterpret_cast< const float* >( &r1 ),
@@ -1627,12 +1655,13 @@ void ExportMesh( FbxNode*       pNode,
                 const auto j0 = skinnedDst[ 0 ]->joint_indices( );
                 const auto j1 = skinnedDst[ 1 ]->joint_indices( );
                 const auto j2 = skinnedDst[ 2 ]->joint_indices( );
-                builder.SetAttributeValuesForFace( jointIndicesAttributeIndex,
+
+                builder.SetAttributeValuesForFace( mapping.jointIndicesAttributeIndex,
                                                    faceIndex,
                                                    reinterpret_cast< const float* >( &j0 ),
                                                    reinterpret_cast< const float* >( &j1 ),
                                                    reinterpret_cast< const float* >( &j2 ) );
-                builder.SetAttributeValuesForFace( jointWeightsAttributeIndex,
+                builder.SetAttributeValuesForFace( mapping.jointWeightsAttributeIndex,
                                                    faceIndex,
                                                    reinterpret_cast< const float* >( &skinnedDst[ 0 ]->joint_weights( ) ),
                                                    reinterpret_cast< const float* >( &skinnedDst[ 1 ]->joint_weights( ) ),
@@ -1647,12 +1676,14 @@ void ExportMesh( FbxNode*       pNode,
                 const auto j0 = skinnedDst[ 0 ]->decompressed_skinned( ).joint_indices( );
                 const auto j1 = skinnedDst[ 1 ]->decompressed_skinned( ).joint_indices( );
                 const auto j2 = skinnedDst[ 2 ]->decompressed_skinned( ).joint_indices( );
-                builder.SetAttributeValuesForFace( jointIndicesAttributeIndex,
+
+                builder.SetAttributeValuesForFace( mapping.jointIndicesAttributeIndex,
                                                    faceIndex,
                                                    reinterpret_cast< const float* >( &j0 ),
                                                    reinterpret_cast< const float* >( &j1 ),
                                                    reinterpret_cast< const float* >( &j2 ) );
-                builder.SetAttributeValuesForFace( jointWeightsAttributeIndex,
+
+                builder.SetAttributeValuesForFace( mapping.jointWeightsAttributeIndex,
                                                    faceIndex,
                                                    reinterpret_cast< const float* >( &skinnedDst[ 0 ]->decompressed_skinned( ).joint_weights( ) ),
                                                    reinterpret_cast< const float* >( &skinnedDst[ 1 ]->decompressed_skinned( ).joint_weights( ) ),
@@ -1661,12 +1692,13 @@ void ExportMesh( FbxNode*       pNode,
                 const auto ej0 = skinnedDst[ 0 ]->extra_joint_indices( );
                 const auto ej1 = skinnedDst[ 1 ]->extra_joint_indices( );
                 const auto ej2 = skinnedDst[ 2 ]->extra_joint_indices( );
-                builder.SetAttributeValuesForFace( extraJointIndicesAttributeIndex,
+
+                builder.SetAttributeValuesForFace( mapping.extraJointIndicesAttributeIndex,
                                                    faceIndex,
                                                    reinterpret_cast< const float* >( &ej0 ),
                                                    reinterpret_cast< const float* >( &ej1 ),
                                                    reinterpret_cast< const float* >( &ej2 ) );
-                builder.SetAttributeValuesForFace( extraJointWeightsAttributeIndex,
+                builder.SetAttributeValuesForFace( mapping.extraJointWeightsAttributeIndex,
                                                    faceIndex,
                                                    reinterpret_cast< const float* >( &skinnedDst[ 0 ]->extra_joint_weights( ) ),
                                                    reinterpret_cast< const float* >( &skinnedDst[ 1 ]->extra_joint_weights( ) ),
@@ -1678,110 +1710,65 @@ void ExportMesh( FbxNode*       pNode,
             }
         }
 
-        apemode::Stopwatch sw;
         s.console->info( "Starting draco mesh finalization ..." );
         if ( auto finalizedMesh = builder.Finalize( ) ) {
             s.console->info( "Draco mesh finalization succeeded." );
             s.console->info( "Starting draco encoding ..." );
 
-            #if 0
-            draco::MeshCleanup cleanup;
-            if ( cleanup( finalizedMesh.get( ), draco::MeshCleanupOptions( ) ) ) {
-                s.console->info( "Succeeded" );
-            } else {
-                s.console->info( "Failed" );
-            }
-            #endif
+            const size_t originalSize = m.vertices.size( ) + m.indices.size( );
 
             draco::EncoderBuffer encoderBuffer{};
+            draco::Status        encoderStatus;
 
             draco::ExpertEncoder encoder( *finalizedMesh.get( ) );
             encoder.Reset( draco::ExpertEncoder::OptionsType::CreateDefaultOptions( ) );
-            encoder.SetEncodingMethod( encoderMethod );
+            encoder.SetEncodingMethod( draco::MESH_EDGEBREAKER_ENCODING );
             encoder.SetSpeedOptions( -1, -1 );
-            encoder.SetAttributeQuantization(positionAttributeIndex, 16);
-            encoder.SetAttributeQuantization(uvAttributeIndex, 16);
-            #ifndef APEMODE_DECOMPRESSED_QTANGENTS
-            encoder.SetAttributeQuantization(normalAttributeIndex, 8);
-            encoder.SetAttributeQuantization(tangentAttributeIndex, 8);
-            #else
-            encoder.SetAttributeQuantization(qtangentAttributeIndex, 16);
-            #endif
-            encoder.SetAttributeQuantization(colorAttributeIndex, 8);
-            encoder.SetAttributeQuantization(reflectionIndexAttributeIndex, 8);
 
-            if (jointIndicesAttributeIndex != -1) {
-                assert( jointWeightsAttributeIndex != -1 );
-                if (jointIndicesQuantizationBits != -1)
-                    encoder.SetAttributeQuantization(jointIndicesAttributeIndex, jointIndicesQuantizationBits);
-                if (jointWeightsQuantizationBits != -1)
-                    encoder.SetAttributeQuantization(jointWeightsAttributeIndex, jointWeightsQuantizationBits);
-            }
-            if (extraJointIndicesAttributeIndex != -1) {
-                assert( extraJointWeightsAttributeIndex != -1 );
-                if (jointIndicesQuantizationBits != -1)
-                    encoder.SetAttributeQuantization(extraJointIndicesAttributeIndex, jointIndicesQuantizationBits);
-                if (jointWeightsQuantizationBits != -1)
-                    encoder.SetAttributeQuantization(extraJointWeightsAttributeIndex, jointWeightsQuantizationBits);
-            }
-
-//            auto options = draco::EncoderOptionsBase< draco::GeometryAttribute::Type >::CreateDefaultOptions( );
-//            options.SetGlobalBool( "split_mesh_on_seams", false );
-//            draco::Encoder encoder;
-//            encoder.Reset( options );
-//            encoder.SetEncodingMethod( encoderMethod );
-//            encoder.SetSpeedOptions( -1, -1 );
-//            encoder.SetAttributeQuantization( draco::GeometryAttribute::POSITION, 16 );
-//            encoder.SetAttributeQuantization( draco::GeometryAttribute::TEX_COORD, 16 );
-//            encoder.SetAttributeQuantization( draco::GeometryAttribute::GENERIC, 30 );
-//            encoder.SetAttributeQuantization( draco::GeometryAttribute::NORMAL, 8 );
-//            const draco::Status encoderStatus = encoder.EncodeMeshToBuffer( *finalizedMesh.get( ), &encoderBuffer );
-
-            const draco::Status encoderStatus = encoder.EncodeToBuffer( &encoderBuffer );
+            ConfigureEncoder( encoder, mapping, encodingProfile );
+            
+            encoderStatus = encoder.EncodeToBuffer( &encoderBuffer );
             if ( encoderStatus.code( ) == draco::Status::OK ) {
-                size_t originalVertexSize = vertexCount * ( 4 * 3 + 4 * 2 + 6 * 4 + 4 * 4 );
+                const size_t edgebreakerSize = encoderBuffer.size();
 
-                s.console->info( "DracoMeshEncoding\t{}\t{}\t{}\t{}\t{}%\t{}\tDVF_{}\t{}",
-                                 m.vertices.size( ),
-                                 encoderBuffer.size( ),
-                                 ToPrettySizeString( m.vertices.size( ) ),
-                                 ToPrettySizeString( encoderBuffer.size( ) ),
-                                 ( 100.0f * encoderBuffer.size( ) / originalVertexSize ), // m.vertices.size( ) ),
+                s.console->info( "Edgebreaker: ({} -> {}), compression: {}x, vertices: {}, format: {}",
+                                 ToPrettySizeString( originalSize ),
+                                 ToPrettySizeString( edgebreakerSize ),
+                                 1.0f * originalSize / edgebreakerSize,
                                  vertexCount,
-                                 apemodefb::EnumNameEVertexFormatFb(eVertexFmt),
-                                 sw.ElapsedSeconds( ) );
+                                 apemodefb::EnumNameEVertexFormatFb( eVertexFmt ) );
 
                 eCompressionType = apemodefb::ECompressionTypeFb_GoogleDraco3D;
                 m.vertices.resize( encoderBuffer.size( ) );
                 memcpy( m.vertices.data( ), encoderBuffer.data( ), encoderBuffer.size( ) );
                 decltype( m.indices )( ).swap( m.indices );
+                
             } else {
                 s.console->info( "Failed: code = {}, error = {}", int( encoderStatus.code( ) ), encoderStatus.error_msg( ) );
                 assert( false );
-                exit(-1);
+                exit( -1 );
             }
         }
     } else {
-        size_t stride = 0;
+        size_t stride          = 0;
         size_t strideUnskinned = 0;
 
         strideUnskinned = sizeof( apemodefb::DefaultVertexFb );
         if ( skinInfos.empty( ) ) {
-            stride = sizeof( apemodefb::DefaultVertexFb );
+            stride     = sizeof( apemodefb::DefaultVertexFb );
             eVertexFmt = apemodefb::EVertexFormatFb_Default;
         } else {
-            assert( boneCount == eBoneCountPerControlPoint_4 ||
-                    boneCount == eBoneCountPerControlPoint_8 );
+            assert( boneCount == eBoneCountPerControlPoint_4 || boneCount == eBoneCountPerControlPoint_8 );
 
             switch ( boneCount ) {
-            case eBoneCountPerControlPoint_4:
-                stride = sizeof( apemodefb::SkinnedVertexFb );
-                eVertexFmt = apemodefb::EVertexFormatFb_Skinned;
-                break;
-            case eBoneCountPerControlPoint_8:
-                stride = sizeof( apemodefb::FatSkinnedVertexFb );
-                eVertexFmt = apemodefb::EVertexFormatFb_FatSkinned;
-                break;
+                case eBoneCountPerControlPoint_4:
+                    stride     = sizeof( apemodefb::SkinnedVertexFb );
+                    eVertexFmt = apemodefb::EVertexFormatFb_Skinned;
+                    break;
+                case eBoneCountPerControlPoint_8:
+                    stride     = sizeof( apemodefb::FatSkinnedVertexFb );
+                    eVertexFmt = apemodefb::EVertexFormatFb_FatSkinned;
+                    break;
             }
         }
 
@@ -1824,7 +1811,7 @@ void ExportMesh( FbxNode*       pNode,
         }
 
         if ( !skinInfos.empty( ) ) {
-            // auto & skin = s.skins[ m.skinId ];
+
             for ( uint32_t i = 0; i < vertexCount; ++i ) {
                 auto controlPointIndex = vertices[ i ].controlPointIndex;
                 auto& skinInfo = skinInfos[ controlPointIndex ];

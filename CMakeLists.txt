@@ -174,6 +174,27 @@ set(json_source_dir ${SOURCE_DIR})
 message(STATUS "json_source_dir = ${json_source_dir}")
 
 ExternalProject_Add(
+    zstd
+    GIT_REPOSITORY "git@github.com:facebook/zstd.git"
+    GIT_TAG "master"
+    UPDATE_COMMAND ""
+    PATCH_COMMAND ""
+    SOURCE_DIR "${CMAKE_SOURCE_DIR}/dependencies/zstd"
+    CONFIGURE_COMMAND mkdir -p ${CMAKE_SOURCE_DIR}/dependencies/zstd/${BUILD_FOLDER_SUFFIX} && ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" -B${CMAKE_SOURCE_DIR}/dependencies/zstd/${BUILD_FOLDER_SUFFIX} -H${CMAKE_SOURCE_DIR}/dependencies/zstd/build/cmake
+    BUILD_COMMAND xcodebuild -project ${CMAKE_SOURCE_DIR}/dependencies/zstd/${BUILD_FOLDER_SUFFIX}/zstd.xcodeproj -configuration Release && xcodebuild -project ${CMAKE_SOURCE_DIR}/dependencies/zstd/${BUILD_FOLDER_SUFFIX}/zstd.xcodeproj -configuration Debug
+    TEST_COMMAND ""
+    INSTALL_COMMAND ""
+)
+
+ExternalProject_Get_Property(zstd SOURCE_DIR)
+ExternalProject_Get_Property(zstd BINARY_DIR)
+set(zstd_source_dir ${SOURCE_DIR})
+set(zstd_binary_dir ${CMAKE_SOURCE_DIR}/dependencies/zstd/${BUILD_FOLDER_SUFFIX}/lib)
+message(STATUS "zstd_source_dir = ${zstd_source_dir}")
+message(STATUS "zstd_binary_dir = ${zstd_binary_dir}")
+
+
+ExternalProject_Add(
     zlib
     GIT_REPOSITORY "git@github.com:madler/zlib.git"
     GIT_TAG "master"
@@ -389,6 +410,7 @@ add_dependencies(
     mathfu
     cxxopts
     spdlog
+    zstd
     zlib
     flatbuffers
     pybind11
@@ -405,6 +427,7 @@ target_include_directories(
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline
     ${CMAKE_SOURCE_DIR}/dependencies/dlib
     ${CMAKE_SOURCE_DIR}/dependencies/draco/src
+    ${zstd_source_dir}/lib
     ${draco_binary_dir}
     ${CMAKE_SOURCE_DIR}/dependencies/cxxopts/include
     ${CMAKE_SOURCE_DIR}/dependencies/mathfu/include
@@ -420,17 +443,20 @@ target_include_directories(
 if (WIN32)
     set(
         third_party_libs
+
         debug ${dlib_binary_dir}/dlib${CONFIGURATION_SUFFIX}/dlib.lib
         debug ${zlib_binary_dir}${CONFIGURATION_SUFFIX}/zlibstaticd.lib
         debug ${flatbuffers_binary_dir}${CONFIGURATION_SUFFIX}/flatbuffers.lib
         debug ${draco_binary_dir}${CONFIGURATION_SUFFIX}/draco.lib
         debug ${draco_binary_dir}${CONFIGURATION_SUFFIX}/dracoenc.lib
+        debug ${zstd_binary_dir}${CONFIGURATION_SUFFIX}/zstd.lib
 
         optimized ${dlib_binary_dir}/dlib${CONFIGURATION_SUFFIX}/dlib.lib
         optimized ${zlib_binary_dir}${CONFIGURATION_SUFFIX}/zlibstatic.lib
         optimized ${flatbuffers_binary_dir}${CONFIGURATION_SUFFIX}/flatbuffers.lib
         optimized ${draco_binary_dir}${CONFIGURATION_SUFFIX}/draco.lib
         optimized ${draco_binary_dir}${CONFIGURATION_SUFFIX}/dracoenc.lib
+        optimized ${zstd_binary_dir}${CONFIGURATION_SUFFIX}/zstd.lib
 
         ${PYTHON_LIBRARY}
         winmm.lib
@@ -445,12 +471,14 @@ elseif(APPLE)
         debug ${draco_binary_dir}/Debug/libdracoenc.a
         debug ${zlib_binary_dir}/Debug/libz.a
         debug ${flatbuffers_binary_dir}/Debug/libflatbuffers.a
+        debug ${zstd_binary_dir}/Debug/libzstd.a
 
         optimized ${dlib_binary_dir}/dlib/Release/libdlib.a
         optimized ${draco_binary_dir}/Release/libdraco.a
         optimized ${draco_binary_dir}/Release/libdracoenc.a
         optimized ${zlib_binary_dir}/Release/libz.a
         optimized ${flatbuffers_binary_dir}/Release/libflatbuffers.a
+        optimized ${zstd_binary_dir}/Release/libzstd.a
 
         ${PYTHON_LIBRARY}
         ${Boost_FILESYSTEM_LIBRARY}
