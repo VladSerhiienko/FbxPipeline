@@ -4,7 +4,6 @@ branches:
     - master
 
 image:
-  # - Visual Studio 2015
   - Visual Studio 2017
 
 configuration:
@@ -21,6 +20,7 @@ matrix:
 
 init:
   - git config --global core.autocrlf true
+
 install:
   - ps: (Get-Content CMakeLists.txt).replace("git@github.com:","https://github.com/") | Set-Content CMakeLists.txt
   - ps: md installs
@@ -40,13 +40,9 @@ install:
 
 before_build:
   - cmake -G "Visual Studio 15 2017 Win64" -Bbuild -H. -DBUILD_FOLDER_SUFFIX:STRING=build -DFBX_SDK_INCLUDE_DIR="C:/Program Files/Autodesk/FBX/FBX SDK/2018.1.1/include" -DFBX_SDK_LIBRARY_DEBUG="C:/Program Files/Autodesk/FBX/FBX SDK/2018.1.1/lib/vs2015/x64/debug/libfbxsdk-md.lib" -DFBX_SDK_LIBRARY_RELEASE="C:/Program Files/Autodesk/FBX/FBX SDK/2018.1.1/lib/vs2015/x64/release/libfbxsdk-md.lib"
-  - msbuild build/FbxPipeline.sln /t:FbxPipeline /p:Configuration="Release"
-  # - cmake -G "Visual Studio 14 2015 Win64" -Bbuild -H. -DBUILD_FOLDER_SUFFIX:STRING=build -DFBX_SDK_INCLUDE_DIR="C:/Program Files/Autodesk/FBX/FBX SDK/2018.1.1/include" -DFBX_SDK_LIBRARY_DEBUG="C:/Program Files/Autodesk/FBX/FBX SDK/2018.1.1/lib/vs2015/x64/debug/libfbxsdk-md.lib" -DFBX_SDK_LIBRARY_RELEASE="C:/Program Files/Autodesk/FBX/FBX SDK/2018.1.1/lib/vs2015/x64/release/libfbxsdk-md.lib"
 
 build:
   project: build/FbxPipeline.sln
-  # parallel: true
-  # verbosity: minimal
 
 notifications:
 - provider: Email
