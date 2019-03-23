@@ -17,6 +17,7 @@ matrix:
         packages:
           - g++-7
           - cmake
+          - boost1.67
   - os: linux
     env: COMPILER_C=clang-7 COMPILER_CC=clang++-7
     compiler:
@@ -28,6 +29,7 @@ matrix:
           - llvm-toolchain-trusty-7
         packages:
           - clang-7
+          - boost1.67
           - cmake
 
 before_script:
