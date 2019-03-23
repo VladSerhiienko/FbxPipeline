@@ -18,9 +18,9 @@ install:
   - ps: Start-Process -FilePath "python364.exe" /S -Wait
   - ps: cd ..
 before_build:
-  - cmake -G "Visual Studio 15 2017 Win64" -Bbuild_msvc_visual_studio_15_2017_win64 -H. -DFBX_SDK_INCLUDE_DIR="C:/Program Files/Autodesk/FBX/FBX SDK/2018.1.1/include" -DFBX_SDK_LIBRARY_DEBUG="C:/Program Files/Autodesk/FBX/FBX SDK/2018.1.1/lib/vs2015/x64/debug/libfbxsdk-md.lib" -DFBX_SDK_LIBRARY_RELEASE="C:/Program Files/Autodesk/FBX/FBX SDK/2018.1.1/lib/vs2015/x64/release/libfbxsdk-md.lib"
+  - cmake -G "Visual Studio 15 2017 Win64" -Bbuild_msvc -H. -DBUILD_FOLDER_SUFFIX:STRING=build_msvc -DFBX_SDK_INCLUDE_DIR="C:/Program Files/Autodesk/FBX/FBX SDK/2018.1.1/include" -DFBX_SDK_LIBRARY_DEBUG="C:/Program Files/Autodesk/FBX/FBX SDK/2018.1.1/lib/vs2015/x64/debug/libfbxsdk-md.lib" -DFBX_SDK_LIBRARY_RELEASE="C:/Program Files/Autodesk/FBX/FBX SDK/2018.1.1/lib/vs2015/x64/release/libfbxsdk-md.lib"
 build:
-  project: build_msvc_visual_studio_15_2017_win64/FbxPipeline.sln
+  project: build_msvc/FbxPipeline.sln
   parallel: true
   verbosity: minimal
 notifications:
