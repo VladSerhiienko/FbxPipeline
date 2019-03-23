@@ -12,7 +12,9 @@ matrix:
       - gcc
     addons:
       apt:
+        update: true
         sources:
+          - sourceline: 'ppa:mhier/libboost-latest'
           - ubuntu-toolchain-r-test
         packages:
           - g++-7
@@ -24,7 +26,9 @@ matrix:
       - clang
     addons:
       apt:
+        update: true
         sources:
+          - sourceline: 'ppa:mhier/libboost-latest'
           - ubuntu-toolchain-r-test
           - llvm-toolchain-trusty-7
         packages:
