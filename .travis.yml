@@ -7,8 +7,19 @@ matrix:
   - os: osx
     osx_image: xcode10.1
   - os: linux
+    env: COMPILER_C=gcc-7 COMPILER_CC=g++-7
     compiler:
       - gcc
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+        packages:
+          - g++-7
+          - cmake
+  - os: linux
+    env: COMPILER_C=clang-7 COMPILER_CC=clang++-7
+    compiler:
       - clang
     addons:
       apt:
@@ -17,7 +28,6 @@ matrix:
           - llvm-toolchain-trusty-7
         packages:
           - clang-7
-          - g++-7
           - cmake
 
 before_script:
@@ -46,6 +56,7 @@ install:
 
 script:
   - cmake --version;
+    rm -rf build;
     rm -rf build_appleclang_unix_makefiles;
     rm -rf build_appleclang_xcode;
     rm -rf build_gnu_unix_makefiles;
@@ -53,32 +64,24 @@ script:
     rm -rf dependencies;
   - if [[ $TRAVIS_OS_NAME == "osx" ]]; then
     sed -i '' "s,git@github.com:,https://github.com/,g" CMakeLists.txt;
-    cmake -G Xcode -H. -Bbuild_appleclang_xcode -DFBX_SDK_INCLUDE_DIR="/Applications/Autodesk/FBX SDK/2019.0/include"
-                                                -DFBX_SDK_LIBRARY_DEBUG="/Applications/Autodesk/FBX SDK/2019.0/lib/clang/debug/libfbxsdk.a"
-                                                -DFBX_SDK_LIBRARY_RELEASE="/Applications/Autodesk/FBX SDK/2019.0/lib/clang/release/libfbxsdk.a";
-    xcodebuild -project build_appleclang_xcode/FbxPipeline.xcodeproj
+    cmake -G Xcode -H. -Bbuild  -DBUILD_FOLDER_SUFFIX:STRING=build
+                                -DFBX_SDK_INCLUDE_DIR="/Applications/Autodesk/FBX SDK/2019.0/include"
+                                -DFBX_SDK_LIBRARY_DEBUG="/Applications/Autodesk/FBX SDK/2019.0/lib/clang/debug/libfbxsdk.a"
+                                -DFBX_SDK_LIBRARY_RELEASE="/Applications/Autodesk/FBX SDK/2019.0/lib/clang/release/libfbxsdk.a";
+    xcodebuild -project build/FbxPipeline.xcodeproj
                -configuration Release;
     fi
   - if [[ $TRAVIS_OS_NAME == "linux" ]]; then
     clang --version;
-    export CC=/usr/bin/clang-7;
-    export CXX=/usr/bin/clang++-7;
+    export CC=${COMPILER_C};
+    export CXX=${COMPILER_CC};
     sed -i 's,git@github.com:,https://github.com/,g' CMakeLists.txt;
-    cmake -H. -Bbuild_clang_unix_makefiles -DFBX_SDK_INCLUDE_DIR=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/include
-                                         -DFBX_SDK_LIBRARY_DEBUG=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/lib/gcc4/x64/debug/libfbxsdk.a
-                                         -DFBX_SDK_LIBRARY_RELEASE=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/lib/gcc4/x64/release/libfbxsdk.a;
-    make -C build_clang_unix_makefiles;
+    cmake -H. -Bbuild -DBUILD_FOLDER_SUFFIX:STRING=build
+                      -DFBX_SDK_INCLUDE_DIR=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/include
+                      -DFBX_SDK_LIBRARY_DEBUG=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/lib/gcc4/x64/debug/libfbxsdk.a
+                      -DFBX_SDK_LIBRARY_RELEASE=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/lib/gcc4/x64/release/libfbxsdk.a;
+    make -C build;
     fi
-  # - if [[ $TRAVIS_OS_NAME == "linux" ]]; then
-  #   export CC=/usr/bin/gcc-6;
-  #   export CXX=/usr/bin/g++-6;
-  #   sed -i 's,git@github.com:,https://github.com/,g' CMakeLists.txt;
-  #   cmake -H. -Bbuild_gnu_unix_makefiles -DFBX_SDK_INCLUDE_DIR=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/include
-  #                                        -DFBX_SDK_LIBRARY_DEBUG=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/lib/gcc4/x64/debug/libfbxsdk.a
-  #                                        -DFBX_SDK_LIBRARY_RELEASE=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/lib/gcc4/x64/release/libfbxsdk.a;
-  #   make -C build_gnu_unix_makefiles;
-  #   fi
-  # - ls -lR
 
 notifications:
   email:
