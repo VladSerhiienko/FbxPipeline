@@ -32,9 +32,10 @@ endif()
 
 if (NOT MSVC)
     find_package(Boost COMPONENTS system filesystem REQUIRED)
-    message(STATUS "BOOST_INCLUDE_DIRS = ${BOOST_INCLUDE_DIRS}")
-    message(STATUS "BOOST_SYSTEM_LIBRARY = ${BOOST_SYSTEM_LIBRARY}")
-    message(STATUS "BOOST_FILESYSTEM_LIBRARY = ${BOOST_FILESYSTEM_LIBRARY}")
+    message(STATUS "Boost_INCLUDE_DIRS = ${Boost_INCLUDE_DIRS}")
+    message(STATUS "Boost_SYSTEM_LIBRARY = ${Boost_SYSTEM_LIBRARY}")
+    message(STATUS "Boost_FILESYSTEM_LIBRARY = ${Boost_FILESYSTEM_LIBRARY}")
+    message(STATUS "Boost_LIBRARIES = ${Boost_LIBRARIES}")
 endif()
 
 if (WIN32)
@@ -152,7 +153,7 @@ ExternalProject_Add(
     UPDATE_COMMAND ""
     PATCH_COMMAND ""
     SOURCE_DIR "${CMAKE_SOURCE_DIR}/dependencies/flatbuffers"
-    CMAKE_ARGS ${default_cmake_args}
+    CMAKE_ARGS ${default_cmake_args} -DFLATBUFFERS_BUILD_FLATHASH:BOOL=OFF -DFLATBUFFERS_BUILD_TESTS:BOOL=OFF -DFLATBUFFERS_INSTALL:BOOL=OFF
     TEST_COMMAND ""
     INSTALL_COMMAND ""
     LOG_DOWNLOAD ON
@@ -394,7 +395,7 @@ target_include_directories(
 
     ${FBX_SDK_INCLUDE_DIR}
     ${PYTHON_INCLUDE_DIR}
-    ${BOOST_INCLUDE_DIRS}
+    ${Boost_INCLUDE_DIRS}
 )
 
 if (WIN32)
@@ -422,8 +423,8 @@ elseif(APPLE)
         optimized ${flatbuffers_binary_dir}/Release/libflatbuffers.a
 
         ${PYTHON_LIBRARY}
-        ${BOOST_FILESYSTEM_LIBRARY}
-        ${BOOST_SYSTEM_LIBRARY}
+        ${Boost_FILESYSTEM_LIBRARY}
+        ${Boost_SYSTEM_LIBRARY}
         "-framework Cocoa"
 
         pthread
@@ -441,8 +442,8 @@ else()
         m
         dl
 
-        ${BOOST_FILESYSTEM_LIBRARY}
-        ${BOOST_SYSTEM_LIBRARY}
+        ${Boost_LIBRARIES}
+        # ${Boost_SYSTEM_LIBRARY}
     )
 endif()
 
