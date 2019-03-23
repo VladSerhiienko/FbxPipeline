@@ -43,6 +43,7 @@ if (WIN32)
          -B${BUILD_FOLDER_SUFFIX} "-H." )
 elseif(APPLE)
     set( default_cmake_args
+         -G "Xcode"
          -B${BUILD_FOLDER_SUFFIX} -H. )
 else()
     set( default_cmake_args
@@ -492,7 +493,7 @@ elseif(APPLE)
 else()
     set(
         third_party_libs
-        ${dlib_binary_dir}/dlib/libdlib .a
+        ${dlib_binary_dir}/dlib/libdlib.a
         ${draco_binary_dir}/libbraco.a
         ${draco_binary_dir}/libbracoenc.a
         ${flatbuffers_binary_dir}/libflatbuffers.a
