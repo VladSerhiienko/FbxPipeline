@@ -4,7 +4,7 @@ branches:
     - master
 
 clone_folder: c:\projects\FbxPipeline_v0.9
-image: Visual Studio 2017
+image: Previous Visual Studio 2017
 
 configuration:
   - Release
