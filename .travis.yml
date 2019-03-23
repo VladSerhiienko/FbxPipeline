@@ -49,19 +49,21 @@ script:
   - cmake --version
   - if [[ $TRAVIS_OS_NAME == "osx" ]]; then
     sed -i '' "s,git@github.com:,https://github.com/,g" CMakeLists.txt;
-    cmake -H. -Bbuild_darwin_x86_64_appleclang -DFBX_SDK_INCLUDE_DIR="/Applications/Autodesk/FBX SDK/2019.0/include"
-                                               -DFBX_SDK_LIBRARY_DEBUG="/Applications/Autodesk/FBX SDK/2019.0/lib/clang/debug/libfbxsdk.a"
-                                               -DFBX_SDK_LIBRARY_RELEASE="/Applications/Autodesk/FBX SDK/2019.0/lib/clang/release/libfbxsdk.a";
-    cd build_darwin_x86_64_appleclang;
+    rm -rf build_appleclang_unix_makefiles;
+    cmake -H. -Bbuild_appleclang_unix_makefiles -DFBX_SDK_INCLUDE_DIR="/Applications/Autodesk/FBX SDK/2019.0/include"
+                                                -DFBX_SDK_LIBRARY_DEBUG="/Applications/Autodesk/FBX SDK/2019.0/lib/clang/debug/libfbxsdk.a"
+                                                -DFBX_SDK_LIBRARY_RELEASE="/Applications/Autodesk/FBX SDK/2019.0/lib/clang/release/libfbxsdk.a";
+    cd build_appleclang_unix_makefiles;
     fi
   - if [[ $TRAVIS_OS_NAME == "linux" ]]; then
     export CC=/usr/bin/gcc-6;
     export CXX=/usr/bin/g++-6;
     sed -i 's,git@github.com:,https://github.com/,g' CMakeLists.txt;
-    cmake -H. -Bbuild_linux_x86_64_gnu -DFBX_SDK_INCLUDE_DIR=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/include
-                                       -DFBX_SDK_LIBRARY_DEBUG=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/lib/gcc4/x64/debug/libfbxsdk.a
-                                       -DFBX_SDK_LIBRARY_RELEASE=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/lib/gcc4/x64/release/libfbxsdk.a;
-    cd build_linux_x86_64_gnu;
+    rm -rf build_gnu_unix_makefiles;
+    cmake -H. -Bbuild_gnu_unix_makefiles -DFBX_SDK_INCLUDE_DIR=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/include
+                                         -DFBX_SDK_LIBRARY_DEBUG=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/lib/gcc4/x64/debug/libfbxsdk.a
+                                         -DFBX_SDK_LIBRARY_RELEASE=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/lib/gcc4/x64/release/libfbxsdk.a;
+    cd build_gnu_unix_makefiles;
     fi
   - make
 
