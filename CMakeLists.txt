@@ -494,8 +494,8 @@ else()
     set(
         third_party_libs
         ${dlib_binary_dir}/dlib/libdlib.a
-        ${draco_binary_dir}/libbraco.a
-        ${draco_binary_dir}/libbracoenc.a
+        ${draco_binary_dir}/libdraco.a
+        ${draco_binary_dir}/libdracoenc.a
         ${flatbuffers_binary_dir}/libflatbuffers.a
         # ${zstd_binary_dir}/libzstd.a
         # ${zlib_binary_dir}/libz.a
