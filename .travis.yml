@@ -64,7 +64,7 @@ script:
     export CC=/usr/bin/clang-7;
     export CXX=/usr/bin/clang++-7;
     sed -i 's,git@github.com:,https://github.com/,g' CMakeLists.txt;
-    cmake -H. -Bbuild_clang_unix_makefiless -DFBX_SDK_INCLUDE_DIR=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/include
+    cmake -H. -Bbuild_clang_unix_makefiles -DFBX_SDK_INCLUDE_DIR=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/include
                                          -DFBX_SDK_LIBRARY_DEBUG=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/lib/gcc4/x64/debug/libfbxsdk.a
                                          -DFBX_SDK_LIBRARY_RELEASE=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/lib/gcc4/x64/release/libfbxsdk.a;
     make -C build_clang_unix_makefiles;
