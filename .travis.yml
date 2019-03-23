@@ -48,9 +48,9 @@ script:
   - cmake --version;
     rm -rf build_appleclang_unix_makefiles;
     rm -rf build_appleclang_xcode;
-    rm -rf dependencies;
     rm -rf build_gnu_unix_makefiles;
     rm -rf build_clang_unix_makefiles;
+    rm -rf dependencies;
   - if [[ $TRAVIS_OS_NAME == "osx" ]]; then
     sed -i '' "s,git@github.com:,https://github.com/,g" CMakeLists.txt;
     cmake -G Xcode -H. -Bbuild_appleclang_xcode -DFBX_SDK_INCLUDE_DIR="/Applications/Autodesk/FBX SDK/2019.0/include"

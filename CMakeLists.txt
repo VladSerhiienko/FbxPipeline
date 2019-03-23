@@ -3,9 +3,6 @@ cmake_minimum_required(VERSION 3.4.1)
 include(ExternalProject)
 project(FbxPipeline)
 
-# Problems with draco, fPIC flag.
-# set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
 message(STATUS "CMAKE_SYSTEM_INFO_FILE = ${CMAKE_SYSTEM_INFO_FILE}")
 message(STATUS "CMAKE_SYSTEM_NAME = ${CMAKE_SYSTEM_NAME}")
 message(STATUS "CMAKE_SYSTEM_PROCESSOR = ${CMAKE_SYSTEM_PROCESSOR}")
@@ -93,12 +90,18 @@ ExternalProject_Add(
     draco
     GIT_REPOSITORY "git@github.com:google/draco.git"
     SOURCE_DIR "${CMAKE_SOURCE_DIR}/dependencies/draco"
-    GIT_TAG "1.3.4"
+    GIT_TAG "1.3.5"
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+    INSTALL_COMMAND ""
     UPDATE_COMMAND ""
     PATCH_COMMAND ""
-    CMAKE_ARGS ${default_cmake_args}
-    TEST_COMMAND ""
-    INSTALL_COMMAND ""
+    LOG_DOWNLOAD ON
+    # UPDATE_COMMAND ""
+    # PATCH_COMMAND ""
+    # CMAKE_ARGS ${default_cmake_args}
+    # TEST_COMMAND ""
+    # INSTALL_COMMAND ""
 )
 
 ExternalProject_Get_Property(draco SOURCE_DIR)
@@ -161,62 +164,6 @@ set(flatbuffers_source_dir ${SOURCE_DIR})
 set(flatbuffers_binary_dir ${BINARY_DIR})
 message(STATUS "flatbuffers_source_dir = ${flatbuffers_source_dir}")
 message(STATUS "flatbuffers_binary_dir = ${flatbuffers_binary_dir}")
-
-# ExternalProject_Add(
-#     json
-#     GIT_REPOSITORY "git@github.com:nlohmann/json.git"
-#     GIT_TAG "master"
-#     SOURCE_DIR "${CMAKE_SOURCE_DIR}/dependencies/json"
-#     CONFIGURE_COMMAND ""
-#     BUILD_COMMAND ""
-#     INSTALL_COMMAND ""
-#     UPDATE_COMMAND ""
-#     PATCH_COMMAND ""
-#     LOG_DOWNLOAD ON
-# )
-
-# ExternalProject_Get_Property(json SOURCE_DIR)
-# set(json_source_dir ${SOURCE_DIR})
-# message(STATUS "json_source_dir = ${json_source_dir}")
-
-# ExternalProject_Add(
-#     zstd
-#     GIT_REPOSITORY "git@github.com:facebook/zstd.git"
-#     GIT_TAG "master"
-#     UPDATE_COMMAND ""
-#     PATCH_COMMAND ""
-#     SOURCE_DIR "${CMAKE_SOURCE_DIR}/dependencies/zstd"
-#     CONFIGURE_COMMAND mkdir -p ${CMAKE_SOURCE_DIR}/dependencies/zstd/${BUILD_FOLDER_SUFFIX} && ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" -B${CMAKE_SOURCE_DIR}/dependencies/zstd/${BUILD_FOLDER_SUFFIX} -H${CMAKE_SOURCE_DIR}/dependencies/zstd/build/cmake
-#     BUILD_COMMAND xcodebuild -project ${CMAKE_SOURCE_DIR}/dependencies/zstd/${BUILD_FOLDER_SUFFIX}/zstd.xcodeproj -configuration Release && xcodebuild -project ${CMAKE_SOURCE_DIR}/dependencies/zstd/${BUILD_FOLDER_SUFFIX}/zstd.xcodeproj -configuration Debug
-#     TEST_COMMAND ""
-#     INSTALL_COMMAND ""
-# )
-
-# ExternalProject_Get_Property(zstd SOURCE_DIR)
-# ExternalProject_Get_Property(zstd BINARY_DIR)
-# set(zstd_source_dir ${SOURCE_DIR})
-# set(zstd_binary_dir ${CMAKE_SOURCE_DIR}/dependencies/zstd/${BUILD_FOLDER_SUFFIX}/lib)
-# message(STATUS "zstd_source_dir = ${zstd_source_dir}")
-# message(STATUS "zstd_binary_dir = ${zstd_binary_dir}")
-
-# ExternalProject_Add(
-#     zlib
-#     GIT_REPOSITORY "git@github.com:madler/zlib.git"
-#     GIT_TAG "master"
-#     UPDATE_COMMAND ""
-#     PATCH_COMMAND ""
-#     SOURCE_DIR "${CMAKE_SOURCE_DIR}/dependencies/zlib"
-#     CMAKE_ARGS ${default_cmake_args}
-#     TEST_COMMAND ""
-#     INSTALL_COMMAND ""
-# )
-
-# ExternalProject_Get_Property(zlib SOURCE_DIR)
-# ExternalProject_Get_Property(zlib BINARY_DIR)
-# set(zlib_source_dir ${SOURCE_DIR})
-# set(zlib_binary_dir ${BINARY_DIR})
-# message(STATUS "zlib_source_dir = ${zlib_source_dir}")
-# message(STATUS "zlib_binary_dir = ${zlib_binary_dir}")
 
 ExternalProject_Add(
     pybind11
@@ -318,12 +265,13 @@ add_library(
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpmesh.cpp
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpmeshopt.cpp
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpnode.cpp
-    # ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxppacking.cpp
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxppch.cpp
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpstate.cpp
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxptransform.cpp
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpextensions.cpp
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxpembeddedpy.cpp
+    ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxplnkdraco.cpp
+    # ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline/fbxppacking.cpp
 )
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
@@ -432,13 +380,10 @@ add_dependencies(
 target_include_directories(
     FbxPipeline
     PUBLIC
-    ${PYTHON_INCLUDE_DIR}
     ${CMAKE_SOURCE_DIR}/FbxPipeline/generated
     ${CMAKE_SOURCE_DIR}/FbxPipeline/FbxPipeline
     ${CMAKE_SOURCE_DIR}/dependencies/dlib
     ${CMAKE_SOURCE_DIR}/dependencies/draco/src
-    # ${zstd_source_dir}/lib
-    ${draco_binary_dir}
     ${CMAKE_SOURCE_DIR}/dependencies/cxxopts/include
     ${CMAKE_SOURCE_DIR}/dependencies/mathfu/include
     ${CMAKE_SOURCE_DIR}/dependencies/mathfu/dependencies/vectorial/include
@@ -446,7 +391,9 @@ target_include_directories(
     ${flatbuffers_source_dir}/include
     ${flatbuffers_source_dir}/grpc
     ${pybind11_source_dir}/include
+
     ${FBX_SDK_INCLUDE_DIR}
+    ${PYTHON_INCLUDE_DIR}
     ${Boost_INCLUDE_DIRS}
 )
 
@@ -456,17 +403,9 @@ if (WIN32)
 
         debug ${dlib_binary_dir}/dlib${CONFIGURATION_SUFFIX}/dlib.lib
         debug ${flatbuffers_binary_dir}${CONFIGURATION_SUFFIX}/flatbuffers.lib
-        debug ${draco_binary_dir}${CONFIGURATION_SUFFIX}/draco.lib
-        debug ${draco_binary_dir}${CONFIGURATION_SUFFIX}/dracoenc.lib
-        # debug ${zstd_binary_dir}${CONFIGURATION_SUFFIX}/zstd.lib
-        # debug ${zlib_binary_dir}${CONFIGURATION_SUFFIX}/zlibstaticd.lib
 
         optimized ${dlib_binary_dir}/dlib${CONFIGURATION_SUFFIX}/dlib.lib
         optimized ${flatbuffers_binary_dir}${CONFIGURATION_SUFFIX}/flatbuffers.lib
-        optimized ${draco_binary_dir}${CONFIGURATION_SUFFIX}/draco.lib
-        optimized ${draco_binary_dir}${CONFIGURATION_SUFFIX}/dracoenc.lib
-        # optimized ${zstd_binary_dir}${CONFIGURATION_SUFFIX}/zstd.lib
-        # optimized ${zlib_binary_dir}${CONFIGURATION_SUFFIX}/zlibstatic.lib
 
         ${PYTHON_LIBRARY}
         winmm.lib
@@ -477,18 +416,10 @@ elseif(APPLE)
     set(
         third_party_libs
         debug ${dlib_binary_dir}/dlib/Debug/libdlib.a
-        debug ${draco_binary_dir}/Debug/libdraco.a
-        debug ${draco_binary_dir}/Debug/libdracoenc.a
         debug ${flatbuffers_binary_dir}/Debug/libflatbuffers.a
-        # debug ${zstd_binary_dir}/Debug/libzstd.a
-        # debug ${zlib_binary_dir}/Debug/libz.a
 
         optimized ${dlib_binary_dir}/dlib/Release/libdlib.a
-        optimized ${draco_binary_dir}/Release/libdraco.a
-        optimized ${draco_binary_dir}/Release/libdracoenc.a
         optimized ${flatbuffers_binary_dir}/Release/libflatbuffers.a
-        # optimized ${zstd_binary_dir}/Release/libzstd.a
-        # optimized ${zlib_binary_dir}/Release/libz.a
 
         ${PYTHON_LIBRARY}
         ${Boost_FILESYSTEM_LIBRARY}
@@ -502,11 +433,8 @@ else()
     set(
         third_party_libs
         ${dlib_binary_dir}/dlib/libdlib.a
-        ${draco_binary_dir}/libdraco.a
-        ${draco_binary_dir}/libdracoenc.a
         ${flatbuffers_binary_dir}/libflatbuffers.a
-        # ${zstd_binary_dir}/libzstd.a
-        # ${zlib_binary_dir}/libz.a
+        
         ${PYTHON_LIBRARY}
         pthread
         stdc++fs
