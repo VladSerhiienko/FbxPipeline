@@ -5,7 +5,7 @@ sudo: required
 matrix:
   include:
   - os: osx
-    osx_image: xcode10.2
+    osx_image: xcode10.1
   - os: linux
     compiler:
       - gcc
@@ -68,7 +68,7 @@ script:
                                          -DFBX_SDK_LIBRARY_RELEASE=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/lib/gcc4/x64/release/libfbxsdk.a;
     make -C build_gnu_unix_makefiles;
     fi
-  - ls -lR
+  # - ls -lR
 
 notifications:
   email:
