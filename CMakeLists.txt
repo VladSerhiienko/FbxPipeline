@@ -324,8 +324,8 @@ add_library(
 )
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    message(STATUS "Adding -fPIC flag")
-    target_compile_options(FbxPipeline PRIVATE -fPIC)
+    message(STATUS "Adding POSITION_INDEPENDENT_CODE ON for CNU builds")
+    set_property(TARGET FbxPipeline PROPERTY POSITION_INDEPENDENT_CODE ON)
 endif()
 
 if( MSVC )
