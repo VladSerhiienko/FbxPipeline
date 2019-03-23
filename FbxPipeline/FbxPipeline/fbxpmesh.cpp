@@ -16,7 +16,7 @@
 #include <draco/compression/encode.h>
 #include <draco/compression/expert_encode.h>
 
-#include <zstd.h>
+// #include <zstd.h>
 
 namespace mathfu {
     using dvec2 = mathfu::Vector< double, 2 >;
@@ -1227,15 +1227,15 @@ void ConfigureEncoder( draco::ExpertEncoder& encoder, EncodingVertexLayout a, En
     }
 }
 
-void ReportZstdCompressionRatio(const void* pSrc, size_t srcSize, size_t& zstdSize, double& elapsedTime, int compressionLevel = ZSTD_maxCLevel()) {
-    size_t compressedSize = ZSTD_compressBound(srcSize);
-    std::vector<char> compressed;
-    compressed.resize(compressedSize);
+// void ReportZstdCompressionRatio(const void* pSrc, size_t srcSize, size_t& zstdSize, double& elapsedTime, int compressionLevel = ZSTD_maxCLevel()) {
+//     size_t compressedSize = ZSTD_compressBound(srcSize);
+//     std::vector<char> compressed;
+//     compressed.resize(compressedSize);
     
-    apemode::Stopwatch sw{};
-    zstdSize = ZSTD_compress(compressed.data(), compressedSize, pSrc, srcSize, compressionLevel);
-    elapsedTime = sw.ElapsedSeconds();
-}
+//     apemode::Stopwatch sw{};
+//     zstdSize = ZSTD_compress(compressed.data(), compressedSize, pSrc, srcSize, compressionLevel);
+//     elapsedTime = sw.ElapsedSeconds();
+// }
 
 enum class EVertexOrder { CW, CCW };
 
