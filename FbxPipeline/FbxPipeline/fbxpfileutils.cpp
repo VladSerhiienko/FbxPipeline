@@ -6,7 +6,7 @@
 #include <stdio.h>
 #endif
 
-#if __APPLE__
+#if !defined(_WIN32)
 #include <boost/filesystem.hpp>
 namespace std {
     namespace filesystem = boost::filesystem;
