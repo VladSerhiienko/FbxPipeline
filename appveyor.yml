@@ -1,11 +1,22 @@
 version: '{build}'
 branches:
   only:
-  - master
-skip_tags: true
+    - master
+
+clone_folder: c:\projects\FbxPipeline_v0.9
 image: Visual Studio 2017
-platform: x64
-configuration: Release
+
+configuration:
+  - Release
+  - Debug
+platform:
+  - x64
+environment:
+  matrix:
+  - arch: Win64
+matrix:
+  fast_finish: true
+
 init:
   - git config --global core.autocrlf true
 install:
@@ -18,13 +29,15 @@ install:
   - ps: Start-Process -FilePath "python364.exe" /S -Wait
   - ps: cd ..
   - ps: ls
-  # - ps: Remove-Item -LiteralPath "build_msvc" -Force -Recurse -ErrorAction SilentlyContinue
+
 before_build:
   - cmake -G "Visual Studio 15 2017 Win64" -Bbuild_msvc -H. -DBUILD_FOLDER_SUFFIX:STRING=build_msvc -DFBX_SDK_INCLUDE_DIR="C:/Program Files/Autodesk/FBX/FBX SDK/2018.1.1/include" -DFBX_SDK_LIBRARY_DEBUG="C:/Program Files/Autodesk/FBX/FBX SDK/2018.1.1/lib/vs2015/x64/debug/libfbxsdk-md.lib" -DFBX_SDK_LIBRARY_RELEASE="C:/Program Files/Autodesk/FBX/FBX SDK/2018.1.1/lib/vs2015/x64/release/libfbxsdk-md.lib"
+
 build:
   project: build_msvc/FbxPipeline.sln
   parallel: true
   verbosity: minimal
+
 notifications:
 - provider: Email
   to:

@@ -3,7 +3,8 @@ cmake_minimum_required(VERSION 3.4.1)
 include(ExternalProject)
 project(FbxPipeline)
 
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+# Problems with draco, fPIC flag.
+# set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 message(STATUS "CMAKE_SYSTEM_INFO_FILE = ${CMAKE_SYSTEM_INFO_FILE}")
 message(STATUS "CMAKE_SYSTEM_NAME = ${CMAKE_SYSTEM_NAME}")

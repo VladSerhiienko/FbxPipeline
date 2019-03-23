@@ -16,9 +16,10 @@ matrix:
           - ubuntu-toolchain-r-test
           - llvm-toolchain-trusty-5.0
         packages:
-          - clang-5.0
-          - gcc-6
-          - g++-6
+          - clang-6.0
+          - libstdc++6
+          # - gcc-6
+          # - g++-6
           - cmake
 
 before_script:
@@ -51,6 +52,7 @@ script:
     rm -rf build_appleclang_xcode;
     rm -rf dependencies;
     rm -rf build_gnu_unix_makefiles;
+    rm -rf build_clang_unix_makefiles;
   - if [[ $TRAVIS_OS_NAME == "osx" ]]; then
     sed -i '' "s,git@github.com:,https://github.com/,g" CMakeLists.txt;
     cmake -G Xcode -H. -Bbuild_appleclang_xcode -DFBX_SDK_INCLUDE_DIR="/Applications/Autodesk/FBX SDK/2019.0/include"
@@ -60,14 +62,23 @@ script:
                -configuration Release;
     fi
   - if [[ $TRAVIS_OS_NAME == "linux" ]]; then
-    export CC=/usr/bin/gcc-6;
-    export CXX=/usr/bin/g++-6;
+    export CC=/usr/bin/clang-6;
+    export CXX=/usr/bin/clang-6;
     sed -i 's,git@github.com:,https://github.com/,g' CMakeLists.txt;
-    cmake -H. -Bbuild_gnu_unix_makefiles -DFBX_SDK_INCLUDE_DIR=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/include
+    cmake -H. -Bbuild_clang_unix_makefiless -DFBX_SDK_INCLUDE_DIR=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/include
                                          -DFBX_SDK_LIBRARY_DEBUG=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/lib/gcc4/x64/debug/libfbxsdk.a
                                          -DFBX_SDK_LIBRARY_RELEASE=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/lib/gcc4/x64/release/libfbxsdk.a;
-    make -C build_gnu_unix_makefiles;
+    make -C build_clang_unix_makefiles;
     fi
+  # - if [[ $TRAVIS_OS_NAME == "linux" ]]; then
+  #   export CC=/usr/bin/gcc-6;
+  #   export CXX=/usr/bin/g++-6;
+  #   sed -i 's,git@github.com:,https://github.com/,g' CMakeLists.txt;
+  #   cmake -H. -Bbuild_gnu_unix_makefiles -DFBX_SDK_INCLUDE_DIR=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/include
+  #                                        -DFBX_SDK_LIBRARY_DEBUG=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/lib/gcc4/x64/debug/libfbxsdk.a
+  #                                        -DFBX_SDK_LIBRARY_RELEASE=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/lib/gcc4/x64/release/libfbxsdk.a;
+  #   make -C build_gnu_unix_makefiles;
+  #   fi
   # - ls -lR
 
 notifications:
