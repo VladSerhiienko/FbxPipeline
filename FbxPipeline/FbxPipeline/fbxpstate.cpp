@@ -43,7 +43,7 @@ std::shared_ptr< spdlog::logger > CreateLogger( spdlog::level::level_enum lvl, s
 
         std::string curentTimeStr;
         std::stringstream curentTimeStrStream;
-        curentTimeStrStream << std::put_time( pCurrentTime, "%F-%T-" );
+        // curentTimeStrStream << std::put_time( pCurrentTime, "%F-%T-" );
         curentTimeStrStream << currentSystemTime;
         curentTimeStr = curentTimeStrStream.str( );
         std::replace( curentTimeStr.begin( ), curentTimeStr.end( ), ':', '-' );
