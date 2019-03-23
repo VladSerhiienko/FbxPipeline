@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iostream>
 #include <iomanip>
+#include <ctime>
 
 #include <flatbuffers/util.h>
 #include <spdlog/sinks/msvc_sink.h>

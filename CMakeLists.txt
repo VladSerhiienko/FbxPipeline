@@ -32,9 +32,9 @@ endif()
 
 if (NOT MSVC)
     find_package(Boost COMPONENTS system filesystem REQUIRED)
-    message(STATUS "BOOST_INCLUDE_DIRS = {BOOST_INCLUDE_DIRS}")
-    message(STATUS "BOOST_SYSTEM_LIBRARY = {BOOST_SYSTEM_LIBRARY}")
-    message(STATUS "BOOST_FILESYSTEM_LIBRARY = {BOOST_FILESYSTEM_LIBRARY}")
+    message(STATUS "BOOST_INCLUDE_DIRS = ${BOOST_INCLUDE_DIRS}")
+    message(STATUS "BOOST_SYSTEM_LIBRARY = ${BOOST_SYSTEM_LIBRARY}")
+    message(STATUS "BOOST_FILESYSTEM_LIBRARY = ${BOOST_FILESYSTEM_LIBRARY}")
 endif()
 
 if (WIN32)
@@ -425,6 +425,7 @@ elseif(APPLE)
         ${BOOST_FILESYSTEM_LIBRARY}
         ${BOOST_SYSTEM_LIBRARY}
         "-framework Cocoa"
+
         pthread
         m
         dl
@@ -436,12 +437,12 @@ else()
         ${flatbuffers_binary_dir}/libflatbuffers.a
 
         ${PYTHON_LIBRARY}
-        ${BOOST_FILESYSTEM_LIBRARY}
-        ${BOOST_SYSTEM_LIBRARY}
         pthread
-        stdc++fs
         m
         dl
+
+        ${BOOST_FILESYSTEM_LIBRARY}
+        ${BOOST_SYSTEM_LIBRARY}
     )
 endif()
 
