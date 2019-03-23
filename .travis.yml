@@ -46,10 +46,13 @@ install:
     fi
 
 script:
-  - cmake --version
+  - cmake --version;
+    rm -rf build_appleclang_unix_makefiles;
+    rm -rf build_appleclang_xcode;
+    rm -rf dependencies;
+    rm -rf build_gnu_unix_makefiles;
   - if [[ $TRAVIS_OS_NAME == "osx" ]]; then
     sed -i '' "s,git@github.com:,https://github.com/,g" CMakeLists.txt;
-    rm -rf build_appleclang_xcode;
     cmake -G Xcode -H. -Bbuild_appleclang_xcode -DFBX_SDK_INCLUDE_DIR="/Applications/Autodesk/FBX SDK/2019.0/include"
                                                 -DFBX_SDK_LIBRARY_DEBUG="/Applications/Autodesk/FBX SDK/2019.0/lib/clang/debug/libfbxsdk.a"
                                                 -DFBX_SDK_LIBRARY_RELEASE="/Applications/Autodesk/FBX SDK/2019.0/lib/clang/release/libfbxsdk.a";
@@ -60,7 +63,6 @@ script:
     export CC=/usr/bin/gcc-6;
     export CXX=/usr/bin/g++-6;
     sed -i 's,git@github.com:,https://github.com/,g' CMakeLists.txt;
-    rm -rf build_gnu_unix_makefiles;
     cmake -H. -Bbuild_gnu_unix_makefiles -DFBX_SDK_INCLUDE_DIR=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/include
                                          -DFBX_SDK_LIBRARY_DEBUG=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/lib/gcc4/x64/debug/libfbxsdk.a
                                          -DFBX_SDK_LIBRARY_RELEASE=/home/travis/build/VladSerhiienko/FbxPipeline/FbxSdk/lib/gcc4/x64/release/libfbxsdk.a;

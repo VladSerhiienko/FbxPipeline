@@ -43,7 +43,7 @@ if (WIN32)
          -B${BUILD_FOLDER_SUFFIX} "-H." )
 elseif(APPLE)
     set( default_cmake_args
-         -G "Xcode"
+         # -G "Xcode"
          -B${BUILD_FOLDER_SUFFIX} -H. )
 else()
     set( default_cmake_args
